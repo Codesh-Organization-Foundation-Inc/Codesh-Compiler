@@ -7,90 +7,91 @@ const char* RIGHT_PARA_RGX = "\\(";
 const char* LEFT_PARA_RGX = "\\)";
 const char* ANYTHING_ELSE_RGX = "\\w+";
 
-const char* SCOPE_BEGIN ="ויאמר\\:";
-const char* SCOPE_END = "ויתם\\.";
+const char* KEYWORD_IMPORT = "\\bויבא\\b";
 
-const char* KEYWORD_LET = "ויהי";
-const char* KEYWORD_RETURN = "וישב";
+const char* SCOPE_BEGIN ="\\bויאמר\\:";
+const char* SCOPE_END = "\\bויתם\\.";
 
-const char* OPERATOR_ADDITION = "ויוסף ל־";
-const char* OPERATOR_SUBTRACTION = "ויוחסר מן";
-const char* OPERATOR_MULTIPLICATION = "ויוכפל";
-const char* OPERATOR_DIVISION = "ויחולק";
-const char* OPERATOR_MODULO = "ויושרה";
+const char* KEYWORD_LET = "\\bויהי\\b";
+const char* KEYWORD_RETURN = "\\bוישב\\b";
 
-const char* OPERATOR_ADDITION_ASSIGNMENT = "ויסף";
-const char* OPERATOR_SUBTRACTION_ASSIGNMENT = "ויחסר";
-const char* OPERATOR_MULTIPLICATION_ASSIGNMENT = "ויכפל";
-const char* OPERATOR_DIVISION_ASSIGNMENT = "ויחלק";
-const char* OPERATOR_MODULO_ASSIGNMENT = "וישרה";
+const char* OPERATOR_ADDITION = "\\bויוסף ל־";
+const char* OPERATOR_SUBTRACTION = "\\bויוחסר מן\\b";
+const char* OPERATOR_MULTIPLICATION = "\\bויוכפל\\b";
+const char* OPERATOR_DIVISION = "\\bויחולק\\b";
+const char* OPERATOR_MODULO = "\\bויושרה\\b";
 
-const char* OPERATOR_INCREAMENT = "ויתקדם";
-const char* OPERATOR_DECREAMENT = "ויפחת";
+const char* OPERATOR_ADDITION_ASSIGNMENT = "\\bויסף\\b";
+const char* OPERATOR_SUBTRACTION_ASSIGNMENT = "\\bויחסר\\b";
+const char* OPERATOR_MULTIPLICATION_ASSIGNMENT = "\\bויכפל\\b";
+const char* OPERATOR_DIVISION_ASSIGNMENT = "\\bויחלק\\b";
+const char* OPERATOR_MODULO_ASSIGNMENT = "\\bוישרה\\b";
 
-const char* OPEN_PARENTHESIS = "כי";
-const char* CLOSE_PARENTHESIS = "פסק";
+const char* OPERATOR_INCREAMENT = "\\bויתקדם\\b";
+const char* OPERATOR_DECREAMENT = "\\bויפחת\\b";
+
+const char* OPEN_PARENTHESIS = "\\bכי\\b";
+const char* CLOSE_PARENTHESIS = "\\bפסק\\b";
 
 const char* SEMICOLON = "\\;";
 const char* DOT = "\\bל־";
 
-const char* KEYWORD_CLASS = "עצם";
-const char* KEYWORD_ENUM = "מניין";
-const char* KEYWORD_THIS = "אנוכי";
-const char* KEYWORD_FUNCTION = "המעשה"
-const char* KEYWORD_FUNCTION_CALL = "ויעש"
+const char* KEYWORD_CLASS = "\\bעצם\\b";
+const char* KEYWORD_ENUM = "\\bמניין\\b";
+const char* KEYWORD_THIS = "\\bאנוכי\\b";
+const char* KEYWORD_FUNCTION = "\\bהמעשה\\b"
+const char* KEYWORD_FUNCTION_CALL = "\\bויעש\\b"
 
-const char* KEYWORD_PUBLIC = "נגלה|נגלית";
-const char* KEYWORD_PRIVATE = "נסתר|נסתרת";
-const char* KEYWORD_STATIC = "כללי";
-const char* KEYWORD_ABSTRACT = "רוחני";
-const char* KEYWORD_FINAL = "וימות ולא־יתחלף";
-const char* KEYWORD_SUPER = "אבי";
+const char* KEYWORD_PUBLIC = "\\b(?:נגלה|נגלית)\\b";
+const char* KEYWORD_PRIVATE = "\\b(?:נסתר|נסתרת)\\b";
+const char* KEYWORD_STATIC = "\\bכללי\\b";
+const char* KEYWORD_ABSTRACT = "\\bרוחני\\b";
+const char* KEYWORD_FINAL = "\\bוימות ולא־יתחלף\\b";
+const char* KEYWORD_SUPER = "\\bאבי\\b";
 
-const char* KEYWORD_VAR = "משתנה";
-const char* KEYWORD_INTEGER = "שלם";
-const char* KEYWORD_FLOAT = "צף";
-const char* KEYWORD_DOUBLE = "מצף";
-const char* KEYWORD_LONG = "רב";
-const char* KEYWORD_SHORT = "קצר";
-const char* KEYWORD_BYTE = "קצרצר";
-const char* KEYWORD_CHAR = "תו";
-const char* KEYWORD_STRING ="פסוק";
-const char* KEYWORD_BOOLEAN ="דבר־מה";
-const char* KEYWORD_NULL = "תהו";
+const char* KEYWORD_VAR = "\\bמשתנה\\b";
+const char* KEYWORD_INTEGER = "\\bשלם\\b";
+const char* KEYWORD_FLOAT = "\\bצף\\b";
+const char* KEYWORD_DOUBLE = "\\bמצף\\b";
+const char* KEYWORD_LONG = "\\bרב\\b";
+const char* KEYWORD_SHORT = "\\bקצר\\b";
+const char* KEYWORD_BYTE = "\\bקצרצר\\b";
+const char* KEYWORD_CHAR = "\\bתו\\b";
+const char* KEYWORD_STRING ="\\bפסוק\\b";
+const char* KEYWORD_BOOLEAN ="\\bדבר־מה\\b";
+const char* KEYWORD_NULL = "\\bתהו\\b";
 
-const char* KEYWORD_IF = "אם";
-const char* KEYWORD_ELSE = "אחרת";
-const char* KEYWORD_SWITCH = "מחלוקת";
-const char* KEYWORD_CASE = "כאשר";
-const char* KEYWORD_DEFAULT = "חדל";
+const char* KEYWORD_IF = "\\bאם\\b";
+const char* KEYWORD_ELSE = "\\bאחרת\\b";
+const char* KEYWORD_SWITCH = "\\bמחלוקת\\b";
+const char* KEYWORD_CASE = "\\bכאשר\\b";
+const char* KEYWORD_DEFAULT = "\\bחדל\\b";
 
-const char* OPERATOR_EQUALS = "שווה";
-const char* OPERATOR_AGAINST = "לנגד";
-const char* OPERATOR_NOT = "שקרי־הוא";
-const char* OPERATOR_GREATER = "גדול";
-const char* OPERATOR_GREATER_EQUAL = "גדול־ושווה";
-const char* OPERATOR_LESS = "קטן";
-const char* OPERATOR_LESS_EQUAL = "קטן־ושווה";
-const char* OPERATOR_AND = "וגם";
-const char* OPERATOR_OR = "או";
+const char* OPERATOR_EQUALS = "\\bשווה\\b";
+const char* OPERATOR_AGAINST = "\\bלנגד\\b";
+const char* OPERATOR_NOT = "\\bשקרי־הוא\\b";
+const char* OPERATOR_GREATER = "\\bגדול\\b";
+const char* OPERATOR_GREATER_EQUAL = "\\bגדול־ושווה\\b";
+const char* OPERATOR_LESS = "\\bקטן\\b";
+const char* OPERATOR_LESS_EQUAL = "\\bקטן־ושווה\\b";
+const char* OPERATOR_AND = "\\bוגם\\b";
+const char* OPERATOR_OR = "\\bאו\\b";
 
-const char* KEYWORD_FOR = "וימנה";
-const char* KEYWORD_DO = "עשה";
-const char* KEYWORD_WHILE = "בעוד";
-const char* KEYWORD_CONTINUE = "פסח";
-const char* KEYWORD_BREAK ="לך־לך";
+const char* KEYWORD_FOR = "\\bוימנה\\b";
+const char* KEYWORD_DO = "\\bעשה\\b";
+const char* KEYWORD_WHILE = "\\bבעוד\\b";
+const char* KEYWORD_CONTINUE = "\\bפסח\\b";
+const char* KEYWORD_BREAK ="\\bלך־לך\\b";
 
 const char* COMMENT_MULTILINE = "והגה ה\\' לאמור:(?:.|\\s)*ויחדל.";
 const char* COMMENT_ONE_LINER = "והגה ה\\'.*$";
 
-const char* KEYWORD_TRY = "וינסה";
-const char* KEYWORD_EXCEPTION = "פסיקה";
-const char* KEYWORD_CATCH = "ויתפוס";
-const char* KEYWORD_THROW = "וישלך";
-const char* KEYWORD_THROWS = "וישלכהו";
+const char* KEYWORD_TRY = "\\bוינסה\\b";
+const char* KEYWORD_EXCEPTION = "\\bפסיקה\\b";
+const char* KEYWORD_CATCH = "\\bויתפוס\\b";
+const char* KEYWORD_THROW = "\\bוישלך\\b";
+const char* KEYWORD_THROWS = "\\bוישלכהו\\b";
 
-const char* KEYWORD_IMPORT = "ויבא";
 
 
 #endif // CODESH_COMPILER_REGEX_HELPER_H
