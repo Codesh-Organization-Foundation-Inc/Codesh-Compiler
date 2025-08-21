@@ -6,5 +6,4 @@ set(CMAKE_C_STANDARD 11)
 add_executable(Codesh_Compiler
         src/main.c
         src/token/token_type.h
-        src/token/token_type.h
         src/lexer/regex_helper.h)
