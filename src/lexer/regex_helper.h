@@ -34,11 +34,11 @@ const char* CLOSE_PARENTHESIS = "פסק";
 const char* SEMICOLON = "\\;";
 const char* DOT = "\\bל־";
 
-const char* CLASS = "עצם";
-const char* ENUM = "מניין";
-const char* THIS = "אנוכי";
-const char* FUNCTION = "המעשה"
-const char* FUNCTION_CALL = "ויעש"
+const char* KEYWORD_CLASS = "עצם";
+const char* KEYWORD_ENUM = "מניין";
+const char* KEYWORD_THIS = "אנוכי";
+const char* KEYWORD_FUNCTION = "המעשה"
+const char* KEYWORD_FUNCTION_CALL = "ויעש"
 
 const char* KEYWORD_PUBLIC = "נגלה|נגלית";
 const char* KEYWORD_PRIVATE = "נסתר|נסתרת";
@@ -47,17 +47,17 @@ const char* KEYWORD_ABSTRACT = "רוחני";
 const char* KEYWORD_FINAL = "וימות ולא־יתחלף";
 const char* KEYWORD_SUPER = "אבי";
 
-const char* VAR = "משתנה";
-const char* INTEGER = "שלם";
-const char* FLOAT = "צף";
-const char* DOUBLE = "מצף";
-const char* LONG = "רב";
-const char* SHORT = "קצר";
-const char* BYTE = "קצרצר";
-const char* CHAR = "תו";
-const char* STRING ="פסוק";
-const char* BOOLEAN ="דבר־מה";
-const char* NULL = "תהו";
+const char* KEYWORD_VAR = "משתנה";
+const char* KEYWORD_INTEGER = "שלם";
+const char* KEYWORD_FLOAT = "צף";
+const char* KEYWORD_DOUBLE = "מצף";
+const char* KEYWORD_LONG = "רב";
+const char* KEYWORD_SHORT = "קצר";
+const char* KEYWORD_BYTE = "קצרצר";
+const char* KEYWORD_CHAR = "תו";
+const char* KEYWORD_STRING ="פסוק";
+const char* KEYWORD_BOOLEAN ="דבר־מה";
+const char* KEYWORD_NULL = "תהו";
 
 const char* KEYWORD_IF = "אם";
 const char* KEYWORD_ELSE = "אחרת";
@@ -67,13 +67,13 @@ const char* KEYWORD_DEFAULT = "חדל";
 
 const char* OPERATOR_EQUALS = "שווה";
 const char* OPERATOR_AGAINST = "לנגד";
-const char* KEYWORD_NOT = "שקרי־הוא";
-const char* KEYWORD_GREATER = "גדול";
-const char* KEYWORD_GREATER_EQUAL = "גדול־ושווה";
-const char* KEYWORD_LESS = "קטן";
-const char* KEYWORD_LESS_EQUAL = "קטן־ושווה";
-const char* KEYWORD_AND = "וגם";
-const char* KEYWORD_OR = "או";
+const char* OPERATOR_NOT = "שקרי־הוא";
+const char* OPERATOR_GREATER = "גדול";
+const char* OPERATOR_GREATER_EQUAL = "גדול־ושווה";
+const char* OPERATOR_LESS = "קטן";
+const char* OPERATOR_LESS_EQUAL = "קטן־ושווה";
+const char* OPERATOR_AND = "וגם";
+const char* OPERATOR_OR = "או";
 
 const char* KEYWORD_FOR = "וימנה";
 const char* KEYWORD_DO = "עשה";
