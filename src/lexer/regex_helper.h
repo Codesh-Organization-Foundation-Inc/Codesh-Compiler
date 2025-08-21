@@ -90,6 +90,4 @@ const char* KEYWORD_CATCH_RGX = "\\bויתפוס\\b";
 const char* KEYWORD_THROW_RGX = "\\bוישלך\\b";
 const char* KEYWORD_THROWS_RGX = "\\bוישלכהו\\b";
 
-
-
 #endif // CODESH_COMPILER_REGEX_HELPER_H
