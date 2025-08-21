@@ -31,10 +31,13 @@ enum token_type
     CLOSE_PARENTHESIS, // פסק
 
     SEMICOLON, //;
+    DOT, // ל־
 
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
     KEYWORD_THIS, // אנוכי
+    KEYWORD_FUNCTION, // המעשה
+    KEYWORD_FUNCTION_CALL, // ויעש
 
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
