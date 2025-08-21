@@ -3,9 +3,7 @@
 
 const char* NUMBER_RGX = "\\d+(?:\\.\\d+)?";
 const char* OPERATOR_RGX = "[\\/\\*-\\+\\%]";
-const char* RIGHT_PARA_RGX = "\\(";
-const char* LEFT_PARA_RGX = "\\)";
-const char* ANYTHING_ELSE_RGX = "\\w+";
+const char* ANYTHING_ELSE_RGX = "\\S+";
 
 const char* KEYWORD_IMPORT = "\\bויבא\\b";
 
