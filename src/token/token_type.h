@@ -9,7 +9,8 @@ enum token_type
     KEYWORD_LET, // ויהי
     KEYWORD_RETURN, // וישב
 
-    NUMBER, // any number (with digit 0 - 9)
+    IDENTIFIER_NUMBER, // any number (with digit 0 - 9)
+    IDENTIFIER_CUSTOM, // any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
@@ -23,17 +24,17 @@ enum token_type
     OPERATOR_DIVISION_ASSIGNMENT, // ויחלק
     OPERATOR_MODULO_ASSIGNMENT, // וישרה
 
-    OPERATOR_INCREAMENT, // ויתקדם
-    OPERATOR_DECREAMENT, // ויפחת
+    OPERATOR_INCREMENT, // ויתקדם
+    OPERATOR_DECREMENT, // ויפחת
 
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
     SEMICOLON, //;
 
-    CLASS, // עצם
-    ENUM, // מניין
-    THIS, // אנוכי
+    KEYWORD_CLASS, // עצם
+    KEYWORD_ENUM, // מניין
+    KEYWORD_THIS, // אנוכי
 
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
@@ -42,17 +43,17 @@ enum token_type
     KEYWORD_FINAL, // וימות ולא־יתחלף
     KEYWORD_SUPER, // אבי
 
-    VAR, //משתנה
-    INTEGER, // שלם
-    FLOAT, // צף
-    DOUBLE, //מצף
-    LONG, // רב
-    SHORT, // קצר
-    BYTE, // קצרצר
-    CHAR, // תו
-    STRING, // פסוק
-    BOOLEAN, // דבר־מה
-    NULL, //תהו
+    KEYWORD_VAR, //משתנה
+    KEYWORD_INTEGER, // שלם
+    KEYWORD_FLOAT, // צף
+    KEYWORD_DOUBLE, //מצף
+    KEYWORD_LONG, // רב
+    KEYWORD_SHORT, // קצר
+    KEYWORD_BYTE, // קצרצר
+    KEYWORD_CHAR, // תו
+    KEYWORD_STRING, // פסוק
+    KEYWORD_BOOLEAN, // דבר־מה
+    KEYWORD_NULL, //תהו
 
     KEYWORD_IF, // אם
     KEYWORD_ELSE, // אחרת
@@ -60,7 +61,7 @@ enum token_type
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // חדל
 
-    OPERATOR_EQUALS, // שווה ... לנגד
+    KEYWORD_OPERATOR_EQUALS, // שווה ... לנגד
     KEYWORD_NOT, // שקרי־הוא
     KEYWORD_GREATER, // גדול
     KEYWORD_GREATER_EQUAL, // גדול־ושווה
