@@ -81,8 +81,8 @@ const char* KEYWORD_WHILE = "בעוד";
 const char* KEYWORD_CONTINUE = "פסח";
 const char* KEYWORD_BREAK ="לך־לך";
 
-const char* COMMENT_ONE_LINER = "והגה ה\\'";
-const char* COMMENT_MULTILINE = "והגה ה\\' לאמור\\:";
+const char* COMMENT_MULTILINE = "והגה ה\\' לאמור:(?:.|\\s)*ויחדל.";
+const char* COMMENT_ONE_LINER = "והגה ה\\'.*$";
 
 const char* KEYWORD_TRY = "וינסה";
 const char* KEYWORD_EXCEPTION = "פסיקה";

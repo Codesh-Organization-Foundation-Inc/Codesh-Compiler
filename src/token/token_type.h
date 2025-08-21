@@ -80,8 +80,8 @@ enum token_type
     KEYWORD_CONTINUE, // פסח
     KEYWORD_BREAK, // לך־לך
 
-    COMMENT_ONE_LINER, // והגה ה'
     COMMENT_MULTILINE, // והגה ה' לאמור:
+    COMMENT_ONE_LINER, // והגה ה'
 
     KEYWORD_TRY, // וינסה
     KEYWORD_EXCEPTION, // פסיקה
