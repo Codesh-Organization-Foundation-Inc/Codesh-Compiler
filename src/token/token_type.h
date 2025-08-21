@@ -3,7 +3,89 @@
 
 enum token_type
 {
+    SCOPE_BEGIN, // ויאמר:
+    SCOPE_END, // ויתם.
 
+    KEYWORD_LET, // ויהי
+    KEYWORD_RETURN, // וישב
+
+    NUMBER, // any number (with digit 0 - 9)
+
+    OPERATOR_ADDITION, // ויוסף ל-
+    OPERATOR_SUBTRACTION, // ויוחסר מן
+    OPERATOR_MULTIPLICATION, // ויוכפל
+    OPERATOR_DIVISION, // ויחולק
+    OPERATOR_MODULO, // ויושרה
+
+    OPERATOR_ADDITION_ASSIGNMENT, //ויסף
+    OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר
+    OPERATOR_MULTIPLICATION_ASSIGNMENT, // ויכפל
+    OPERATOR_DIVISION_ASSIGNMENT, // ויחלק
+    OPERATOR_MODULO_ASSIGNMENT, // וישרה
+
+    OPERATOR_INCREAMENT, // ויתקדם
+    OPERATOR_DECREAMENT, // ויפחת
+
+    OPEN_PARENTHESIS, // כי
+    CLOSE_PARENTHESIS, // פסק
+
+    SEMICOLON, //;
+
+    CLASS, // עצם
+    ENUM, // מניין
+    THIS, // אנוכי
+
+    KEYWORD_PUBLIC, // נגלה|נגלית
+    KEYWORD_PRIVATE, // נסתר|נסתרת
+    KEYWORD_STATIC, // כללי
+    KEYWORD_ABSTRACT, // רוחני
+    KEYWORD_FINAL, // וימות ולא־יתחלף
+    KEYWORD_SUPER, // אבי
+
+    VAR, //משתנה
+    INTEGER, // שלם
+    FLOAT, // צף
+    DOUBLE, //מצף
+    LONG, // רב
+    SHORT, // קצר
+    BYTE, // קצרצר
+    CHAR, // תו
+    STRING, // פסוק
+    BOOLEAN, // דבר־מה
+    NULL, //תהו
+
+    KEYWORD_IF, // אם
+    KEYWORD_ELSE, // אחרת
+    KEYWORD_SWITCH, // מחלוקת
+    KEYWORD_CASE, // כאשר
+    KEYWORD_DEFAULT, // חדל
+
+    OPERATOR_EQUALS, // שווה ... לנגד
+    KEYWORD_NOT, // שקרי־הוא
+    KEYWORD_GREATER, // גדול
+    KEYWORD_GREATER_EQUAL, // גדול־ושווה
+    KEYWORD_LESS, // קטן
+    KEYWORD_LESS_EQUAL, // קטן־ושווה
+    KEYWORD_AND, // וגם
+    KEYWORD_OR, // או
+
+
+    KEYWORD_FOR, // וימנה
+    KEYWORD_DO, // עשה
+    KEYWORD_WHILE, // בעוד
+    KEYWORD_CONTINUE, // פסח
+    KEYWORD_BREAK, // לך־לך
+
+    COMMENT_ONE_LINER, // והגה ה'
+    COMMENT_MULTILINE, // והגה ה' לאמור:
+
+    KEYWORD_TRY, // וינסה
+    KEYWORD_EXCEPTION, // פסיקה
+    KEYWORD_CATCH, // ויתפוס
+    KEYWORD_THROW, // וישלך
+    KEYWORD_THROWS, // וישלכהו
+
+    KEYWORD_IMPORT // ויבא
 };
 
 #endif //TOKEN_TYPE_H

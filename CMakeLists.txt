@@ -7,4 +7,5 @@ add_executable(Codesh_Compiler
         src/main.c
         src/token/token.c
         src/token/token.h
+        src/token/token_type.h
         src/token/token_type.h)
