@@ -14,9 +14,9 @@ static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES
     {COMMENT_MULTILINE_GROUP_NAME, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)"},
     {COMMENT_ONE_LINER_GROUP_NAME, R"(והגה ה\'.*$)"},
 
-    {COMMA_GROUP_NAME, R"(\,)"},
-    {SEMICOLON_GROUP_NAME, R"(\;)"},
-    {DOT_GROUP_NAME, R"(\bל־)"},
+    {PUNCTUATION_COMMA_GROUP_NAME, R"(\,)"},
+    {PUNCTUATION_SEMICOLON_GROUP_NAME, R"(\;)"},
+    {PUNCTUATION_DOT_GROUP_NAME, R"(\bל־)"},
 
     {IDENTIFIER_NUMBER_GROUP_NAME, R"(\d+(?:\.\d+)?)"},
 

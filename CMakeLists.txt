@@ -5,10 +5,17 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Codesh_Compiler
         src/main.cpp
-        src/token/token_type.h
+        src/token/token_group.h
         src/lexer/regex.h
-        src/token/token_type.cpp
         src/parser/command_parser.cpp
         src/parser/command_parser.h
         src/lexer/regex.cpp
-        src/lexer/group_name.h)
+        src/lexer/group_name.h
+        src/token/token.h
+        src/token/token.cpp)
+
+
+# sudo dnf install boost-regex boost-devel
+
+find_package(Boost REQUIRED regex)
+target_link_libraries(Codesh_Compiler Boost::boost)

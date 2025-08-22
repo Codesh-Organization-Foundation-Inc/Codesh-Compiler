@@ -1,11 +1,9 @@
 #pragma once
 
-#include <string_view>
-
-namespace codesh::token
+namespace codesh
 {
 
-enum token_type
+enum token_group
 {
     SCOPE_BEGIN, // ויאמר:
     SCOPE_END, // ויתם.
@@ -36,9 +34,9 @@ enum token_type
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
-    SEMICOLON, // ;
-    COMMA, // ,
-    DOT, // ל־
+    PUNCTUATION_SEMICOLON, // ;
+    PUNCTUATION_COMMA, // ,
+    PUNCTUATION_DOT, // ל־
 
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
@@ -100,7 +98,5 @@ enum token_type
 
     KEYWORD_IMPORT // ויבא
 };
-
-token_type get_token_type(std::string_view group_name);
 
 }

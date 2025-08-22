@@ -35,9 +35,9 @@ constexpr std::string_view OPERATOR_DECREMENT_GROUP_NAME = "OPERATOR_DECREMENT";
 constexpr std::string_view OPEN_PARENTHESIS_GROUP_NAME = "OPEN_PARENTHESIS";
 constexpr std::string_view CLOSE_PARENTHESIS_GROUP_NAME = "CLOSE_PARENTHESIS";
 
-constexpr std::string_view COMMA_GROUP_NAME = "COMMA";
-constexpr std::string_view SEMICOLON_GROUP_NAME = "SEMICOLON";
-constexpr std::string_view DOT_GROUP_NAME = "DOT";
+constexpr std::string_view PUNCTUATION_COMMA_GROUP_NAME = "COMMA";
+constexpr std::string_view PUNCTUATION_SEMICOLON_GROUP_NAME = "SEMICOLON";
+constexpr std::string_view PUNCTUATION_DOT_GROUP_NAME = "DOT";
 
 constexpr std::string_view KEYWORD_CLASS_GROUP_NAME = "KEYWORD_CLASS";
 constexpr std::string_view KEYWORD_ENUM_GROUP_NAME = "KEYWORD_ENUM";
