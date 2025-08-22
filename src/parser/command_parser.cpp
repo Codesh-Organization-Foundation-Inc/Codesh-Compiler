@@ -3,17 +3,14 @@
 
 codesh::command_settings codesh::parse_command(int argc, char** argv)
 {
-    codesh::command_settings result {};
+    command_settings result {};
 
     if (argc < 2)
     {
         throw std::runtime_error("Missing arguments: need input and output file");
     }
-    else
-    {
-        result.src_path = argv[1];
-        result.dest_path = argv[2];
-    }
+    result.src_path = argv[1];
+    result.dest_path = argv[2];
 
     return result;
 }
