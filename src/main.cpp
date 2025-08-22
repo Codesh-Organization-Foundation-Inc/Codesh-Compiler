@@ -1,7 +1,7 @@
-#include <stdio.h>
+#include <iostream>
 
-int main(void) {
-    printf("hi mom");
+int main() {
+    std::cout << "hi mom" << std::endl;
     return 0;
 }
 
