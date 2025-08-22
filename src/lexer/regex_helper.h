@@ -37,8 +37,8 @@ const char* DOT_RGX = "\\bל־";
 const char* KEYWORD_CLASS_RGX = "\\bעצם\\b";
 const char* KEYWORD_ENUM_RGX = "\\bמניין\\b";
 const char* KEYWORD_THIS_RGX = "\\bאנוכי\\b";
-const char* KEYWORD_FUNCTION_RGX = "\\bהמעשה\\b"
-const char* KEYWORD_FUNCTION_CALL_RGX = "\\bויעש\\b"
+const char* KEYWORD_FUNCTION_RGX = "\\bהמעשה\\b";
+const char* KEYWORD_FUNCTION_CALL_RGX = "\\bויעש\\b";
 
 const char* KEYWORD_PUBLIC_RGX = "\\b(?:נגלה|נגלית)\\b";
 const char* KEYWORD_PRIVATE_RGX = "\\b(?:נסתר|נסתרת)\\b";
