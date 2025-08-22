@@ -102,7 +102,7 @@ static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES
     {KEYWORD_THROWS_GROUP_NAME, R"(\bוישלכהו\b)"},
 
 
-    {IDENTIFIER_CUSTOM_GROUP_NAME, R"(\S+)"},
+    {IDENTIFIER_CUSTOM_GROUP_NAME, R"(\w+)"},
 };
 
 
