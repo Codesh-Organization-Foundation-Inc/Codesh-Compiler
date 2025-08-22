@@ -1,6 +1,3 @@
-#include <stdbool.h>
-#include <stdio.h>
-
 struct command_settings
 {
     char* src_path;
@@ -10,7 +7,7 @@ struct command_settings
 
 command_settings parse_command(int argc, char** argv)
 {
-    command_settings result = { 0 };
+    command_settings result = { nllptr };
 
     if (argc < 2)
     {
