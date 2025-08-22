@@ -5,12 +5,12 @@
 namespace codesh
 {
 
-struct command_settings
+struct command_args
 {
     std::string_view src_path;
     std::string_view dest_path;
 };
 
-command_settings parse_command(int argc, const char **argv);
+command_args parse_command(int argc, char **argv);
 
 }
