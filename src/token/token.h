@@ -19,7 +19,7 @@ class token
 
 public:
     token(token_type type, token_group group);
-    ~token();
+    virtual ~token();
 
     [[nodiscard]] static token *from_group_id(int group_id, const std::string &content);
 
