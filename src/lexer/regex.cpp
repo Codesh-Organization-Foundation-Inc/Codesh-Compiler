@@ -1,112 +1,112 @@
 #include "regex.h"
 
-#include "group_name.h"
+#include "../token/token.h"
 
 #include <format>
 #include <sstream>
 #include <vector>
 
-using namespace codesh::regex::group_name;
+using codesh::token_group;
 
 
-// The order of this vector determines the order of regex priority.
-static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES = {
-    {COMMENT_MULTILINE_GROUP_NAME, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)"},
-    {COMMENT_ONE_LINER_GROUP_NAME, R"(והגה ה\'.*$)"},
+// The order of this vector determines the order of regex priority & group number.
+static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
+    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)"},
+    {token_group::COMMENT_ONE_LINER, R"(והגה ה\'.*$)"},
 
-    {PUNCTUATION_COMMA_GROUP_NAME, R"(\,)"},
-    {PUNCTUATION_SEMICOLON_GROUP_NAME, R"(\;)"},
-    {PUNCTUATION_DOT_GROUP_NAME, R"(\bל־)"},
+    {token_group::PUNCTUATION_COMMA, R"(\,)"},
+    {token_group::PUNCTUATION_SEMICOLON, R"(\;)"},
+    {token_group::PUNCTUATION_DOT, R"(\bל־)"},
 
-    {IDENTIFIER_NUMBER_GROUP_NAME, R"(\d+(?:\.\d+)?)"},
+    {token_group::IDENTIFIER_NUMBER, R"(\d+(?:\.\d+)?)"},
 
-    {KEYWORD_IMPORT_GROUP_NAME, R"(\bויבא\b)"},
+    {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
-    {SCOPE_BEGIN_GROUP_NAME, R"(\bויאמר\:)"},
-    {SCOPE_END_GROUP_NAME, R"(\bויתם\.)"},
+    {token_group::SCOPE_BEGIN, R"(\bויאמר\:)"},
+    {token_group::SCOPE_END, R"(\bויתם\.)"},
 
-    {KEYWORD_LET_GROUP_NAME, R"(\bויהי\b)"},
-    {KEYWORD_NAME_GROUP_NAME, R"(\bושמו\b)"},
-    {KEYWORD_SHALL_BE_GROUP_NAME, R"(\b(?:יהיה|תהיה)\b)"},
-    {KEYWORD_RETURN_GROUP_NAME, R"(\bוישב\b)"},
+    {token_group::KEYWORD_LET, R"(\bויהי\b)"},
+    {token_group::KEYWORD_NAME, R"(\bושמו\b)"},
+    {token_group::KEYWORD_SHALL_BE, R"(\b(?:יהיה|תהיה)\b)"},
+    {token_group::KEYWORD_RETURN, R"(\bוישב\b)"},
 
-    {OPERATOR_ADDITION_GROUP_NAME, R"(\bויוסף ל־)"},
-    {OPERATOR_SUBTRACTION_GROUP_NAME, R"(\bויוחסר מן\b)"},
-    {OPERATOR_MULTIPLICATION_GROUP_NAME, R"(\bויוכפל\b)"},
-    {OPERATOR_DIVISION_GROUP_NAME, R"(\bויחולק\b)"},
-    {OPERATOR_MODULO_GROUP_NAME, R"(\bויושרה\b)"},
+    {token_group::OPERATOR_ADDITION, R"(\bויוסף ל־)"},
+    {token_group::OPERATOR_SUBTRACTION, R"(\bויוחסר מן\b)"},
+    {token_group::OPERATOR_MULTIPLICATION, R"(\bויוכפל\b)"},
+    {token_group::OPERATOR_DIVISION, R"(\bויחולק\b)"},
+    {token_group::OPERATOR_MODULO, R"(\bויושרה\b)"},
 
-    {OPERATOR_ADDITION_ASSIGNMENT_GROUP_NAME, R"(\bויסף\b)"},
-    {OPERATOR_SUBTRACTION_ASSIGNMENT_GROUP_NAME, R"(\bויחסר\b)"},
-    {OPERATOR_MULTIPLICATION_ASSIGNMENT_GROUP_NAME, R"(\bויכפל\b)"},
-    {OPERATOR_DIVISION_ASSIGNMENT_GROUP_NAME, R"(\bויחלק\b)"},
-    {OPERATOR_MODULO_ASSIGNMENT_GROUP_NAME, R"(\bוישרה\b)"},
+    {token_group::OPERATOR_ADDITION_ASSIGNMENT, R"(\bויסף\b)"},
+    {token_group::OPERATOR_SUBTRACTION_ASSIGNMENT, R"(\bויחסר\b)"},
+    {token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT, R"(\bויכפל\b)"},
+    {token_group::OPERATOR_DIVISION_ASSIGNMENT, R"(\bויחלק\b)"},
+    {token_group::OPERATOR_MODULO_ASSIGNMENT, R"(\bוישרה\b)"},
 
-    {OPERATOR_INCREMENT_GROUP_NAME, R"(\bויתקדם\b)"},
-    {OPERATOR_DECREMENT_GROUP_NAME, R"(\bויפחת\b)"},
+    {token_group::OPERATOR_INCREMENT, R"(\bויתקדם\b)"},
+    {token_group::OPERATOR_DECREMENT, R"(\bויפחת\b)"},
 
-    {OPEN_PARENTHESIS_GROUP_NAME, R"(\bכי\b)"},
-    {CLOSE_PARENTHESIS_GROUP_NAME, R"(\bפסק\b)"},
+    {token_group::OPEN_PARENTHESIS, R"(\bכי\b)"},
+    {token_group::CLOSE_PARENTHESIS, R"(\bפסק\b)"},
 
-    {KEYWORD_CLASS_GROUP_NAME, R"(\bעצם\b)"},
-    {KEYWORD_ENUM_GROUP_NAME, R"(\bמניין\b)"},
-    {KEYWORD_THIS_GROUP_NAME, R"(\bאנוכי\b)"},
-    {KEYWORD_FUNCTION_GROUP_NAME, R"(\bהמעשה\b)"},
-    {KEYWORD_FUNCTION_CALL_GROUP_NAME, R"(\bויעש\b)"},
+    {token_group::KEYWORD_CLASS, R"(\bעצם\b)"},
+    {token_group::KEYWORD_ENUM, R"(\bמניין\b)"},
+    {token_group::KEYWORD_THIS, R"(\bאנוכי\b)"},
+    {token_group::KEYWORD_FUNCTION, R"(\bהמעשה\b)"},
+    {token_group::KEYWORD_FUNCTION_CALL, R"(\bויעש\b)"},
 
-    {KEYWORD_PUBLIC_GROUP_NAME, R"(\b(?:נגלה|נגלית)\b)"},
-    {KEYWORD_PRIVATE_GROUP_NAME, R"(\b(?:נסתר|נסתרת)\b)"},
-    {KEYWORD_STATIC_GROUP_NAME, R"(\bכללי\b)"},
-    {KEYWORD_ABSTRACT_GROUP_NAME, R"(\bרוחני\b)"},
-    {KEYWORD_FINAL_GROUP_NAME, R"(\bוימות ולא־יתחלף\b)"},
-    {KEYWORD_SUPER_GROUP_NAME, R"(\bאבי\b)"},
+    {token_group::KEYWORD_PUBLIC, R"(\b(?:נגלה|נגלית)\b)"},
+    {token_group::KEYWORD_PRIVATE, R"(\b(?:נסתר|נסתרת)\b)"},
+    {token_group::KEYWORD_STATIC, R"(\bכללי\b)"},
+    {token_group::KEYWORD_ABSTRACT, R"(\bרוחני\b)"},
+    {token_group::KEYWORD_FINAL, R"(\bוימות ולא־יתחלף\b)"},
+    {token_group::KEYWORD_SUPER, R"(\bאבי\b)"},
 
-    {KEYWORD_VAR_GROUP_NAME, R"(\bמשתנה\b)"},
-    {KEYWORD_INTEGER_GROUP_NAME, R"(\bשלם\b)"},
-    {KEYWORD_FLOAT_GROUP_NAME, R"(\bצף\b)"},
-    {KEYWORD_DOUBLE_GROUP_NAME, R"(\bמצף\b)"},
-    {KEYWORD_LONG_GROUP_NAME, R"(\bרב\b)"},
-    {KEYWORD_SHORT_GROUP_NAME, R"(\bקצר\b)"},
-    {KEYWORD_BYTE_GROUP_NAME, R"(\bקצרצר\b)"},
-    {KEYWORD_CHAR_GROUP_NAME, R"(\bתו\b)"},
-    {KEYWORD_STRING_GROUP_NAME, R"(\bפסוק\b)"},
-    {KEYWORD_BOOLEAN_GROUP_NAME, R"(\bדבר־מה\b)"},
-    {KEYWORD_NULL_GROUP_NAME, R"(\bתהו\b)"},
+    {token_group::KEYWORD_VAR, R"(\bמשתנה\b)"},
+    {token_group::KEYWORD_INTEGER, R"(\bשלם\b)"},
+    {token_group::KEYWORD_FLOAT, R"(\bצף\b)"},
+    {token_group::KEYWORD_DOUBLE, R"(\bמצף\b)"},
+    {token_group::KEYWORD_LONG, R"(\bרב\b)"},
+    {token_group::KEYWORD_SHORT, R"(\bקצר\b)"},
+    {token_group::KEYWORD_BYTE, R"(\bקצרצר\b)"},
+    {token_group::KEYWORD_CHAR, R"(\bתו\b)"},
+    {token_group::KEYWORD_STRING, R"(\bפסוק\b)"},
+    {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
+    {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
 
-    {KEYWORD_IF_GROUP_NAME, R"(\bאם\b)"},
-    {KEYWORD_ELSE_GROUP_NAME, R"(\bאחרת\b)"},
-    {KEYWORD_SWITCH_GROUP_NAME, R"(\bמחלוקת\b)"},
-    {KEYWORD_CASE_GROUP_NAME, R"(\bכאשר\b)"},
-    {KEYWORD_DEFAULT_GROUP_NAME, R"(\bחדל\b)"},
+    {token_group::KEYWORD_IF, R"(\bאם\b)"},
+    {token_group::KEYWORD_ELSE, R"(\bאחרת\b)"},
+    {token_group::KEYWORD_SWITCH, R"(\bמחלוקת\b)"},
+    {token_group::KEYWORD_CASE, R"(\bכאשר\b)"},
+    {token_group::KEYWORD_DEFAULT, R"(\bחדל\b)"},
 
-    {OPERATOR_EQUALS_GROUP_NAME, R"(\bשווה\b)"},
-    {OPERATOR_AGAINST_GROUP_NAME, R"(\bלנגד\b)"},
-    {OPERATOR_NOT_GROUP_NAME, R"(\bשקרי־הוא\b)"},
-    {OPERATOR_GREATER_GROUP_NAME, R"(\bגדול\b)"},
-    {OPERATOR_GREATER_EQUAL_GROUP_NAME, R"(\bגדול־ושווה\b)"},
-    {OPERATOR_LESS_GROUP_NAME, R"(\bקטן\b)"},
-    {OPERATOR_LESS_EQUAL_GROUP_NAME, R"(\bקטן־ושווה\b)"},
-    {OPERATOR_AND_GROUP_NAME, R"(\bוגם\b)"},
-    {OPERATOR_OR_GROUP_NAME, R"(\bאו\b)"},
+    {token_group::OPERATOR_EQUALS, R"(\bשווה\b)"},
+    {token_group::OPERATOR_AGAINST, R"(\bלנגד\b)"},
+    {token_group::OPERATOR_NOT, R"(\bשקרי־הוא\b)"},
+    {token_group::OPERATOR_GREATER, R"(\bגדול\b)"},
+    {token_group::OPERATOR_GREATER_EQUAL, R"(\bגדול־ושווה\b)"},
+    {token_group::OPERATOR_LESS, R"(\bקטן\b)"},
+    {token_group::OPERATOR_LESS_EQUAL, R"(\bקטן־ושווה\b)"},
+    {token_group::OPERATOR_AND, R"(\bוגם\b)"},
+    {token_group::OPERATOR_OR, R"(\bאו\b)"},
 
-    {KEYWORD_FOR_GROUP_NAME, R"(\bוימנה\b)"},
-    {KEYWORD_DO_GROUP_NAME, R"(\bעשה\b)"},
-    {KEYWORD_WHILE_GROUP_NAME, R"(\bבעוד\b)"},
-    {KEYWORD_CONTINUE_GROUP_NAME, R"(\bפסח\b)"},
-    {KEYWORD_BREAK_GROUP_NAME, R"(\bלך־לך\b)"},
+    {token_group::KEYWORD_FOR, R"(\bוימנה\b)"},
+    {token_group::KEYWORD_DO, R"(\bעשה\b)"},
+    {token_group::KEYWORD_WHILE, R"(\bבעוד\b)"},
+    {token_group::KEYWORD_CONTINUE, R"(\bפסח\b)"},
+    {token_group::KEYWORD_BREAK, R"(\bלך־לך\b)"},
 
-    {KEYWORD_TRY_GROUP_NAME, R"(\bוינסה\b)"},
-    {KEYWORD_EXCEPTION_GROUP_NAME, R"(\bפסיקה\b)"},
-    {KEYWORD_CATCH_GROUP_NAME, R"(\bויתפוס\b)"},
-    {KEYWORD_THROW_GROUP_NAME, R"(\bוישלך\b)"},
-    {KEYWORD_THROWS_GROUP_NAME, R"(\bוישלכהו\b)"},
+    {token_group::KEYWORD_TRY, R"(\bוינסה\b)"},
+    {token_group::KEYWORD_EXCEPTION, R"(\bפסיקה\b)"},
+    {token_group::KEYWORD_CATCH, R"(\bויתפוס\b)"},
+    {token_group::KEYWORD_THROW, R"(\bוישלך\b)"},
+    {token_group::KEYWORD_THROWS, R"(\bוישלכהו\b)"},
 
 
-    {IDENTIFIER_CUSTOM_GROUP_NAME, R"(\w+)"},
+    {token_group::IDENTIFIER_CUSTOM, R"(\w+)"},
 };
 
 
-static std::string build_single_regex(const std::pair<std::string_view, std::string_view>& token_regex);
+static std::string build_single_regex(const std::pair<token_group, std::string> &token_regex);
 
 
 static std::string build_lexer_regex()
@@ -120,20 +120,30 @@ static std::string build_lexer_regex()
 
     for (size_t i = 1; i < TOKEN_REGEXES.size(); ++i)
     {
-        oss << "|" << build_single_regex(TOKEN_REGEXES[i]);
+        oss << '|' << build_single_regex(TOKEN_REGEXES[i]);
     }
 
     return oss.str();
 }
 
-static std::string build_single_regex(const std::pair<std::string_view, std::string_view>& token_regex)
+static std::string build_single_regex(const std::pair<token_group, std::string> &token_regex)
 {
     std::ostringstream oss;
 
-    oss << "(?<" << token_regex.first << ">" << token_regex.second << ")";
+    oss << '(' << token_regex.second << ')';
 
     return oss.str();
 }
 
 
 const std::string codesh::LEXER_RGX = build_lexer_regex();
+
+/////
+
+token_group codesh::token_group_from_regex_id(const int group_id)
+{
+    if (group_id > TOKEN_REGEXES.size())
+        throw std::invalid_argument("Invalid token group id");
+
+    return TOKEN_REGEXES[group_id - 1].first;
+}

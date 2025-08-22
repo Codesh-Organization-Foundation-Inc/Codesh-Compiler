@@ -15,14 +15,13 @@ class token
     const token_type type;
     const token_group group;
 
-    static token_group get_token_group(std::string_view name);
     static token_type get_token_type(token_group name);
 
 public:
     token(token_type type, token_group group);
     ~token();
 
-    static token *from_group_name(const std::string &group_name, const std::string &content);
+    [[nodiscard]] static token *from_group_id(int group_id, const std::string &content);
 
     [[nodiscard]] token_type get_type() const;
     [[nodiscard]] token_group get_group() const;

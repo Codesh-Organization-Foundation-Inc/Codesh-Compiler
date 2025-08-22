@@ -10,9 +10,9 @@ add_executable(Codesh_Compiler
         src/parser/command_parser.cpp
         src/parser/command_parser.h
         src/lexer/regex.cpp
-        src/lexer/group_name.h
         src/token/token.h
-        src/token/token.cpp)
+        src/token/token.cpp
+        src/token/token_group.cpp)
 
 
 # sudo dnf install boost-regex boost-devel
