@@ -14,6 +14,9 @@ static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES
     {COMMENT_MULTILINE_GROUP_NAME, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)"},
     {COMMENT_ONE_LINER_GROUP_NAME, R"(והגה ה\'.*$)"},
 
+    {COMMA_GROUP_NAME, R"(\,)"},
+    {SEMICOLON_GROUP_NAME, R"(\;)"},
+    {DOT_GROUP_NAME, R"(\bל־)"},
 
     {IDENTIFIER_NUMBER_GROUP_NAME, R"(\d+(?:\.\d+)?)"},
 
@@ -23,6 +26,8 @@ static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES
     {SCOPE_END_GROUP_NAME, R"(\bויתם\.)"},
 
     {KEYWORD_LET_GROUP_NAME, R"(\bויהי\b)"},
+    {KEYWORD_NAME_GROUP_NAME, R"(\bושמו\b)"},
+    {KEYWORD_SHALL_BE_GROUP_NAME, R"(\b(?:יהיה|תהיה)\b)"},
     {KEYWORD_RETURN_GROUP_NAME, R"(\bוישב\b)"},
 
     {OPERATOR_ADDITION_GROUP_NAME, R"(\bויוסף ל־)"},
@@ -42,9 +47,6 @@ static const std::vector<std::pair<std::string_view, std::string>> TOKEN_REGEXES
 
     {OPEN_PARENTHESIS_GROUP_NAME, R"(\bכי\b)"},
     {CLOSE_PARENTHESIS_GROUP_NAME, R"(\bפסק\b)"},
-
-    {SEMICOLON_GROUP_NAME, R"(\;)"},
-    {DOT_GROUP_NAME, R"(\bל־)"},
 
     {KEYWORD_CLASS_GROUP_NAME, R"(\bעצם\b)"},
     {KEYWORD_ENUM_GROUP_NAME, R"(\bמניין\b)"},

@@ -11,10 +11,12 @@ enum token_type
     SCOPE_END, // ויתם.
 
     KEYWORD_LET, // ויהי
+    KEYWORD_NAME, // ושמו
+    KEYWORD_SHALL_BE, // יהיה
     KEYWORD_RETURN, // וישב
 
-    IDENTIFIER_NUMBER, // any number (with digit 0 - 9)
-    IDENTIFIER_CUSTOM, // any other word, eg. variable1
+    IDENTIFIER_NUMBER, // Any number
+    IDENTIFIER_CUSTOM, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
@@ -34,7 +36,8 @@ enum token_type
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
-    SEMICOLON, //;
+    SEMICOLON, // ;
+    COMMA, // ,
     DOT, // ל־
 
     KEYWORD_CLASS, // עצם

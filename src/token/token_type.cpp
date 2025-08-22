@@ -17,6 +17,8 @@ static const std::unordered_map<std::string_view, token_type> GROUP_NAME_TO_TOKE
     {SCOPE_END_GROUP_NAME, token_type::SCOPE_END},
 
     {KEYWORD_LET_GROUP_NAME, token_type::KEYWORD_LET},
+    {KEYWORD_NAME_GROUP_NAME, token_type::KEYWORD_NAME},
+    {KEYWORD_SHALL_BE_GROUP_NAME, token_type::KEYWORD_SHALL_BE},
     {KEYWORD_RETURN_GROUP_NAME, token_type::KEYWORD_RETURN},
 
     {OPERATOR_ADDITION_GROUP_NAME, token_type::OPERATOR_ADDITION},
@@ -38,6 +40,7 @@ static const std::unordered_map<std::string_view, token_type> GROUP_NAME_TO_TOKE
     {CLOSE_PARENTHESIS_GROUP_NAME, token_type::CLOSE_PARENTHESIS},
 
     {SEMICOLON_GROUP_NAME, token_type::SEMICOLON},
+    {COMMA_GROUP_NAME, token_type::COMMA},
     {DOT_GROUP_NAME, token_type::DOT},
 
     {KEYWORD_CLASS_GROUP_NAME, token_type::KEYWORD_CLASS},

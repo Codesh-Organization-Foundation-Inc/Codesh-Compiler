@@ -13,6 +13,8 @@ constexpr std::string_view SCOPE_BEGIN_GROUP_NAME = "SCOPE_BEGIN";
 constexpr std::string_view SCOPE_END_GROUP_NAME = "SCOPE_END";
 
 constexpr std::string_view KEYWORD_LET_GROUP_NAME = "KEYWORD_LET";
+constexpr std::string_view KEYWORD_NAME_GROUP_NAME = "KEYWORD_NAME";
+constexpr std::string_view KEYWORD_SHALL_BE_GROUP_NAME = "KEYWORD_SHALL_BE";
 constexpr std::string_view KEYWORD_RETURN_GROUP_NAME = "KEYWORD_RETURN";
 
 constexpr std::string_view OPERATOR_ADDITION_GROUP_NAME = "OPERATOR_ADDITION";
@@ -33,6 +35,7 @@ constexpr std::string_view OPERATOR_DECREMENT_GROUP_NAME = "OPERATOR_DECREMENT";
 constexpr std::string_view OPEN_PARENTHESIS_GROUP_NAME = "OPEN_PARENTHESIS";
 constexpr std::string_view CLOSE_PARENTHESIS_GROUP_NAME = "CLOSE_PARENTHESIS";
 
+constexpr std::string_view COMMA_GROUP_NAME = "COMMA";
 constexpr std::string_view SEMICOLON_GROUP_NAME = "SEMICOLON";
 constexpr std::string_view DOT_GROUP_NAME = "DOT";
 
