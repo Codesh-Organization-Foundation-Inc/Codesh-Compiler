@@ -31,8 +31,8 @@ constexpr std::string_view OPERATOR_MULTIPLICATION_ASSIGNMENT_RGX = R"(\bויכ�
 constexpr std::string_view OPERATOR_DIVISION_ASSIGNMENT_RGX = R"(\bויחלק\b)";
 constexpr std::string_view OPERATOR_MODULO_ASSIGNMENT_RGX = R"(\bוישרה\b)";
 
-constexpr std::string_view OPERATOR_INCREAMENT_RGX = R"(\bויתקדם\b)";
-constexpr std::string_view OPERATOR_DECREAMENT_RGX = R"(\bויפחת\b)";
+constexpr std::string_view OPERATOR_INCREMENT_RGX = R"(\bויתקדם\b)";
+constexpr std::string_view OPERATOR_DECREMENT_RGX = R"(\bויפחת\b)";
 
 constexpr std::string_view OPEN_PARENTHESIS_RGX = R"(\bכי\b)";
 constexpr std::string_view CLOSE_PARENTHESIS_RGX = R"(\bפסק\b)";
