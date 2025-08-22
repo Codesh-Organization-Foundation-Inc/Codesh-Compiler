@@ -1,5 +1,7 @@
 #pragma once
 
+namespace codesh
+{
 
 enum token_type
 {
@@ -91,3 +93,5 @@ enum token_type
 
     KEYWORD_IMPORT // ויבא
 };
+
+}

@@ -1,172 +1,100 @@
 #pragma once
 
+#include <string_view>
+
+namespace codesh::regex
+{
 
 // Group Regexes
 
-const char *const NUMBER_RGX = "\\d+(?:\\.\\d+)?";
-const char *const OPERATOR_RGX = "[\\/\\*-\\+\\%]";
-const char *const ANYTHING_ELSE_RGX = "\\S+";
+constexpr std::string_view NUMBER_RGX = R"(\d+(?:\.\d+)?)";
+constexpr std::string_view OPERATOR_RGX = R"([\/\*-\+\%])";
+constexpr std::string_view ANYTHING_ELSE_RGX = R"(\S+)";
 
-const char *const KEYWORD_IMPORT_RGX = "\\bויבא\\b";
+constexpr std::string_view KEYWORD_IMPORT_RGX = R"(\bויבא\b)";
 
-const char *const SCOPE_BEGIN_RGX = "\\bויאמר\\:";
-const char *const SCOPE_END_RGX = "\\bויתם\\.";
+constexpr std::string_view SCOPE_BEGIN_RGX = R"(\bויאמר\:)";
+constexpr std::string_view SCOPE_END_RGX = R"(\bויתם\.)";
 
-const char *const KEYWORD_LET_RGX = "\\bויהי\\b";
-const char *const KEYWORD_RETURN_RGX = "\\bוישב\\b";
+constexpr std::string_view KEYWORD_LET_RGX = R"(\bויהי\b)";
+constexpr std::string_view KEYWORD_RETURN_RGX = R"(\bוישב\b)";
 
-const char *const OPERATOR_ADDITION_RGX = "\\bויוסף ל־";
-const char *const OPERATOR_SUBTRACTION_RGX = "\\bויוחסר מן\\b";
-const char *const OPERATOR_MULTIPLICATION_RGX = "\\bויוכפל\\b";
-const char *const OPERATOR_DIVISION_RGX = "\\bויחולק\\b";
-const char *const OPERATOR_MODULO_RGX = "\\bויושרה\\b";
+constexpr std::string_view OPERATOR_ADDITION_RGX = R"(\bויוסף ל־)";
+constexpr std::string_view OPERATOR_SUBTRACTION_RGX = R"(\bויוחסר מן\b)";
+constexpr std::string_view OPERATOR_MULTIPLICATION_RGX = R"(\bויוכפל\b)";
+constexpr std::string_view OPERATOR_DIVISION_RGX = R"(\bויחולק\b)";
+constexpr std::string_view OPERATOR_MODULO_RGX = R"(\bויושרה\b)";
 
-const char *const OPERATOR_ADDITION_ASSIGNMENT_RGX = "\\bויסף\\b";
-const char *const OPERATOR_SUBTRACTION_ASSIGNMENT_RGX = "\\bויחסר\\b";
-const char *const OPERATOR_MULTIPLICATION_ASSIGNMENT_RGX = "\\bויכפל\\b";
-const char *const OPERATOR_DIVISION_ASSIGNMENT_RGX = "\\bויחלק\\b";
-const char *const OPERATOR_MODULO_ASSIGNMENT_RGX = "\\bוישרה\\b";
+constexpr std::string_view OPERATOR_ADDITION_ASSIGNMENT_RGX = R"(\bויסף\b)";
+constexpr std::string_view OPERATOR_SUBTRACTION_ASSIGNMENT_RGX = R"(\bויחסר\b)";
+constexpr std::string_view OPERATOR_MULTIPLICATION_ASSIGNMENT_RGX = R"(\bויכפל\b)";
+constexpr std::string_view OPERATOR_DIVISION_ASSIGNMENT_RGX = R"(\bויחלק\b)";
+constexpr std::string_view OPERATOR_MODULO_ASSIGNMENT_RGX = R"(\bוישרה\b)";
 
-const char *const OPERATOR_INCREAMENT_RGX = "\\bויתקדם\\b";
-const char *const OPERATOR_DECREAMENT_RGX = "\\bויפחת\\b";
+constexpr std::string_view OPERATOR_INCREAMENT_RGX = R"(\bויתקדם\b)";
+constexpr std::string_view OPERATOR_DECREAMENT_RGX = R"(\bויפחת\b)";
 
-const char *const OPEN_PARENTHESIS_RGX = "\\bכי\\b";
-const char *const CLOSE_PARENTHESIS_RGX = "\\bפסק\\b";
+constexpr std::string_view OPEN_PARENTHESIS_RGX = R"(\bכי\b)";
+constexpr std::string_view CLOSE_PARENTHESIS_RGX = R"(\bפסק\b)";
 
-const char *const SEMICOLON_RGX = "\\;";
-const char *const DOT_RGX = "\\bל־";
+constexpr std::string_view SEMICOLON_RGX = R"(\;)";
+constexpr std::string_view DOT_RGX = R"(\bל־)";
 
-const char *const KEYWORD_CLASS_RGX = "\\bעצם\\b";
-const char *const KEYWORD_ENUM_RGX = "\\bמניין\\b";
-const char *const KEYWORD_THIS_RGX = "\\bאנוכי\\b";
-const char *const KEYWORD_FUNCTION_RGX = "\\bהמעשה\\b";
-const char *const KEYWORD_FUNCTION_CALL_RGX = "\\bויעש\\b";
+constexpr std::string_view KEYWORD_CLASS_RGX = R"(\bעצם\b)";
+constexpr std::string_view KEYWORD_ENUM_RGX = R"(\bמניין\b)";
+constexpr std::string_view KEYWORD_THIS_RGX = R"(\bאנוכי\b)";
+constexpr std::string_view KEYWORD_FUNCTION_RGX = R"(\bהמעשה\b)";
+constexpr std::string_view KEYWORD_FUNCTION_CALL_RGX = R"(\bויעש\b)";
 
-const char *const KEYWORD_PUBLIC_RGX = "\\b(?:נגלה|נגלית)\\b";
-const char *const KEYWORD_PRIVATE_RGX = "\\b(?:נסתר|נסתרת)\\b";
-const char *const KEYWORD_STATIC_RGX = "\\bכללי\\b";
-const char *const KEYWORD_ABSTRACT_RGX = "\\bרוחני\\b";
-const char *const KEYWORD_FINAL_RGX = "\\bוימות ולא־יתחלף\\b";
-const char *const KEYWORD_SUPER_RGX = "\\bאבי\\b";
+constexpr std::string_view KEYWORD_PUBLIC_RGX = R"(\b(?:נגלה|נגלית)\b)";
+constexpr std::string_view KEYWORD_PRIVATE_RGX = R"(\b(?:נסתר|נסתרת)\b)";
+constexpr std::string_view KEYWORD_STATIC_RGX = R"(\bכללי\b)";
+constexpr std::string_view KEYWORD_ABSTRACT_RGX = R"(\bרוחני\b)";
+constexpr std::string_view KEYWORD_FINAL_RGX = R"(\bוימות ולא־יתחלף\b)";
+constexpr std::string_view KEYWORD_SUPER_RGX = R"(\bאבי\b)";
 
-const char *const KEYWORD_VAR_RGX = "\\bמשתנה\\b";
-const char *const KEYWORD_INTEGER_RGX = "\\bשלם\\b";
-const char *const KEYWORD_FLOAT_RGX = "\\bצף\\b";
-const char *const KEYWORD_DOUBLE_RGX = "\\bמצף\\b";
-const char *const KEYWORD_LONG_RGX = "\\bרב\\b";
-const char *const KEYWORD_SHORT_RGX = "\\bקצר\\b";
-const char *const KEYWORD_BYTE_RGX = "\\bקצרצר\\b";
-const char *const KEYWORD_CHAR_RGX = "\\bתו\\b";
-const char *const KEYWORD_STRING_RGX = "\\bפסוק\\b";
-const char *const KEYWORD_BOOLEAN_RGX = "\\bדבר־מה\\b";
-const char *const KEYWORD_NULL_RGX = "\\bתהו\\b";
+constexpr std::string_view KEYWORD_VAR_RGX = R"(\bמשתנה\b)";
+constexpr std::string_view KEYWORD_INTEGER_RGX = R"(\bשלם\b)";
+constexpr std::string_view KEYWORD_FLOAT_RGX = R"(\bצף\b)";
+constexpr std::string_view KEYWORD_DOUBLE_RGX = R"(\bמצף\b)";
+constexpr std::string_view KEYWORD_LONG_RGX = R"(\bרב\b)";
+constexpr std::string_view KEYWORD_SHORT_RGX = R"(\bקצר\b)";
+constexpr std::string_view KEYWORD_BYTE_RGX = R"(\bקצרצר\b)";
+constexpr std::string_view KEYWORD_CHAR_RGX = R"(\bתו\b)";
+constexpr std::string_view KEYWORD_STRING_RGX = R"(\bפסוק\b)";
+constexpr std::string_view KEYWORD_BOOLEAN_RGX = R"(\bדבר־מה\b)";
+constexpr std::string_view KEYWORD_NULL_RGX = R"(\bתהו\b)";
 
-const char *const KEYWORD_IF_RGX = "\\bאם\\b";
-const char *const KEYWORD_ELSE_RGX = "\\bאחרת\\b";
-const char *const KEYWORD_SWITCH_RGX = "\\bמחלוקת\\b";
-const char *const KEYWORD_CASE_RGX = "\\bכאשר\\b";
-const char *const KEYWORD_DEFAULT_RGX = "\\bחדל\\b";
+constexpr std::string_view KEYWORD_IF_RGX = R"(\bאם\b)";
+constexpr std::string_view KEYWORD_ELSE_RGX = R"(\bאחרת\b)";
+constexpr std::string_view KEYWORD_SWITCH_RGX = R"(\bמחלוקת\b)";
+constexpr std::string_view KEYWORD_CASE_RGX = R"(\bכאשר\b)";
+constexpr std::string_view KEYWORD_DEFAULT_RGX = R"(\bחדל\b)";
 
-const char *const OPERATOR_EQUALS_RGX = "\\bשווה\\b";
-const char *const OPERATOR_AGAINST_RGX = "\\bלנגד\\b";
-const char *const OPERATOR_NOT_RGX = "\\bשקרי־הוא\\b";
-const char *const OPERATOR_GREATER_RGX = "\\bגדול\\b";
-const char *const OPERATOR_GREATER_EQUAL_RGX = "\\bגדול־ושווה\\b";
-const char *const OPERATOR_LESS_RGX = "\\bקטן\\b";
-const char *const OPERATOR_LESS_EQUAL_RGX = "\\bקטן־ושווה\\b";
-const char *const OPERATOR_AND_RGX = "\\bוגם\\b";
-const char *const OPERATOR_OR_RGX = "\\bאו\\b";
+constexpr std::string_view OPERATOR_EQUALS_RGX = R"(\bשווה\b)";
+constexpr std::string_view OPERATOR_AGAINST_RGX = R"(\bלנגד\b)";
+constexpr std::string_view OPERATOR_NOT_RGX = R"(\bשקרי־הוא\b)";
+constexpr std::string_view OPERATOR_GREATER_RGX = R"(\bגדול\b)";
+constexpr std::string_view OPERATOR_GREATER_EQUAL_RGX = R"(\bגדול־ושווה\b)";
+constexpr std::string_view OPERATOR_LESS_RGX = R"(\bקטן\b)";
+constexpr std::string_view OPERATOR_LESS_EQUAL_RGX = R"(\bקטן־ושווה\b)";
+constexpr std::string_view OPERATOR_AND_RGX = R"(\bוגם\b)";
+constexpr std::string_view OPERATOR_OR_RGX = R"(\bאו\b)";
 
-const char *const KEYWORD_FOR_RGX = "\\bוימנה\\b";
-const char *const KEYWORD_DO_RGX = "\\bעשה\\b";
-const char *const KEYWORD_WHILE_RGX = "\\bבעוד\\b";
-const char *const KEYWORD_CONTINUE_RGX = "\\bפסח\\b";
-const char *const KEYWORD_BREAK_RGX = "\\bלך־לך\\b";
+constexpr std::string_view KEYWORD_FOR_RGX = R"(\bוימנה\b)";
+constexpr std::string_view KEYWORD_DO_RGX = R"(\bעשה\b)";
+constexpr std::string_view KEYWORD_WHILE_RGX = R"(\bבעוד\b)";
+constexpr std::string_view KEYWORD_CONTINUE_RGX = R"(\bפסח\b)";
+constexpr std::string_view KEYWORD_BREAK_RGX = R"(\bלך־לך\b)";
 
-const char *const COMMENT_MULTILINE_RGX = "והגה ה\\' לאמור:(?:.|\\s)*ויחדל.";
-const char *const COMMENT_ONE_LINER_RGX = "והגה ה\\'.*$";
+constexpr std::string_view COMMENT_MULTILINE_RGX = R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)";
+constexpr std::string_view COMMENT_ONE_LINER_RGX = R"(והגה ה\'.*$)";
 
-const char *const KEYWORD_TRY_RGX = "\\bוינסה\\b";
-const char *const KEYWORD_EXCEPTION_RGX = "\\bפסיקה\\b";
-const char *const KEYWORD_CATCH_RGX = "\\bויתפוס\\b";
-const char *const KEYWORD_THROW_RGX = "\\bוישלך\\b";
-const char *const KEYWORD_THROWS_RGX = "\\bוישלכהו\\b";
+constexpr std::string_view KEYWORD_TRY_RGX = R"(\bוינסה\b)";
+constexpr std::string_view KEYWORD_EXCEPTION_RGX = R"(\bפסיקה\b)";
+constexpr std::string_view KEYWORD_CATCH_RGX = R"(\bויתפוס\b)";
+constexpr std::string_view KEYWORD_THROW_RGX = R"(\bוישלך\b)";
+constexpr std::string_view KEYWORD_THROWS_RGX = R"(\bוישלכהו\b)";
 
-// Group Names
+}
 
-struct group_name_to_regex
-{
-    const char *const group_name;
-    const char *const regex;
-};
-
-const struct group_name_to_regex CODESH_GN2R[] = {
-    {"NUMBER", NUMBER_RGX},
-    {"OPERATOR", OPERATOR_RGX},
-    {"ANYTHING_ELSE", ANYTHING_ELSE_RGX},
-    {"KEYWORD_IMPORT", KEYWORD_IMPORT_RGX},
-    {"SCOPE_END", SCOPE_END_RGX},
-    {"KEYWORD_LET", KEYWORD_LET_RGX},
-    {"KEYWORD_RETURN", KEYWORD_RETURN_RGX},
-    {"OPERATOR_ADDITION", OPERATOR_ADDITION_RGX},
-    {"OPERATOR_SUBTRACTION", OPERATOR_SUBTRACTION_RGX},
-    {"OPERATOR_MULTIPLICATION", OPERATOR_MULTIPLICATION_RGX},
-    {"OPERATOR_DIVISION", OPERATOR_DIVISION_RGX},
-    {"OPERATOR_MODULO", OPERATOR_MODULO_RGX},
-    {"OPERATOR_ADDITION_ASSIGNMENT", OPERATOR_ADDITION_ASSIGNMENT_RGX},
-    {"OPERATOR_SUBTRACTION_ASSIGNMENT", OPERATOR_SUBTRACTION_ASSIGNMENT_RGX},
-    {"OPERATOR_MULTIPLICATION_ASSIGNMENT", OPERATOR_MULTIPLICATION_ASSIGNMENT_RGX},
-    {"OPERATOR_DIVISION_ASSIGNMENT", OPERATOR_DIVISION_ASSIGNMENT_RGX},
-    {"OPERATOR_MODULO_ASSIGNMENT", OPERATOR_MODULO_ASSIGNMENT_RGX},
-    {"OPERATOR_INCREAMENT", OPERATOR_INCREAMENT_RGX},
-    {"OPERATOR_DECREAMENT", OPERATOR_DECREAMENT_RGX},
-    {"OPEN_PARENTHESIS", OPEN_PARENTHESIS_RGX},
-    {"CLOSE_PARENTHESIS", CLOSE_PARENTHESIS_RGX},
-    {"SEMICOLON", SEMICOLON_RGX},
-    {"DOT", DOT_RGX},
-    {"KEYWORD_CLASS", KEYWORD_CLASS_RGX},
-    {"KEYWORD_ENUM", KEYWORD_ENUM_RGX},
-    {"KEYWORD_THIS", KEYWORD_THIS_RGX},
-    {"KEYWORD_FUNCTION", KEYWORD_FUNCTION_RGX},
-    {"KEYWORD_FUNCTION_CALL", KEYWORD_FUNCTION_CALL_RGX},
-    {"KEYWORD_PUBLIC", KEYWORD_PUBLIC_RGX},
-    {"KEYWORD_PRIVATE", KEYWORD_PRIVATE_RGX},
-    {"KEYWORD_STATIC", KEYWORD_STATIC_RGX},
-    {"KEYWORD_ABSTRACT", KEYWORD_ABSTRACT_RGX},
-    {"KEYWORD_FINAL", KEYWORD_FINAL_RGX},
-    {"KEYWORD_SUPER", KEYWORD_SUPER_RGX},
-    {"KEYWORD_VAR", KEYWORD_VAR_RGX},
-    {"KEYWORD_INTEGER", KEYWORD_INTEGER_RGX},
-    {"KEYWORD_FLOAT", KEYWORD_FLOAT_RGX},
-    {"KEYWORD_DOUBLE", KEYWORD_DOUBLE_RGX},
-    {"KEYWORD_LONG", KEYWORD_LONG_RGX},
-    {"KEYWORD_SHORT", KEYWORD_SHORT_RGX},
-    {"KEYWORD_BYTE", KEYWORD_BYTE_RGX},
-    {"KEYWORD_CHAR", KEYWORD_CHAR_RGX},
-    {"KEYWORD_NULL", KEYWORD_NULL_RGX},
-    {"KEYWORD_IF", KEYWORD_IF_RGX},
-    {"KEYWORD_ELSE", KEYWORD_ELSE_RGX},
-    {"KEYWORD_SWITCH", KEYWORD_SWITCH_RGX},
-    {"KEYWORD_CASE", KEYWORD_CASE_RGX},
-    {"KEYWORD_DEFAULT", KEYWORD_DEFAULT_RGX},
-    {"OPERATOR_EQUALS", OPERATOR_EQUALS_RGX},
-    {"OPERATOR_AGAINST", OPERATOR_AGAINST_RGX},
-    {"OPERATOR_NOT", OPERATOR_NOT_RGX},
-    {"OPERATOR_GREATER", OPERATOR_GREATER_RGX},
-    {"OPERATOR_GREATER_EQUAL", OPERATOR_GREATER_EQUAL_RGX},
-    {"OPERATOR_LESS", OPERATOR_LESS_RGX},
-    {"OPERATOR_LESS_EQUAL", OPERATOR_LESS_EQUAL_RGX},
-    {"OPERATOR_AND", OPERATOR_AND_RGX},
-    {"OPERATOR_OR", OPERATOR_OR_RGX},
-    {"KEYWORD_FOR", KEYWORD_FOR_RGX},
-    {"KEYWORD_DO", KEYWORD_DO_RGX},
-    {"KEYWORD_WHILE", KEYWORD_WHILE_RGX},
-    {"KEYWORD_CONTINUE", KEYWORD_CONTINUE_RGX},
-    {"COMMENT_MULTILINE", COMMENT_MULTILINE_RGX},
-    {"COMMENT_ONE_LINER", COMMENT_ONE_LINER_RGX},
-    {"KEYWORD_TRY", KEYWORD_TRY_RGX},
-    {"KEYWORD_EXCEPTION", KEYWORD_EXCEPTION_RGX},
-    {"KEYWORD_CATCH", KEYWORD_CATCH_RGX},
-    {"KEYWORD_THROW", KEYWORD_THROW_RGX},
-    {"KEYWORD_THROWS", KEYWORD_THROWS_RGX},
-};

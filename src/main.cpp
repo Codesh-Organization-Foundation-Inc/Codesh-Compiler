@@ -1,7 +1,9 @@
+#include "lexer/regex_helper.h"
+
 #include <iostream>
 
 int main() {
-    std::cout << "hi mom" << std::endl;
+    std::cout << codesh::regex::KEYWORD_CLASS_RGX << std::endl;
     return 0;
 }
 

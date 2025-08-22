@@ -7,4 +7,5 @@ add_executable(Codesh_Compiler
         src/main.cpp
         src/token/token_type.h
         src/lexer/regex_helper.h
+        src/lexer/regex_helper.cpp
         src/parser/command_parser.cpp)
