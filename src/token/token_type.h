@@ -1,6 +1,8 @@
 #pragma once
 
-namespace codesh
+#include <string_view>
+
+namespace codesh::token
 {
 
 enum token_type
@@ -66,14 +68,16 @@ enum token_type
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // חדל
 
-    KEYWORD_OPERATOR_EQUALS, // שווה ... לנגד
-    KEYWORD_NOT, // שקרי־הוא
-    KEYWORD_GREATER, // גדול
-    KEYWORD_GREATER_EQUAL, // גדול־ושווה
-    KEYWORD_LESS, // קטן
-    KEYWORD_LESS_EQUAL, // קטן־ושווה
-    KEYWORD_AND, // וגם
-    KEYWORD_OR, // או
+    OPERATOR_EQUALS, // שווה ... לנגד
+    OPERATOR_NOT, // שקרי־הוא
+    OPERATOR_GREATER, // גדול
+    OPERATOR_GREATER_EQUAL, // גדול־ושווה
+    OPERATOR_LESS, // קטן
+    OPERATOR_LESS_EQUAL, // קטן־ושווה
+    OPERATOR_AND, // וגם
+    OPERATOR_OR, // או
+
+    OPERATOR_AGAINST, // לנגד
 
 
     KEYWORD_FOR, // וימנה
@@ -82,7 +86,7 @@ enum token_type
     KEYWORD_CONTINUE, // פסח
     KEYWORD_BREAK, // לך־לך
 
-    COMMENT_MULTILINE, // והגה ה' לאמור:
+    COMMENT_MULTILINE, // והגה ה' לאמור: ... ויחדל.
     COMMENT_ONE_LINER, // והגה ה'
 
     KEYWORD_TRY, // וינסה
@@ -93,5 +97,7 @@ enum token_type
 
     KEYWORD_IMPORT // ויבא
 };
+
+token_type get_token_type(std::string_view group_name);
 
 }

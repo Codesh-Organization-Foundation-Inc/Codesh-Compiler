@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Codesh_Compiler
         src/main.cpp
         src/token/token_type.h
-        src/lexer/regex_helper.h
-        src/lexer/regex_helper.cpp
+        src/lexer/regex.h
+        src/token/token_type.cpp
         src/parser/command_parser.cpp
-        src/parser/command_parser.h)
+        src/parser/command_parser.h
+        src/lexer/regex.cpp
+        src/lexer/group_name.h)

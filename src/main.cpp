@@ -1,9 +1,11 @@
-#include "lexer/regex_helper.h"
+#include "lexer/regex.h"
+#include "token/token_type.h"
 
 #include <iostream>
 
 int main() {
-    std::cout << codesh::regex::KEYWORD_CLASS_RGX << std::endl;
+    std::cout << codesh::token::get_token_type("KEYWORD_TRY") << std::endl;
+    std::cout << codesh::LEXER_RGX << std::endl;
     return 0;
 }
 
