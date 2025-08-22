@@ -8,9 +8,9 @@ struct command_settings
 };
 
 
-struct command_settings parse_command(int argc, char** argv)
+command_settings parse_command(int argc, char** argv)
 {
-    struct command_settings result = { 0 };
+    command_settings result = { 0 };
 
     if (argc < 2)
     {

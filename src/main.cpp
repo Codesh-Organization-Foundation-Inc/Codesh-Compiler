@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <regex.h>
 
 int main(void) {
-    printf("Hello, World!\n");
+    printf("hi mom");
     return 0;
 }
 

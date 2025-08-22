@@ -1,5 +1,5 @@
-#ifndef TOKEN_TYPE_H
-#define TOKEN_TYPE_H
+#pragma once
+
 
 enum token_type
 {
@@ -91,5 +91,3 @@ enum token_type
 
     KEYWORD_IMPORT // ויבא
 };
-
-#endif //TOKEN_TYPE_H

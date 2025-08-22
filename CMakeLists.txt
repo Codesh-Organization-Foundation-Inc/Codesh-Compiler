@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.31.6)
-project(Codesh_Compiler C)
+project(Codesh_Compiler CXX)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Codesh_Compiler
-        src/main.c
+        src/main.cpp
         src/token/token_type.h
         src/lexer/regex_helper.h
         src/parser/command_parser.cpp)
