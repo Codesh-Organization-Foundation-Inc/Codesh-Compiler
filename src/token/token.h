@@ -7,7 +7,7 @@
 namespace codesh
 {
 
-enum token_type : int;
+enum class token_type : int;
 
 
 class token
@@ -36,7 +36,7 @@ public:
 };
 
 
-enum token_type : int
+enum class token_type : int
 {
     KEYWORD,
     IDENTIFIER,

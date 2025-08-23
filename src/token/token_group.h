@@ -3,7 +3,7 @@
 namespace codesh
 {
 
-enum token_group : int
+enum class token_group : int
 {
     SCOPE_BEGIN, // ויאמר:
     SCOPE_END, // ויתם.

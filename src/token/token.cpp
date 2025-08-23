@@ -10,11 +10,11 @@ codesh::token_type codesh::token::get_token_type(const token_group name)
 {
     switch (name)
     {
-    case IDENTIFIER_CUSTOM:
-    case IDENTIFIER_NUMBER:
-        return IDENTIFIER;
+    case token_group::IDENTIFIER_CUSTOM:
+    case token_group::IDENTIFIER_NUMBER:
+        return token_type::IDENTIFIER;
 
-    default: return KEYWORD;
+    default: return token_type::KEYWORD;
     }
 }
 
@@ -32,7 +32,7 @@ codesh::token *codesh::token::from_group_id(const int group_id, const std::strin
 
     switch (const token_type type = get_token_type(group))
     {
-    case IDENTIFIER:
+    case token_type::IDENTIFIER:
         return new identifier_token(type, group, content);
     default:
         return new token(type, group);

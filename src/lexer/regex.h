@@ -4,7 +4,7 @@
 
 namespace codesh
 {
-enum token_group : int;
+enum class token_group : int;
 }
 
 
