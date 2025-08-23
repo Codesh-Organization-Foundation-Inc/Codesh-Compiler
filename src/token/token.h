@@ -27,7 +27,7 @@ public:
     [[nodiscard]] token_group get_group() const;
 };
 
-class identifier_token : public token
+class identifier_token final : public token
 {
     const std::string content;
 
