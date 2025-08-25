@@ -13,7 +13,9 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // יהיה
     KEYWORD_RETURN, // וישב
 
-    IDENTIFIER_NUMBER, // Any number
+    IDENTIFIER_NUMBER_DOUBLE,
+    IDENTIFIER_NUMBER_FLOAT,
+    IDENTIFIER_NUMBER_INT,
     IDENTIFIER_CUSTOM, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
@@ -51,7 +53,7 @@ enum class token_group : int
     KEYWORD_FINAL, // וימות ולא־יתחלף
     KEYWORD_SUPER, // אבי
 
-    KEYWORD_VAR, //משתנה
+    KEYWORD_VAR, // משתנה
     KEYWORD_INTEGER, // שלם
     KEYWORD_FLOAT, // צף
     KEYWORD_DOUBLE, //מצף

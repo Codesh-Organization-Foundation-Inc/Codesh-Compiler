@@ -11,7 +11,7 @@ codesh::token_type codesh::token::get_token_type(const token_group name)
     switch (name)
     {
     case token_group::IDENTIFIER_CUSTOM:
-    case token_group::IDENTIFIER_NUMBER:
+    case token_group::IDENTIFIER_NUMBER_INT:
         return token_type::IDENTIFIER;
 
     default: return token_type::KEYWORD;
