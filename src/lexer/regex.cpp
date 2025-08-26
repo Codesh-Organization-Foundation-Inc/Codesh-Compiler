@@ -11,8 +11,8 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל\:)"},
-    {token_group::COMMENT_ONE_LINER, R"(והגה ה\'.*$)"},
+    {token_group::COMMENT_MULTILINE, R"(והגה ה' לאמר:(?:.|\s)*ויחדל\:)"},
+    {token_group::COMMENT_ONE_LINER, R"(והגה ה'.*$)"},
 
     {token_group::PUNCTUATION_COMMA, R"(\,)"},
     {token_group::PUNCTUATION_DOT, R"(\bל־)"},
@@ -21,7 +21,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::IDENTIFIER_NUMBER_DOUBLE, R"(\d+\.\d+)"},
     {token_group::IDENTIFIER_NUMBER_INT, R"(\d+)"},
     {token_group::IDENTIFIER_STRING, R"(\"(?:[^\"\\]|\\.)*\")"},
-    {token_group::IDENTIFIER_CHAR, R"(\'(?:[^\'\\]|\\.)\')"},
+    {token_group::IDENTIFIER_CHAR, R"('(?:[^'\\]|\\.)')"},
 
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
