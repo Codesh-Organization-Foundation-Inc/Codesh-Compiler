@@ -20,8 +20,8 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::IDENTIFIER_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
     {token_group::IDENTIFIER_NUMBER_DOUBLE, R"(\d+\.\d+)"},
     {token_group::IDENTIFIER_NUMBER_INT, R"(\d+)"},
-    {token_group::IDENTIFIER_STRING, R"(\".*\")"},
-    {token_group::IDENTIFIER_CHAR, R"(\'.\')"},
+    {token_group::IDENTIFIER_STRING, R"(\"(?:[^\"\\]|\\.)*\")"},
+    {token_group::IDENTIFIER_CHAR, R"(\'(?:[^\'\\]|\\.)\')"},
 
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
