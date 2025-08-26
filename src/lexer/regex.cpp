@@ -11,7 +11,7 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל\:)"},
+    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמר:(?:.|\s)*ויחדל\:)"},
     {token_group::COMMENT_ONE_LINER, R"(והגה ה\'.*$)"},
 
     {token_group::PUNCTUATION_COMMA, R"(\,)"},
@@ -76,14 +76,18 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_STRING, R"(\bפסוק\b)"},
     {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
     {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
-
     {token_group::KEYWORD_ARRAY, R"(\bכמערך\b)"},
+
+    {token_group::KEYWORD_REPLACE, R"(\bויחלף\b)"},
 
     {token_group::KEYWORD_IF, R"(\bאם\b)"},
     {token_group::KEYWORD_ELSE, R"(\bאחרת\b)"},
     {token_group::KEYWORD_SWITCH, R"(\bמחלוקת\b)"},
     {token_group::KEYWORD_CASE, R"(\bכאשר\b)"},
     {token_group::KEYWORD_DEFAULT, R"(\bחדל\b)"},
+
+    {token_group::KEYWORD_TRUE, R"(\bאמן\b)"},
+    {token_group::KEYWORD_FALSE, R"(\bכזב\b)"},
 
     {token_group::OPERATOR_EQUALS, R"(\bשווה\b)"},
     {token_group::OPERATOR_AGAINST, R"(\bלנגד\b)"},
