@@ -11,6 +11,8 @@ add_executable(Codesh_Compiler
         src/lexer/regex.cpp
         src/token/token.h
         src/token/token.cpp
+        src/parser/parser.h
+        src/parser/parser.cpp
         src/lexer/tokenizer.h
         src/lexer/tokenizer.cpp)
 

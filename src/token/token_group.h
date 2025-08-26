@@ -13,16 +13,18 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // יהיה
     KEYWORD_RETURN, // וישב
 
-    IDENTIFIER_NUMBER_DOUBLE,
-    IDENTIFIER_NUMBER_FLOAT,
-    IDENTIFIER_NUMBER_INT,
-    IDENTIFIER_STRING,
-    IDENTIFIER_CHAR,
+    //
+    IDENTIFIER_NUMBER_DOUBLE, // x.y
+    IDENTIFIER_NUMBER_FLOAT, // x.y צף | x צף
+    IDENTIFIER_NUMBER_INT, // x
+    IDENTIFIER_STRING, // "פסוק"
+    IDENTIFIER_CHAR, // 'תו'
     IDENTIFIER_CUSTOM, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
     OPERATOR_MULTIPLICATION, // ויוכפל
+    OPERATOR_TIMES, // פי
     OPERATOR_DIVISION, // ויחולק
     OPERATOR_MODULO, // ויושרה
 
@@ -95,7 +97,6 @@ enum class token_group : int
     KEYWORD_FROM, // מן
     KEYWORD_TO, // עד
     KEYWORD_SKIP, // וידלג
-
     KEYWORD_DO, // עשה
     KEYWORD_WHILE, // בעוד
     KEYWORD_CONTINUE, // פסח

@@ -36,6 +36,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::OPERATOR_ADDITION, R"(\bויוסף ל־)"},
     {token_group::OPERATOR_SUBTRACTION, R"(\bויוחסר מן\b)"},
     {token_group::OPERATOR_MULTIPLICATION, R"(\bויוכפל\b)"},
+    {token_group::OPERATOR_TIMES, R"(\bפי\b)"},
     {token_group::OPERATOR_DIVISION, R"(\bויחולק\b)"},
     {token_group::OPERATOR_MODULO, R"(\bויושרה\b)"},
 

@@ -12,6 +12,10 @@ codesh::token_type codesh::token::get_token_type(const token_group name)
     {
     case token_group::IDENTIFIER_CUSTOM:
     case token_group::IDENTIFIER_NUMBER_INT:
+    case token_group::IDENTIFIER_NUMBER_FLOAT:
+    case token_group::IDENTIFIER_NUMBER_DOUBLE:
+    case token_group::IDENTIFIER_STRING:
+    case token_group::IDENTIFIER_CHAR:
         return token_type::IDENTIFIER;
 
     default: return token_type::KEYWORD;
