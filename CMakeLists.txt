@@ -10,10 +10,18 @@ add_executable(Codesh_Compiler
         src/parser/command_parser.h
         src/lexer/regex.cpp
         src/token/token.h
-        src/token/token.cpp)
+        src/token/token.cpp
+        src/lexer/tokenizer.h
+        src/lexer/tokenizer.cpp)
 
 
 # sudo dnf install boost-regex boost-devel
 
 find_package(Boost REQUIRED regex)
 target_link_libraries(Codesh_Compiler Boost::boost)
+
+# sudo dnf install libicu-devel
+
+find_package(ICU REQUIRED COMPONENTS uc i18n)
+include_directories(${ICU_INCLUDE_DIRS})
+target_link_libraries(Codesh_Compiler ${ICU_LIBRARIES})

@@ -1,18 +1,15 @@
 #include "lexer/regex.h"
-#include "token/token.h"
+#include "lexer/tokenizer.h"
 
 #include <iostream>
+#include <queue>
 
 int main(const int argc, char **const argv) {
     // const codesh::command_args args = codesh::parse_command(argc, argv);
 
-    const codesh::token *token_test = codesh::token::from_group_id(10, "abcdef");
-    const codesh::token *token_num = codesh::token::from_group_id(74, "23423");
+    std::cout << codesh::LEXER_RGX_STR << std::endl;
 
-    std::cout << codesh::LEXER_RGX << std::endl;
-
-    delete token_test;
-    delete token_num;
+    const auto tokens = codesh::tokenize_code("ויהי שלם ושמו א, נגלה יהיה, ויאמר:");
 
     return 0;
 }
