@@ -11,22 +11,22 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל.)"},
+    {token_group::COMMENT_MULTILINE, R"(והגה ה\' לאמור:(?:.|\s)*ויחדל\:)"},
     {token_group::COMMENT_ONE_LINER, R"(והגה ה\'.*$)"},
 
     {token_group::PUNCTUATION_COMMA, R"(\,)"},
-    {token_group::PUNCTUATION_SEMICOLON, R"(\;)"},
     {token_group::PUNCTUATION_DOT, R"(\bל־)"},
 
     {token_group::IDENTIFIER_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
     {token_group::IDENTIFIER_NUMBER_DOUBLE, R"(\d+\.\d+)"},
     {token_group::IDENTIFIER_NUMBER_INT, R"(\d+)"},
-
+    {token_group::IDENTIFIER_STRING, R"(\".*\")"},
+    {token_group::IDENTIFIER_CHAR, R"(\'.\')"},
 
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
     {token_group::SCOPE_BEGIN, R"(\bויאמר\:)"},
-    {token_group::SCOPE_END, R"(\bויתם\.)"},
+    {token_group::SCOPE_END, R"(\bויתם\:)"},
 
     {token_group::KEYWORD_LET, R"(\bויהי\b)"},
     {token_group::KEYWORD_NAME, R"(\bושמו\b)"},
@@ -76,6 +76,8 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
     {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
 
+    {token_group::KEYWORD_ARRAY, R"(\bכמערך\b)"},
+
     {token_group::KEYWORD_IF, R"(\bאם\b)"},
     {token_group::KEYWORD_ELSE, R"(\bאחרת\b)"},
     {token_group::KEYWORD_SWITCH, R"(\bמחלוקת\b)"},
@@ -92,17 +94,25 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::OPERATOR_AND, R"(\bוגם\b)"},
     {token_group::OPERATOR_OR, R"(\bאו\b)"},
 
+
     {token_group::KEYWORD_FOR, R"(\bוימנה\b)"},
+    {token_group::KEYWORD_FROM, R"(\bמן\b)"},
+    {token_group::KEYWORD_TO, R"(\bעד\b)"},
+    {token_group::KEYWORD_SKIP, R"(\bוידלג\b)"},
+
     {token_group::KEYWORD_DO, R"(\bעשה\b)"},
     {token_group::KEYWORD_WHILE, R"(\bבעוד\b)"},
     {token_group::KEYWORD_CONTINUE, R"(\bפסח\b)"},
     {token_group::KEYWORD_BREAK, R"(\bלך־לך\b)"},
+
 
     {token_group::KEYWORD_TRY, R"(\bוינסה\b)"},
     {token_group::KEYWORD_EXCEPTION, R"(\bפסיקה\b)"},
     {token_group::KEYWORD_CATCH, R"(\bויתפוס\b)"},
     {token_group::KEYWORD_THROW, R"(\bוישלך\b)"},
     {token_group::KEYWORD_THROWS, R"(\bוישלכהו\b)"},
+
+    {token_group::PUNCTUATION_END_OP, R"(\:)"},
 
 
     {token_group::IDENTIFIER_CUSTOM, R"(\w+)"},

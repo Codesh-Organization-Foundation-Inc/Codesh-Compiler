@@ -6,7 +6,7 @@ namespace codesh
 enum class token_group : int
 {
     SCOPE_BEGIN, // ויאמר:
-    SCOPE_END, // ויתם.
+    SCOPE_END, // ויתם:
 
     KEYWORD_LET, // ויהי
     KEYWORD_NAME, // ושמו
@@ -16,6 +16,8 @@ enum class token_group : int
     IDENTIFIER_NUMBER_DOUBLE,
     IDENTIFIER_NUMBER_FLOAT,
     IDENTIFIER_NUMBER_INT,
+    IDENTIFIER_STRING,
+    IDENTIFIER_CHAR,
     IDENTIFIER_CUSTOM, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
@@ -36,13 +38,13 @@ enum class token_group : int
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
-    PUNCTUATION_SEMICOLON, // ;
+    PUNCTUATION_END_OP, // :
     PUNCTUATION_COMMA, // ,
     PUNCTUATION_DOT, // ל־
 
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
-    KEYWORD_THIS, // אנוכי
+    KEYWORD_THIS, // אנכי
     KEYWORD_FUNCTION, // המעשה
     KEYWORD_FUNCTION_CALL, // ויעש
 
@@ -56,20 +58,26 @@ enum class token_group : int
     KEYWORD_VAR, // משתנה
     KEYWORD_INTEGER, // שלם
     KEYWORD_FLOAT, // צף
-    KEYWORD_DOUBLE, //מצף
+    KEYWORD_DOUBLE, // מצף
     KEYWORD_LONG, // רב
     KEYWORD_SHORT, // קצר
     KEYWORD_BYTE, // קצרצר
     KEYWORD_CHAR, // תו
     KEYWORD_STRING, // פסוק
     KEYWORD_BOOLEAN, // דבר־מה
-    KEYWORD_NULL, //תהו
+    KEYWORD_NULL, // תהו
+    KEYWORD_ARRAY, // כמערך
+
+    KEYWORD_REPLACE, // ויחלף
 
     KEYWORD_IF, // אם
     KEYWORD_ELSE, // אחרת
     KEYWORD_SWITCH, // מחלוקת
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // חדל
+
+    KEYWORD_TRUE, // אמן
+    KEYWORD_FALSE, // כזב
 
     OPERATOR_EQUALS, // שווה ... לנגד
     OPERATOR_NOT, // שקרי־הוא
@@ -84,12 +92,17 @@ enum class token_group : int
 
 
     KEYWORD_FOR, // וימנה
+    KEYWORD_FROM, // מן
+    KEYWORD_TO, // עד
+    KEYWORD_SKIP, // וידלג
+
     KEYWORD_DO, // עשה
     KEYWORD_WHILE, // בעוד
     KEYWORD_CONTINUE, // פסח
     KEYWORD_BREAK, // לך־לך
 
-    COMMENT_MULTILINE, // והגה ה' לאמור: ... ויחדל.
+
+    COMMENT_MULTILINE, // והגה ה' לאמור: ... ויחדל:
     COMMENT_ONE_LINER, // והגה ה'
 
     KEYWORD_TRY, // וינסה
