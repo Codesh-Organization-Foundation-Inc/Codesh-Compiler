@@ -12,7 +12,7 @@ using codesh::token_group;
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::COMMENT_MULTILINE, R"(והגה ה' לאמר:(?:.|\s)*ויחדל\:)"},
-    {token_group::COMMENT_ONE_LINER, R"(והגה ה'.*$)"},
+    {token_group::COMMENT_ONE_LINER, R"(והגה ה'[^\n]*)"},
 
     {token_group::PUNCTUATION_COMMA, R"(\,)"},
     {token_group::PUNCTUATION_DOT, R"(\bל־)"},

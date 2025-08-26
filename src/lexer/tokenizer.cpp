@@ -13,7 +13,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::tokenize_code(const std::stri
     while (it != end) {
         auto match = *it;
 
-        for (int i = 1; i < static_cast<int>(token_group::COUNT); ++i)
+        for (int i = 1; i < static_cast<int>(token_group::COUNT) + 1; ++i)
         {
             if (match[i].matched)
             {
