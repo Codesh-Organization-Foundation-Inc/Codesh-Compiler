@@ -112,7 +112,9 @@ enum class token_group : int
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
 
-    KEYWORD_IMPORT // ויבא
+    KEYWORD_IMPORT, // ויבא
+
+    COUNT // Dummy entry that equals the amount of entries in the enum
 };
 
 }

@@ -30,16 +30,16 @@ codesh::token::token(const token_type type, const token_group group) :
 codesh::token::~token() = default;
 
 
-codesh::token *codesh::token::from_group_id(const int group_id, const std::string &content)
+std::unique_ptr<codesh::token> codesh::token::from_group_id(const int group_id, const std::string &content)
 {
     const token_group group = token_group_from_regex_id(group_id);
 
     switch (const token_type type = get_token_type(group))
     {
     case token_type::IDENTIFIER:
-        return new identifier_token(type, group, content);
+        return std::make_unique<identifier_token>(type, group, content);
     default:
-        return new token(type, group);
+        return std::make_unique<token>(type, group);
     }
 }
 

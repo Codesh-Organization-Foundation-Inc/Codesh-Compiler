@@ -150,7 +150,8 @@ static std::string build_single_regex(const std::pair<token_group, std::string> 
 }
 
 
-const std::string codesh::LEXER_RGX = build_lexer_regex();
+const std::string codesh::LEXER_RGX_STR = build_lexer_regex();
+const boost::u32regex codesh::LEXER_RGX = boost::make_u32regex(LEXER_RGX_STR);
 
 /////
 

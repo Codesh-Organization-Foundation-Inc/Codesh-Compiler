@@ -4,6 +4,8 @@
 
 #include "token_group.h"
 
+#include <memory>
+
 namespace codesh
 {
 
@@ -21,7 +23,7 @@ public:
     token(token_type type, token_group group);
     virtual ~token();
 
-    [[nodiscard]] static token *from_group_id(int group_id, const std::string &content);
+    [[nodiscard]] static std::unique_ptr<token> from_group_id(int group_id, const std::string &content);
 
     [[nodiscard]] token_type get_type() const;
     [[nodiscard]] token_group get_group() const;
