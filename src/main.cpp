@@ -1,21 +1,21 @@
 #include "lexer/regex.h"
 #include "lexer/tokenizer.h"
+#include "parser/command_parser.h"
 
 #include <fstream>
-#include <sstream>
 #include <iostream>
-#include <string>
 #include <queue>
-
+#include <sstream>
+#include <string>
 
 std::string read_file(const std::string &file_name);
 
 int main(const int argc, char **const argv) {
-    // const codesh::command_args args = codesh::parse_command(argc, argv);
+    const codesh::command_args args = codesh::parse_command(argc, argv);
 
     std::cout << codesh::LEXER_RGX_STR << std::endl;
 
-    const std::string amen_file = read_file("../rashi.amen");
+    const std::string amen_file = read_file(std::string(args.src_path));
     const auto tokens = codesh::tokenize_code(amen_file);
 
     return 0;
