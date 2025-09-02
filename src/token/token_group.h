@@ -54,7 +54,7 @@ enum class token_group : int
     KEYWORD_PRIVATE, // נסתר|נסתרת
     KEYWORD_STATIC, // כללי
     KEYWORD_ABSTRACT, // רוחני
-    KEYWORD_FINAL, // וימות ולא־יתחלף
+    KEYWORD_FINAL, // ימות ולא־יתחלף
     KEYWORD_SUPER, // אבי
 
     KEYWORD_VAR, // משתנה
@@ -114,8 +114,8 @@ enum class token_group : int
 
     KEYWORD_IMPORT, // ויבא
 
-    KEYWORD_PACKAGE,
-    KEYWORD_INDEX,
+    KEYWORD_PACKAGE, // וישב בארץ
+    KEYWORD_INDEX, // במקום
 
     COUNT // Dummy entry that equals the amount of entries in the enum
 };
