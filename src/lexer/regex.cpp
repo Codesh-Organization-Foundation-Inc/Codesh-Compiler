@@ -23,6 +23,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::IDENTIFIER_STRING, R"(\"(?:[^\"\\]|\\.)*\")"},
     {token_group::IDENTIFIER_CHAR, R"('(?:[^'\\]|\\.)')"},
 
+    {token_group::KEYWORD_PACKAGE, R"(\bוישב בארץ\b)"},
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
     {token_group::SCOPE_BEGIN, R"(\bויאמר\:)"},
@@ -62,7 +63,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_PRIVATE, R"(\b(?:נסתר|נסתרת)\b)"},
     {token_group::KEYWORD_STATIC, R"(\bכללי\b)"},
     {token_group::KEYWORD_ABSTRACT, R"(\bרוחני\b)"},
-    {token_group::KEYWORD_FINAL, R"(\bוימות ולא־יתחלף\b)"},
+    {token_group::KEYWORD_FINAL, R"(\bימות ולא־יתחלף\b)"},
     {token_group::KEYWORD_SUPER, R"(\bאבי\b)"},
 
     {token_group::KEYWORD_VAR, R"(\bמשתנה\b)"},
@@ -77,14 +78,15 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
     {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
     {token_group::KEYWORD_ARRAY, R"(\bכמערך\b)"},
+    {token_group::KEYWORD_INDEX, R"(\bבמקום\b)"},
 
     {token_group::KEYWORD_REPLACE, R"(\bויחלף\b)"},
 
     {token_group::KEYWORD_IF, R"(\bאם\b)"},
     {token_group::KEYWORD_ELSE, R"(\bאחרת\b)"},
-    {token_group::KEYWORD_SWITCH, R"(\bמחלוקת\b)"},
-    {token_group::KEYWORD_CASE, R"(\bכאשר\b)"},
-    {token_group::KEYWORD_DEFAULT, R"(\bחדל\b)"},
+    {token_group::KEYWORD_SWITCH, R"(\bויחלוק על\b)"},
+    {token_group::KEYWORD_CASE, R"(\bאם־כי\b)"},
+    {token_group::KEYWORD_DEFAULT, R"(\bבאין צדיק\b)"},
 
     {token_group::KEYWORD_TRUE, R"(\bאמן\b)"},
     {token_group::KEYWORD_FALSE, R"(\bכזב\b)"},

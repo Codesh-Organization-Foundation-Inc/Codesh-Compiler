@@ -114,6 +114,9 @@ enum class token_group : int
 
     KEYWORD_IMPORT, // ויבא
 
+    KEYWORD_PACKAGE,
+    KEYWORD_INDEX,
+
     COUNT // Dummy entry that equals the amount of entries in the enum
 };
 
