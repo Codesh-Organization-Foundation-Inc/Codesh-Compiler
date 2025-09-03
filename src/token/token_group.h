@@ -43,6 +43,7 @@ enum class token_group : int
     PUNCTUATION_END_OP, // :
     PUNCTUATION_COMMA, // ,
     PUNCTUATION_DOT, // ל־
+    PUNCTUATION_WILDCARD, // כולל
 
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
@@ -81,7 +82,8 @@ enum class token_group : int
     KEYWORD_TRUE, // אמן
     KEYWORD_FALSE, // כזב
 
-    OPERATOR_EQUALS, // שווה ... לנגד
+    OPERATOR_EQUALS, // שווה
+    OPERATOR_NOT_EQUALS, // אינו־שווה
     OPERATOR_NOT, // שקרי־הוא
     OPERATOR_GREATER, // גדול
     OPERATOR_GREATER_EQUAL, // גדול־ושווה
@@ -112,7 +114,7 @@ enum class token_group : int
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
 
-    KEYWORD_IMPORT_STATIC,
+    KEYWORD_IMPORT_STATIC, // ויבא בכלל
     KEYWORD_IMPORT, // ויבא
 
     KEYWORD_PACKAGE, // וישב בארץ

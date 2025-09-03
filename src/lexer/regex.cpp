@@ -16,6 +16,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
 
     {token_group::PUNCTUATION_COMMA, R"(\,)"},
     {token_group::PUNCTUATION_DOT, R"(\bל־)"},
+    {token_group::PUNCTUATION_WILDCARD, R"(\bכולל\b)"},
 
     {token_group::IDENTIFIER_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
     {token_group::IDENTIFIER_NUMBER_DOUBLE, R"(\d+\.\d+)"},
@@ -93,6 +94,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_FALSE, R"(\bכזב\b)"},
 
     {token_group::OPERATOR_EQUALS, R"(\bשווה\b)"},
+    {token_group::OPERATOR_NOT_EQUALS, R"(\אינו־שווה\b)"},
     {token_group::OPERATOR_AGAINST, R"(\bלנגד\b)"},
     {token_group::OPERATOR_NOT, R"(\bשקרי־הוא\b)"},
     {token_group::OPERATOR_GREATER, R"(\bגדול\b)"},
