@@ -56,8 +56,7 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/boolean/and_operator_ast_node.h
         src/parser/ast/operator/boolean/or_operator_ast_node.cpp
         src/parser/ast/operator/boolean/or_operator_ast_node.h
-        src/parser/ast/import_declaration_ast_node.cpp
-        src/parser/ast/import_declaration_ast_node.h
+        src/parser/ast/import_declaration.h
         src/parser/ast/type_declaration_ast_node.cpp
         src/parser/ast/type_declaration_ast_node.h)
 
