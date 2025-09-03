@@ -8,10 +8,12 @@ codesh::ast::op::subtraction_operator_ast_node<T>::subtraction_operator_ast_node
     impl::binary_ast_node<T>(std::move(left), std::move(right))
 {
 }
+
 template <typename T> codesh::ast::node_type codesh::ast::op::subtraction_operator_ast_node<T>::get_type() const
 {
     return node_type::SUBTRACTION;
 }
+
 template <typename T> T codesh::ast::op::subtraction_operator_ast_node<T>::evaluate() const
 {
     return this->get_left() - this->get_right();

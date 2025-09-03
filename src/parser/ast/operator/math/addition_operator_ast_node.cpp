@@ -8,10 +8,12 @@ codesh::ast::op::addition_operator_ast_node<T>::addition_operator_ast_node(std::
     impl::binary_ast_node<T>(std::move(left), std::move(right))
 {
 }
+
 template <typename T> codesh::ast::node_type codesh::ast::op::addition_operator_ast_node<T>::get_type() const
 {
     return node_type::ADDITION;
 }
+
 template <typename T> T codesh::ast::op::addition_operator_ast_node<T>::evaluate() const
 {
     return this->get_left() + this->get_right();

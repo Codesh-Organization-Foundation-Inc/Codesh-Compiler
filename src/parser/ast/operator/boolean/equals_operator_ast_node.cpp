@@ -8,10 +8,12 @@ codesh::ast::op::equals_operator_ast_node<T>::equals_operator_ast_node(std::uniq
     impl::binary_ast_node<T>(std::move(left), std::move(right))
 {
 }
+
 template <typename T> codesh::ast::node_type codesh::ast::op::equals_operator_ast_node<T>::get_type() const
 {
     return node_type::EQUALS;
 }
+
 template <typename T> T codesh::ast::op::equals_operator_ast_node<T>::evaluate() const
 {
     return this->get_left() == this->get_right();

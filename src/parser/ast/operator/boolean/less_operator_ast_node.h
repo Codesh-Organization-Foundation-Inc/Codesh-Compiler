@@ -1,8 +1,10 @@
 #pragma once
+
 #include "../../impl/binary_ast_node.h"
 
 namespace codesh::ast::op
 {
+
 template <typename T>
 class less_operator_ast_node final : public impl::binary_ast_node<T>
 {
@@ -14,5 +16,6 @@ public:
 private:
     [[nodiscard]] T evaluate() const override;
 };
+
 }
 

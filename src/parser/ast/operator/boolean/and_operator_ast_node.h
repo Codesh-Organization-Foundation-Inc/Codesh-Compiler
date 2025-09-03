@@ -3,6 +3,7 @@
 
 namespace codesh::ast::op
 {
+
 template <typename T>
 class and_operator_ast_node final : public impl::binary_ast_node<T>
 {
@@ -14,5 +15,6 @@ public:
 private:
     [[nodiscard]] T evaluate() const override;
 };
+
 }
 
