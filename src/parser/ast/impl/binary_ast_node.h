@@ -1,20 +1,22 @@
 #pragma once
-#include "ast_node.h"
+#include "typed_ast_node.h"
 
 #include <memory>
 
 namespace codesh::ast::impl
 {
 
-
-class binary_ast_node : public ast_node
+template <typename T>
+class binary_ast_node : public typed_ast_node<T>
 {
-    std::unique_ptr<ast_node> left, right;
+    std::unique_ptr<typed_ast_node<T>> left, right;
 
 public:
-    [[nodiscard]] ast_node &get_left() const;
-    [[nodiscard]] ast_node &get_right() const;
+    [[nodiscard]] typed_ast_node<T> &get_left() const;
+    [[nodiscard]] typed_ast_node<T> &get_right() const;
 };
 
 
 }
+
+#include "binary_ast_node.tpp"

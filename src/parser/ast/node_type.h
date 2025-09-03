@@ -5,7 +5,8 @@ namespace codesh::ast
 
 enum class node_type
 {
-    ROOT
+    BLOCK,
+    WHILE
 };
 
 }

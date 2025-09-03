@@ -17,12 +17,14 @@ add_executable(Codesh_Compiler
         src/lexer/tokenizer.cpp
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
-        src/parser/ast/root_ast_node.cpp
-        src/parser/ast/root_ast_node.h
-        src/parser/ast/impl/multichild_ast_node.h
-        src/parser/ast/impl/binary_ast_node.cpp
+        src/parser/ast/block_ast_node.cpp
+        src/parser/ast/block_ast_node.h
+        src/parser/ast/impl/binary_ast_node.tpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/node_type.h)
+        src/parser/ast/node_type.h
+        src/parser/ast/while_ast_node.cpp
+        src/parser/ast/while_ast_node.h
+        src/parser/ast/impl/typed_ast_node.h)
 
 
 # sudo dnf install boost-regex boost-devel
