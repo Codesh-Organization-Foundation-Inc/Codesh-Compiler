@@ -24,7 +24,33 @@ add_executable(Codesh_Compiler
         src/parser/ast/node_type.h
         src/parser/ast/while_ast_node.cpp
         src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/typed_ast_node.h)
+        src/parser/ast/impl/typed_ast_node.h
+        src/parser/ast/operator/math/addition_operator_ast_node.cpp
+        src/parser/ast/operator/math/addition_operator_ast_node.h
+        src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
+        src/parser/ast/operator/math/subtraction_operator_ast_node.h
+        src/parser/ast/operator/math/multiplication_operator_ast_node.cpp
+        src/parser/ast/operator/math/multiplication_operator_ast_node.h
+        src/parser/ast/operator/math/division_operator_ast_node.cpp
+        src/parser/ast/operator/math/division_operator_ast_node.h
+        src/parser/ast/operator/math/modulu_operator_ast_node.cpp
+        src/parser/ast/operator/math/modulu_operator_ast_node.h
+        src/parser/ast/operator/boolean/equals_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/equals_operator_ast_node.h
+        src/parser/ast/operator/boolean/not_equals_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/not_equals_operator_ast_node.h
+        src/parser/ast/operator/boolean/greater_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/greater_operator_ast_node.h
+        src/parser/ast/operator/boolean/greater_equals_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/greater_equals_operator_ast_node.h
+        src/parser/ast/operator/boolean/less_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/less_operator_ast_node.h
+        src/parser/ast/operator/boolean/less_equals_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/less_equals_operator_ast_node.h
+        src/parser/ast/operator/boolean/and_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/and_operator_ast_node.h
+        src/parser/ast/operator/boolean/or_operator_ast_node.cpp
+        src/parser/ast/operator/boolean/or_operator_ast_node.h)
 
 
 # sudo dnf install boost-regex boost-devel
