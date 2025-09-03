@@ -7,7 +7,7 @@ namespace codesh::ast::impl
 {
 
 
-class binary_ast : public ast_node
+class binary_ast_node : public ast_node
 {
     std::unique_ptr<ast_node> left, right;
 

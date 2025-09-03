@@ -9,7 +9,7 @@ namespace codesh::ast::impl
 {
 
 
-class multichild_ast : public ast_node
+class multichild_ast_node : public ast_node
 {
 public:
     std::list<std::unique_ptr<ast_node>> children;

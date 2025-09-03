@@ -1,13 +1,12 @@
 #pragma once
 
-#include "impl/multichild_ast.h"
-
+#include "impl/multichild_ast_node.h"
 
 namespace codesh::ast
 {
 
 
-class ast_root final : public impl::multichild_ast
+class root_ast_node final : public impl::multichild_ast_node
 {
 public:
     [[nodiscard]] node_type get_type() const override;
