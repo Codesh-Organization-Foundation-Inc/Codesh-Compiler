@@ -24,6 +24,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::IDENTIFIER_CHAR, R"('(?:[^'\\]|\\.)')"},
 
     {token_group::KEYWORD_PACKAGE, R"(\bוישב בארץ\b)"},
+    {token_group::KEYWORD_IMPORT_STATIC, R"(\bויבא בכלל\b)"},
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
     {token_group::SCOPE_BEGIN, R"(\bויאמר\:)"},
