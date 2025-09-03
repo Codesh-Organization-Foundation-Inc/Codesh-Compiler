@@ -22,6 +22,7 @@ enum class node_type
     NOT_EQUALS,
     OR,
     VARIABLE_DECLARATION,
+    IMPORT_DECLARATION,
     TYPE_DECLARATION,
 };
 
