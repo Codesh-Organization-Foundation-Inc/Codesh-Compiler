@@ -5,6 +5,7 @@ namespace codesh::ast
 
 enum class node_type
 {
+    COMPILATION_UNIT,
     BLOCK,
     WHILE,
     ADDITION,
@@ -19,7 +20,10 @@ enum class node_type
     LESS_EQUALS,
     LESS,
     NOT_EQUALS,
-    OR
+    OR,
+    VARIABLE_DECLARATION,
+    IMPORT_DECLARATION,
+    TYPE_DECLARATION,
 };
 
 }
