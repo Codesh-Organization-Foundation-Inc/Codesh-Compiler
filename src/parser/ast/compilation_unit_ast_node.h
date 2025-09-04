@@ -1,20 +1,12 @@
 #pragma once
 
 #include "impl/ast_node.h"
+#include "import_declaration_ast_node.h"
+#include "type_declaration_ast_node.h"
 
 #include <list>
 #include <memory>
 #include <string>
-
-namespace codesh::ast
-{
-class type_declaration_ast_node;
-}
-namespace codesh::ast
-{
-class import_declaration_ast_node;
-}
-
 
 namespace codesh::ast
 {

@@ -3,8 +3,8 @@
 #include "../../node_type.h"
 
 template <typename T>
-codesh::ast::op::and_operator_ast_node<T>::and_operator_ast_node(std::unique_ptr<typed_ast_node<T>> left,
-                                                                           std::unique_ptr<typed_ast_node<T>> right) :
+codesh::ast::op::and_operator_ast_node<T>::and_operator_ast_node(std::unique_ptr<impl::typed_ast_node<T>> left,
+                                                                           std::unique_ptr<impl::typed_ast_node<T>> right) :
     impl::binary_ast_node<T>(std::move(left), std::move(right))
 {
 }

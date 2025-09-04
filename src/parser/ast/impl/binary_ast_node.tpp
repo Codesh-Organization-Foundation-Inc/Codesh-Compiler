@@ -8,14 +8,14 @@ codesh::ast::impl::binary_ast_node<T>::binary_ast_node(std::unique_ptr<typed_ast
     left(std::move(left)), right(std::move(right))
 {
 }
-template <typename T> codesh::ast::typed_ast_node<T> &codesh::ast::impl::binary_ast_node<T>::get_left() const
+template <typename T> codesh::ast::impl::typed_ast_node<T> *codesh::ast::impl::binary_ast_node<T>::get_left() const
 {
-    return *this->left;
+    return this->left;
 }
 
-template <typename T> codesh::ast::typed_ast_node<T> &codesh::ast::impl::binary_ast_node<T>::get_right() const
+template <typename T> codesh::ast::impl::typed_ast_node<T> *codesh::ast::impl::binary_ast_node<T>::get_right() const
 {
-    return *this->right;
+    return this->right;
 }
 template <typename T> void codesh::ast::impl::binary_ast_node<T>::set_left(typed_ast_node<T> &node)
 {

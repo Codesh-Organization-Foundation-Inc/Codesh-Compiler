@@ -9,7 +9,7 @@ template <typename T>
 class less_equals_operator_ast_node final : public impl::binary_ast_node<T>
 {
 public:
-    less_equals_operator_ast_node(std::unique_ptr<typed_ast_node<T>> left, std::unique_ptr<typed_ast_node<T>> right);
+    less_equals_operator_ast_node(std::unique_ptr<impl::typed_ast_node<T>> left, std::unique_ptr<impl::typed_ast_node<T>> right);
 
     [[nodiscard]] node_type get_type() const override;
 

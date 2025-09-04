@@ -3,7 +3,7 @@
 #include "node_type.h"
 #include "block_ast_node.h"
 
-codesh::ast::while_ast_node::while_ast_node(std::unique_ptr<typed_ast_node<bool>> condition,
+codesh::ast::while_ast_node::while_ast_node(std::unique_ptr<impl::typed_ast_node<bool>> condition,
                                             std::unique_ptr<block_ast_node> block) :
     condition(std::move(condition)),
     block(std::move(block))
