@@ -12,7 +12,7 @@ public:
 
     [[nodiscard]] node_type get_type() const override;
 
-  private:
+private:
     [[nodiscard]] T evaluate() const override;
 };
 
