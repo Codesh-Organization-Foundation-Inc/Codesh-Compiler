@@ -22,6 +22,12 @@ class while_ast_node final : public impl::ast_node
 public:
     while_ast_node(std::unique_ptr<impl::typed_ast_node<bool>> condition, std::unique_ptr<block_ast_node> block);
 
+    [[nodiscard]] impl::typed_ast_node<bool> *get_condition() const;
+    [[nodiscard]] block_ast_node *get_block() const;
+
+    void set_condition(std::unique_ptr<impl::typed_ast_node<bool>> condition);
+    void set_block(std::unique_ptr<block_ast_node> block);
+
     [[nodiscard]] node_type get_type() const override;
 };
 

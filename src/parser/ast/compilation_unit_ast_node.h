@@ -23,8 +23,8 @@ public:
     [[nodiscard]] node_type get_type() const override;
 
     [[nodiscard]] std::string get_package_name() const;
-    [[nodiscard]] const std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations() const;
-    [[nodiscard]] const std::list<std::unique_ptr<type_declaration_ast_node>> &get_type_declarations() const;
+    [[nodiscard]] std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations();
+    [[nodiscard]] std::list<std::unique_ptr<type_declaration_ast_node>> &get_type_declarations();
 };
 
 }
