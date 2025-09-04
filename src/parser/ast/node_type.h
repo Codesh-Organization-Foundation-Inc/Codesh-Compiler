@@ -24,6 +24,7 @@ enum class node_type
     VARIABLE_DECLARATION,
     IMPORT_DECLARATION,
     TYPE_DECLARATION,
+    NOT,
 };
 
 }
