@@ -18,7 +18,7 @@ enum class token_group : int
     IDENTIFIER_NUMBER_FLOAT, // x.y צף | x צף
     IDENTIFIER_NUMBER_INT, // x
     IDENTIFIER_STRING, // "פסוק"
-    IDENTIFIER_CHAR, // 'תו'
+    IDENTIFIER_CHAR, // 'אות'
     IDENTIFIER_CUSTOM, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
@@ -41,15 +41,21 @@ enum class token_group : int
     CLOSE_PARENTHESIS, // פסק
 
     PUNCTUATION_END_OP, // :
-    PUNCTUATION_COMMA, // ,
+    PUNCTUATION_ARG_SEPARATOR, // ו־
     PUNCTUATION_DOT, // ל־
     PUNCTUATION_WILDCARD, // כולל
 
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
+    KEYWORD_INTERFACE, // צלם
     KEYWORD_THIS, // אנכי
+    KEYWORD_OF_INSTANCE, // מזרע
+    KEYWORD_IMPLEMENTS, // וירש את
+    KEYWORD_NEW, // ויברא
+
     KEYWORD_FUNCTION, // המעשה
     KEYWORD_FUNCTION_CALL, // ויעש
+    KEYWORD_FUNCTION_TAKE_ARGS, // ויקח
 
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
@@ -65,7 +71,7 @@ enum class token_group : int
     KEYWORD_LONG, // רב
     KEYWORD_SHORT, // קצר
     KEYWORD_BYTE, // קצרצר
-    KEYWORD_CHAR, // תו
+    KEYWORD_CHAR, // אות
     KEYWORD_STRING, // פסוק
     KEYWORD_BOOLEAN, // דבר־מה
     KEYWORD_NULL, // תהו
@@ -105,8 +111,8 @@ enum class token_group : int
     KEYWORD_BREAK, // לך־לך
 
 
-    COMMENT_MULTILINE, // והגה ה' לאמור: ... ויחדל:
-    COMMENT_ONE_LINER, // והגה ה'
+    COMMENT_MULTILINE, // כה הגה ה' לאמור: ... ויחדל:
+    COMMENT_ONE_LINER, // כה הגה ה'
 
     KEYWORD_TRY, // וינסה
     KEYWORD_EXCEPTION, // פסיקה

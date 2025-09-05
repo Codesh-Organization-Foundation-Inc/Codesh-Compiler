@@ -11,10 +11,10 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::COMMENT_MULTILINE, R"(והגה ה' לאמר:(?:.|\s)*ויחדל\:)"},
-    {token_group::COMMENT_ONE_LINER, R"(והגה ה'[^\n]*)"},
+    {token_group::COMMENT_MULTILINE, R"(כה הגה ה' לאמר:(?:.|\s)*ויחדל\:)"},
+    {token_group::COMMENT_ONE_LINER, R"(כה הגה ה' לאמר [^\n]*)"},
 
-    {token_group::PUNCTUATION_COMMA, R"(\,)"},
+    {token_group::PUNCTUATION_ARG_SEPARATOR, R"(\bו־)"},
     {token_group::PUNCTUATION_DOT, R"(\bל־)"},
     {token_group::PUNCTUATION_WILDCARD, R"(\bכולל\b)"},
 
@@ -57,9 +57,15 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
 
     {token_group::KEYWORD_CLASS, R"(\bעצם\b)"},
     {token_group::KEYWORD_ENUM, R"(\bמניין\b)"},
-    {token_group::KEYWORD_THIS, R"(\bאנוכי\b)"},
+    {token_group::KEYWORD_INTERFACE, R"(\bצלם\b)"},
+    {token_group::KEYWORD_THIS, R"(\bאנכי\b)"},
+    {token_group::KEYWORD_IMPLEMENTS, R"(\bוירש את\b)"},
+    {token_group::KEYWORD_OF_INSTANCE, R"(\bמזרע\b)"},
+    {token_group::KEYWORD_NEW, R"(\bויברא\b)"},
+
     {token_group::KEYWORD_FUNCTION, R"(\bהמעשה\b)"},
     {token_group::KEYWORD_FUNCTION_CALL, R"(\bויעש\b)"},
+    {token_group::KEYWORD_FUNCTION_TAKE_ARGS, R"(\bויקח\b)"},
 
     {token_group::KEYWORD_PUBLIC, R"(\b(?:נגלה|נגלית)\b)"},
     {token_group::KEYWORD_PRIVATE, R"(\b(?:נסתר|נסתרת)\b)"},
@@ -75,7 +81,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_LONG, R"(\bרב\b)"},
     {token_group::KEYWORD_SHORT, R"(\bקצר\b)"},
     {token_group::KEYWORD_BYTE, R"(\bקצרצר\b)"},
-    {token_group::KEYWORD_CHAR, R"(\bתו\b)"},
+    {token_group::KEYWORD_CHAR, R"(\bאות\b)"},
     {token_group::KEYWORD_STRING, R"(\bפסוק\b)"},
     {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
     {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
