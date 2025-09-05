@@ -85,7 +85,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_STRING, R"(\bפסוק\b)"},
     {token_group::KEYWORD_BOOLEAN, R"(\bדבר־מה\b)"},
     {token_group::KEYWORD_NULL, R"(\bתהו\b)"},
-    {token_group::KEYWORD_ARRAY, R"(\bכמערך\b)"},
+    {token_group::KEYWORD_ARRAY, R"(\bכמסדר\b)"},
     {token_group::KEYWORD_INDEX, R"(\bבמקום\b)"},
 
     {token_group::KEYWORD_REPLACE, R"(\bויחלף\b)"},
