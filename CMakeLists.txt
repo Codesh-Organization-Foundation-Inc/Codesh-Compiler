@@ -66,8 +66,8 @@ add_executable(Codesh_Compiler
         src/lexer/trie/trie.h
         src/lexer/trie/keyword_info.h
         src/lexer/trie/word_boundary.h
-        src/lexer/trie/keyword.cpp
-        src/lexer/trie/keyword.h)
+        src/lexer/trie/keywords.cpp
+        src/lexer/trie/keywords.h)
 
 
 # sudo dnf install boost-regex boost-devel
