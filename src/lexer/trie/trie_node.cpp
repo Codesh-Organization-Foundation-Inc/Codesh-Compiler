@@ -1,8 +1,6 @@
 #include "trie_node.h"
 
-codesh::lexer::trie::trie_node::trie_node() = default;
-
-codesh::lexer::trie::trie_node::trie_node(std::unique_ptr<keyword_info> keyword) : keyword(std::move(keyword))
+codesh::lexer::trie::trie_node::trie_node() : keyword(nullptr)
 {
 }
 
@@ -15,8 +13,15 @@ std::optional<std::reference_wrapper<const codesh::lexer::trie::keyword_info>> c
     return std::cref(*this->keyword);
 }
 
-std::unordered_map<char, std::unique_ptr<codesh::lexer::trie::trie_node>> &codesh::lexer::trie::trie_node::
-    get_children()
+void codesh::lexer::trie::trie_node::set_keyword(const keyword_info *const keyword)
 {
-    return this->children;
+    this->keyword = keyword;
+}
+
+codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_child(const char c)
+{
+    if (this->children.contains(c))
+        return *this->children.at(c);
+
+    return *children.emplace(c, std::make_unique<trie_node>()).first->second;
 }
