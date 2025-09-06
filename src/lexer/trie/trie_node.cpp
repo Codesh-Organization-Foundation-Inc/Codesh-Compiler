@@ -1,4 +1,4 @@
-#include "trie.h"
+#include "trie_node.h"
 
 codesh::lexer::trie::trie_node::trie_node() = default;
 
