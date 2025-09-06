@@ -1,7 +1,5 @@
 #include "keywords.h"
 
-constexpr std::string_view codesh::lexer::trie::keyword::MULTILINE_COMMENT_END = "ויחדל:";
-
 const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWORDS = {
     {token_group::COMMENT_MULTILINE, "ויאמר ה' לאמר:", word_boundary::BEFORE},
     {token_group::COMMENT_MULTILINE, "וכה הגה ה' לאמר:", word_boundary::BEFORE},
