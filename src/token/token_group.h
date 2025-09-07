@@ -14,12 +14,12 @@ enum class token_group : int
     KEYWORD_RETURN, // וישב
 
     //
-    IDENTIFIER_NUMBER_DOUBLE, // x.y
-    IDENTIFIER_NUMBER_FLOAT, // x.y צף | x צף
-    IDENTIFIER_NUMBER_INT, // x
-    IDENTIFIER_STRING, // "פסוק"
-    IDENTIFIER_CHAR, // 'אות'
-    IDENTIFIER_CUSTOM, // Any other word, eg. variable1
+    LITERAL_NUMBER_DOUBLE, // x.y
+    LITERAL_NUMBER_FLOAT, // x.y צף | x צף
+    LITERAL_NUMBER_INT, // x
+    LITERAL_STRING, // "פסוק"
+    LITERAL_CHAR, // 'אות'
+    IDENTIFIER, // Any other word, eg. variable1
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן

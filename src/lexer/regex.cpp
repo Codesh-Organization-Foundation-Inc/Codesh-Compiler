@@ -11,13 +11,13 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::IDENTIFIER_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
-    {token_group::IDENTIFIER_NUMBER_DOUBLE, R"(\d+\.\d+)"},
-    {token_group::IDENTIFIER_NUMBER_INT, R"(\d+)"},
-    {token_group::IDENTIFIER_STRING, R"(\"(?:[^\"\\]|\\.)*\")"},
-    {token_group::IDENTIFIER_CHAR, R"('(?:[^'\\]|\\.)')"},
+    {token_group::LITERAL_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
+    {token_group::LITERAL_NUMBER_DOUBLE, R"(\d+\.\d+)"},
+    {token_group::LITERAL_NUMBER_INT, R"(\d+)"},
+    {token_group::LITERAL_STRING, R"(\"(?:[^\"\\]|\\.)*\")"},
+    {token_group::LITERAL_CHAR, R"('(?:[^'\\]|\\.)')"},
 
-    {token_group::IDENTIFIER_CUSTOM, R"(\w+)"},
+    {token_group::IDENTIFIER, R"(\w+)"},
     {token_group::INVALID, R"(\S+)"},
 };
 
