@@ -18,7 +18,8 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
 
     {token_group::KEYWORD_LET, "ויהי", word_boundary::BOTH},
     {token_group::KEYWORD_NAME, "ושמו", word_boundary::BOTH},
-    {token_group::KEYWORD_SHALL_BE, "(?:יהיה|תהיה)", word_boundary::BOTH},
+    {token_group::KEYWORD_SHALL_BE, "יהיה", word_boundary::BOTH},
+    {token_group::KEYWORD_SHALL_BE, "תהיה", word_boundary::BOTH},
     {token_group::KEYWORD_RETURN, "וישב", word_boundary::BOTH},
 
     {token_group::OPERATOR_ADDITION, "ויוסף ל־", word_boundary::BEFORE},
