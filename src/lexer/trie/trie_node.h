@@ -21,6 +21,7 @@ public:
     void set_keyword(const keyword_info *keyword);
 
     [[nodiscard]] trie_node &get_or_create_child(char c);
+    [[nodiscard]] std::optional<std::reference_wrapper<const trie_node>> get_child(char c) const;
 };
 
 }

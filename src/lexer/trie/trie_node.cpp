@@ -25,3 +25,12 @@ codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_ch
 
     return *children.emplace(c, std::make_unique<trie_node>()).first->second;
 }
+
+std::optional<std::reference_wrapper<const codesh::lexer::trie::trie_node>> codesh::lexer::trie::trie_node::get_child(
+    const char c) const
+{
+    if (this->children.contains(c))
+        return *this->children.at(c);
+
+    return std::nullopt;
+}
