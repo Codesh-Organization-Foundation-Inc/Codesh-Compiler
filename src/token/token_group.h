@@ -53,7 +53,7 @@ enum class token_group : int
     KEYWORD_IMPLEMENTS, // וירש את
     KEYWORD_NEW, // ויברא
 
-    KEYWORD_FUNCTION, // המעשה
+    KEYWORD_FUNCTION, // מעשה
     KEYWORD_FUNCTION_CALL, // ויעש
     KEYWORD_FUNCTION_TAKE_ARGS, // ויקח
 
