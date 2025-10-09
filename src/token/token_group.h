@@ -10,7 +10,7 @@ enum class token_group : int
 
     KEYWORD_LET, // ויהי
     KEYWORD_NAME, // ושמו
-    KEYWORD_SHALL_BE, // יהיה
+    KEYWORD_SHALL_BE, // היה
     KEYWORD_RETURN, // וישב
 
     //
