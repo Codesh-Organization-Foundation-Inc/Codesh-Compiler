@@ -27,8 +27,6 @@ public:
 
     void set_condition(std::unique_ptr<impl::typed_ast_node<bool>> condition);
     void set_block(std::unique_ptr<block_ast_node> block);
-
-    [[nodiscard]] node_type get_type() const override;
 };
 
 }
