@@ -6,7 +6,7 @@ codesh::ast::op::not_equals_operator_ast_node::not_equals_operator_ast_node(std:
 {
 }
 
-void *codesh::ast::op::not_equals_operator_ast_node::compile() const
+void *codesh::ast::op::not_equals_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

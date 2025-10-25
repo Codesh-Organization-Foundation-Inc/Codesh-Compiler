@@ -6,7 +6,7 @@ codesh::ast::op::modulu_operator_ast_node::modulu_operator_ast_node(std::unique_
 {
 }
 
-void *codesh::ast::op::modulu_operator_ast_node::compile() const
+void *codesh::ast::op::modulu_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

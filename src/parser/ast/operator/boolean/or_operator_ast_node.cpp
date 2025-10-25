@@ -6,7 +6,7 @@ codesh::ast::op::or_operator_ast_node::or_operator_ast_node(std::unique_ptr<meth
 {
 }
 
-void *codesh::ast::op::or_operator_ast_node::compile() const
+void *codesh::ast::op::or_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

@@ -10,7 +10,7 @@ class modulu_operator_ast_node final : public impl::binary_ast_node
 public:
     modulu_operator_ast_node(std::unique_ptr<method_ast_node> left, std::unique_ptr<method_ast_node> right);
 
-    [[nodiscard]] void *compile() const override;
+    [[nodiscard]] void *to_ir() const override;
 };
 
 }

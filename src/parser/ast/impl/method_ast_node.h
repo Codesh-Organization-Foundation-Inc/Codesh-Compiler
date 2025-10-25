@@ -15,7 +15,7 @@ class method_ast_node : public ast_node
      * @return The IR representation of this AST node
      */
 public:
-    [[nodiscard]] virtual void *compile() const = 0;
+    [[nodiscard]] virtual void *to_ir() const = 0;
 };
 
 }

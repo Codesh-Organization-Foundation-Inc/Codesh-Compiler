@@ -6,7 +6,7 @@ codesh::ast::op::subtraction_operator_ast_node::subtraction_operator_ast_node(st
 {
 }
 
-void *codesh::ast::op::subtraction_operator_ast_node::compile() const
+void *codesh::ast::op::subtraction_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

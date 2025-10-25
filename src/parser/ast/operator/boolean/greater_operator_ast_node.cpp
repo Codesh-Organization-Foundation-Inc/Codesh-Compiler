@@ -6,7 +6,7 @@ codesh::ast::op::greater_operator_ast_node::greater_operator_ast_node(std::uniqu
 {
 }
 
-void *codesh::ast::op::greater_operator_ast_node::compile() const
+void *codesh::ast::op::greater_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

@@ -10,7 +10,7 @@ class not_operator_ast_node final : public impl::unary_ast_node
 public:
     explicit not_operator_ast_node(std::unique_ptr<method_ast_node> child);
 
-    [[nodiscard]] void *compile() const override;
+    [[nodiscard]] void *to_ir() const override;
 };
 
 }

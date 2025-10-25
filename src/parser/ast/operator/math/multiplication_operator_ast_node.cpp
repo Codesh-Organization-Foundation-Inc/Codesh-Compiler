@@ -7,7 +7,7 @@ codesh::ast::op::multiplication_operator_ast_node::multiplication_operator_ast_n
     binary_ast_node(std::move(left), std::move(right))
 {}
 
-void *codesh::ast::op::multiplication_operator_ast_node::compile() const
+void *codesh::ast::op::multiplication_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

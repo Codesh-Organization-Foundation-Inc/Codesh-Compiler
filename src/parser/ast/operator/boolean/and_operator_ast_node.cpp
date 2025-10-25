@@ -6,7 +6,7 @@ codesh::ast::op::and_operator_ast_node::and_operator_ast_node(std::unique_ptr<me
 {
 }
 
-void *codesh::ast::op::and_operator_ast_node::compile() const
+void *codesh::ast::op::and_operator_ast_node::to_ir() const
 {
     return nullptr;
 }

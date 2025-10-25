@@ -5,7 +5,7 @@ codesh::ast::op::not_operator_ast_node::not_operator_ast_node(std::unique_ptr<me
 {
 }
 
-void *codesh::ast::op::not_operator_ast_node::compile() const
+void *codesh::ast::op::not_operator_ast_node::to_ir() const
 {
     return nullptr;
 }
