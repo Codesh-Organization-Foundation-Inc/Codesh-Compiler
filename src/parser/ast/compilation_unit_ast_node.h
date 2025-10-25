@@ -20,8 +20,6 @@ class compilation_unit_ast_node final : public impl::ast_node
 public:
     explicit compilation_unit_ast_node(std::string package_name);
 
-    [[nodiscard]] node_type get_type() const override;
-
     [[nodiscard]] std::string get_package_name() const;
     [[nodiscard]] std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations();
     [[nodiscard]] std::list<std::unique_ptr<type_declaration_ast_node>> &get_type_declarations();

@@ -2,16 +2,9 @@
 
 #include <utility>
 
-#include "node_type.h"
-
 codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(std::string package_name)
     : package_name(std::move(package_name))
 {
-}
-
-codesh::ast::node_type codesh::ast::compilation_unit_ast_node::get_type() const
-{
-    return node_type::COMPILATION_UNIT;
 }
 
 std::string codesh::ast::compilation_unit_ast_node::get_package_name() const

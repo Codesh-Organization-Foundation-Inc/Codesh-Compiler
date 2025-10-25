@@ -19,8 +19,6 @@ public:
     [[nodiscard]] std::string get_package_name() const;
     [[nodiscard]] bool get_is_on_demand() const;
     [[nodiscard]] bool get_is_static() const;
-
-    [[nodiscard]] node_type get_type() const override;
 };
 
 }
