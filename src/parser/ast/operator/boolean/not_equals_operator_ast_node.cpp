@@ -1,13 +1,12 @@
 #include "not_equals_operator_ast_node.h"
 
-template <typename T>
-codesh::ast::op::not_equals_operator_ast_node<T>::not_equals_operator_ast_node(std::unique_ptr<impl::typed_ast_node<T>> left,
-                                                                           std::unique_ptr<impl::typed_ast_node<T>> right) :
-    impl::binary_ast_node<T>(std::move(left), std::move(right))
+codesh::ast::op::not_equals_operator_ast_node::not_equals_operator_ast_node(std::unique_ptr<method_ast_node> left,
+                                                                           std::unique_ptr<method_ast_node> right) :
+    binary_ast_node(std::move(left), std::move(right))
 {
 }
 
-template <typename T> T codesh::ast::op::not_equals_operator_ast_node<T>::evaluate() const
+void *codesh::ast::op::not_equals_operator_ast_node::compile() const
 {
-    return this->get_left() != this->get_right();
+    return nullptr;
 }

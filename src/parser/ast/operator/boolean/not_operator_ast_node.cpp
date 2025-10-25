@@ -1,12 +1,11 @@
 #include "not_operator_ast_node.h"
 
-template <typename T>
-codesh::ast::op::not_operator_ast_node<T>::not_operator_ast_node(std::unique_ptr<impl::typed_ast_node<T>> child)
-    : impl::unary_ast_node<T>(child)
+codesh::ast::op::not_operator_ast_node::not_operator_ast_node(std::unique_ptr<method_ast_node> child)
+    : unary_ast_node(std::move(child))
 {
 }
 
-template <typename T> T codesh::ast::op::not_operator_ast_node<T>::evaluate() const
+void *codesh::ast::op::not_operator_ast_node::compile() const
 {
-    return !this->child->evaluate();
+    return nullptr;
 }
