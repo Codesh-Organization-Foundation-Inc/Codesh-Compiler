@@ -10,13 +10,17 @@ static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tok
         ast::compilation_unit_ast_node *root_node);
 static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
-
+/**
+ * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
+ * @return The consumed token
+ */
 static std::unique_ptr<codesh::token> consume_token(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     std::unique_ptr<codesh::token> token = std::move(tokens.front());
     tokens.pop();
     return token;
 }
+
 
 
 std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<token>> &tokens)
@@ -48,26 +52,6 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
 }
 
 
-static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::compilation_unit_ast_node *root_node)
-{
-    tokens.pop();
-    parse_fqcn(tokens, root_node->get_package_name());
-    ensure_end_op(tokens);
-}
-
-
-static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    if (tokens.empty() || tokens.front().get()->get_group() != codesh::token_group::PUNCTUATION_END_OP)
-    {
-        throw std::runtime_error("Expected colon"); //TODO: Convert to custom Codesh error
-    }
-
-    tokens.pop();
-}
-
-
 static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     switch (consume_token(tokens)->get_group())
@@ -77,6 +61,27 @@ static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tok
     case codesh::token_group::KEYWORD_IAW: return basad_type::IAW;
     default: throw std::runtime_error("Invalid keyword: Expected BASAD declaration"); //TODO: Convert to custom Codesh error
     }
+}
+
+static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::compilation_unit_ast_node *root_node)
+{
+    tokens.pop();
+    parse_fqcn(tokens, root_node->get_package_name());
+    ensure_end_op(tokens);
+}
+
+/**
+ * Ensures a colon exists at the current token, and consumes it.
+ */
+static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    if (tokens.empty() || tokens.front().get()->get_group() != codesh::token_group::PUNCTUATION_END_OP)
+    {
+        throw std::runtime_error("Expected colon"); //TODO: Convert to custom Codesh error
+    }
+
+    tokens.pop();
 }
 
 /**
