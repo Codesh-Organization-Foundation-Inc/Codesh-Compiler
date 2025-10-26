@@ -13,6 +13,11 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // היה
     KEYWORD_RETURN, // וישב
 
+    KEYWORD_BASAD, // בס"ד
+    KEYWORD_BH, // בע"ה
+    KEYWORD_IAW, // אי"א
+
+
     //
     LITERAL_NUMBER_DOUBLE, // x.y
     LITERAL_NUMBER_FLOAT, // x.y צף | x צף
@@ -24,8 +29,8 @@ enum class token_group : int
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
     OPERATOR_MULTIPLICATION, // ויוכפל
-    OPERATOR_TIMES, // פי
     OPERATOR_DIVISION, // ויחולק
+    OPERATOR_TIMES, // פי
     OPERATOR_MODULO, // ויושרה
 
     OPERATOR_ADDITION_ASSIGNMENT, //ויסף
@@ -40,6 +45,10 @@ enum class token_group : int
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
+    KEYWORD_ANNOTATION, // חותם
+    KEYWORD_ANNOTATE, // והיה
+    KEYWORD_ANNOTATE_OVERRIDE, // ויגזול
+
     PUNCTUATION_END_OP, // :
     PUNCTUATION_ARG_SEPARATOR, // ו־
     PUNCTUATION_DOT, // ל־
@@ -49,7 +58,7 @@ enum class token_group : int
     KEYWORD_ENUM, // מניין
     KEYWORD_INTERFACE, // צלם
     KEYWORD_THIS, // אנכי
-    KEYWORD_OF_INSTANCE, // מזרע
+    KEYWORD_INSTANCE, // מזרע
     KEYWORD_IMPLEMENTS, // וירש את
     KEYWORD_NEW, // ויברא
 
@@ -115,7 +124,6 @@ enum class token_group : int
     COMMENT_ONE_LINER, // כה הגה ה'
 
     KEYWORD_TRY, // וינסה
-    KEYWORD_EXCEPTION, // פסיקה
     KEYWORD_CATCH, // ויתפוס
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
