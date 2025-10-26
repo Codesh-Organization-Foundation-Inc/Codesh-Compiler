@@ -33,6 +33,12 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
         get_basad_type(tokens)
     );
 
+    if (root_node->get_basad_type() == basad_type::IAW)
+    {
+        //TODO: Return the joke program
+        return root_node;
+    }
+
 
     while (!tokens.empty())
     {
