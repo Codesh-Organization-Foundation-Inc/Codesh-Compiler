@@ -21,7 +21,6 @@ add_executable(Codesh_Compiler
         src/parser/ast/block_ast_node.h
         src/parser/ast/impl/binary_ast_node.tpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/node_type.h
         src/parser/ast/while_ast_node.cpp
         src/parser/ast/while_ast_node.h
         src/parser/ast/impl/typed_ast_node.h

@@ -1,6 +1,4 @@
 #include "while_ast_node.h"
-
-#include "node_type.h"
 #include "block_ast_node.h"
 
 codesh::ast::while_ast_node::while_ast_node(std::unique_ptr<impl::typed_ast_node<bool>> condition,
@@ -27,9 +25,4 @@ void codesh::ast::while_ast_node::set_condition(std::unique_ptr<impl::typed_ast_
 void codesh::ast::while_ast_node::set_block(std::unique_ptr<block_ast_node> block)
 {
     this->block = std::move(block);
-}
-
-codesh::ast::node_type codesh::ast::while_ast_node::get_type() const
-{
-    return node_type::WHILE;
 }

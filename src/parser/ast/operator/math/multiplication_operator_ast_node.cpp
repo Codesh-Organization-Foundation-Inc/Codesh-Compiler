@@ -1,7 +1,5 @@
 #include "multiplication_operator_ast_node.h"
 
-#include "../../node_type.h"
-
 template <typename T>
 codesh::ast::op::multiplication_operator_ast_node<T>::multiplication_operator_ast_node(
     std::unique_ptr<impl::typed_ast_node<T>> left,
@@ -9,11 +7,6 @@ codesh::ast::op::multiplication_operator_ast_node<T>::multiplication_operator_as
 ) :
     impl::binary_ast_node<T>(std::move(left), std::move(right))
 {}
-
-template <typename T> codesh::ast::node_type codesh::ast::op::multiplication_operator_ast_node<T>::get_type() const
-{
-    return node_type::MULTIPLICATION;
-}
 
 template <typename T> T codesh::ast::op::multiplication_operator_ast_node<T>::evaluate() const
 {
