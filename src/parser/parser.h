@@ -8,5 +8,5 @@
 
 namespace codesh
 {
-[[nodiscard]] std::unique_ptr<ast::impl::ast_node> parse(const std::queue<std::unique_ptr<token>> &code);
+[[nodiscard]] std::unique_ptr<ast::impl::ast_node> parse(std::queue<std::unique_ptr<token>> &tokens);
 }

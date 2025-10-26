@@ -1,13 +1,16 @@
 #include "compilation_unit_ast_node.h"
 
-#include <utility>
-
-codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(std::string package_name)
-    : package_name(std::move(package_name))
+codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const enum basad_type basad_type)
+    : basad(basad_type)
 {
 }
 
-std::string codesh::ast::compilation_unit_ast_node::get_package_name() const
+basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
+{
+    return this->basad;
+}
+
+std::list<std::string> &codesh::ast::compilation_unit_ast_node::get_package_name()
 {
     return this->package_name;
 }
