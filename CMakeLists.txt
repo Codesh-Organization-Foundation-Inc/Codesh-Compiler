@@ -61,7 +61,15 @@ add_executable(Codesh_Compiler
         src/parser/ast/type_declaration_ast_node.cpp
         src/parser/ast/type_declaration_ast_node.h
         src/parser/ast/impl/unary_ast_node.cpp
-        src/parser/ast/impl/unary_ast_node.h)
+        src/parser/ast/impl/unary_ast_node.h
+        src/lexer/trie/trie_node.cpp
+        src/lexer/trie/trie_node.h
+        src/lexer/trie/keyword_info.h
+        src/lexer/trie/word_boundary.h
+        src/lexer/trie/keywords.cpp
+        src/lexer/trie/keywords.h
+        src/lexer/trie/trie.cpp
+        src/lexer/trie/trie.h)
 
 
 # sudo dnf install boost-regex boost-devel

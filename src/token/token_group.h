@@ -126,7 +126,7 @@ enum class token_group : int
     KEYWORD_PACKAGE, // וישב בארץ
     KEYWORD_INDEX, // במקום
 
-    COUNT // Dummy entry that equals the amount of entries in the enum
+    INVALID
 };
 
 }

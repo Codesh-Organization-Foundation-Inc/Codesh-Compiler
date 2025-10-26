@@ -16,7 +16,7 @@ int main(const int argc, char **const argv) {
     std::cout << codesh::LEXER_RGX_STR << std::endl;
 
     const std::string amen_file = read_file(std::string(args.src_path));
-    const auto tokens = codesh::tokenize_code(amen_file);
+    const auto tokens = codesh::lexer::tokenize_code(amen_file);
 
     return 0;
 }
