@@ -5,6 +5,7 @@
 namespace ast = codesh::ast;
 
 static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn);
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::compilation_unit_ast_node *root_node);
@@ -29,9 +30,7 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
         throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
 
 
-    std::unique_ptr<ast::compilation_unit_ast_node> root_node = std::make_unique<ast::compilation_unit_ast_node>(
-        get_basad_type(tokens)
-    );
+    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens);
 
     if (root_node->get_basad_type() == basad_type::IAW)
     {
@@ -40,21 +39,25 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
     }
 
 
-    while (!tokens.empty())
+    return root_node;
+}
+
+
+static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
+        get_basad_type(tokens)
+    );
+
+    if (!tokens.empty())
     {
-        switch (tokens.front().get()->get_group())
+        if (tokens.front().get()->get_group() == codesh::token_group::KEYWORD_ORIGIN_COUNTRY)
         {
-
-        case token_group::KEYWORD_ORIGIN_COUNTRY:
-            parse_origin_country(tokens, root_node.get());
-            break;
-
-        default: throw std::runtime_error("Unexpected token"); // TODO: Convert to custom Codesh error
-
+            parse_origin_country(tokens, node.get());
         }
     }
 
-    return root_node;
+    return node;
 }
 
 
@@ -76,6 +79,7 @@ static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tok
     parse_fqcn(tokens, root_node->get_package_name());
     ensure_end_op(tokens);
 }
+
 
 /**
  * Ensures a colon exists at the current token, and consumes it.
@@ -111,7 +115,8 @@ static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::
             break;
         }
 
-        tokens.pop(); // Consume the dot
+        // Consume the dot
+        tokens.pop();
     }
 
 }
