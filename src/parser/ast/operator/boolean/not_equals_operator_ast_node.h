@@ -5,14 +5,12 @@
 namespace codesh::ast::op
 {
 
-template <typename T>
-class not_equals_operator_ast_node final : public impl::binary_ast_node<T>
+class not_equals_operator_ast_node final : public impl::binary_ast_node
 {
 public:
-    not_equals_operator_ast_node(std::unique_ptr<impl::typed_ast_node<T>> left, std::unique_ptr<impl::typed_ast_node<T>> right);
+    not_equals_operator_ast_node(std::unique_ptr<method_ast_node> left, std::unique_ptr<method_ast_node> right);
 
-private:
-    [[nodiscard]] T evaluate() const override;
+    [[nodiscard]] void *to_ir() const override;
 };
 
 }
