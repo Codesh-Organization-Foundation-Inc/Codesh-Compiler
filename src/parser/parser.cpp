@@ -51,7 +51,7 @@ static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(st
 
     if (!tokens.empty())
     {
-        if (tokens.front().get()->get_group() == codesh::token_group::KEYWORD_ORIGIN_COUNTRY)
+        if (tokens.front()->get_group() == codesh::token_group::KEYWORD_ORIGIN_COUNTRY)
         {
             parse_origin_country(tokens, node.get());
         }
@@ -86,7 +86,7 @@ static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tok
  */
 static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    if (tokens.empty() || tokens.front().get()->get_group() != codesh::token_group::PUNCTUATION_END_OP)
+    if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::PUNCTUATION_END_OP)
     {
         throw std::runtime_error("Expected colon"); //TODO: Convert to custom Codesh error
     }
