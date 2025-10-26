@@ -10,6 +10,8 @@ static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::compilation_unit_ast_node *root_node);
 static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::type_declaration_ast_node> parse_type_declaration(
+    std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 /**
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
@@ -39,9 +41,33 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
     }
 
 
+    //TODO: Optionally parse imports here
+
+
+    // Global scope
+    while (!tokens.empty())
+    {
+        switch (tokens.front()->get_group())
+        {
+        case token_group::KEYWORD_LET:
+            root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
+            break;
+
+        default: throw std::runtime_error("Unexpected token");
+        }
+    }
+
+
     return root_node;
 }
 
+
+static std::unique_ptr<ast::type_declaration_ast_node> parse_type_declaration(
+    std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    tokens.pop();
+    return {};
+}
 
 static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
