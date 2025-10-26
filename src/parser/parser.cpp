@@ -20,7 +20,7 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
         get_basad_type(tokens)
     );
 
-    if (tokens.front().get()->get_group() == token_group::KEYWORD_ORIGIN_COUNTRY)
+    if (!tokens.empty() && tokens.front().get()->get_group() == token_group::KEYWORD_ORIGIN_COUNTRY)
     {
         tokens.pop();
         set_fqcn(tokens, root_node->get_package_name());
@@ -54,7 +54,7 @@ static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tok
  */
 static void set_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn)
 {
-    std::unique_ptr<codesh::token> identifier = consume_token(tokens);
+    const std::unique_ptr<codesh::token> identifier = consume_token(tokens);
 
     if (identifier->get_group() != codesh::token_group::IDENTIFIER)
     {
