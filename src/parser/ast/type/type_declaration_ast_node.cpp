@@ -1,11 +1,7 @@
 #include "type_declaration_ast_node.h"
 
-std::string codesh::ast::type::type_declaration_ast_node::get_name() const
-{
-    return name;
-}
+#include <utility>
 
-void codesh::ast::type::type_declaration_ast_node::set_name(const std::string &name)
+codesh::ast::type::type_declaration_ast_node::type_declaration_ast_node(std::string name) : name(std::move(name))
 {
-    this->name = name;
 }
