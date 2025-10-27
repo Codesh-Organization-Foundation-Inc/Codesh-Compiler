@@ -24,6 +24,8 @@ static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static bool consuming_check(std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::token_group token_group);
 static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::type::class_declaration_ast_node *const class_node);
 
 /**
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
@@ -31,6 +33,9 @@ static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>>
  */
 static std::unique_ptr<codesh::token> consume_token(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
+    //TODO: Request custom error message
+    ensure_tokens_exist(tokens);
+
     std::unique_ptr<codesh::token> token = std::move(tokens.front());
     tokens.pop();
     return token;
@@ -79,7 +84,7 @@ static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declarat
     switch (consume_token(tokens)->get_group())
     {
     case codesh::token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
-    case codesh::token_group::KEYWORD_INTERFACE: return parse_class_declaration(tokens);
+    case codesh::token_group::KEYWORD_INTERFACE:; //TODO
     case codesh::token_group::KEYWORD_ENUM:; //TODO
     case codesh::token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
@@ -114,10 +119,36 @@ static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declar
 
 
     // Get attributes
-    ensure_tokens_exist(tokens);
     node->set_attributes(parse_attributes(tokens));
 
+
+    // Start scope
+    if (consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    {
+        throw std::runtime_error("Unexpected token: Expected start of scope (ויאמר:)");
+    }
+
+    parse_class_scope(tokens, node.get());
+
+
     return node;
+}
+
+static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::type::class_declaration_ast_node *const class_node)
+{
+    while (!tokens.empty())
+    {
+        switch (consume_token(tokens)->get_group())
+        {
+        //TODO: Parse class scope
+
+        case codesh::token_group::SCOPE_END: return;
+        default: throw std::runtime_error("Unexpected token");
+        }
+    }
+
+    throw std::runtime_error("Unexpected EOF: Expected end of scope (ויתם:)");
 }
 
 
@@ -127,7 +158,7 @@ static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
     std::unique_ptr<ast::type::attributes_ast_node> node = std::make_unique<ast::type::attributes_ast_node>();
 
     // Attributes are optional, so check whether they exist at all.
-    if (tokens.front()->get_group() == codesh::token_group::SCOPE_BEGIN)
+    if (tokens.empty() || tokens.front()->get_group() == codesh::token_group::SCOPE_BEGIN)
         return node;
 
 
