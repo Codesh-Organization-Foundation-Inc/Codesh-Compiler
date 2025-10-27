@@ -6,6 +6,7 @@ namespace ast = codesh::ast;
 
 static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::import_declaration_ast_node> parse_import(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn);
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::compilation_unit_ast_node *root_node);
@@ -29,7 +30,6 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
     if (tokens.empty())
         throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
 
-
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens);
 
     if (root_node->get_basad_type() == basad_type::IAW)
@@ -39,9 +39,45 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
     }
 
 
+    // Optionally parse imports
+    while (!tokens.empty() && tokens.front()->get_group() == token_group::KEYWORD_IMPORT)
+    {
+        root_node->get_import_declarations().push_back(parse_import(tokens));
+    }
+
+    //TODO: Global scope
+
+
     return root_node;
 }
 
+
+static std::unique_ptr<ast::import_declaration_ast_node> parse_import(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    tokens.pop();
+    if (tokens.empty())
+    {
+        throw std::runtime_error("Expected identifier"); //TODO: Convert to custom Codesh error
+    }
+
+    std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
+
+    if (tokens.front()->get_group() == codesh::token_group::KEYWORD_IMPORT_STATIC)
+    {
+        import_node->set_is_static(true);
+    }
+
+    parse_fqcn(tokens, import_node->get_package_name());
+
+    if (import_node->get_package_name().back() == "*")
+    {
+        import_node->get_package_name().pop_back();
+        import_node->set_is_on_demand(true);
+    }
+
+    ensure_end_op(tokens);
+    return import_node;
+}
 
 static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
@@ -105,18 +141,29 @@ static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::
 
         if (id->get_group() != codesh::token_group::IDENTIFIER)
         {
-            throw std::runtime_error("Expected identifier in package name");
+            if (id->get_group() == codesh::token_group::PUNCTUATION_WILDCARD)
+            {
+                fqcn.emplace_back("*");
+            }
+            else
+            {
+                throw std::runtime_error("Expected identifier in package name");
+            }
         }
-
-        fqcn.push_back(static_cast<codesh::identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::PUNCTUATION_DOT)
+        else
         {
-            break;
+            fqcn.push_back(static_cast<codesh::identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
         }
 
-        // Consume the dot
-        tokens.pop();
+
+        if (!tokens.empty() && tokens.front()->get_group() == codesh::token_group::PUNCTUATION_DOT)
+        {
+            // Consume the dot
+            tokens.pop();
+            continue;
+        }
+
+        break;
     }
 
 }

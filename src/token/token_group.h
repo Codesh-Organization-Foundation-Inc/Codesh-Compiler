@@ -124,7 +124,7 @@ enum class token_group : int
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
 
-    KEYWORD_IMPORT_STATIC, // ויבא בכלל
+    KEYWORD_IMPORT_STATIC, // בכלל
     KEYWORD_IMPORT, // ויבא
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ

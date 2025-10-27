@@ -29,7 +29,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::KEYWORD_IAW, R"(\bאי\"א\b)"},
 
     {token_group::KEYWORD_ORIGIN_COUNTRY, R"(\bוישב בארץ\b)"},
-    {token_group::KEYWORD_IMPORT_STATIC, R"(\bויבא בכלל\b)"},
+    {token_group::KEYWORD_IMPORT_STATIC, R"(\bבכלל\b)"},
     {token_group::KEYWORD_IMPORT, R"(\bויבא\b)"},
 
     {token_group::SCOPE_BEGIN, R"(\bויאמר\:)"},
