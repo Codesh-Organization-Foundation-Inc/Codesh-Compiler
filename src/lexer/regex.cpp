@@ -37,7 +37,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
 
     {token_group::KEYWORD_LET, R"(\bויהי\b)"},
     {token_group::KEYWORD_NAME, R"(\bושמו\b)"},
-    {token_group::KEYWORD_SHALL_BE, R"(\b(?:יהיה|תהיה)\b)"},
+    {token_group::KEYWORD_SHALL_BE, R"(\bהיה\b)"},
     {token_group::KEYWORD_RETURN, R"(\bוישב\b)"},
 
     {token_group::OPERATOR_ADDITION, R"(\bויוסף ל־)"},
