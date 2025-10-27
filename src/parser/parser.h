@@ -1,7 +1,12 @@
-#ifndef CODESH_COMPILER_PARSER_H
-#define CODESH_COMPILER_PARSER_H
+#pragma once
 
+#include "ast/impl/ast_node.h"
+#include "../token/token.h"
 
+#include <memory>
+#include <queue>
 
-
-#endif // CODESH_COMPILER_PARSER_H
+namespace codesh
+{
+[[nodiscard]] std::unique_ptr<ast::impl::ast_node> parse(std::queue<std::unique_ptr<token>> &tokens);
+}

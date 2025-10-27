@@ -35,6 +35,8 @@ class identifier_token final : public token
 
 public:
     identifier_token(token_type type, token_group group, std::string content);
+
+    [[nodiscard]] std::string get_content() const;
 };
 
 

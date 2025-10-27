@@ -60,7 +60,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/type_declaration_ast_node.cpp
         src/parser/ast/type_declaration_ast_node.h
         src/parser/ast/impl/unary_ast_node.cpp
-        src/parser/ast/impl/unary_ast_node.h)
+        src/parser/ast/impl/unary_ast_node.h
+        src/defenition/basad_type.h)
 
 
 # sudo dnf install boost-regex boost-devel

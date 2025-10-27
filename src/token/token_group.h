@@ -13,6 +13,10 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // היה
     KEYWORD_RETURN, // וישב
 
+    KEYWORD_BASAD,
+    KEYWORD_BH,
+    KEYWORD_IAW,
+
     //
     LITERAL_NUMBER_DOUBLE, // x.y
     LITERAL_NUMBER_FLOAT, // x.y צף | x צף
@@ -123,7 +127,7 @@ enum class token_group : int
     KEYWORD_IMPORT_STATIC, // ויבא בכלל
     KEYWORD_IMPORT, // ויבא
 
-    KEYWORD_PACKAGE, // וישב בארץ
+    KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_INDEX, // במקום
 
     COUNT // Dummy entry that equals the amount of entries in the enum
