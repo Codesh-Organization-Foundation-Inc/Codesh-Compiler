@@ -1,13 +1,13 @@
 #include "compilation_unit_ast_node.h"
 
-codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const basad_type basad_type)
-    : basad(basad_type)
+codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type) :
+    basad_type(basad_type)
 {
 }
 
-basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
+codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
 {
-    return this->basad;
+    return this->basad_type;
 }
 
 std::list<std::string> &codesh::ast::compilation_unit_ast_node::get_package_name()

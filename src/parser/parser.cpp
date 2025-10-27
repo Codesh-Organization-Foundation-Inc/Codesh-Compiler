@@ -5,7 +5,7 @@
 
 namespace ast = codesh::ast;
 
-static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn);
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -37,7 +37,7 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens);
 
-    if (root_node->get_basad_type() == basad_type::IAW)
+    if (root_node->get_basad_type() == definition::basad_type::IAW)
     {
         //TODO: Return the joke program
         return root_node;
@@ -125,13 +125,13 @@ static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(st
 }
 
 
-static basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
+static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     switch (consume_token(tokens)->get_group())
     {
-    case codesh::token_group::KEYWORD_BASAD: return basad_type::BASAD;
-    case codesh::token_group::KEYWORD_BH: return basad_type::BH;
-    case codesh::token_group::KEYWORD_IAW: return basad_type::IAW;
+    case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
+    case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
+    case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
 
     default: throw std::runtime_error("Unexpected token: Expected BASAD declaration"); //TODO: Convert to custom Codesh error
     }
