@@ -52,6 +52,7 @@ enum class token_group : int
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
     KEYWORD_INTERFACE, // צלם
+    KEYWORD_ANNOTATION, // חותם
     KEYWORD_THIS, // אנכי
     KEYWORD_OF_INSTANCE, // מזרע
     KEYWORD_IMPLEMENTS, // וירש את
@@ -64,6 +65,7 @@ enum class token_group : int
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
     KEYWORD_STATIC, // כללי
+    KEYWORD_PROTECTED, // קדש
     KEYWORD_ABSTRACT, // רוחני
     KEYWORD_FINAL, // ימות ולא־יתחלף
     KEYWORD_SUPER, // אבי

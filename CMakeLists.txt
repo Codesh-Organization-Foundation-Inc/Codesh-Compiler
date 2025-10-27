@@ -57,11 +57,16 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/boolean/or_operator_ast_node.h
         src/parser/ast/import_declaration_ast_node.cpp
         src/parser/ast/import_declaration_ast_node.h
-        src/parser/ast/type_declaration_ast_node.cpp
-        src/parser/ast/type_declaration_ast_node.h
+        src/parser/ast/type/type_declaration_ast_node.cpp
+        src/parser/ast/type/type_declaration_ast_node.h
         src/parser/ast/impl/unary_ast_node.cpp
         src/parser/ast/impl/unary_ast_node.h
-        src/defenition/basad_type.h)
+        src/defenition/basad_type.h
+        src/parser/ast/type/class_declaration_ast_node.cpp
+        src/parser/ast/type/attributes_ast_node.cpp
+        src/parser/ast/type/attributes_ast_node.h
+        src/defenition/visibility.h
+        src/defenition/visibility.cpp)
 
 
 # sudo dnf install boost-regex boost-devel
