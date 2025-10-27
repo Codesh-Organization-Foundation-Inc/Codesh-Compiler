@@ -9,10 +9,11 @@ namespace codesh::ast::type
 
 class type_declaration_ast_node : public impl::ast_node
 {
-    const std::string name;
+    std::string name;
 
 public:
-    explicit type_declaration_ast_node(std::string name);
+    [[nodiscard]] std::string get_name() const;
+    void set_name(const std::string &name);
 };
 
 }

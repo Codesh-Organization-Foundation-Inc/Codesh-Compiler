@@ -1,6 +1,6 @@
 #include "compilation_unit_ast_node.h"
 
-codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const enum basad_type basad_type)
+codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const basad_type basad_type)
     : basad(basad_type)
 {
 }
