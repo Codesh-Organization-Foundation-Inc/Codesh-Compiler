@@ -96,8 +96,6 @@ static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declarat
 static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declaration(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    tokens.pop();
-
     if (consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
     {
         throw std::runtime_error("Unexpected token: Expected ושמו");
@@ -188,7 +186,6 @@ static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
     }
 
 
-    ensure_tokens_exist(tokens);
     if (!consuming_check(tokens, codesh::token_group::KEYWORD_SHALL_BE))
     {
         // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
