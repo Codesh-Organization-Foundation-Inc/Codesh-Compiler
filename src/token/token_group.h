@@ -65,6 +65,7 @@ enum class token_group : int
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
     KEYWORD_STATIC, // כללי
+    KEYWORD_PROTECTED, // קדש
     KEYWORD_ABSTRACT, // רוחני
     KEYWORD_FINAL, // ימות ולא־יתחלף
     KEYWORD_SUPER, // אבי

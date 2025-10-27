@@ -1,8 +1,13 @@
 #include "parser.h"
 
 #include "ast/compilation_unit_ast_node.h"
+#include "ast/type/attributes_ast_node.h"
 #include "ast/type/class_declaration_ast_node.h"
 
+namespace codesh::ast::type
+{
+class attributes_ast_node;
+}
 namespace ast = codesh::ast;
 
 static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
@@ -15,6 +20,10 @@ static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declarat
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declaration(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
+static bool consuming_check(std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::token_group token_group);
+static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 /**
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
@@ -90,6 +99,7 @@ static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declar
     }
 
 
+    // Get name
     const std::unique_ptr<codesh::token> name_token = consume_token(tokens);
 
     if (name_token->get_group() != codesh::token_group::IDENTIFIER)
@@ -97,11 +107,63 @@ static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declar
         throw std::runtime_error("Unexpected token: Expected identifier");
     }
 
+
     std::unique_ptr<ast::type::class_declaration_ast_node> node = std::make_unique<ast::type::class_declaration_ast_node>(
         static_cast<const codesh::identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-static-cast-downcast)
     );
 
-    //TODO: Parse attributes
+
+    // Get attributes
+    ensure_tokens_exist(tokens);
+    node->set_attributes(parse_attributes(tokens));
+
+    return node;
+}
+
+
+static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    std::unique_ptr<ast::type::attributes_ast_node> node = std::make_unique<ast::type::attributes_ast_node>();
+
+    // Attributes are optional, so check whether they exist at all.
+    if (tokens.front()->get_group() == codesh::token_group::SCOPE_BEGIN)
+        return node;
+
+
+    // Optional 1: Visibility
+    if (const auto visibility = codesh::definition::token_group_to_visibility(tokens.front().get()))
+    {
+        node->set_visibility(visibility.value());
+        tokens.pop();
+    }
+
+    // Optional 2: Static
+    if (consuming_check(tokens, codesh::token_group::KEYWORD_STATIC))
+    {
+        node->set_is_static(true);
+    }
+
+    // Optional 3: Abstract
+    if (consuming_check(tokens, codesh::token_group::KEYWORD_ABSTRACT))
+    {
+        node->set_is_abstract(true);
+    }
+
+    // Optional 4: Final
+    if (consuming_check(tokens, codesh::token_group::KEYWORD_FINAL))
+    {
+        node->set_is_final(true);
+    }
+
+
+    ensure_tokens_exist(tokens);
+    if (!consuming_check(tokens, codesh::token_group::KEYWORD_SHALL_BE))
+    {
+        // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
+        // or did not close the attribute statement with Shall Be.
+        throw std::runtime_error("Unexpected token: Expected attribute list enclosed by היה");
+    }
 
     return node;
 }
@@ -157,6 +219,28 @@ static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens)
     }
 
     tokens.pop();
+}
+
+/**
+ * Checks whether the group of the first token matches the requested one.
+ * If so, pops it from the queue.
+ * @return Whether the token group matches the requested
+ */
+static bool consuming_check(std::queue<std::unique_ptr<codesh::token>> &tokens, const codesh::token_group token_group)
+{
+    if (!tokens.empty() && tokens.front()->get_group() != token_group)
+        return false;
+
+    tokens.pop();
+    return true;
+}
+
+static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    if (tokens.empty())
+    {
+        throw std::runtime_error("Unexpected EOF");
+    }
 }
 
 /**
