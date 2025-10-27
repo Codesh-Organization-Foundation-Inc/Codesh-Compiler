@@ -21,7 +21,7 @@ std::list<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::as
     return this->import_declarations;
 }
 
-std::list<std::unique_ptr<codesh::ast::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+std::list<std::unique_ptr<codesh::ast::type::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_type_declarations()
 {
     return this->type_declarations;

@@ -10,7 +10,7 @@ static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::compilation_unit_ast_node *root_node);
 static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens);
-static std::unique_ptr<ast::type_declaration_ast_node> parse_type_declaration(
+static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declaration(
     std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 /**
@@ -59,7 +59,7 @@ std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<to
 
 
 
-static std::unique_ptr<ast::type_declaration_ast_node> parse_type_declaration(
+static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declaration(
     std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     tokens.pop();
