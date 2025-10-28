@@ -6,7 +6,6 @@
 #include "class_parser.h"
 
 namespace ast = codesh::ast;
-namespace parser = codesh::parser;
 
 
 std::unique_ptr<ast::type::type_declaration_ast_node> codesh::parser::parse_type_declaration(
@@ -26,43 +25,43 @@ std::unique_ptr<ast::type::type_declaration_ast_node> codesh::parser::parse_type
 }
 
 
-std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
-        std::queue<std::unique_ptr<codesh::token>> &tokens)
+std::unique_ptr<ast::type::attributes_ast_node> codesh::parser::parse_attributes(
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     std::unique_ptr<ast::type::attributes_ast_node> node = std::make_unique<ast::type::attributes_ast_node>();
 
     // Attributes are optional, so check whether they exist at all.
-    if (tokens.empty() || tokens.front()->get_group() == codesh::token_group::SCOPE_BEGIN)
+    if (tokens.empty() || tokens.front()->get_group() == token_group::SCOPE_BEGIN)
         return node;
 
 
     // Optional 1: Visibility
-    if (const auto visibility = codesh::definition::token_group_to_visibility(tokens.front().get()))
+    if (const auto visibility = definition::token_group_to_visibility(tokens.front().get()))
     {
         node->set_visibility(visibility.value());
         tokens.pop();
     }
 
     // Optional 2: Static
-    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_STATIC))
+    if (util::consuming_check(tokens, token_group::KEYWORD_STATIC))
     {
         node->set_is_static(true);
     }
 
     // Optional 3: Abstract
-    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ABSTRACT))
+    if (util::consuming_check(tokens, token_group::KEYWORD_ABSTRACT))
     {
         node->set_is_abstract(true);
     }
 
     // Optional 4: Final
-    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_FINAL))
+    if (util::consuming_check(tokens, token_group::KEYWORD_FINAL))
     {
         node->set_is_final(true);
     }
 
 
-    if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_SHALL_BE))
+    if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
         // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
         // or did not close the attribute statement with Shall Be.

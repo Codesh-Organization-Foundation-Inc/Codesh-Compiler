@@ -11,35 +11,35 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         ast::type::class_declaration_ast_node *class_node);
 
 
-std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declaration(
-        std::queue<std::unique_ptr<codesh::token>> &tokens)
+std::unique_ptr<ast::type::class_declaration_ast_node> codesh::parser::parse_class_declaration(
+        std::queue<std::unique_ptr<token>> &tokens)
 {
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+    if (util::consume_token(tokens)->get_group() != token_group::KEYWORD_NAME)
     {
         throw std::runtime_error("Unexpected token: Expected ושמו");
     }
 
 
     // Get name
-    const std::unique_ptr<codesh::token> name_token = parser::util::consume_token(tokens);
+    const std::unique_ptr<token> name_token = util::consume_token(tokens);
 
-    if (name_token->get_group() != codesh::token_group::IDENTIFIER)
+    if (name_token->get_group() != token_group::IDENTIFIER)
     {
         throw std::runtime_error("Unexpected token: Expected identifier");
     }
 
 
     std::unique_ptr<ast::type::class_declaration_ast_node> node = std::make_unique<ast::type::class_declaration_ast_node>(
-        static_cast<const codesh::identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-cast-downcast)
+        static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-cast-downcast)
     );
 
 
     // Get attributes
-    node->set_attributes(parser::parse_attributes(tokens));
+    node->set_attributes(parse_attributes(tokens));
 
 
     // Start scope
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    if (util::consume_token(tokens)->get_group() != token_group::SCOPE_BEGIN)
     {
         throw std::runtime_error("Unexpected token: Expected start of scope (ויאמר:)");
     }
