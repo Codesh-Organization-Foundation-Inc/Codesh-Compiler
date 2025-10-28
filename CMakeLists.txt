@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(Codesh_Compiler
         src/main.cpp
         src/lexer/regex.h
-        src/parser/command_parser.cpp
-        src/parser/command_parser.h
+        src/command_parser.cpp
+        src/command_parser.h
         src/lexer/regex.cpp
         src/token/token.h
         src/token/token.cpp
@@ -66,7 +66,11 @@ add_executable(Codesh_Compiler
         src/parser/ast/type/attributes_ast_node.cpp
         src/parser/ast/type/attributes_ast_node.h
         src/defenition/visibility.h
-        src/defenition/visibility.cpp)
+        src/defenition/visibility.cpp
+        src/parser/compilation_unit_parser.h
+        src/parser/compilation_unit_parser.cpp
+        src/parser/util.cpp
+        src/parser/util.h)
 
 
 # sudo dnf install boost-regex boost-devel

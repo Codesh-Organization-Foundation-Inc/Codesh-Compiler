@@ -6,7 +6,7 @@
 #include <memory>
 #include <queue>
 
-namespace codesh
+namespace codesh::parser
 {
 [[nodiscard]] std::unique_ptr<ast::impl::ast_node> parse(std::queue<std::unique_ptr<token>> &tokens);
 }

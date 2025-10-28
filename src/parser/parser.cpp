@@ -3,48 +3,29 @@
 #include "ast/compilation_unit_ast_node.h"
 #include "ast/type/attributes_ast_node.h"
 #include "ast/type/class_declaration_ast_node.h"
+#include "compilation_unit_parser.h"
+#include "util.h"
 
 namespace codesh::ast::type
 {
 class attributes_ast_node;
 }
 namespace ast = codesh::ast;
+namespace parser = codesh::parser;
 
-static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
-static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::import_declaration_ast_node> parse_import(std::queue<std::unique_ptr<codesh::token>> &tokens);
-static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn);
-static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::compilation_unit_ast_node *root_node);
-static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declaration(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declaration(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
-static bool consuming_check(std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::token_group token_group);
-static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::type::class_declaration_ast_node *const class_node);
-
-/**
- * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
- * @return The consumed token
- */
-static std::unique_ptr<codesh::token> consume_token(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    //TODO: Request custom error message
-    ensure_tokens_exist(tokens);
-
-    std::unique_ptr<codesh::token> token = std::move(tokens.front());
-    tokens.pop();
-    return token;
-}
+        ast::type::class_declaration_ast_node *class_node);
 
 
 
-std::unique_ptr<ast::impl::ast_node> codesh::parse(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<ast::impl::ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens)
 {
     if (tokens.empty())
         throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
@@ -89,7 +70,7 @@ static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declarat
 {
     tokens.pop();
 
-    switch (consume_token(tokens)->get_group())
+    switch (parser::util::consume_token(tokens)->get_group())
     {
     case codesh::token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
     case codesh::token_group::KEYWORD_INTERFACE:; //TODO
@@ -104,14 +85,14 @@ static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declarat
 static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declaration(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    if (consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
     {
         throw std::runtime_error("Unexpected token: Expected ושמו");
     }
 
 
     // Get name
-    const std::unique_ptr<codesh::token> name_token = consume_token(tokens);
+    const std::unique_ptr<codesh::token> name_token = parser::util::consume_token(tokens);
 
     if (name_token->get_group() != codesh::token_group::IDENTIFIER)
     {
@@ -129,7 +110,7 @@ static std::unique_ptr<ast::type::class_declaration_ast_node> parse_class_declar
 
 
     // Start scope
-    if (consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
     {
         throw std::runtime_error("Unexpected token: Expected start of scope (ויאמר:)");
     }
@@ -145,7 +126,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 {
     while (!tokens.empty())
     {
-        switch (consume_token(tokens)->get_group())
+        switch (parser::util::consume_token(tokens)->get_group())
         {
         //TODO: Parse class scope
 
@@ -176,25 +157,25 @@ static std::unique_ptr<ast::type::attributes_ast_node> parse_attributes(
     }
 
     // Optional 2: Static
-    if (consuming_check(tokens, codesh::token_group::KEYWORD_STATIC))
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_STATIC))
     {
         node->set_is_static(true);
     }
 
     // Optional 3: Abstract
-    if (consuming_check(tokens, codesh::token_group::KEYWORD_ABSTRACT))
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ABSTRACT))
     {
         node->set_is_abstract(true);
     }
 
     // Optional 4: Final
-    if (consuming_check(tokens, codesh::token_group::KEYWORD_FINAL))
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_FINAL))
     {
         node->set_is_final(true);
     }
 
 
-    if (!consuming_check(tokens, codesh::token_group::KEYWORD_SHALL_BE))
+    if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_SHALL_BE))
     {
         // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
         // or did not close the attribute statement with Shall Be.
@@ -220,7 +201,7 @@ static std::unique_ptr<ast::import_declaration_ast_node> parse_import(std::queue
         import_node->set_is_static(true);
     }
 
-    parse_fqcn(tokens, import_node->get_package_name());
+    parser::util::parse_fqcn(tokens, import_node->get_package_name());
 
     if (import_node->get_package_name().back() == "*")
     {
@@ -228,118 +209,6 @@ static std::unique_ptr<ast::import_declaration_ast_node> parse_import(std::queue
         import_node->set_is_on_demand(true);
     }
 
-    ensure_end_op(tokens);
+    parser::util::ensure_end_op(tokens);
     return import_node;
-}
-
-static std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        get_basad_type(tokens)
-    );
-
-    if (!tokens.empty())
-    {
-        if (tokens.front()->get_group() == codesh::token_group::KEYWORD_ORIGIN_COUNTRY)
-        {
-            parse_origin_country(tokens, node.get());
-        }
-    }
-
-    return node;
-}
-
-
-static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    switch (consume_token(tokens)->get_group())
-    {
-    case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
-    case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
-    case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
-
-    default: throw std::runtime_error("Unexpected token: Expected BASAD declaration"); //TODO: Convert to custom Codesh error
-    }
-}
-
-static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::compilation_unit_ast_node *root_node)
-{
-    tokens.pop();
-    parse_fqcn(tokens, root_node->get_package_name());
-    ensure_end_op(tokens);
-}
-
-
-/**
- * Ensures a colon exists at the current token, and consumes it.
- */
-static void ensure_end_op(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::PUNCTUATION_END_OP)
-    {
-        throw std::runtime_error("Unexpected token: Expected colon"); //TODO: Convert to custom Codesh error
-    }
-
-    tokens.pop();
-}
-
-/**
- * Checks whether the group of the first token matches the requested one.
- * If so, pops it from the queue.
- * @return Whether the token group matches the requested
- */
-static bool consuming_check(std::queue<std::unique_ptr<codesh::token>> &tokens, const codesh::token_group token_group)
-{
-    if (!tokens.empty() && tokens.front()->get_group() != token_group)
-        return false;
-
-    tokens.pop();
-    return true;
-}
-
-static void ensure_tokens_exist(const std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    if (tokens.empty())
-    {
-        throw std::runtime_error("Unexpected EOF");
-    }
-}
-
-/**
- * Parses a Fully Qualified Class Name
- */
-static void parse_fqcn(std::queue<std::unique_ptr<codesh::token>> &tokens, std::list<std::string> &fqcn)
-{
-    while (!tokens.empty())
-    {
-        std::unique_ptr<codesh::token> id = consume_token(tokens);
-
-        if (id->get_group() != codesh::token_group::IDENTIFIER)
-        {
-            if (id->get_group() == codesh::token_group::PUNCTUATION_WILDCARD)
-            {
-                fqcn.emplace_back("*");
-            }
-            else
-            {
-                throw std::runtime_error("Unexpected token: Expected identifier");
-            }
-        }
-        else
-        {
-            fqcn.push_back(static_cast<codesh::identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
-        }
-
-
-        if (!tokens.empty() && tokens.front()->get_group() == codesh::token_group::PUNCTUATION_DOT)
-        {
-            // Consume the dot
-            tokens.pop();
-            continue;
-        }
-
-        break;
-    }
-
 }
