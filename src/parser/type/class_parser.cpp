@@ -30,7 +30,7 @@ std::unique_ptr<ast::type::class_declaration_ast_node> codesh::parser::parse_cla
 
 
     std::unique_ptr<ast::type::class_declaration_ast_node> node = std::make_unique<ast::type::class_declaration_ast_node>(
-        static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-cast-downcast)
+        static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-static-cast-downcast)
     );
 
 
