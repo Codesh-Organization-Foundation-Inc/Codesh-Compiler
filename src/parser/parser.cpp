@@ -1,18 +1,12 @@
 #include "parser.h"
 
 #include "ast/compilation_unit_ast_node.h"
-#include "ast/type/class_declaration_ast_node.h"
-#include "class_parser.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
+#include "type/type_parser.h"
 #include "util.h"
 
 namespace ast = codesh::ast;
-namespace parser = codesh::parser;
-
-static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declaration(
-        std::queue<std::unique_ptr<codesh::token>> &tokens);
-
 
 
 std::unique_ptr<ast::impl::ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens)
@@ -51,22 +45,4 @@ std::unique_ptr<ast::impl::ast_node> codesh::parser::parse(std::queue<std::uniqu
 
 
     return root_node;
-}
-
-
-
-static std::unique_ptr<ast::type::type_declaration_ast_node> parse_type_declaration(
-        std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    tokens.pop();
-
-    switch (parser::util::consume_token(tokens)->get_group())
-    {
-    case codesh::token_group::KEYWORD_CLASS: return parser::parse_class_declaration(tokens);
-    case codesh::token_group::KEYWORD_INTERFACE:; //TODO
-    case codesh::token_group::KEYWORD_ENUM:; //TODO
-    case codesh::token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
-
-    default: throw std::runtime_error("Unexpected token: Expected class, interface, enum or annotation");
-    }
 }
