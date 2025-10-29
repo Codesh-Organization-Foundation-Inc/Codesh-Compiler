@@ -13,7 +13,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
      {token_group::PUNCTUATION_DOT, "ל־", word_boundary::BEFORE},
      {token_group::PUNCTUATION_WILDCARD, "כולל", word_boundary::BOTH},
 
-     {token_group::KEYWORD_PACKAGE, "וישב בארץ", word_boundary::BOTH},
+     {token_group::KEYWORD_ORIGIN_COUNTRY, "וישב בארץ", word_boundary::BOTH},
      {token_group::KEYWORD_IMPORT_STATIC, "ויבא בכלל את", word_boundary::BOTH},
      {token_group::KEYWORD_IMPORT, "ויבא את", word_boundary::BOTH},
 

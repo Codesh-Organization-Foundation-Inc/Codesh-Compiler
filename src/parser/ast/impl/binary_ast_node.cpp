@@ -1,5 +1,3 @@
-#pragma once
-
 #include "binary_ast_node.h"
 
 codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<method_ast_node> left,
