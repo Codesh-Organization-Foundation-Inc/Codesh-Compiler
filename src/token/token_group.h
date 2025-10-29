@@ -17,8 +17,6 @@ enum class token_group : int
     KEYWORD_BH, // בע"ה
     KEYWORD_IAW, // אי"א
 
-
-    //
     LITERAL_NUMBER_DOUBLE, // x.y
     LITERAL_NUMBER_FLOAT, // x.y צף | x צף
     LITERAL_NUMBER_INT, // x
@@ -57,6 +55,7 @@ enum class token_group : int
     KEYWORD_CLASS, // עצם
     KEYWORD_ENUM, // מניין
     KEYWORD_INTERFACE, // צלם
+    KEYWORD_ANNOTATION, // חותם
     KEYWORD_THIS, // אנכי
     KEYWORD_INSTANCE, // מזרע
     KEYWORD_IMPLEMENTS, // וירש את
@@ -69,6 +68,7 @@ enum class token_group : int
     KEYWORD_PUBLIC, // נגלה|נגלית
     KEYWORD_PRIVATE, // נסתר|נסתרת
     KEYWORD_STATIC, // כללי
+    KEYWORD_PROTECTED, // קדש
     KEYWORD_ABSTRACT, // רוחני
     KEYWORD_FINAL, // ימות ולא־יתחלף
     KEYWORD_SUPER, // אבי
@@ -128,10 +128,10 @@ enum class token_group : int
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
 
-    KEYWORD_IMPORT_STATIC, // ויבא בכלל
+    KEYWORD_IMPORT_STATIC, // בכלל
     KEYWORD_IMPORT, // ויבא
 
-    KEYWORD_PACKAGE, // וישב בארץ
+    KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_INDEX, // במקום
 
     INVALID

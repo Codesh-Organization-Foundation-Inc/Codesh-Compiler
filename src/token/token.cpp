@@ -53,7 +53,12 @@ token_group codesh::token::get_group() const
     return this->group;
 }
 
-codesh::identifier_token::identifier_token(const token_type type, const token_group group, std::string content) :
-    token(type, group),
-    content(std::move(content))
-{}
+codesh::identifier_token::identifier_token(const token_type type, const token_group group, std::string content)
+    : token(type, group), content(std::move(content))
+{
+}
+
+std::string codesh::identifier_token::get_content() const
+{
+    return this->content;
+}
