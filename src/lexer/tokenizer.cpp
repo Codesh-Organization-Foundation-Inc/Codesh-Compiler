@@ -1,11 +1,17 @@
 #include "tokenizer.h"
 
-#include <unicode/uchar.h>
 #include "../token/token.h"
 #include "regex.h"
+#include "trie/keywords.h"
 #include "trie/trie.h"
+#include <unicode/uchar.h>
 
 namespace trie = codesh::lexer::trie;
+
+/**
+ * @return How many characters this character should consume.
+ */
+static size_t get_keyword_consume_size(const std::u16string &code, const codesh::token *token, size_t keyword_end);
 
 
 static bool is_word_char(const char16_t c) {
@@ -53,15 +59,6 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
             continue;
         }
 
-        // Check if comment:
-        // if (code.compare(i, 10, "והגה ה' לאמר:") == 0) {
-        //     size_t end = code.find("ויחדל:", i);
-        //     if (end != std::string::npos) {
-        //         tokens.push(token::from_block(code.substr(i, end - i + 7)));
-        //         i = end + 7;
-        //         continue;
-        //     }
-        // }
 
         const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
         const trie::keyword_info *last_match = nullptr;
@@ -80,7 +77,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (last_match && check_boundary(code, last_match, i, last_match_end))
         {
             tokens.push(std::make_unique<token>(token_type::KEYWORD, last_match->token));
-            i = last_match_end;
+            i = get_keyword_consume_size(code, tokens.back().get(), last_match_end);
             continue;
         }
 
@@ -100,4 +97,34 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
     }
 
     return tokens;
+}
+
+static size_t get_keyword_consume_size(const std::u16string &code, const codesh::token *const token,
+                                       const size_t keyword_end)
+{
+    switch (token->get_group())
+    {
+        case codesh::token_group::COMMENT_ONE_LINER: {
+            // If it's a one-line comment, look for the end of the line.
+            const size_t end = code.find(u'\n', keyword_end);
+
+            if (end != std::string::npos)
+                return end;
+
+            return keyword_end;
+        }
+
+        case codesh::token_group::COMMENT_MULTILINE: {
+            // If it's a multiline comment, look for a trie::keyword::MULTILINE_COMMENT_END match.
+            const size_t end = code.find(trie::keyword::MULTILINE_COMMENT_END, keyword_end);
+
+            if (end != std::string::npos)
+                return end + trie::keyword::MULTILINE_COMMENT_END.length();
+
+            //TODO: Convert to error token or alike
+            throw std::runtime_error("Unenclosed multiline comment");
+        }
+
+        default: return keyword_end;
+    }
 }

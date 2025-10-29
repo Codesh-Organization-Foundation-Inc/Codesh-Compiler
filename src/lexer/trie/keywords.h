@@ -11,7 +11,7 @@ extern const std::vector<keyword_info> KEYWORDS;
 
 namespace keyword
 {
-constexpr std::string_view MULTILINE_COMMENT_END = "ויחדל:";
+constexpr std::u16string_view MULTILINE_COMMENT_END = u"ויחדל:";
 }
 
 }
