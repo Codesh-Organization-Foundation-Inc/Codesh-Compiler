@@ -61,6 +61,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         }
 
 
+        // First, use the Trie structure to process built-in keywords.
         const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
         const trie::keyword_info *last_match = nullptr;
         size_t last_match_end = i;
