@@ -6,12 +6,11 @@
 #include "trie/trie.h"
 
 
-static bool is_word_char(const char32_t c) {
-    const auto uc = static_cast<UChar32>(c);
-    return u_isalnum(uc) || c == U'־';
+static bool is_word_char(const char16_t c) {
+    return u_isalnum(c) || c == U'־';
 }
 
-static bool check_boundary(const codesh::lexer::trie::keyword_info* kw, const std::u32string& code, size_t start, size_t end) {
+static bool check_boundary(const codesh::lexer::trie::keyword_info* kw, const std::u16string& code, size_t start, size_t end) {
     if (!kw) return false;
     if ((kw->boundary == codesh::lexer::trie::word_boundary::BEFORE || kw->boundary == codesh::lexer::trie::word_boundary::BOTH) &&
         start > 0 && is_word_char(code[start-1])) return false;
@@ -20,7 +19,7 @@ static bool check_boundary(const codesh::lexer::trie::keyword_info* kw, const st
     return true;
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u32string code)
+std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
 {
     // boost::u32regex_iterator it(code.begin(), code.end(), LEXER_RGX);
     // const boost::u32regex_iterator<std::string::const_iterator> end;
