@@ -22,10 +22,10 @@ int main(const int argc, char **const argv) {
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
     //TODO: Use 3rd party library as this is deprecated
     std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> conv;
-    const std::u16string res = conv.from_bytes(amen_file);
+    const std::u16string utf16_code = conv.from_bytes(amen_file);
 
     std::cout << codesh::LEXER_RGX_STR << std::endl;
-    const auto tokens = codesh::lexer::tokenize_code(amen_file);
+    auto tokens = codesh::lexer::tokenize_code(utf16_code);
 
 
     const auto ast = codesh::parse(tokens);
