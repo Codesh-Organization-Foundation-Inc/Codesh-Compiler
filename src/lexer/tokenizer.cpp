@@ -9,7 +9,7 @@ namespace trie = codesh::lexer::trie;
 
 
 static bool is_word_char(const char16_t c) {
-    return u_isalnum(c) || c == U'־';
+    return u_isalnum(c) || c == u'־';
 }
 
 static bool check_boundary(const std::u16string &code, const trie::keyword_info *keyword, const size_t start,
