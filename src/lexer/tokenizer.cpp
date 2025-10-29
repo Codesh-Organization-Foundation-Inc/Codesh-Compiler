@@ -9,9 +9,10 @@
 namespace trie = codesh::lexer::trie;
 
 /**
- * @return How many characters this character should consume.
+ * @returns How many characters should be consumed by this match
  */
-static size_t get_keyword_consume_size(const std::u16string &code, const codesh::token *token, size_t keyword_end);
+static size_t handle_keyword_match(const std::u16string &code, codesh::token_group token_group,
+                                   std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
 
 
 static bool is_word_char(const char16_t c) {
@@ -76,8 +77,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
         if (last_match && check_boundary(code, last_match, i, last_match_end))
         {
-            tokens.push(std::make_unique<token>(token_type::KEYWORD, last_match->token));
-            i = get_keyword_consume_size(code, tokens.back().get(), last_match_end);
+            i = handle_keyword_match(code, last_match->token, tokens, last_match_end);
             continue;
         }
 
@@ -99,10 +99,11 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
     return tokens;
 }
 
-static size_t get_keyword_consume_size(const std::u16string &code, const codesh::token *const token,
-                                       const size_t keyword_end)
+
+static size_t handle_keyword_match(const std::u16string &code, const codesh::token_group token_group,
+                                   std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end)
 {
-    switch (token->get_group())
+    switch (token_group)
     {
         case codesh::token_group::COMMENT_ONE_LINER: {
             // If it's a one-line comment, look for the end of the line.
@@ -125,6 +126,9 @@ static size_t get_keyword_consume_size(const std::u16string &code, const codesh:
             throw std::runtime_error("Unenclosed multiline comment");
         }
 
-        default: return keyword_end;
+        default: {
+            tokens.push(std::make_unique<codesh::token>(codesh::token_type::KEYWORD, token_group));
+            return keyword_end;
+        }
     }
 }
