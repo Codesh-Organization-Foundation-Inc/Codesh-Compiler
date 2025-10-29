@@ -88,7 +88,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         const trie::keyword_info *last_match = nullptr;
         size_t last_match_end = i;
 
-        while (j < code.size() && current->get_child(code[j])) {
+        while (j < code.size() && current->get_child(code[j]))
+        {
             current = &current->get_child(code[j])->get();
             j++;
             if (const auto keyword = current->get_keyword()) {
@@ -97,7 +98,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
             }
         }
 
-        if (last_match && check_boundary(code, last_match, i, last_match_end)) {
+        if (last_match && check_boundary(code, last_match, i, last_match_end))
+        {
             tokens.push(std::make_unique<token>(token_type::KEYWORD, last_match->token));
             i = last_match_end;
             continue;
