@@ -4,11 +4,11 @@
 #include "parser/parser.h"
 
 #include <fstream>
-#include <codecvt>
 #include <iostream>
 #include <queue>
 #include <sstream>
 #include <string>
+#include <utf8.h>
 
 std::string read_file(const std::string &file_name);
 
@@ -17,16 +17,10 @@ int main(const int argc, char **const argv) {
 
     const std::string amen_file = read_file(std::string(args.src_path));
 
-
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
-    //TODO: Use 3rd party library as this is deprecated
-    std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> conv;
-    const std::u16string utf16_code = conv.from_bytes(amen_file);
-
-    std::cout << codesh::LEXER_RGX_STR << std::endl;
+    const std::u16string utf16_code = utf8::utf8to16(amen_file);
     auto tokens = codesh::lexer::tokenize_code(utf16_code);
-
 
     const auto ast = codesh::parse(tokens);
 

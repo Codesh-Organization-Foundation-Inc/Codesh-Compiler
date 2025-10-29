@@ -21,6 +21,9 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::INVALID, R"(\S+)"},
 };
 
+const token_group codesh::lexer::TOKEN_GROUP_RGX_START = TOKEN_REGEXES.front().first;
+const size_t codesh::lexer::TOKEN_GROUP_RGX_COUNT = TOKEN_REGEXES.size();
+
 
 static std::string build_single_regex(const std::pair<token_group, std::string> &token_regex);
 
@@ -52,15 +55,15 @@ static std::string build_single_regex(const std::pair<token_group, std::string> 
 }
 
 
-const std::string codesh::LEXER_RGX_STR = build_lexer_regex();
-const boost::u32regex codesh::LEXER_RGX = boost::make_u32regex(LEXER_RGX_STR);
+const std::string codesh::lexer::LEXER_RGX_STR = build_lexer_regex();
+const boost::u32regex codesh::lexer::LEXER_RGX = boost::make_u32regex(LEXER_RGX_STR);
 
 /////
 
-token_group codesh::token_group_from_regex_id(const int group_id)
+token_group codesh::lexer::token_group_from_regex_id(const int group_id)
 {
-    if (group_id > TOKEN_REGEXES.size())
+    if (group_id > TOKEN_GROUP_RGX_COUNT)
         throw std::invalid_argument("Invalid token group id");
 
-    return TOKEN_REGEXES[group_id - 1].first;
+    return static_cast<token_group>(static_cast<size_t>(TOKEN_GROUP_RGX_START) + group_id - 1);
 }

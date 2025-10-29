@@ -17,13 +17,6 @@ enum class token_group : int
     KEYWORD_BH, // בע"ה
     KEYWORD_IAW, // אי"א
 
-    LITERAL_NUMBER_DOUBLE, // x.y
-    LITERAL_NUMBER_FLOAT, // x.y צף | x צף
-    LITERAL_NUMBER_INT, // x
-    LITERAL_STRING, // "פסוק"
-    LITERAL_CHAR, // 'אות'
-    IDENTIFIER, // Any other word, eg. variable1
-
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
     OPERATOR_MULTIPLICATION, // ויוכפל
@@ -132,6 +125,17 @@ enum class token_group : int
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_INDEX, // במקום
+
+
+    // REGEX Matches
+
+    LITERAL_NUMBER_FLOAT, // x.y צף | x צף
+    LITERAL_NUMBER_DOUBLE, // x.y
+    LITERAL_NUMBER_INT, // x
+    LITERAL_STRING, // "פסוק"
+    LITERAL_CHAR, // 'אות'
+
+    IDENTIFIER, // Any other word, eg. variable1
 
     INVALID
 };

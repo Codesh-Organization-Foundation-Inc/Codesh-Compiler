@@ -42,26 +42,6 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
 
 std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
 {
-    // boost::u32regex_iterator it(code.begin(), code.end(), LEXER_RGX);
-    // const boost::u32regex_iterator<std::string::const_iterator> end;
-    //
-    // std::queue<std::unique_ptr<token>> tokens;
-    //
-    // while (it != end) {
-    //     auto match = *it;
-    //
-    //     for (int i = 1; i < static_cast<int>(token_group::COUNT) + 1; ++i)
-    //     {
-    //         if (match[i].matched)
-    //         {
-    //             tokens.push(token::from_group_id(i, match[i]));
-    //             break;
-    //         }
-    //     }
-    //
-    //     ++it;
-    // }
-
     std::queue<std::unique_ptr<token>> tokens;
 
     size_t i = 0;
@@ -84,17 +64,16 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         // }
 
         const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
-        size_t j = i;
         const trie::keyword_info *last_match = nullptr;
         size_t last_match_end = i;
 
-        while (j < code.size() && current->get_child(code[j]))
+        for (size_t j = i; j < code.size() && current->get_child(code[j]); j++)
         {
             current = &current->get_child(code[j])->get();
-            j++;
+
             if (const auto keyword = current->get_keyword()) {
                 last_match = &keyword->get();
-                last_match_end = j;
+                last_match_end = j + 1;
             }
         }
 
@@ -106,7 +85,18 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         }
 
 
+        // If not a keyword, resort to a REGEX literal/identifier check.
+        const auto match = *boost::utf16regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
 
+        for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
+        {
+            if (const auto &match_info = match[j]; match_info.matched)
+            {
+                tokens.push(token::from_regex_group_id(j, match_info));
+                i += match_info.length();
+                break;
+            }
+        }
     }
 
     return tokens;
