@@ -68,14 +68,19 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
         for (size_t j = i; j < code.size() && current->get_child(code[j]); j++)
         {
-            //TODO: If the current character is a space and so was the one before it,
-            // just ignore it with j++.
-            // This is as to allow "מילה     מילה" (multispace for the same keyword)
             current = &current->get_child(code[j])->get();
 
             if (const auto keyword = current->get_keyword()) {
                 last_match = &keyword->get();
                 last_match_end = j + 1;
+            }
+
+            // If the current and next characters are spaces,
+            // simply ignore it character.
+            // This is as to allow "מילה     מילה" (multispace for the same keyword)
+            while (code[j] == u' ' && code[j + 1] == u' ')
+            {
+                j++;
             }
         }
 
