@@ -1,6 +1,6 @@
+#include "command_parser.h"
 #include "lexer/regex.h"
 #include "lexer/tokenizer.h"
-#include "parser/command_parser.h"
 #include "parser/parser.h"
 
 #include <fstream>
@@ -19,7 +19,7 @@ int main(const int argc, char **const argv) {
     const std::string amen_file = read_file(std::string(args.src_path));
     auto tokens = codesh::tokenize_code(amen_file);
 
-    const auto ast = codesh::parse(tokens);
+    const auto ast = codesh::parser::parse(tokens);
 
     return 0;
 }
