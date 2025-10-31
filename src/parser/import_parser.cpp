@@ -15,10 +15,20 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
 
     std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
 
-    if (tokens.front()->get_group() == token_group::KEYWORD_IMPORT_STATIC)
+    // Check if is a static import
+    switch (tokens.front()->get_group())
     {
+    case token_group::KEYWORD_IMPORT_STATIC:
         import_node->set_is_static(true);
+        break;
+
+    case token_group::KEYWORD_IMPORT_REGULAR:
+        // Already not static
+        break;
+
+    default: throw std::runtime_error("Unexpected token: Expected import type");
     }
+
 
     util::parse_fqcn(tokens, import_node->get_package_name());
 
