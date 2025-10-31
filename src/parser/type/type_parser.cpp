@@ -25,7 +25,7 @@ std::unique_ptr<ast::type::type_declaration_ast_node> codesh::parser::parse_type
 }
 
 
-std::unique_ptr<ast::type::attributes_ast_node> codesh::parser::parse_attributes(
+std::unique_ptr<ast::type::attributes_ast_node> codesh::parser::parse_modifiers(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     std::unique_ptr<ast::type::attributes_ast_node> node = std::make_unique<ast::type::attributes_ast_node>();

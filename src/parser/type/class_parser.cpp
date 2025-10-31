@@ -35,7 +35,7 @@ std::unique_ptr<ast::type::class_declaration_ast_node> codesh::parser::parse_cla
 
 
     // Get attributes
-    node->set_attributes(parse_attributes(tokens));
+    node->set_attributes(parse_modifiers(tokens));
 
 
     // Start scope
