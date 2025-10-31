@@ -66,7 +66,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/type/attributes_ast_node.cpp
         src/parser/ast/type/attributes_ast_node.h
         src/defenition/visibility.h
-        src/defenition/visibility.cpp)
+        src/defenition/visibility.cpp
+        src/output/jvm_target/class_file.h)
 
 
 # sudo dnf install boost-regex boost-devel
