@@ -19,8 +19,9 @@ enum class token_group : int
     CLOSE_QUOTATION, // לאמר
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
-    KEYWORD_IMPORT, // ויבא את
-    KEYWORD_IMPORT_STATIC, // ויבא בכלל את
+    KEYWORD_IMPORT, // ויבא
+    KEYWORD_IMPORT_REGULAR, // את
+    KEYWORD_IMPORT_STATIC, // לכל־את
 
     KEYWORD_LET, // ויהי
     KEYWORD_NAME, // ושמו/ושמה
