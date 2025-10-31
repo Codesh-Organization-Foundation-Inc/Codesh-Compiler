@@ -35,17 +35,17 @@ std::unique_ptr<ast::type::attributes_ast_node> codesh::parser::parse_attributes
         return node;
 
 
-    // Optional 1: Visibility
+    // Optional 1: Static
+    if (util::consuming_check(tokens, token_group::KEYWORD_STATIC))
+    {
+        node->set_is_static(true);
+    }
+
+    // Optional 2: Visibility
     if (const auto visibility = definition::token_group_to_visibility(tokens.front().get()))
     {
         node->set_visibility(visibility.value());
         tokens.pop();
-    }
-
-    // Optional 2: Static
-    if (util::consuming_check(tokens, token_group::KEYWORD_STATIC))
-    {
-        node->set_is_static(true);
     }
 
     // Optional 3: Abstract
