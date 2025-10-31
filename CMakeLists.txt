@@ -61,6 +61,15 @@ add_executable(Codesh_Compiler
         src/parser/ast/type/type_declaration_ast_node.h
         src/parser/ast/impl/unary_ast_node.cpp
         src/parser/ast/impl/unary_ast_node.h
+        src/lexer/trie/trie_node.cpp
+        src/lexer/trie/trie_node.h
+        src/lexer/trie/keyword_info.h
+        src/lexer/trie/word_boundary.h
+        src/lexer/trie/keywords.cpp
+        src/lexer/trie/keywords.h
+        src/lexer/trie/trie.cpp
+        src/lexer/trie/trie.h
+        src/parser/ast/impl/unary_ast_node.h
         src/defenition/basad_type.h
         src/parser/ast/type/class_declaration_ast_node.cpp
         src/parser/ast/type/attributes_ast_node.cpp
@@ -89,3 +98,22 @@ target_link_libraries(Codesh_Compiler Boost::boost)
 find_package(ICU REQUIRED COMPONENTS uc i18n)
 include_directories(${ICU_INCLUDE_DIRS})
 target_link_libraries(Codesh_Compiler ${ICU_LIBRARIES})
+
+
+include(FetchContent)
+
+
+# utfcpp
+# Declare utfcpp content
+FetchContent_Declare(
+        utfcpp
+        GIT_REPOSITORY https://github.com/nemtrif/utfcpp.git
+        GIT_TAG        origin/master
+        GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(utfcpp)
+
+target_include_directories(Codesh_Compiler PRIVATE
+    ${utfcpp_SOURCE_DIR}/source
+)

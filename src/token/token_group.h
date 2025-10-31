@@ -13,23 +13,15 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // היה
     KEYWORD_RETURN, // וישב
 
-    KEYWORD_BASAD,
-    KEYWORD_BH,
-    KEYWORD_IAW,
-
-    //
-    LITERAL_NUMBER_DOUBLE, // x.y
-    LITERAL_NUMBER_FLOAT, // x.y צף | x צף
-    LITERAL_NUMBER_INT, // x
-    LITERAL_STRING, // "פסוק"
-    LITERAL_CHAR, // 'אות'
-    IDENTIFIER, // Any other word, eg. variable1
+    KEYWORD_BASAD, // בס"ד
+    KEYWORD_BH, // בע"ה
+    KEYWORD_IAW, // אי"א
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
     OPERATOR_MULTIPLICATION, // ויוכפל
-    OPERATOR_TIMES, // פי
     OPERATOR_DIVISION, // ויחולק
+    OPERATOR_TIMES, // פי
     OPERATOR_MODULO, // ויושרה
 
     OPERATOR_ADDITION_ASSIGNMENT, //ויסף
@@ -44,6 +36,9 @@ enum class token_group : int
     OPEN_PARENTHESIS, // כי
     CLOSE_PARENTHESIS, // פסק
 
+    KEYWORD_ANNOTATE, // והיה
+    KEYWORD_ANNOTATE_OVERRIDE, // ויגזול
+
     PUNCTUATION_END_OP, // :
     PUNCTUATION_ARG_SEPARATOR, // ו־
     PUNCTUATION_DOT, // ל־
@@ -54,7 +49,7 @@ enum class token_group : int
     KEYWORD_INTERFACE, // צלם
     KEYWORD_ANNOTATION, // חותם
     KEYWORD_THIS, // אנכי
-    KEYWORD_OF_INSTANCE, // מזרע
+    KEYWORD_INSTANCE, // מזרע
     KEYWORD_IMPLEMENTS, // וירש את
     KEYWORD_NEW, // ויברא
 
@@ -121,7 +116,6 @@ enum class token_group : int
     COMMENT_ONE_LINER, // כה הגה ה'
 
     KEYWORD_TRY, // וינסה
-    KEYWORD_EXCEPTION, // פסיקה
     KEYWORD_CATCH, // ויתפוס
     KEYWORD_THROW, // וישלך
     KEYWORD_THROWS, // וישלכהו
@@ -132,7 +126,18 @@ enum class token_group : int
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_INDEX, // במקום
 
-    COUNT // Dummy entry that equals the amount of entries in the enum
+
+    // REGEX Matches
+
+    LITERAL_NUMBER_FLOAT, // x.y צף | x צף
+    LITERAL_NUMBER_DOUBLE, // x.y
+    LITERAL_NUMBER_INT, // x
+    LITERAL_STRING, // "פסוק"
+    LITERAL_CHAR, // 'אות'
+
+    IDENTIFIER, // Any other word, eg. variable1
+
+    INVALID
 };
 
 }
