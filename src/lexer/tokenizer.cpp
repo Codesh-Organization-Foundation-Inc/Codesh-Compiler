@@ -19,7 +19,12 @@ static void escape_characters(std::string &str, const std::string &word);
 
 
 static const boost::regex NEWLINE_REPLACE_RGX(
-    "(?<!" + std::string(trie::keyword::STRING_ESCAPE) + ")" + std::string(trie::keyword::STRING_NEWLINE)
+    "(?<!"
+        + std::string(trie::keyword::STRING_ESCAPE)
+            .substr(
+                0, trie::keyword::STRING_ESCAPE.length() - 1
+            )
+        + ")" + std::string(trie::keyword::STRING_NEWLINE)
 );
 
 
@@ -170,6 +175,11 @@ static void on_regex_token(codesh::token *token)
         codesh::identifier_token *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
         std::string content = iden_token->get_content();
 
+        // Handle newline
+        // We want to replace "newline" but not "no newline".
+        // To not create a conflict and unnecessary spaghetti code, will simply resort to REGEX:
+        content = boost::regex_replace(content, NEWLINE_REPLACE_RGX, " \n ");
+
         // Remove string enclose
         content = content
             .substr(
@@ -177,14 +187,9 @@ static void on_regex_token(codesh::token *token)
                 content.length() - trie::keyword::STRING_END.length()*2
             );
 
-        // Handle newline
-        // We want to replace "newline" but not "no newline".
-        // To not create a conflict and unnecessary spaghetti code, will simply resort to REGEX:
-        content = boost::regex_replace(content, NEWLINE_REPLACE_RGX, "\n");
-
         // Replace escaped characters
         escape_characters(content, std::string(trie::keyword::STRING_END).substr(1));
-        escape_characters(content, std::string(trie::keyword::STRING_NEWLINE));
+        escape_characters(content, std::string(trie::keyword::STRING_NEWLINE).substr(1));
 
         iden_token->set_content(content);
     }
