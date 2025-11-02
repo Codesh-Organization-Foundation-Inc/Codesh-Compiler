@@ -1,6 +1,7 @@
 #include "tokenizer.h"
 
 #include "../token/token.h"
+#include "../util.h"
 #include "regex.h"
 #include "trie/keywords.h"
 #include "trie/trie.h"
@@ -176,11 +177,9 @@ static void on_regex_token(codesh::token *token)
 
 static void escape_characters(std::string &str, const std::string &word)
 {
-    const std::string from = std::string(trie::keyword::STRING_ESCAPE) + word;
-
-    size_t pos = str.find(from);
-    while (pos != std::string::npos) {
-        str.replace(pos, from.size(), word);
-        pos = str.find(from, pos + word.size());
-    }
+    codesh::util::replaceAll(
+        str,
+        std::string(trie::keyword::STRING_ESCAPE) + word,
+        word
+    );
 }
