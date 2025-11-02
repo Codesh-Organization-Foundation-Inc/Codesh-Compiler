@@ -18,6 +18,8 @@ constexpr std::u16string_view MULTILINE_COMMENT_END = u"כי־טוב:";
 constexpr std::string_view STRING_OPEN = "יקרא ";
 constexpr std::string_view STRING_END = " לאמר";
 
+constexpr std::string_view STRING_NEWLINE = "ש\"ח";
+
 constexpr std::string_view STRING_ESCAPE = "ליטרלי ";
 }
 

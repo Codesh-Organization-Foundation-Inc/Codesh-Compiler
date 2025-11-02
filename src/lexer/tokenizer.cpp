@@ -18,6 +18,11 @@ static void on_regex_token(codesh::token *token);
 static void escape_characters(std::string &str, const std::string &word);
 
 
+static const boost::regex NEWLINE_REPLACE_RGX(
+    "(?<!" + std::string(trie::keyword::STRING_ESCAPE) + ")" + std::string(trie::keyword::STRING_NEWLINE)
+);
+
+
 static bool is_word_char(const char16_t c) {
     return u_isalnum(c) || c == u'־';
 }
@@ -96,6 +101,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
         // If not a keyword, resort word a REGEX literal/identifier check.
         const auto match = *boost::utf16regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
+        bool matched = false;
 
         for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
         {
@@ -107,8 +113,15 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
                 tokens.push(std::move(token));
 
                 i += match_info.length();
+                matched = true;
                 break;
             }
+        }
+
+        if (!matched)
+        {
+            //FIXME: This is mostly caused by an unenclosed string.
+            throw std::runtime_error("Error tokenizing file: No matching keywords found");
         }
     }
 
@@ -164,8 +177,14 @@ static void on_regex_token(codesh::token *token)
                 content.length() - trie::keyword::STRING_END.length()*2
             );
 
+        // Handle newline
+        // We want to replace "newline" but not "no newline".
+        // To not create a conflict and unnecessary spaghetti code, will simply resort to REGEX:
+        content = boost::regex_replace(content, NEWLINE_REPLACE_RGX, "\n");
+
         // Replace escaped characters
         escape_characters(content, std::string(trie::keyword::STRING_END).substr(1));
+        escape_characters(content, std::string(trie::keyword::STRING_NEWLINE));
 
         iden_token->set_content(content);
     }
