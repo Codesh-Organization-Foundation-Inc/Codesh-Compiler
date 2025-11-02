@@ -11,9 +11,6 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::OPEN_PARENTHESIS, u"כי־", word_boundary::BEFORE},
     {token_group::CLOSE_PARENTHESIS, u"ויחדל", word_boundary::BOTH},
 
-    {token_group::OPEN_QUOTATION, u"יקרא", word_boundary::BOTH},
-    {token_group::CLOSE_QUOTATION, u"לאמר", word_boundary::BOTH},
-
     {token_group::KEYWORD_ORIGIN_COUNTRY, u"וישב בארץ", word_boundary::BOTH},
     {token_group::KEYWORD_IMPORT, u"ויבא", word_boundary::BOTH},
     {token_group::KEYWORD_IMPORT_STATIC, u"לכל־את", word_boundary::BOTH},

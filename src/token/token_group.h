@@ -15,9 +15,6 @@ enum class token_group : int
     OPEN_PARENTHESIS, // כי־
     CLOSE_PARENTHESIS, // ויחדל
 
-    OPEN_QUOTATION, // יקרא
-    CLOSE_QUOTATION, // לאמר
-
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_IMPORT, // ויבא
     KEYWORD_IMPORT_REGULAR, // את
