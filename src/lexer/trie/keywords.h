@@ -17,6 +17,8 @@ constexpr std::u16string_view MULTILINE_COMMENT_END = u"כי־טוב:";
 // The returned string is in UTF-8.
 constexpr std::string_view STRING_OPEN = "יקרא ";
 constexpr std::string_view STRING_END = " לאמר";
+
+constexpr std::string_view STRING_ESCAPE = "ליטרלי ";
 }
 
 }
