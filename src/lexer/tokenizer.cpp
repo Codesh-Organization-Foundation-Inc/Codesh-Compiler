@@ -13,6 +13,7 @@ namespace trie = codesh::lexer::trie;
  */
 static size_t handle_keyword_match(const std::u16string &code, codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
+static void on_regex_token(codesh::token *token);
 
 
 static bool is_word_char(const char16_t c) {
@@ -98,7 +99,11 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         {
             if (const auto &match_info = match[j]; match_info.matched)
             {
-                tokens.push(token::from_regex_group_id(j, match_info));
+                std::unique_ptr<token> token = token::from_regex_group_id(j, match_info);
+
+                on_regex_token(token.get());
+                tokens.push(std::move(token));
+
                 i += match_info.length();
                 break;
             }
@@ -139,5 +144,26 @@ static size_t handle_keyword_match(const std::u16string &code, const codesh::tok
             tokens.push(std::make_unique<codesh::token>(codesh::token_type::KEYWORD, token_group));
             return keyword_end;
         }
+    }
+}
+
+static void on_regex_token(codesh::token *token)
+{
+    switch (token->get_group())
+    {
+    case codesh::token_group::LITERAL_STRING: {
+        codesh::identifier_token *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
+        const std::string content = iden_token->get_content();
+
+        iden_token->set_content(content.substr(
+            trie::keyword::STRING_OPEN.length(),
+            content.length() - trie::keyword::STRING_END.length()*2
+        ));
+
+        // content.substr(trie::keyword::STRING_OPEN.length(), content.length() - trie::keyword::STRING_END.length())
+    }
+
+    default:
+        break;
     }
 }
