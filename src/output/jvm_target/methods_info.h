@@ -1,0 +1,12 @@
+#pragma once
+
+namespace codesh::output::jvm_target
+{
+struct methods_info
+{
+    unsigned char access_flags[2];
+    unsigned char name_index[2];
+    unsigned char descriptor_index[2];
+    unsigned char attributes_count[2];
+};
+}
