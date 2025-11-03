@@ -7,6 +7,8 @@ namespace codesh::output::jvm_target
 struct cp_info
 {
     unsigned char tag[1];
+
+    virtual ~cp_info();
 };
 
 // tag = 1

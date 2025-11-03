@@ -7,6 +7,8 @@ struct attribute_info
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
+
+    virtual ~attribute_info();
 };
 
 struct exception_table
