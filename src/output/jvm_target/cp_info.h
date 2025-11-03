@@ -14,7 +14,7 @@ struct cp_info
 // tag = 1
 struct CONSTANT_Utf8_info : cp_info
 {
-    unsigned char length[1];
+    // unsigned char length[1];
     std::vector<unsigned char> bytes;
 };
 

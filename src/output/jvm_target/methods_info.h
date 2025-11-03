@@ -8,8 +8,8 @@ struct methods_info
     unsigned char access_flags[2];
     unsigned char name_index[2];
     unsigned char descriptor_index[2];
-    unsigned char attributes_count[2];
-    std::vector<attribute_info *> attribute_info;
+    // unsigned char attributes_count[2];
+    std::vector<std::unique_ptr<attribute_info>> attribute_info;
 };
 
 }
