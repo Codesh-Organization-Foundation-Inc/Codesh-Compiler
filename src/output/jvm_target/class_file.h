@@ -12,7 +12,7 @@ struct class_file
     unsigned char minor_version[2];
     unsigned char major_version[2];
     unsigned char constant_pool_count[2];
-    std::vector<cp_info*> constant_pool;
+    std::vector<cp_info *> constant_pool;
     unsigned char access_flags[2];
     unsigned char this_class[2];
     unsigned char super_class[2];
@@ -21,9 +21,9 @@ struct class_file
     unsigned char fields_count[2];
     unsigned char fields_info[0]; // change later
     unsigned char methods_count[2];
-    std::vector<methods_info*> methods_info;
+    std::vector<methods_info *> methods_info;
     unsigned char attribute_count[2];
-    std::vector<attribute_info*> attribute_info;
+    std::vector<attribute_info *> attribute_info;
 
 };
 

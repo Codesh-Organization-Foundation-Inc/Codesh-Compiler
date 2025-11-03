@@ -23,9 +23,9 @@ struct Code_attribute : attribute_info
     unsigned char max_locals[2];
     unsigned char code_length[4];
     unsigned char exception_table_length[2];
-    std::vector<exception_table> exception_table;
+    std::vector<exception_table *> exception_table;
     unsigned char attribute_count[2];
-    std::vector<attribute_info> attributes;
+    std::vector<attribute_info *> attributes;
 };
 
 struct line_number_table
@@ -39,7 +39,7 @@ struct LineNumberTable_attribute : attribute_info
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
     unsigned char line_number_table_length[2];
-    std::vector<line_number_table> line_number_table;
+    std::vector<line_number_table *> line_number_table;
 };
 
 struct local_variable_table
@@ -56,7 +56,7 @@ struct LocalVariableTable_attribute : attribute_info
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
     unsigned char local_variable_table_length[2];
-    std::vector<line_number_table> line_number_table;
+    std::vector<line_number_table *> line_number_table;
 };
 
 struct SourceFile_attribute : attribute_info

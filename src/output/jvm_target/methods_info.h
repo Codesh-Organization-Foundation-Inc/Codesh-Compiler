@@ -9,7 +9,7 @@ struct methods_info
     unsigned char name_index[2];
     unsigned char descriptor_index[2];
     unsigned char attributes_count[2];
-    std::vector<attribute_info*> attribute_info;
+    std::vector<attribute_info *> attribute_info;
 };
 
 }
