@@ -85,7 +85,9 @@ add_executable(Codesh_Compiler
         src/parser/type/class_parser.cpp
         src/parser/type/class_parser.h
         src/parser/type/type_parser.cpp
-        src/parser/type/type_parser.h)
+        src/parser/type/type_parser.h
+        src/util.cpp
+        src/util.h)
 
 
 # sudo dnf install boost-regex boost-devel

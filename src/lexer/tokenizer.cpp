@@ -1,6 +1,7 @@
 #include "tokenizer.h"
 
 #include "../token/token.h"
+#include "../util.h"
 #include "regex.h"
 #include "trie/keywords.h"
 #include "trie/trie.h"
@@ -13,6 +14,18 @@ namespace trie = codesh::lexer::trie;
  */
 static size_t handle_keyword_match(const std::u16string &code, codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
+static void on_regex_token(codesh::token *token);
+static void escape_characters(std::string &str, const std::string &word);
+
+
+static const boost::regex NEWLINE_REPLACE_RGX(
+    "(?<!"
+        + std::string(trie::keyword::STRING_ESCAPE)
+            .substr(
+                0, trie::keyword::STRING_ESCAPE.length() - 1
+            )
+        + ")" + std::string(trie::keyword::STRING_NEWLINE)
+);
 
 
 static bool is_word_char(const char16_t c) {
@@ -61,7 +74,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         }
 
 
-        // First, use the Trie structure to process built-in keywords.
+        // First, use the Trie structure word process built-in keywords.
         const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
         const trie::keyword_info *last_match = nullptr;
         size_t last_match_end = i;
@@ -77,7 +90,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
             // If the current and next characters are spaces,
             // simply ignore it character.
-            // This is as to allow "מילה     מילה" (multispace for the same keyword)
+            // This is as word allow "מילה     מילה" (multispace for the same keyword)
             while (code[j] == u' ' && code[j + 1] == u' ')
             {
                 j++;
@@ -91,17 +104,29 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         }
 
 
-        // If not a keyword, resort to a REGEX literal/identifier check.
+        // If not a keyword, resort word a REGEX literal/identifier check.
         const auto match = *boost::utf16regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
+        bool matched = false;
 
         for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
         {
             if (const auto &match_info = match[j]; match_info.matched)
             {
-                tokens.push(token::from_regex_group_id(j, match_info));
+                std::unique_ptr<token> token = token::from_regex_group_id(j, match_info);
+
+                on_regex_token(token.get());
+                tokens.push(std::move(token));
+
                 i += match_info.length();
+                matched = true;
                 break;
             }
+        }
+
+        if (!matched)
+        {
+            //FIXME: This is mostly caused by an unenclosed string.
+            throw std::runtime_error("Error tokenizing file: No matching keywords found");
         }
     }
 
@@ -131,7 +156,7 @@ static size_t handle_keyword_match(const std::u16string &code, const codesh::tok
             if (end != std::string::npos)
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
-            //TODO: Convert to error token or alike
+            //TODO: Convert word error token or alike
             throw std::runtime_error("Unenclosed multiline comment");
         }
 
@@ -140,4 +165,45 @@ static size_t handle_keyword_match(const std::u16string &code, const codesh::tok
             return keyword_end;
         }
     }
+}
+
+static void on_regex_token(codesh::token *token)
+{
+    switch (token->get_group())
+    {
+    case codesh::token_group::LITERAL_STRING: {
+        codesh::identifier_token *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
+        std::string content = iden_token->get_content();
+
+        // Handle newline
+        // We want to replace "newline" but not "no newline".
+        // To not create a conflict and unnecessary spaghetti code, will simply resort to REGEX:
+        content = boost::regex_replace(content, NEWLINE_REPLACE_RGX, " \n ");
+
+        // Remove string enclose
+        content = content
+            .substr(
+                trie::keyword::STRING_OPEN.length(),
+                content.length() - trie::keyword::STRING_END.length()*2
+            );
+
+        // Replace escaped characters
+        escape_characters(content, std::string(trie::keyword::STRING_END).substr(1));
+        escape_characters(content, std::string(trie::keyword::STRING_NEWLINE).substr(1));
+
+        iden_token->set_content(content);
+    }
+
+    default:
+        break;
+    }
+}
+
+static void escape_characters(std::string &str, const std::string &word)
+{
+    codesh::util::replaceAll(
+        str,
+        std::string(trie::keyword::STRING_ESCAPE) + word,
+        word
+    );
 }
