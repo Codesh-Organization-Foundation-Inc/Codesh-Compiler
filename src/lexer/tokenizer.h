@@ -10,7 +10,7 @@ class token;
 }
 
 
-namespace codesh
+namespace codesh::lexer
 {
-[[nodiscard]] std::queue<std::unique_ptr<token>> tokenize_code(const std::string &code);
+[[nodiscard]] std::queue<std::unique_ptr<token>> tokenize_code(const std::u16string &code);
 }

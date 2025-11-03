@@ -23,7 +23,7 @@ public:
     token(token_type type, token_group group);
     virtual ~token();
 
-    [[nodiscard]] static std::unique_ptr<token> from_group_id(int group_id, const std::string &content);
+    [[nodiscard]] static std::unique_ptr<token> from_regex_group_id(int group_id, const std::u16string &content);
 
     [[nodiscard]] token_type get_type() const;
     [[nodiscard]] token_group get_group() const;
@@ -31,12 +31,13 @@ public:
 
 class identifier_token final : public token
 {
-    const std::string content;
+    std::string content;
 
 public:
     identifier_token(token_type type, token_group group, std::string content);
 
     [[nodiscard]] std::string get_content() const;
+    void set_content(const std::string &content);
 };
 
 
