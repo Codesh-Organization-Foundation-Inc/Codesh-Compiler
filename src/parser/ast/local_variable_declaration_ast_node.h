@@ -14,7 +14,7 @@ class local_variable_declaration_ast_node : public impl::ast_node
     std::string name;
     std::unique_ptr<type::type_ast_node> type;
 
-    bool is_final;
+    bool final;
 
 public:
     local_variable_declaration_ast_node();
@@ -23,7 +23,7 @@ public:
     void set_name(const std::string &name);
     [[nodiscard]] type::type_ast_node *get_type() const;
     void set_type(std::unique_ptr<type::type_ast_node> type);
-    [[nodiscard]] bool is_is_final() const;
+    [[nodiscard]] bool is_final() const;
     void set_is_final(bool is_final);
 };
 
