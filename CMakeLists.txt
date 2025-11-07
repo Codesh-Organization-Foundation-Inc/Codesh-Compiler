@@ -23,12 +23,12 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/binary_ast_node.h
         src/parser/ast/while_ast_node.cpp
         src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/method_ast_node.h
+        src/parser/ast/impl/ir_convertable_ast_node.h
         src/parser/ast/variable_declaration_ast_node.cpp
         src/parser/ast/variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/method_ast_node.h
+        src/parser/ast/impl/ir_convertable_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -92,7 +92,9 @@ add_executable(Codesh_Compiler
         src/parser/type/type_parser.cpp
         src/parser/type/type_parser.h
         src/util.cpp
-        src/util.h)
+        src/util.h
+        src/parser/ast/method_declaration_ast_node.cpp
+        src/parser/ast/method_declaration_ast_node.h)
 
 
 # sudo dnf install boost-regex boost-devel

@@ -8,8 +8,8 @@ namespace codesh::ast::op
 class multiplication_operator_ast_node final : public impl::binary_ast_node
 {
 public:
-    multiplication_operator_ast_node(std::unique_ptr<method_ast_node> left,
-                                     std::unique_ptr<method_ast_node> right);
+    multiplication_operator_ast_node(std::unique_ptr<ir_convertable_ast_node> left,
+                                     std::unique_ptr<ir_convertable_ast_node> right);
 
     [[nodiscard]] void *to_ir() const override;
 };
