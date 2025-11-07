@@ -8,10 +8,10 @@ namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::type_delc::class_declaration_ast_node *class_node);
+        ast::type_decl::class_declaration_ast_node *class_node);
 
 
-std::unique_ptr<ast::type_delc::class_declaration_ast_node> codesh::parser::parse_class_declaration(
+std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     if (util::consume_token(tokens)->get_group() != token_group::KEYWORD_NAME)
@@ -29,7 +29,7 @@ std::unique_ptr<ast::type_delc::class_declaration_ast_node> codesh::parser::pars
     }
 
 
-    std::unique_ptr<ast::type_delc::class_declaration_ast_node> node = std::make_unique<ast::type_delc::class_declaration_ast_node>(
+    std::unique_ptr<ast::type_decl::class_declaration_ast_node> node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
         static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-static-cast-downcast)
     );
 
@@ -52,7 +52,7 @@ std::unique_ptr<ast::type_delc::class_declaration_ast_node> codesh::parser::pars
 
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        ast::type_delc::class_declaration_ast_node *const class_node)
+        ast::type_decl::class_declaration_ast_node *const class_node)
 {
     while (!tokens.empty())
     {

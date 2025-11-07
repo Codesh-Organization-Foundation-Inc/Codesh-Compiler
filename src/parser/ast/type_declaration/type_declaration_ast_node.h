@@ -6,7 +6,7 @@
 #include <memory>
 #include <string>
 
-namespace codesh::ast::type_delc
+namespace codesh::ast::type_decl
 {
 
 class type_declaration_ast_node : public impl::ast_node
