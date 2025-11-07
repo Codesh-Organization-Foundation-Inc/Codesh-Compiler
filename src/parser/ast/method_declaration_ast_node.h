@@ -1,6 +1,7 @@
 #pragma once
 
 #include "impl/ast_node.h"
+#include "impl/i_descriptor_emitter.h"
 #include "type/type_ast_node.h"
 #include "type_declaration/attributes_ast_node.h"
 
@@ -12,7 +13,7 @@ namespace codesh::ast
 {
 class local_variable_declaration_ast_node;
 
-class method_declaration_ast_node : public impl::ast_node
+class method_declaration_ast_node : public impl::ast_node, impl::i_descriptor_emitter
 {
     std::string name;
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
@@ -24,7 +25,7 @@ class method_declaration_ast_node : public impl::ast_node
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
 public:
-    [[nodiscard]] std::string generate_descriptor() const;
+    [[nodiscard]] std::string generate_descriptor() const override;
 
 
     [[nodiscard]] std::string get_name() const;
