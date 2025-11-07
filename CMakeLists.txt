@@ -72,6 +72,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/type_declaration/class_declaration_ast_node.cpp
         src/parser/ast/type_declaration/attributes_ast_node.cpp
         src/parser/ast/type_declaration/attributes_ast_node.h
+        src/parser/ast/type_declaration/type_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/type_declaration_ast_node.h
         src/defenition/visibility.h
         src/defenition/visibility.cpp
         src/output/jvm_target/class_file.h
