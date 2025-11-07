@@ -104,9 +104,7 @@ add_executable(Codesh_Compiler
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/type/type_ast_node.cpp
-        src/parser/ast/impl/i_descriptor_emitter.h
-        src/parser/ast/type/class_descriptor_generator.cpp
-        src/parser/ast/type/class_descriptor_generator.h)
+        src/parser/ast/impl/i_descriptor_emitter.h)
 
 
 # sudo dnf install boost-regex boost-devel
