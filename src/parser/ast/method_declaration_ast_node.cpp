@@ -1,5 +1,17 @@
 #include "method_declaration_ast_node.h"
 
+#include <sstream>
+
+std::string codesh::ast::method_declaration_ast_node::generate_descriptor() const
+{
+    std::ostringstream result;
+
+
+
+    return result.str();
+}
+
+
 std::string codesh::ast::method_declaration_ast_node::get_name() const
 {
     return name;

@@ -24,6 +24,9 @@ class method_declaration_ast_node : public impl::ast_node
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
 public:
+    [[nodiscard]] std::string generate_descriptor() const;
+
+
     [[nodiscard]] std::string get_name() const;
     void set_name(const std::string &name);
 
