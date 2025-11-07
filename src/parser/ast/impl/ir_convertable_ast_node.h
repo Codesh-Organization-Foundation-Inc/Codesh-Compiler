@@ -8,7 +8,7 @@ namespace codesh::ast::impl
 /**
  * An AST node that can be converted to method IR
  */
-class method_ast_node : public ast_node
+class ir_convertable_ast_node : public ast_node
 {
     //TODO: Update return type when implemented IR structs etc.
     /**
