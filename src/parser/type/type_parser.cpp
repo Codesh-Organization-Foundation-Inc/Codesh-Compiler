@@ -1,14 +1,14 @@
 #include "type_parser.h"
 
 #include "../../defenition/visibility.h"
-#include "../ast/type/class_declaration_ast_node.h"
+#include "../ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
 #include "class_parser.h"
 
 namespace ast = codesh::ast;
 
 
-std::unique_ptr<ast::type::type_declaration_ast_node> codesh::parser::parse_type_declaration(
+std::unique_ptr<ast::type_delc::type_declaration_ast_node> codesh::parser::parse_type_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
@@ -25,10 +25,10 @@ std::unique_ptr<ast::type::type_declaration_ast_node> codesh::parser::parse_type
 }
 
 
-std::unique_ptr<ast::type::attributes_ast_node> codesh::parser::parse_modifiers(
+std::unique_ptr<ast::type_delc::attributes_ast_node> codesh::parser::parse_modifiers(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::type::attributes_ast_node> node = std::make_unique<ast::type::attributes_ast_node>();
+    std::unique_ptr<ast::type_delc::attributes_ast_node> node = std::make_unique<ast::type_delc::attributes_ast_node>();
 
     // Attributes are optional, so check whether they exist at all.
     if (tokens.empty() || tokens.front()->get_group() == token_group::SCOPE_BEGIN)

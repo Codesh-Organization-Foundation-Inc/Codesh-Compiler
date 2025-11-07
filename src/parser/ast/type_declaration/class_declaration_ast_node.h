@@ -2,7 +2,7 @@
 
 #include "type_declaration_ast_node.h"
 
-namespace codesh::ast::type
+namespace codesh::ast::type_delc
 {
 
 class class_declaration_ast_node final : public type_declaration_ast_node
