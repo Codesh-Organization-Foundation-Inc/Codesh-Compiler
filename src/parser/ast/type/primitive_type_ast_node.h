@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../../defenition/primitive_type.h"
-#include "../impl/i_descriptor_emitter.h"
 #include "type_ast_node.h"
 
 namespace codesh::ast::type
@@ -13,7 +12,7 @@ class attributes_ast_node;
 }
 
 
-class primitive_type_ast_node : public type_ast_node, public impl::i_descriptor_emitter
+class primitive_type_ast_node : public type_ast_node
 {
     const definition::primitive_type type;
 

@@ -18,6 +18,8 @@ class custom_type_ast_node : public type_ast_node
     std::string name;
 
 public:
+    [[nodiscard]] std::string generate_descriptor() const override;
+
     [[nodiscard]] std::string get_name() const;
     void set_name(const std::string &name);
 };

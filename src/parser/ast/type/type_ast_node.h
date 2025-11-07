@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../impl/ast_node.h"
+#include "../impl/i_descriptor_emitter.h"
 
 namespace codesh::ast::type
 {
@@ -11,7 +12,7 @@ class attributes_ast_node;
 }
 
 
-class type_ast_node : public impl::ast_node
+class type_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
 {
     int array_dimensions;
 
