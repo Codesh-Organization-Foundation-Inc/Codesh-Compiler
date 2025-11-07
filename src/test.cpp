@@ -13,12 +13,17 @@ void codesh::test::descriptor()
 
     // Normal return type
     method.set_return_type(std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE));
-    std::cout << method.generate_descriptor() << '\n' << std::endl;
+    std::cout << method.generate_descriptor() << std::endl;
+
 
     // Adding a parameter
     std::unique_ptr<ast::local_variable_declaration_ast_node> local_var = std::make_unique<ast::local_variable_declaration_ast_node>();
-    local_var->set_type(std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER));
+
+    std::unique_ptr<ast::type::primitive_type_ast_node> param_type = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
+    param_type->set_array_dimensions(2);
+
+    local_var->set_type(std::move(param_type));
     method.get_parameter_types().push_back(std::move(local_var));
 
-    std::cout << method.generate_descriptor() << '\n' << std::endl;
+    std::cout << method.generate_descriptor() << std::endl;
 }
