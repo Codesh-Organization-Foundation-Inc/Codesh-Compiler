@@ -20,7 +20,7 @@ int main(const int argc, char **const argv) {
 
 
     //TESTS
-    codesh::test::descriptor();
+    //codesh::test::descriptor();
     //
 
 
