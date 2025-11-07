@@ -9,7 +9,7 @@ int codesh::ast::type::type_ast_node::get_array_dimensions() const
     return array_dimensions;
 }
 
-void codesh::ast::type::type_ast_node::set_array_dimensions(int array_dimensions)
+void codesh::ast::type::type_ast_node::set_array_dimensions(const int array_dimensions)
 {
     this->array_dimensions = array_dimensions;
 }
