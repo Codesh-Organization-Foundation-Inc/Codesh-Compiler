@@ -23,7 +23,7 @@ std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor() co
     case definition::primitive_type::CHAR: result << 'C'; break;
     case definition::primitive_type::DOUBLE: result << 'D'; break;
     case definition::primitive_type::INTEGER: result << 'I'; break;
-    case definition::primitive_type::LONG: result << 'L'; break;
+    case definition::primitive_type::LONG: result << 'J'; break;
     case definition::primitive_type::SHORT: result << 'S'; break;
     case definition::primitive_type::BYTE: result << 'B'; break;
     case definition::primitive_type::BOOLEAN: result << 'Z'; break;
