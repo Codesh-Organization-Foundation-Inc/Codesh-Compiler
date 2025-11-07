@@ -12,8 +12,10 @@ enum class primitive_type
 
     LONG,
     SHORT,
+    BYTE,
 
-    CHAR
+    CHAR,
+    BOOLEAN
 };
 
 }

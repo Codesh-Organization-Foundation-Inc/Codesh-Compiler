@@ -13,7 +13,7 @@ namespace codesh::ast
 {
 class local_variable_declaration_ast_node;
 
-class method_declaration_ast_node : public impl::ast_node, impl::i_descriptor_emitter
+class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
 {
     std::string name;
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
