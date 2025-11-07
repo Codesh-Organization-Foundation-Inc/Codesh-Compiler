@@ -1,6 +1,6 @@
 #include "local_variable_declaration_ast_node.h"
 
-codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() : is_final(false)
+codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() : final(false)
 {
 }
 
@@ -24,12 +24,12 @@ void codesh::ast::local_variable_declaration_ast_node::set_type(std::unique_ptr<
     this->type = std::move(type);
 }
 
-bool codesh::ast::local_variable_declaration_ast_node::is_is_final() const
+bool codesh::ast::local_variable_declaration_ast_node::is_final() const
 {
-    return is_final;
+    return final;
 }
 
 void codesh::ast::local_variable_declaration_ast_node::set_is_final(bool is_final)
 {
-    this->is_final = is_final;
+    this->final = is_final;
 }
