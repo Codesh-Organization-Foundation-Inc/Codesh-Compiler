@@ -5,6 +5,11 @@
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(std::string name) : name(std::move(name))
 {
 }
+std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor() const
+{
+    //TODO: Add package here
+    return "L" + get_name() + ";";
+}
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::get_name() const
 {
