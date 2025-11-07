@@ -1,12 +1,25 @@
 #include "method_declaration_ast_node.h"
 
+#include "local_variable_declaration_ast_node.h"
+
 #include <sstream>
 
 std::string codesh::ast::method_declaration_ast_node::generate_descriptor() const
 {
     std::ostringstream result;
 
+    // Argument types
+    result << '(';
 
+    for (const auto &parameter_type : get_parameter_types())
+    {
+        result << parameter_type->get_type()->generate_descriptor();
+    }
+
+    result << ')';
+
+    // Return type
+    result << get_return_type()->generate_descriptor();
 
     return result.str();
 }
