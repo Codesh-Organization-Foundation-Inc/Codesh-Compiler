@@ -10,6 +10,7 @@ std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor() co
 {
     switch (get_type())
     {
+    case definition::primitive_type::VOID: return "V";
     case definition::primitive_type::FLOAT: return "F";
     case definition::primitive_type::CHAR: return "C";
     case definition::primitive_type::DOUBLE: return "D";
