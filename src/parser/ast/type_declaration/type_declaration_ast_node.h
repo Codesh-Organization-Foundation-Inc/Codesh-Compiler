@@ -1,21 +1,25 @@
 #pragma once
 
 #include "../impl/ast_node.h"
+#include "../impl/i_descriptor_emitter.h"
 #include "attributes_ast_node.h"
 
 #include <memory>
 #include <string>
 
-namespace codesh::ast::type
+namespace codesh::ast::type_decl
 {
 
-class type_declaration_ast_node : public impl::ast_node
+class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
 {
     const std::string name;
     std::unique_ptr<attributes_ast_node> attributes;
 
 public:
     explicit type_declaration_ast_node(std::string name);
+
+    [[nodiscard]] std::string generate_descriptor() const override;
+
 
     [[nodiscard]] std::string get_name() const;
     [[nodiscard]] attributes_ast_node *get_attributes() const;

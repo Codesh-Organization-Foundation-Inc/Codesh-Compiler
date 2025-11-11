@@ -2,6 +2,7 @@
 #include "lexer/regex.h"
 #include "lexer/tokenizer.h"
 #include "parser/parser.h"
+#include "test.h"
 
 #include <fstream>
 #include <iostream>
@@ -16,6 +17,12 @@ int main(const int argc, char **const argv) {
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
     const std::string amen_file = read_file(std::string(args.src_path));
+
+
+    //TESTS
+    //codesh::test::descriptor();
+    //
+
 
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)

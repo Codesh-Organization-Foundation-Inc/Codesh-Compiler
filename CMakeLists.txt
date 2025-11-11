@@ -23,12 +23,12 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/binary_ast_node.h
         src/parser/ast/while_ast_node.cpp
         src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/method_ast_node.h
-        src/parser/ast/variable_declaration_ast_node.cpp
-        src/parser/ast/variable_declaration_ast_node.h
+        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/local_variable_declaration_ast_node.cpp
+        src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/method_ast_node.h
+        src/parser/ast/impl/ir_convertable_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -57,8 +57,6 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/boolean/or_operator_ast_node.h
         src/parser/ast/import_declaration_ast_node.cpp
         src/parser/ast/import_declaration_ast_node.h
-        src/parser/ast/type/type_declaration_ast_node.cpp
-        src/parser/ast/type/type_declaration_ast_node.h
         src/parser/ast/impl/unary_ast_node.cpp
         src/parser/ast/impl/unary_ast_node.h
         src/lexer/trie/trie_node.cpp
@@ -71,9 +69,11 @@ add_executable(Codesh_Compiler
         src/lexer/trie/trie.h
         src/parser/ast/impl/unary_ast_node.h
         src/defenition/basad_type.h
-        src/parser/ast/type/class_declaration_ast_node.cpp
-        src/parser/ast/type/attributes_ast_node.cpp
-        src/parser/ast/type/attributes_ast_node.h
+        src/parser/ast/type_declaration/class_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/attributes_ast_node.cpp
+        src/parser/ast/type_declaration/attributes_ast_node.h
+        src/parser/ast/type_declaration/type_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/type_declaration_ast_node.h
         src/defenition/visibility.h
         src/defenition/visibility.cpp
         src/output/jvm_target/class_file.h
@@ -92,7 +92,21 @@ add_executable(Codesh_Compiler
         src/parser/type/type_parser.cpp
         src/parser/type/type_parser.h
         src/util.cpp
-        src/util.h)
+        src/util.h
+        src/parser/ast/method_declaration_ast_node.cpp
+        src/parser/ast/method_declaration_ast_node.h
+        src/parser/ast/type/type_ast_node.h
+        src/parser/ast/type/custom_type_ast_node.cpp
+        src/parser/ast/type/custom_type_ast_node.h
+        src/parser/ast/type/primitive_type_ast_node.cpp
+        src/parser/ast/type/primitive_type_ast_node.h
+        src/defenition/primitive_type.h
+        src/parser/ast/local_variable_declaration_ast_node.cpp
+        src/parser/ast/local_variable_declaration_ast_node.h
+        src/parser/ast/type/type_ast_node.cpp
+        src/parser/ast/impl/i_descriptor_emitter.h
+        src/test.cpp
+        src/test.h)
 
 
 # sudo dnf install boost-regex boost-devel

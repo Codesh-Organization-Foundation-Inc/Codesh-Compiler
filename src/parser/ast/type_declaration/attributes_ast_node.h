@@ -3,7 +3,7 @@
 #include "../../../defenition/visibility.h"
 #include "../impl/ast_node.h"
 
-namespace codesh::ast::type
+namespace codesh::ast::type_decl
 {
 
 class attributes_ast_node final : public impl::ast_node

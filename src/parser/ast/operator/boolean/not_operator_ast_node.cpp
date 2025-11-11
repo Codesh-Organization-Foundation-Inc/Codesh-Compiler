@@ -1,6 +1,6 @@
 #include "not_operator_ast_node.h"
 
-codesh::ast::op::not_operator_ast_node::not_operator_ast_node(std::unique_ptr<method_ast_node> child)
+codesh::ast::op::not_operator_ast_node::not_operator_ast_node(std::unique_ptr<ir_convertable_ast_node> child)
     : unary_ast_node(std::move(child))
 {
 }
