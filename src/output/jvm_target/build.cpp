@@ -245,12 +245,13 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
     cf.constant_pool.push_back(std::move(const_name_and_type));
 }
 
-static void add_class_info(codesh::output::jvm_target::defs::class_filed char arr[], const int num, const int width)
+static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index)
 {
-    for (int i = 0; i < width; i++)
-    {
-        arr[width - 1 - i] = static_cast<unsigned char>(num >> (8 * i) & 0xFF);
-    }
+    auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
+    const_class->tag[0] = 0x07;
+    const_class->name_index[0] = (name_index >> 8) & 0xFF;
+    const_class->name_index[1] = name_index & 0xFF;
+    cf.constant_pool.push_back(std::move(const_class));
 }
 
 
