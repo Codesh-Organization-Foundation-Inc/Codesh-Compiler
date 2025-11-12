@@ -25,9 +25,10 @@ struct code_attribute_entry : attribute_info_entry
     unsigned char max_stack[2];
     unsigned char max_locals[2];
     unsigned char code_length[4];
-    // unsigned char exception_table_length[2];
+    unsigned char code[5]; // for now
+    unsigned char exception_table_length[2];
     std::vector<std::unique_ptr<exception_table_entry>> exception_table;
-    // unsigned char attribute_count[2];
+    unsigned char attribute_count[2];
     std::vector<std::unique_ptr<attribute_info_entry>> attributes;
 };
 
@@ -41,11 +42,11 @@ struct line_number_table_attribute_entry : attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
-    // unsigned char line_number_table_length[2];
+    unsigned char line_number_table_length[2];
     std::vector<std::unique_ptr<line_number_table_entry>> line_number_table;
 };
 
-struct local_variable_table
+struct local_variable_table_entry
 {
     unsigned char start_pc[2];
     unsigned char length[2];
@@ -58,8 +59,8 @@ struct local_variable_table_attribute_entry : attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
-    // unsigned char local_variable_table_length[2];
-    std::vector<std::unique_ptr<line_number_table_entry>> line_number_table;
+    unsigned char local_variable_table_length[2];
+    std::vector<std::unique_ptr<local_variable_table_entry>> local_variable_table;
 };
 
 struct source_file_attribute_entry : attribute_info_entry
