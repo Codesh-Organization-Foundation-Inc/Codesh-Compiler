@@ -1,47 +1,10 @@
 #include "build.h"
 
+static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s);
+static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, const int class_index, const int name_and_type_index);
+static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index, const int descriptor_index);
+static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index);
 
-static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s)
-{
-    auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
-    const_utf8->tag[0] = 0x01;
-    const_utf8->length[0] = (s.size() >> 8) & 0xFF;
-    const_utf8->length[1] = s.size() & 0xFF;
-    // TODO: Add a check: if size > 0xFFFF
-    const_utf8->bytes.insert(const_utf8->bytes.end(), s.begin(), s.end());
-    cf.constant_pool.push_back(std::move(const_utf8));
-}
-
-static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, const int class_index, const int name_and_type_index)
-{
-    auto const_methodref = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>();
-    const_methodref->tag[0] = 0x0A;
-    const_methodref->class_index[0] = (class_index >> 8) & 0xFF;
-    const_methodref->class_index[1] = class_index & 0xFF;
-    const_methodref->name_and_type_index[0] = (name_and_type_index >> 8) & 0xFF;
-    const_methodref->name_and_type_index[1] = name_and_type_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_methodref));
-}
-
-static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index, const int descriptor_index)
-{
-    auto const_name_and_type = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>();
-    const_name_and_type->tag[0] = 0x0C;
-    const_name_and_type->name_index[0] = (name_index >> 8) & 0xFF;
-    const_name_and_type->name_index[1] = name_index & 0xFF;
-    const_name_and_type->descriptor_index[0] = (descriptor_index >> 8) & 0xFF;
-    const_name_and_type->descriptor_index[1] = descriptor_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_name_and_type));
-}
-
-static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index)
-{
-    auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
-    const_class->tag[0] = 0x07;
-    const_class->name_index[0] = (name_index >> 8) & 0xFF;
-    const_class->name_index[1] = name_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_class));
-}
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     const ast::compilation_unit_ast_node *root_node)
@@ -230,6 +193,51 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     return class_file;
 
 }
+
+
+static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s)
+{
+    auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
+    const_utf8->tag[0] = 0x01;
+    const_utf8->length[0] = (s.size() >> 8) & 0xFF;
+    const_utf8->length[1] = s.size() & 0xFF;
+    // TODO: Add a check: if size > 0xFFFF
+    const_utf8->bytes.insert(const_utf8->bytes.end(), s.begin(), s.end());
+    cf.constant_pool.push_back(std::move(const_utf8));
+}
+
+static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, const int class_index, const int name_and_type_index)
+{
+    auto const_methodref = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>();
+    const_methodref->tag[0] = 0x0A;
+    const_methodref->class_index[0] = (class_index >> 8) & 0xFF;
+    const_methodref->class_index[1] = class_index & 0xFF;
+    const_methodref->name_and_type_index[0] = (name_and_type_index >> 8) & 0xFF;
+    const_methodref->name_and_type_index[1] = name_and_type_index & 0xFF;
+    cf.constant_pool.push_back(std::move(const_methodref));
+}
+
+static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index, const int descriptor_index)
+{
+    auto const_name_and_type = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>();
+    const_name_and_type->tag[0] = 0x0C;
+    const_name_and_type->name_index[0] = (name_index >> 8) & 0xFF;
+    const_name_and_type->name_index[1] = name_index & 0xFF;
+    const_name_and_type->descriptor_index[0] = (descriptor_index >> 8) & 0xFF;
+    const_name_and_type->descriptor_index[1] = descriptor_index & 0xFF;
+    cf.constant_pool.push_back(std::move(const_name_and_type));
+}
+
+static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index)
+{
+    auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
+    const_class->tag[0] = 0x07;
+    const_class->name_index[0] = (name_index >> 8) & 0xFF;
+    const_class->name_index[1] = name_index & 0xFF;
+    cf.constant_pool.push_back(std::move(const_class));
+}
+
+
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, std::string destination)
 {
