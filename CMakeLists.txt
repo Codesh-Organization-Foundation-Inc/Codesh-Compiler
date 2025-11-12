@@ -76,10 +76,10 @@ add_executable(Codesh_Compiler
         src/parser/ast/type_declaration/type_declaration_ast_node.h
         src/defenition/visibility.h
         src/defenition/visibility.cpp
-        src/output/jvm_target/class_file.h
-        src/output/jvm_target/cp_info.h
-        src/output/jvm_target/methods_info.h
-        src/output/jvm_target/attribute_info.h
+        src/output/jvm_target/defs/class_file.h
+        src/output/jvm_target/defs/cp_info.h
+        src/output/jvm_target/defs/methods_info.h
+        src/output/jvm_target/defs/attribute_info.h
         src/defenition/visibility.cpp
         src/parser/compilation_unit_parser.h
         src/parser/compilation_unit_parser.cpp

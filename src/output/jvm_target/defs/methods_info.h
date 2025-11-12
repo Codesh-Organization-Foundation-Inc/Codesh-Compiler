@@ -1,7 +1,7 @@
 #pragma once
 #include "attribute_info.h"
 
-namespace codesh::output::jvm_target
+namespace codesh::output::jvm_target::defs
 {
 struct methods_info
 {

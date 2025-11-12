@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-namespace codesh::output::jvm_target
+namespace codesh::output::jvm_target::defs
 {
 
 struct cp_info

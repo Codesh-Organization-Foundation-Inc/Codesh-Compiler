@@ -1,9 +1,9 @@
 #pragma once
-#include "cp_info.h"
-#include "methods_info.h"
+#include "./cp_info.h"
+#include "./methods_info.h"
 #include "attribute_info.h"
 
-namespace codesh::output::jvm_target
+namespace codesh::output::jvm_target::defs
 {
 
 struct class_file

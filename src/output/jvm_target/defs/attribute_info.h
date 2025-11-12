@@ -1,8 +1,7 @@
 #pragma once
-#include <algorithm>
 #include <memory>
 
-namespace codesh::output::jvm_target
+namespace codesh::output::jvm_target::defs
 {
 
 struct attribute_info
