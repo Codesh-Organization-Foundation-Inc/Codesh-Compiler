@@ -1,9 +1,19 @@
 #include "build.h"
 
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s);
-static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, const int class_index, const int name_and_type_index);
-static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index, const int descriptor_index);
-static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index);
+static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, int class_index,
+                               int name_and_type_index);
+static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, int name_index,
+                                   int descriptor_index);
+static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, int name_index);
+
+static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
+/**
+ * Puts the number `num` into the array `arr` over `width` bytes.
+ *
+ * Uses big-endian order (as JVM uses it).
+ */
+static void put_int_bytes(unsigned char arr[], int width, int num);
 
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
@@ -11,19 +21,9 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 {
     defs::class_file class_file;
 
-    // magic
-    class_file.magic[0] = 0xCA;
-    class_file.magic[1] = 0xFE;
-    class_file.magic[2] = 0xBA;
-    class_file.magic[3] = 0xBE;
-
-    // minor version
-    class_file.minor_version[0] = 0x00;
-    class_file.minor_version[1] = 0x00;
-
-    // major version
-    class_file.minor_version[0] = 0x00;
-    class_file.minor_version[1] = 0x41;
+    put_bytes(class_file.magic, {0xCA, 0xFE, 0xBA, 0xBE});
+    put_int_bytes(class_file.minor_version, 2, 0);
+    put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
     // constant pool
     class_file.constant_pool_count[0] = 0x00;
@@ -195,6 +195,23 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 }
 
 
+static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents)
+{
+    for (size_t i = 0; i < contents.size(); i++)
+    {
+        arr[i] = contents[i];
+    }
+}
+
+static void put_int_bytes(unsigned char arr[], const int width, const int num)
+{
+    for (int i = 0; i < width; i++)
+    {
+        arr[width - 1 - i] = static_cast<unsigned char>(num >> (8 * i) & 0xFF);
+    }
+}
+
+
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s)
 {
     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
@@ -228,13 +245,12 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
     cf.constant_pool.push_back(std::move(const_name_and_type));
 }
 
-static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index)
+static void add_class_info(codesh::output::jvm_target::defs::class_filed char arr[], const int num, const int width)
 {
-    auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
-    const_class->tag[0] = 0x07;
-    const_class->name_index[0] = (name_index >> 8) & 0xFF;
-    const_class->name_index[1] = name_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_class));
+    for (int i = 0; i < width; i++)
+    {
+        arr[width - 1 - i] = static_cast<unsigned char>(num >> (8 * i) & 0xFF);
+    }
 }
 
 
