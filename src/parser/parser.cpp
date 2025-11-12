@@ -1,6 +1,5 @@
 #include "parser.h"
 
-#include "ast/compilation_unit_ast_node.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
 #include "type/type_parser.h"
@@ -9,7 +8,7 @@
 namespace ast = codesh::ast;
 
 
-std::unique_ptr<ast::impl::ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens)
 {
     if (tokens.empty())
         throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error

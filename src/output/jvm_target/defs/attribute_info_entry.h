@@ -4,15 +4,15 @@
 namespace codesh::output::jvm_target::defs
 {
 
-struct attribute_info
+struct attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
 
-    virtual ~attribute_info();
+    virtual ~attribute_info_entry();
 };
 
-struct exception_table
+struct exception_table_entry
 {
     unsigned char start_pc[2];
     unsigned char end_pc[2];
@@ -20,29 +20,29 @@ struct exception_table
     unsigned char catch_type[2];
 };
 
-struct Code_attribute : attribute_info
+struct code_attribute_entry : attribute_info_entry
 {
     unsigned char max_stack[2];
     unsigned char max_locals[2];
     unsigned char code_length[4];
     // unsigned char exception_table_length[2];
-    std::vector<std::unique_ptr<exception_table>> exception_table;
+    std::vector<std::unique_ptr<exception_table_entry>> exception_table;
     // unsigned char attribute_count[2];
-    std::vector<std::unique_ptr<attribute_info>> attributes;
+    std::vector<std::unique_ptr<attribute_info_entry>> attributes;
 };
 
-struct line_number_table
+struct line_number_table_entry
 {
     unsigned char start_pc[2];
     unsigned char line_number[2];
 };
 
-struct LineNumberTable_attribute : attribute_info
+struct line_number_table_attribute_entry : attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
     // unsigned char line_number_table_length[2];
-    std::vector<std::unique_ptr<line_number_table>> line_number_table;
+    std::vector<std::unique_ptr<line_number_table_entry>> line_number_table;
 };
 
 struct local_variable_table
@@ -54,15 +54,15 @@ struct local_variable_table
     unsigned char index[2];
 };
 
-struct LocalVariableTable_attribute : attribute_info
+struct local_variable_table_attribute_entry : attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];
     // unsigned char local_variable_table_length[2];
-    std::vector<std::unique_ptr<line_number_table>> line_number_table;
+    std::vector<std::unique_ptr<line_number_table_entry>> line_number_table;
 };
 
-struct SourceFile_attribute : attribute_info
+struct source_file_attribute_entry : attribute_info_entry
 {
     unsigned char attribute_name_index[2];
     unsigned char attribute_length[4];

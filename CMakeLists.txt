@@ -78,8 +78,8 @@ add_executable(Codesh_Compiler
         src/defenition/visibility.cpp
         src/output/jvm_target/defs/class_file.h
         src/output/jvm_target/defs/cp_info.h
-        src/output/jvm_target/defs/methods_info.h
-        src/output/jvm_target/defs/attribute_info.h
+        src/output/jvm_target/defs/methods_info_entry.h
+        src/output/jvm_target/defs/attribute_info_entry.h
         src/defenition/visibility.cpp
         src/parser/compilation_unit_parser.h
         src/parser/compilation_unit_parser.cpp
@@ -106,7 +106,9 @@ add_executable(Codesh_Compiler
         src/parser/ast/type/type_ast_node.cpp
         src/parser/ast/impl/i_descriptor_emitter.h
         src/test.cpp
-        src/test.h)
+        src/test.h
+        src/output/jvm_target/build.cpp
+        src/output/jvm_target/build.h)
 
 
 # sudo dnf install boost-regex boost-devel

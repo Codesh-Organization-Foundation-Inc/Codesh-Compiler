@@ -1,7 +1,7 @@
 #pragma once
 #include "./cp_info.h"
-#include "./methods_info.h"
-#include "attribute_info.h"
+#include "./methods_info_entry.h"
+#include "attribute_info_entry.h"
 
 namespace codesh::output::jvm_target::defs
 {
@@ -21,9 +21,9 @@ struct class_file
     unsigned char fields_count[2];
     // unsigned char fields_info[0]; // change later
     // unsigned char methods_count[2];
-    std::vector<std::unique_ptr<methods_info>> methods_info;
+    std::vector<std::unique_ptr<methods_info_entry>> methods_info;
     // unsigned char attribute_count[2];
-    std::vector<std::unique_ptr<attribute_info>> attribute_info;
+    std::vector<std::unique_ptr<attribute_info_entry>> attribute_info;
 
 };
 
