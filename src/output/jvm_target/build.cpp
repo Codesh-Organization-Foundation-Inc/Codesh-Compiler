@@ -256,7 +256,7 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, con
 
 
 
-void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, std::string destination)
+void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, const std::string &destination)
 {
     // TODO: Eliran
 }
