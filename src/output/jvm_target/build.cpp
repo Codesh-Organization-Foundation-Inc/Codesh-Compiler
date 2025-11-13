@@ -1,12 +1,15 @@
 #include "build.h"
 
-static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s);
-static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, int class_index,
-                               int name_and_type_index);
-static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, int name_index,
-                                   int descriptor_index);
-static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, int name_index);
+#include <list>
 
+static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &s);
+static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, int class_index,
+                               int name_and_type_index);
+static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index,
+                                   int descriptor_index);
+static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index);
+
+static void add_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::AccessFlags> &flags);
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
 /**
  * Puts the number `num` into the array `arr` over `width` bytes.
@@ -25,9 +28,8 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     put_int_bytes(class_file.minor_version, 2, 0);
     put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
-    // constant pool
-    class_file.constant_pool_count[0] = 0x00;
-    class_file.constant_pool_count[1] = 0x10;
+    // TODO: add auto counter to constant_pool_count
+    put_int_bytes(class_file.constant_pool_count, 2, 16);
 
     // TODO: make it that you dont need to add class_file to arguments
     { // TODO: add a function that does it
@@ -39,8 +41,6 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_utf8_info(class_file, "()V");
         add_class_info(class_file, 8);
         add_utf8_info(class_file, "Main");
-
-
         add_utf8_info(class_file, "Code");
         add_utf8_info(class_file, "LineNumberTable");
         add_utf8_info(class_file, "LocalVariableTable");
@@ -50,119 +50,66 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_utf8_info(class_file, "Main.java;");
     }
 
-    class_file.constant_pool_count[0] = 0x00;
-    class_file.constant_pool_count[1] = 0x21;
+    add_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
 
-    class_file.this_class[0] = 0x00;
-    class_file.this_class[1] = 0x07;
+    put_int_bytes(class_file.this_class, 2, 7);
+    put_int_bytes(class_file.super_class, 2, 2);
 
-    class_file.super_class[0] = 0x00;
-    class_file.super_class[1] = 0x02;
+    put_int_bytes(class_file.interfaces_count, 2, 0);
+    put_int_bytes(class_file.fields_count, 2, 0);
 
-    class_file.interfaces_count[0] = 0x00;
-    class_file.interfaces_count[1] = 0x00;
-    class_file.fields_count[0] = 0x00;
-    class_file.fields_count[1] = 0x00;
+    put_int_bytes(class_file.methods_count, 2, 1);
 
-    class_file.methods_count[0] = 0x00;
-    class_file.methods_count[1] = 0x01;
 
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
     {
-        method_entry->access_flags[0] = 0x00;
-        method_entry->access_flags[1] = 0x01;
-
-        method_entry->name_index[0] = 0x00;
-        method_entry->name_index[1] = 0x05;
-        method_entry->descriptor_index[0] = 0x00;
-        method_entry->descriptor_index[1] = 0x06;
-
-        method_entry->attributes_count[0] = 0x00;
-        method_entry->attributes_count[1] = 0x01;
+        put_int_bytes(method_entry->access_flags, 2, 1);
+        put_int_bytes(method_entry->name_index, 2, 5);
+        put_int_bytes(method_entry->descriptor_index, 2, 6);
+        put_int_bytes(method_entry->attributes_count, 2, 1);
 
         auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
-        code_attr->attribute_name_index[0] = 0x00;
-        code_attr->attribute_name_index[1] = 0x09;
+        put_int_bytes(code_attr->attribute_name_index, 2, 9);
+        put_int_bytes(code_attr->attribute_length, 4, 47);
+        put_int_bytes(code_attr->max_stack, 2, 1);
+        put_int_bytes(code_attr->max_locals, 2, 1);
+        put_int_bytes(code_attr->code_length, 4, 5);
 
-        code_attr->attribute_length[0] = 0x00;
-        code_attr->attribute_length[1] = 0x00;
-        code_attr->attribute_length[2] = 0x00;
-        code_attr->attribute_length[3] = 0x2F;
+        put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
 
-        code_attr->max_stack[0] = 0x00;
-        code_attr->max_stack[1] = 0x01;
-
-        code_attr->max_locals[0] = 0x00;
-        code_attr->max_locals[1] = 0x01;
-
-        code_attr->code_length[0] = 0x00;
-        code_attr->code_length[1] = 0x00;
-        code_attr->code_length[2] = 0x00;
-        code_attr->code_length[3] = 0x05;
-
-        unsigned char bc[5] = {0x2A, 0xB7, 0x00, 0x01, 0xB1};
-        for (int i = 0; i < 5; i++)
-        {
-            code_attr->code[i] = bc[i];
-        }
-
-        code_attr->exception_table_length[0] = 0x00;
-        code_attr->exception_table_length[1] = 0x00;
-
-        code_attr->attribute_count[0] = 0x00;
-        code_attr->attribute_count[1] = 0x02;
+        put_int_bytes(code_attr->exception_table_length, 2 ,0);
+        put_int_bytes(code_attr->attribute_count, 2 ,2);
 
         auto line_number_table_attr = std::make_unique<defs::line_number_table_attribute_entry>();
 
-        line_number_table_attr->attribute_name_index[0] = 0x00;
-        line_number_table_attr->attribute_name_index[1] = 0x0A;
-
-        line_number_table_attr->attribute_length[0] = 0x00;
-        line_number_table_attr->attribute_length[1] = 0x00;
-        line_number_table_attr->attribute_length[2] = 0x00;
-        line_number_table_attr->attribute_length[3] = 0x06;
-
-        line_number_table_attr->line_number_table_length[0] = 0x00;
-        line_number_table_attr->line_number_table_length[1] = 0x01;
+        put_int_bytes(line_number_table_attr->attribute_name_index, 2 ,10);
+        put_int_bytes(line_number_table_attr->attribute_length, 4 ,6);
+        put_int_bytes(line_number_table_attr->line_number_table_length, 2 ,1);
 
         auto lnt_entry = std::make_unique<defs::line_number_table_entry>();
-        lnt_entry->start_pc[0] = 0x00;
-        lnt_entry->start_pc[1] = 0x00;
-        lnt_entry->line_number[0] = 0x00;
-        lnt_entry->line_number[1] = 0x01;
+
+        put_int_bytes(lnt_entry->start_pc, 2 ,0);
+        put_int_bytes(lnt_entry->line_number, 2 ,1);
 
         line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
-
         code_attr->attributes.push_back(std::move(line_number_table_attr));
 
 
         auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
 
-        local_variable_table->attribute_name_index[0] = 0x00;
-        local_variable_table->attribute_name_index[1] = 0x0B;
-
-        local_variable_table->attribute_length[0] = 0x00;
-        local_variable_table->attribute_length[1] = 0x00;
-        local_variable_table->attribute_length[2] = 0x00;
-        local_variable_table->attribute_length[3] = 0x0C;
-
-        local_variable_table->local_variable_table_length[0] = 0x00;
-        local_variable_table->local_variable_table_length[1] = 0x01;
+        put_int_bytes(local_variable_table->attribute_name_index, 2, 11);
+        put_int_bytes(local_variable_table->attribute_length, 4, 12);
+        put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
 
         auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
 
-        lvt_entry->start_pc[0] = 0x00;
-        lvt_entry->start_pc[1] = 0x00;
-        lvt_entry->length[0] = 0x00;
-        lvt_entry->length[1] = 0x05;
-        lvt_entry->name_index[0] = 0x00;
-        lvt_entry->name_index[1] = 0x0C;
-        lvt_entry->descriptor_index[0] = 0x00;
-        lvt_entry->descriptor_index[1] = 0x0D;
-        lvt_entry->index[0] = 0x00;
-        lvt_entry->index[1] = 0x00;
+        put_int_bytes(lvt_entry->start_pc, 2, 0);
+        put_int_bytes(lvt_entry->length, 2, 5);
+        put_int_bytes(lvt_entry->name_index, 2, 12);
+        put_int_bytes(lvt_entry->descriptor_index, 2, 13);
+        put_int_bytes(lvt_entry->index, 2, 0);
 
         local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
 
@@ -174,26 +121,17 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     }
 
 
-    class_file.attribute_count[0] = 0x00;
-    class_file.attribute_count[1] = 0x01;
+    put_int_bytes(class_file.attribute_count, 2, 1);
 
     auto source_file_entry = std::make_unique<defs::source_file_attribute_entry>();
-    source_file_entry->attribute_name_index[0] = 0x00;
-    source_file_entry->attribute_name_index[1] = 0x0E;
-
-    source_file_entry->attribute_length[0] = 0x00;
-    source_file_entry->attribute_length[1] = 0x00;
-    source_file_entry->attribute_length[2] = 0x00;
-    source_file_entry->attribute_length[3] = 0x02;
-
-    source_file_entry->sourcefile_index[0] = 0x00;
-    source_file_entry->sourcefile_index[1] = 0x0F;
-
+    put_int_bytes(source_file_entry->attribute_name_index, 2, 14);
+    put_int_bytes(source_file_entry->attribute_length, 2, 2);
+    put_int_bytes(source_file_entry->sourcefile_index, 2, 15);
+    class_file.attribute_info.push_back(std::move(source_file_entry));
 
     return class_file;
 
 }
-
 
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents)
 {
@@ -212,7 +150,7 @@ static void put_int_bytes(unsigned char arr[], const int width, const int num)
 }
 
 
-static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, const std::string &s)
+static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &s)
 {
     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
     const_utf8->tag[0] = 0x01;
@@ -220,10 +158,10 @@ static void add_utf8_info(codesh::output::jvm_target::defs::class_file &cf, cons
     const_utf8->length[1] = s.size() & 0xFF;
     // TODO: Add a check: if size > 0xFFFF
     const_utf8->bytes.insert(const_utf8->bytes.end(), s.begin(), s.end());
-    cf.constant_pool.push_back(std::move(const_utf8));
+    class_file.constant_pool.push_back(std::move(const_utf8));
 }
 
-static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf, const int class_index, const int name_and_type_index)
+static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, const int class_index, const int name_and_type_index)
 {
     auto const_methodref = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>();
     const_methodref->tag[0] = 0x0A;
@@ -231,10 +169,10 @@ static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cf,
     const_methodref->class_index[1] = class_index & 0xFF;
     const_methodref->name_and_type_index[0] = (name_and_type_index >> 8) & 0xFF;
     const_methodref->name_and_type_index[1] = name_and_type_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_methodref));
+    class_file.constant_pool.push_back(std::move(const_methodref));
 }
 
-static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index, const int descriptor_index)
+static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &class_file, const int name_index, const int descriptor_index)
 {
     auto const_name_and_type = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>();
     const_name_and_type->tag[0] = 0x0C;
@@ -242,18 +180,29 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
     const_name_and_type->name_index[1] = name_index & 0xFF;
     const_name_and_type->descriptor_index[0] = (descriptor_index >> 8) & 0xFF;
     const_name_and_type->descriptor_index[1] = descriptor_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_name_and_type));
+    class_file.constant_pool.push_back(std::move(const_name_and_type));
 }
 
-static void add_class_info(codesh::output::jvm_target::defs::class_file &cf, const int name_index)
+static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, const int name_index)
 {
     auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
     const_class->tag[0] = 0x07;
     const_class->name_index[0] = (name_index >> 8) & 0xFF;
     const_class->name_index[1] = name_index & 0xFF;
-    cf.constant_pool.push_back(std::move(const_class));
+    class_file.constant_pool.push_back(std::move(const_class));
 }
 
+static void add_flags(codesh::output::jvm_target::defs::class_file &class_file,
+                      const std::list<codesh::output::jvm_target::AccessFlags> &flags)
+{
+    //TODO: Change default values
+    uint16_t value = 0;
+    for (auto flag: flags)
+    {
+        value |= static_cast<uint16_t>(flag);
+    }
+    put_int_bytes(class_file.access_flags, 2,  value);
+}
 
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, const std::string &destination)
