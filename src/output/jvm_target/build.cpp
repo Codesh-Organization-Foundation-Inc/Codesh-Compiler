@@ -1,5 +1,7 @@
 #include "build.h"
 
+#include <fstream>
+#include <iostream>
 #include <list>
 
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &s);
@@ -11,12 +13,23 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &class_f
 
 static void add_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::AccessFlags> &flags);
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
+
 /**
  * Puts the number `num` into the array `arr` over `width` bytes.
  *
  * Uses big-endian order (as JVM uses it).
  */
 static void put_int_bytes(unsigned char arr[], int width, int num);
+
+void write_bytes(std::ofstream &out, const unsigned char *data, size_t length);
+static void write_methods(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
+static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes);
+static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file);
+
+
+
+
+
 
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
@@ -133,6 +146,39 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
 }
 
+
+void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, const std::string &destination)
+{
+    std::ofstream destination_file(destination, std::ios::binary);
+    if (!destination_file)
+    {
+        std::cerr << "Couldnt find destination file" << std::endl;
+        return;
+    }
+
+    write_bytes(destination_file, class_file.magic, 4);
+    write_bytes(destination_file, class_file.minor_version, 2);
+    write_bytes(destination_file, class_file.major_version, 2);
+    write_bytes(destination_file, class_file.constant_pool_count, 2);
+
+    write_constant_pool(destination_file, class_file);
+
+    write_bytes(destination_file, class_file.access_flags, 2);
+    write_bytes(destination_file, class_file.this_class, 2);
+    write_bytes(destination_file, class_file.super_class, 2);
+
+    write_bytes(destination_file, class_file.interfaces_count, 2);
+    write_bytes(destination_file, class_file.fields_count, 2);
+    write_bytes(destination_file, class_file.methods_count, 2);
+
+    write_methods(destination_file, class_file.methods_info);
+
+    write_bytes(destination_file, class_file.attribute_count, 2);
+    write_attributes(destination_file, class_file.attribute_info);
+
+    destination_file.close();
+}
+
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents)
 {
     for (size_t i = 0; i < contents.size(); i++)
@@ -199,8 +245,109 @@ static void add_flags(codesh::output::jvm_target::defs::class_file &class_file,
     put_int_bytes(class_file.access_flags, 2,  value);
 }
 
-
-void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, const std::string &destination)
+void write_bytes(std::ofstream &out, const unsigned char *data, size_t length)
 {
-    // TODO: Eliran
+    out.write(reinterpret_cast<const char *>(data), length);
+}
+
+static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file)
+{
+    for (const auto &entry : class_file.constant_pool)
+    {
+        auto tag = entry->tag[0];
+        write_bytes(out, entry->tag, 1);
+
+        switch (tag)
+        {
+        case 1: // utf8
+        {
+            auto utf8 = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(entry.get());
+            write_bytes(out, utf8->length, 2);
+            out.write(reinterpret_cast<const char *>(utf8->bytes.data()), utf8->bytes.size());
+            break;
+        }
+        case 7: // class
+        {
+            auto cls = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(entry.get());
+            write_bytes(out, cls->name_index, 2);
+            break;
+        }
+        case 10: // methodref
+        {
+            auto mref = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(entry.get());
+            write_bytes(out, mref->class_index, 2);
+            write_bytes(out, mref->name_and_type_index, 2);
+            break;
+        }
+        case 12: // name_and_type
+        {
+            auto nat = static_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(entry.get());
+            write_bytes(out, nat->name_index, 2);
+            write_bytes(out, nat->descriptor_index, 2);
+            break;
+        }
+        default:
+            std::cerr << "Unknown constant pool tag: " << (int)tag << std::endl;
+            break;
+        }
+    }
+}
+
+static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes)
+{
+    for (const auto &attr : attributes)
+    {
+        write_bytes(out, attr->attribute_name_index, 2);
+        write_bytes(out, attr->attribute_length, 4);
+
+        // Check what kind of attribute this is
+        if (auto code = dynamic_cast<const codesh::output::jvm_target::defs::code_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, code->max_stack, 2);
+            write_bytes(out, code->max_locals, 2);
+            write_bytes(out, code->code_length, 4);
+            write_bytes(out, code->code, 5);
+            write_bytes(out, code->exception_table_length, 2);
+
+            write_bytes(out, code->attribute_count, 2);
+            write_attributes(out, code->attributes);
+        }
+        else if (auto lnt = dynamic_cast<const codesh::output::jvm_target::defs::line_number_table_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, lnt->line_number_table_length, 2);
+            for (const auto &entry : lnt->line_number_table)
+            {
+                write_bytes(out, entry->start_pc, 2);
+                write_bytes(out, entry->line_number, 2);
+            }
+        }
+        else if (auto lvt = dynamic_cast<const codesh::output::jvm_target::defs::local_variable_table_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, lvt->local_variable_table_length, 2);
+            for (const auto &entry : lvt->local_variable_table)
+            {
+                write_bytes(out, entry->start_pc, 2);
+                write_bytes(out, entry->length, 2);
+                write_bytes(out, entry->name_index, 2);
+                write_bytes(out, entry->descriptor_index, 2);
+                write_bytes(out, entry->index, 2);
+            }
+        }
+        else if (auto src = dynamic_cast<const codesh::output::jvm_target::defs::source_file_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, src->sourcefile_index, 2);
+        }
+    }
+}
+
+static void write_methods(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods)
+{
+    for (const auto &method : methods)
+    {
+        write_bytes(out, method->access_flags, 2);
+        write_bytes(out, method->name_index, 2);
+        write_bytes(out, method->descriptor_index, 2);
+        write_bytes(out, method->attributes_count, 2);
+        write_attributes(out, method->attribute_info);
+    }
 }
