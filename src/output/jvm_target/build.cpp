@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include "./defs/attribute_info_entry.h"
 
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &s);
 static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, int class_index,
