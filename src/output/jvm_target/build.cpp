@@ -57,7 +57,11 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_utf8_info(class_file, "Main.java");
     }
 
-    put_int_bytes(class_file.constant_pool_count, 2, class_file.constant_pool.size() + 1);
+    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
+    if (constant_pool_size > 0xFFFF)
+        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
+
+    put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 
     add_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
 
@@ -196,7 +200,7 @@ static void put_int_bytes(unsigned char arr[], const size_t width, const int num
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str)
 {
     if (str.size() > 0xFFFF)
-        throw std::runtime_error("String size is longer than possible");
+        throw std::runtime_error("String size is longer than possible; max length is 65535");
 
     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
 
