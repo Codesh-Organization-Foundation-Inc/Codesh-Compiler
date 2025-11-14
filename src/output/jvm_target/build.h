@@ -10,7 +10,7 @@ namespace codesh::output::jvm_target
 
 constexpr int JAVA_TARGET_VERSION = 65;
 
-enum class AccessFlags : uint16_t
+enum class access_flag : uint16_t
 {
     ACC_PUBLIC      = 0x0001,
     ACC_FINAL       = 0x0010,

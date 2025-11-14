@@ -17,7 +17,7 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
                                    int descriptor_index);
 static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index);
 
-static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::AccessFlags> &flags);
+static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::access_flag> &flags);
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
 
 /**
@@ -46,7 +46,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     add_constant_pool_entries(class_file);
 
 
-    add_access_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
+    add_access_flags(class_file, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     put_int_bytes(class_file.this_class, 2, 7);
     put_int_bytes(class_file.super_class, 2, 2);
@@ -221,7 +221,6 @@ static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_fi
 
     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
 
-    put_int_bytes(const_utf8->tag, 1, 1);
     put_int_bytes(const_utf8->length, 2, str.size()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
     const_utf8->bytes.insert(const_utf8->bytes.end(), str.begin(), str.end());
 
@@ -232,7 +231,6 @@ static void add_methodref_info(codesh::output::jvm_target::defs::class_file &cla
 {
     auto const_methodref = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>();
 
-    put_int_bytes(const_methodref->tag, 1, 10);
     put_int_bytes(const_methodref->class_index, 2, class_index);
     put_int_bytes(const_methodref->name_and_type_index, 2, name_and_type_index);
 
@@ -243,7 +241,6 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
 {
     auto const_name_and_type = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>();
 
-    put_int_bytes(const_name_and_type->tag, 1, 12);
     put_int_bytes(const_name_and_type->name_index, 2, name_index);
     put_int_bytes(const_name_and_type->descriptor_index, 2, descriptor_index);
 
@@ -254,14 +251,13 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &class_f
 {
     auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
 
-    put_int_bytes(const_class->tag, 1, 7);
     put_int_bytes(const_class->name_index, 2, name_index);
 
     class_file.constant_pool.push_back(std::move(const_class));
 }
 
 static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file,
-                      const std::list<codesh::output::jvm_target::AccessFlags> &flags)
+                      const std::list<codesh::output::jvm_target::access_flag> &flags)
 {
     //TODO: Change default values
     uint16_t value = 0;
@@ -283,46 +279,33 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 {
     for (const auto &entry : class_file.constant_pool)
     {
-        const auto tag = entry->tag[0];
-        write_bytes(out, entry->tag, 1);
-
-        switch (tag)
+        if (const auto utf8 = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(entry.get()))
         {
-        case 1: // utf8
-        {
-            const auto utf8 = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(entry.get()); // NOLINT(*-pro-type-static-cast-downcast)
             write_bytes(out, utf8->length, 2);
-            write_bytes(out, utf8->bytes.data(), utf8->bytes.size()); // NOLINT(*-narrowing-conversions) (Already checked at add_utf8_info)
-            break;
+            write_bytes(out, utf8->bytes.data(), utf8->bytes.size());
         }
-        case 7: // class
+        else if (const auto cls = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(entry.get()))
         {
-            const auto cls = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(entry.get()); // NOLINT(*-pro-type-static-cast-downcast)
             write_bytes(out, cls->name_index, 2);
-            break;
         }
-        case 10: // methodref
+        else if (const auto mref = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(entry.get()))
         {
-            const auto mref = static_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(entry.get()); // NOLINT(*-pro-type-static-cast-downcast)
             write_bytes(out, mref->class_index, 2);
             write_bytes(out, mref->name_and_type_index, 2);
-            break;
         }
-        case 12: // name_and_type
+        else if (const auto nat = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(entry.get()))
         {
-            const auto nat = static_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(entry.get()); // NOLINT(*-pro-type-static-cast-downcast)
             write_bytes(out, nat->name_index, 2);
             write_bytes(out, nat->descriptor_index, 2);
-            break;
         }
-        default:
-            std::cerr << "Unknown constant pool tag: " << static_cast<int>(tag) << std::endl;
-            break;
+        else
+        {
+            throw std::runtime_error("Unknown constant pool type");
         }
     }
 }
 
-static int operator|(const codesh::output::jvm_target::AccessFlags lhs, const codesh::output::jvm_target::AccessFlags rhs)
+static int operator|(const codesh::output::jvm_target::access_flag lhs, const codesh::output::jvm_target::access_flag rhs)
 {
     return static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs);
 }
