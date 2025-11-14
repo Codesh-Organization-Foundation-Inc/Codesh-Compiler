@@ -45,6 +45,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
     add_constant_pool_entries(class_file);
 
+
     add_access_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
 
     put_int_bytes(class_file.this_class, 2, 7);
@@ -54,7 +55,6 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     put_int_bytes(class_file.fields_count, 2, 0);
 
     put_int_bytes(class_file.methods_count, 2, 1);
-
     add_method(class_file);
 
     put_int_bytes(class_file.attribute_count, 2, 1);
@@ -64,7 +64,6 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
 
     return class_file;
-
 }
 
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file)
