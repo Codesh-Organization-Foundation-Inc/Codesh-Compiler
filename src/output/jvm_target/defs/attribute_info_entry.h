@@ -41,8 +41,6 @@ struct line_number_table_entry
 
 struct line_number_table_attribute_entry : attribute_info_entry
 {
-    unsigned char attribute_name_index[2];
-    unsigned char attribute_length[4];
     unsigned char line_number_table_length[2];
     std::vector<std::unique_ptr<line_number_table_entry>> line_number_table;
 };
@@ -58,8 +56,6 @@ struct local_variable_table_entry
 
 struct local_variable_table_attribute_entry : attribute_info_entry
 {
-    unsigned char attribute_name_index[2];
-    unsigned char attribute_length[4];
     unsigned char local_variable_table_length[2];
     std::vector<std::unique_ptr<local_variable_table_entry>> local_variable_table;
 };

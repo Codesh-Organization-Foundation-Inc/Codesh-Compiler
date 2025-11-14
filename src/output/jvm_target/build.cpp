@@ -130,7 +130,6 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         class_file.methods_info.push_back(std::move(method_entry));
     }
 
-
     put_int_bytes(class_file.attribute_count, 2, 1);
 
     auto source_file_entry = std::make_unique<defs::source_file_attribute_entry>();
