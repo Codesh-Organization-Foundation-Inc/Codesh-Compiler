@@ -50,7 +50,7 @@ std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        std::cerr << "Error: could not open file" << std::endl;
+        throw std::runtime_error("Couldn't open " + file_name);
     }
 
     std::stringstream buffer;
