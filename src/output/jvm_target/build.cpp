@@ -279,10 +279,13 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 {
     for (const auto &info : class_file.constant_pool)
     {
+        const unsigned char tag[] = {info->tag};
+        write_bytes(out, tag, 1);
+
         if (const auto utf8_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(info.get()))
         {
             write_bytes(out, utf8_info->length, 2);
-            write_bytes(out, utf8_info->bytes.data(), utf8_info->bytes.size());
+            write_bytes(out, utf8_info->bytes.data(), utf8_info->bytes.size()); // NOLINT(*-narrowing-conversions) (Already checked in add_utf8_info)
         }
         else if (const auto cls_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(info.get()))
         {
