@@ -4,6 +4,10 @@
 #include <iostream>
 #include "./defs/attribute_info_entry.h"
 
+static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file);
+static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
+static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
+
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str);
 static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, int class_index,
                                int name_and_type_index);
@@ -38,30 +42,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     put_int_bytes(class_file.minor_version, 2, 0);
     put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
-
-    { // TODO: add a function that does it
-        add_methodref_info(class_file, 2, 3);
-        add_class_info(class_file, 4);
-        add_name_and_type_info(class_file, 5, 6);
-        add_utf8_info(class_file, "java/lang/Object");
-        add_utf8_info(class_file, "<init>");
-        add_utf8_info(class_file, "()V");
-        add_class_info(class_file, 8);
-        add_utf8_info(class_file, "Main");
-        add_utf8_info(class_file, "Code");
-        add_utf8_info(class_file, "LineNumberTable");
-        add_utf8_info(class_file, "LocalVariableTable");
-        add_utf8_info(class_file, "this");
-        add_utf8_info(class_file, "LMain;");
-        add_utf8_info(class_file, "SourceFile");
-        add_utf8_info(class_file, "Main.java");
-    }
-
-    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
-    if (constant_pool_size > 0xFFFF)
-        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
-
-    put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+    add_constant_pool_entries(class_file);
 
     put_int_bytes(class_file.access_flags, 2, AccessFlags::ACC_SUPER | AccessFlags::ACC_PUBLIC);
 
@@ -73,79 +54,112 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
     put_int_bytes(class_file.methods_count, 2, 1);
 
-
-    auto method_entry = std::make_unique<defs::methods_info_entry>();
-
-    {
-        put_int_bytes(method_entry->access_flags, 2, 1);
-        put_int_bytes(method_entry->name_index, 2, 5);
-        put_int_bytes(method_entry->descriptor_index, 2, 6);
-        put_int_bytes(method_entry->attributes_count, 2, 1);
-
-        auto code_attr = std::make_unique<defs::code_attribute_entry>();
-
-        put_int_bytes(code_attr->attribute_name_index, 2, 9);
-        put_int_bytes(code_attr->attribute_length, 4, 47);
-        put_int_bytes(code_attr->max_stack, 2, 1);
-        put_int_bytes(code_attr->max_locals, 2, 1);
-        put_int_bytes(code_attr->code_length, 4, 5);
-
-        put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
-
-        put_int_bytes(code_attr->exception_table_length, 2, 0);
-        put_int_bytes(code_attr->attribute_count, 2, 2);
-
-        auto line_number_table_attr = std::make_unique<defs::line_number_table_attribute_entry>();
-
-        put_int_bytes(line_number_table_attr->attribute_name_index, 2, 10);
-        put_int_bytes(line_number_table_attr->attribute_length, 4, 6);
-        put_int_bytes(line_number_table_attr->line_number_table_length, 2, 1);
-
-        auto lnt_entry = std::make_unique<defs::line_number_table_entry>();
-
-        put_int_bytes(lnt_entry->start_pc, 2, 0);
-        put_int_bytes(lnt_entry->line_number, 2, 1);
-
-        line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
-        code_attr->attributes.push_back(std::move(line_number_table_attr));
-
-
-        auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
-
-        put_int_bytes(local_variable_table->attribute_name_index, 2, 11);
-        put_int_bytes(local_variable_table->attribute_length, 4, 12);
-        put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
-
-        auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
-
-        put_int_bytes(lvt_entry->start_pc, 2, 0);
-        put_int_bytes(lvt_entry->length, 2, 5);
-        put_int_bytes(lvt_entry->name_index, 2, 12);
-        put_int_bytes(lvt_entry->descriptor_index, 2, 13);
-        put_int_bytes(lvt_entry->index, 2, 0);
-
-        local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
-
-        code_attr->attributes.push_back(std::move(local_variable_table));
-
-        method_entry->attribute_info.push_back(std::move(code_attr));
-
-        class_file.methods_info.push_back(std::move(method_entry));
-    }
+    add_method(class_file);
 
     put_int_bytes(class_file.attribute_count, 2, 1);
 
 
-    auto source_file_entry = std::make_unique<defs::source_file_attribute_entry>();
+    add_source_file(class_file);
+
+
+    return class_file;
+
+}
+
+static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file)
+{
+    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
+
+    if (constant_pool_size > 0xFFFF)
+        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
+
+    put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+
+
+    add_methodref_info(class_file, 2, 3);
+    add_class_info(class_file, 4);
+    add_name_and_type_info(class_file, 5, 6);
+    add_utf8_info(class_file, "java/lang/Object");
+    add_utf8_info(class_file, "<init>");
+    add_utf8_info(class_file, "()V");
+    add_class_info(class_file, 8);
+    add_utf8_info(class_file, "Main");
+    add_utf8_info(class_file, "Code");
+    add_utf8_info(class_file, "LineNumberTable");
+    add_utf8_info(class_file, "LocalVariableTable");
+    add_utf8_info(class_file, "this");
+    add_utf8_info(class_file, "LMain;");
+    add_utf8_info(class_file, "SourceFile");
+    add_utf8_info(class_file, "Main.java");
+}
+
+static void add_method(codesh::output::jvm_target::defs::class_file &class_file)
+{
+    auto method_entry = std::make_unique<codesh::output::jvm_target::defs::methods_info_entry>();
+
+    put_int_bytes(method_entry->access_flags, 2, 1);
+    put_int_bytes(method_entry->name_index, 2, 5);
+    put_int_bytes(method_entry->descriptor_index, 2, 6);
+    put_int_bytes(method_entry->attributes_count, 2, 1);
+
+
+    // Code
+    auto code_attr = std::make_unique<codesh::output::jvm_target::defs::code_attribute_entry>();
+
+    put_int_bytes(code_attr->attribute_name_index, 2, 9);
+    put_int_bytes(code_attr->attribute_length, 4, 47);
+    put_int_bytes(code_attr->max_stack, 2, 1);
+    put_int_bytes(code_attr->max_locals, 2, 1);
+    put_int_bytes(code_attr->code_length, 4, 5);
+
+    put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
+
+    put_int_bytes(code_attr->exception_table_length, 2, 0);
+    put_int_bytes(code_attr->attribute_count, 2, 2);
+
+    // Line number table
+    auto line_number_table_attr = std::make_unique<codesh::output::jvm_target::defs::line_number_table_attribute_entry>();
+    put_int_bytes(line_number_table_attr->attribute_name_index, 2, 10);
+    put_int_bytes(line_number_table_attr->attribute_length, 4, 6);
+    put_int_bytes(line_number_table_attr->line_number_table_length, 2, 1);
+
+    auto lnt_entry = std::make_unique<codesh::output::jvm_target::defs::line_number_table_entry>();
+    put_int_bytes(lnt_entry->start_pc, 2, 0);
+    put_int_bytes(lnt_entry->line_number, 2, 1);
+
+    line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
+    code_attr->attributes.push_back(std::move(line_number_table_attr));
+
+
+    // Local variables
+    auto local_variable_table = std::make_unique<codesh::output::jvm_target::defs::local_variable_table_attribute_entry>();
+    put_int_bytes(local_variable_table->attribute_name_index, 2, 11);
+    put_int_bytes(local_variable_table->attribute_length, 4, 12);
+    put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
+
+    auto lvt_entry = std::make_unique<codesh::output::jvm_target::defs::local_variable_table_entry>();
+    put_int_bytes(lvt_entry->start_pc, 2, 0);
+    put_int_bytes(lvt_entry->length, 2, 5);
+    put_int_bytes(lvt_entry->name_index, 2, 12);
+    put_int_bytes(lvt_entry->descriptor_index, 2, 13);
+    put_int_bytes(lvt_entry->index, 2, 0);
+    local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
+
+    code_attr->attributes.push_back(std::move(local_variable_table));
+
+
+    method_entry->attribute_info.push_back(std::move(code_attr));
+    class_file.methods_info.push_back(std::move(method_entry));
+}
+
+static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file)
+{
+    auto source_file_entry = std::make_unique<codesh::output::jvm_target::defs::source_file_attribute_entry>();
     put_int_bytes(source_file_entry->attribute_name_index, 2, 14);
     put_int_bytes(source_file_entry->attribute_length, 4, 2);
     put_int_bytes(source_file_entry->sourcefile_index, 2, 15);
 
     class_file.attribute_info.push_back(std::move(source_file_entry));
-
-
-    return class_file;
-
 }
 
 
@@ -291,7 +305,7 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
     }
 }
 
-static int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs)
+static int operator|(const codesh::output::jvm_target::AccessFlags lhs, const codesh::output::jvm_target::AccessFlags rhs)
 {
     return static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs);
 }

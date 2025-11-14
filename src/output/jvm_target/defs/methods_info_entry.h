@@ -1,4 +1,5 @@
 #pragma once
+
 #include "attribute_info_entry.h"
 
 namespace codesh::output::jvm_target::defs
