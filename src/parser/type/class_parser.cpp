@@ -101,7 +101,7 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
             throw std::runtime_error("Unexpected token: Expected ושמו");
         }
 
-
+        // * (the name)
         const std::unique_ptr<codesh::token> name_token = parser::util::consume_token(tokens);
         if (name_token->get_group() != codesh::token_group::IDENTIFIER)
         {
@@ -109,7 +109,43 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
         }
 
         ast::method_declaration_ast_node method_node;
+
         method_node.set_name(dynamic_cast<const codesh::identifier_token *>(name_token.get())->get_content());
 
+        // Get attributes
+        method_node.set_attributes(parser::parse_modifiers(tokens)); // check if this works with methods
+
+        const std::unique_ptr<codesh::token> next_token = parser::util::consume_token(tokens);
+        // if (next_token->get_group() != codesh::token_group::) // Add ויקח to tokens
+
+        if (next_token->get_group() == codesh::token_group::KEYWORD_RETURN)
+        {
+            const std::unique_ptr<codesh::token> return_token = parser::util::consume_token(tokens);
+            switch (return_token->get_group())
+            {
+            case codesh::token_group::KEYWORD_INTEGER:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_FLOAT:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_DOUBLE:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_LONG:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_SHORT:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_BYTE:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_CHAR:
+                method_node.set_return_type(); break;
+            case codesh::token_group::KEYWORD_BOOLEAN:
+                method_node.set_return_type(); break;
+
+            default: throw std::runtime_error("Unexpected token");
+            }
+        }
+        else
+        {
+            method_node.set_return_type();
+        }
     }
 }
