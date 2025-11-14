@@ -69,14 +69,6 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file)
 {
-    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
-
-    if (constant_pool_size > 0xFFFF)
-        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
-
-    put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
-
-
     add_methodref_info(class_file, 2, 3);
     add_class_info(class_file, 4);
     add_name_and_type_info(class_file, 5, 6);
@@ -92,6 +84,17 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
     add_utf8_info(class_file, "LMain;");
     add_utf8_info(class_file, "SourceFile");
     add_utf8_info(class_file, "Main.java");
+
+
+    //TODO: Put this block at the beginning when no mock values are implemented.
+    // This is as the constant_pool_size should be known beforehand.
+
+    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
+
+    if (constant_pool_size > 0xFFFF)
+        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
+
+    put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 }
 
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file)
