@@ -29,23 +29,17 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 
 
 
-
-
-
-
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     const ast::compilation_unit_ast_node *root_node)
 {
+
     defs::class_file class_file;
 
     put_bytes(class_file.magic, {0xCA, 0xFE, 0xBA, 0xBE});
     put_int_bytes(class_file.minor_version, 2, 0);
     put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
-    // TODO: add auto counter to constant_pool_count
-    put_int_bytes(class_file.constant_pool_count, 2, 16);
 
-    // TODO: make it that you dont need to add class_file to arguments
     { // TODO: add a function that does it
         add_methodref_info(class_file, 2, 3);
         add_class_info(class_file, 4);
@@ -60,9 +54,11 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_utf8_info(class_file, "LocalVariableTable");
         add_utf8_info(class_file, "this");
         add_utf8_info(class_file, "Lmain;");
-        add_utf8_info(class_file, "SourceFile;");
-        add_utf8_info(class_file, "Main.java;");
+        add_utf8_info(class_file, "SourceFile");
+        add_utf8_info(class_file, "Main.java");
     }
+
+    put_int_bytes(class_file.constant_pool_count, 2, class_file.constant_pool.size() + 1);
 
     add_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
 
@@ -201,8 +197,11 @@ static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_fi
 {
     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
     put_int_bytes(const_utf8->tag, 1, 1);
+    if (s.size() > 0xFFFF)
+    {
+        std::cerr << "String size is longer than expected" << std::endl;
+    }
     put_int_bytes(const_utf8->length, 2, s.size());
-    // TODO: Add a check: if size > 0xFFFF
     const_utf8->bytes.insert(const_utf8->bytes.end(), s.begin(), s.end());
     class_file.constant_pool.push_back(std::move(const_utf8));
 }
@@ -230,7 +229,7 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &class_f
 {
     auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
     put_int_bytes(const_class->tag, 1, 7);
-    put_int_bytes(const_class->tag, 2, name_index);
+    put_int_bytes(const_class->name_index, 2, name_index);
     class_file.constant_pool.push_back(std::move(const_class));
 }
 
@@ -301,7 +300,6 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         write_bytes(out, attr->attribute_name_index, 2);
         write_bytes(out, attr->attribute_length, 4);
 
-        // Check what kind of attribute this is
         if (auto code = dynamic_cast<const codesh::output::jvm_target::defs::code_attribute_entry *>(attr.get()))
         {
             write_bytes(out, code->max_stack, 2);
