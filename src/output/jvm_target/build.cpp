@@ -277,26 +277,26 @@ static void write_bytes(std::ofstream &out, const unsigned char *data, const std
 
 static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file)
 {
-    for (const auto &entry : class_file.constant_pool)
+    for (const auto &info : class_file.constant_pool)
     {
-        if (const auto utf8 = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(entry.get()))
+        if (const auto utf8_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(info.get()))
         {
-            write_bytes(out, utf8->length, 2);
-            write_bytes(out, utf8->bytes.data(), utf8->bytes.size());
+            write_bytes(out, utf8_info->length, 2);
+            write_bytes(out, utf8_info->bytes.data(), utf8_info->bytes.size());
         }
-        else if (const auto cls = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(entry.get()))
+        else if (const auto cls_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(info.get()))
         {
-            write_bytes(out, cls->name_index, 2);
+            write_bytes(out, cls_info->name_index, 2);
         }
-        else if (const auto mref = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(entry.get()))
+        else if (const auto mref_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(info.get()))
         {
-            write_bytes(out, mref->class_index, 2);
-            write_bytes(out, mref->name_and_type_index, 2);
+            write_bytes(out, mref_info->class_index, 2);
+            write_bytes(out, mref_info->name_and_type_index, 2);
         }
-        else if (const auto nat = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(entry.get()))
+        else if (const auto nat_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(info.get()))
         {
-            write_bytes(out, nat->name_index, 2);
-            write_bytes(out, nat->descriptor_index, 2);
+            write_bytes(out, nat_info->name_index, 2);
+            write_bytes(out, nat_info->descriptor_index, 2);
         }
         else
         {
@@ -317,30 +317,30 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         write_bytes(out, attr->attribute_name_index, 2);
         write_bytes(out, attr->attribute_length, 4);
 
-        if (const auto code = dynamic_cast<const codesh::output::jvm_target::defs::code_attribute_entry *>(attr.get()))
+        if (const auto code_attr = dynamic_cast<const codesh::output::jvm_target::defs::code_attribute_entry *>(attr.get()))
         {
-            write_bytes(out, code->max_stack, 2);
-            write_bytes(out, code->max_locals, 2);
-            write_bytes(out, code->code_length, 4);
-            write_bytes(out, code->code, 5);
-            write_bytes(out, code->exception_table_length, 2);
+            write_bytes(out, code_attr->max_stack, 2);
+            write_bytes(out, code_attr->max_locals, 2);
+            write_bytes(out, code_attr->code_length, 4);
+            write_bytes(out, code_attr->code, 5);
+            write_bytes(out, code_attr->exception_table_length, 2);
 
-            write_bytes(out, code->attribute_count, 2);
-            write_attributes(out, code->attributes);
+            write_bytes(out, code_attr->attribute_count, 2);
+            write_attributes(out, code_attr->attributes);
         }
-        else if (const auto lnt = dynamic_cast<const codesh::output::jvm_target::defs::line_number_table_attribute_entry *>(attr.get()))
+        else if (const auto lnt_attr = dynamic_cast<const codesh::output::jvm_target::defs::line_number_table_attribute_entry *>(attr.get()))
         {
-            write_bytes(out, lnt->line_number_table_length, 2);
-            for (const auto &entry : lnt->line_number_table)
+            write_bytes(out, lnt_attr->line_number_table_length, 2);
+            for (const auto &entry : lnt_attr->line_number_table)
             {
                 write_bytes(out, entry->start_pc, 2);
                 write_bytes(out, entry->line_number, 2);
             }
         }
-        else if (const auto lvt = dynamic_cast<const codesh::output::jvm_target::defs::local_variable_table_attribute_entry *>(attr.get()))
+        else if (const auto lvt_attr = dynamic_cast<const codesh::output::jvm_target::defs::local_variable_table_attribute_entry *>(attr.get()))
         {
-            write_bytes(out, lvt->local_variable_table_length, 2);
-            for (const auto &entry : lvt->local_variable_table)
+            write_bytes(out, lvt_attr->local_variable_table_length, 2);
+            for (const auto &entry : lvt_attr->local_variable_table)
             {
                 write_bytes(out, entry->start_pc, 2);
                 write_bytes(out, entry->length, 2);
@@ -349,9 +349,9 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
                 write_bytes(out, entry->index, 2);
             }
         }
-        else if (const auto src = dynamic_cast<const codesh::output::jvm_target::defs::source_file_attribute_entry *>(attr.get()))
+        else if (const auto src_attr = dynamic_cast<const codesh::output::jvm_target::defs::source_file_attribute_entry *>(attr.get()))
         {
-            write_bytes(out, src->sourcefile_index, 2);
+            write_bytes(out, src_attr->sourcefile_index, 2);
         }
     }
 }
