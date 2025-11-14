@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <list>
 #include "./defs/attribute_info_entry.h"
 
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str);
@@ -21,12 +20,12 @@ static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &con
  */
 static void put_int_bytes(unsigned char arr[], size_t width, int num);
 
-void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
+static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
 static void write_methods(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
 static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes);
 static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file);
 
-int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs);
+static int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs);
 
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
@@ -244,7 +243,7 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &class_f
     class_file.constant_pool.push_back(std::move(const_class));
 }
 
-void write_bytes(std::ofstream &out, const unsigned char *data, const std::streamsize length)
+static void write_bytes(std::ofstream &out, const unsigned char *data, const std::streamsize length)
 {
     out.write(reinterpret_cast<const char *>(data), length);
 }
@@ -292,7 +291,7 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
     }
 }
 
-int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs)
+static int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs)
 {
     return static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs);
 }
