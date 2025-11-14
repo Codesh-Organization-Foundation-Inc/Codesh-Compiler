@@ -134,7 +134,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
     auto source_file_entry = std::make_unique<defs::source_file_attribute_entry>();
     put_int_bytes(source_file_entry->attribute_name_index, 2, 14);
-    put_int_bytes(source_file_entry->attribute_length, 2, 2);
+    put_int_bytes(source_file_entry->attribute_length, 4, 2);
     put_int_bytes(source_file_entry->sourcefile_index, 2, 15);
     class_file.attribute_info.push_back(std::move(source_file_entry));
 
