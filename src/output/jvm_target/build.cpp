@@ -353,6 +353,10 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         {
             write_bytes(out, src_attr->sourcefile_index, 2);
         }
+        else
+        {
+            throw std::runtime_error("Unknown attribute type");
+        }
     }
 }
 
