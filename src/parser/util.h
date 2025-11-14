@@ -29,7 +29,8 @@ void ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens);
 /**
  * Parses a Fully Qualified Class Name
  */
-void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn);
+void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn,
+        bool allow_wildcard = false);
 /**
  * Ensures a colon exists at the current token, and consumes it.
  */

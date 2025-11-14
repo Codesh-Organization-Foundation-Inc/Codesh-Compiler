@@ -30,7 +30,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
     }
 
 
-    util::parse_fqcn(tokens, import_node->get_package_name());
+    util::parse_fqcn(tokens, import_node->get_package_name(), true);
 
     if (import_node->get_package_name().back() == "*")
     {

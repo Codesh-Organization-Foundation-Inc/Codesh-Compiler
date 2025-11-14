@@ -38,7 +38,8 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 }
 
 
-void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn)
+void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn,
+        const bool allow_wildcard)
 {
     while (!tokens.empty())
     {
@@ -46,7 +47,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 
         if (id->get_group() != token_group::IDENTIFIER)
         {
-            if (id->get_group() == token_group::PUNCTUATION_WILDCARD)
+            if (allow_wildcard && id->get_group() == token_group::PUNCTUATION_WILDCARD)
             {
                 fqcn.emplace_back("*");
             }
