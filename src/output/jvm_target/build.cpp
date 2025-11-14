@@ -1,12 +1,17 @@
 #include "build.h"
 
+#include "../../parser/ast/compilation_unit_ast_node.h"
+
+#include "./defs/attribute_info_entry.h"
+
+#include <filesystem>
 #include <fstream>
 #include <iostream>
-#include "./defs/attribute_info_entry.h"
 
 #include <list>
 
-static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file);
+static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
+        const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
 
@@ -34,7 +39,7 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
-    const ast::compilation_unit_ast_node *root_node)
+    const ast::compilation_unit_ast_node &root_node)
 {
     defs::class_file class_file {
         .magic = {0xCA, 0xFE, 0xBA, 0xBE},
@@ -43,7 +48,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     put_int_bytes(class_file.minor_version, 2, 0);
     put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
-    add_constant_pool_entries(class_file);
+    add_constant_pool_entries(class_file, root_node);
 
 
     add_access_flags(class_file, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
@@ -66,7 +71,8 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     return class_file;
 }
 
-static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file)
+static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
+        const codesh::ast::compilation_unit_ast_node &root_node)
 {
     add_methodref_info(class_file, 2, 3);
     add_class_info(class_file, 4);
@@ -82,7 +88,7 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
     add_utf8_info(class_file, "this");
     add_utf8_info(class_file, "LMain;");
     add_utf8_info(class_file, "SourceFile");
-    add_utf8_info(class_file, "Main.java");
+    add_utf8_info(class_file, root_node.get_source_stem() + ".אמן");
 
 
     //TODO: Put this block at the beginning when no mock values are implemented.
@@ -166,9 +172,10 @@ static void add_source_file(codesh::output::jvm_target::defs::class_file &class_
 }
 
 
-void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file, const std::string &destination)
+void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file,
+    const ast::compilation_unit_ast_node &root_node, const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination, std::ios::binary);
+    std::ofstream destination_file(destination / (root_node.get_source_stem() + ".class"), std::ios::binary);
 
     if (!destination_file)
         throw std::runtime_error("Unable to open output file");
