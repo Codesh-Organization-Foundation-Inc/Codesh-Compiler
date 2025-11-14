@@ -305,11 +305,6 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
     }
 }
 
-static int operator|(const codesh::output::jvm_target::access_flag lhs, const codesh::output::jvm_target::access_flag rhs)
-{
-    return static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs);
-}
-
 static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes)
 {
     for (const auto &attr : attributes)
