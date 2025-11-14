@@ -44,7 +44,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_methodref_info(class_file, 2, 3);
         add_class_info(class_file, 4);
         add_name_and_type_info(class_file, 5, 6);
-        add_utf8_info(class_file, "java.lang.Object");
+        add_utf8_info(class_file, "java/lang/Object");
         add_utf8_info(class_file, "<init>");
         add_utf8_info(class_file, "()V");
         add_class_info(class_file, 8);
@@ -53,7 +53,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
         add_utf8_info(class_file, "LineNumberTable");
         add_utf8_info(class_file, "LocalVariableTable");
         add_utf8_info(class_file, "this");
-        add_utf8_info(class_file, "Lmain;");
+        add_utf8_info(class_file, "LMain;");
         add_utf8_info(class_file, "SourceFile");
         add_utf8_info(class_file, "Main.java");
     }
