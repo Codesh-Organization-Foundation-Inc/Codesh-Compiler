@@ -8,12 +8,13 @@
 namespace ast = codesh::ast;
 
 
-std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
+        const std::string &source_stem)
 {
     if (tokens.empty())
         throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
 
-    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens);
+    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
 
     if (root_node->get_basad_type() == definition::basad_type::IAW)
     {

@@ -6,6 +6,7 @@
 #include "parser/parser.h"
 #include "test.h"
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <queue>
@@ -33,10 +34,11 @@ int main(const int argc, char **const argv) {
     auto tokens = codesh::lexer::tokenize_code(utf16_code);
 
     // PARSING
-    const auto ast = codesh::parser::parse(tokens);
+    const std::filesystem::path src_path(args.src_path);
+    const auto ast = codesh::parser::parse(tokens, src_path.stem());
 
     // BUILDING
-    const codesh::output::jvm_target::defs::class_file class_file = codesh::output::jvm_target::build(ast.get());
+    const codesh::output::jvm_target::defs::class_file class_file = codesh::output::jvm_target::build(*ast);
     codesh::output::jvm_target::write_to_file(class_file, std::string(args.dest_path));
 
     return 0;

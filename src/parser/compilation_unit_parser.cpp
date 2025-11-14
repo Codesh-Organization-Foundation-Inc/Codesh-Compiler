@@ -13,10 +13,11 @@ static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tok
                                  ast::compilation_unit_ast_node *root_node);
 
 
-std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilation_unit(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilation_unit(
+        std::queue<std::unique_ptr<token>> &tokens, const std::string &source_stem)
 {
     std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        get_basad_type(tokens)
+        get_basad_type(tokens), source_stem
     );
 
     if (!tokens.empty())

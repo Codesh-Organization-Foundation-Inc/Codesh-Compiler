@@ -1,8 +1,17 @@
 #include "compilation_unit_ast_node.h"
 
-codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type) :
+#include <utility>
+
+codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type,
+        std::string source_stem) :
+    source_stem(std::move(source_stem)),
     basad_type(basad_type)
 {
+}
+
+std::string codesh::ast::compilation_unit_ast_node::get_source_stem() const
+{
+    return this->source_stem;
 }
 
 codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
