@@ -62,8 +62,6 @@ struct local_variable_table_attribute_entry : attribute_info_entry
 
 struct source_file_attribute_entry : attribute_info_entry
 {
-    unsigned char attribute_name_index[2];
-    unsigned char attribute_length[4];
     unsigned char sourcefile_index[2];
 };
 }
