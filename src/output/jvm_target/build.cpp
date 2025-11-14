@@ -4,6 +4,8 @@
 #include <iostream>
 #include "./defs/attribute_info_entry.h"
 
+#include <list>
+
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
@@ -15,6 +17,7 @@ static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file 
                                    int descriptor_index);
 static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index);
 
+static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::AccessFlags> &flags);
 static void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
 
 /**
@@ -29,8 +32,6 @@ static void write_methods(std::ofstream &out, const std::vector<std::unique_ptr<
 static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes);
 static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file);
 
-static int operator|(codesh::output::jvm_target::AccessFlags lhs, codesh::output::jvm_target::AccessFlags rhs);
-
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     const ast::compilation_unit_ast_node *root_node)
@@ -44,7 +45,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 
     add_constant_pool_entries(class_file);
 
-    put_int_bytes(class_file.access_flags, 2, AccessFlags::ACC_SUPER | AccessFlags::ACC_PUBLIC);
+    add_access_flags(class_file, {AccessFlags::ACC_SUPER, AccessFlags::ACC_PUBLIC});
 
     put_int_bytes(class_file.this_class, 2, 7);
     put_int_bytes(class_file.super_class, 2, 2);
@@ -255,6 +256,20 @@ static void add_class_info(codesh::output::jvm_target::defs::class_file &class_f
     put_int_bytes(const_class->name_index, 2, name_index);
 
     class_file.constant_pool.push_back(std::move(const_class));
+}
+
+static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file,
+                      const std::list<codesh::output::jvm_target::AccessFlags> &flags)
+{
+    //TODO: Change default values
+    uint16_t value = 0;
+
+    for (auto flag: flags)
+    {
+        value |= static_cast<uint16_t>(flag);
+    }
+
+    put_int_bytes(class_file.access_flags, 2, value);
 }
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, const std::streamsize length)
