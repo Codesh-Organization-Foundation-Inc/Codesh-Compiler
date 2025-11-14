@@ -110,7 +110,8 @@ add_executable(Codesh_Compiler
         src/output/jvm_target/build.cpp
         src/output/jvm_target/build.h
         src/output/jvm_target/defs/attribute_info_entry.cpp
-        src/output/jvm_target/defs/cp_info.cpp)
+        src/output/jvm_target/defs/cp_info.cpp
+)
 
 
 # sudo dnf install boost-regex boost-devel

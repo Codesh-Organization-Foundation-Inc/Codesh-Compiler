@@ -1,5 +1,6 @@
 #include "class_parser.h"
 
+#include "../ast/method_declaration_ast_node.h"
 #include "../ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
 #include "type_parser.h"
@@ -9,6 +10,9 @@ namespace parser = codesh::parser;
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
+
+static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::method_declaration_ast_node *method_node);
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
@@ -58,7 +62,10 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     {
         switch (parser::util::consume_token(tokens)->get_group())
         {
-        //TODO: Parse class scope
+        case codesh::token_group::KEYWORD_LET:
+            ast::method_declaration_ast_node *method_node; // TODO: initialize
+            parse_method_scope(tokens, method_node);
+            break;
 
         case codesh::token_group::SCOPE_END: return;
         default: throw std::runtime_error("Unexpected token");
@@ -66,4 +73,21 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     }
 
     throw std::runtime_error("Unexpected EOF: Expected end of scope (ויתם:)");
+}
+
+static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::method_declaration_ast_node *method_node)
+{
+    while (!tokens.empty())
+    {
+        if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_FUNCTION) // TODO: it can be ויהי עצם another time or ויהי משתנה
+        {
+            throw std::runtime_error("Unexpected token: Expected מעשה");
+        }
+
+        if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+        {
+            throw std::runtime_error("Unexpected token: Expected ושמו");
+        }
+    }
 }
