@@ -4,6 +4,10 @@
 #include <filesystem>
 #include <list>
 
+namespace codesh::ast::type_decl
+{
+class type_declaration_ast_node;
+}
 namespace codesh::output::jvm_target
 {
 class constant_pool;
@@ -36,6 +40,8 @@ class class_file_builder
     std::unique_ptr<defs::class_file> class_file;
 
     const ast::compilation_unit_ast_node &root_node;
+    const ast::type_decl::type_declaration_ast_node &type_decl;
+
     const constant_pool &constant_pool_;
 
 
@@ -46,7 +52,8 @@ class class_file_builder
     void add_access_flags(const std::list<access_flag> &flags) const;
 
 public:
-    explicit class_file_builder(const ast::compilation_unit_ast_node &root_node);
+    class_file_builder(const ast::compilation_unit_ast_node &root_node,
+            const ast::type_decl::type_declaration_ast_node &type_decl);
 
     [[nodiscard]] std::unique_ptr<defs::class_file> build();
 };

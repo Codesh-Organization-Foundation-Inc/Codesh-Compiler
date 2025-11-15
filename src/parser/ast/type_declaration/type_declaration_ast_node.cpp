@@ -31,3 +31,17 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_attributes(
 {
     this->attributes = std::move(attributes);
 }
+
+std::optional<std::reference_wrapper<const codesh::output::jvm_target::constant_pool>> codesh::ast::type_decl::
+    type_declaration_ast_node::get_constant_pool() const
+{
+    if (constant_pool == nullptr)
+        return std::nullopt;
+
+    return *constant_pool;
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(output::jvm_target::constant_pool constant_pool)
+{
+    this->constant_pool = std::make_unique<output::jvm_target::constant_pool>(std::move(constant_pool));
+}

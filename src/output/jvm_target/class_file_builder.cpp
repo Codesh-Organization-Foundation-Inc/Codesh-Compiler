@@ -3,6 +3,7 @@
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../util.h"
+#include "constant_pool.h"
 
 #include "./defs/attribute_info_entry.h"
 
@@ -14,10 +15,12 @@
 #include <ranges>
 
 
-codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node) :
+codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node,
+        const ast::type_decl::type_declaration_ast_node &type_decl) :
     class_file(std::make_unique<defs::class_file>()),
     root_node(root_node),
-    constant_pool_(root_node.get_constant_pool()->get())
+    type_decl(type_decl),
+    constant_pool_(type_decl.get_constant_pool()->get())
 {}
 
 std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jvm_target::class_file_builder::build()
@@ -35,8 +38,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     util::put_int_bytes(
         class_file->this_class, 2,
         constant_pool_.get_class_index(
-            //FIXME: This should be the binary name
-            constant_pool_.get_utf8_index(root_node.get_source_stem())
+            constant_pool_.get_utf8_index(type_decl.get_binary_name())
         )
     );
     util::put_int_bytes(
@@ -132,11 +134,9 @@ void codesh::output::jvm_target::class_file_builder::add_method() const
     util::put_int_bytes(lvt_entry->length, 2, 5);
     util::put_int_bytes(lvt_entry->name_index, 2, constant_pool_.get_utf8_index("this"));
 
-    //FIXME: For now this just assumes the filename.
-    // THE CLASS SHOULD BE PASSED TO THIS METHOD.
     util::put_int_bytes(
         lvt_entry->descriptor_index, 2,
-    constant_pool_.get_utf8_index("L" + root_node.get_source_stem() + ";")
+    constant_pool_.get_utf8_index(type_decl.generate_descriptor())
     );
 
     util::put_int_bytes(lvt_entry->index, 2, 0);
