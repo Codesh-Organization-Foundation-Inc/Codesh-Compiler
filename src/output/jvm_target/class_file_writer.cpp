@@ -62,8 +62,7 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 {
     for (const auto &info : class_file.constant_pool)
     {
-        const unsigned char tag[] = {info.get().tag};
-        write_bytes(out, tag, 1);
+        write_bytes(out, &info.get().tag, 1);
 
         if (const auto utf8_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(&info.get()))
         {
