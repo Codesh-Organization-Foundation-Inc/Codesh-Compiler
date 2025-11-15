@@ -5,6 +5,8 @@
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
+#include <map>
+
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node)
 {
     // We must first collect all literals before collecting all others as other pools depend on the string literals.
@@ -21,10 +23,22 @@ int codesh::output::jvm_target::constant_pool::get_index(const std::string &lite
     return result->second;
 }
 
-std::ranges::elements_view<std::ranges::ref_view<const std::map<std::string, int>>, 0>
-    codesh::output::jvm_target::constant_pool::get_string_literals() const
+std::vector<std::string> codesh::output::jvm_target::constant_pool::get_string_literals() const
 {
-    return std::views::keys(string_literals);
+    std::map<int, std::reference_wrapper<const std::string>> inverted_strings;
+    for (const auto &[key, value] : string_literals)
+    {
+        inverted_strings.emplace(value, key);
+    }
+
+    std::vector<std::string> result;
+    result.reserve(inverted_strings.size());
+    for (const auto value : inverted_strings | std::views::values)
+    {
+        result.push_back(value);
+    }
+
+    return result;
 }
 
 // TODO: Support other non-string literals
