@@ -1,21 +1,26 @@
 #include "build.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
 #include "./defs/attribute_info_entry.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
 #include <list>
+#include <map>
+#include <set>
 
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
 
-static void traverse_constant_pools(codesh::output::jvm_target::defs::class_file &class_file);
+[[nodiscard]] static std::map<std::string, int> traverse_constant_pool_literals(
+        codesh::output::jvm_target::defs::class_file &class_file,
+        const codesh::ast::compilation_unit_ast_node &root_node);
 
 static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str);
 static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, int class_index,
@@ -76,26 +81,32 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    // Default class stuff
-    add_methodref_info(class_file, 2, 3); // 1
-    add_class_info(class_file, 4); // 2
-    add_name_and_type_info(class_file, 5, 6); // 3
-    // For super:
-    //TODO: Probably unnecessary if a class is derived
-    add_utf8_info(class_file, "java/lang/Object"); // 4
-    add_utf8_info(class_file, "<init>"); // 5
-    // For empty constructor
-    //TODO: Unnecessary if a constructor was declared
-    add_utf8_info(class_file, "()V"); // 6
-
-    add_class_info(class_file, 8);
-    add_utf8_info(class_file, "Main");
-    add_utf8_info(class_file, "Code");
-    add_utf8_info(class_file, "LocalVariableTable");
-    add_utf8_info(class_file, "this");
-    add_utf8_info(class_file, "LMain;");
-    add_utf8_info(class_file, "SourceFile");
-    add_utf8_info(class_file, root_node.get_source_stem() + ".אמן");
+    const std::map<std::string, int> constant_pool = traverse_constant_pool_literals(class_file, root_node);
+    // // Default class stuff
+    // add_methodref_info(class_file, 2, 3); // 1
+    // add_class_info(class_file, 4); // 2
+    // add_name_and_type_info(class_file, 5, 6); // 3
+    //
+    // // Super:
+    // //TODO: Unnecessary if a class is derived
+    // add_utf8_info(class_file, "java/lang/Object"); // 4
+    //
+    // // Empty constructor:
+    // add_utf8_info(class_file, "<init>"); // 5
+    // //TODO: Unnecessary if a constructor was declared
+    // add_utf8_info(class_file, "()V"); // 6
+    //
+    //
+    // add_class_info(class_file, 8);
+    // add_utf8_info(class_file, "Main");
+    //
+    // add_utf8_info(class_file, "Code");
+    // add_utf8_info(class_file, "LocalVariableTable");
+    // add_utf8_info(class_file, "this");
+    // add_utf8_info(class_file, "LMain;");
+    //
+    // add_utf8_info(class_file, "SourceFile");
+    // add_utf8_info(class_file, root_node.get_source_stem() + ".אמן");
 
 
     //TODO: Put this block at the beginning when no mock values are implemented.
@@ -110,9 +121,52 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
 }
 
 
-static void traverse_constant_pools(codesh::output::jvm_target::defs::class_file &class_file)
+static std::map<std::string, int> traverse_constant_pool_literals(codesh::output::jvm_target::defs::class_file &class_file,
+        const codesh::ast::compilation_unit_ast_node &root_node)
 {
+    std::set<std::string> literals = {
+        "SourceFile",
+        root_node.get_source_stem() + ".אמן"
+    };
 
+
+    // If there's at least a single class, there's code in it.
+    if (!root_node.get_type_declarations().empty())
+    {
+        literals.emplace("<init>");
+
+        literals.emplace("Code");
+        literals.emplace("LocalVariableTable");
+        literals.emplace("this");
+    }
+
+
+    for (const auto &type_decl : root_node.get_type_declarations())
+    {
+        literals.emplace(type_decl->get_binary_name());
+        literals.emplace(type_decl->generate_descriptor());
+
+        if (const auto class_decl = dynamic_cast<const codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
+        {
+            const auto super_class = class_decl->get_super_class();
+
+            if (super_class == nullptr)
+            {
+                // If it doesn't extend anything, it extends Object.
+                literals.emplace("java/lang/Object");
+            }
+            else
+            {
+                literals.emplace(super_class->generate_descriptor());
+            }
+
+            //TODO: This should only happen if no constructor is present
+            literals.emplace("()V");
+        }
+    }
+
+
+    return {};
 }
 
 
