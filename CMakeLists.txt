@@ -107,8 +107,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/i_descriptor_emitter.h
         src/test.cpp
         src/test.h
-        src/output/jvm_target/build.cpp
-        src/output/jvm_target/build.h
+        src/output/jvm_target/class_file_builder.cpp
+        src/output/jvm_target/class_file_builder.h
         src/output/jvm_target/defs/attribute_info_entry.cpp
         src/output/jvm_target/defs/cp_info.cpp
         src/defenition/definitions.h

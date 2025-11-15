@@ -1,4 +1,4 @@
-#include "build.h"
+#include "class_file_builder.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../util.h"
@@ -12,33 +12,29 @@
 #include <list>
 #include <ranges>
 
-static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
-        const codesh::ast::compilation_unit_ast_node &root_node);
-static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
-static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
-
-static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::access_flag> &flags);
-
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
-static void write_methods(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
-static void write_attributes(std::ofstream &out, const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes);
+static void write_methods(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
+static void write_attributes(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::attribute_info_entry>> &attributes);
 static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_target::defs::class_file &class_file);
 
 
-codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
-    const ast::compilation_unit_ast_node &root_node)
-{
-    defs::class_file class_file {
-        .magic = {0xCA, 0xFE, 0xBA, 0xBE},
-    };
+codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node) :
+    root_node(root_node)
+{}
 
+
+codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::class_file_builder::build()
+{
+    util::put_bytes(class_file.magic, {0xCA, 0xFE, 0xBA, 0xBE});
     util::put_int_bytes(class_file.minor_version, 2, 0);
     util::put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
-    add_constant_pool_entries(class_file, root_node);
+    add_constant_pool_entries();
 
 
-    add_access_flags(class_file, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
+    add_access_flags({access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     util::put_int_bytes(class_file.this_class, 2, 7);
     util::put_int_bytes(class_file.super_class, 2, 2);
@@ -47,27 +43,26 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
     util::put_int_bytes(class_file.fields_count, 2, 0);
 
     util::put_int_bytes(class_file.methods_count, 2, 1);
-    add_method(class_file);
+    add_method();
 
     util::put_int_bytes(class_file.attribute_count, 2, 1);
 
 
-    add_source_file(class_file);
+    add_source_file();
 
 
     return class_file;
 }
 
-static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
-        const codesh::ast::compilation_unit_ast_node &root_node)
+void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 {
-    const codesh::output::jvm_target::constant_pool &constant_pool = root_node.get_constant_pool()->get();
+    const constant_pool &constant_pool = root_node.get_constant_pool()->get();
     const size_t constant_pool_size = constant_pool.size() + 1;
 
     if (constant_pool_size > 0xFFFF)
         throw std::runtime_error("Too many constant pool entries; max amount is 65535");
 
-    codesh::util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+    util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 
 
     for (const auto &constant_pool_entry : constant_pool.get_literals())
@@ -77,29 +72,29 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
 }
 
 
-static void add_method(codesh::output::jvm_target::defs::class_file &class_file)
+void codesh::output::jvm_target::class_file_builder::add_method()
 {
-    auto method_entry = std::make_unique<codesh::output::jvm_target::defs::methods_info_entry>();
+    auto method_entry = std::make_unique<defs::methods_info_entry>();
 
-    codesh::util::put_int_bytes(method_entry->access_flags, 2, 1);
-    codesh::util::put_int_bytes(method_entry->name_index, 2, 5);
-    codesh::util::put_int_bytes(method_entry->descriptor_index, 2, 6);
-    codesh::util::put_int_bytes(method_entry->attributes_count, 2, 1);
+    util::put_int_bytes(method_entry->access_flags, 2, 1);
+    util::put_int_bytes(method_entry->name_index, 2, 5);
+    util::put_int_bytes(method_entry->descriptor_index, 2, 6);
+    util::put_int_bytes(method_entry->attributes_count, 2, 1);
 
 
     // Code
-    auto code_attr = std::make_unique<codesh::output::jvm_target::defs::code_attribute_entry>();
+    auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
-    codesh::util::put_int_bytes(code_attr->attribute_name_index, 2, 9);
-    codesh::util::put_int_bytes(code_attr->attribute_length, 4, 35);
-    codesh::util::put_int_bytes(code_attr->max_stack, 2, 1);
-    codesh::util::put_int_bytes(code_attr->max_locals, 2, 1);
-    codesh::util::put_int_bytes(code_attr->code_length, 4, 5);
+    util::put_int_bytes(code_attr->attribute_name_index, 2, 9);
+    util::put_int_bytes(code_attr->attribute_length, 4, 35);
+    util::put_int_bytes(code_attr->max_stack, 2, 1);
+    util::put_int_bytes(code_attr->max_locals, 2, 1);
+    util::put_int_bytes(code_attr->code_length, 4, 5);
 
-    codesh::util::put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
+    util::put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
 
-    codesh::util::put_int_bytes(code_attr->exception_table_length, 2, 0);
-    codesh::util::put_int_bytes(code_attr->attribute_count, 2, 1);
+    util::put_int_bytes(code_attr->exception_table_length, 2, 0);
+    util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     //TODO: Re-add line number table
 
@@ -118,17 +113,17 @@ static void add_method(codesh::output::jvm_target::defs::class_file &class_file)
 
 
     // Local variables
-    auto local_variable_table = std::make_unique<codesh::output::jvm_target::defs::local_variable_table_attribute_entry>();
-    codesh::util::put_int_bytes(local_variable_table->attribute_name_index, 2, 10);
-    codesh::util::put_int_bytes(local_variable_table->attribute_length, 4, 12);
-    codesh::util::put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
+    auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
+    util::put_int_bytes(local_variable_table->attribute_name_index, 2, 10);
+    util::put_int_bytes(local_variable_table->attribute_length, 4, 12);
+    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
 
-    auto lvt_entry = std::make_unique<codesh::output::jvm_target::defs::local_variable_table_entry>();
-    codesh::util::put_int_bytes(lvt_entry->start_pc, 2, 0);
-    codesh::util::put_int_bytes(lvt_entry->length, 2, 5);
-    codesh::util::put_int_bytes(lvt_entry->name_index, 2, 11);
-    codesh::util::put_int_bytes(lvt_entry->descriptor_index, 2, 12);
-    codesh::util::put_int_bytes(lvt_entry->index, 2, 0);
+    auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
+    util::put_int_bytes(lvt_entry->start_pc, 2, 0);
+    util::put_int_bytes(lvt_entry->length, 2, 5);
+    util::put_int_bytes(lvt_entry->name_index, 2, 11);
+    util::put_int_bytes(lvt_entry->descriptor_index, 2, 12);
+    util::put_int_bytes(lvt_entry->index, 2, 0);
     local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
 
     code_attr->attributes.push_back(std::move(local_variable_table));
@@ -138,16 +133,29 @@ static void add_method(codesh::output::jvm_target::defs::class_file &class_file)
     class_file.methods_info.push_back(std::move(method_entry));
 }
 
-static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file)
+void codesh::output::jvm_target::class_file_builder::add_source_file()
 {
-    auto source_file_entry = std::make_unique<codesh::output::jvm_target::defs::source_file_attribute_entry>();
-    codesh::util::put_int_bytes(source_file_entry->attribute_name_index, 2, 13);
-    codesh::util::put_int_bytes(source_file_entry->attribute_length, 4, 2);
-    codesh::util::put_int_bytes(source_file_entry->sourcefile_index, 2, 14);
+    auto source_file_entry = std::make_unique<defs::source_file_attribute_entry>();
+    util::put_int_bytes(source_file_entry->attribute_name_index, 2, 13);
+    util::put_int_bytes(source_file_entry->attribute_length, 4, 2);
+    util::put_int_bytes(source_file_entry->sourcefile_index, 2, 14);
 
     class_file.attribute_info.push_back(std::move(source_file_entry));
 }
 
+void codesh::output::jvm_target::class_file_builder::add_access_flags(
+        const std::list<access_flag> &flags)
+{
+    //TODO: Change default values
+    uint16_t value = 0;
+
+    for (auto flag: flags)
+    {
+        value |= static_cast<uint16_t>(flag);
+    }
+
+    util::put_int_bytes(class_file.access_flags, 2, value);
+}
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file,
     const ast::compilation_unit_ast_node &root_node, const std::filesystem::path &destination)
@@ -179,20 +187,6 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     write_attributes(destination_file, class_file.attribute_info);
 
     destination_file.close();
-}
-
-static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file,
-                      const std::list<codesh::output::jvm_target::access_flag> &flags)
-{
-    //TODO: Change default values
-    uint16_t value = 0;
-
-    for (auto flag: flags)
-    {
-        value |= static_cast<uint16_t>(flag);
-    }
-
-    codesh::util::put_int_bytes(class_file.access_flags, 2, value);
 }
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, const std::streamsize length)

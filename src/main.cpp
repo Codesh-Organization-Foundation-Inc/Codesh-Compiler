@@ -1,7 +1,7 @@
 #include "command_parser.h"
 #include "lexer/regex.h"
 #include "lexer/tokenizer.h"
-#include "output/jvm_target/build.h"
+#include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/defs/class_file.h"
 #include "parser/parser.h"
 #include "test.h"

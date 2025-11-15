@@ -2,6 +2,7 @@
 #include "defs/class_file.h"
 
 #include <filesystem>
+#include <list>
 
 namespace codesh::ast
 {
@@ -26,7 +27,24 @@ enum class access_flag : uint16_t
 };
 
 
-[[nodiscard]] defs::class_file build(const ast::compilation_unit_ast_node &root_node);
+class class_file_builder
+{
+    defs::class_file class_file;
+
+    const ast::compilation_unit_ast_node &root_node;
+
+
+    void add_constant_pool_entries();
+    void add_method();
+    void add_source_file();
+
+    void add_access_flags(const std::list<access_flag> &flags);
+
+public:
+    explicit class_file_builder(const ast::compilation_unit_ast_node &root_node);
+
+    [[nodiscard]] defs::class_file build();
+};
 
 void write_to_file(const defs::class_file &class_file, const ast::compilation_unit_ast_node &root_node,
         const std::filesystem::path &destination);
