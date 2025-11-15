@@ -8,42 +8,34 @@
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
-codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node) : index(1)
+codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
+        const ast::type_decl::type_declaration_ast_node &type_decl) :
+    root_node(root_node),
+    type_decl(type_decl),
+    index(1)
 {
     goc_utf8_info("SourceFile");
     goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);
 
-    // If there's at least a single class, there's code in it.
-    if (!root_node.get_type_declarations().empty())
+    goc_utf8_info("Code");
+    goc_utf8_info("LocalVariableTable");
+    goc_utf8_info("this");
+
+    goc_class_info(
+        goc_utf8_info(type_decl.get_binary_name())
+    );
+    goc_utf8_info(type_decl.generate_descriptor());
+
+    if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
-        goc_utf8_info("Code");
-        goc_utf8_info("LocalVariableTable");
-        goc_utf8_info("this");
-
-        traverse_type_decls(root_node);
-    }
-}
-
-void codesh::output::jvm_target::constant_pool::traverse_type_decls(const ast::compilation_unit_ast_node &root_node)
-{
-    for (const auto &type_decl : root_node.get_type_declarations())
-    {
-        goc_class_info(
-            goc_utf8_info(type_decl->get_binary_name())
-        );
-        goc_utf8_info(type_decl->generate_descriptor());
-
-        if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
-        {
-            traverse_class_decl(*class_decl);
-        }
+        traverse_class_decl(*class_decl);
     }
 }
 
 void codesh::output::jvm_target::constant_pool::traverse_class_decl(
-        const ast::type_decl::class_declaration_ast_node &class_decl_node)
+        const ast::type_decl::class_declaration_ast_node &class_decl)
 {
-    const auto super_class = class_decl_node.get_super_class();
+    const auto super_class = class_decl.get_super_class();
 
     int super_class_cpi;
 
@@ -72,9 +64,9 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
 }
 
 
-int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> root_node)
+int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
-    const auto [it, inserted] = literals.try_emplace(std::move(root_node), index);
+    const auto [it, inserted] = literals.try_emplace(std::move(constant_info), index);
 
     if (inserted)
     {
@@ -82,7 +74,7 @@ int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs
         return index++;
     }
 
-    return literals_lookup_map.at(root_node.get());
+    return literals_lookup_map.at(constant_info.get());
 }
 
 int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)

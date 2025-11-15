@@ -8,6 +8,10 @@
 #include <unordered_set>
 #include <vector>
 
+namespace codesh::ast::type_decl
+{
+class type_declaration_ast_node;
+}
 namespace codesh::output::jvm_target::defs
 {
 class cp_info;
@@ -30,6 +34,9 @@ namespace codesh::output::jvm_target
 {
 class constant_pool
 {
+    const ast::compilation_unit_ast_node &root_node;
+    const ast::type_decl::type_declaration_ast_node &type_decl;
+
     std::unordered_map<
         std::unique_ptr<const defs::cp_info>, int,
         defs::cp_info_unique_ptr_hash, defs::cp_info_unique_ptr_equal
@@ -43,13 +50,12 @@ class constant_pool
         defs::cp_info_ptr_hash, defs::cp_info_ptr_equal
     > literals_lookup_map;
 
-    void traverse_type_decls(const ast::compilation_unit_ast_node &root_node);
-    void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl_node);
+    void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
 
 
     int index;
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
-    int goc_constant(std::unique_ptr<defs::cp_info> root_node);
+    int goc_constant(std::unique_ptr<defs::cp_info> constant_info);
 
     int goc_utf8_info(const std::string &utf8);
     int goc_methodref_info(int class_index, int name_and_type_index);
@@ -65,7 +71,8 @@ public:
     /**
      * Constructs a new constant pool using the provided AST node
      */
-    explicit constant_pool(const ast::compilation_unit_ast_node &root_node);
+    constant_pool(const ast::compilation_unit_ast_node &root_node,
+            const ast::type_decl::type_declaration_ast_node &type_decl);
 
     [[nodiscard]] int get_index(const defs::cp_info &literal) const;
     [[nodiscard]] int get_utf8_index(const std::string &utf8) const;

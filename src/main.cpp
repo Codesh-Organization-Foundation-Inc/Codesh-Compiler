@@ -40,7 +40,7 @@ int main(const int argc, char **const argv) {
     for (auto &type_declaration : ast->get_type_declarations())
     {
         // CONSTRUCTING CONSTANT POOLS
-        type_declaration->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast));
+        type_declaration->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast, *type_declaration));
 
         // BUILDING
         const auto class_file = codesh::output::jvm_target::class_file_builder(
