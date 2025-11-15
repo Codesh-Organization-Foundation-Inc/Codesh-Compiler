@@ -153,7 +153,7 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 {
     const auto result = literals_lookup_map.find(&literal);
     if (result == literals_lookup_map.end())
-        return -1;
+        throw std::runtime_error("Could not find literal in constant pool");
 
     return result->second;
 }

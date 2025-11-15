@@ -4,6 +4,10 @@
 #include <filesystem>
 #include <list>
 
+namespace codesh::output::jvm_target
+{
+class constant_pool;
+}
 namespace codesh::ast
 {
 class compilation_unit_ast_node;
@@ -29,21 +33,22 @@ enum class access_flag : uint16_t
 
 class class_file_builder
 {
-    defs::class_file class_file;
+    std::unique_ptr<defs::class_file> class_file;
 
     const ast::compilation_unit_ast_node &root_node;
+    const constant_pool &constant_pool_;
 
 
-    void add_constant_pool_entries();
-    void add_method();
-    void add_source_file();
+    void add_constant_pool_entries() const;
+    void add_method() const;
+    void add_source_file() const;
 
-    void add_access_flags(const std::list<access_flag> &flags);
+    void add_access_flags(const std::list<access_flag> &flags) const;
 
 public:
     explicit class_file_builder(const ast::compilation_unit_ast_node &root_node);
 
-    [[nodiscard]] defs::class_file build();
+    [[nodiscard]] std::unique_ptr<defs::class_file> build();
 };
 
 }

@@ -42,7 +42,7 @@ int main(const int argc, char **const argv) {
 
     // BUILDING
     const auto class_file = codesh::output::jvm_target::class_file_builder(*ast).build();
-    codesh::output::jvm_target::write_to_file(class_file, *ast, args.dest_path);
+    codesh::output::jvm_target::write_to_file(*class_file, *ast, args.dest_path);
 
     return 0;
 }
