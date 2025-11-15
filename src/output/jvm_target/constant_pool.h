@@ -63,6 +63,6 @@ public:
     /**
      * @return All string literals by the order of their index
      */
-    [[nodiscard]] std::vector<std::reference_wrapper<const defs::cp_info>> get_string_literals() const;
+    [[nodiscard]] std::vector<std::reference_wrapper<const defs::cp_info>> get_literals() const;
 };
 }

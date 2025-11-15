@@ -17,13 +17,6 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
 
-static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str);
-static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, int class_index,
-                               int name_and_type_index);
-static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index,
-                                   int descriptor_index);
-static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, int name_index);
-
 static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file, const std::list<codesh::output::jvm_target::access_flag> &flags);
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
@@ -68,9 +61,9 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    for (const auto &constant_pool_entry : root_node.get_constant_pool()->get().get_string_literals())
+    for (const auto &constant_pool_entry : root_node.get_constant_pool()->get().get_literals())
     {
-        add_utf8_info(class_file, constant_pool_entry);
+        class_file.constant_pool.push_back(constant_pool_entry);
     }
 
     // // Default class stuff
@@ -281,24 +274,24 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 {
     for (const auto &info : class_file.constant_pool)
     {
-        const unsigned char tag[] = {info->tag};
+        const unsigned char tag[] = {info.get().tag};
         write_bytes(out, tag, 1);
 
-        if (const auto utf8_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(info.get()))
+        if (const auto utf8_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Utf8_info *>(&info.get()))
         {
             write_bytes(out, utf8_info->length, 2);
             write_bytes(out, utf8_info->bytes.data(), utf8_info->bytes.size()); // NOLINT(*-narrowing-conversions) (Already checked in add_utf8_info)
         }
-        else if (const auto cls_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(info.get()))
+        else if (const auto cls_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Class_info *>(&info.get()))
         {
             write_bytes(out, cls_info->name_index, 2);
         }
-        else if (const auto mref_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(info.get()))
+        else if (const auto mref_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Methodref_info *>(&info.get()))
         {
             write_bytes(out, mref_info->class_index, 2);
             write_bytes(out, mref_info->name_and_type_index, 2);
         }
-        else if (const auto nat_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(info.get()))
+        else if (const auto nat_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_NameAndType_info *>(&info.get()))
         {
             write_bytes(out, nat_info->name_index, 2);
             write_bytes(out, nat_info->descriptor_index, 2);

@@ -57,22 +57,31 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
     return result->second;
 }
 
-std::vector<std::string> codesh::output::jvm_target::constant_pool::get_string_literals() const
+std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_info>>
+    codesh::output::jvm_target::constant_pool::get_literals() const
 {
-    std::unordered_map<int, std::reference_wrapper<const std::string>> inverted_strings;
-    for (const auto &[key, value] : string_literals)
+    // The literals need to match the order written in the Class file.
+    // The order is specified by this map's int value.
+    // So make the value the new key, and return the sorted vector.
+    //
+    // This then means that every return index (with get_index) matches the one in the class file.
+
+    std::unordered_map<int, const defs::cp_info *> inverted_literals;
+    for (const auto &[key, value] : literals_lookup_map)
     {
-        inverted_strings.emplace(value, key);
+        inverted_literals.emplace(value, key);
     }
 
-    std::vector<std::string> result;
-    result.reserve(inverted_strings.size());
-    for (int i = 0; i < inverted_strings.size(); i++)
+
+    std::vector<std::reference_wrapper<const defs::cp_info>> results;
+    results.reserve(inverted_literals.size());
+
+    for (int i = 0; i < inverted_literals.size(); i++)
     {
-        result.push_back(inverted_strings.at(i + 1));
+        results.emplace_back(*inverted_literals.at(i + 1));
     }
 
-    return result;
+    return results;
 }
 
 void codesh::output::jvm_target::constant_pool::traverse_type_decls(const ast::compilation_unit_ast_node &root_node)
