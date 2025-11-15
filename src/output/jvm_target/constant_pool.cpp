@@ -9,15 +9,15 @@
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node) : index(1)
 {
-    goc_utf8_constant("SourceFile");
-    goc_utf8_constant(root_node.get_source_stem() + ".אמן");
+    goc_utf8_info("SourceFile");
+    goc_utf8_info(root_node.get_source_stem() + ".אמן");
 
     // If there's at least a single class, there's code in it.
     if (!root_node.get_type_declarations().empty())
     {
-        goc_utf8_constant("Code");
-        goc_utf8_constant("LocalVariableTable");
-        goc_utf8_constant("this");
+        goc_utf8_info("Code");
+        goc_utf8_info("LocalVariableTable");
+        goc_utf8_info("this");
 
         traverse_type_decls(root_node);
     }
@@ -28,9 +28,9 @@ void codesh::output::jvm_target::constant_pool::traverse_type_decls(const ast::c
     for (const auto &type_decl : root_node.get_type_declarations())
     {
         goc_class_info(
-            goc_utf8_constant(type_decl->get_binary_name())
+            goc_utf8_info(type_decl->get_binary_name())
         );
-        goc_utf8_constant(type_decl->generate_descriptor());
+        goc_utf8_info(type_decl->generate_descriptor());
 
         if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
         {
@@ -49,11 +49,11 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
     if (super_class == nullptr)
     {
         // If it doesn't extend anything, it extends Object.
-        super_class_cpi = goc_utf8_constant("java/lang/Object");
+        super_class_cpi = goc_utf8_info("java/lang/Object");
     }
     else
     {
-        super_class_cpi = goc_utf8_constant(super_class->get_binary_name());
+        super_class_cpi = goc_utf8_info(super_class->get_binary_name());
     }
 
     const int super_class_constant = goc_class_info(super_class_cpi);
@@ -63,9 +63,9 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         super_class_constant,
 
         goc_name_and_type_info(
-            goc_utf8_constant("<init>"),
+            goc_utf8_info("<init>"),
             //TODO: Actually check super call params
-            goc_utf8_constant("()V")
+            goc_utf8_info("()V")
         )
     );
 }
@@ -84,7 +84,26 @@ int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs
     return literals_lookup_map.at(root_node.get());
 }
 
-int codesh::output::jvm_target::constant_pool::goc_utf8_constant(const std::string &utf8)
+int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)
+{
+    return goc_constant(utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
+{
+    return goc_constant(methodref_info(class_index, name_and_type_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int name_index, const int descriptor_index)
+{
+    return goc_constant(name_and_type_info(name_index, descriptor_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
+{
+    return goc_constant(class_info(name_index));
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
+    codesh::output::jvm_target::constant_pool::utf8_info(const std::string &utf8)
 {
     if (utf8.size() > 0xFFFF)
         throw std::runtime_error("String size is longer than possible; max length is 65535");
@@ -93,36 +112,39 @@ int codesh::output::jvm_target::constant_pool::goc_utf8_constant(const std::stri
     util::put_int_bytes(utf8_info->length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
     utf8_info->bytes.insert(utf8_info->bytes.end(), utf8.begin(), utf8.end());
 
-    return goc_constant(std::move(utf8_info));
+    return std::move(utf8_info);
 }
 
-int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
+    codesh::output::jvm_target::constant_pool::methodref_info(const int class_index, const int name_and_type_index)
 {
     auto const_methodref = std::make_unique<defs::CONSTANT_Methodref_info>();
 
     util::put_int_bytes(const_methodref->class_index, 2, class_index);
     util::put_int_bytes(const_methodref->name_and_type_index, 2, name_and_type_index);
 
-    return goc_constant(std::move(const_methodref));
+    return std::move(const_methodref);
 }
 
-int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int name_index, const int descriptor_index)
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>
+    codesh::output::jvm_target::constant_pool::name_and_type_info(const int name_index, const int descriptor_index)
 {
     auto const_name_and_type = std::make_unique<defs::CONSTANT_NameAndType_info>();
 
     util::put_int_bytes(const_name_and_type->name_index, 2, name_index);
     util::put_int_bytes(const_name_and_type->descriptor_index, 2, descriptor_index);
 
-    return goc_constant(std::move(const_name_and_type));
+    return std::move(const_name_and_type);
 }
 
-int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
+    codesh::output::jvm_target::constant_pool::class_info(const int name_index)
 {
     auto const_class = std::make_unique<defs::CONSTANT_Class_info>();
 
     util::put_int_bytes(const_class->name_index, 2, name_index);
 
-    return goc_constant(std::move(const_class));
+    return std::move(const_class);
 }
 
 
@@ -134,6 +156,29 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 
     return result->second;
 }
+
+int codesh::output::jvm_target::constant_pool::get_utf8_index(const std::string &utf8) const
+{
+    return get_index(*utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::get_methodref_index(const int class_index,
+                                                                   const int name_and_type_index) const
+{
+    return get_index(*methodref_info(class_index, name_and_type_index));
+}
+
+int codesh::output::jvm_target::constant_pool::get_name_and_type_index(const int name_index,
+                                                                       const int descriptor_index) const
+{
+    return get_index(*name_and_type_info(name_index, descriptor_index));
+}
+
+int codesh::output::jvm_target::constant_pool::get_class_index(const int name_index) const
+{
+    return get_index(*class_info(name_index));
+}
+
 
 std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_info>>
     codesh::output::jvm_target::constant_pool::get_literals() const
