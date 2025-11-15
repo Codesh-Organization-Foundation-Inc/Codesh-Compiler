@@ -61,47 +61,19 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    for (const auto &constant_pool_entry : root_node.get_constant_pool()->get().get_literals())
-    {
-        class_file.constant_pool.push_back(constant_pool_entry);
-    }
-
-    // // Default class stuff
-    // add_methodref_info(class_file, 2, 3); // 1
-    // add_class_info(class_file, 4); // 2
-    // add_name_and_type_info(class_file, 5, 6); // 3
-    //
-    // // Super:
-    // //TODO: Unnecessary if a class is derived
-    // add_utf8_info(class_file, "java/lang/Object"); // 4
-    //
-    // // Empty constructor:
-    // add_utf8_info(class_file, "<init>"); // 5
-    // //TODO: Unnecessary if a constructor was declared
-    // add_utf8_info(class_file, "()V"); // 6
-    //
-    //
-    // add_class_info(class_file, 8);
-    // add_utf8_info(class_file, "Main");
-    //
-    // add_utf8_info(class_file, "Code");
-    // add_utf8_info(class_file, "LocalVariableTable");
-    // add_utf8_info(class_file, "this");
-    // add_utf8_info(class_file, "LMain;");
-    //
-    // add_utf8_info(class_file, "SourceFile");
-    // add_utf8_info(class_file, root_node.get_source_stem() + ".אמן");
-
-
-    //TODO: Put this block at the beginning when no mock values are implemented.
-    // This is as the constant_pool_size should be known beforehand.
-
-    const size_t constant_pool_size = class_file.constant_pool.size() + 1;
+    const codesh::output::jvm_target::constant_pool &constant_pool = root_node.get_constant_pool()->get();
+    const size_t constant_pool_size = constant_pool.size() + 1;
 
     if (constant_pool_size > 0xFFFF)
         throw std::runtime_error("Too many constant pool entries; max amount is 65535");
 
     codesh::util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+
+
+    for (const auto &constant_pool_entry : constant_pool.get_literals())
+    {
+        class_file.constant_pool.push_back(constant_pool_entry);
+    }
 }
 
 

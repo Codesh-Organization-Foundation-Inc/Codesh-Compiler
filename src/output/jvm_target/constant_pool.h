@@ -77,5 +77,7 @@ public:
      * @return All string literals by the order of their index
      */
     [[nodiscard]] std::vector<std::reference_wrapper<const defs::cp_info>> get_literals() const;
+
+    [[nodiscard]] size_t size() const;
 };
 }

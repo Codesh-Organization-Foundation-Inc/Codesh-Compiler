@@ -206,3 +206,8 @@ std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_in
 
     return results;
 }
+
+size_t codesh::output::jvm_target::constant_pool::size() const
+{
+    return literals.size();
+}
