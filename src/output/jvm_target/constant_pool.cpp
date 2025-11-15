@@ -31,6 +31,7 @@ void codesh::output::jvm_target::constant_pool::add_constant(std::unique_ptr<def
 
     if (inserted)
     {
+        literals_lookup_map.emplace(it->first.get(), index);
         index++;
     }
 }
@@ -47,10 +48,10 @@ void codesh::output::jvm_target::constant_pool::add_utf8_constant(const std::str
     add_constant(std::move(utf8_info));
 }
 
-int codesh::output::jvm_target::constant_pool::get_index(const std::string &literal) const
+int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &literal) const
 {
-    const auto result = string_literals.find(literal);
-    if (result == string_literals.end())
+    const auto result = literals_lookup_map.find(&literal);
+    if (result == literals_lookup_map.end())
         return -1;
 
     return result->second;

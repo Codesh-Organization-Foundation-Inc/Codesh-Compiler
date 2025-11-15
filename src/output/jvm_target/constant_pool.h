@@ -32,8 +32,16 @@ class constant_pool
 {
     std::unordered_map<
         std::unique_ptr<const defs::cp_info>, int,
-        defs::cp_info_ptr_hash, defs::cp_info_ptr_equal
+        defs::cp_info_unique_ptr_hash, defs::cp_info_unique_ptr_equal
     > literals;
+    /**
+     * C++ is fucking dumb and we can't .find() a reference/pointer when the key is a uNiqUe pOIntEr
+     * fucking goo goo ga ga ahh language
+     */
+    std::unordered_map<
+        const defs::cp_info *, int,
+        defs::cp_info_ptr_hash, defs::cp_info_ptr_equal
+    > literals_lookup_map;
 
     void traverse_type_decls(const ast::compilation_unit_ast_node &root_node);
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl_node);
