@@ -209,48 +209,6 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     destination_file.close();
 }
 
-// static void add_utf8_info(codesh::output::jvm_target::defs::class_file &class_file, const std::string &str)
-// {
-//     if (str.size() > 0xFFFF)
-//         throw std::runtime_error("String size is longer than possible; max length is 65535");
-//
-//     auto const_utf8 = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>();
-//
-//     codesh::util::put_int_bytes(const_utf8->length, 2, str.size()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
-//     const_utf8->bytes.insert(const_utf8->bytes.end(), str.begin(), str.end());
-//
-//     class_file.constant_pool.push_back(std::move(const_utf8));
-// }
-//
-// static void add_methodref_info(codesh::output::jvm_target::defs::class_file &class_file, const int class_index, const int name_and_type_index)
-// {
-//     auto const_methodref = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>();
-//
-//     codesh::util::put_int_bytes(const_methodref->class_index, 2, class_index);
-//     codesh::util::put_int_bytes(const_methodref->name_and_type_index, 2, name_and_type_index);
-//
-//     class_file.constant_pool.push_back(std::move(const_methodref));
-// }
-//
-// static void add_name_and_type_info(codesh::output::jvm_target::defs::class_file &class_file, const int name_index, const int descriptor_index)
-// {
-//     auto const_name_and_type = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>();
-//
-//     codesh::util::put_int_bytes(const_name_and_type->name_index, 2, name_index);
-//     codesh::util::put_int_bytes(const_name_and_type->descriptor_index, 2, descriptor_index);
-//
-//     class_file.constant_pool.push_back(std::move(const_name_and_type));
-// }
-//
-// static void add_class_info(codesh::output::jvm_target::defs::class_file &class_file, const int name_index)
-// {
-//     auto const_class = std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>();
-//
-//     codesh::util::put_int_bytes(const_class->name_index, 2, name_index);
-//
-//     class_file.constant_pool.push_back(std::move(const_class));
-// }
-
 static void add_access_flags(codesh::output::jvm_target::defs::class_file &class_file,
                       const std::list<codesh::output::jvm_target::access_flag> &flags)
 {

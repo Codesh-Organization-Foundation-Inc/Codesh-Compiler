@@ -35,7 +35,7 @@ class constant_pool
         defs::cp_info_unique_ptr_hash, defs::cp_info_unique_ptr_equal
     > literals;
     /**
-     * C++ is fucking dumb and we can't .find() a reference/pointer when the key is a uNiqUe pOIntEr
+     * C++ is fucking dumb and we can't .find() a fucking reference/pointer when the key is a uNiqUe pOIntEr.
      * fucking goo goo ga ga ahh language
      */
     std::unordered_map<
@@ -51,6 +51,9 @@ class constant_pool
     void add_constant(std::unique_ptr<defs::cp_info> root_node);
 
     void add_utf8_constant(const std::string &utf8);
+    void add_methodref_info(int class_index, int name_and_type_index);
+    void add_name_and_type_info(int name_index, int descriptor_index);
+    void add_class_info(int name_index);
 
 public:
     /**
