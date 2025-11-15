@@ -34,7 +34,10 @@ int main(const int argc, char **const argv) {
     auto tokens = codesh::lexer::tokenize_code(utf16_code);
 
     // PARSING
-    const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
+    auto ast = codesh::parser::parse(tokens, args.src_path.stem());
+
+    // CONSTRUCTING CONSTANT POOLS
+    ast->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast));
 
     // BUILDING
     const codesh::output::jvm_target::defs::class_file class_file = codesh::output::jvm_target::build(*ast);
