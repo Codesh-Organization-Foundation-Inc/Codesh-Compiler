@@ -2,6 +2,7 @@
 #include "lexer/regex.h"
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
+#include "output/jvm_target/class_file_writer.h"
 #include "output/jvm_target/defs/class_file.h"
 #include "parser/parser.h"
 #include "test.h"
@@ -40,7 +41,7 @@ int main(const int argc, char **const argv) {
     ast->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast));
 
     // BUILDING
-    const codesh::output::jvm_target::defs::class_file class_file = codesh::output::jvm_target::build(*ast);
+    const auto class_file = codesh::output::jvm_target::class_file_builder(*ast).build();
     codesh::output::jvm_target::write_to_file(class_file, *ast, args.dest_path);
 
     return 0;
