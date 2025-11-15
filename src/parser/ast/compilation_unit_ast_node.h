@@ -33,6 +33,10 @@ public:
     [[nodiscard]] std::list<std::string> &get_package_name();
     [[nodiscard]] std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations();
     [[nodiscard]] std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations();
+
+    [[nodiscard]] const std::list<std::string> &get_package_name() const;
+    [[nodiscard]] const std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations() const;
+    [[nodiscard]] const std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations() const;
 };
 
 }
