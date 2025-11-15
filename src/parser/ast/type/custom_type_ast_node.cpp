@@ -3,9 +3,14 @@
 std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
 {
     //TODO: Get classpath from symbol table
-    return "L;";
+    return "L" + name + ";";
 }
 
+std::string codesh::ast::type::custom_type_ast_node::get_binary_name() const
+{
+    //TODO: Get package from symbol table
+    return name;
+}
 
 std::string codesh::ast::type::custom_type_ast_node::get_name() const
 {

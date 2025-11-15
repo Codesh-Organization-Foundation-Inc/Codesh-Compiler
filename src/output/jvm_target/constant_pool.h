@@ -47,13 +47,14 @@ class constant_pool
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl_node);
 
 
-    size_t index;
-    void add_constant(std::unique_ptr<defs::cp_info> root_node);
+    int index;
+    // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
+    int goc_constant(std::unique_ptr<defs::cp_info> root_node);
 
-    void add_utf8_constant(const std::string &utf8);
-    void add_methodref_info(int class_index, int name_and_type_index);
-    void add_name_and_type_info(int name_index, int descriptor_index);
-    void add_class_info(int name_index);
+    int goc_utf8_constant(const std::string &utf8);
+    int goc_methodref_info(int class_index, int name_and_type_index);
+    int goc_name_and_type_info(int name_index, int descriptor_index);
+    int goc_class_info(int name_index);
 
 public:
     /**
