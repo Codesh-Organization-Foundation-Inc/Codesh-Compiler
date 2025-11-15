@@ -11,7 +11,7 @@ static void traverse_class_decl(const codesh::ast::type_decl::class_declaration_
 
 
 //TODO: Support other non-string literals
-std::unordered_map<std::string, int> codesh::output::jvm_target::constant_pool_builder::build(
+std::map<std::string, int> codesh::output::jvm_target::constant_pool_builder::build(
     const ast::compilation_unit_ast_node &root_node)
 {
     std::unordered_set<std::string> literals = {
@@ -33,7 +33,7 @@ std::unordered_map<std::string, int> codesh::output::jvm_target::constant_pool_b
     }
 
 
-    std::unordered_map<std::string, int> results;
+    std::map<std::string, int> results;
 
     int index = 1;
     for (const auto &literal : literals)

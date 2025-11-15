@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <unordered_map>
+#include <map>
 
 namespace codesh::ast
 {
@@ -14,5 +14,5 @@ struct class_file;
 
 namespace codesh::output::jvm_target::constant_pool_builder
 {
-[[nodiscard]] std::unordered_map<std::string, int> build(const ast::compilation_unit_ast_node &root_node);
+[[nodiscard]] std::map<std::string, int> build(const ast::compilation_unit_ast_node &root_node);
 }

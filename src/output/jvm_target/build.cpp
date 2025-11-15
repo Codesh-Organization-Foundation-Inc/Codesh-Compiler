@@ -11,7 +11,7 @@
 
 #include <list>
 #include <ranges>
-#include <unordered_map>
+#include <map>
 
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node);
@@ -77,7 +77,7 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    const std::unordered_map<std::string, int> literal_constants = codesh::output::jvm_target::constant_pool_builder::build(
+    const std::map<std::string, int> literal_constants = codesh::output::jvm_target::constant_pool_builder::build(
         root_node
     );
 
