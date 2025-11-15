@@ -5,6 +5,7 @@
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
+#include <bits/locale_facets_nonio.h>
 #include <map>
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node)
@@ -25,7 +26,7 @@ int codesh::output::jvm_target::constant_pool::get_index(const std::string &lite
 
 std::vector<std::string> codesh::output::jvm_target::constant_pool::get_string_literals() const
 {
-    std::map<int, std::reference_wrapper<const std::string>> inverted_strings;
+    std::unordered_map<int, std::reference_wrapper<const std::string>> inverted_strings;
     for (const auto &[key, value] : string_literals)
     {
         inverted_strings.emplace(value, key);
@@ -33,9 +34,9 @@ std::vector<std::string> codesh::output::jvm_target::constant_pool::get_string_l
 
     std::vector<std::string> result;
     result.reserve(inverted_strings.size());
-    for (const auto value : inverted_strings | std::views::values)
+    for (int i = 0; i < inverted_strings.size(); i++)
     {
-        result.push_back(value);
+        result.push_back(inverted_strings.at(i + 1));
     }
 
     return result;
