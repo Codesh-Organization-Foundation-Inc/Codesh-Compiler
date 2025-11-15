@@ -1,11 +1,17 @@
 #pragma once
 
+#include "defs/cp_info.h"
+
 #include <ranges>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+namespace codesh::output::jvm_target::defs
+{
+class cp_info;
+}
 namespace codesh::ast::type_decl
 {
 class class_declaration_ast_node;
@@ -25,7 +31,7 @@ namespace codesh::output::jvm_target
 class constant_pool
 {
     std::unordered_map<std::string, int> string_literals;
-    std::unordered_map<std::string, int> class_literals;
+    std::unordered_map<defs::cp_info *, int, defs::cp_info_ptr_hash, defs::cp_info_ptr_equal> literals;
 
     void collect_literals(const ast::compilation_unit_ast_node &root_node);
     void collect_non_literals(const ast::compilation_unit_ast_node &root_node);

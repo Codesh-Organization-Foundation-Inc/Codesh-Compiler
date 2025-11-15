@@ -118,7 +118,7 @@ add_executable(Codesh_Compiler
 
 # sudo dnf install boost-regex boost-devel
 
-find_package(Boost REQUIRED regex)
+find_package(Boost REQUIRED)
 target_link_libraries(Codesh_Compiler Boost::boost)
 
 # sudo dnf install libicu-devel
