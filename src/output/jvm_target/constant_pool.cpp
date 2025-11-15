@@ -1,5 +1,6 @@
 #include "constant_pool.h"
 
+#include "../../defenition/definitions.h"
 #include "../../util.h"
 
 #include <unordered_set>
@@ -10,7 +11,7 @@
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node) : index(1)
 {
     goc_utf8_info("SourceFile");
-    goc_utf8_info(root_node.get_source_stem() + ".אמן");
+    goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);
 
     // If there's at least a single class, there's code in it.
     if (!root_node.get_type_declarations().empty())
