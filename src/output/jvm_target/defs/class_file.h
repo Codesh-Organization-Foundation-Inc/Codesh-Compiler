@@ -13,7 +13,7 @@ struct class_file
     unsigned char minor_version[2];
     unsigned char major_version[2];
     unsigned char constant_pool_count[2];
-    std::vector<std::unique_ptr<cp_info>> constant_pool;
+    std::vector<std::reference_wrapper<const cp_info>> constant_pool;
     unsigned char access_flags[2];
     unsigned char this_class[2];
     unsigned char super_class[2];
