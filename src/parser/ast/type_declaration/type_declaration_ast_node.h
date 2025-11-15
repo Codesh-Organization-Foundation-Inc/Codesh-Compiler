@@ -19,6 +19,10 @@ public:
     explicit type_declaration_ast_node(std::string name);
 
     [[nodiscard]] std::string generate_descriptor() const override;
+    /**
+     * @return The class name prefixed by the package, separated by slashes
+     */
+    [[nodiscard]] std::string get_binary_name() const;
 
 
     [[nodiscard]] std::string get_name() const;
