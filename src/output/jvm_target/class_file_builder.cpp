@@ -20,7 +20,15 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::co
     class_file(std::make_unique<defs::class_file>()),
     root_node(root_node),
     type_decl(type_decl),
-    constant_pool_(type_decl.get_constant_pool()->get())
+    constant_pool_(type_decl.get_constant_pool()->get()),
+
+    this_class_cpi(constant_pool_.get_class_index(
+        constant_pool_.get_utf8_index(type_decl.get_binary_name())
+    )),
+    super_class_cpi(constant_pool_.get_class_index(
+        //TODO: Support "extends"
+        constant_pool_.get_utf8_index("java/lang/Object")
+    ))
 {}
 
 std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jvm_target::class_file_builder::build()
@@ -35,24 +43,14 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 
     add_access_flags({access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
-    util::put_int_bytes(
-        class_file->this_class, 2,
-        constant_pool_.get_class_index(
-            constant_pool_.get_utf8_index(type_decl.get_binary_name())
-        )
-    );
-    util::put_int_bytes(
-        class_file->super_class, 2,
-        constant_pool_.get_class_index(
-            constant_pool_.get_utf8_index("java/lang/Object")
-        )
-    );
+    util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
+    util::put_int_bytes(class_file->super_class, 2, super_class_cpi);
 
     util::put_int_bytes(class_file->interfaces_count, 2, 0);
     util::put_int_bytes(class_file->fields_count, 2, 0);
 
     util::put_int_bytes(class_file->methods_count, 2, 1);
-    add_method();
+    add_constructor_method();
 
     util::put_int_bytes(class_file->attribute_count, 2, 1);
 
@@ -80,7 +78,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_method() const
+void codesh::output::jvm_target::class_file_builder::add_constructor_method() const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
@@ -97,9 +95,33 @@ void codesh::output::jvm_target::class_file_builder::add_method() const
     util::put_int_bytes(code_attr->attribute_length, 4, 35);
     util::put_int_bytes(code_attr->max_stack, 2, 1);
     util::put_int_bytes(code_attr->max_locals, 2, 1);
-    util::put_int_bytes(code_attr->code_length, 4, 5);
 
-    util::put_bytes(code_attr->code, {0x2A, 0xB7, 0x00, 0x01, 0xB1});
+    // Actual bytecode
+    code_attr->code.push_back(0x2A);
+    {
+        const unsigned char super_call[] = {
+            0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
+                super_class_cpi,
+                constant_pool_.get_name_and_type_index(
+                    constant_pool_.get_utf8_index("<init>"),
+                    constant_pool_.get_utf8_index("()V")
+                )
+            ))
+        };
+
+        for (const unsigned char bytecode : super_call)
+        {
+            code_attr->code.push_back(bytecode);
+        }
+    }
+    code_attr->code.push_back(0xB1);
+
+
+    if (code_attr->code.size() > 0xFFFFFF)
+        throw std::runtime_error("Method code is too long");
+
+    util::put_int_bytes(code_attr->code_length, 4, code_attr->code.size()); // NOLINT(*-narrowing-conversions)
+
 
     util::put_int_bytes(code_attr->exception_table_length, 2, 0);
     util::put_int_bytes(code_attr->attribute_count, 2, 1);

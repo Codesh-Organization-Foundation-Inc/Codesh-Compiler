@@ -44,9 +44,13 @@ class class_file_builder
 
     const constant_pool &constant_pool_;
 
+    // Common pools
+    const int this_class_cpi;
+    const int super_class_cpi;
+
 
     void add_constant_pool_entries() const;
-    void add_method() const;
+    void add_constructor_method() const;
     void add_source_file() const;
 
     void add_access_flags(const std::list<access_flag> &flags) const;

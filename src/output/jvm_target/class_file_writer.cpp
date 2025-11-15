@@ -103,7 +103,7 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
             write_bytes(out, code_attr->max_stack, 2);
             write_bytes(out, code_attr->max_locals, 2);
             write_bytes(out, code_attr->code_length, 4);
-            write_bytes(out, code_attr->code, 5);
+            write_bytes(out, code_attr->code.data(), code_attr->code.size()); // NOLINT(*-narrowing-conversions)
             write_bytes(out, code_attr->exception_table_length, 2);
 
             write_bytes(out, code_attr->attribute_count, 2);
