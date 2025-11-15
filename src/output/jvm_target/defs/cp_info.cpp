@@ -204,12 +204,13 @@ bool codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::operator==(con
 
 
 
-size_t codesh::output::jvm_target::defs::cp_info_ptr_hash::operator()(const cp_info *obj) const
+size_t codesh::output::jvm_target::defs::cp_info_ptr_hash::operator()(const std::unique_ptr<const cp_info> &obj) const
 {
     return obj->hash_code();
 }
 
-bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const cp_info *lhs, const cp_info *rhs) const
+bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const std::unique_ptr<const cp_info> &lhs,
+        const std::unique_ptr<const cp_info> &rhs) const
 {
     if (lhs->tag != rhs->tag)
         return false;
@@ -217,38 +218,38 @@ bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const cp_in
     switch (lhs->tag)
     {
     case 1:
-        return *static_cast<const CONSTANT_Utf8_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Utf8_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Utf8_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Utf8_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 3:
-        return *static_cast<const CONSTANT_Integer_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Integer_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Integer_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Integer_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 4:
-        return *static_cast<const CONSTANT_Float_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Float_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Float_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Float_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 5:
-        return *static_cast<const CONSTANT_Long_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Long_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Long_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Long_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 6:
-        return *static_cast<const CONSTANT_Double_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Double_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Double_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Double_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 7:
-        return *static_cast<const CONSTANT_Class_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Class_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Class_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Class_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 8:
-        return *static_cast<const CONSTANT_String_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_String_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_String_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_String_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 9:
-        return *static_cast<const CONSTANT_Fieldref_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Fieldref_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Fieldref_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Fieldref_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 10:
-        return *static_cast<const CONSTANT_Methodref_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_Methodref_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_Methodref_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_Methodref_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 11:
-        return *static_cast<const CONSTANT_InterfaceMethodref_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_InterfaceMethodref_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_InterfaceMethodref_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_InterfaceMethodref_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     case 12:
-        return *static_cast<const CONSTANT_NameAndType_info *>(lhs) == // NOLINT(*-pro-type-static-cast-downcast)
-               *static_cast<const CONSTANT_NameAndType_info *>(rhs); // NOLINT(*-pro-type-static-cast-downcast)
+        return *static_cast<const CONSTANT_NameAndType_info *>(lhs.get()) == // NOLINT(*-pro-type-static-cast-downcast)
+               *static_cast<const CONSTANT_NameAndType_info *>(rhs.get()); // NOLINT(*-pro-type-static-cast-downcast)
     default:
         return false;
     }

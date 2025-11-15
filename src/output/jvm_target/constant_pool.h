@@ -2,7 +2,7 @@
 
 #include "defs/cp_info.h"
 
-#include <ranges>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -31,7 +31,7 @@ namespace codesh::output::jvm_target
 class constant_pool
 {
     std::unordered_map<std::string, int> string_literals;
-    std::unordered_map<defs::cp_info *, int, defs::cp_info_ptr_hash, defs::cp_info_ptr_equal> literals;
+    std::unordered_map<std::unique_ptr<const defs::cp_info>, int, defs::cp_info_ptr_hash, defs::cp_info_ptr_equal> literals;
 
     void collect_literals(const ast::compilation_unit_ast_node &root_node);
     void collect_non_literals(const ast::compilation_unit_ast_node &root_node);

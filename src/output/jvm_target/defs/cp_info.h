@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 namespace codesh::output::jvm_target::defs
@@ -150,12 +151,12 @@ public:
 
 struct cp_info_ptr_hash
 {
-    size_t operator()(const cp_info* obj) const;
+    size_t operator()(const std::unique_ptr<const cp_info> &obj) const;
 };
 
 struct cp_info_ptr_equal
 {
-    bool operator()(const cp_info* lhs, const cp_info* rhs) const;
+    bool operator()(const std::unique_ptr<const cp_info> &lhs, const std::unique_ptr<const cp_info> &rhs) const;
 };
 
 }
