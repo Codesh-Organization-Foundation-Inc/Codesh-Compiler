@@ -39,8 +39,10 @@ public:
      */
     explicit constant_pool(const ast::compilation_unit_ast_node &root_node);
 
+    [[nodiscard]] int get_index(const std::string &literal) const;
+
     [[nodiscard]] std::ranges::elements_view<std::ranges::ref_view<const std::map<std::string, int>>, 0>
-    get_string_literals() const;
+        get_string_literals() const;
 
 };
 }

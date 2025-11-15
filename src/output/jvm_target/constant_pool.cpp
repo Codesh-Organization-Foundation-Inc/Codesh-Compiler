@@ -12,6 +12,15 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
     collect_non_literals(root_node);
 }
 
+int codesh::output::jvm_target::constant_pool::get_index(const std::string &literal) const
+{
+    const auto result = string_literals.find(literal);
+    if (result == string_literals.end())
+        return -1;
+
+    return result->second;
+}
+
 std::ranges::elements_view<std::ranges::ref_view<const std::map<std::string, int>>, 0>
     codesh::output::jvm_target::constant_pool::get_string_literals() const
 {
