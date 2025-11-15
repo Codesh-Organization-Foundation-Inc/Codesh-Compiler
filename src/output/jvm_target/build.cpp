@@ -10,15 +10,16 @@
 #include <fstream>
 
 #include <list>
-#include <map>
+#include <ranges>
 #include <set>
+#include <unordered_map>
 
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_method(codesh::output::jvm_target::defs::class_file &class_file);
 static void add_source_file(codesh::output::jvm_target::defs::class_file &class_file);
 
-[[nodiscard]] static std::map<std::string, int> traverse_constant_pool_literals(
+[[nodiscard]] static std::unordered_map<std::string, int> traverse_constant_pool_literals(
         codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -81,7 +82,13 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    const std::map<std::string, int> constant_pool = traverse_constant_pool_literals(class_file, root_node);
+    const std::unordered_map<std::string, int> constant_pool = traverse_constant_pool_literals(class_file, root_node);
+
+    for (const auto &constant_pool_entry : constant_pool | std::views::keys)
+    {
+        add_utf8_info(class_file, constant_pool_entry);
+    }
+
     // // Default class stuff
     // add_methodref_info(class_file, 2, 3); // 1
     // add_class_info(class_file, 4); // 2
@@ -121,7 +128,7 @@ static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_fi
 }
 
 
-static std::map<std::string, int> traverse_constant_pool_literals(codesh::output::jvm_target::defs::class_file &class_file,
+static std::unordered_map<std::string, int> traverse_constant_pool_literals(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
     std::set<std::string> literals = {
@@ -166,7 +173,15 @@ static std::map<std::string, int> traverse_constant_pool_literals(codesh::output
     }
 
 
-    return {};
+    std::unordered_map<std::string, int> results;
+
+    int index = 1;
+    for (const auto &literal : literals)
+    {
+        results.emplace(literal, index++);
+    }
+
+    return results;
 }
 
 
