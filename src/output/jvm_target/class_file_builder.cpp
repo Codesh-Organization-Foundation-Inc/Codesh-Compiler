@@ -21,9 +21,9 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node) :
+    class_file(),
     root_node(root_node)
 {}
-
 
 codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::class_file_builder::build()
 {
