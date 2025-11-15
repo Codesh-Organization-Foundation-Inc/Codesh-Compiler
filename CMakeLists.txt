@@ -113,7 +113,9 @@ add_executable(Codesh_Compiler
         src/output/jvm_target/defs/cp_info.cpp
         src/defenition/definitions.h
         src/output/jvm_target/constant_pool.cpp
-        src/output/jvm_target/constant_pool.h)
+        src/output/jvm_target/constant_pool.h
+        src/output/jvm_target/class_file_writer.cpp
+        src/output/jvm_target/class_file_writer.h)
 
 
 # sudo dnf install boost-regex boost-devel
