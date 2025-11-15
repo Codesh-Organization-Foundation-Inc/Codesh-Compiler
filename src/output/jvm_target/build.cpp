@@ -1,7 +1,7 @@
 #include "build.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "constant_pool_builder.h"
+#include "constant_pool.h"
 
 #include "./defs/attribute_info_entry.h"
 
@@ -77,11 +77,9 @@ codesh::output::jvm_target::defs::class_file codesh::output::jvm_target::build(
 static void add_constant_pool_entries(codesh::output::jvm_target::defs::class_file &class_file,
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    const std::map<std::string, int> literal_constants = codesh::output::jvm_target::constant_pool_builder::build(
-        root_node
-    );
+    const auto literal_constants = codesh::output::jvm_target::constant_pool(root_node);
 
-    for (const auto &constant_pool_entry : literal_constants | std::views::keys)
+    for (const auto &constant_pool_entry : literal_constants.get_string_literals())
     {
         add_utf8_info(class_file, constant_pool_entry);
     }

@@ -1,18 +1,25 @@
-#include "constant_pool_builder.h"
+#include "constant_pool.h"
 
 #include <unordered_set>
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
-static void traverse_type_decls(const codesh::ast::compilation_unit_ast_node &root_node, std::unordered_set<std::string> &literals);
-static void traverse_class_decl(const codesh::ast::type_decl::class_declaration_ast_node &class_decl_node,
-        std::unordered_set<std::string> &literals);
+codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node)
+{
+    // We must first collect all literals before collecting all others as other pools depend on the string literals.
+    collect_literals(root_node);
+    collect_non_literals(root_node);
+}
 
+std::ranges::elements_view<std::ranges::ref_view<const std::map<std::string, int>>, 0>
+    codesh::output::jvm_target::constant_pool::get_string_literals() const
+{
+    return std::views::keys(string_literals);
+}
 
-//TODO: Support other non-string literals
-std::map<std::string, int> codesh::output::jvm_target::constant_pool_builder::build(
-    const ast::compilation_unit_ast_node &root_node)
+// TODO: Support other non-string literals
+void codesh::output::jvm_target::constant_pool::collect_literals(const ast::compilation_unit_ast_node &root_node)
 {
     std::unordered_set<std::string> literals = {
         "SourceFile",
@@ -33,33 +40,30 @@ std::map<std::string, int> codesh::output::jvm_target::constant_pool_builder::bu
     }
 
 
-    std::map<std::string, int> results;
-
     int index = 1;
     for (const auto &literal : literals)
     {
-        results.emplace(literal, index++);
+        string_literals.emplace(literal, index++);
     }
-
-    return results;
 }
 
-static void traverse_type_decls(const codesh::ast::compilation_unit_ast_node &root_node, std::unordered_set<std::string> &literals)
+void codesh::output::jvm_target::constant_pool::traverse_type_decls(const ast::compilation_unit_ast_node &root_node,
+        std::unordered_set<std::string> &literals)
 {
     for (const auto &type_decl : root_node.get_type_declarations())
     {
         literals.emplace(type_decl->get_binary_name());
         literals.emplace(type_decl->generate_descriptor());
 
-        if (const auto class_decl = dynamic_cast<const codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
+        if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
         {
             traverse_class_decl(*class_decl, literals);
         }
     }
 }
 
-static void traverse_class_decl(const codesh::ast::type_decl::class_declaration_ast_node &class_decl_node,
-        std::unordered_set<std::string> &literals)
+void codesh::output::jvm_target::constant_pool::traverse_class_decl(
+        const ast::type_decl::class_declaration_ast_node &class_decl_node, std::unordered_set<std::string> &literals)
 {
     const auto super_class = class_decl_node.get_super_class();
 
@@ -75,4 +79,9 @@ static void traverse_class_decl(const codesh::ast::type_decl::class_declaration_
 
     //TODO: This should only happen if no constructor is present
     literals.emplace("()V");
+}
+
+
+void codesh::output::jvm_target::constant_pool::collect_non_literals(const ast::compilation_unit_ast_node &root_node)
+{
 }
