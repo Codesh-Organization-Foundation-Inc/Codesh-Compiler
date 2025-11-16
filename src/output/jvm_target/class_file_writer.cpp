@@ -22,9 +22,10 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
 
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file,
-    const ast::compilation_unit_ast_node &root_node, const std::filesystem::path &destination)
+    const ast::compilation_unit_ast_node &root_node,
+    const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination / (root_node.get_source_stem() + ".class"), std::ios::binary);
+    std::ofstream destination_file(destination / (type_decl.get_name() + ".class"), std::ios::binary);
 
     if (!destination_file)
         throw std::runtime_error("Unable to open output file");

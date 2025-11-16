@@ -49,7 +49,7 @@ int main(const int argc, char **const argv) {
         ).build();
 
         // WRITING
-        codesh::output::jvm_target::write_to_file(*class_file, *ast, args.dest_path);
+        codesh::output::jvm_target::write_to_file(*class_file, *ast, *type_declaration, args.dest_path);
     }
 
     return 0;
