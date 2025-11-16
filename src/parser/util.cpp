@@ -31,45 +31,58 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_type(
     std::queue<std::unique_ptr<token>> &tokens)
 {
+    std::unique_ptr<ast::type::type_ast_node> result;
+
     const auto type_token = consume_token(tokens);
 
     switch (type_token->get_group())
     {
     case token_group::KEYWORD_INTEGER:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
+        break;
     case token_group::KEYWORD_FLOAT:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::FLOAT);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::FLOAT);
+        break;
     case token_group::KEYWORD_DOUBLE:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::DOUBLE);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::DOUBLE);
+        break;
     case token_group::KEYWORD_LONG:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::LONG);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::LONG);
+        break;
     case token_group::KEYWORD_SHORT:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::SHORT);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::SHORT);
+        break;
     case token_group::KEYWORD_BYTE:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE);
+        break;
     case token_group::KEYWORD_CHAR:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::CHAR);
-
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::CHAR);
+        break;
     case token_group::KEYWORD_BOOLEAN:
-        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BOOLEAN);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BOOLEAN);
+        break;
 
     case token_group::IDENTIFIER:
     {
         auto custom_type_node = std::make_unique<ast::type::custom_type_ast_node>();
         custom_type_node->set_name(static_cast<identifier_token *>(type_token.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        return custom_type_node;
+        result = std::move(custom_type_node);
+        break;
     }
 
     default:
         throw std::runtime_error("Unexpected token: Invalid type name");
     }
+
+
+    // Handle arrays
+    while (tokens.front()->get_group() == token_group::KEYWORD_ARRAY)
+    {
+        result->set_array_dimensions(result->get_array_dimensions() + 1);
+    }
+
+    return result;
 }
 
 bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)
