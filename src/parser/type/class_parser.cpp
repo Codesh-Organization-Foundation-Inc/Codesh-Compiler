@@ -30,13 +30,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
 
     // Get name
-    const std::unique_ptr<token> name_token = util::consume_token(tokens);
-
-    if (name_token->get_group() != token_group::IDENTIFIER)
-    {
-        throw std::runtime_error("Unexpected token: Expected identifier");
-    }
-
+    const std::unique_ptr<token> name_token = util::consume_identifier_token(tokens);
 
     std::unique_ptr<ast::type_decl::class_declaration_ast_node> node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
         static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-static-cast-downcast)
@@ -70,7 +64,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         case codesh::token_group::KEYWORD_LET: {
             switch (tokens.front()->get_group())
             {
-            case codesh::token_group::KEYWORD_FUNCTION:
+            case codesh::token_group::KEYWORD_METHOD:
             {
                 parse_method_scope(tokens);
                 // class_node->get_methods().push_back(std::move(...)); // TODO: Add somthing like this
@@ -101,10 +95,16 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 {
     const codesh::token_group type_token = tokens.front()->get_group();
 
-    if (type_token != codesh::token_group::IDENTIFIER
-        && type_token != codesh::token_group::KEYWORD_VAR)
+
+    if (type_token != codesh::token_group::IDENTIFIER)
     {
-        throw std::runtime_error("Unexpected token");
+        //TODO: Parse token group as type and see if it is a primitive
+        bool isPrimitive = false;
+
+        if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
+        {
+            throw std::runtime_error("Unexpected token");
+        }
     }
 
     //TODO: Support fields
@@ -122,11 +122,7 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
         }
 
         // * (the name)
-        const std::unique_ptr<codesh::token> name_token = parser::util::consume_token(tokens);
-        if (name_token->get_group() != codesh::token_group::IDENTIFIER)
-        {
-            throw std::runtime_error("Unexpected token: Expected identifier");
-        }
+        const std::unique_ptr<codesh::token> name_token = parser::util::consume_identifier_token(tokens);
 
         ast::method_declaration_ast_node method_node;
 

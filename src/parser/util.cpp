@@ -10,6 +10,19 @@ std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<st
     return token;
 }
 
+std::unique_ptr<codesh::token> codesh::parser::util::consume_identifier_token(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    std::unique_ptr<token> token = consume_token(tokens);
+
+    if (token->get_group() != token_group::IDENTIFIER)
+    {
+        throw std::runtime_error("Unexpected token: Expected identifier");
+    }
+
+    return std::move(token);
+}
+
 bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)
 {
     if (!tokens.empty() && tokens.front()->get_group() != token_group)

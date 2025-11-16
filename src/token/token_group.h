@@ -25,7 +25,7 @@ enum class token_group : int
     KEYWORD_SHALL_BE, // היה/תהיה
     KEYWORD_RETURN, // וישב
 
-    KEYWORD_FUNCTION, // מעשה
+    KEYWORD_METHOD, // מעשה
     KEYWORD_FUNCTION_CALL, // ויעש
     KEYWORD_TAKES, // ויקח
 
