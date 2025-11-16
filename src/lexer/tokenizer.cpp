@@ -27,9 +27,11 @@ static const boost::regex NEWLINE_REPLACE_RGX(
         + ")" + std::string(trie::keyword::STRING_NEWLINE)
 );
 
-
-static bool is_word_char(const char16_t c) {
-    return u_isalnum(c) || c == u'־';
+/**
+ * @returns Whether the provided character may disobey a word's boundary
+ */
+static bool is_annoying_char(const char16_t c) {
+    return u_isalnum(c);
 }
 
 static bool check_boundary(const std::u16string &code, const trie::keyword_info *keyword, const size_t start,
@@ -45,14 +47,14 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
     if (keyword->boundary == trie::word_boundary::BEFORE || keyword->boundary == trie::word_boundary::BOTH)
     {
         // Check whether a character exists before this keyword
-        if (start > 0 && is_word_char(code[start-1]))
+        if (start > 0 && is_annoying_char(code[start-1]))
             return false;
     }
 
     if (keyword->boundary == trie::word_boundary::AFTER || keyword->boundary == trie::word_boundary::BOTH)
     {
         // Check whether a character exists after this keyword
-        if (end < code.size() && is_word_char(code[end]))
+        if (end < code.size() && is_annoying_char(code[end]))
             return false;
     }
 

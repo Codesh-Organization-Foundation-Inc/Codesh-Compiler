@@ -8,6 +8,10 @@
 
 namespace codesh
 {
+namespace ast::type
+{
+class type_ast_node;
+}
 enum class token_group;
 }
 
@@ -35,10 +39,20 @@ void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::strin
  * Ensures a colon exists at the current token, and consumes it.
  */
 void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
+
 /**
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
  * @return The consumed token
  */
-std::unique_ptr<token> consume_token(std::queue<std::unique_ptr<token>> &tokens);
+[[nodiscard]] std::unique_ptr<token> consume_token(std::queue<std::unique_ptr<token>> &tokens);
+
+/**
+ * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
+ * If the token is not an identifier, throws.
+ * @return The consumed token
+ */
+[[nodiscard]] std::unique_ptr<identifier_token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
+
+[[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
 
 }

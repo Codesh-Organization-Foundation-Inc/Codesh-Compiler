@@ -2,6 +2,7 @@
 
 #include "impl/ast_node.h"
 #include "impl/i_descriptor_emitter.h"
+#include "local_variable_declaration_ast_node.h"
 #include "type/type_ast_node.h"
 #include "type_declaration/attributes_ast_node.h"
 
@@ -11,7 +12,6 @@
 
 namespace codesh::ast
 {
-class local_variable_declaration_ast_node;
 
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
 {
