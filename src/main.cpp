@@ -26,8 +26,6 @@ int main(const int argc, char **const argv) {
 
 
     // LEXING
-    // Convert the string to UTF-8.
-    // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
     auto tokens = codesh::lexer::tokenize_code(amen_file);
 
     // PARSING
