@@ -47,6 +47,6 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  * If the token is not an identifier, throws.
  * @return The consumed token
  */
-[[nodiscard]] std::unique_ptr<token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
+[[nodiscard]] std::unique_ptr<identifier_token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
 
 }

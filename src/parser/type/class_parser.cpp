@@ -31,11 +31,9 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
 
     // Get name
-    const std::unique_ptr<token> name_token = util::consume_identifier_token(tokens);
+    const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens);
 
-    std::unique_ptr<ast::type_decl::class_declaration_ast_node> node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
-        static_cast<const identifier_token *>(name_token.get())->get_content() // NOLINT(*-pro-type-static-cast-downcast)
-    );
+    auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(name_token->get_content());
 
 
     // Get attributes
@@ -125,11 +123,11 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
     }
 
     // * (the name)
-    const std::unique_ptr<codesh::token> name_token = parser::util::consume_identifier_token(tokens);
+    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
     auto method_node = std::make_unique<ast::method_declaration_ast_node>();
 
-    method_node->set_name(static_cast<const codesh::identifier_token *>(name_token.get())->get_content());
+    method_node->set_name(name_token->get_content());
 
     // Get attributes
     method_node->set_attributes(parser::parse_modifiers(tokens));
@@ -147,13 +145,11 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
             throw std::runtime_error("Expected ושמו");
 
         // * (the name)
-        std::unique_ptr<codesh::token> token_name = parser::util::consume_identifier_token(tokens);
+        const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
 
         auto param = std::make_unique<ast::local_variable_declaration_ast_node>();
         param->set_type(std::move(param_type));
-        param->set_name(
-            static_cast<codesh::identifier_token *>(token_name.get())->get_content()
-        );
+        param->set_name(token_name->get_content());
 
         method_node->get_parameter_types().push_back(std::move(param));
     }
