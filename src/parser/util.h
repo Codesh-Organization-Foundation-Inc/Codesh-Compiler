@@ -40,13 +40,13 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
  * @return The consumed token
  */
-std::unique_ptr<token> consume_token(std::queue<std::unique_ptr<token>> &tokens);
+[[nodiscard]] std::unique_ptr<token> consume_token(std::queue<std::unique_ptr<token>> &tokens);
 
 /**
  * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
  * If the token is not an identifier, throws.
  * @return The consumed token
  */
-std::unique_ptr<token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
+[[nodiscard]] std::unique_ptr<token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
 
 }

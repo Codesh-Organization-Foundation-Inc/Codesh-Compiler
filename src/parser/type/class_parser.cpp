@@ -17,7 +17,8 @@ static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::uniq
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
 
-static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
@@ -66,7 +67,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             {
             case codesh::token_group::KEYWORD_METHOD:
             {
-                parse_method_scope(tokens);
+                parse_method_signature_scope(tokens);
                 // class_node->get_methods().push_back(std::move(...)); // TODO: Add somthing like this
             }
             case codesh::token_group::KEYWORD_CLASS:
@@ -93,7 +94,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    const codesh::token_group type_token = tokens.front()->get_group();
+    const codesh::token_group type_token = parser::util::consume_token(tokens)->get_group();
 
 
     if (type_token != codesh::token_group::IDENTIFIER)
@@ -111,76 +112,76 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     throw std::runtime_error("Fields not yet supported");
 }
 
-static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
+static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    while (!tokens.empty())
+    tokens.pop();
+
+    // ושמו
+    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
     {
+        throw std::runtime_error("Unexpected token: Expected ושמו");
+    }
+
+    // * (the name)
+    const std::unique_ptr<codesh::token> name_token = parser::util::consume_identifier_token(tokens);
+
+    auto method_node = std::make_unique<ast::method_declaration_ast_node>();
+
+    method_node->set_name(static_cast<const codesh::identifier_token *>(name_token.get())->get_content());
+
+    // Get attributes
+    method_node->set_attributes(parser::parse_modifiers(tokens));
+
+
+    while (tokens.front()->get_group() == codesh::token_group::KEYWORD_TAKES)
+    {
+        tokens.pop();
+
+        // Parse parameter type
+        std::unique_ptr<ast::type::type_ast_node> param_type = parse_type(tokens);
+
         // ושמו
         if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
-        {
-            throw std::runtime_error("Unexpected token: Expected ושמו");
-        }
+            throw std::runtime_error("Expected ושמו");
 
         // * (the name)
-        const std::unique_ptr<codesh::token> name_token = parser::util::consume_identifier_token(tokens);
+        std::unique_ptr<codesh::token> token_name = parser::util::consume_identifier_token(tokens);
 
-        ast::method_declaration_ast_node method_node;
+        auto param = std::make_unique<ast::local_variable_declaration_ast_node>();
+        param->set_type(std::move(param_type));
+        param->set_name(
+            static_cast<codesh::identifier_token *>(token_name.get())->get_content()
+        );
 
-        method_node.set_name(dynamic_cast<const codesh::identifier_token *>(name_token.get())->get_content());
-
-        // Get attributes
-        method_node.set_attributes(parser::parse_modifiers(tokens));
-
-        const std::unique_ptr<codesh::token> next_token = parser::util::consume_token(tokens);
-
-        if (next_token->get_group() == codesh::token_group::KEYWORD_TAKES)
-        {
-            while (true)
-            {
-                // Parse parameter type
-                std::unique_ptr<ast::type::type_ast_node> param_type = parse_type(tokens);
-
-                // ושמו
-                if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
-                    throw std::runtime_error("Expected ושמו");
-
-                // * (the name)
-                std::unique_ptr<codesh::token> token_name = parser::util::consume_token(tokens);
-                if (token_name->get_group() != codesh::token_group::IDENTIFIER)
-                    throw std::runtime_error("Expected identifier");
-
-                auto param = std::make_unique<ast::local_variable_declaration_ast_node>();
-                param->set_type(std::move(param_type));
-                param->set_name(
-                    dynamic_cast<codesh::identifier_token *>(token_name.get())->get_content()
-                );
-
-                method_node.get_parameter_types().push_back(std::move(param));
-
-                // if next token is ויקח continue the loop
-                if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::KEYWORD_TAKES)
-                    break;
-
-                parser::util::consume_token(tokens); // consume additional ויקח
-            }
-
-            // Now read next token (either וישב or :ויאמר)
-            continue;
-        }
-
-
-        if (next_token->get_group() == codesh::token_group::KEYWORD_RETURN)
-        {
-            method_node.set_return_type(parse_type(tokens));
-        }
-        else
-        {
-            // If no וישב, return type = void
-            method_node.set_return_type(
-                std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID));
-        }
-
+        method_node->get_parameter_types().push_back(std::move(param));
     }
+
+
+    // If no וישב, return type = void:
+    if (tokens.front()->get_group() == codesh::token_group::KEYWORD_RETURN)
+    {
+        tokens.pop();
+        method_node->set_return_type(parse_type(tokens));
+    }
+    else
+    {
+        method_node->set_return_type(
+            std::make_unique<ast::type::primitive_type_ast_node>(
+                codesh::definition::primitive_type::VOID
+            )
+        );
+    }
+
+
+    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    {
+        throw std::runtime_error("Expected start of scope");
+    }
+
+    //TODO: Parse method scope
+
+    return std::move(method_node);
 }
 
 static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
