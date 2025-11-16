@@ -12,7 +12,7 @@ namespace trie = codesh::lexer::trie;
 /**
  * @returns How many characters should be consumed by this match
  */
-static size_t handle_keyword_match(const std::u16string &code, codesh::token_group token_group,
+static size_t handle_keyword_match(const std::string &code, codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
 static void on_regex_token(codesh::token *token);
 static void escape_characters(std::string &str, const std::string &word);
@@ -30,11 +30,11 @@ static const boost::regex NEWLINE_REPLACE_RGX(
 /**
  * @returns Whether the provided character may disobey a word's boundary
  */
-static bool is_annoying_char(const char16_t c) {
+static bool is_annoying_char(const char c) {
     return u_isalnum(c);
 }
 
-static bool check_boundary(const std::u16string &code, const trie::keyword_info *keyword, const size_t start,
+static bool check_boundary(const std::string &code, const trie::keyword_info *keyword, const size_t start,
                            const size_t end) {
     if (!keyword)
         return false;
@@ -62,7 +62,7 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
     return true;
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
+std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::string &code)
 {
     std::queue<std::unique_ptr<token>> tokens;
 
@@ -107,7 +107,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
 
         // If not a keyword, resort word a REGEX literal/identifier check.
-        const auto match = *boost::utf16regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
+        const auto match = *boost::u32regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
         bool matched = false;
 
         for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
@@ -136,7 +136,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 }
 
 
-static size_t handle_keyword_match(const std::u16string &code, const codesh::token_group token_group,
+static size_t handle_keyword_match(const std::string &code, const codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end)
 {
     switch (token_group)

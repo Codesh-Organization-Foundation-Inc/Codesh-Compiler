@@ -3,7 +3,6 @@
 #include "../lexer/regex.h"
 
 #include <utility>
-#include "utf8.h"
 
 using codesh::token_group;
 
@@ -31,19 +30,14 @@ codesh::token::token(const token_type type, const token_group group) :
 codesh::token::~token() = default;
 
 
-std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(const int group_id, const std::u16string &content)
+std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(const int group_id, const std::string &content)
 {
     const token_group group = lexer::token_group_from_regex_id(group_id);
 
     switch (const token_type type = get_token_type(group))
     {
-    case token_type::IDENTIFIER: {
-        // Convert the content back to UTF-8.
-        // UTF-16 is only necessary for tokenization.
-        const std::string utf8_content = utf8::utf16to8(content);
-
-        return std::make_unique<identifier_token>(type, group, utf8_content);
-    }
+    case token_type::IDENTIFIER:
+        return std::make_unique<identifier_token>(type, group, content);
 
     default:
         return std::make_unique<token>(type, group);

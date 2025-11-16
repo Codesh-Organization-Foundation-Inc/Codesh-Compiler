@@ -18,7 +18,7 @@ void codesh::lexer::trie::trie_node::set_keyword(const keyword_info *const keywo
     this->keyword = keyword;
 }
 
-codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_child(const char16_t c)
+codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_child(const char c)
 {
     if (this->children.contains(c))
         return *this->children.at(c);
@@ -27,7 +27,7 @@ codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_ch
 }
 
 std::optional<std::reference_wrapper<const codesh::lexer::trie::trie_node>> codesh::lexer::trie::trie_node::get_child(
-    const char16_t c) const
+    const char c) const
 {
     if (this->children.contains(c))
         return *this->children.at(c);
