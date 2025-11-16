@@ -83,8 +83,10 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             }
         }
 
-        case codesh::token_group::SCOPE_END:
+        case codesh::token_group::SCOPE_END: {
+            tokens.pop();
             return;
+        }
 
         default: throw std::runtime_error("Unexpected token");
         }
