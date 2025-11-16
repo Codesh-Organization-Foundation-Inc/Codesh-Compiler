@@ -107,16 +107,21 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/i_descriptor_emitter.h
         src/test.cpp
         src/test.h
-        src/output/jvm_target/build.cpp
-        src/output/jvm_target/build.h
+        src/output/jvm_target/class_file_builder.cpp
+        src/output/jvm_target/class_file_builder.h
         src/output/jvm_target/defs/attribute_info_entry.cpp
         src/output/jvm_target/defs/cp_info.cpp
+        src/output/jvm_target/defs/cp_info.cpp
+        src/defenition/definitions.h
+        src/output/jvm_target/constant_pool.cpp
+        src/output/jvm_target/constant_pool.h
+        src/output/jvm_target/class_file_writer.cpp
+        src/output/jvm_target/class_file_writer.h
 )
-
 
 # sudo dnf install boost-regex boost-devel
 
-find_package(Boost REQUIRED regex)
+find_package(Boost REQUIRED)
 target_link_libraries(Codesh_Compiler Boost::boost)
 
 # sudo dnf install libicu-devel

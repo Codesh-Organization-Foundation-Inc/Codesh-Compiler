@@ -26,7 +26,7 @@ struct code_attribute_entry : attribute_info_entry
     unsigned char max_stack[2];
     unsigned char max_locals[2];
     unsigned char code_length[4];
-    unsigned char code[5]; // for now
+    std::vector<unsigned char> code;
     unsigned char exception_table_length[2];
     std::vector<std::unique_ptr<exception_table_entry>> exception_table;
     unsigned char attribute_count[2];

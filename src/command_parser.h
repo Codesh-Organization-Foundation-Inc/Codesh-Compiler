@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string_view>
+#include <filesystem>
 
 namespace codesh
 {
 
 struct command_args
 {
-    std::string_view src_path;
-    std::string_view dest_path;
+    std::filesystem::path src_path;
+    std::filesystem::path dest_path;
 };
 
 command_args parse_command(int argc, char **argv);

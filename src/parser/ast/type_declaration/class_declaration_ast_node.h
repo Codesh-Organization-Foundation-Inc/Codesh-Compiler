@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../type/custom_type_ast_node.h"
 #include "type_declaration_ast_node.h"
 
 namespace codesh::ast::type_decl
@@ -7,9 +8,14 @@ namespace codesh::ast::type_decl
 
 class class_declaration_ast_node final : public type_declaration_ast_node
 {
-    //TODO: Add extends and implements
+    //TODO: Add implements
+    std::unique_ptr<type::custom_type_ast_node> super_class;
+
 public:
     explicit class_declaration_ast_node(const std::string &name);
+
+    [[nodiscard]] type::custom_type_ast_node *get_super_class() const;
+    void set_super_class(std::unique_ptr<type::custom_type_ast_node> super_class);
 };
 
 }
