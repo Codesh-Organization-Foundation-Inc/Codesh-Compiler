@@ -10,7 +10,6 @@
 #include <queue>
 #include <sstream>
 #include <string>
-#include <utf8.h>
 
 std::string read_file(const std::string &file_name);
 
@@ -27,10 +26,7 @@ int main(const int argc, char **const argv) {
 
 
     // LEXING
-    // Convert the string to UTF-8.
-    // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
-    const std::u16string utf16_code = utf8::utf8to16(amen_file);
-    auto tokens = codesh::lexer::tokenize_code(utf16_code);
+    auto tokens = codesh::lexer::tokenize_code(amen_file);
 
     // PARSING
     const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
