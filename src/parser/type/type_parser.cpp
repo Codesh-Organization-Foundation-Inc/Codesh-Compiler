@@ -3,7 +3,7 @@
 #include "../../defenition/visibility.h"
 #include "../ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
-#include "class_parser.h"
+#include "class/class_parser.h"
 
 namespace ast = codesh::ast;
 

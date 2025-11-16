@@ -1,5 +1,6 @@
 #pragma once
-#include "../ast/type_declaration/attributes_ast_node.h"
+
+#include "../../ast/type_declaration/attributes_ast_node.h"
 
 #include <memory>
 #include <queue>

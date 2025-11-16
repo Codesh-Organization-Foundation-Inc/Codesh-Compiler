@@ -1,11 +1,12 @@
 #include "class_parser.h"
 
-#include "../ast/method_declaration_ast_node.h"
-#include "../ast/type_declaration/class_declaration_ast_node.h"
-#include "../ast/local_variable_declaration_ast_node.h"
-#include "../util.h"
-#include "../ast/type/primitive_type_ast_node.h"
-#include "type_parser.h"
+#include "../../ast/local_variable_declaration_ast_node.h"
+#include "../../ast/method_declaration_ast_node.h"
+#include "../../ast/type/primitive_type_ast_node.h"
+#include "../../ast/type_declaration/class_declaration_ast_node.h"
+#include "../../util.h"
+#include "../type_parser.h"
+#include "method_parser.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -174,7 +175,7 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
         throw std::runtime_error("Expected start of scope");
     }
 
-    //TODO: Parse method scope
+    parser::parse_method(tokens);
 
     return std::move(method_node);
 }
