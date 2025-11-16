@@ -123,7 +123,7 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
 
         const std::unique_ptr<codesh::token> next_token = parser::util::consume_token(tokens);
 
-        if (next_token->get_group() == codesh::token_group::KEYWORD_TAKE)
+        if (next_token->get_group() == codesh::token_group::KEYWORD_TAKES)
         {
             while (true)
             {
@@ -148,7 +148,7 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
                 method_node.get_parameter_types().push_back(std::move(param));
 
                 // if next token is ויקח continue the loop
-                if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::KEYWORD_TAKE)
+                if (tokens.empty() || tokens.front()->get_group() != codesh::token_group::KEYWORD_TAKES)
                     break;
 
                 parser::util::consume_token(tokens); // consume additional ויקח
