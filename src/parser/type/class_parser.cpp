@@ -99,7 +99,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     if (type_token != codesh::token_group::IDENTIFIER)
     {
         //TODO: Parse token group as type and see if it is a primitive
-        bool isPrimitive = false;
+        const bool isPrimitive = false;
 
         if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
         {
@@ -183,12 +183,9 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
 
 static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    if (tokens.empty())
-    {
-        throw std::runtime_error("Unexpected EOF: expected type");
-    }
 
-    auto type_token = parser::util::consume_token(tokens);
+    const auto type_token = parser::util::consume_token(tokens);
+
     switch (type_token->get_group())
     {
     case codesh::token_group::KEYWORD_INTEGER:
@@ -217,13 +214,13 @@ static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::uniq
 
     case codesh::token_group::IDENTIFIER:
     {
-        const std::string custom_name = dynamic_cast<codesh::identifier_token *>(type_token.get())->get_content();
         auto custom_type_node = std::make_unique<ast::type::custom_type_ast_node>();
-        custom_type_node->set_name(custom_name);
+        custom_type_node->set_name(static_cast<codesh::identifier_token *>(type_token.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
+
         return custom_type_node;
     }
 
-    default: // maybe its not needed
-        throw std::runtime_error("Unexpected token: expected type");
+    default:
+        throw std::runtime_error("Unexpected token: Invalid type name");
     }
 }
