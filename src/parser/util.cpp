@@ -79,6 +79,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     // Handle arrays
     while (tokens.front()->get_group() == token_group::KEYWORD_ARRAY)
     {
+        tokens.pop();
         result->set_array_dimensions(result->get_array_dimensions() + 1);
     }
 
