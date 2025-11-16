@@ -1,5 +1,8 @@
 #include "util.h"
 
+#include "ast/type/custom_type_ast_node.h"
+#include "ast/type/primitive_type_ast_node.h"
+
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens)
 {
     // TODO: Request custom error message
@@ -23,6 +26,50 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
     return std::unique_ptr<identifier_token>(
         static_cast<identifier_token *>(token.release()) // NOLINT(*-pro-type-static-cast-downcast)
     );
+}
+
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_type(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    const auto type_token = consume_token(tokens);
+
+    switch (type_token->get_group())
+    {
+    case token_group::KEYWORD_INTEGER:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
+
+    case token_group::KEYWORD_FLOAT:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::FLOAT);
+
+    case token_group::KEYWORD_DOUBLE:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::DOUBLE);
+
+    case token_group::KEYWORD_LONG:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::LONG);
+
+    case token_group::KEYWORD_SHORT:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::SHORT);
+
+    case token_group::KEYWORD_BYTE:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE);
+
+    case token_group::KEYWORD_CHAR:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::CHAR);
+
+    case token_group::KEYWORD_BOOLEAN:
+        return std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BOOLEAN);
+
+    case token_group::IDENTIFIER:
+    {
+        auto custom_type_node = std::make_unique<ast::type::custom_type_ast_node>();
+        custom_type_node->set_name(static_cast<identifier_token *>(type_token.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
+
+        return custom_type_node;
+    }
+
+    default:
+        throw std::runtime_error("Unexpected token: Invalid type name");
+    }
 }
 
 bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)

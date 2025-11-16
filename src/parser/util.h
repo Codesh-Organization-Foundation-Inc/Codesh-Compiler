@@ -8,6 +8,10 @@
 
 namespace codesh
 {
+namespace ast::type
+{
+class type_ast_node;
+}
 enum class token_group;
 }
 
@@ -48,5 +52,7 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  * @return The consumed token
  */
 [[nodiscard]] std::unique_ptr<identifier_token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
+
+[[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
 
 }

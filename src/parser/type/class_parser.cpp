@@ -5,14 +5,12 @@
 #include "../ast/local_variable_declaration_ast_node.h"
 #include "../util.h"
 #include "../ast/type/primitive_type_ast_node.h"
-#include "../ast/type/custom_type_ast_node.h"
 #include "type_parser.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens);
-static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
@@ -98,8 +96,8 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
     if (type_token != codesh::token_group::IDENTIFIER)
     {
-        //TODO: Parse token group as type and see if it is a primitive
-        const bool isPrimitive = false;
+        // TODO: Parse token group as type and see if it is a primitive
+        constexpr bool isPrimitive = false;
 
         if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
         {
@@ -138,7 +136,7 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
         tokens.pop();
 
         // Parse parameter type
-        std::unique_ptr<ast::type::type_ast_node> param_type = parse_type(tokens);
+        std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
 
         // ושמו
         if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
@@ -159,7 +157,7 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
     if (tokens.front()->get_group() == codesh::token_group::KEYWORD_RETURN)
     {
         tokens.pop();
-        method_node->set_return_type(parse_type(tokens));
+        method_node->set_return_type(parser::util::parse_type(tokens));
     }
     else
     {
@@ -179,48 +177,4 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
     //TODO: Parse method scope
 
     return std::move(method_node);
-}
-
-static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-
-    const auto type_token = parser::util::consume_token(tokens);
-
-    switch (type_token->get_group())
-    {
-    case codesh::token_group::KEYWORD_INTEGER:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::INTEGER);
-
-    case codesh::token_group::KEYWORD_FLOAT:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::FLOAT);
-
-    case codesh::token_group::KEYWORD_DOUBLE:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::DOUBLE);
-
-    case codesh::token_group::KEYWORD_LONG:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::LONG);
-
-    case codesh::token_group::KEYWORD_SHORT:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::SHORT);
-
-    case codesh::token_group::KEYWORD_BYTE:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::BYTE);
-
-    case codesh::token_group::KEYWORD_CHAR:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::CHAR);
-
-    case codesh::token_group::KEYWORD_BOOLEAN:
-        return std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::BOOLEAN);
-
-    case codesh::token_group::IDENTIFIER:
-    {
-        auto custom_type_node = std::make_unique<ast::type::custom_type_ast_node>();
-        custom_type_node->set_name(static_cast<codesh::identifier_token *>(type_token.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        return custom_type_node;
-    }
-
-    default:
-        throw std::runtime_error("Unexpected token: Invalid type name");
-    }
 }
