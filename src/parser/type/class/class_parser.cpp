@@ -67,6 +67,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
                 class_node->get_methods().push_back(
                     parse_method_signature_scope(tokens)
                 );
+
+                break;
             }
             case codesh::token_group::KEYWORD_CLASS:
             {
