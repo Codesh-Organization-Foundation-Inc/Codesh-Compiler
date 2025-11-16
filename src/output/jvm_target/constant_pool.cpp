@@ -66,11 +66,11 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
 
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
-    const auto [it, inserted] = literals.try_emplace(std::move(constant_info), index);
+    const auto [it, inserted] = literals.emplace(std::move(constant_info));
 
     if (inserted)
     {
-        literals_lookup_map.emplace(it->first.get(), index);
+        literals_lookup_map.emplace(it->get(), index);
         return index++;
     }
 

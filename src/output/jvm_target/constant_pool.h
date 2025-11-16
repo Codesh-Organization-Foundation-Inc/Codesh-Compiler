@@ -37,8 +37,8 @@ class constant_pool
     const ast::compilation_unit_ast_node &root_node;
     const ast::type_decl::type_declaration_ast_node &type_decl;
 
-    std::unordered_map<
-        std::unique_ptr<const defs::cp_info>, int,
+    std::unordered_set<
+        std::unique_ptr<const defs::cp_info>,
         defs::cp_info_unique_ptr_hash, defs::cp_info_unique_ptr_equal
     > literals;
     /**
