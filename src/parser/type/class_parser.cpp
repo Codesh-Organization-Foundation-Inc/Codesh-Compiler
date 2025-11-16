@@ -11,6 +11,7 @@
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
+static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -66,35 +67,48 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     {
         switch (parser::util::consume_token(tokens)->get_group())
         {
-        case codesh::token_group::KEYWORD_LET:
+        case codesh::token_group::KEYWORD_LET: {
+            switch (tokens.front()->get_group())
             {
-            codesh::token_group kind = tokens.front()->get_group();
-            if (kind == codesh::token_group::KEYWORD_FUNCTION)
+            case codesh::token_group::KEYWORD_FUNCTION:
             {
                 parse_method_scope(tokens);
                 // class_node->get_methods().push_back(std::move(...)); // TODO: Add somthing like this
             }
-            else if (kind == codesh::token_group::KEYWORD_CLASS)
+            case codesh::token_group::KEYWORD_CLASS:
             {
-                // TODO: Add ויהי עצם
-                continue;
+                // TODO: Support ויהי עצם
+                throw std::runtime_error("Inner classes not yet supported");
             }
-            else if (kind == codesh::token_group::KEYWORD_VAR)
-            {
-                //TODO: Add ויהי משתנה
-                continue;
+
+            default:
+                // Assume fields by default as they can either be custom types (identifiers)
+                // or primitives (other tokens).
+                parse_field_scope(tokens);
             }
-            else
-            {
-                throw std::runtime_error("Unexpected token"); //TODO: Add custom codesh error messege
-            }
-            break;
-            }
-        case codesh::token_group::SCOPE_END: return;
+        }
+
+        case codesh::token_group::SCOPE_END:
+            return;
+
         default: throw std::runtime_error("Unexpected token");
         }
     }
     throw std::runtime_error("Unexpected EOF: Expected end of scope (ויתם:)");
+}
+
+static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    const codesh::token_group type_token = tokens.front()->get_group();
+
+    if (type_token != codesh::token_group::IDENTIFIER
+        && type_token != codesh::token_group::KEYWORD_VAR)
+    {
+        throw std::runtime_error("Unexpected token");
+    }
+
+    //TODO: Support fields
+    throw std::runtime_error("Fields not yet supported");
 }
 
 static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
@@ -165,7 +179,7 @@ static void parse_method_scope(std::queue<std::unique_ptr<codesh::token>> &token
         }
         else
         {
-            // If no וישב ,return type = void
+            // If no וישב, return type = void
             method_node.set_return_type(
                 std::make_unique<ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID));
         }
