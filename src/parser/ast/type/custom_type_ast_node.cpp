@@ -1,9 +1,20 @@
 #include "custom_type_ast_node.h"
 
+#include <sstream>
+
 std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
 {
+    std::ostringstream builder;
+
+    for (size_t i = 0; i < this->get_array_dimensions(); i++)
+    {
+        builder << '[';
+    }
+
     //TODO: Get classpath from symbol table
-    return "L" + name + ";";
+    builder << "L" << name << ";";
+
+    return builder.str();
 }
 
 std::string codesh::ast::type::custom_type_ast_node::get_binary_name() const
