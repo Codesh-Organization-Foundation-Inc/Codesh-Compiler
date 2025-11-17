@@ -123,16 +123,6 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     return std::move(this_param);
 }
 
-std::unique_ptr<codesh::ast::method_declaration_ast_node> make_default_constructor()
-{
-    auto method_decl = std::make_unique<codesh::ast::method_declaration_ast_node>();
-
-    // method_decl->set_name("<init>");
-    // method_decl->
-
-    return std::move(method_decl);
-}
-
 static std::string read_file(const std::string &file_name)
 {
     std::ifstream file;

@@ -58,7 +58,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     else
     {
         // TODO: Handle
-        util::put_int_bytes(class_file->methods_count, 1, 0);
+        util::put_int_bytes(class_file->methods_count, 2, 0);
     }
 
     util::put_int_bytes(class_file->attribute_count, 2, 1);
@@ -75,13 +75,13 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
     {
         add_method(*method_decl);
     }
-    for (const auto &method_decl : class_decl.get_methods())
-    {
-        // add_method(*method_decl);
-    }
+    // for (const auto &method_decl : class_decl.get_methods())
+    // {
+    //     add_method(*method_decl);
+    // }
 
     util::put_int_bytes(
-        class_file->methods_count, 1,
+        class_file->methods_count, 2,
         static_cast<int>(class_decl.get_constructors().size())
             // + static_cast<int>(class_decl.get_methods().size())
     );
