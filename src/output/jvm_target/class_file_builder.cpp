@@ -208,7 +208,10 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     util::put_int_bytes(local_variable_table->local_variable_table_length, 2, local_vars_count);
 
-    util::put_int_bytes(local_variable_table->attribute_length, 4, 2 + 10 * local_vars_count);
+    util::put_int_bytes(
+        local_variable_table->attribute_length, 4,
+        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * local_vars_count
+    );
     code_attr->attributes.push_back(std::move(local_variable_table));
 
 
