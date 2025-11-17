@@ -92,7 +92,6 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
-    util::put_int_bytes(code_attr->attribute_length, 4, 35);
     util::put_int_bytes(code_attr->max_stack, 2, 1);
     util::put_int_bytes(code_attr->max_locals, 2, 1);
 
@@ -166,6 +165,11 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
 
     code_attr->attributes.push_back(std::move(local_variable_table));
 
+
+    util::put_int_bytes(
+        code_attr->attribute_length, 4,
+        30 + static_cast<int>(code_attr->code.size())
+    );
 
     method_entry->attribute_info.push_back(std::move(code_attr));
     class_file->methods_info.push_back(std::move(method_entry));
