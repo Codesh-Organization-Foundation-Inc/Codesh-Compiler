@@ -57,9 +57,11 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 {
     while (!tokens.empty())
     {
-        switch (parser::util::consume_token(tokens)->get_group())
+        switch (tokens.front()->get_group())
         {
         case codesh::token_group::KEYWORD_LET: {
+            tokens.pop();
+
             switch (tokens.front()->get_group())
             {
             case codesh::token_group::KEYWORD_METHOD:
