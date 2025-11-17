@@ -25,8 +25,6 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
 
     goc_utf8_info("Code");
     goc_utf8_info("LocalVariableTable");
-    //TODO: This should come NATURALLY from the default constructor, if exists.
-    goc_utf8_info("this");
 
     goc_utf8_info(type_decl.generate_descriptor());
 
@@ -66,6 +64,13 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
                 goc_utf8_info(method_decl->generate_descriptor())
             )
         );
+
+        // Add parameters
+        for (const auto &param_node : method_decl->get_parameters())
+        {
+            goc_utf8_info(param_node->get_name());
+            goc_utf8_info(param_node->get_type()->generate_descriptor());
+        }
     }
 
     // Add super constructor method reference
