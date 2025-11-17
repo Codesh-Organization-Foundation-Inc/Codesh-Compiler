@@ -91,7 +91,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 
         for (const auto &method_decl : class_decl->get_methods())
         {
-            if (!method_decl->get_attributes()->get_is_static())
+            if (method_decl->get_attributes()->get_is_static())
                 continue;
 
             method_decl->get_parameters().push_front(
