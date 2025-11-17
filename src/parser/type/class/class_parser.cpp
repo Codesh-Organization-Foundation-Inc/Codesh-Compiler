@@ -1,7 +1,7 @@
 #include "class_parser.h"
 
 #include "../../ast/local_variable_declaration_ast_node.h"
-#include "../../ast/method_declaration_ast_node.h"
+#include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/type/primitive_type_ast_node.h"
 #include "../../ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"

@@ -1,6 +1,6 @@
 #include "method_declaration_ast_node.h"
 
-#include "local_variable_declaration_ast_node.h"
+#include "../local_variable_declaration_ast_node.h"
 
 #include <sstream>
 

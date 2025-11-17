@@ -157,7 +157,7 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
 
     util::put_int_bytes(
         lvt_entry->descriptor_index, 2,
-    constant_pool_.get_utf8_index(type_decl.generate_descriptor())
+        constant_pool_.get_utf8_index(type_decl.generate_descriptor())
     );
 
     util::put_int_bytes(lvt_entry->index, 2, 0);

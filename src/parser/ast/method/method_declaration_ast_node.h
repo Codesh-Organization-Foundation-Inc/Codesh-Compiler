@@ -1,10 +1,10 @@
 #pragma once
 
-#include "impl/ast_node.h"
-#include "impl/i_descriptor_emitter.h"
-#include "local_variable_declaration_ast_node.h"
-#include "type/type_ast_node.h"
-#include "type_declaration/attributes_ast_node.h"
+#include "../impl/ast_node.h"
+#include "../impl/i_descriptor_emitter.h"
+#include "../local_variable_declaration_ast_node.h"
+#include "../type/type_ast_node.h"
+#include "../type_declaration/attributes_ast_node.h"
 
 #include <list>
 #include <memory>

@@ -1,8 +1,8 @@
 #include "test.h"
 
 #include "defenition/primitive_type.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
-#include "parser/ast/method_declaration_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
 #include <iostream>

@@ -28,3 +28,15 @@ const std::list<std::unique_ptr<codesh::ast::method_declaration_ast_node>> &code
 {
     return methods;
 }
+
+std::list<std::unique_ptr<codesh::ast::constructor_declaration_ast_node>> &codesh::ast::type_decl::
+    class_declaration_ast_node::get_constructors()
+{
+    return constructors;
+}
+
+const std::list<std::unique_ptr<codesh::ast::constructor_declaration_ast_node>> &codesh::ast::type_decl::
+    class_declaration_ast_node::get_constructors() const
+{
+    return constructors;
+}
