@@ -67,19 +67,6 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
             )
         );
     }
-    // Add constructors
-    const int constructor_name_cpi = goc_utf8_info("<init>");
-    for (const auto &constructor_decl : class_decl.get_constructors())
-    {
-        goc_methodref_info(
-            this_class_cpi,
-
-            goc_name_and_type_info(
-                constructor_name_cpi,
-                goc_utf8_info(constructor_decl->generate_descriptor())
-            )
-        );
-    }
 
     // Add super constructor method reference
     //TODO: Move to IR

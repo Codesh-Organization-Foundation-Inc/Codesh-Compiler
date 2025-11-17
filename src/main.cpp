@@ -78,7 +78,7 @@ static void add_default_constructors(const codesh::ast::compilation_unit_ast_nod
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
 
         constructor_decl->set_attributes(std::move(attributes_node));
-        class_decl->get_constructors().push_back(std::move(constructor_decl));
+        class_decl->get_methods().push_front(std::move(constructor_decl));
     }
 }
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node)
@@ -88,14 +88,6 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
         const auto class_decl = dynamic_cast<codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get());
         if (!class_decl)
             continue;
-
-        for (const auto &constructor_decl : class_decl->get_constructors())
-        {
-            // They must all be non-static anyway; Just add it.
-            constructor_decl->get_parameters().push_front(
-                create_this_param(*class_decl)
-            );
-        }
 
         for (const auto &method_decl : class_decl->get_methods())
         {
