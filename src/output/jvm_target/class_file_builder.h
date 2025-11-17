@@ -54,7 +54,7 @@ class class_file_builder
     const int super_class_cpi;
 
 
-    void handle_class_type(const ast::type_decl::class_declaration_ast_node &class_decl);
+    void handle_class_type(const ast::type_decl::class_declaration_ast_node &class_decl) const;
 
 
     void add_constant_pool_entries() const;

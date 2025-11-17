@@ -68,7 +68,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 }
 
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
-    const ast::type_decl::class_declaration_ast_node &class_decl)
+    const ast::type_decl::class_declaration_ast_node &class_decl) const
 {
     for (const auto &method_decl : class_decl.get_constructors())
     {
