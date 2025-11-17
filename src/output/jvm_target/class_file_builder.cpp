@@ -2,6 +2,8 @@
 
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../parser/ast/method/method_declaration_ast_node.h"
+#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
 #include "constant_pool.h"
 
@@ -40,7 +42,6 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 
     add_constant_pool_entries();
 
-
     add_access_flags({access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
@@ -49,16 +50,34 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     util::put_int_bytes(class_file->interfaces_count, 2, 0);
     util::put_int_bytes(class_file->fields_count, 2, 0);
 
-    util::put_int_bytes(class_file->methods_count, 2, 1);
-    add_constructor_method();
+    if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
+    {
+        handle_class_type(*class_decl);
+    }
+    else
+    {
+        // TODO: Handle
+        util::put_int_bytes(class_file->methods_count, 2, 0);
+    }
 
     util::put_int_bytes(class_file->attribute_count, 2, 1);
 
-
     add_source_file();
 
-
     return std::move(class_file);
+}
+
+void codesh::output::jvm_target::class_file_builder::handle_class_type(
+    const ast::type_decl::class_declaration_ast_node &class_decl)
+{
+    for (const auto &method_decl : class_decl.get_constructors())
+    {
+        add_method(*method_decl);
+    }
+    // for (const auto &method_decl : class_decl.get_methods())
+    // {
+    //     add_method(*method_decl);
+    // }
 }
 
 void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries() const
@@ -78,13 +97,22 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_constructor_method() const
+void codesh::output::jvm_target::class_file_builder::add_method(const ast::method_declaration_ast_node &method_decl)
+    const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
     util::put_int_bytes(method_entry->access_flags, 2, 1);
-    util::put_int_bytes(method_entry->name_index, 2, constant_pool_.get_utf8_index("<init>"));
-    util::put_int_bytes(method_entry->descriptor_index, 2, constant_pool_.get_utf8_index("()V"));
+
+    util::put_int_bytes(
+        method_entry->name_index, 2,
+        constant_pool_.get_utf8_index(method_decl.get_name())
+    );
+    util::put_int_bytes(
+        method_entry->descriptor_index, 2,
+    constant_pool_.get_utf8_index(method_decl.generate_descriptor())
+    );
+
     util::put_int_bytes(method_entry->attributes_count, 2, 1);
 
 
@@ -96,23 +124,28 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
     util::put_int_bytes(code_attr->max_locals, 2, 1);
 
     // Actual bytecode
-    code_attr->code.push_back(0x2A);
+    //TODO: This should already be integrated in constructor's IR.
+    if (dynamic_cast<const ast::constructor_declaration_ast_node *>(&method_decl))
     {
-        const unsigned char super_call[] = {
-            0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
-                super_class_cpi,
-                constant_pool_.get_name_and_type_index(
-                    constant_pool_.get_utf8_index("<init>"),
-                    constant_pool_.get_utf8_index("()V")
-                )
-            ))
-        };
-
-        for (const unsigned char bytecode : super_call)
+        code_attr->code.push_back(0x2A);
         {
-            code_attr->code.push_back(bytecode);
+            const unsigned char super_call[] = {
+                0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
+                    super_class_cpi,
+                    constant_pool_.get_name_and_type_index(
+                        constant_pool_.get_utf8_index("<init>"),
+                        constant_pool_.get_utf8_index("()V")
+                    )
+                ))
+            };
+
+            for (const unsigned char bytecode : super_call)
+            {
+                code_attr->code.push_back(bytecode);
+            }
         }
     }
+
     code_attr->code.push_back(0xB1);
 
 

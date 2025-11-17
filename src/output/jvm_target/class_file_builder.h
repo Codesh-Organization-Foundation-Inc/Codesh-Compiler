@@ -6,6 +6,10 @@
 
 namespace codesh::ast::type_decl
 {
+class class_declaration_ast_node;
+}
+namespace codesh::ast::type_decl
+{
 class type_declaration_ast_node;
 }
 namespace codesh::output::jvm_target
@@ -14,6 +18,7 @@ class constant_pool;
 }
 namespace codesh::ast
 {
+class method_declaration_ast_node;
 class compilation_unit_ast_node;
 }
 namespace codesh::output::jvm_target
@@ -49,8 +54,11 @@ class class_file_builder
     const int super_class_cpi;
 
 
+    void handle_class_type(const ast::type_decl::class_declaration_ast_node &class_decl);
+
+
     void add_constant_pool_entries() const;
-    void add_constructor_method() const;
+    void add_method(const ast::method_declaration_ast_node &method_decl) const;
     void add_source_file() const;
 
     void add_access_flags(const std::list<access_flag> &flags) const;
