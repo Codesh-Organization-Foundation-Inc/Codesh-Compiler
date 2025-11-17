@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../../output/jvm_target/class_file_builder.h"
 #include "../impl/ast_node.h"
 #include "../impl/i_descriptor_emitter.h"
 #include "../local_variable_declaration_ast_node.h"

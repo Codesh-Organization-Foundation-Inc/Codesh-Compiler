@@ -29,6 +29,9 @@ constexpr int JAVA_TARGET_VERSION = 65;
 enum class access_flag : uint16_t
 {
     ACC_PUBLIC      = 0x0001,
+    ACC_PRIVATE     = 0x0002,
+    ACC_PROTECTED   = 0x0004,
+    ACC_STATIC      = 0x0008,
     ACC_FINAL       = 0x0010,
     ACC_SUPER       = 0x0020,
     ACC_INTERFACE   = 0x0200,
@@ -61,7 +64,7 @@ class class_file_builder
     void add_method(const ast::method_declaration_ast_node &method_decl) const;
     void add_source_file() const;
 
-    void add_access_flags(const std::list<access_flag> &flags) const;
+    static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);
 
 public:
     class_file_builder(const ast::compilation_unit_ast_node &root_node,

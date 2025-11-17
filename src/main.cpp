@@ -2,9 +2,9 @@
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/class_file_writer.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "parser/parser.h"
-#include "test.h"
 
 #include <filesystem>
 #include <fstream>
@@ -68,7 +68,13 @@ static void add_default_constructors(const codesh::ast::compilation_unit_ast_nod
         //TODO: Check if there exists a constructor.
         // Only then should one be added.
 
-        class_decl->get_constructors().push_back(std::make_unique<codesh::ast::constructor_declaration_ast_node>());
+        auto constructor_decl = std::make_unique<codesh::ast::constructor_declaration_ast_node>();
+
+        auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+        attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
+
+        constructor_decl->set_attributes(std::move(attributes_node));
+        class_decl->get_constructors().push_back(std::move(constructor_decl));
     }
 }
 

@@ -42,7 +42,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 
     add_constant_pool_entries();
 
-    add_access_flags({access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
+    set_access_flags(class_file->access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
     util::put_int_bytes(class_file->super_class, 2, super_class_cpi);
@@ -108,7 +108,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
-    util::put_int_bytes(method_entry->access_flags, 2, 1);
+    set_access_flags(method_entry->access_flags, method_decl.get_attributes()->get_access_flags());
 
     util::put_int_bytes(
         method_entry->name_index, 2,
@@ -230,8 +230,8 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
     class_file->attribute_info.push_back(std::move(source_file_entry));
 }
 
-void codesh::output::jvm_target::class_file_builder::add_access_flags(
-        const std::list<access_flag> &flags) const
+void codesh::output::jvm_target::class_file_builder::set_access_flags(
+        unsigned char buffer[], const std::vector<access_flag> &flags)
 {
     //TODO: Change default values
     uint16_t value = 0;
@@ -241,5 +241,5 @@ void codesh::output::jvm_target::class_file_builder::add_access_flags(
         value |= static_cast<uint16_t>(flag);
     }
 
-    util::put_int_bytes(class_file->access_flags, 2, value);
+    util::put_int_bytes(buffer, 2, value);
 }
