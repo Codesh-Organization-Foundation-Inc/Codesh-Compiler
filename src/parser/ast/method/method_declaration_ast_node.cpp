@@ -11,9 +11,19 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor() cons
     // Argument types
     result << '(';
 
+    bool is_first = true;
     for (const auto &parameter_type : get_parameters())
     {
+        if (is_first && !attributes->get_is_static())
+        {
+            // The first parameter of a non-static must be 'this', so just ignore it.
+            is_first = false;
+            continue;
+        }
+
         result << parameter_type->get_type()->generate_descriptor();
+
+        is_first = false;
     }
 
     result << ')';
