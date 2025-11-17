@@ -12,18 +12,22 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
         const ast::type_decl::type_declaration_ast_node &type_decl) :
     root_node(root_node),
     type_decl(type_decl),
-    index(1)
+
+    index(1),
+    this_class_cpi(
+        goc_class_info(
+            goc_utf8_info(type_decl.get_binary_name())
+        )
+    )
 {
     goc_utf8_info("SourceFile");
     goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);
 
     goc_utf8_info("Code");
     goc_utf8_info("LocalVariableTable");
+    //TODO: This should come NATURALLY from the default constructor, if exists.
     goc_utf8_info("this");
 
-    goc_class_info(
-        goc_utf8_info(type_decl.get_binary_name())
-    );
     goc_utf8_info(type_decl.generate_descriptor());
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
@@ -51,7 +55,34 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
 
     const int super_class_constant = goc_class_info(super_class_cpi);
 
+    // Add methods
+    for (const auto &method_decl : class_decl.get_methods())
+    {
+        goc_methodref_info(
+            this_class_cpi,
+
+            goc_name_and_type_info(
+                goc_utf8_info(method_decl->get_name()),
+                goc_utf8_info(method_decl->generate_descriptor())
+            )
+        );
+    }
+    // Add constructors
+    const int constructor_name_cpi = goc_utf8_info("<init>");
+    for (const auto &constructor_decl : class_decl.get_constructors())
+    {
+        goc_methodref_info(
+            this_class_cpi,
+
+            goc_name_and_type_info(
+                constructor_name_cpi,
+                goc_utf8_info(constructor_decl->generate_descriptor())
+            )
+        );
+    }
+
     // Add super constructor method reference
+    //TODO: Move to IR
     goc_methodref_info(
         super_class_constant,
 
@@ -74,7 +105,7 @@ int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs
         return index++;
     }
 
-    return literals_lookup_map.at(constant_info.get());
+    return literals_lookup_map.at(it->get());
 }
 
 int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)

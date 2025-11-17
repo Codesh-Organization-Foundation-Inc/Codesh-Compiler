@@ -74,10 +74,10 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
     {
         add_method(*method_decl);
     }
-    // for (const auto &method_decl : class_decl.get_methods())
-    // {
-    //     add_method(*method_decl);
-    // }
+    for (const auto &method_decl : class_decl.get_methods())
+    {
+        add_method(*method_decl);
+    }
 }
 
 void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries() const

@@ -52,8 +52,9 @@ class constant_pool
 
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
 
-
     int index;
+    const int this_class_cpi;
+
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
     int goc_constant(std::unique_ptr<defs::cp_info> constant_info);
 
