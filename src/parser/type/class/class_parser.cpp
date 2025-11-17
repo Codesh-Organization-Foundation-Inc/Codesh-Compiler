@@ -156,7 +156,7 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
         param->set_type(std::move(param_type));
         param->set_name(token_name->get_content());
 
-        method_node->get_parameter_types().push_back(std::move(param));
+        method_node->get_parameters().push_back(std::move(param));
     }
 
 

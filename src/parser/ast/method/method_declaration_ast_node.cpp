@@ -11,7 +11,7 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor() cons
     // Argument types
     result << '(';
 
-    for (const auto &parameter_type : get_parameter_types())
+    for (const auto &parameter_type : get_parameters())
     {
         result << parameter_type->get_type()->generate_descriptor();
     }
@@ -58,9 +58,9 @@ void codesh::ast::method_declaration_ast_node::set_return_type(std::unique_ptr<t
 }
 
 const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method_declaration_ast_node::
-    get_parameter_types() const
+    get_parameters() const
 {
-    return parameter_types;
+    return parameters;
 }
 
 const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method_declaration_ast_node::
@@ -70,9 +70,9 @@ const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast:
 }
 
 std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method_declaration_ast_node::
-    get_parameter_types()
+    get_parameters()
 {
-    return parameter_types;
+    return parameters;
 }
 
 std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method_declaration_ast_node::

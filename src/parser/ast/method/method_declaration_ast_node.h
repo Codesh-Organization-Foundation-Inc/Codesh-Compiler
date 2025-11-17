@@ -20,7 +20,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
     std::unique_ptr<type::type_ast_node> return_type;
-    std::list<std::unique_ptr<local_variable_declaration_ast_node>> parameter_types;
+    std::list<std::unique_ptr<local_variable_declaration_ast_node>> parameters;
 
     // "throws" declaration
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
@@ -39,10 +39,10 @@ public:
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
 
 
-    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameter_types() const;
+    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameters() const;
     [[nodiscard]] const std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
 
-    [[nodiscard]] std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameter_types();
+    [[nodiscard]] std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameters();
     [[nodiscard]] std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
 };
 

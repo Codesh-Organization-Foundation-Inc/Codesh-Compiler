@@ -23,7 +23,7 @@ void codesh::test::descriptor()
     param_type->set_array_dimensions(2);
 
     local_var->set_type(std::move(param_type));
-    method.get_parameter_types().push_back(std::move(local_var));
+    method.get_parameters().push_back(std::move(local_var));
 
     std::cout << method.generate_descriptor() << std::endl;
 
@@ -31,7 +31,7 @@ void codesh::test::descriptor()
     std::unique_ptr<ast::local_variable_declaration_ast_node> local_var_2 = std::make_unique<ast::local_variable_declaration_ast_node>();
     local_var_2->set_type(std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::FLOAT));
 
-    method.get_parameter_types().push_back(std::move(local_var_2));
+    method.get_parameters().push_back(std::move(local_var_2));
 
     std::cout << method.generate_descriptor() << std::endl;
 }

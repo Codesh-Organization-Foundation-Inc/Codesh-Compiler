@@ -42,6 +42,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 
     add_constant_pool_entries();
 
+    //TODO: Set by class attributes
     set_access_flags(class_file->access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
@@ -76,13 +77,13 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
     }
     for (const auto &method_decl : class_decl.get_methods())
     {
-        add_method(*method_decl);
+        // add_method(*method_decl);
     }
 
     util::put_int_bytes(
         class_file->methods_count, 1,
         static_cast<int>(class_decl.get_constructors().size())
-            + static_cast<int>(class_decl.get_methods().size())
+            // + static_cast<int>(class_decl.get_methods().size())
     );
 }
 
@@ -162,7 +163,6 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     util::put_int_bytes(code_attr->exception_table_length, 2, 0);
-    util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     //TODO: Re-add line number table
 
@@ -209,6 +209,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         code_attr->attribute_length, 4,
         30 + static_cast<int>(code_attr->code.size())
     );
+    util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     method_entry->attribute_info.push_back(std::move(code_attr));
     class_file->methods_info.push_back(std::move(method_entry));
