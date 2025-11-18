@@ -119,6 +119,8 @@ add_executable(Codesh_Compiler
         src/output/jvm_target/class_file_writer.h
         src/parser/type/class/method_parser.cpp
         src/parser/type/class/method_parser.h
+        src/semantic_analyzer/analyzer.h
+        src/semantic_analyzer/analyzer.cpp
 )
 
 # sudo dnf install boost-regex boost-devel

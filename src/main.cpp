@@ -31,6 +31,10 @@ int main(const int argc, char **const argv) {
     // PARSING
     const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
 
+    // SEMANTIC ANALYZING
+
+
+
     // A class file represents a single file.
     // So for each type declaration, build one class file:
     for (auto &type_declaration : ast->get_type_declarations())
