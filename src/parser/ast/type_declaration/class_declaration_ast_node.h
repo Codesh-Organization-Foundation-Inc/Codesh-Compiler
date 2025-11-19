@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../method_declaration_ast_node.h"
+#include "../method/constructor_declaration_ast_node.h"
+#include "../method/method_declaration_ast_node.h"
 #include "../type/custom_type_ast_node.h"
 #include "type_declaration_ast_node.h"
 

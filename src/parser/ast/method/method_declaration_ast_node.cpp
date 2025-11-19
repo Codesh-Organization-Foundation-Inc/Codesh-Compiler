@@ -1,6 +1,6 @@
 #include "method_declaration_ast_node.h"
 
-#include "local_variable_declaration_ast_node.h"
+#include "../local_variable_declaration_ast_node.h"
 
 #include <sstream>
 
@@ -11,9 +11,19 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor() cons
     // Argument types
     result << '(';
 
-    for (const auto &parameter_type : get_parameter_types())
+    bool is_first = true;
+    for (const auto &parameter_type : get_parameters())
     {
+        if (is_first && !attributes->get_is_static())
+        {
+            // The first parameter of a non-static must be 'this', so just ignore it.
+            is_first = false;
+            continue;
+        }
+
         result << parameter_type->get_type()->generate_descriptor();
+
+        is_first = false;
     }
 
     result << ')';
@@ -58,9 +68,9 @@ void codesh::ast::method_declaration_ast_node::set_return_type(std::unique_ptr<t
 }
 
 const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method_declaration_ast_node::
-    get_parameter_types() const
+    get_parameters() const
 {
-    return parameter_types;
+    return parameters;
 }
 
 const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method_declaration_ast_node::
@@ -70,9 +80,9 @@ const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast:
 }
 
 std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method_declaration_ast_node::
-    get_parameter_types()
+    get_parameters()
 {
-    return parameter_types;
+    return parameters;
 }
 
 std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method_declaration_ast_node::

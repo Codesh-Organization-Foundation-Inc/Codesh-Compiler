@@ -3,6 +3,12 @@
 #include "../../../defenition/visibility.h"
 #include "../impl/ast_node.h"
 
+#include <vector>
+
+namespace codesh::output::jvm_target
+{
+enum class access_flag : unsigned short int;
+}
 namespace codesh::ast::type_decl
 {
 
@@ -15,6 +21,8 @@ class attributes_ast_node final : public impl::ast_node
 
 public:
     attributes_ast_node();
+
+    [[nodiscard]] std::vector<output::jvm_target::access_flag> get_access_flags() const;
 
     [[nodiscard]] definition::visibility get_visibility() const;
     void set_visibility(definition::visibility visibility);
