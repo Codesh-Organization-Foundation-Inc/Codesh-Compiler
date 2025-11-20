@@ -3,6 +3,7 @@
 #include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/class_file_writer.h"
 #include "parser/parser.h"
+#include "semantic_analyzer/analyzer.h"
 #include "test.h"
 
 #include <filesystem>
@@ -32,6 +33,7 @@ int main(const int argc, char **const argv) {
     const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
 
     // SEMANTIC ANALYZING
+    codesh::semantic_analyzer::run(*ast);
 
 
 

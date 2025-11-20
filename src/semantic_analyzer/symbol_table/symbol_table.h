@@ -4,7 +4,7 @@
 #include <string>
 #include "../../parser/ast/type/type_ast_node.h"
 
-namespace codesh::semantic
+namespace codesh::semantic_analyzer
 {
 
 }

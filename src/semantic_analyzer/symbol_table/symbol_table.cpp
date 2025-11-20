@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 
-namespace codesh::semantic
+namespace codesh::semantic_analyzer
 {
 
 }
