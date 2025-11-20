@@ -1,25 +1,58 @@
 #pragma once
-#include <string>
+#include "../../output/jvm_target/class_file_builder.h"
 
+#include <boost/container_hash/hash.hpp>
+#include <list>
+#include <memory>
+#include <string>
+#include <unordered_map>
+
+namespace codesh::definition
+{
+enum class visibility;
+}
+namespace codesh::ast::impl
+{
+class ast_node;
+}
 namespace codesh::semantic_analyzer
 {
 
-enum class SymbolKind
+class entry;
+
+enum class symbol_kind
 {
-    VARIABLE,
     TYPE,
-    METHOD,
+    VARIABLE,
     FIELD,
-    PARAMETER
+    METHOD
 };
 
-struct Symbol
+class scope
 {
-    std::string name;
-    SymbolKind kind;
-    void* ast_node;
+    // int id;
+    //
+    // std::unordered_map<std::string, entry> entries;
+    // std::unordered_map<int, std::unique_ptr<scope>> scopes;
+    //
+    // std::optional<std::reference_wrapper<scope>> *parent_scope;
+    //TODO
+};
 
-    Symbol(std::string name, SymbolKind kind, void* node);
+
+class entry
+{
+    // symbol_kind symbol;
+    // std::list<output::jvm_target::access_flag> access_flags;
+    //
+    // virtual ~entry();
+
+    //TODO
+};
+
+class method_entry : public entry
+{
+    //TODO
 };
 
 }

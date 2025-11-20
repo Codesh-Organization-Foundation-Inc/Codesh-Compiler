@@ -6,7 +6,7 @@
 namespace codesh::semantic_analyzer
 {
 
-void throw_error(const std::string& msg)
+void throw_error(const std::string &msg)
 {
     throw std::runtime_error("semantic error: " + msg);
 }

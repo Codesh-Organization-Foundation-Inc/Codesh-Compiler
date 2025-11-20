@@ -5,6 +5,6 @@
 namespace codesh::semantic_analyzer
 {
 
-static void throw_error(const std::string& msg);
+static void throw_error(const std::string &msg);
 
 }

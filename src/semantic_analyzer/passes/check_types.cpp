@@ -5,20 +5,19 @@
 namespace codesh::semantic_analyzer
 {
 
-void checkTypes(ast::compilation_unit_ast_node& root)
+void check_types(ast::compilation_unit_ast_node &root)
 {
-    std::unordered_set<std::string> typeNames;
+    std::unordered_set<std::string> type_names;
 
-    for (auto& typeDecl : root.get_type_declarations())
+    for (const auto &type_decl : root.get_type_declarations())
     {
-        const std::string& name = typeDecl->get_name();
+        const std::string &name = type_decl->get_name();
+        const auto [it, did_insert] = type_names.emplace(name);
 
-        if (typeNames.contains(name))
+        if (!did_insert)
         {
             throw_error("Duplicate type declared: " + name);
         }
-
-        typeNames.insert(name);
     }
 }
 
