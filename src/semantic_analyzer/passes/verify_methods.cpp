@@ -51,7 +51,7 @@ void check_methods(const ast::compilation_unit_ast_node &root)
             // checking return type
             const auto &return_type = method->get_return_type();
 
-            if (auto* custom = dynamic_cast<ast::type::custom_type_ast_node*>(return_type))
+            if (auto  *custom = dynamic_cast<ast::type::custom_type_ast_node*>(return_type))
             {
                 const std::string &type_name = custom->get_name();
 
@@ -71,7 +71,7 @@ void check_methods(const ast::compilation_unit_ast_node &root)
                 if (dynamic_cast<ast::type::primitive_type_ast_node*>(parameter_type))
                     continue;
 
-                auto* custom_parameter =
+                auto  *custom_parameter =
                     dynamic_cast<ast::type::custom_type_ast_node*>(parameter_type);
 
                 if (!custom_parameter)
@@ -82,7 +82,7 @@ void check_methods(const ast::compilation_unit_ast_node &root)
                     );
                 }
 
-                // Check existence
+
                 const std::string &parameter_type_name = custom_parameter->get_name();
 
                 if (!type_exists(root, parameter_type_name))
