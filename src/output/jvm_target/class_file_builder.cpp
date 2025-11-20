@@ -2,6 +2,8 @@
 
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../parser/ast/method/method_declaration_ast_node.h"
+#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
 #include "constant_pool.h"
 
@@ -40,8 +42,8 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 
     add_constant_pool_entries();
 
-
-    add_access_flags({access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
+    //TODO: Set by class attributes
+    set_access_flags(class_file->access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
     util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
     util::put_int_bytes(class_file->super_class, 2, super_class_cpi);
@@ -49,16 +51,35 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     util::put_int_bytes(class_file->interfaces_count, 2, 0);
     util::put_int_bytes(class_file->fields_count, 2, 0);
 
-    util::put_int_bytes(class_file->methods_count, 2, 1);
-    add_constructor_method();
+    if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
+    {
+        handle_class_type(*class_decl);
+    }
+    else
+    {
+        // TODO: Handle
+        util::put_int_bytes(class_file->methods_count, 2, 0);
+    }
 
     util::put_int_bytes(class_file->attribute_count, 2, 1);
 
-
     add_source_file();
 
-
     return std::move(class_file);
+}
+
+void codesh::output::jvm_target::class_file_builder::handle_class_type(
+    const ast::type_decl::class_declaration_ast_node &class_decl) const
+{
+    for (const auto &method_decl : class_decl.get_methods())
+    {
+        add_method(*method_decl);
+    }
+
+    util::put_int_bytes(
+        class_file->methods_count, 2,
+        static_cast<int>(class_decl.get_methods().size())
+    );
 }
 
 void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries() const
@@ -78,13 +99,22 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_constructor_method() const
+void codesh::output::jvm_target::class_file_builder::add_method(const ast::method_declaration_ast_node &method_decl)
+    const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
-    util::put_int_bytes(method_entry->access_flags, 2, 1);
-    util::put_int_bytes(method_entry->name_index, 2, constant_pool_.get_utf8_index("<init>"));
-    util::put_int_bytes(method_entry->descriptor_index, 2, constant_pool_.get_utf8_index("()V"));
+    set_access_flags(method_entry->access_flags, method_decl.get_attributes()->get_access_flags());
+
+    util::put_int_bytes(
+        method_entry->name_index, 2,
+        constant_pool_.get_utf8_index(method_decl.get_name())
+    );
+    util::put_int_bytes(
+        method_entry->descriptor_index, 2,
+    constant_pool_.get_utf8_index(method_decl.generate_descriptor())
+    );
+
     util::put_int_bytes(method_entry->attributes_count, 2, 1);
 
 
@@ -92,28 +122,32 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
-    util::put_int_bytes(code_attr->attribute_length, 4, 35);
     util::put_int_bytes(code_attr->max_stack, 2, 1);
     util::put_int_bytes(code_attr->max_locals, 2, 1);
 
     // Actual bytecode
-    code_attr->code.push_back(0x2A);
+    //TODO: This should already be integrated in constructor's IR.
+    if (dynamic_cast<const ast::constructor_declaration_ast_node *>(&method_decl))
     {
-        const unsigned char super_call[] = {
-            0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
-                super_class_cpi,
-                constant_pool_.get_name_and_type_index(
-                    constant_pool_.get_utf8_index("<init>"),
-                    constant_pool_.get_utf8_index("()V")
-                )
-            ))
-        };
-
-        for (const unsigned char bytecode : super_call)
+        code_attr->code.push_back(0x2A);
         {
-            code_attr->code.push_back(bytecode);
+            const unsigned char super_call[] = {
+                0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
+                    super_class_cpi,
+                    constant_pool_.get_name_and_type_index(
+                        constant_pool_.get_utf8_index("<init>"),
+                        constant_pool_.get_utf8_index("()V")
+                    )
+                ))
+            };
+
+            for (const unsigned char bytecode : super_call)
+            {
+                code_attr->code.push_back(bytecode);
+            }
         }
     }
+
     code_attr->code.push_back(0xB1);
 
 
@@ -124,7 +158,6 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
 
 
     util::put_int_bytes(code_attr->exception_table_length, 2, 0);
-    util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     //TODO: Re-add line number table
 
@@ -148,24 +181,45 @@ void codesh::output::jvm_target::class_file_builder::add_constructor_method() co
         local_variable_table->attribute_name_index, 2,
         constant_pool_.get_utf8_index("LocalVariableTable")
     );
-    util::put_int_bytes(local_variable_table->attribute_length, 4, 12);
-    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, 1);
 
-    auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
-    util::put_int_bytes(lvt_entry->start_pc, 2, 0);
-    util::put_int_bytes(lvt_entry->length, 2, 5);
-    util::put_int_bytes(lvt_entry->name_index, 2, constant_pool_.get_utf8_index("this"));
+    // Add parameters
+    int index = 0;
+    for (const auto &param_node : method_decl.get_parameters())
+    {
+        auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
+        util::put_int_bytes(lvt_entry->start_pc, 2, 0);
+        util::put_int_bytes(lvt_entry->length, 2, static_cast<int>(code_attr->code.size()));
+
+        util::put_int_bytes(
+            lvt_entry->name_index, 2,
+            constant_pool_.get_utf8_index(param_node->get_name())
+        );
+        util::put_int_bytes(
+            lvt_entry->descriptor_index, 2,
+            constant_pool_.get_utf8_index(param_node->get_type()->generate_descriptor())
+        );
+
+        util::put_int_bytes(lvt_entry->index, 2, index++);
+        local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
+    }
+
+    //TODO: Account for local variables too
+    const int local_vars_count = static_cast<int>(method_decl.get_parameters().size());
+
+    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, local_vars_count);
 
     util::put_int_bytes(
-        lvt_entry->descriptor_index, 2,
-    constant_pool_.get_utf8_index(type_decl.generate_descriptor())
+        local_variable_table->attribute_length, 4,
+        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * local_vars_count
     );
-
-    util::put_int_bytes(lvt_entry->index, 2, 0);
-    local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
-
     code_attr->attributes.push_back(std::move(local_variable_table));
 
+
+    util::put_int_bytes(
+        code_attr->attribute_length, 4,
+        30 + static_cast<int>(code_attr->code.size())
+    );
+    util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     method_entry->attribute_info.push_back(std::move(code_attr));
     class_file->methods_info.push_back(std::move(method_entry));
@@ -187,8 +241,8 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
     class_file->attribute_info.push_back(std::move(source_file_entry));
 }
 
-void codesh::output::jvm_target::class_file_builder::add_access_flags(
-        const std::list<access_flag> &flags) const
+void codesh::output::jvm_target::class_file_builder::set_access_flags(
+        unsigned char buffer[], const std::vector<access_flag> &flags)
 {
     //TODO: Change default values
     uint16_t value = 0;
@@ -198,5 +252,5 @@ void codesh::output::jvm_target::class_file_builder::add_access_flags(
         value |= static_cast<uint16_t>(flag);
     }
 
-    util::put_int_bytes(class_file->access_flags, 2, value);
+    util::put_int_bytes(buffer, 2, value);
 }

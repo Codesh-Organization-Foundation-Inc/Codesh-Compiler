@@ -1,8 +1,45 @@
 #include "attributes_ast_node.h"
 
+#include "../../../output/jvm_target/class_file_builder.h"
+
 codesh::ast::type_decl::attributes_ast_node::attributes_ast_node()
     : visibility(definition::visibility::PACKAGE_PRIVATE), is_static(false), is_final(false), is_abstract(false)
 {
+}
+
+std::vector<codesh::output::jvm_target::access_flag> codesh::ast::type_decl::attributes_ast_node::get_access_flags() const
+{
+    std::vector<output::jvm_target::access_flag> result;
+
+    switch (visibility)
+    {
+    case definition::visibility::PUBLIC:
+        result.push_back(output::jvm_target::access_flag::ACC_PUBLIC);
+        break;
+    case definition::visibility::PRIVATE:
+        result.push_back(output::jvm_target::access_flag::ACC_PRIVATE);
+        break;
+    case definition::visibility::PROTECTED:
+        result.push_back(output::jvm_target::access_flag::ACC_PROTECTED);
+        break;
+
+    default: break;
+    }
+
+    if (is_static)
+    {
+        result.push_back(output::jvm_target::access_flag::ACC_STATIC);
+    }
+    if (is_final)
+    {
+        result.push_back(output::jvm_target::access_flag::ACC_FINAL);
+    }
+    if (is_abstract)
+    {
+        result.push_back(output::jvm_target::access_flag::ACC_ABSTRACT);
+    }
+
+    return result;
 }
 
 codesh::definition::visibility codesh::ast::type_decl::attributes_ast_node::get_visibility() const

@@ -93,8 +93,8 @@ add_executable(Codesh_Compiler
         src/parser/type/type_parser.h
         src/util.cpp
         src/util.h
-        src/parser/ast/method_declaration_ast_node.cpp
-        src/parser/ast/method_declaration_ast_node.h
+        src/parser/ast/method/method_declaration_ast_node.cpp
+        src/parser/ast/method/method_declaration_ast_node.h
         src/parser/ast/type/type_ast_node.h
         src/parser/ast/type/custom_type_ast_node.cpp
         src/parser/ast/type/custom_type_ast_node.h
@@ -132,6 +132,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol.h
         src/semantic_analyzer/errors/errors.h
         src/semantic_analyzer/errors/errors.cpp
+        src/parser/ast/method/constructor_declaration_ast_node.cpp
+        src/parser/ast/method/constructor_declaration_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

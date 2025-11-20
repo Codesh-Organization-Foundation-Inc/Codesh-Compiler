@@ -1,10 +1,12 @@
 #pragma once
 
-#include "../../ast/type_declaration/attributes_ast_node.h"
-
 #include <memory>
 #include <queue>
 
+namespace codesh
+{
+class token;
+}
 namespace codesh::ast::type_decl
 {
 class class_declaration_ast_node;
