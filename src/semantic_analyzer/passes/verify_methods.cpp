@@ -9,7 +9,6 @@
 
 namespace codesh::semantic_analyzer
 {
-// TODO: do all in name_name and put reference and pointers after
 static bool type_exists(const ast::compilation_unit_ast_node &root, const std::string &name)
 {
     for (auto &declaration : root.get_type_declarations())
