@@ -11,7 +11,6 @@
 #include <unordered_set>
 
 
-
 static void check_duplicate_method(
     const std::string &method_name,
     const std::string &class_name,
@@ -64,7 +63,6 @@ static void check_duplicate_method(
         codesh::semantic_analyzer::throw_error(
             "Duplicate method declared: " + method_name +
             " in type " + class_name
-            // std::format("Duplicate method declared: {} in type  {}", method_name, class_name) ); //NOT WORKING FOR SOME REASON
         );
     }
 }
