@@ -13,7 +13,7 @@ namespace codesh::semantic_analyzer
 
 enum class symbol_type
 {
-    PACKAGE,
+    COUNTRY,
     TYPE,
     LOCAL_VARIABLE,
     FIELD,
@@ -41,19 +41,19 @@ class i_scope_containing_symbol
 protected:
     [[nodiscard]] virtual std::vector<symbol_type> allowed_symbol_types() const = 0;
 
-    [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
-    [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
-
 public:
     virtual ~i_scope_containing_symbol();
 
+    [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
+    [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
+
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
 
-    void add_symbol(std::string name, std::unique_ptr<symbol> entry);
+    bool add_symbol(std::string name, std::unique_ptr<symbol> entry);
 };
 
 
-class package_symbol final : public symbol, public i_scope_containing_symbol
+class country_symbol final : public symbol, public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
@@ -61,12 +61,12 @@ class package_symbol final : public symbol, public i_scope_containing_symbol
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
 
+public:
+    country_symbol();
+    explicit country_symbol(country_symbol *parent_package);
+
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
-
-public:
-    package_symbol();
-    explicit package_symbol(package_symbol *parent_package);
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol
@@ -80,14 +80,15 @@ class type_symbol final : public symbol, public i_scope_containing_symbol
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
 
-    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
-    [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
     type_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
             std::string descriptor);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+
+    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
 };
 
 

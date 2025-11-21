@@ -3,6 +3,8 @@
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "passes/check_methods.h"
 #include "passes/check_type_declarations.h"
+#include "symbol_table/symbol.h"
+#include "symbol_table/symbol_table.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -11,11 +13,15 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
 
 void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &ast_root, symbol_table &symbol_table)
 {
+    // Add global scope to symbol table
+    //TODO: Resolve all countries of origin
+    symbol_table.add_symbol("", std::make_unique<country_symbol>());
+
     //TODO: move these to other files
     add_default_constructors(ast_root);
     add_this_param_to_non_static_methods(ast_root);
 
-    check_type_declarations(ast_root, symbol_table);
+    add_type_declarations(ast_root, symbol_table);
     check_methods(ast_root, symbol_table);
 }
 

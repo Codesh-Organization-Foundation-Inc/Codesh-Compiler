@@ -16,8 +16,8 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_ta
     return global_scope;
 }
 
-std::optional<std::reference_wrapper<codesh::semantic_analyzer::package_symbol>> codesh::semantic_analyzer::
-    symbol_table::resolve_optional(const std::string &name) const
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> codesh::semantic_analyzer::
+    symbol_table::resolve_country(const std::string &name) const
 {
     const auto result = resolve(name);
 
@@ -25,9 +25,11 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::package_symbol>>
         return std::nullopt;
 
     // Only packages allowed anyway
-    return *static_cast<package_symbol *>(&result.value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+    return *static_cast<country_symbol *>(&result.value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::symbol_table::ALLOWED_SYMBOL_TYPES = {
-    symbol_type::PACKAGE
+    symbol_type::COUNTRY,
+    // For the global scope
+    symbol_type::TYPE
 };

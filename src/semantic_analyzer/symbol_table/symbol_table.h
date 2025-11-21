@@ -13,11 +13,11 @@ class symbol_table final : public i_scope_containing_symbol
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
 
+public:
+    [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
+
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
-
-public:
-    [[nodiscard]] std::optional<std::reference_wrapper<package_symbol>> resolve_optional(const std::string &name) const;
 };
 
 }

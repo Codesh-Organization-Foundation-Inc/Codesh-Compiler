@@ -8,6 +8,7 @@
 #include "util.h"
 
 #include <format>
+
 #include <unordered_set>
 
 static void check_duplicate_method(
@@ -57,7 +58,7 @@ static void check_duplicate_method(
     const auto [_, inserted] = method_names.emplace(method_name);
     if (!inserted)
     {
-        codesh::semantic_analyzer::throw_error(
+        codesh::semantic_analyzer::collect_error(
             "Duplicate method declared: " + method_name +
             " in type " + class_name
         );
@@ -83,7 +84,7 @@ static void check_return_type(
 
     if (!codesh::semantic_analyzer::util::type_exists(root, type_name))
     {
-        codesh::semantic_analyzer::throw_error(
+        codesh::semantic_analyzer::collect_error(
             "Unknown return type " + type_name +
             " in method " + method_name +
             " of type " + class_name
@@ -110,7 +111,7 @@ static void check_parameters(
 
         if (!custom_param)
         {
-            codesh::semantic_analyzer::throw_error(
+            codesh::semantic_analyzer::collect_error(
                 "Invalid parameter type in method " + method_name +
                 " of type " + class_name
             );
@@ -120,7 +121,7 @@ static void check_parameters(
 
         if (!codesh::semantic_analyzer::util::type_exists(root, param_type_name))
         {
-            codesh::semantic_analyzer::throw_error(
+            codesh::semantic_analyzer::collect_error(
                 "Unknown parameter type " + param_type_name +
                 " in method " + method_name +
                 " of type " + class_name

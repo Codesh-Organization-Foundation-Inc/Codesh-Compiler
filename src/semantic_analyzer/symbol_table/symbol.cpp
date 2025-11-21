@@ -42,7 +42,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     return *result->second;
 }
 
-void codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(std::string name, std::unique_ptr<symbol> entry)
+bool codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(std::string name, std::unique_ptr<symbol> entry)
 {
      for (const symbol_type type : allowed_symbol_types())
      {
@@ -50,32 +50,33 @@ void codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(std::strin
              throw std::runtime_error("Illegal symbol entry");
      }
 
-    get_symbol_map().emplace(std::move(name), std::move(entry));
+    const auto [it, added] = get_symbol_map().emplace(std::move(name), std::move(entry));
+    return added;
 }
 
-std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::package_symbol::allowed_symbol_types()
+std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::country_symbol::allowed_symbol_types()
     const
 {
     return ALLOWED_SYMBOL_TYPES;
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::package_symbol::
+const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::country_symbol::
     get_symbol_map() const
 {
     return scopes;
 }
 
-codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::package_symbol::get_symbol_map()
+codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::country_symbol::get_symbol_map()
 {
     return scopes;
 }
 
-codesh::semantic_analyzer::package_symbol::package_symbol() : symbol(symbol_type::PACKAGE)
+codesh::semantic_analyzer::country_symbol::country_symbol() : symbol(symbol_type::COUNTRY)
 {
 }
 
-codesh::semantic_analyzer::package_symbol::package_symbol(package_symbol *parent_package) :
-    symbol(parent_package, symbol_type::PACKAGE)
+codesh::semantic_analyzer::country_symbol::country_symbol(country_symbol *parent_package) :
+    symbol(parent_package, symbol_type::COUNTRY)
 {
 }
 
@@ -180,9 +181,9 @@ codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::metho
     return method_scope;
 }
 
-const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::package_symbol::ALLOWED_SYMBOL_TYPES = {
+const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::country_symbol::ALLOWED_SYMBOL_TYPES = {
     symbol_type::TYPE,
-    symbol_type::PACKAGE
+    symbol_type::COUNTRY
 };
 
 const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::type_symbol::ALLOWED_SYMBOL_TYPES = {
