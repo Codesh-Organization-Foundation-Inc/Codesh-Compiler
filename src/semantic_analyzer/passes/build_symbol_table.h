@@ -3,5 +3,6 @@
 
 namespace codesh::semantic
 {
-void build_symbol_table(ast::compilation_unit_ast_node& root);
+//TODO
+// void build_symbol_table(ast::compilation_unit_ast_node& root);
 }

@@ -2,10 +2,7 @@
 #include "../errors/errors.h"
 #include <unordered_set>
 
-namespace codesh::semantic_analyzer
-{
-
-void check_types(ast::compilation_unit_ast_node &root)
+void codesh::semantic_analyzer::check_types(ast::compilation_unit_ast_node &root)
 {
     std::unordered_set<std::string> type_names;
 
@@ -19,6 +16,4 @@ void check_types(ast::compilation_unit_ast_node &root)
             throw_error("Duplicate type declared: " + name);
         }
     }
-}
-
 }

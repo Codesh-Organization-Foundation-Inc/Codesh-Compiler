@@ -3,5 +3,5 @@
 
 namespace codesh::semantic_analyzer
 {
-void check_types(ast::compilation_unit_ast_node& root);
+void check_types(ast::compilation_unit_ast_node &root);
 }

@@ -1,8 +1,8 @@
 #pragma once
+
 #include "defs/class_file.h"
 
 #include <filesystem>
-#include <list>
 
 namespace codesh::ast::type_decl
 {

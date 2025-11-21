@@ -2,8 +2,6 @@
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/class_file_writer.h"
-#include "parser/ast/type_declaration/attributes_ast_node.h"
-#include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
 
@@ -12,7 +10,6 @@
 #include <queue>
 #include <sstream>
 #include <string>
-
 
 static std::string read_file(const std::string &file_name);
 
@@ -37,7 +34,6 @@ int main(const int argc, char **const argv) {
     codesh::semantic_analyzer::run(*ast);
 
 
-
     // A class file represents a single file.
     // So for each type declaration, build one class file:
     for (auto &type_declaration : ast->get_type_declarations())
@@ -57,8 +53,6 @@ int main(const int argc, char **const argv) {
 
     return 0;
 }
-
-
 
 static std::string read_file(const std::string &file_name)
 {
