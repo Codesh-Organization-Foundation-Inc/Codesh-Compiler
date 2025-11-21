@@ -4,6 +4,7 @@
 #include "output/jvm_target/class_file_writer.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 
 #include <filesystem>
 #include <fstream>
@@ -31,7 +32,8 @@ int main(const int argc, char **const argv) {
     const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
 
     // SEMANTIC ANALYZING
-    codesh::semantic_analyzer::run(*ast);
+    codesh::semantic_analyzer::symbol_table symbol_table;
+    codesh::semantic_analyzer::run(*ast, symbol_table);
 
 
     // A class file represents a single file.

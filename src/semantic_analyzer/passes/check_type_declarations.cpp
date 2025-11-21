@@ -2,7 +2,7 @@
 #include "check_type_declarations.h"
 #include <unordered_set>
 
-void codesh::semantic_analyzer::check_type_declarations(ast::compilation_unit_ast_node &root)
+void codesh::semantic_analyzer::check_type_declarations(ast::compilation_unit_ast_node &root, symbol_table &symbol_table)
 {
     //FIXME: This should point to the symbol table
     std::unordered_set<std::string> type_names;

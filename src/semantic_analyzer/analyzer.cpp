@@ -9,16 +9,14 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
-void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &ast_root, symbol_table &symbol_table)
 {
     //TODO: move these to other files
     add_default_constructors(ast_root);
     add_this_param_to_non_static_methods(ast_root);
 
-    //TODO:
-    // build_symbol_table(root);
-    check_type_declarations(ast_root);
-    check_methods(ast_root);
+    check_type_declarations(ast_root, symbol_table);
+    check_methods(ast_root, symbol_table);
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)

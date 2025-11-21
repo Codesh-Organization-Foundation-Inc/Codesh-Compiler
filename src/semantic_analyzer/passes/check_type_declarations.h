@@ -4,5 +4,6 @@
 
 namespace codesh::semantic_analyzer
 {
-void check_type_declarations(ast::compilation_unit_ast_node &root);
+class symbol_table;
+void check_type_declarations(ast::compilation_unit_ast_node &root, symbol_table &symbol_table);
 }
