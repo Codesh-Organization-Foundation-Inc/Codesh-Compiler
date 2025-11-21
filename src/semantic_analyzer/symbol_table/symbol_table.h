@@ -1,10 +1,13 @@
 #pragma once
 
-#include <unordered_map>
-#include <string>
-#include "../../parser/ast/type/type_ast_node.h"
+#include "symbol.h"
 
 namespace codesh::semantic_analyzer
 {
+
+class symbol_table
+{
+    std::unordered_map<std::string, package_symbol> global_scope;
+};
 
 }
