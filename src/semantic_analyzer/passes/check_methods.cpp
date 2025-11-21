@@ -10,7 +10,6 @@
 #include <format>
 #include <unordered_set>
 
-
 static void check_duplicate_method(
     const std::string &method_name,
     const std::string &class_name,
@@ -30,8 +29,7 @@ static void check_parameters(
 );
 
 
-void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root)
-{
+void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root) {
     for (auto &type_decl : root.get_type_declarations())
     {
         auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
@@ -55,8 +53,7 @@ static void check_duplicate_method(
     const std::string &method_name,
     const std::string &class_name,
     std::unordered_set<std::string> &method_names
-)
-{
+) {
     const auto [_, inserted] = method_names.emplace(method_name);
     if (!inserted)
     {
@@ -72,8 +69,7 @@ static void check_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node *method,
     const std::string &class_name
-)
-{
+) {
     const std::string &method_name = method->get_name();
     auto *return_type = method->get_return_type();
 
@@ -99,8 +95,7 @@ static void check_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node *method,
     const std::string &class_name
-)
-{
+) {
     const std::string &method_name = method->get_name();
 
     for (const auto &param : method->get_parameters())
