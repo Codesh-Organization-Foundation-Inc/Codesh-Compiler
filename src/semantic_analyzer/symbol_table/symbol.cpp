@@ -1,5 +1,7 @@
 #include "symbol.h"
 
+#include "symbol_table.h"
+
 #include <utility>
 
 codesh::semantic_analyzer::symbol::symbol(const symbol_type symbol_type) :
@@ -57,7 +59,8 @@ std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::p
     return ALLOWED_SYMBOL_TYPES;
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::package_symbol::get_symbol_map() const
+const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::package_symbol::
+    get_symbol_map() const
 {
     return scopes;
 }
@@ -81,7 +84,8 @@ std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::t
     return ALLOWED_SYMBOL_TYPES;
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symbol::get_symbol_map() const
+const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symbol::
+    get_symbol_map() const
 {
     return scopes;
 }
