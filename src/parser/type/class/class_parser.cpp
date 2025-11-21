@@ -82,7 +82,9 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
                 // Assume fields by default as they can either be custom types (identifiers)
                 // or primitives (other tokens).
                 parse_field_scope(tokens);
+                break;
             }
+            break;
         }
 
         case codesh::token_group::SCOPE_END: {
