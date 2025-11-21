@@ -29,16 +29,15 @@ codesh::semantic_analyzer::symbol_type codesh::semantic_analyzer::symbol::get_sy
 
 codesh::semantic_analyzer::i_scope_containing_symbol::~i_scope_containing_symbol() = default;
 
-const codesh::semantic_analyzer::symbol &codesh::semantic_analyzer::
-    i_scope_containing_symbol::get_symbol(const std::string &name) const
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
+    i_scope_containing_symbol::resolve(const std::string &name) const
 {
-    return *get_symbol_map().at(name);
-}
+    const auto result = get_symbol_map().find(name);
 
-codesh::semantic_analyzer::symbol &codesh::semantic_analyzer::i_scope_containing_symbol::get_symbol(
-    const std::string &name)
-{
-    return *get_symbol_map().at(name);
+    if (result == get_symbol_map().end())
+        return std::nullopt;
+
+    return *result->second;
 }
 
 void codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(std::string name, std::unique_ptr<symbol> entry)

@@ -47,8 +47,7 @@ protected:
 public:
     virtual ~i_scope_containing_symbol();
 
-    [[nodiscard]] const symbol &get_symbol(const std::string &name) const;
-    [[nodiscard]] symbol &get_symbol(const std::string &name);
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
 
     void add_symbol(std::string name, std::unique_ptr<symbol> entry);
 };
