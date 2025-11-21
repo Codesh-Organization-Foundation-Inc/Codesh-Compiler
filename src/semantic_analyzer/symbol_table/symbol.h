@@ -27,6 +27,7 @@ class symbol
     symbol_type _symbol_type;
 
 public:
+    explicit symbol(symbol_type symbol_type);
     symbol(symbol *parent_symbol, symbol_type symbol_type);
     virtual ~symbol();
 
@@ -38,55 +39,56 @@ public:
 class i_scope_containing_symbol
 {
 protected:
-    [[nodiscard]] virtual std::vector<symbol_type> allowed_symbol_types() const;
+    [[nodiscard]] virtual std::vector<symbol_type> allowed_symbol_types() const = 0;
+
+    [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
+    [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
 
 public:
     virtual ~i_scope_containing_symbol();
 
-    [[nodiscard]] virtual const std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) const = 0;
-    [[nodiscard]] virtual std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) = 0;
+    [[nodiscard]] const symbol &get_symbol(const std::string &name) const;
+    [[nodiscard]] symbol &get_symbol(const std::string &name);
 
-    void add_symbol(std::unique_ptr<symbol> entry);
+    void add_symbol(std::string name, std::unique_ptr<symbol> entry);
 };
 
 
 class package_symbol final : public symbol, public i_scope_containing_symbol
 {
-    //TODO:
-    // Allowed entries:
-    // - types
-    // - packages
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
+
+protected:
+    [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+
+    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
     package_symbol();
     explicit package_symbol(package_symbol *parent_package);
-
-    [[nodiscard]] const std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) const override;
-    [[nodiscard]] std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) override;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol
 {
-    //TODO:
-    // Allowed entries:
-    // - methods
-    // - fields
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_scope_map entries;
+    named_scope_map scopes;
 
     const std::string descriptor;
     const std::vector<output::jvm_target::access_flag> access_flags;
+
+protected:
+    [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+
+    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
     type_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
             std::string descriptor);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags();
-
-    [[nodiscard]] const std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) const override;
-    [[nodiscard]] std::list<std::unique_ptr<symbol>> &get_symbol(const std::string &name) override;
+    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 };
 
 
@@ -95,7 +97,7 @@ class variable_symbol : public symbol
     const std::string type_descriptor;
 
 public:
-    variable_symbol(symbol &parent_symbol, std::string type_descriptor);
+    variable_symbol(symbol &parent_symbol, symbol_type _symbol_type, std::string type_descriptor);
 };
 
 class field_symbol final : public variable_symbol
@@ -103,15 +105,16 @@ class field_symbol final : public variable_symbol
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 public:
-    field_symbol(symbol &parent_symbol, std::vector<output::jvm_target::access_flag> access_flags);
+    field_symbol(symbol &parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
+            std::string type_descriptor);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags();
+    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 };
 
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    explicit local_variable_symbol(symbol &parent_symbol);
+    local_variable_symbol(symbol &parent_symbol, std::string type_descriptor);
 };
 
 
@@ -137,9 +140,8 @@ public:
     method_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::string> parameter_descriptors, std::string return_type_descriptor);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags();
+    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
-    [[nodiscard]] std::string &get_method_descriptor() const;
     [[nodiscard]] const std::vector<std::string> &get_parameter_descriptors() const;
     [[nodiscard]] std::string get_return_type_descriptor() const;
 
