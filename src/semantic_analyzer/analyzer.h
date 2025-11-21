@@ -5,5 +5,5 @@
 
 namespace codesh::semantic_analyzer
 {
-void run(ast::compilation_unit_ast_node &root);
+void run(ast::compilation_unit_ast_node &ast_root);
 }
