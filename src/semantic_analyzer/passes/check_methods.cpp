@@ -7,11 +7,29 @@
 #include "../errors/errors.h"
 #include "util.h"
 
-#include <algorithm>
+#include <format>
 #include <unordered_set>
 
-void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root)
-{
+static void check_duplicate_method(
+    const std::string &method_name,
+    const std::string &class_name,
+    std::unordered_set<std::string> &method_names
+);
+
+static void check_return_type(
+    const codesh::ast::compilation_unit_ast_node &root,
+    const codesh::ast::method_declaration_ast_node *method,
+    const std::string &class_name
+);
+
+static void check_parameters(
+    const codesh::ast::compilation_unit_ast_node &root,
+    const codesh::ast::method_declaration_ast_node *method,
+    const std::string &class_name
+);
+
+
+void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root) {
     for (auto &type_decl : root.get_type_declarations())
     {
         auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
@@ -22,62 +40,91 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
 
         for (const auto &method : class_node->get_methods())
         {
-            const std::string &name = method->get_name();
+            const std::string &method_name = method->get_name();
 
-            // Duplicate method check
-            const auto [it, did_insert] = method_names.emplace(name);
-            if (!did_insert)
-            {
-                throw_error(
-                    "Duplicate method declared: " + name
-                    + " in type " + class_node->get_name()
-                );
-            }
+            check_duplicate_method(method_name, class_node->get_name(), method_names);
+            check_return_type(root, method.get(), class_node->get_name());
+            check_parameters(root, method.get(), class_node->get_name());
+        }
+    }
+}
 
-            // checking return type
-            const auto return_type = method->get_return_type();
+static void check_duplicate_method(
+    const std::string &method_name,
+    const std::string &class_name,
+    std::unordered_set<std::string> &method_names
+) {
+    const auto [_, inserted] = method_names.emplace(method_name);
+    if (!inserted)
+    {
+        codesh::semantic_analyzer::throw_error(
+            "Duplicate method declared: " + method_name +
+            " in type " + class_name
+        );
+    }
+}
 
-            if (const auto *custom = dynamic_cast<ast::type::custom_type_ast_node *>(return_type))
-            {
-                const std::string &type_name = custom->get_name();
 
-                if (!util::type_exists(root, type_name))
-                {
-                    throw_error(
-                        "Unknown return type " + type_name + " in method " + name
-                        + " of type " + class_node->get_name()
-                    );
-                }
-            }
+static void check_return_type(
+    const codesh::ast::compilation_unit_ast_node &root,
+    const codesh::ast::method_declaration_ast_node *method,
+    const std::string &class_name
+) {
+    const std::string &method_name = method->get_name();
+    auto *return_type = method->get_return_type();
 
-            // check parameters
-            for (const auto &param : method->get_parameters())
-            {
-                ast::type::type_ast_node *parameter_type = param->get_type();
+    const auto *custom_type =
+        dynamic_cast<codesh::ast::type::custom_type_ast_node *>(return_type);
 
-                if (dynamic_cast<ast::type::primitive_type_ast_node *>(parameter_type))
-                    continue;
+    if (!custom_type)
+        return;
 
-                const auto *custom_parameter = dynamic_cast<ast::type::custom_type_ast_node *>(parameter_type);
-                if (!custom_parameter)
-                {
-                    throw_error(
-                        "Invalid parameter type in method " + name +
-                        " of type " + class_node->get_name()
-                    );
-                    continue;
-                }
+    const std::string &type_name = custom_type->get_name();
 
-                const std::string &parameter_type_name = custom_parameter->get_name();
+    if (!codesh::semantic_analyzer::util::type_exists(root, type_name))
+    {
+        codesh::semantic_analyzer::throw_error(
+            "Unknown return type " + type_name +
+            " in method " + method_name +
+            " of type " + class_name
+        );
+    }
+}
 
-                if (!util::type_exists(root, parameter_type_name))
-                {
-                    throw_error(
-                        "Unknown parameter type " + parameter_type_name + " in method " + name +
-                        " of type " + class_node->get_name()
-                    );
-                }
-            }
+static void check_parameters(
+    const codesh::ast::compilation_unit_ast_node &root,
+    const codesh::ast::method_declaration_ast_node *method,
+    const std::string &class_name
+) {
+    const std::string &method_name = method->get_name();
+
+    for (const auto &param : method->get_parameters())
+    {
+        auto *param_type = param->get_type();
+
+        if (dynamic_cast<codesh::ast::type::primitive_type_ast_node *>(param_type))
+            continue;
+
+        const auto *custom_param =
+            dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param_type);
+
+        if (!custom_param)
+        {
+            codesh::semantic_analyzer::throw_error(
+                "Invalid parameter type in method " + method_name +
+                " of type " + class_name
+            );
+        }
+
+        const std::string &param_type_name = custom_param->get_name();
+
+        if (!codesh::semantic_analyzer::util::type_exists(root, param_type_name))
+        {
+            codesh::semantic_analyzer::throw_error(
+                "Unknown parameter type " + param_type_name +
+                " in method " + method_name +
+                " of type " + class_name
+            );
         }
     }
 }
