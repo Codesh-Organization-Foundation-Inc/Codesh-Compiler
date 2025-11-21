@@ -1,14 +1,14 @@
-#include "verify_methods.h"
+#include "check_methods.h"
+
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../errors/errors.h"
+#include "util.h"
 
 #include <algorithm>
 #include <unordered_set>
-
-static bool type_exists(const codesh::ast::compilation_unit_ast_node &root, const std::string &name);
 
 void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root)
 {
@@ -41,7 +41,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
             {
                 const std::string &type_name = custom->get_name();
 
-                if (!type_exists(root, type_name))
+                if (!util::type_exists(root, type_name))
                 {
                     throw_error(
                         "Unknown return type " + type_name + " in method " + name
@@ -70,7 +70,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
 
                 const std::string &parameter_type_name = custom_parameter->get_name();
 
-                if (!type_exists(root, parameter_type_name))
+                if (!util::type_exists(root, parameter_type_name))
                 {
                     throw_error(
                         "Unknown parameter type " + parameter_type_name + " in method " + name +
@@ -80,22 +80,4 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
             }
         }
     }
-}
-
-static bool type_exists(const codesh::ast::compilation_unit_ast_node &root, const std::string &name)
-{
-    return std::ranges::any_of(
-        root.get_type_declarations(),
-
-        [&name](const auto &declaration) {
-            const auto *class_declaration = dynamic_cast<codesh::ast::type_decl::class_declaration_ast_node*>(
-                declaration.get()
-            );
-
-            if (class_declaration)
-                return class_declaration->get_name() == name;
-
-            return false;
-        }
-    );
 }

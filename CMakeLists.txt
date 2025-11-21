@@ -125,15 +125,17 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol_table.cpp
         src/semantic_analyzer/passes/build_symbol_table.h
         src/semantic_analyzer/passes/build_symbol_table.cpp
-        src/semantic_analyzer/passes/check_types.h
-        src/semantic_analyzer/passes/check_types.cpp
-        src/semantic_analyzer/passes/verify_methods.h
-        src/semantic_analyzer/passes/verify_methods.cpp
+        src/semantic_analyzer/passes/check_type_declarations.h
+        src/semantic_analyzer/passes/check_type_declarations.cpp
+        src/semantic_analyzer/passes/check_methods.h
+        src/semantic_analyzer/passes/check_methods.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/semantic_analyzer/errors/errors.h
         src/semantic_analyzer/errors/errors.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
+        src/semantic_analyzer/passes/util.cpp
+        src/semantic_analyzer/passes/util.h
 )
 
 # sudo dnf install boost-regex boost-devel

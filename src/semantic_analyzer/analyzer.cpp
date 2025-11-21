@@ -1,8 +1,8 @@
 #include "analyzer.h"
 
-#include "passes/check_types.h"
-#include "passes/verify_methods.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "passes/check_methods.h"
+#include "passes/check_type_declarations.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -17,7 +17,7 @@ void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &root)
 
     //TODO:
     // build_symbol_table(root);
-    check_types(root);
+    check_type_declarations(root);
     check_methods(root);
 }
 
