@@ -3,24 +3,11 @@
 #include <utility>
 
 codesh::semantic_analyzer::symbol::symbol(const symbol_type symbol_type) :
-    parent_symbol(std::nullopt),
-    _symbol_type(symbol_type)
-{
-}
-
-codesh::semantic_analyzer::symbol::symbol(symbol *const parent_symbol, const symbol_type symbol_type) :
-    parent_symbol(*parent_symbol),
     _symbol_type(symbol_type)
 {
 }
 
 codesh::semantic_analyzer::symbol::~symbol() = default;
-
-std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol::
-    get_parent_symbol() const
-{
-    return parent_symbol;
-}
 
 codesh::semantic_analyzer::symbol_type codesh::semantic_analyzer::symbol::get_symbol_type() const
 {
@@ -61,11 +48,6 @@ codesh::semantic_analyzer::country_symbol::country_symbol() : symbol(symbol_type
 {
 }
 
-codesh::semantic_analyzer::country_symbol::country_symbol(country_symbol *parent_package) :
-    symbol(parent_package, symbol_type::COUNTRY)
-{
-}
-
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::type_symbol::allowed_symbol_types() const
 {
     return ALLOWED_SYMBOL_TYPES;
@@ -82,9 +64,8 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symb
     return scopes;
 }
 
-codesh::semantic_analyzer::type_symbol::type_symbol(symbol &parent_symbol,
-                                                    const std::vector<output::jvm_target::access_flag> &access_flags) :
-    symbol(&parent_symbol, symbol_type::TYPE),
+codesh::semantic_analyzer::type_symbol::type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags) :
+    symbol(symbol_type::TYPE),
     access_flags(access_flags)
 {
 }
@@ -95,17 +76,16 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
     return access_flags;
 }
 
-codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol &parent_symbol, const symbol_type _symbol_type,
+codesh::semantic_analyzer::variable_symbol::variable_symbol(const symbol_type _symbol_type,
         std::unique_ptr<ast::type::type_ast_node> type) :
-    symbol(&parent_symbol, _symbol_type),
+    symbol(_symbol_type),
     type(std::move(type))
 {
 }
 
-codesh::semantic_analyzer::field_symbol::field_symbol(symbol &parent_symbol,
-                                                      std::vector<output::jvm_target::access_flag> access_flags,
+codesh::semantic_analyzer::field_symbol::field_symbol(std::vector<output::jvm_target::access_flag> access_flags,
                                                       std::unique_ptr<ast::type::type_ast_node> type) :
-    variable_symbol(parent_symbol, symbol_type::FIELD, std::move(type)),
+    variable_symbol(symbol_type::FIELD, std::move(type)),
     access_flags(std::move(access_flags))
 {
 }
@@ -116,9 +96,8 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
     return access_flags;
 }
 
-codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol &parent_symbol,
-                                                                        std::unique_ptr<ast::type::type_ast_node> type) :
-    variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type))
+codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type) :
+    variable_symbol(symbol_type::LOCAL_VARIABLE, std::move(type))
 {
 }
 
@@ -133,8 +112,8 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::methods_o
     return scopes;
 }
 
-codesh::semantic_analyzer::methods_overloads_symbol::methods_overloads_symbol(symbol &parent_symbol) :
-    symbol(&parent_symbol, symbol_type::METHOD_OVERLOADS)
+codesh::semantic_analyzer::methods_overloads_symbol::methods_overloads_symbol() :
+    symbol(symbol_type::METHOD_OVERLOADS)
 {
 }
 
@@ -144,21 +123,19 @@ const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::met
     return scopes;
 }
 
-codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(symbol &parent_symbol) :
-    symbol(&parent_symbol, symbol_type::METHOD_SCOPE)
+codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol() :
+    symbol(symbol_type::METHOD_SCOPE)
 {
 }
 
 codesh::semantic_analyzer::method_symbol::method_symbol(
-        symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+         const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
         std::unique_ptr<ast::type::type_ast_node> return_type) :
-    symbol(&parent_symbol, symbol_type::METHOD),
+    symbol(symbol_type::METHOD),
     access_flags(access_flags),
     parameter_types(std::move(parameter_types)),
-    return_type(std::move(return_type)),
-
-    method_scope(*this)
+    return_type(std::move(return_type))
 {
 }
 

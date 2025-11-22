@@ -36,7 +36,6 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 
         const auto [it, inserted] = methods_container.add_symbol(
             method_decl->generate_parameter_descriptors(), std::make_unique<method_symbol>(
-                methods_container,
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone()
@@ -58,9 +57,7 @@ static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads
         codesh::semantic_analyzer::type_symbol &containing_type)
 {
     return containing_type.add_symbol(
-        method_decl.get_name(), std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>(
-            containing_type
-        )
+        method_decl.get_name(), std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>()
     ).first;
 }
 

@@ -26,16 +26,12 @@ enum class symbol_type
 
 class symbol
 {
-    //REVIEW: Is this really needed?
-    std::optional<std::reference_wrapper<symbol>> parent_symbol;
     symbol_type _symbol_type;
 
 public:
     explicit symbol(symbol_type symbol_type);
-    symbol(symbol *parent_symbol, symbol_type symbol_type);
     virtual ~symbol();
 
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> get_parent_symbol() const;
     [[nodiscard]] symbol_type get_symbol_type() const;
 };
 
@@ -69,7 +65,6 @@ protected:
 
 public:
     country_symbol();
-    explicit country_symbol(country_symbol *parent_package);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };
@@ -88,7 +83,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags);
+    type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
@@ -101,7 +96,7 @@ class variable_symbol : public symbol
     const std::unique_ptr<ast::type::type_ast_node> type;
 
 public:
-    variable_symbol(symbol &parent_symbol, symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
+    variable_symbol(symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
 };
 
 class field_symbol final : public variable_symbol
@@ -109,7 +104,7 @@ class field_symbol final : public variable_symbol
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 public:
-    field_symbol(symbol &parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
+    field_symbol(std::vector<output::jvm_target::access_flag> access_flags,
             std::unique_ptr<ast::type::type_ast_node> type);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
@@ -118,7 +113,7 @@ public:
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    local_variable_symbol(symbol &parent_symbol, std::unique_ptr<ast::type::type_ast_node> type);
+    local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type);
 };
 
 
@@ -133,7 +128,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    explicit methods_overloads_symbol(symbol &parent_symbol);
+    methods_overloads_symbol();
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };
@@ -145,7 +140,7 @@ class method_scope_symbol final : public symbol
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    explicit method_scope_symbol(symbol &parent_symbol);
+    method_scope_symbol();
 };
 
 class method_symbol final : public symbol
@@ -158,7 +153,7 @@ class method_symbol final : public symbol
     method_scope_symbol method_scope;
 
 public:
-    method_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+    method_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type);
 
