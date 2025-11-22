@@ -5,8 +5,8 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_BH, "בע\"ה", word_boundary::BOTH},
     {token_group::KEYWORD_IAW, "אי\"א", word_boundary::BOTH},
 
-    {token_group::SCOPE_BEGIN, "ויאמר:", word_boundary::BEFORE},
-    {token_group::SCOPE_END, "ויתם:", word_boundary::BEFORE},
+    {token_group::SCOPE_BEGIN, "ויאמר", word_boundary::BEFORE},
+    {token_group::SCOPE_END, "ויתם", word_boundary::BEFORE},
 
     {token_group::OPEN_PARENTHESIS, "כי־", word_boundary::BEFORE},
     {token_group::CLOSE_PARENTHESIS, "ויחדל", word_boundary::BOTH},
@@ -104,7 +104,6 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::OPERATOR_AND, "וגם", word_boundary::BOTH},
     {token_group::OPERATOR_OR, "או", word_boundary::BOTH},
 
-    {token_group::PUNCTUATION_END_OP, ":", word_boundary::NONE},
     {token_group::PUNCTUATION_ARG_SEPARATOR, "ו־", word_boundary::BEFORE},
     {token_group::PUNCTUATION_DOT, "ל־", word_boundary::BEFORE},
     {token_group::PUNCTUATION_WILDCARD, "כולל", word_boundary::BOTH},
@@ -123,7 +122,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_THROW, "גזר", word_boundary::BOTH},
     {token_group::KEYWORD_THROWS, "פן־יחטא", word_boundary::BOTH},
 
-    {token_group::COMMENT_MULTILINE, "ויאמר ה' לאמר:", word_boundary::BEFORE},
-    {token_group::COMMENT_MULTILINE, "וכה הגה ה' לאמר:", word_boundary::BEFORE},
+    {token_group::COMMENT_MULTILINE, "ויאמר ה' לאמר", word_boundary::BEFORE},
+    {token_group::COMMENT_MULTILINE, "וכה הגה ה' לאמר", word_boundary::BEFORE},
     {token_group::COMMENT_ONE_LINER, "ויאמר ה' לאמר", word_boundary::BOTH},
 };
