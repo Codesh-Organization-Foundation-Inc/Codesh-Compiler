@@ -2,6 +2,10 @@
 
 #include <sstream>
 
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(std::string name) : name(std::move(name))
+{
+}
+
 std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
 {
     std::ostringstream builder;
@@ -30,11 +34,6 @@ void codesh::ast::type::custom_type_ast_node::set_resolved_name(std::string reso
 std::string codesh::ast::type::custom_type_ast_node::get_name() const
 {
     return name;
-}
-
-void codesh::ast::type::custom_type_ast_node::set_name(const std::string &name)
-{
-    this->name = name;
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const
