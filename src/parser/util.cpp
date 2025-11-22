@@ -103,6 +103,16 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
     }
 }
 
+void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tokens)
+{
+    if (tokens.empty() || tokens.front()->get_group() != token_group::PUNCTUATION_END_OP)
+    {
+        throw std::runtime_error("Unexpected token: Expected colon"); //TODO: Convert to custom Codesh error
+    }
+
+    tokens.pop();
+}
+
 
 void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn,
         const bool allow_wildcard)

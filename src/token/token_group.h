@@ -106,6 +106,7 @@ enum class token_group : int
     OPERATOR_AND, // וגם
     OPERATOR_OR, // או
 
+    PUNCTUATION_END_OP, // :
     PUNCTUATION_ARG_SEPARATOR, // ו־
     PUNCTUATION_DOT, // ל־
     PUNCTUATION_WILDCARD, // כולל

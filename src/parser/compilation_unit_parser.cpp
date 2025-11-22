@@ -49,4 +49,5 @@ static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tok
 {
     tokens.pop();
     parser::util::parse_fqcn(tokens, root_node->get_package_name());
+    parser::util::ensure_end_op(tokens);
 }
