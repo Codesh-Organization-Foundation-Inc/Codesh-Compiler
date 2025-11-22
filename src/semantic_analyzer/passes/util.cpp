@@ -1,25 +1,26 @@
 #include "util.h"
 
-#include <algorithm>
-
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 
-bool codesh::semantic_analyzer::util::type_exists(const ast::compilation_unit_ast_node &root, const std::string &name)
+std::optional<std::string> codesh::semantic_analyzer::util::resolve_custom_type(
+        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries, const std::string &name)
 {
-    return std::ranges::any_of(
-        //FIXME: This should point to the symbol table
-        root.get_type_declarations(),
+    //TODO: Implement when implementing countries.
+    // This method should return the Fully Qualified Class Name of the given type name (which isn't a descriptor).
+    return name;
 
-        [&name](auto &declaration) {
-            const auto *class_declaration = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(
-                declaration.get()
-            );
+    //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
+}
 
-            if (class_declaration)
-                return class_declaration->get_name() == name;
+bool codesh::semantic_analyzer::util::resolve_custom_type_node(
+        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+        ast::type::custom_type_ast_node &custom_type_node)
+{
+    const auto resolved_name = resolve_custom_type(lookup_countries, custom_type_node.get_name());
+    if (!resolved_name)
+        return false;
 
-            return false;
-        }
-    );
+    custom_type_node.set_name(resolved_name.value());
+    return true;
 }

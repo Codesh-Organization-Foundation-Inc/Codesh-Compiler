@@ -7,8 +7,6 @@
 #include "../errors/errors.h"
 #include "util.h"
 
-#include <unordered_set>
-
 static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads(
         const codesh::ast::method_declaration_ast_node &method_decl,
         codesh::semantic_analyzer::type_symbol &containing_type);
@@ -18,13 +16,13 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 
 static void check_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node *method,
+    const codesh::ast::method_declaration_ast_node &method_decl,
     const std::string &class_name
 );
 
 static void check_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node *method,
+    const codesh::ast::method_declaration_ast_node &method,
     const std::string &class_name
 );
 
@@ -87,12 +85,10 @@ void codesh::semantic_analyzer::method_declaration::check_methods(ast::compilati
         if (!class_node)
             continue;
 
-        std::unordered_set<std::string> method_names;
-
         for (const auto &method : class_node->get_methods())
         {
-            check_return_type(root, method.get(), class_node->get_name());
-            check_parameters(root, method.get(), class_node->get_name());
+            check_return_type(root, *method, class_node->get_name());
+            check_parameters(root, *method, class_node->get_name());
         }
     }
 }
@@ -100,25 +96,29 @@ void codesh::semantic_analyzer::method_declaration::check_methods(ast::compilati
 
 static void check_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node *method,
+    const codesh::ast::method_declaration_ast_node &method_decl,
     const std::string &class_name
 ) {
-    const std::string &method_name = method->get_name();
-    auto *return_type = method->get_return_type();
+    auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
 
-    const auto *custom_type =
-        dynamic_cast<codesh::ast::type::custom_type_ast_node *>(return_type);
-
-    if (!custom_type)
+    if (!return_type)
+    {
+        // Primitive types bound to be okay
         return;
+    }
 
-    const std::string &type_name = custom_type->get_name();
 
-    if (!codesh::semantic_analyzer::util::type_exists(root, type_name))
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        root.get_symbol_table().value().get().resolve_country("").value()
+    };
+
+
+    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
     {
         codesh::semantic_analyzer::collect_error(
-            "Unknown return type " + type_name +
-            " in method " + method_name +
+            "Unknown return type " + return_type->get_name() +
+            " in method " + method_decl.get_name() +
             " of type " + class_name
         );
     }
@@ -126,37 +126,31 @@ static void check_return_type(
 
 static void check_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node *method,
+    const codesh::ast::method_declaration_ast_node &method,
     const std::string &class_name
 ) {
-    const std::string &method_name = method->get_name();
-
-    for (const auto &param : method->get_parameters())
+    for (const auto &param : method.get_parameters())
     {
-        auto *param_type = param->get_type();
-
-        if (dynamic_cast<codesh::ast::type::primitive_type_ast_node *>(param_type))
-            continue;
-
-        const auto *custom_param =
-            dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param_type);
+        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get());
 
         if (!custom_param)
         {
-            codesh::semantic_analyzer::collect_error(
-                "Invalid parameter type in method " + method_name +
-                " of type " + class_name
-            );
+            // Primitive types bound to be okay
             continue;
         }
 
-        const std::string &param_type_name = custom_param->get_name();
 
-        if (!codesh::semantic_analyzer::util::type_exists(root, param_type_name))
+        //TODO: Use actual countries
+        const std::vector lookup_countries = {
+            root.get_symbol_table().value().get().resolve_country("").value()
+        };
+
+
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
         {
             codesh::semantic_analyzer::collect_error(
-                "Unknown parameter type " + param_type_name +
-                " in method " + method_name +
+                "Unknown return type " + custom_param->get_name() +
+                " in method " + method.get_name() +
                 " of type " + class_name
             );
         }
