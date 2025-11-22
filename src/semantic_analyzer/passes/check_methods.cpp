@@ -129,7 +129,7 @@ static void check_parameters(
                 << " of type " << class_name;
 
             codesh::semantic_analyzer::throw_error(os_string.str());
-            );
+
         }
     }
 }
