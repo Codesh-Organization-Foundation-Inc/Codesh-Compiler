@@ -83,7 +83,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags);
+    explicit type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
