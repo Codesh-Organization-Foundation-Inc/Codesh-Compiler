@@ -26,6 +26,8 @@ public:
 
     [[nodiscard]] std::string get_name() const;
     void set_name(const std::string &name);
+
+    [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
 };
 
 }

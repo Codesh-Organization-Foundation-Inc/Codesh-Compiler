@@ -32,3 +32,8 @@ void codesh::ast::type::custom_type_ast_node::set_name(const std::string &name)
 {
     this->name = name;
 }
+
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const
+{
+    return std::make_unique<custom_type_ast_node>(*this);
+}

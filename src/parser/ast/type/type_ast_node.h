@@ -3,6 +3,8 @@
 #include "../impl/ast_node.h"
 #include "../impl/i_descriptor_emitter.h"
 
+#include <memory>
+
 namespace codesh::ast::type
 {
 
@@ -21,6 +23,8 @@ public:
 
     [[nodiscard]] int get_array_dimensions() const;
     void set_array_dimensions(int array_dimensions);
+
+    [[nodiscard]] virtual std::unique_ptr<type_ast_node> clone() const = 0;
 };
 
 }

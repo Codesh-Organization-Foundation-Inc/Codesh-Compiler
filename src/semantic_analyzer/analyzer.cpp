@@ -1,24 +1,26 @@
 #include "analyzer.h"
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "passes/check_methods.h"
-#include "passes/check_type_declarations.h"
+#include "passes/method_declaration.h"
+#include "passes/type_declaration.h"
+#include "symbol_table/symbol.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
-void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &root)
+void codesh::semantic_analyzer::setup_ast(const ast::compilation_unit_ast_node &ast_root)
 {
-    //TODO: move these to other files
-    add_default_constructors(root);
-    add_this_param_to_non_static_methods(root);
+    add_default_constructors(ast_root);
+    add_this_param_to_non_static_methods(ast_root);
+    //TODO: When calling non-static methods, also add 'this' as first argument
+}
 
-    //TODO:
-    // build_symbol_table(root);
-    check_type_declarations(root);
-    check_methods(root);
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
+{
+    //TODO: Typecheck classes & extends; do this inside of it:
+    method_declaration::check_methods(ast_root);
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)

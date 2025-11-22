@@ -21,8 +21,9 @@ public:
 
     [[nodiscard]] std::string generate_descriptor() const override;
 
-
     [[nodiscard]] definition::primitive_type get_type() const;
+
+    [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
 };
 
 }

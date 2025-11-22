@@ -21,8 +21,10 @@ public:
 
     [[nodiscard]] std::string get_name() const;
     void set_name(const std::string &name);
+
     [[nodiscard]] type::type_ast_node *get_type() const;
     void set_type(std::unique_ptr<type::type_ast_node> type);
+
     [[nodiscard]] bool is_final() const;
     void set_is_final(bool is_final);
 };

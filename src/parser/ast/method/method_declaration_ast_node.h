@@ -27,6 +27,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
 
 public:
     [[nodiscard]] std::string generate_descriptor() const override;
+    [[nodiscard]] std::string generate_parameter_descriptors() const;
 
 
     [[nodiscard]] std::string get_name() const;
