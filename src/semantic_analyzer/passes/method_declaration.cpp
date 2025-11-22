@@ -14,13 +14,13 @@ static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method_declaration_ast_node &method_decl);
 
-static void check_return_type(
+static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node &method_decl,
     const std::string &class_name
 );
 
-static void check_parameters(
+static void resolve_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node &method,
     const std::string &class_name
@@ -78,23 +78,34 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 }
 
 
-void codesh::semantic_analyzer::method_declaration::check_methods(ast::compilation_unit_ast_node &root) {
-    for (auto &type_decl : root.get_type_declarations())
+void codesh::semantic_analyzer::method_declaration::check_methods(const ast::compilation_unit_ast_node &root) {
+    //TODO: Properly get country of origin
+    const country_symbol &country = root.get_symbol_table().value().get().resolve_country("").value();
+
+    for (const auto &type_decl : root.get_type_declarations())
     {
         auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
         if (!class_node)
             continue;
 
-        for (const auto &method : class_node->get_methods())
+        // Get type symbol
+        const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+        for (const auto &method_decl : class_node->get_methods())
         {
-            check_return_type(root, *method, class_node->get_name());
-            check_parameters(root, *method, class_node->get_name());
+            const method_symbol &method = *static_cast<method_symbol *>(&type.resolve(method_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+            resolve_return_type(root, *method_decl, class_node->get_name());
+            resolve_parameters(root, *method_decl, class_node->get_name());
+
+            //TODO: Update method entry in the method scope table
+            //method.
         }
     }
 }
 
 
-static void check_return_type(
+static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node &method_decl,
     const std::string &class_name
@@ -124,7 +135,7 @@ static void check_return_type(
     }
 }
 
-static void check_parameters(
+static void resolve_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
     const codesh::ast::method_declaration_ast_node &method,
     const std::string &class_name

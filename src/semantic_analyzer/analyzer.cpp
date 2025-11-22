@@ -1,6 +1,7 @@
 #include "analyzer.h"
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "passes/method_declaration.h"
 #include "passes/type_declaration.h"
 #include "symbol_table/symbol.h"
 
@@ -18,7 +19,8 @@ void codesh::semantic_analyzer::setup_ast(const ast::compilation_unit_ast_node &
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-
+    //TODO: Typecheck classes & extends; do this inside of it:
+    method_declaration::check_methods(ast_root);
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)
