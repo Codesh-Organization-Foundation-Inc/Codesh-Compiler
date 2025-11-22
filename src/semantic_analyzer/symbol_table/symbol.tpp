@@ -2,7 +2,7 @@
 #include <algorithm>
 
 template <std::derived_from<codesh::semantic_analyzer::symbol> T>
-std::optional<std::reference_wrapper<T>> codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(
+std::pair<std::reference_wrapper<T>, bool> codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(
         std::string name, std::unique_ptr<T> entry)
 {
     const bool is_legal_symbol = std::ranges::any_of(
@@ -16,10 +16,7 @@ std::optional<std::reference_wrapper<T>> codesh::semantic_analyzer::i_scope_cont
         throw std::runtime_error("Illegal symbol entry");
 
 
-    const auto [it, added] = get_symbol_map().emplace(std::move(name), std::move(entry));
+    const auto [it, inserted] = get_symbol_map().emplace(std::move(name), std::move(entry));
 
-    if (added)
-        return *static_cast<T *>(it->second.get());
-
-    return std::nullopt;
+    return {*static_cast<T *>(it->second.get()), inserted};
 }

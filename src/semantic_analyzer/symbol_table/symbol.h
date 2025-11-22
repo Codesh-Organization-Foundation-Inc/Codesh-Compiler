@@ -18,12 +18,15 @@ enum class symbol_type
     TYPE,
     LOCAL_VARIABLE,
     FIELD,
+
+    METHOD_OVERLOADS,
     METHOD,
     METHOD_SCOPE
 };
 
 class symbol
 {
+    //REVIEW: Is this really needed?
     std::optional<std::reference_wrapper<symbol>> parent_symbol;
     symbol_type _symbol_type;
 
@@ -40,7 +43,7 @@ public:
 class i_scope_containing_symbol
 {
 protected:
-    [[nodiscard]] virtual std::vector<symbol_type> allowed_symbol_types() const = 0;
+    [[nodiscard]] virtual const std::vector<symbol_type> &allowed_symbol_types() const = 0;
     [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
 
 public:
@@ -51,7 +54,7 @@ public:
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
 
     template <std::derived_from<symbol> T>
-    std::optional<std::reference_wrapper<T>> add_symbol(std::string name, std::unique_ptr<T> entry);
+    std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
 };
 
 
@@ -61,7 +64,7 @@ class country_symbol final : public symbol, public i_scope_containing_symbol
     named_scope_map scopes;
 
 protected:
-    [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
@@ -81,7 +84,7 @@ class type_symbol final : public symbol, public i_scope_containing_symbol
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 protected:
-    [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
@@ -116,6 +119,23 @@ class local_variable_symbol final : public variable_symbol
 {
 public:
     local_variable_symbol(symbol &parent_symbol, std::unique_ptr<ast::type::type_ast_node> type);
+};
+
+
+class methods_overloads_symbol final : public symbol, public i_scope_containing_symbol
+{
+    static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
+    // Maps parameter descriptors to method declaration
+    named_scope_map scopes;
+
+protected:
+    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
+
+public:
+    explicit methods_overloads_symbol(symbol &parent_symbol);
+
+    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };
 
 

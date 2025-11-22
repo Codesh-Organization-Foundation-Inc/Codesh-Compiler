@@ -11,14 +11,14 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
     {
         const std::string name = type_decl->get_name();
 
-        const auto insert_result = containing_country.add_symbol(
+        const auto [it, inserted] = containing_country.add_symbol(
             name, std::make_unique<type_symbol>(
                 containing_country,
                 type_decl->get_attributes()->get_access_flags()
             )
         );
 
-        if (!insert_result)
+        if (!inserted)
         {
             collect_error("Duplicate type declared: " + name);
         }
@@ -26,7 +26,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
         {
-            method_declaration::collect_methods(*class_decl, insert_result.value().get());
+            method_declaration::collect_methods(*class_decl, it.get());
         }
     }
 }

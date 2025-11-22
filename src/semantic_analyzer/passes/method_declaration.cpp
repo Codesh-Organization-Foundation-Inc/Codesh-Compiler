@@ -9,6 +9,10 @@
 
 #include <unordered_set>
 
+static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads(
+        const codesh::ast::method_declaration_ast_node &method_decl,
+        codesh::semantic_analyzer::type_symbol &containing_type);
+
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method_declaration_ast_node &method_decl);
 
@@ -30,24 +34,36 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 {
     for (const auto &method_decl : class_decl.get_methods())
     {
-        const std::string name = method_decl->get_name();
+        methods_overloads_symbol &methods_container = get_method_overloads(*method_decl, containing_type);
 
-        const auto insert_result = containing_type.add_symbol(
-            name, std::make_unique<method_symbol>(
-                containing_type,
+        const auto [it, inserted] = methods_container.add_symbol(
+            method_decl->generate_parameter_descriptors(), std::make_unique<method_symbol>(
+                methods_container,
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone()
             )
         );
 
-        if (!insert_result)
+        if (!inserted)
         {
-            collect_error("Duplicate method declared: " + name);
+            //TODO: Print full method declaration
+            collect_error("Duplicate method declared: " + method_decl->get_name());
         }
 
         //TODO: Collect local variables
     }
+}
+
+static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads(
+        const codesh::ast::method_declaration_ast_node &method_decl,
+        codesh::semantic_analyzer::type_symbol &containing_type)
+{
+    return containing_type.add_symbol(
+        method_decl.get_name(), std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>(
+            containing_type
+        )
+    ).first;
 }
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(

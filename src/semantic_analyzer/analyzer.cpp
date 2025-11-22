@@ -9,12 +9,16 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
-void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::setup_ast(const ast::compilation_unit_ast_node &ast_root)
 {
-    //TODO: move these to other files
     add_default_constructors(ast_root);
     add_this_param_to_non_static_methods(ast_root);
     //TODO: When calling non-static methods, also add 'this' as first argument
+}
+
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
+{
+
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)

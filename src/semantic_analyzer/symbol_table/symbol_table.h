@@ -17,7 +17,7 @@ class symbol_table final : public i_scope_containing_symbol
     // void static collect_fields(ast::type_decl::class_declaration_ast_node &class_decl);
 
 protected:
-    [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:

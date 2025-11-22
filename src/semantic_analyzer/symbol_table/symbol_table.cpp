@@ -3,8 +3,8 @@
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../passes/type_declaration.h"
 
-std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::symbol_table::allowed_symbol_types()
-    const
+const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::symbol_table::
+    allowed_symbol_types() const
 {
     return ALLOWED_SYMBOL_TYPES;
 }
