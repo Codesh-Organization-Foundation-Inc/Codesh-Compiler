@@ -32,6 +32,7 @@ int main(const int argc, char **const argv) {
     const auto ast = codesh::parser::parse(tokens, args.src_path.stem());
 
     // SEMANTIC ANALYZING
+    ast->construct_symbol_table();
     codesh::semantic_analyzer::run(*ast);
 
 

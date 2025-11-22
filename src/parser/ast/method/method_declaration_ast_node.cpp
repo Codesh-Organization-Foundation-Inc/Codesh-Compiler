@@ -12,7 +12,7 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor() cons
     result << '(';
 
     bool is_first = true;
-    for (const auto &parameter_type : get_parameters())
+    for (const auto &var_node : get_parameters())
     {
         if (is_first && !attributes->get_is_static())
         {
@@ -21,7 +21,7 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor() cons
             continue;
         }
 
-        result << parameter_type->get_type()->generate_descriptor();
+        result << var_node->get_type()->generate_descriptor();
 
         is_first = false;
     }

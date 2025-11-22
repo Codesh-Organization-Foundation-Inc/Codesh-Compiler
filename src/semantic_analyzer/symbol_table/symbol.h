@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../output/jvm_target/class_file_builder.h"
+#include "../../parser/ast/type/type_ast_node.h"
 #include "scope.h"
 
 #include <list>
@@ -40,16 +41,17 @@ class i_scope_containing_symbol
 {
 protected:
     [[nodiscard]] virtual std::vector<symbol_type> allowed_symbol_types() const = 0;
+    [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
 
 public:
     virtual ~i_scope_containing_symbol();
 
     [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
-    [[nodiscard]] virtual named_scope_map &get_symbol_map() = 0;
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
 
-    bool add_symbol(std::string name, std::unique_ptr<symbol> entry);
+    template <std::derived_from<symbol> T>
+    std::optional<std::reference_wrapper<T>> add_symbol(std::string name, std::unique_ptr<T> entry);
 };
 
 
@@ -60,13 +62,13 @@ class country_symbol final : public symbol, public i_scope_containing_symbol
 
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
     country_symbol();
     explicit country_symbol(country_symbol *parent_package);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
-    [[nodiscard]] named_scope_map &get_symbol_map() override;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol
@@ -74,30 +76,29 @@ class type_symbol final : public symbol, public i_scope_containing_symbol
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
 
-    const std::string descriptor;
+    //TODO: Add super type
+    // const std::unique_ptr<ast::type::type_ast_node> super_type;
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;
-
+    [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
-            std::string descriptor);
+    type_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
-    [[nodiscard]] named_scope_map &get_symbol_map() override;
 };
 
 
 class variable_symbol : public symbol
 {
-    const std::string type_descriptor;
+    const std::unique_ptr<ast::type::type_ast_node> type;
 
 public:
-    variable_symbol(symbol &parent_symbol, symbol_type _symbol_type, std::string type_descriptor);
+    variable_symbol(symbol &parent_symbol, symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
 };
 
 class field_symbol final : public variable_symbol
@@ -106,7 +107,7 @@ class field_symbol final : public variable_symbol
 
 public:
     field_symbol(symbol &parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
-            std::string type_descriptor);
+            std::unique_ptr<ast::type::type_ast_node> type);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 };
@@ -114,7 +115,7 @@ public:
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    local_variable_symbol(symbol &parent_symbol, std::string type_descriptor);
+    local_variable_symbol(symbol &parent_symbol, std::unique_ptr<ast::type::type_ast_node> type);
 };
 
 
@@ -131,22 +132,25 @@ class method_symbol final : public symbol
 {
     const std::vector<output::jvm_target::access_flag> access_flags;
 
-    const std::vector<std::string> parameter_descriptors;
-    const std::string return_type_descriptor;
+    const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
+    const std::unique_ptr<ast::type::type_ast_node> return_type;
 
     method_scope_symbol method_scope;
 
 public:
     method_symbol(symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
-        std::vector<std::string> parameter_descriptors, std::string return_type_descriptor);
+            std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
+            std::unique_ptr<ast::type::type_ast_node> return_type);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
-    [[nodiscard]] const std::vector<std::string> &get_parameter_descriptors() const;
-    [[nodiscard]] std::string get_return_type_descriptor() const;
+    [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
+    [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
     [[nodiscard]] method_scope_symbol &get_scopes();
 };
 
 }
+
+#include "symbol.tpp"

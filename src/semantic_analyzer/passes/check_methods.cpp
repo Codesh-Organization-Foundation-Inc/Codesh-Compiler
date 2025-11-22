@@ -7,15 +7,7 @@
 #include "../errors/errors.h"
 #include "util.h"
 
-#include <format>
-
 #include <unordered_set>
-
-static void check_duplicate_method(
-    const std::string &method_name,
-    const std::string &class_name,
-    std::unordered_set<std::string> &method_names
-);
 
 static void check_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
@@ -41,27 +33,9 @@ void codesh::semantic_analyzer::check_methods(ast::compilation_unit_ast_node &ro
 
         for (const auto &method : class_node->get_methods())
         {
-            const std::string &method_name = method->get_name();
-
-            check_duplicate_method(method_name, class_node->get_name(), method_names);
             check_return_type(root, method.get(), class_node->get_name());
             check_parameters(root, method.get(), class_node->get_name());
         }
-    }
-}
-
-static void check_duplicate_method(
-    const std::string &method_name,
-    const std::string &class_name,
-    std::unordered_set<std::string> &method_names
-) {
-    const auto [_, inserted] = method_names.emplace(method_name);
-    if (!inserted)
-    {
-        codesh::semantic_analyzer::collect_error(
-            "Duplicate method declared: " + method_name +
-            " in type " + class_name
-        );
     }
 }
 
@@ -115,6 +89,7 @@ static void check_parameters(
                 "Invalid parameter type in method " + method_name +
                 " of type " + class_name
             );
+            continue;
         }
 
         const std::string &param_type_name = custom_param->get_name();

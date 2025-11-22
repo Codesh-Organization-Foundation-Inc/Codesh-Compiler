@@ -39,3 +39,8 @@ codesh::definition::primitive_type codesh::ast::type::primitive_type_ast_node::g
 {
     return type;
 }
+
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+{
+    return std::make_unique<primitive_type_ast_node>(*this);
+}

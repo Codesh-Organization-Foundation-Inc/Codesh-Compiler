@@ -16,7 +16,7 @@ namespace codesh::ast
 
 class compilation_unit_ast_node final : public impl::ast_node
 {
-    semantic_analyzer::symbol_table symbol_table;
+    std::optional<semantic_analyzer::symbol_table> symbol_table;
     const std::string source_stem;
 
     const definition::basad_type basad_type;
@@ -43,8 +43,9 @@ public:
     [[nodiscard]] const std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations() const;
 
 
-    [[nodiscard]] const semantic_analyzer::symbol_table &get_symbol_table() const;
-    [[nodiscard]] semantic_analyzer::symbol_table &get_symbol_table();
+    [[nodiscard]] std::optional<std::reference_wrapper<const semantic_analyzer::symbol_table>> get_symbol_table() const;
+    [[nodiscard]] std::optional<std::reference_wrapper<semantic_analyzer::symbol_table>> get_symbol_table();
+    void construct_symbol_table();
 };
 
 }

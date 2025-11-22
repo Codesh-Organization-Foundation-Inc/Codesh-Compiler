@@ -42,18 +42,6 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     return *result->second;
 }
 
-bool codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(std::string name, std::unique_ptr<symbol> entry)
-{
-     for (const symbol_type type : allowed_symbol_types())
-     {
-         if (type != entry->get_symbol_type())
-             throw std::runtime_error("Illegal symbol entry");
-     }
-
-    const auto [it, added] = get_symbol_map().emplace(std::move(name), std::move(entry));
-    return added;
-}
-
 std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::country_symbol::allowed_symbol_types()
     const
 {
@@ -97,10 +85,8 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symb
 }
 
 codesh::semantic_analyzer::type_symbol::type_symbol(symbol &parent_symbol,
-                                                    const std::vector<output::jvm_target::access_flag> &access_flags,
-                                                    std::string descriptor) :
+                                                    const std::vector<output::jvm_target::access_flag> &access_flags) :
     symbol(&parent_symbol, symbol_type::TYPE),
-    descriptor(std::move(descriptor)),
     access_flags(access_flags)
 {
 }
@@ -112,16 +98,16 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
 }
 
 codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol &parent_symbol, const symbol_type _symbol_type,
-        std::string type_descriptor) :
+        std::unique_ptr<ast::type::type_ast_node> type) :
     symbol(&parent_symbol, _symbol_type),
-    type_descriptor(std::move(type_descriptor))
+    type(std::move(type))
 {
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(symbol &parent_symbol,
                                                       std::vector<output::jvm_target::access_flag> access_flags,
-                                                      std::string type_descriptor) :
-    variable_symbol(parent_symbol, symbol_type::FIELD, std::move(type_descriptor)),
+                                                      std::unique_ptr<ast::type::type_ast_node> type) :
+    variable_symbol(parent_symbol, symbol_type::FIELD, std::move(type)),
     access_flags(std::move(access_flags))
 {
 }
@@ -133,8 +119,8 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol &parent_symbol,
-                                                                        std::string type_descriptor) :
-    variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type_descriptor))
+                                                                        std::unique_ptr<ast::type::type_ast_node> type) :
+    variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type))
 {
 }
 
@@ -145,11 +131,12 @@ codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(symbol &pare
 
 codesh::semantic_analyzer::method_symbol::method_symbol(
         symbol &parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
-        std::vector<std::string> parameter_descriptors, std::string return_type_descriptor) :
+        std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
+        std::unique_ptr<ast::type::type_ast_node> return_type) :
     symbol(&parent_symbol, symbol_type::METHOD),
     access_flags(access_flags),
-    parameter_descriptors(std::move(parameter_descriptors)),
-    return_type_descriptor(std::move(return_type_descriptor)),
+    parameter_types(std::move(parameter_types)),
+    return_type(std::move(return_type)),
 
     method_scope(*this)
 {
@@ -161,14 +148,15 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
     return access_flags;
 }
 
-const std::vector<std::string> &codesh::semantic_analyzer::method_symbol::get_parameter_descriptors() const
+const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::semantic_analyzer::method_symbol::
+    get_parameter_types() const
 {
-    return parameter_descriptors;
+    return parameter_types;
 }
 
-std::string codesh::semantic_analyzer::method_symbol::get_return_type_descriptor() const
+codesh::ast::type::type_ast_node &codesh::semantic_analyzer::method_symbol::get_return_type() const
 {
-    return return_type_descriptor;
+    return *return_type;
 }
 
 const codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_symbol::get_scope() const

@@ -1,7 +1,6 @@
 #include "analyzer.h"
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "passes/check_methods.h"
 #include "passes/check_type_declarations.h"
 #include "symbol_table/symbol.h"
 #include "symbol_table/symbol_table.h"
@@ -13,16 +12,10 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
 
 void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &ast_root)
 {
-    // Add global scope to symbol table
-    //TODO: Resolve all countries of origin
-    ast_root.get_symbol_table().add_symbol("", std::make_unique<country_symbol>());
-
     //TODO: move these to other files
     add_default_constructors(ast_root);
     add_this_param_to_non_static_methods(ast_root);
-
-    add_type_declarations(ast_root);
-    check_methods(ast_root);
+    //TODO: When calling non-static methods, also add 'this' as first argument
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)
