@@ -3,12 +3,12 @@
 
 #include "../symbol_table/symbol_table.h"
 
-void codesh::semantic_analyzer::add_type_declarations(ast::compilation_unit_ast_node &root_node,
-                                                      const symbol_table &symbol_table)
+//TODO: Move to inner method of symbol table, make it collect everything.
+void codesh::semantic_analyzer::add_type_declarations(ast::compilation_unit_ast_node &root_node)
 {
     //TODO: Iterate over each and every existing country.
     // Same as the root node.
-    auto &country = symbol_table.resolve_country("")->get();
+    auto &country = root_node.get_symbol_table().resolve_country("")->get();
 
     for (const auto &type_decl : root_node.get_type_declarations())
     {

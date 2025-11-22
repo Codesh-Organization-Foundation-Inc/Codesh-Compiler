@@ -52,3 +52,13 @@ const std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_nod
 {
     return this->type_declarations;
 }
+
+const codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table() const
+{
+    return symbol_table;
+}
+
+codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table()
+{
+    return symbol_table;
+}

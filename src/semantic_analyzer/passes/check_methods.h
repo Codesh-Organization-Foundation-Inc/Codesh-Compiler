@@ -6,5 +6,5 @@
 namespace codesh::semantic_analyzer
 {
 class symbol_table;
-void check_methods(const ast::compilation_unit_ast_node &root, symbol_table &symbol_table);
+void check_methods(ast::compilation_unit_ast_node &root);
 }
