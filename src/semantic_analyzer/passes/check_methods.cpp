@@ -57,10 +57,11 @@ static void check_duplicate_method(
     const auto [_, inserted] = method_names.emplace(method_name);
     if (!inserted)
     {
-        codesh::semantic_analyzer::throw_error(
-            "Duplicate method declared: " + method_name +
-            " in type " + class_name
-        );
+        std::ostringstream os_string;
+        os_string << "Duplicate method declared: " << method_name
+            << " in type " << class_name;
+
+        codesh::semantic_analyzer::throw_error(os_string.str());
     }
 }
 
@@ -83,11 +84,12 @@ static void check_return_type(
 
     if (!codesh::semantic_analyzer::util::type_exists(root, type_name))
     {
-        codesh::semantic_analyzer::throw_error(
-            "Unknown return type " + type_name +
-            " in method " + method_name +
-            " of type " + class_name
-        );
+        std::ostringstream os_string;
+        os_string << "Unknown return type " << type_name
+            << " in method " << method_name
+            << " of type " << class_name;
+
+        codesh::semantic_analyzer::throw_error(os_string.str());
     }
 }
 
@@ -110,20 +112,23 @@ static void check_parameters(
 
         if (!custom_param)
         {
-            codesh::semantic_analyzer::throw_error(
-                "Invalid parameter type in method " + method_name +
-                " of type " + class_name
-            );
+            std::ostringstream os_string;
+            os_string << "Invalid parameter type in method " << method_name
+                << " of type " << class_name;
+
+            codesh::semantic_analyzer::throw_error(os_string.str());
         }
 
         const std::string &param_type_name = custom_param->get_name();
 
         if (!codesh::semantic_analyzer::util::type_exists(root, param_type_name))
         {
-            codesh::semantic_analyzer::throw_error(
-                "Unknown parameter type " + param_type_name +
-                " in method " + method_name +
-                " of type " + class_name
+            std::ostringstream os_string;
+            os_string << "Unknown parameter type " << param_type_name
+                << " in method " << method_name
+                << " of type " << class_name;
+
+            codesh::semantic_analyzer::throw_error(os_string.str());
             );
         }
     }
