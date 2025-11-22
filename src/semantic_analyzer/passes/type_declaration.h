@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../symbol_table/symbol.h"
 
 namespace codesh::semantic_analyzer::type_declaration
 {

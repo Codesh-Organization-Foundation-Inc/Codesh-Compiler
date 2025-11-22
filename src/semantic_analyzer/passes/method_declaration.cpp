@@ -25,7 +25,7 @@ static void check_parameters(
 );
 
 
-void codesh::semantic_analyzer::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
+void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
                                                 type_symbol &containing_type)
 {
     for (const auto &method_decl : class_decl.get_methods())
@@ -64,7 +64,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 }
 
 
-void codesh::semantic_analyzer::check_methods(ast::compilation_unit_ast_node &root) {
+void codesh::semantic_analyzer::method_declaration::check_methods(ast::compilation_unit_ast_node &root) {
     for (auto &type_decl : root.get_type_declarations())
     {
         auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());

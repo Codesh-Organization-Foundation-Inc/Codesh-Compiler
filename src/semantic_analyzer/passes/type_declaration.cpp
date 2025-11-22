@@ -26,7 +26,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
         {
-            collect_methods(*class_decl, insert_result.value().get());
+            method_declaration::collect_methods(*class_decl, insert_result.value().get());
         }
     }
 }
