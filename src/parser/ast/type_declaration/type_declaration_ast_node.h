@@ -8,16 +8,18 @@
 #include <string>
 
 #include "../../../output/jvm_target/constant_pool.h"
-
+#include "../impl/i_resolvable.h"
 
 namespace codesh::ast::type_decl
 {
 
-class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
+class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter, public impl::i_resolvable
 {
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
     const std::string name;
+    std::optional<std::string> resolved_name;
+
     std::unique_ptr<attributes_ast_node> attributes;
 
 public:
@@ -27,7 +29,8 @@ public:
     /**
      * @return The class name prefixed by the package, separated by slashes
      */
-    [[nodiscard]] std::string get_binary_name() const;
+    [[nodiscard]] std::string get_binary_name() const override;
+    void set_resolved_name(std::string resolved_name) override;
 
 
     [[nodiscard]] std::string get_name() const;

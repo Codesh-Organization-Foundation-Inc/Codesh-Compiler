@@ -137,6 +137,7 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol.cpp
         src/semantic_analyzer/symbol_table/scope.h
         src/semantic_analyzer/symbol_table/symbol.tpp
+        src/parser/ast/impl/i_resolvable.h
 )
 
 # sudo dnf install boost-regex boost-devel
