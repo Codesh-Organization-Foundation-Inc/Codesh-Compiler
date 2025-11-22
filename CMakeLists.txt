@@ -123,10 +123,10 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/analyzer.cpp
         src/semantic_analyzer/symbol_table/symbol_table.h
         src/semantic_analyzer/symbol_table/symbol_table.cpp
-        src/semantic_analyzer/passes/check_type_declarations.h
-        src/semantic_analyzer/passes/check_type_declarations.cpp
-        src/semantic_analyzer/passes/check_methods.h
-        src/semantic_analyzer/passes/check_methods.cpp
+        src/semantic_analyzer/passes/type_declaration.h
+        src/semantic_analyzer/passes/type_declaration.cpp
+        src/semantic_analyzer/passes/method_declaration.h
+        src/semantic_analyzer/passes/method_declaration.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/semantic_analyzer/errors/errors.h
         src/semantic_analyzer/errors/errors.cpp

@@ -11,13 +11,10 @@ class symbol_table final : public i_scope_containing_symbol
     named_scope_map global_scope;
 
     //TODO:
-    // void collect_countries(ast::compilation_unit_ast_node &root_node);
-    static void collect_types(const ast::compilation_unit_ast_node &root_node, country_symbol &containing_country);
+    // void static collect_countries(ast::compilation_unit_ast_node &root_node);
 
     //TODO:
-    // void collect_fields(ast::type_decl::class_declaration_ast_node &class_decl);
-    static void collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
-            type_symbol &containing_type);
+    // void static collect_fields(ast::type_decl::class_declaration_ast_node &class_decl);
 
 protected:
     [[nodiscard]] std::vector<symbol_type> allowed_symbol_types() const override;

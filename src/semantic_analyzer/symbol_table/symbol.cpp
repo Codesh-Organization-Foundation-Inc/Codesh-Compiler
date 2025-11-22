@@ -1,7 +1,5 @@
 #include "symbol.h"
 
-#include "symbol_table.h"
-
 #include <utility>
 
 codesh::semantic_analyzer::symbol::symbol(const symbol_type symbol_type) :

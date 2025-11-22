@@ -1,4 +1,4 @@
-#include "check_methods.h"
+#include "method_declaration.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
@@ -8,6 +8,9 @@
 #include "util.h"
 
 #include <unordered_set>
+
+static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
+        const codesh::ast::method_declaration_ast_node &method_decl);
 
 static void check_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
@@ -20,6 +23,45 @@ static void check_parameters(
     const codesh::ast::method_declaration_ast_node *method,
     const std::string &class_name
 );
+
+
+void codesh::semantic_analyzer::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
+                                                type_symbol &containing_type)
+{
+    for (const auto &method_decl : class_decl.get_methods())
+    {
+        const std::string name = method_decl->get_name();
+
+        const auto insert_result = containing_type.add_symbol(
+            name, std::make_unique<method_symbol>(
+                containing_type,
+                method_decl->get_attributes()->get_access_flags(),
+                clone_parameter_types(*method_decl),
+                method_decl->get_return_type()->clone()
+            )
+        );
+
+        if (!insert_result)
+        {
+            collect_error("Duplicate method declared: " + name);
+        }
+
+        //TODO: Collect local variables
+    }
+}
+
+static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
+        const codesh::ast::method_declaration_ast_node &method_decl)
+{
+    std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> result;
+
+    for (const auto &param_node : method_decl.get_parameters())
+    {
+        result.push_back(param_node->get_type()->clone());
+    }
+
+    return result;
+}
 
 
 void codesh::semantic_analyzer::check_methods(ast::compilation_unit_ast_node &root) {

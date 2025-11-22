@@ -1,9 +1,8 @@
 #include "analyzer.h"
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "passes/check_type_declarations.h"
+#include "passes/type_declaration.h"
 #include "symbol_table/symbol.h"
-#include "symbol_table/symbol_table.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
