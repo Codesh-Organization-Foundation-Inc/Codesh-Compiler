@@ -45,7 +45,10 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
         if (!inserted)
         {
             //TODO: Print full method declaration
-            collect_error("Duplicate method declared: " + method_decl->get_name());
+            std::ostringstream os_string;
+            os_string << "Duplicate method declared: " << method_decl->get_name();
+
+            collect_error(os_string.str());
         }
 
         //TODO: Collect local variables
@@ -124,11 +127,12 @@ static void resolve_return_type(
 
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
     {
-        codesh::semantic_analyzer::collect_error(
-            "Unknown return type " + return_type->get_name() +
-            " in method " + method_decl.get_name() +
-            " of type " + class_name
-        );
+        std::ostringstream os_string;
+        os_string << "Unknown return type " << return_type->get_name()
+            << " in method " << method_decl.get_name()
+            << " of type " << class_name;
+
+        codesh::semantic_analyzer::collect_error(os_string.str());
     }
 }
 
@@ -156,11 +160,12 @@ static void resolve_parameters(
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
         {
-            codesh::semantic_analyzer::collect_error(
-                "Unknown return type " + custom_param->get_name() +
-                " in method " + method.get_name() +
-                " of type " + class_name
-            );
+            std::ostringstream os_string;
+            os_string << "Unknown return type " << custom_param->get_name()
+                << " in method " << method.get_name()
+                << " of type " << class_name;
+
+            codesh::semantic_analyzer::collect_error(os_string.str());
         }
     }
 }
