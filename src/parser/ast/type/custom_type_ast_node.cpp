@@ -1,12 +1,18 @@
 #include "custom_type_ast_node.h"
 
+#include <iostream>
 #include <sstream>
 
 codesh::ast::type::custom_type_ast_node::custom_type_ast_node(std::string name) : name(std::move(name))
 {
 }
 
-std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
+std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name()
+{
+    return resolved_name;
+}
+
+std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(bool resolved) const
 {
     std::ostringstream builder;
 
@@ -15,25 +21,19 @@ std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
         builder << '[';
     }
 
-    builder << "L" << get_binary_name() << ";";
+    builder << "L" << get_binary_name(resolved) << ";";
 
     return builder.str();
-}
-
-std::string codesh::ast::type::custom_type_ast_node::get_binary_name() const
-{
-    //TODO: This should THROW if the name is not resolved.
-    return resolved_name.value_or(name);
-}
-
-void codesh::ast::type::custom_type_ast_node::set_resolved_name(std::string resolved_name)
-{
-    this->resolved_name.emplace(std::move(resolved_name));
 }
 
 std::string codesh::ast::type::custom_type_ast_node::get_name() const
 {
     return name;
+}
+
+const std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name() const
+{
+    return resolved_name;
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const

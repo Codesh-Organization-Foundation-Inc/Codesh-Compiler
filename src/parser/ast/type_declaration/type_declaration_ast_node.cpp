@@ -2,24 +2,23 @@
 
 #include <utility>
 
+std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name()
+{
+    return resolved_name;
+}
+
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(std::string name) : name(std::move(name))
 {
 }
 
-std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor() const
+std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    return "L" + get_binary_name() + ";";
+    return "L" + get_binary_name(resolved) + ";";
 }
 
-std::string codesh::ast::type_decl::type_declaration_ast_node::get_binary_name() const
+const std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name() const
 {
-    //TODO: This should THROW if the name is not resolved.
-    return resolved_name.value_or(name);
-}
-
-void codesh::ast::type_decl::type_declaration_ast_node::set_resolved_name(std::string resolved_name)
-{
-    this->resolved_name.emplace(std::move(resolved_name));
+    return resolved_name;
 }
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::get_name() const

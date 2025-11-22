@@ -35,7 +35,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
         methods_overloads_symbol &methods_container = get_method_overloads(*method_decl, containing_type);
 
         const auto [it, inserted] = methods_container.add_symbol(
-            method_decl->generate_parameter_descriptors(), std::make_unique<method_symbol>(
+            method_decl->generate_parameter_descriptors(false), std::make_unique<method_symbol>(
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone()
@@ -78,7 +78,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 }
 
 
-void codesh::semantic_analyzer::method_declaration::check_methods(const ast::compilation_unit_ast_node &root) {
+void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
     //TODO: Properly get country of origin
     const country_symbol &country = root.get_symbol_table()->get().resolve_country("").value();
 

@@ -4,21 +4,25 @@
 
 #include <sstream>
 
-std::string codesh::ast::method_declaration_ast_node::generate_descriptor() const
+std::string codesh::ast::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
     std::ostringstream result;
 
     // Argument types
-    result << '(' << generate_parameter_descriptors() << ')';
+    result << '(' << generate_parameter_descriptors(resolved) << ')';
 
     // Return type
-    result << get_return_type()->generate_descriptor();
+    result << get_return_type()->generate_descriptor(resolved);
 
     return result.str();
 }
 
-std::string codesh::ast::method_declaration_ast_node::generate_parameter_descriptors() const
+std::string codesh::ast::method_declaration_ast_node::generate_parameter_descriptors(const bool resolved) const
 {
+    if (!resolved)
+        return generate_unresolved_parameter_descriptors();
+
+
     std::ostringstream result;
 
     bool is_first = true;
@@ -34,6 +38,18 @@ std::string codesh::ast::method_declaration_ast_node::generate_parameter_descrip
         result << var_node->get_type()->generate_descriptor();
 
         is_first = false;
+    }
+
+    return result.str();
+}
+
+std::string codesh::ast::method_declaration_ast_node::generate_unresolved_parameter_descriptors() const
+{
+    std::ostringstream result;
+
+    for (const auto &var_node : get_parameters())
+    {
+        result << var_node->get_type()->generate_descriptor(false);
     }
 
     return result.str();
