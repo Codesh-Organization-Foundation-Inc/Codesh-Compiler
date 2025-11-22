@@ -113,7 +113,7 @@ public:
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type);
+    explicit local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type);
 };
 
 

@@ -80,7 +80,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 
 void codesh::semantic_analyzer::method_declaration::check_methods(const ast::compilation_unit_ast_node &root) {
     //TODO: Properly get country of origin
-    const country_symbol &country = root.get_symbol_table().value().get().resolve_country("").value();
+    const country_symbol &country = root.get_symbol_table()->get().resolve_country("").value();
 
     for (const auto &type_decl : root.get_type_declarations())
     {
