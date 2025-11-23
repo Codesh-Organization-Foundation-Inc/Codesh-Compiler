@@ -31,7 +31,7 @@ static const boost::regex NEWLINE_REPLACE_RGX(
  * @returns Whether the provided character may disobey a word's boundary
  */
 static bool is_annoying_char(const char c) {
-    return u_isalnum(c);
+    return isalnum(c);
 }
 
 static bool check_boundary(const std::string &code, const trie::keyword_info *keyword, const size_t start,
