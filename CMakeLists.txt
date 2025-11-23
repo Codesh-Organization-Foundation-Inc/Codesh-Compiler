@@ -144,14 +144,18 @@ add_executable(Codesh_Compiler
 
 # sudo dnf install boost-regex boost-devel
 
-find_package(Boost REQUIRED)
-target_link_libraries(Codesh_Compiler Boost::boost)
+find_package(Boost REQUIRED COMPONENTS regex headers)
+target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
 
-find_package(ICU REQUIRED COMPONENTS uc i18n)
+find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
-target_link_libraries(Codesh_Compiler ${ICU_LIBRARIES})
+target_link_libraries(Codesh_Compiler
+        ${ICU_LIBRARIES} icui18n
+        icuuc
+        icudata
+)
 
 
 include(FetchContent)
