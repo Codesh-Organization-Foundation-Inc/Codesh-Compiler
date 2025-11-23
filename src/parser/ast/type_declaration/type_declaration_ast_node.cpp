@@ -2,19 +2,23 @@
 
 #include <utility>
 
+std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name()
+{
+    return resolved_name;
+}
+
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(std::string name) : name(std::move(name))
 {
 }
-std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor() const
+
+std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    //TODO: Add package here
-    return "L" + get_name() + ";";
+    return "L" + get_binary_name(resolved) + ";";
 }
 
-std::string codesh::ast::type_decl::type_declaration_ast_node::get_binary_name() const
+const std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name() const
 {
-    //TODO: Add package here
-    return get_name();
+    return resolved_name;
 }
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::get_name() const

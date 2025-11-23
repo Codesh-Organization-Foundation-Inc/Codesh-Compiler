@@ -7,7 +7,7 @@ codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const defini
 {
 }
 
-std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor() const
+std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor(bool resolved) const
 {
     std::ostringstream result;
 

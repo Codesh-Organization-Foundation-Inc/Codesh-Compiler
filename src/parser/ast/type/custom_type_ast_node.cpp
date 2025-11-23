@@ -1,8 +1,18 @@
 #include "custom_type_ast_node.h"
 
+#include <iostream>
 #include <sstream>
 
-std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(std::string name) : name(std::move(name))
+{
+}
+
+std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name()
+{
+    return resolved_name;
+}
+
+std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(bool resolved) const
 {
     std::ostringstream builder;
 
@@ -11,16 +21,9 @@ std::string codesh::ast::type::custom_type_ast_node::generate_descriptor() const
         builder << '[';
     }
 
-    //TODO: Get classpath from symbol table
-    builder << "L" << name << ";";
+    builder << "L" << get_binary_name(resolved) << ";";
 
     return builder.str();
-}
-
-std::string codesh::ast::type::custom_type_ast_node::get_binary_name() const
-{
-    //TODO: Get package from symbol table
-    return name;
 }
 
 std::string codesh::ast::type::custom_type_ast_node::get_name() const
@@ -28,9 +31,9 @@ std::string codesh::ast::type::custom_type_ast_node::get_name() const
     return name;
 }
 
-void codesh::ast::type::custom_type_ast_node::set_name(const std::string &name)
+const std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name() const
 {
-    this->name = name;
+    return resolved_name;
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const

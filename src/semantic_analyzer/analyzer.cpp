@@ -10,17 +10,19 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
-void codesh::semantic_analyzer::setup_ast(const ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
 {
     add_default_constructors(ast_root);
-    add_this_param_to_non_static_methods(ast_root);
-    //TODO: When calling non-static methods, also add 'this' as first argument
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    //TODO: Typecheck classes & extends; do this inside of it:
-    method_declaration::check_methods(ast_root);
+    //TODO: Apply name resolution (Eilran)
+    method_declaration::resolve_methods(ast_root);
+    //TODO: Rename בראשית ויקח כתובים כמסדר to main(String[])
+
+    add_this_param_to_non_static_methods(ast_root);
+    //TODO: When CALLING non-static methods, also add 'this' as first argument
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)
@@ -71,8 +73,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     this_param->set_name("this");
     this_param->set_is_final(true);
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>();
-    this_class_type->set_name(class_decl.get_binary_name());
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_binary_name());
     this_param->set_type(std::move(this_class_type));
 
     return std::move(this_param);

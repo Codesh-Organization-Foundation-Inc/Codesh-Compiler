@@ -64,10 +64,8 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     case token_group::IDENTIFIER:
     {
-        auto custom_type_node = std::make_unique<ast::type::custom_type_ast_node>();
-        custom_type_node->set_name(static_cast<identifier_token *>(type_token.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        result = std::move(custom_type_node);
+        const std::string name = static_cast<identifier_token *>(type_token.get())->get_content(); // NOLINT(*-pro-type-static-cast-downcast)
+        result = std::make_unique<ast::type::custom_type_ast_node>(name);
         break;
     }
 

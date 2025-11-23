@@ -21,6 +21,6 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(
     if (!resolved_name)
         return false;
 
-    custom_type_node.set_name(resolved_name.value());
+    custom_type_node.set_resolved_name(resolved_name.value());
     return true;
 }
