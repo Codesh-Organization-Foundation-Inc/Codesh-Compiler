@@ -26,6 +26,11 @@ static void resolve_parameters(
     const std::string &class_name
 );
 
+static void resolve_main_method(
+    codesh::semantic_analyzer::type_symbol &type,
+    const codesh::ast::method_declaration_ast_node &method_decl
+);
+
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
                                                 type_symbol &containing_type)
@@ -101,6 +106,14 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
             //TODO: Update method entry in the method scope table
             //method.
         }
+
+        auto &mutable_type = const_cast<type_symbol &>(type);
+        for (const auto &method_decl_ptr : class_node->get_methods())
+        {
+            resolve_main_method(mutable_type, *method_decl_ptr);
+        }
+
+
     }
 }
 
@@ -168,4 +181,43 @@ static void resolve_parameters(
             codesh::semantic_analyzer::collect_error(os_string.str());
         }
     }
+}
+
+static void resolve_main_method(
+    codesh::semantic_analyzer::type_symbol &type,
+    const codesh::ast::method_declaration_ast_node &method_decl
+) {
+    const std::string orig_name = "בראשית";
+    const std::string new_name = "Main";
+
+    const std::string expected_descriptor = method_decl.generate_descriptor(true);
+
+    // check if name is בראשית
+    if (method_decl.get_name() != orig_name)
+        return;
+
+    // check if parameter type is כתובים כמסדר
+    if (expected_descriptor != "([Ljava/lang/String;)V")
+        return;
+
+    const codesh::semantic_analyzer::named_scope_map &type_map = static_cast<const codesh::semantic_analyzer::i_scope_containing_symbol &>(type).get_symbol_map();
+    auto it_overloads = type_map.find(orig_name);
+    if (it_overloads == type_map.end())
+    {
+        std::ostringstream os;
+        os << "Internal: expected overloads for '" << orig_name << "' in type but not found.";
+        codesh::semantic_analyzer::collect_error(os.str());
+        return;
+    }
+
+    // The overloads container must be a methods_overloads_symbol
+    auto *orig_overloads = dynamic_cast<codesh::semantic_analyzer::methods_overloads_symbol *>(it_overloads->second.get());
+    if (!orig_overloads) {
+        std::ostringstream os;
+        os << "Internal: symbol for '" << orig_name << "' is not a methods_overloads_symbol.";
+        codesh::semantic_analyzer::collect_error(os.str());
+        return;
+    }
+
+
 }
