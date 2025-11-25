@@ -194,14 +194,15 @@ static void resolve_main_method(
     if (method_decl.get_name() != original_name)
         return;
 
-    // Must be Java's main signature
+
     const std::string full_descriptor = method_decl.generate_descriptor(true);
     const std::string descriptor_key  = method_decl.generate_parameter_descriptors(true);
 
+    // check signatures (returns void and takes String[])
     if (full_descriptor != "([Ljava/lang/String;)V")
         return;
 
-    // Resolve the overload group
+    // Resolve the overload
     const auto overload_ref = type.resolve(original_name);
     if (!overload_ref)
         return;
@@ -223,14 +224,15 @@ static void resolve_main_method(
 
     // Validate flags
     {
-        bool pub = false, stat = false;
+        bool is_public = false, is_static = false;
         for (auto &f : method_sym->get_access_flags()) {
-            if (f == codesh::output::jvm_target::access_flag::ACC_PUBLIC) pub = true;
-            if (f == codesh::output::jvm_target::access_flag::ACC_STATIC) stat = true;
+            if (f == codesh::output::jvm_target::access_flag::ACC_PUBLIC) is_public = true;
+            if (f == codesh::output::jvm_target::access_flag::ACC_STATIC) is_static = true;
         }
-        if (!pub || !stat) {
+        if (!is_public || !is_static)
+        {
             codesh::semantic_analyzer::collect_error(
-                "The method 'בראשית' must be public static."
+                "The method 'בראשית' must be public and static."
             );
             return;
         }
@@ -242,20 +244,21 @@ static void resolve_main_method(
         cloned_params.push_back(p->clone());
 
     // Clone return type
-    auto cloned_ret = method_sym->get_return_type().clone();
+    auto cloned_return = method_sym->get_return_type().clone();
 
     auto new_method = std::make_unique<codesh::semantic_analyzer::method_symbol>(
         method_sym->get_access_flags(),
         std::move(cloned_params),
-        std::move(cloned_ret)
+        std::move(cloned_return)
     );
 
     // Ensure an overload container exists for "Main"
-    auto pair_res =
+    const auto pair_res =
         type.add_symbol(new_name, std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>());
 
     auto *main_overloads = &pair_res.first.get();
-    if (!main_overloads) {
+    if (!main_overloads)
+    {
         codesh::semantic_analyzer::collect_error(
             "Internal: Failed to access Main overload container.");
         return;
@@ -263,13 +266,14 @@ static void resolve_main_method(
 
     // Add new method into "Main" overloads
     auto [_, inserted] = main_overloads->add_symbol(descriptor_key, std::move(new_method));
-    if (!inserted) {
+    if (!inserted)
+    {
         codesh::semantic_analyzer::collect_error(
             "Duplicate Main(String[]) found.");
         return;
     }
 
-    // Rename the AST so codegen outputs "Main"
+    // Set ast name
     const_cast<codesh::ast::method_declaration_ast_node&>(method_decl).set_name(new_name);
 }
 
