@@ -156,11 +156,10 @@ static void resolve_parameters(
 ) {
     for (const auto &param : method.get_parameters())
     {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get());
+        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get()); // TODO: check why is null for כתובים כמנחות
 
         if (!custom_param)
         {
-            // Primitive types are ok
             continue;
         }
 

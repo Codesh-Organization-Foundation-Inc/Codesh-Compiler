@@ -17,9 +17,8 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    //TODO: Apply name resolution (Eilran)
+    // Rename בראשית ויקח כתובים כמסדר to main(String[])
     method_declaration::resolve_methods(ast_root);
-    //TODO: Rename בראשית ויקח כתובים כמסדר to main(String[])
 
     add_this_param_to_non_static_methods(ast_root);
     //TODO: When CALLING non-static methods, also add 'this' as first argument
