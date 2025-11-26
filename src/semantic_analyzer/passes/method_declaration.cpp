@@ -156,7 +156,7 @@ static void resolve_parameters(
 ) {
     for (const auto &param : method.get_parameters())
     {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get()); // TODO: check why is null for כתובים כמנחות
+        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
 
         if (!custom_param)
         {
@@ -187,7 +187,7 @@ static void resolve_main_method(
     const codesh::ast::method_declaration_ast_node &method_decl
 ) {
     const std::string original_name = "בראשית";
-    const std::string new_name  = "Main"; // maybe change to main
+    const std::string new_name  = "Main"; // change to main if needed
 
     // Only match בראשית
     if (method_decl.get_name() != original_name)
@@ -224,9 +224,9 @@ static void resolve_main_method(
     // Validate flags
     {
         bool is_public = false, is_static = false;
-        for (auto &f : method_sym->get_access_flags()) {
-            if (f == codesh::output::jvm_target::access_flag::ACC_PUBLIC) is_public = true;
-            if (f == codesh::output::jvm_target::access_flag::ACC_STATIC) is_static = true;
+        for (auto &method_access_flag : method_sym->get_access_flags()) {
+            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC) is_public = true;
+            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC) is_static = true;
         }
         if (!is_public || !is_static)
         {
