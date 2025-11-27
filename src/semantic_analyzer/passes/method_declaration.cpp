@@ -212,7 +212,7 @@ static void resolve_main_method(
         return;
 
     // Resolve the specific method by descriptor
-    const auto method_ref = overloads->resolve(descriptor_key);
+    const auto method_ref = overloads->resolve(full_descriptor);
     if (!method_ref)
         return;
 
@@ -224,14 +224,17 @@ static void resolve_main_method(
     // Validate flags
     {
         bool is_public = false, is_static = false;
-        for (auto &method_access_flag : method_sym->get_access_flags()) {
-            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC) is_public = true;
-            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC) is_static = true;
+        for (auto &method_access_flag : method_sym->get_access_flags())
+        {
+            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC)
+                is_public = true;
+            if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC)
+                is_static = true;
         }
         if (!is_public || !is_static)
         {
             codesh::semantic_analyzer::collect_error(
-                "The method 'בראשית' must be public and static."
+                "The method 'בראשית' must be public and static." // remove it if not neccassery
             );
             return;
         }
