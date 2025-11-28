@@ -13,7 +13,8 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         const auto [it, inserted] = containing_country.add_symbol(
             name, std::make_unique<type_symbol>(
-                type_decl->get_attributes()->get_access_flags()
+                type_decl->get_attributes()->get_access_flags(),
+                *type_decl
             )
         );
 

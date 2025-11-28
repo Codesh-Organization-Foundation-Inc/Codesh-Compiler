@@ -42,7 +42,8 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
-                method_decl->get_return_type()->clone()
+                method_decl->get_return_type()->clone(),
+                *method_decl
             )
         );
 
