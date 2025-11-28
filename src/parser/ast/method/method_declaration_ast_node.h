@@ -25,12 +25,13 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     // "throws" declaration
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
+    [[nodiscard]] std::string generate_unresolved_parameter_descriptors() const;
+
 public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] std::string generate_parameter_descriptors(bool resolved = true) const;
-    [[nodiscard]] std::string generate_unresolved_parameter_descriptors() const;
+    [[nodiscard]] std::string generate_parameters_descriptor(bool resolved = true) const;
 
 
     [[nodiscard]] std::string get_name() const;

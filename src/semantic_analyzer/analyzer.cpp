@@ -1,6 +1,7 @@
 #include "analyzer.h"
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "aliases.h"
 #include "passes/method_declaration.h"
 #include "passes/type_declaration.h"
 #include "symbol_table/symbol.h"
@@ -17,12 +18,12 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    //TODO: Apply name resolution (Eilran)
     method_declaration::resolve_methods(ast_root);
-    //TODO: Rename בראשית ויקח כתובים כמסדר to main(String[])
 
     add_this_param_to_non_static_methods(ast_root);
     //TODO: When CALLING non-static methods, also add 'this' as first argument
+
+    resolve_aliases(ast_root);
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)

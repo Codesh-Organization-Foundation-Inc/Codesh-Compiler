@@ -1,5 +1,18 @@
 #pragma once
+
 #include <algorithm>
+
+template <std::derived_from<codesh::ast::impl::ast_node> T>
+codesh::semantic_analyzer::i_ast_node_produced<T>::i_ast_node_produced(T &producing_node) :
+    producing_node(producing_node)
+{
+}
+
+template <std::derived_from<codesh::ast::impl::ast_node> T>
+T &codesh::semantic_analyzer::i_ast_node_produced<T>::get_producing_node() const
+{
+    return producing_node;
+}
 
 template <std::derived_from<codesh::semantic_analyzer::symbol> T>
 std::pair<std::reference_wrapper<T>, bool> codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(

@@ -2,6 +2,8 @@
 
 #include "../../output/jvm_target/class_file_builder.h"
 #include "../../parser/ast/type/type_ast_node.h"
+#include "../../parser/ast/type_declaration/type_declaration_ast_node.h"
+#include "../../parser/ast/method/method_declaration_ast_node.h"
 #include "scope.h"
 
 #include <list>
@@ -11,6 +13,8 @@
 
 namespace codesh::semantic_analyzer
 {
+class method_symbol;
+
 
 enum class symbol_type
 {
@@ -48,12 +52,29 @@ public:
     [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
+    /**
+     * Resolves the requested symbol. Returns `nullptr` in case not found.
+     */
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name);
 
     template <std::derived_from<symbol> T>
     std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
+    void remove_symbol(const std::string &name);
+};
+
+template <std::derived_from<ast::impl::ast_node> T>
+class i_ast_node_produced
+{
+    T &producing_node;
+
+public:
+    explicit i_ast_node_produced(T &producing_node);
+
+    [[nodiscard]] T &get_producing_node() const;
 };
 
 
+//TODO: Attach ast node
 class country_symbol final : public symbol, public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
@@ -64,12 +85,13 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    country_symbol();
+    explicit country_symbol(ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };
 
-class type_symbol final : public symbol, public i_scope_containing_symbol
+class type_symbol final : public symbol, public i_scope_containing_symbol,
+        public i_ast_node_produced<ast::type_decl::type_declaration_ast_node>
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
@@ -83,7 +105,8 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    explicit type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags);
+    type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
+            ast::type_decl::type_declaration_ast_node &producing_node);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
@@ -99,25 +122,28 @@ public:
     variable_symbol(symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
 };
 
+//TODO: Attach ast node
 class field_symbol final : public variable_symbol
 {
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 public:
     field_symbol(std::vector<output::jvm_target::access_flag> access_flags,
-            std::unique_ptr<ast::type::type_ast_node> type);
+            std::unique_ptr<ast::type::type_ast_node> type, ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 };
 
+//TODO: Attach ast node
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    explicit local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type);
+    explicit local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type,
+            ast::impl::ast_node *producing_node = nullptr);
 };
 
 
-class methods_overloads_symbol final : public symbol, public i_scope_containing_symbol
+class method_overloads_symbol final : public symbol, public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     // Maps parameter descriptors to method declaration
@@ -128,9 +154,11 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    methods_overloads_symbol();
+    method_overloads_symbol();
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+
+    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(const std::string &name) const;
 };
 
 
@@ -140,10 +168,10 @@ class method_scope_symbol final : public symbol
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    method_scope_symbol();
+    method_scope_symbol(ast::impl::ast_node *producing_node = nullptr);
 };
 
-class method_symbol final : public symbol
+class method_symbol final : public symbol, public i_ast_node_produced<ast::method_declaration_ast_node>
 {
     const std::vector<output::jvm_target::access_flag> access_flags;
 
@@ -155,7 +183,7 @@ class method_symbol final : public symbol
 public:
     method_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-            std::unique_ptr<ast::type::type_ast_node> return_type);
+            std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node &producing_node);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 

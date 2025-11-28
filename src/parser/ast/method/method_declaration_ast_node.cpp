@@ -9,7 +9,7 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor(const 
     std::ostringstream result;
 
     // Argument types
-    result << '(' << generate_parameter_descriptors(resolved) << ')';
+    result << '(' << generate_parameters_descriptor(resolved) << ')';
 
     // Return type
     result << get_return_type()->generate_descriptor(resolved);
@@ -17,7 +17,7 @@ std::string codesh::ast::method_declaration_ast_node::generate_descriptor(const 
     return result.str();
 }
 
-std::string codesh::ast::method_declaration_ast_node::generate_parameter_descriptors(const bool resolved) const
+std::string codesh::ast::method_declaration_ast_node::generate_parameters_descriptor(const bool resolved) const
 {
     if (!resolved)
         return generate_unresolved_parameter_descriptors();

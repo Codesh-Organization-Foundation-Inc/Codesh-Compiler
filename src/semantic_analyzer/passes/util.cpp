@@ -6,10 +6,13 @@
 std::optional<std::string> codesh::semantic_analyzer::util::resolve_custom_type(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries, const std::string &name)
 {
+    if (name == "כתובים")
+        return "java/lang/String";
+
     //TODO: Implement when implementing countries.
     // This method should return the Fully Qualified Class Name of the given type name (which isn't a descriptor).
-    return name;
 
+    return name;
     //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
 }
 
