@@ -7,7 +7,7 @@
 #include "../errors/errors.h"
 #include "util.h"
 
-static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads(
+static codesh::semantic_analyzer::method_overloads_symbol &get_method_overloads(
         const codesh::ast::method_declaration_ast_node &method_decl,
         codesh::semantic_analyzer::type_symbol &containing_type);
 
@@ -32,10 +32,10 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 {
     for (const auto &method_decl : class_decl.get_methods())
     {
-        methods_overloads_symbol &methods_container = get_method_overloads(*method_decl, containing_type);
+        method_overloads_symbol &methods_container = get_method_overloads(*method_decl, containing_type);
 
         const auto [it, inserted] = methods_container.add_symbol(
-            method_decl->generate_parameter_descriptors(false), std::make_unique<method_symbol>(
+            method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone()
@@ -55,12 +55,12 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
     }
 }
 
-static codesh::semantic_analyzer::methods_overloads_symbol &get_method_overloads(
+static codesh::semantic_analyzer::method_overloads_symbol &get_method_overloads(
         const codesh::ast::method_declaration_ast_node &method_decl,
         codesh::semantic_analyzer::type_symbol &containing_type)
 {
     return containing_type.add_symbol(
-        method_decl.get_name(), std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>()
+        method_decl.get_name(), std::make_unique<codesh::semantic_analyzer::method_overloads_symbol>()
     ).first;
 }
 
@@ -93,13 +93,13 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
         for (const auto &method_decl : class_node->get_methods())
         {
-            methods_overloads_symbol &method_overloads = *static_cast<methods_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+            method_overloads_symbol &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
                 &type.resolve(method_decl->get_name()).value().get()
             );
 
-            std::unique_ptr<methods_overloads_symbol> method(
-                static_cast<methods_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                    method_overloads.resolve_and_move(method_decl->generate_parameter_descriptors(false))
+            std::unique_ptr<method_symbol> method(
+                static_cast<method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+                    method_overloads.resolve_and_move(method_decl->generate_parameters_descriptor(false))
                         .release()
                 )
             );
@@ -109,7 +109,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
 
             // Move to a new overloads entry now that the parameters' descriptors are real
-            method_overloads.add_symbol(method_decl->generate_parameter_descriptors(), std::move(method));
+            method_overloads.add_symbol(method_decl->generate_parameters_descriptor(), std::move(method));
         }
 
     }

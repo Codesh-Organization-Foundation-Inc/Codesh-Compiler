@@ -117,23 +117,23 @@ codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(std::uni
 {
 }
 
-const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::methods_overloads_symbol::
+const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::method_overloads_symbol::
     allowed_symbol_types() const
 {
     return ALLOWED_SYMBOL_TYPES;
 }
 
-codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::methods_overloads_symbol::get_symbol_map()
+codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::method_overloads_symbol::get_symbol_map()
 {
     return scopes;
 }
 
-codesh::semantic_analyzer::methods_overloads_symbol::methods_overloads_symbol() :
+codesh::semantic_analyzer::method_overloads_symbol::method_overloads_symbol() :
     symbol(symbol_type::METHOD_OVERLOADS)
 {
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::methods_overloads_symbol::get_symbol_map()
+const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::method_overloads_symbol::get_symbol_map()
     const
 {
     return scopes;
@@ -192,6 +192,6 @@ const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analy
     symbol_type::FIELD
 };
 
-const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::methods_overloads_symbol::ALLOWED_SYMBOL_TYPES = {
+const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::method_overloads_symbol::ALLOWED_SYMBOL_TYPES = {
     symbol_type::METHOD,
 };

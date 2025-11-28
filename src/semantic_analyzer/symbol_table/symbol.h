@@ -51,7 +51,7 @@ public:
     /**
      * Resolves the requested symbol. Returns `nullptr` in case not found.
      */
-    std::unique_ptr<symbol> resolve_and_move(const std::string &name);
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name);
 
     template <std::derived_from<symbol> T>
     std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
@@ -121,7 +121,7 @@ public:
 };
 
 
-class methods_overloads_symbol final : public symbol, public i_scope_containing_symbol
+class method_overloads_symbol final : public symbol, public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     // Maps parameter descriptors to method declaration
@@ -132,7 +132,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    methods_overloads_symbol();
+    method_overloads_symbol();
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };

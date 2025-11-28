@@ -31,7 +31,7 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] std::string generate_parameter_descriptors(bool resolved = true) const;
+    [[nodiscard]] std::string generate_parameters_descriptor(bool resolved = true) const;
 
 
     [[nodiscard]] std::string get_name() const;
