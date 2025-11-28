@@ -43,6 +43,11 @@ std::unique_ptr<codesh::semantic_analyzer::symbol> codesh::semantic_analyzer::i_
     return symbol;
 }
 
+void codesh::semantic_analyzer::i_scope_containing_symbol::remove_symbol(const std::string &name)
+{
+    get_symbol_map().erase(name);
+}
+
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::country_symbol::allowed_symbol_types()
     const
 {

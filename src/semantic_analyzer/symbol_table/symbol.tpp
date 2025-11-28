@@ -9,9 +9,9 @@ codesh::semantic_analyzer::i_ast_node_produced<T>::i_ast_node_produced(T &produc
 }
 
 template <std::derived_from<codesh::ast::impl::ast_node> T>
-std::optional<std::reference_wrapper<T>> codesh::semantic_analyzer::i_ast_node_produced<T>::get_producing_node() const
+T &codesh::semantic_analyzer::i_ast_node_produced<T>::get_producing_node() const
 {
-    return *get_producing_node();
+    return producing_node;
 }
 
 template <std::derived_from<codesh::semantic_analyzer::symbol> T>

@@ -59,6 +59,7 @@ public:
 
     template <std::derived_from<symbol> T>
     std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
+    void remove_symbol(const std::string &name);
 };
 
 template <std::derived_from<ast::impl::ast_node> T>
@@ -69,7 +70,7 @@ class i_ast_node_produced
 public:
     explicit i_ast_node_produced(T &producing_node);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<T>> get_producing_node() const;
+    [[nodiscard]] T &get_producing_node() const;
 };
 
 
