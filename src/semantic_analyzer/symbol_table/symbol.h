@@ -11,6 +11,8 @@
 
 namespace codesh::semantic_analyzer
 {
+class method_symbol;
+
 
 enum class symbol_type
 {
@@ -135,6 +137,8 @@ public:
     method_overloads_symbol();
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+
+    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(const std::string &name) const;
 };
 
 

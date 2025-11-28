@@ -26,6 +26,10 @@ static void resolve_parameters(
     const std::string &class_name
 );
 
+static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type,
+                                    codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
+                                    codesh::semantic_analyzer::method_symbol &method_symbol);
+
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
                                                 type_symbol &containing_type)
@@ -148,10 +152,10 @@ static void resolve_return_type(
 }
 
 static void resolve_parameters(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method,
-    const std::string &class_name
-) {
+        const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::ast::method_declaration_ast_node &method,
+        const std::string &class_name)
+{
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
@@ -181,97 +185,114 @@ static void resolve_parameters(
 }
 
 
-// void resolve_aliases(const codesh::ast::compilation_unit_ast_node &root_node) {
-//     // const std::string original_name = "בראשית";
-//     // const std::string new_name  = "main";
-//
-//     // Only match בראשית
-//     if (method_decl.get_name() != original_name)
-//         return;
-//
-//
-//     const std::string full_descriptor = method_decl.generate_descriptor(true);
-//     const std::string descriptor_key  = method_decl.generate_parameter_descriptors(true);
-//
-//     // check signatures (returns void and takes String[])
-//     if (full_descriptor != "([Ljava/lang/String;)V")
-//         return;
-//
-//     // Resolve the overload
-//     const auto overload_ref = type.resolve(original_name);
-//     if (!overload_ref)
-//         return;
-//
-//     const auto *overloads =
-//         dynamic_cast<codesh::semantic_analyzer::methods_overloads_symbol*>(&overload_ref->get());
-//     if (!overloads)
-//         return;
-//
-//     // Resolve the specific method by descriptor
-//     const auto method_ref = overloads->resolve(full_descriptor);
-//     if (!method_ref)
-//         return;
-//
-//     const auto *method_sym =
-//         dynamic_cast<codesh::semantic_analyzer::method_symbol*>(&method_ref->get());
-//     if (!method_sym)
-//         return;
-//
-//     // Validate flags
-//     {
-//         bool is_public = false, is_static = false;
-//         for (auto &method_access_flag : method_sym->get_access_flags())
-//         {
-//             if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC)
-//                 is_public = true;
-//             if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC)
-//                 is_static = true;
-//         }
-//         if (!is_public || !is_static)
-//         {
-//             codesh::semantic_analyzer::collect_error(
-//                 "The method 'בראשית' must be public and static." // remove it if not neccassery
-//             );
-//             return;
-//         }
-//     }
-//
-//     // Clone param types
-//     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> cloned_params;
-//     for (auto &p : method_sym->get_parameter_types())
-//         cloned_params.push_back(p->clone());
-//
-//     // Clone return type
-//     auto cloned_return = method_sym->get_return_type().clone();
-//
-//     auto new_method = std::make_unique<codesh::semantic_analyzer::method_symbol>(
-//         method_sym->get_access_flags(),
-//         std::move(cloned_params),
-//         std::move(cloned_return)
-//     );
-//
-//     // Ensure an overload container exists for "Main"
-//     const auto pair_res =
-//         type.add_symbol(new_name, std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>());
-//
-//     auto *main_overloads = &pair_res.first.get();
-//     if (!main_overloads)
-//     {
-//         codesh::semantic_analyzer::collect_error(
-//             "Internal: Failed to access Main overload container.");
-//         return;
-//     }
-//
-//     // Add new method into "Main" overloads
-//     auto [_, inserted] = main_overloads->add_symbol(descriptor_key, std::move(new_method));
-//     if (!inserted)
-//     {
-//         codesh::semantic_analyzer::collect_error(
-//             "Duplicate Main(String[]) found.");
-//         return;
-//     }
-//
-//     // Set ast name
-//     const_cast<codesh::ast::method_declaration_ast_node&>(method_decl).set_name(new_name);
-// }
-//
+void codesh::semantic_analyzer::method_declaration::resolve_aliases(type_symbol &type)
+{
+    // בראשית
+    auto &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+        &type.resolve("בראשית").value().get()
+    );
+
+    const auto bereshit = method_overloads.resolve_method("בראשית");
+    if (bereshit.has_value())
+    {
+        handle_bereshit_aliases(type, method_overloads, bereshit.value());
+    }
+}
+
+static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type,
+                                    codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
+                                    codesh::semantic_analyzer::method_symbol &method_symbol)
+{
+    // // const std::string original_name = "בראשית";
+    // // const std::string new_name  = "main";
+    //
+    // // Only match בראשית
+    // if (method_decl.get_name() != original_name)
+    //     return;
+    //
+    //
+    // const std::string full_descriptor = method_decl.generate_descriptor(true);
+    // const std::string descriptor_key  = method_decl.generate_parameter_descriptors(true);
+    //
+    // // check signatures (returns void and takes String[])
+    // if (full_descriptor != "([Ljava/lang/String;)V")
+    //     return;
+    //
+    // // Resolve the overload
+    // const auto overload_ref = type.resolve(original_name);
+    // if (!overload_ref)
+    //     return;
+    //
+    // const auto *overloads =
+    //     dynamic_cast<codesh::semantic_analyzer::methods_overloads_symbol*>(&overload_ref->get());
+    // if (!overloads)
+    //     return;
+    //
+    // // Resolve the specific method by descriptor
+    // const auto method_ref = overloads->resolve(full_descriptor);
+    // if (!method_ref)
+    //     return;
+    //
+    // const auto *method_sym =
+    //     dynamic_cast<codesh::semantic_analyzer::method_symbol*>(&method_ref->get());
+    // if (!method_sym)
+    //     return;
+    //
+    // // Validate flags
+    // {
+    //     bool is_public = false, is_static = false;
+    //     for (auto &method_access_flag : method_sym->get_access_flags())
+    //     {
+    //         if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC)
+    //             is_public = true;
+    //         if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC)
+    //             is_static = true;
+    //     }
+    //     if (!is_public || !is_static)
+    //     {
+    //         codesh::semantic_analyzer::collect_error(
+    //             "The method 'בראשית' must be both public and static." // remove it if not neccassery
+    //         );
+    //         return;
+    //     }
+    // }
+    //
+    // // Clone param types
+    // std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> cloned_params;
+    // for (auto &p : method_sym->get_parameter_types())
+    //     cloned_params.push_back(p->clone());
+    //
+    // // Clone return type
+    // auto cloned_return = method_sym->get_return_type().clone();
+    //
+    // auto new_method = std::make_unique<codesh::semantic_analyzer::method_symbol>(
+    //     method_sym->get_access_flags(),
+    //     std::move(cloned_params),
+    //     std::move(cloned_return)
+    // );
+    //
+    // // Ensure an overload container exists for "Main"
+    // const auto pair_res =
+    //     type.add_symbol(new_name, std::make_unique<codesh::semantic_analyzer::methods_overloads_symbol>());
+    //
+    // auto *main_overloads = &pair_res.first.get();
+    // if (!main_overloads)
+    // {
+    //     codesh::semantic_analyzer::collect_error(
+    //         "Internal: Failed to access Main overload container.");
+    //     return;
+    // }
+    //
+    // // Add new method into "Main" overloads
+    // auto [_, inserted] = main_overloads->add_symbol(descriptor_key, std::move(new_method));
+    // if (!inserted)
+    // {
+    //     codesh::semantic_analyzer::collect_error(
+    //         "Duplicate Main(String[]) found.");
+    //     return;
+    // }
+    //
+    // // Set ast name
+    // const_cast<codesh::ast::method_declaration_ast_node&>(method_decl).set_name(new_name);
+}
+

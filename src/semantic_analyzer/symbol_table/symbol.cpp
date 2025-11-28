@@ -139,6 +139,17 @@ const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::met
     return scopes;
 }
 
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> codesh::semantic_analyzer::
+    method_overloads_symbol::resolve_method(const std::string &name) const
+{
+    const auto result = resolve(name);
+
+    if (!result.has_value())
+        return std::nullopt;
+
+    return *static_cast<method_symbol *>(&result.value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+}
+
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol() :
     symbol(symbol_type::METHOD_SCOPE)
 {
