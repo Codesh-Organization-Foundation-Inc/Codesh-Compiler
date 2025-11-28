@@ -192,7 +192,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_aliases(type_symbol 
         &type.resolve("בראשית").value().get()
     );
 
-    const auto bereshit = method_overloads.resolve_method("בראשית");
+    const auto bereshit = method_overloads.resolve_method("[Ljava/lang/String;");
     if (bereshit.has_value())
     {
         handle_bereshit_aliases(type, method_overloads, bereshit.value());
@@ -203,21 +203,6 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
                                     codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
                                     codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    // // const std::string original_name = "בראשית";
-    // // const std::string new_name  = "main";
-    //
-    // // Only match בראשית
-    // if (method_decl.get_name() != original_name)
-    //     return;
-    //
-    //
-    // const std::string full_descriptor = method_decl.generate_descriptor(true);
-    // const std::string descriptor_key  = method_decl.generate_parameter_descriptors(true);
-    //
-    // // check signatures (returns void and takes String[])
-    // if (full_descriptor != "([Ljava/lang/String;)V")
-    //     return;
-    //
     // // Resolve the overload
     // const auto overload_ref = type.resolve(original_name);
     // if (!overload_ref)
@@ -238,7 +223,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     // if (!method_sym)
     //     return;
     //
-    // // Validate flags
+    // Validate flags
     // {
     //     bool is_public = false, is_static = false;
     //     for (auto &method_access_flag : method_sym->get_access_flags())
