@@ -27,6 +27,22 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     return *result->second;
 }
 
+std::unique_ptr<codesh::semantic_analyzer::symbol> codesh::semantic_analyzer::i_scope_containing_symbol::
+    resolve_and_move(const std::string &name)
+{
+    const auto result = get_symbol_map().find(name);
+
+    if (result == get_symbol_map().end())
+        return nullptr;
+
+    std::unique_ptr<symbol> symbol = std::move(result->second);
+    // This symbol is about to be moved out of this table -
+    // so remove its duplicate entry from here.
+    get_symbol_map().erase(result);
+
+    return symbol;
+}
+
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::country_symbol::allowed_symbol_types()
     const
 {

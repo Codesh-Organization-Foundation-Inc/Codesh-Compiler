@@ -48,6 +48,10 @@ public:
     [[nodiscard]] virtual const named_scope_map &get_symbol_map() const = 0;
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
+    /**
+     * Resolves the requested symbol. Returns `nullptr` in case not found.
+     */
+    std::unique_ptr<symbol> resolve_and_move(const std::string &name);
 
     template <std::derived_from<symbol> T>
     std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
