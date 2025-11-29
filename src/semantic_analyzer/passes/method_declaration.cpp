@@ -40,7 +40,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone(),
-                *method_decl
+                method_decl.get()
             )
         );
 
@@ -203,7 +203,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
         return;
 
 
-    codesh::ast::method_declaration_ast_node &method_node = bereshit_method->get().get_producing_node();
+    codesh::ast::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
 
 
     // Validate flags

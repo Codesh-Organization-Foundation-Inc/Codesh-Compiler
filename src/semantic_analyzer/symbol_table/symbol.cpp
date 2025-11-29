@@ -81,15 +81,20 @@ const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::typ
     return scopes;
 }
 
+codesh::ast::type_decl::type_declaration_ast_node *codesh::semantic_analyzer::type_symbol::get_producing_node() const
+{
+    return producing_node;
+}
+
 codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symbol::get_symbol_map()
 {
     return scopes;
 }
 
 codesh::semantic_analyzer::type_symbol::type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
-        ast::type_decl::type_declaration_ast_node &producing_node) :
+        ast::type_decl::type_declaration_ast_node *producing_node) :
     symbol(symbol_type::TYPE),
-    i_ast_node_produced(producing_node),
+    producing_node(producing_node),
     access_flags(access_flags)
 {
 }
@@ -168,12 +173,12 @@ codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(ast::impl::a
 codesh::semantic_analyzer::method_symbol::method_symbol(
          const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-        std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node &producing_node) :
+        std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node *producing_node) :
     symbol(symbol_type::METHOD),
-    i_ast_node_produced(producing_node),
     access_flags(access_flags),
     parameter_types(std::move(parameter_types)),
-    return_type(std::move(return_type))
+    return_type(std::move(return_type)),
+    producing_node(producing_node)
 {
 }
 
@@ -202,6 +207,11 @@ const codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer:
 codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_symbol::get_scopes()
 {
     return method_scope;
+}
+
+codesh::ast::method_declaration_ast_node *codesh::semantic_analyzer::method_symbol::get_producing_node() const
+{
+    return producing_node;
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::country_symbol::ALLOWED_SYMBOL_TYPES = {

@@ -65,12 +65,10 @@ public:
 template <std::derived_from<ast::impl::ast_node> T>
 class i_ast_node_produced
 {
-    T &producing_node;
-
 public:
-    explicit i_ast_node_produced(T &producing_node);
+    virtual ~i_ast_node_produced();
 
-    [[nodiscard]] T &get_producing_node() const;
+    [[nodiscard]] virtual T *get_producing_node() const = 0;
 };
 
 
@@ -96,6 +94,8 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
 
+    ast::type_decl::type_declaration_ast_node *producing_node;
+
     //TODO: Add super type
     // const std::unique_ptr<ast::type::type_ast_node> super_type;
     const std::vector<output::jvm_target::access_flag> access_flags;
@@ -106,11 +106,12 @@ protected:
 
 public:
     type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
-            ast::type_decl::type_declaration_ast_node &producing_node);
+            ast::type_decl::type_declaration_ast_node *producing_node);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+    [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
 };
 
 
@@ -162,13 +163,14 @@ public:
 };
 
 
+//TODO: Handle producing node
 class method_scope_symbol final : public symbol
 {
     std::unordered_map<std::string, std::unique_ptr<variable_symbol>> local_variables;
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    method_scope_symbol(ast::impl::ast_node *producing_node = nullptr);
+    explicit method_scope_symbol(ast::impl::ast_node *producing_node = nullptr);
 };
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method_declaration_ast_node>
@@ -180,10 +182,12 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
 
     method_scope_symbol method_scope;
 
+    ast::method_declaration_ast_node *producing_node;
+
 public:
     method_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-            std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node &producing_node);
+            std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
@@ -192,6 +196,8 @@ public:
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
     [[nodiscard]] method_scope_symbol &get_scopes();
+
+    [[nodiscard]] ast::method_declaration_ast_node *get_producing_node() const override;
 };
 
 }
