@@ -46,6 +46,9 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
             is_public = true;
         if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC)
             is_static = true;
+
+        if (is_public && is_static)
+            break;
     }
 
     if (!(is_public && is_static))
