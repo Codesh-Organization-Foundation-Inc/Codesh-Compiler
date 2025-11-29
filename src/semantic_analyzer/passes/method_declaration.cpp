@@ -26,8 +26,8 @@ static void resolve_parameters(
 );
 
 static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);
-static void rename_method(codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name,
-        codesh::semantic_analyzer::type_symbol &type);
+static void rename_method(codesh::semantic_analyzer::type_symbol &type,
+                          codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name);
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
@@ -229,12 +229,12 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     }
 
 
-    rename_method(method_node, "main", type);
+    rename_method(type, method_node, "main");
 }
 
 
-static void rename_method(codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name,
-        codesh::semantic_analyzer::type_symbol &type)
+static void rename_method(codesh::semantic_analyzer::type_symbol &type,
+                          codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name)
 {
     // Get the original method names' overloads
     codesh::semantic_analyzer::method_overloads_symbol &source_method_overloads =
