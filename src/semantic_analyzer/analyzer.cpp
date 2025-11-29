@@ -2,8 +2,7 @@
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
-#include "passes/method_declaration.h"
-#include "passes/type_declaration.h"
+#include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -25,6 +24,9 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     resolve_aliases(ast_root);
 }
+
+
+// Prepares
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)
 {

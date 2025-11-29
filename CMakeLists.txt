@@ -123,17 +123,17 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/analyzer.cpp
         src/semantic_analyzer/symbol_table/symbol_table.h
         src/semantic_analyzer/symbol_table/symbol_table.cpp
-        src/semantic_analyzer/passes/type_declaration.h
-        src/semantic_analyzer/passes/type_declaration.cpp
-        src/semantic_analyzer/passes/method_declaration.h
-        src/semantic_analyzer/passes/method_declaration.cpp
+        src/semantic_analyzer/type_decl/collect.h
+        src/semantic_analyzer/type_decl/collect.cpp
+        src/semantic_analyzer/method_decl/collect.h
+        src/semantic_analyzer/method_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/semantic_analyzer/errors/errors.h
         src/semantic_analyzer/errors/errors.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
-        src/semantic_analyzer/passes/util.cpp
-        src/semantic_analyzer/passes/util.h
+        src/semantic_analyzer/util.cpp
+        src/semantic_analyzer/util.h
         src/semantic_analyzer/symbol_table/symbol.cpp
         src/semantic_analyzer/symbol_table/scope.h
         src/semantic_analyzer/symbol_table/symbol.tpp
@@ -142,6 +142,10 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/i_resolvable.cpp
         src/semantic_analyzer/aliases.cpp
         src/semantic_analyzer/aliases.h
+        src/semantic_analyzer/method_decl/resolve.cpp
+        src/semantic_analyzer/method_decl/resolve.h
+        src/semantic_analyzer/method_decl/resolve_aliases.cpp
+        src/semantic_analyzer/method_decl/resolve_aliases.h
 )
 
 # sudo dnf install boost-regex boost-devel

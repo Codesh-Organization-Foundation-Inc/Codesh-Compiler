@@ -7,11 +7,10 @@ namespace codesh::semantic_analyzer
 class type_symbol;
 }
 
+
 namespace codesh::semantic_analyzer::method_declaration
 {
 void collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl, type_symbol &containing_type);
-
-void resolve_methods(const ast::compilation_unit_ast_node &root);
 
 void resolve_aliases(type_symbol &type);
 }

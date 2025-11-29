@@ -1,8 +1,8 @@
-#include "type_declaration.h"
+#include "collect.h"
 
-#include "../errors/errors.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "method_declaration.h"
+#include "../errors/errors.h"
+#include "../method_decl/collect.h"
 
 void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compilation_unit_ast_node &root_node,
         country_symbol &containing_country)

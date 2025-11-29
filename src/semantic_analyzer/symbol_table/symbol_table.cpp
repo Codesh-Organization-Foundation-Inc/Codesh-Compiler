@@ -1,7 +1,7 @@
 #include "symbol_table.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../passes/type_declaration.h"
+#include "../type_decl/collect.h"
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::symbol_table::
     allowed_symbol_types() const

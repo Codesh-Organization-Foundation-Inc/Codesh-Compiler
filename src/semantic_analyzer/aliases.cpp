@@ -1,7 +1,7 @@
 #include "aliases.h"
 
 #include "../parser/ast/compilation_unit_ast_node.h"
-#include "passes/method_declaration.h"
+#include "method_decl/collect.h"
 #include "symbol_table/symbol.h"
 
 void codesh::semantic_analyzer::resolve_aliases(const ast::compilation_unit_ast_node &ast_root)

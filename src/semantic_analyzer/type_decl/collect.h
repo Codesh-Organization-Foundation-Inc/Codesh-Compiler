@@ -1,6 +1,14 @@
 #pragma once
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
+namespace codesh::semantic_analyzer
+{
+class country_symbol;
+}
+namespace codesh::ast
+{
+class compilation_unit_ast_node;
+}
+
 
 namespace codesh::semantic_analyzer::type_declaration
 {
