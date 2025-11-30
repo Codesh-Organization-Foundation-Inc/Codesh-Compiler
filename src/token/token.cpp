@@ -64,7 +64,7 @@ std::string codesh::identifier_token::get_content() const
     return this->content;
 }
 
-void codesh::identifier_token::set_content(const std::string &content)
+void codesh::identifier_token::set_content(std::string content)
 {
-    this->content = content;
+    this->content = std::move(content);
 }
