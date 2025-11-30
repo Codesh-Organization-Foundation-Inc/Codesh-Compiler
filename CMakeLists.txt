@@ -123,31 +123,45 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/analyzer.cpp
         src/semantic_analyzer/symbol_table/symbol_table.h
         src/semantic_analyzer/symbol_table/symbol_table.cpp
-        src/semantic_analyzer/passes/build_symbol_table.h
-        src/semantic_analyzer/passes/build_symbol_table.cpp
-        src/semantic_analyzer/passes/check_type_declarations.h
-        src/semantic_analyzer/passes/check_type_declarations.cpp
-        src/semantic_analyzer/passes/check_methods.h
-        src/semantic_analyzer/passes/check_methods.cpp
+        src/semantic_analyzer/type_decl/collect.h
+        src/semantic_analyzer/type_decl/collect.cpp
+        src/semantic_analyzer/method_decl/collect.h
+        src/semantic_analyzer/method_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/semantic_analyzer/errors/errors.h
         src/semantic_analyzer/errors/errors.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
-        src/semantic_analyzer/passes/util.cpp
-        src/semantic_analyzer/passes/util.h
+        src/semantic_analyzer/util.cpp
+        src/semantic_analyzer/util.h
+        src/semantic_analyzer/symbol_table/symbol.cpp
+        src/semantic_analyzer/symbol_table/scope.h
+        src/semantic_analyzer/symbol_table/symbol.tpp
+        src/parser/ast/impl/i_resolvable.h
+        src/parser/ast/impl/i_descriptor_emitter.cpp
+        src/parser/ast/impl/i_resolvable.cpp
+        src/semantic_analyzer/aliases.cpp
+        src/semantic_analyzer/aliases.h
+        src/semantic_analyzer/method_decl/resolve.cpp
+        src/semantic_analyzer/method_decl/resolve.h
+        src/semantic_analyzer/method_decl/resolve_aliases.cpp
+        src/semantic_analyzer/method_decl/resolve_aliases.h
 )
 
 # sudo dnf install boost-regex boost-devel
 
-find_package(Boost REQUIRED)
-target_link_libraries(Codesh_Compiler Boost::boost)
+find_package(Boost REQUIRED COMPONENTS regex headers)
+target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
 
-find_package(ICU REQUIRED COMPONENTS uc i18n)
+find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
-target_link_libraries(Codesh_Compiler ${ICU_LIBRARIES})
+target_link_libraries(Codesh_Compiler
+        ${ICU_LIBRARIES} icui18n
+        icuuc
+        icudata
+)
 
 
 include(FetchContent)
