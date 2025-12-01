@@ -15,6 +15,7 @@ class symbol;
 
 enum class ir_instruction_type : unsigned char
 {
+    NOP = 0x00, // No operation
     A_LOAD_0 = 0x2A, // Loads a variable from the local variable table at index 0
     RETURN = 0xB1,
     INVOKE_SPECIAL = 0xB7, // Calls for constructors, private methods and super calls
