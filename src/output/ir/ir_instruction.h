@@ -22,7 +22,7 @@ using operand = std::variant<
 >;
 
 
-enum class ir_instruction_type : unsigned char
+enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
     A_LOAD_0 = 0x2A, // Loads a variable from the local variable table at index 0
@@ -32,11 +32,11 @@ enum class ir_instruction_type : unsigned char
 
 class ir_instruction
 {
-    const ir_instruction_type instruction_type;
+    const opcode instruction_type;
     const std::vector<operand> operands;
 
 public:
-    ir_instruction(ir_instruction_type instruction_type, std::vector<operand> operands);
+    ir_instruction(opcode instruction_type, std::vector<operand> operands);
 
     [[nodiscard]] semantic_analyzer::symbol &get_address_as_symbol(size_t address_index) const;
     [[nodiscard]] jvm_target::defs::cp_info &get_address_as_cp_info(size_t address_index) const;
