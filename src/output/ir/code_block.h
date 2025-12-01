@@ -11,7 +11,7 @@ class code_block
 
 public:
     [[nodiscard]] const std::vector<ir_instruction> &get_instructions() const;
-    void add_instruction(ir_instruction instruction, size_t stack_height);
+    void add_instruction(ir_instruction instruction);
 };
 
 }
