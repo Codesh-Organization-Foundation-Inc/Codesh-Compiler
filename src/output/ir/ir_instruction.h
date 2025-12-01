@@ -23,13 +23,16 @@ enum class ir_instruction_type : unsigned char
 
 class ir_instruction
 {
-    using address = std::variant<codesh::semantic_analyzer::symbol *, codesh::output::jvm_target::defs::cp_info *>;
+    using operand = std::variant<
+        codesh::semantic_analyzer::symbol *,
+        codesh::output::jvm_target::defs::cp_info *
+    >;
 
     const ir_instruction_type instruction_type;
-    const std::vector<address> addresses;
+    const std::vector<operand> operands;
 
 public:
-    ir_instruction(ir_instruction_type instruction_type, std::vector<address> addresses);
+    ir_instruction(ir_instruction_type instruction_type, std::vector<operand> operands);
 
     [[nodiscard]] codesh::semantic_analyzer::symbol &get_address_as_symbol(size_t address_index) const;
     [[nodiscard]] codesh::output::jvm_target::defs::cp_info &get_address_as_cp_info(size_t address_index) const;
