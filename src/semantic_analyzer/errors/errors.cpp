@@ -1,25 +1,34 @@
 #include "errors.h"
+#include <iostream>
 
-#include <stdexcept>
-#include <string>
-
-namespace codesh::errors
+namespace codesh::semantic_analyzer
 {
 
-
-void add_error(const std::string& msg)
+void error_collector::add_error(const std::string &msg)
 {
-    errors_vector.push_back({ msg, 0, 0});
+    errors_vector.push_back({ msg, 0, 0 });
 }
 
-void add_error(const std::string& msg, int line, int column)
+void error_collector::add_error(const std::string &msg, const int line, const int column)
 {
-    errors_vector.push_back({ msg, line, column});
-    //TODO: add the line and column
+    errors_vector.push_back({ msg, line, column });
+}
+
+bool error_collector::has_errors() const
+{
+    return !errors_vector.empty();
+}
+
+void error_collector::print_errors() const
+{
+    for (const auto &[message, line, column] : errors_vector)
+    {
+        std::cerr
+            << "Error at line " << line
+            << ", column " << column
+            << ": " << message;
+        // TODO: change it
+    }
 }
 
 }
-// void codesh::semantic_analyzer::throw_error(const std::string &msg)
-// {
-//     throw std::runtime_error("semantic error: " + msg);
-// }

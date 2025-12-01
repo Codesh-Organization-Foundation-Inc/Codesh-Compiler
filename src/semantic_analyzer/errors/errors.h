@@ -13,14 +13,14 @@ struct compiler_error
     int column;
 };
 
-class error_collection
+class error_collector
 {
 public:
 
     // Add a new error
-    void add_error(const std::string& msg);
+    void add_error(const std::string &msg);
 
-    void add_error(const std::string& msg, int line, int column);
+    void add_error(const std::string &msg, int line, int column);
 
     // Whether any errors exist
     [[nodiscard]] bool has_errors() const;
@@ -28,11 +28,8 @@ public:
     // Print all errors
     void print_errors() const;
 
-    // Return const reference to all errors
-    [[nodiscard]] const std::vector<compiler_error>& get_errors() const { return errors; }
-
 private:
-    std::vector<compiler_error>errors_vector;
+    std::vector<compiler_error> errors_vector;
 
 };
 
