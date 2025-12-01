@@ -19,10 +19,12 @@ class primitive_type_ast_node : public type_ast_node
 public:
     explicit primitive_type_ast_node(definition::primitive_type type);
 
-    [[nodiscard]] std::string generate_descriptor() const override;
-
+    using i_descriptor_emitter::generate_descriptor;
+    [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
     [[nodiscard]] definition::primitive_type get_type() const;
+
+    [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
 };
 
 }

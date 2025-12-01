@@ -7,7 +7,7 @@ codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const defini
 {
 }
 
-std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor() const
+std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor(bool resolved) const
 {
     std::ostringstream result;
 
@@ -38,4 +38,9 @@ std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor() co
 codesh::definition::primitive_type codesh::ast::type::primitive_type_ast_node::get_type() const
 {
     return type;
+}
+
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+{
+    return std::make_unique<primitive_type_ast_node>(*this);
 }
