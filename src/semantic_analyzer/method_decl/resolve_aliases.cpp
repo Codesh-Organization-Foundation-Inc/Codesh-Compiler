@@ -2,7 +2,6 @@
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
 #include "../util.h"
 
 static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);
@@ -53,9 +52,9 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
 
     if (!(is_public && is_static))
     {
-        codesh::semantic_analyzer::collect_error(
-            "The method 'בראשית' must be both public and static."
-        );
+        // codesh::semantic_analyzer::collect_error( //TODO resolve
+        //     "The method 'בראשית' must be both public and static."
+        // );
         return;
     }
 

@@ -1,7 +1,6 @@
 #include "collect.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../errors/errors.h"
 #include "../method_decl/collect.h"
 
 void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compilation_unit_ast_node &root_node,
@@ -20,7 +19,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (!inserted)
         {
-            collect_error("Duplicate type declared: " + name);
+            // collect_error("Duplicate type declared: " + name); //TODO resolve
         }
 
 

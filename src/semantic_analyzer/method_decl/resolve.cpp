@@ -4,7 +4,6 @@
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
 #include "../util.h"
 
 static void resolve_return_type(
@@ -85,7 +84,7 @@ static void resolve_return_type(
             << " in method " << method_decl.get_name()
             << " of type " << class_name;
 
-        codesh::semantic_analyzer::collect_error(os_string.str());
+        // codesh::semantic_analyzer::collect_error(os_string.str()); //TODO resolve
     }
 }
 
@@ -115,7 +114,7 @@ static void resolve_parameters(
                 << " in method " << method.get_name()
                 << " of type " << class_name;
 
-            codesh::semantic_analyzer::collect_error(os_string.str());
+            // codesh::semantic_analyzer::collect_error(os_string.str()); //TODO resolve
         }
     }
 }

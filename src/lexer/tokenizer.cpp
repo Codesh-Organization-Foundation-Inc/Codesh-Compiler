@@ -71,6 +71,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
     {
         if (isspace(code[i]))
         {
+            //TODO: If this space is a newline, add newline++
+            //TODO: Add char counter, If newline++, then char_count = 0;
             i++;
             continue;
         }

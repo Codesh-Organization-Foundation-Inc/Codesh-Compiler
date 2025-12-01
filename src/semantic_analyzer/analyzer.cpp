@@ -1,8 +1,8 @@
 #include "analyzer.h"
 
-#include "../semantic_analyzer/errors/errors.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
+#include "errors/blasphemy_collector.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
 
@@ -23,11 +23,11 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
     //TODO: When CALLING non-static methods, also add 'this' as first argument
 
-    error_collector error_storage;
+    blasphemy_collector error_storage;
 
-    resolve_aliases(ast_root);
+    resolve_aliases(ast_root); //TODO pass as parameters
 
-    error_storage.print_errors();
+    error_storage.print_all_errors();
 }
 
 

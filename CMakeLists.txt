@@ -128,8 +128,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/collect.h
         src/semantic_analyzer/method_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
-        src/semantic_analyzer/errors/errors.h
-        src/semantic_analyzer/errors/errors.cpp
+        src/semantic_analyzer/errors/blasphemy_collector.h
+        src/semantic_analyzer/errors/blasphemy_collector.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
         src/semantic_analyzer/util.cpp
