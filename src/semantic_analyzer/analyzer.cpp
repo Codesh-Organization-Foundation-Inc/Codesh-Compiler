@@ -1,5 +1,6 @@
 #include "analyzer.h"
 
+#include "../semantic_analyzer/errors/errors.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "passes/check_methods.h"
 #include "passes/check_type_declarations.h"
@@ -11,14 +12,19 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
 
 void codesh::semantic_analyzer::run(ast::compilation_unit_ast_node &root)
 {
+
     //TODO: move these to other files
     add_default_constructors(root);
     add_this_param_to_non_static_methods(root);
 
     //TODO:
     // build_symbol_table(root);
-    check_type_declarations(root);
-    check_methods(root);
+    error_collector error_storage;
+
+    check_type_declarations(root, error_storage);
+    check_methods(root, error_storage);
+
+    error_storage.print_errors();
 }
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)

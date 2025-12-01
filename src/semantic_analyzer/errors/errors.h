@@ -6,6 +6,7 @@
 namespace codesh::semantic_analyzer
 {
 
+// TODO: move the file out and make it that there will be error type (semantic, parser...)
 struct compiler_error
 {
     std::string message;

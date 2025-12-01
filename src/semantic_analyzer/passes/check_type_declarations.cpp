@@ -2,7 +2,7 @@
 #include "check_type_declarations.h"
 #include <unordered_set>
 
-void codesh::semantic_analyzer::check_type_declarations(ast::compilation_unit_ast_node &root)
+void codesh::semantic_analyzer::check_type_declarations(ast::compilation_unit_ast_node &root, error_collector &error_storage)
 {
     //FIXME: This should point to the symbol table
     std::unordered_set<std::string> type_names;
@@ -14,7 +14,7 @@ void codesh::semantic_analyzer::check_type_declarations(ast::compilation_unit_as
 
         if (!did_insert)
         {
-            throw_error("Duplicate type declared: " + name);
+            error_storage.add_error("Duplicate type declared: " + name);
         }
     }
 }

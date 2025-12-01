@@ -14,7 +14,8 @@
 static std::string read_file(const std::string &file_name);
 
 
-int main(const int argc, char **const argv) {
+int main(const int argc, char **const argv)
+{
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
     const std::string amen_file = read_file(std::string(args.src_path));

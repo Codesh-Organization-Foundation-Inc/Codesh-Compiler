@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root)
+void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_node &root, error_collector &error_storage)
 {
     for (auto &type_decl : root.get_type_declarations())
     {
@@ -28,7 +28,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
             const auto [it, did_insert] = method_names.emplace(name);
             if (!did_insert)
             {
-                throw_error(
+                error_storage.add_error(
                     "Duplicate method declared: " + name
                     + " in type " + class_node->get_name()
                 );
@@ -43,7 +43,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
 
                 if (!util::type_exists(root, type_name))
                 {
-                    throw_error(
+                    error_storage.add_error(
                         "Unknown return type " + type_name + " in method " + name
                         + " of type " + class_node->get_name()
                     );
@@ -61,7 +61,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
                 const auto *custom_parameter = dynamic_cast<ast::type::custom_type_ast_node *>(parameter_type);
                 if (!custom_parameter)
                 {
-                    throw_error(
+                    error_storage.add_error(
                         "Invalid parameter type in method " + name +
                         " of type " + class_node->get_name()
                     );
@@ -72,7 +72,7 @@ void codesh::semantic_analyzer::check_methods(const ast::compilation_unit_ast_no
 
                 if (!util::type_exists(root, parameter_type_name))
                 {
-                    throw_error(
+                    error_storage.add_error(
                         "Unknown parameter type " + parameter_type_name + " in method " + name +
                         " of type " + class_node->get_name()
                     );
