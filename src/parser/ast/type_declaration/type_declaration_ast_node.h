@@ -28,8 +28,9 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<attributes_ast_node> attributes;
 
 
-    std::list<std::unique_ptr<method::method_declaration_ast_node>> methods;
-    std::list<std::unique_ptr<method::constructor_declaration_ast_node>> constructors;
+    std::list<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
+    std::list<method::method_declaration_ast_node *> methods;
+    std::list<method::constructor_declaration_ast_node *> constructors;
 
 protected:
     [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
@@ -56,11 +57,16 @@ public:
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
 
-
-    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_methods() const;
-    [[nodiscard]] const std::list<std::unique_ptr<method::constructor_declaration_ast_node>> &get_constructors() const;
+    /**
+     * @return All methods, including constructors.
+     * Methods are placed first, then constructors.
+     */
+    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
     void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
     void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
+
+    [[nodiscard]] const std::list<method::constructor_declaration_ast_node *> &get_constructors() const;
+    [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
 };
 
 }

@@ -33,7 +33,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
         // Get type symbol
         const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        for (const auto &method_decl : class_node->get_methods())
+        for (const auto &method_decl : class_node->get_all_methods())
         {
             method_overloads_symbol &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
                 &type.resolve(method_decl->get_name()).value().get()

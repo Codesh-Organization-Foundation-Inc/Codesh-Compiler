@@ -44,7 +44,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
     const int super_class_constant = goc_class_info(super_class_cpi);
 
     // Add methods
-    for (const auto &method_decl : class_decl.get_methods())
+    for (const auto &method_decl : class_decl.get_all_methods())
     {
         goc_methodref_info(
             this_class_cpi,

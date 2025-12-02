@@ -15,6 +15,10 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
  * When found that a constructor does not call super, will automatically call it with no arguments.
  */
 static void add_default_super_call(const codesh::ast::compilation_unit_ast_node &root_node);
+// /**
+//  * When found that a method
+//  */
+// static void add_default_return_statement(const codesh::ast::compilation_unit_ast_node &root_node);
 
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
@@ -87,12 +91,12 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
         if (!class_decl)
             continue;
 
-        for (const auto &constructor : class_decl->get_constructors())
+        for (const auto constructor : class_decl->get_constructors())
         {
             const auto &body = constructor->get_body();
 
             // Only add super calls to those who lack it
-            //TODO: Support "this" calls
+            //TODO: Also filter "this" calls
             if (dynamic_cast<const codesh::ast::method::operation::super_call_ast_node *>(body.front().get()))
                 continue;
 
@@ -111,7 +115,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
         if (!class_decl)
             continue;
 
-        for (const auto &method_decl : class_decl->get_methods())
+        for (const auto &method_decl : class_decl->get_all_methods())
         {
             if (method_decl->get_attributes()->get_is_static())
                 continue;
