@@ -7,9 +7,16 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
+    // Load "this" for the super constructor
+    containing_block.add_instruction(std::make_unique<output::ir::load_instruction>(
+        output::ir::instruction_type::REFERENCE,
+        0
+    ));
+
+
     const output::jvm_target::constant_pool &constant_pool = containing_type_decl.get_constant_pool().value();
 
-    const int method_cp_index = constant_pool.get_methodref_index(
+    const int super_constructor_cp_index = constant_pool.get_methodref_index(
         constant_pool.get_class_index(constant_pool.get_utf8_index(containing_type_decl.get_binary_name())),
 
         constant_pool.get_name_and_type_index(
@@ -19,5 +26,7 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         )
     );
 
-    containing_block.add_instruction(std::make_unique<output::ir::invoke_special_instruction>(method_cp_index));
+    containing_block.add_instruction(std::make_unique<output::ir::invoke_special_instruction>(
+        super_constructor_cp_index
+    ));
 }
