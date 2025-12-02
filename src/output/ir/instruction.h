@@ -13,7 +13,7 @@ class symbol;
 }
 
 
-namespace codesh::output
+namespace codesh::output::ir
 {
 
 using operand = std::variant<
@@ -30,13 +30,13 @@ enum class opcode : unsigned char
     INVOKE_SPECIAL = 0xB7, // Calls for constructors, private methods and super calls
 };
 
-class ir_instruction
+class instruction
 {
     const opcode instruction_type;
     const std::vector<operand> operands;
 
 public:
-    ir_instruction(opcode instruction_type, std::vector<operand> operands);
+    instruction(opcode instruction_type, std::vector<operand> operands);
 
     [[nodiscard]] semantic_analyzer::symbol &get_address_as_symbol(size_t address_index) const;
     [[nodiscard]] jvm_target::defs::cp_info &get_address_as_cp_info(size_t address_index) const;
