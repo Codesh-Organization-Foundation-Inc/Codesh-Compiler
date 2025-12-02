@@ -17,13 +17,13 @@ void codesh::ast::type_decl::class_declaration_ast_node::set_super_class(
     this->super_class = std::move(super_class);
 }
 
-std::list<std::unique_ptr<codesh::ast::method_declaration_ast_node>> &codesh::ast::type_decl::
+std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
     class_declaration_ast_node::get_methods()
 {
     return methods;
 }
 
-const std::list<std::unique_ptr<codesh::ast::method_declaration_ast_node>> &codesh::ast::type_decl::
+const std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
     class_declaration_ast_node::get_methods() const
 {
     return methods;

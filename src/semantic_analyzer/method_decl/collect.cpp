@@ -7,7 +7,7 @@
 #include "../util.h"
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
-        const codesh::ast::method_declaration_ast_node &method_decl);
+        const codesh::ast::method::method_declaration_ast_node &method_decl);
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
@@ -41,7 +41,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 }
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
-        const codesh::ast::method_declaration_ast_node &method_decl)
+        const codesh::ast::method::method_declaration_ast_node &method_decl)
 {
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> result;
 

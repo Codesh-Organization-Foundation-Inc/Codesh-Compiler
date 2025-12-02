@@ -39,7 +39,7 @@ static void add_default_constructors(const codesh::ast::compilation_unit_ast_nod
         //TODO: Check if there exists a constructor.
         // Only then should one be added.
 
-        auto constructor_decl = std::make_unique<codesh::ast::constructor_declaration_ast_node>();
+        auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>();
 
         auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);

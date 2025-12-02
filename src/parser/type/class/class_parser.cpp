@@ -16,7 +16,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
 
-static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
@@ -118,7 +118,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     throw std::runtime_error("Fields not yet supported");
 }
 
-static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     tokens.pop();
@@ -132,7 +132,7 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
     // * (the name)
     const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
-    auto method_node = std::make_unique<ast::method_declaration_ast_node>();
+    auto method_node = std::make_unique<ast::method::method_declaration_ast_node>();
 
     method_node->set_name(name_token->get_content());
 

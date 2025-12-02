@@ -12,7 +12,7 @@
 #include <memory>
 #include <string>
 
-namespace codesh::ast
+namespace codesh::ast::method
 {
 
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter

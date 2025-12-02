@@ -99,7 +99,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_method(const ast::method_declaration_ast_node &method_decl)
+void codesh::output::jvm_target::class_file_builder::add_method(const ast::method::method_declaration_ast_node &method_decl)
     const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
@@ -127,7 +127,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     // Actual bytecode
     //TODO: This should already be integrated in constructor's IR.
-    if (dynamic_cast<const ast::constructor_declaration_ast_node *>(&method_decl))
+    if (dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
     {
         code_attr->code.push_back(0x2A);
         {

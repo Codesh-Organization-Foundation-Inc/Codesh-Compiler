@@ -173,7 +173,7 @@ codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(ast::impl::a
 codesh::semantic_analyzer::method_symbol::method_symbol(
          const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-        std::unique_ptr<ast::type::type_ast_node> return_type, ast::method_declaration_ast_node *producing_node) :
+        std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node) :
     symbol(symbol_type::METHOD),
     access_flags(access_flags),
     parameter_types(std::move(parameter_types)),
@@ -209,7 +209,7 @@ codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::metho
     return method_scope;
 }
 
-codesh::ast::method_declaration_ast_node *codesh::semantic_analyzer::method_symbol::get_producing_node() const
+codesh::ast::method::method_declaration_ast_node *codesh::semantic_analyzer::method_symbol::get_producing_node() const
 {
     return producing_node;
 }

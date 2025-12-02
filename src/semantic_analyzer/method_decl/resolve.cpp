@@ -9,13 +9,13 @@
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
+    const codesh::ast::method::method_declaration_ast_node &method_decl,
     const std::string &class_name
 );
 
 static void resolve_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method,
+    const codesh::ast::method::method_declaration_ast_node &method,
     const std::string &class_name
 );
 
@@ -60,7 +60,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
+    const codesh::ast::method::method_declaration_ast_node &method_decl,
     const std::string &class_name
 ) {
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
@@ -91,7 +91,7 @@ static void resolve_return_type(
 
 static void resolve_parameters(
         const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method_declaration_ast_node &method,
+        const codesh::ast::method::method_declaration_ast_node &method,
         const std::string &class_name)
 {
     for (const auto &param : method.get_parameters())
