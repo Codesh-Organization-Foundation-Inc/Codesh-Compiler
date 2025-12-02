@@ -118,7 +118,7 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
     for (const auto &type_decl : root_node.get_type_declarations())
     {
 
-        for (const auto method : type_decl->get_methods())
+        for (const auto &method : type_decl->get_all_methods())
         {
             // This is only relevant for void-returning methods
             const codesh::ast::type::primitive_type_ast_node *return_type =
