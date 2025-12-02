@@ -87,6 +87,18 @@ void codesh::ast::method_declaration_ast_node::set_return_type(std::unique_ptr<t
     this->return_type = std::move(return_type);
 }
 
+std::list<std::unique_ptr<codesh::ast::impl::ir_convertable_ast_node>> &codesh::ast::method_declaration_ast_node::
+    get_body()
+{
+    return body;
+}
+
+const std::list<std::unique_ptr<codesh::ast::impl::ir_convertable_ast_node>> &codesh::ast::method_declaration_ast_node::
+    get_body() const
+{
+    return body;
+}
+
 const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method_declaration_ast_node::
     get_parameters() const
 {
