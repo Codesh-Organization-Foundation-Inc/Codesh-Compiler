@@ -150,6 +150,10 @@ add_executable(Codesh_Compiler
         src/output/ir/code_block.h
         src/output/ir/instruction.cpp
         src/output/ir/instruction.h
+        src/parser/ast/method/operation/return_ast_node.cpp
+        src/parser/ast/method/operation/return_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.cpp
 )
 
 # sudo dnf install boost-regex boost-devel
