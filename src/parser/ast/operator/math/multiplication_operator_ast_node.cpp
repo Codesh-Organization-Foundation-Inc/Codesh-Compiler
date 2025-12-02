@@ -7,6 +7,8 @@ codesh::ast::op::multiplication_operator_ast_node::multiplication_operator_ast_n
     binary_ast_node(std::move(left), std::move(right))
 {}
 
-void codesh::ast::op::multiplication_operator_ast_node::emit_ir(output::ir::code_block &containing_block) const
+void codesh::ast::op::multiplication_operator_ast_node::emit_ir(
+    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+    const type_decl::class_declaration_ast_node &containing_class_decl) const
 {
 }

@@ -37,7 +37,8 @@ public:
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const output::jvm_target::constant_pool>> get_constant_pool() const;
+    [[nodiscard]] std::optional<std::reference_wrapper<const output::jvm_target::constant_pool>> get_constant_pool()
+        const;
     void set_constant_pool(output::jvm_target::constant_pool constant_pool);
 };
 
