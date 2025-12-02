@@ -29,6 +29,7 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
 
 
     std::list<std::unique_ptr<method::method_declaration_ast_node>> methods;
+    std::list<std::unique_ptr<method::constructor_declaration_ast_node>> constructors;
 
 protected:
     [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
@@ -56,8 +57,10 @@ public:
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
 
 
-    [[nodiscard]] std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_methods();
     [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_methods() const;
+    [[nodiscard]] const std::list<std::unique_ptr<method::constructor_declaration_ast_node>> &get_constructors() const;
+    void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
+    void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
 };
 
 }

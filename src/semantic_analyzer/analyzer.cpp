@@ -70,7 +70,7 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
         constructor_decl->set_attributes(std::move(attributes_node));
 
-        class_decl->get_methods().emplace_front(std::move(constructor_decl));
+        class_decl->add_method(std::move(constructor_decl));
     }
 }
 
@@ -82,15 +82,9 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
         if (!class_decl)
             continue;
 
-        for (const auto &method : class_decl->get_methods())
+        for (const auto &constructor : class_decl->get_constructors())
         {
-            const auto constructor =
-                dynamic_cast<codesh::ast::method::constructor_declaration_ast_node *>(method.get());
-
-            if (!constructor)
-                continue;
-
-            const auto &body = method->get_body();
+            const auto &body = constructor->get_body();
 
             // Only add super calls to those who lack it
             //TODO: Support "this" calls
