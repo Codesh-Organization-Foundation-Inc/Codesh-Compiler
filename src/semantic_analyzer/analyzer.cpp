@@ -126,7 +126,7 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
 
             if (return_type == nullptr)
                 continue;
-            if (return_type->get_type() == codesh::definition::primitive_type::VOID)
+            if (return_type->get_type() != codesh::definition::primitive_type::VOID)
                 continue;
 
 
