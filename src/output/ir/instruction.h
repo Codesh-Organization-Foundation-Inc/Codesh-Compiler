@@ -27,7 +27,7 @@ enum class opcode : unsigned char
     D_LOAD, // Loads a double variable from the local variable table at the specified index
     A_LOAD, // Loads a reference variable from the local variable table at the specified index
 
-    I_LOAD_0 = 0x1E, // Loads an integer variable from the local variable table at index 0
+    I_LOAD_0 = 0x1A, // Loads an integer variable from the local variable table at index 0
     I_LOAD_1, // Loads an integer variable from the local variable table at index 1
     I_LOAD_2, // Loads an integer variable from the local variable table at index 2
     I_LOAD_3, // Loads an integer variable from the local variable table at index 3
