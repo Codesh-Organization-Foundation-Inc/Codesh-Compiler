@@ -25,6 +25,18 @@ std::string codesh::ast::type_decl::type_declaration_ast_node::get_name() const
 {
     return this->name;
 }
+
+codesh::ast::type::custom_type_ast_node *codesh::ast::type_decl::type_declaration_ast_node::get_super_class() const
+{
+    return super_class.get();
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::set_super_class(
+    std::unique_ptr<type::custom_type_ast_node> super_class)
+{
+    this->super_class = std::move(super_class);
+}
+
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::type_declaration_ast_node::get_attributes()
     const
 {
@@ -45,7 +57,8 @@ std::optional<std::reference_wrapper<const codesh::output::jvm_target::constant_
     return *constant_pool;
 }
 
-void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(output::jvm_target::constant_pool constant_pool)
+void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(
+        output::jvm_target::constant_pool constant_pool)
 {
     this->constant_pool = std::make_unique<output::jvm_target::constant_pool>(std::move(constant_pool));
 }

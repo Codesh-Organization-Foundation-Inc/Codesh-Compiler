@@ -5,14 +5,22 @@
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
 
-static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
+/**
+ * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
+ */
+static void add_default_super_class(const codesh::ast::compilation_unit_ast_node &root_node);
+static void add_default_constructor(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
+const std::string codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+
+
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
 {
-    add_default_constructors(ast_root);
+    add_default_super_class(ast_root);
+    add_default_constructor(ast_root);
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
@@ -28,7 +36,25 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
 // Prepares
 
-static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node)
+static void add_default_super_class(const codesh::ast::compilation_unit_ast_node &root_node)
+{
+    for (const auto &type_decl : root_node.get_type_declarations())
+    {
+        const auto class_decl = dynamic_cast<codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get());
+        if (!class_decl)
+            continue;
+
+        if (class_decl->get_super_class() != nullptr)
+            continue;
+
+
+        class_decl->set_super_class(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+            codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME
+        ));
+    }
+}
+
+static void add_default_constructor(const codesh::ast::compilation_unit_ast_node &root_node)
 {
     for (const auto &type_decl : root_node.get_type_declarations())
     {

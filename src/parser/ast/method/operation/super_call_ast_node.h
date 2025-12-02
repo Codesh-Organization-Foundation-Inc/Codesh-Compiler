@@ -10,7 +10,7 @@ class super_call_ast_node : impl::ir_convertable_ast_node
 
 public:
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-               const type_decl::class_declaration_ast_node &containing_class_decl) const override;
+               const type_decl::type_declaration_ast_node &containing_type_decl) const override;
 };
 
 }

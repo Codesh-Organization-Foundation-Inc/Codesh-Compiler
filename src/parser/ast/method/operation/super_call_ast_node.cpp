@@ -5,16 +5,16 @@
 
 void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-        const type_decl::class_declaration_ast_node &containing_class_decl) const
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    const output::jvm_target::constant_pool &constant_pool = containing_class_decl.get_constant_pool().value();
+    const output::jvm_target::constant_pool &constant_pool = containing_type_decl.get_constant_pool().value();
 
     const int method_cp_index = constant_pool.get_methodref_index(
-        //TODO: Use actual superclass
-        constant_pool.get_class_index(constant_pool.get_utf8_index("java/lang/Object")),
+        constant_pool.get_class_index(constant_pool.get_utf8_index(containing_type_decl.get_binary_name())),
 
         constant_pool.get_name_and_type_index(
             constant_pool.get_utf8_index("<init>"),
+            //TODO: Match parameters list
             constant_pool.get_utf8_index("()V")
         )
     );
