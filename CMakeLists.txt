@@ -19,8 +19,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/while_ast_node.cpp
-        src/parser/ast/while_ast_node.h
+        src/parser/ast/method/operation/while_ast_node.cpp
+        src/parser/ast/method/operation/while_ast_node.h
         src/parser/ast/impl/ir_convertable_ast_node.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h

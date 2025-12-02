@@ -1,7 +1,7 @@
 #pragma once
 
-#include "impl/ast_node.h"
-#include "impl/ir_convertable_ast_node.h"
+#include "../../impl/ast_node.h"
+#include "../../impl/ir_convertable_ast_node.h"
 
 #include <memory>
 
@@ -11,7 +11,7 @@ class block_ast_node;
 }
 
 
-namespace codesh::ast
+namespace codesh::ast::method::operation
 {
 
 class while_ast_node final : public impl::ast_node
