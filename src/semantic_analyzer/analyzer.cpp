@@ -76,7 +76,7 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
             continue;
 
         // Only add a default constructor if one does not exist
-        if (class_decl->get_constructors().empty())
+        if (!class_decl->get_constructors().empty())
             continue;
 
         auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>();
