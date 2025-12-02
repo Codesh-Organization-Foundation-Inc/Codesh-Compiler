@@ -2,6 +2,12 @@
 
 #include "ast_node.h"
 
+namespace codesh::output::ir
+{
+class code_block;
+}
+
+
 namespace codesh::ast::impl
 {
 
@@ -10,12 +16,11 @@ namespace codesh::ast::impl
  */
 class ir_convertable_ast_node : public ast_node
 {
-    //TODO: Update return type when implemented IR structs etc.
     /**
      * @return The IR representation of this AST node
      */
 public:
-    [[nodiscard]] virtual void *to_ir() const = 0;
+    virtual void emit_ir(output::ir::code_block &containing_block) const = 0;
 };
 
 }

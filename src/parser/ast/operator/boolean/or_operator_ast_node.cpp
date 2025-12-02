@@ -6,7 +6,6 @@ codesh::ast::op::or_operator_ast_node::or_operator_ast_node(std::unique_ptr<ir_c
 {
 }
 
-void *codesh::ast::op::or_operator_ast_node::to_ir() const
+void codesh::ast::op::or_operator_ast_node::emit_ir(output::ir::code_block &containing_block) const
 {
-    return nullptr;
 }

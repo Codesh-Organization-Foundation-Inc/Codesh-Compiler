@@ -17,8 +17,6 @@ add_executable(Codesh_Compiler
         src/lexer/tokenizer.cpp
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
-        src/parser/ast/block_ast_node.cpp
-        src/parser/ast/block_ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
         src/parser/ast/while_ast_node.cpp

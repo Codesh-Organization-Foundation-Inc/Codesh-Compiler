@@ -6,7 +6,6 @@ codesh::ast::op::division_operator_ast_node::division_operator_ast_node(std::uni
 {
 }
 
-void *codesh::ast::op::division_operator_ast_node::to_ir() const
+void codesh::ast::op::division_operator_ast_node::emit_ir(output::ir::code_block &containing_block) const
 {
-    return nullptr;
 }

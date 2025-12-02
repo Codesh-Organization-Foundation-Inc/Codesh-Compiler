@@ -11,7 +11,7 @@ public:
     multiplication_operator_ast_node(std::unique_ptr<ir_convertable_ast_node> left,
                                      std::unique_ptr<ir_convertable_ast_node> right);
 
-    [[nodiscard]] void *to_ir() const override;
+    void emit_ir(output::ir::code_block &containing_block) const override;
 };
 
 }

@@ -6,7 +6,6 @@ codesh::ast::op::addition_operator_ast_node::addition_operator_ast_node(std::uni
 {
 }
 
-void *codesh::ast::op::addition_operator_ast_node::to_ir() const
+void codesh::ast::op::addition_operator_ast_node::emit_ir(output::ir::code_block &containing_block) const
 {
-    return nullptr;
 }

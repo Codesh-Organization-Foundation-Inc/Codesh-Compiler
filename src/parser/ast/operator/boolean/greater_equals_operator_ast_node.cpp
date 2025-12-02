@@ -6,7 +6,6 @@ codesh::ast::op::greater_equals_operator_ast_node::greater_equals_operator_ast_n
 {
 }
 
-void *codesh::ast::op::greater_equals_operator_ast_node::to_ir() const
+void codesh::ast::op::greater_equals_operator_ast_node::emit_ir(output::ir::code_block &containing_block) const
 {
-    return nullptr;
 }

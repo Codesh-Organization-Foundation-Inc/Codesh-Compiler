@@ -17,16 +17,16 @@ namespace codesh::ast
 class while_ast_node final : public impl::ast_node
 {
     std::unique_ptr<impl::ir_convertable_ast_node> condition;
-    std::unique_ptr<block_ast_node> block;
+    // std::unique_ptr<block_ast_node> block;
 
 public:
-    while_ast_node(std::unique_ptr<impl::ir_convertable_ast_node> condition, std::unique_ptr<block_ast_node> block);
+    explicit while_ast_node(std::unique_ptr<impl::ir_convertable_ast_node> condition);
 
     [[nodiscard]] impl::ir_convertable_ast_node *get_condition() const;
-    [[nodiscard]] block_ast_node *get_block() const;
+    // [[nodiscard]] block_ast_node *get_block() const;
 
     void set_condition(std::unique_ptr<impl::ir_convertable_ast_node> condition);
-    void set_block(std::unique_ptr<block_ast_node> block);
+    // void set_block(std::unique_ptr<block_ast_node> block);
 };
 
 }
