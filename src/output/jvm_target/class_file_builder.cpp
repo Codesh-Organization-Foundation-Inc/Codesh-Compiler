@@ -142,8 +142,8 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     code_attr->code.reserve(bytecode_collector.size());
     code_attr->code.insert(
         std::end(code_attr->code),
-        std::begin(code_attr->code),
-        std::end(code_attr->code)
+        std::begin(bytecode_collector),
+        std::end(bytecode_collector)
     );
 
 
