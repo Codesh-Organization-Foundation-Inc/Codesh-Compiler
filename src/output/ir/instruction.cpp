@@ -1,19 +1,68 @@
 #include "instruction.h"
 
-codesh::output::ir::instruction::instruction(const opcode instruction_type,
-        std::vector<operand> operands) :
-    instruction_type(instruction_type),
-    operands(std::move(operands))
+codesh::output::ir::instruction::instruction(const opcode _opcode) :
+    _opcode(_opcode)
 {
 }
 
-codesh::semantic_analyzer::symbol &codesh::output::ir::instruction::get_address_as_symbol(const size_t address_index) const
+codesh::output::ir::instruction::~instruction() = default;
+
+codesh::output::ir::opcode codesh::output::ir::instruction::get_opcode() const
 {
-    return *std::get<semantic_analyzer::symbol *>(operands[address_index]);
+    return _opcode;
 }
 
-codesh::output::jvm_target::defs::cp_info &codesh::output::ir::instruction::get_address_as_cp_info(const size_t address_index)
-    const
+void codesh::output::ir::instruction::emit(std::vector<unsigned char> &collector) const
 {
-    return *std::get<jvm_target::defs::cp_info *>(operands[address_index]);
+    collector.emplace_back(static_cast<unsigned char>(_opcode));
+}
+
+codesh::output::ir::typed_instruction::typed_instruction(const opcode _opcode, const instruction_type type) :
+    instruction(_opcode),
+    type(type)
+{
+}
+
+codesh::output::ir::instruction_type codesh::output::ir::typed_instruction::get_instruction_type() const
+{
+    return type;
+}
+
+codesh::output::ir::nop_instruction::nop_instruction() : instruction(opcode::NOP)
+{
+}
+
+codesh::output::ir::load_instruction::load_instruction(const instruction_type type, const unsigned char lvt_index) :
+    typed_instruction(opcode::A_LOAD, type),
+    lvt_index(lvt_index)
+{
+}
+
+unsigned char codesh::output::ir::load_instruction::get_lvt_index() const
+{
+    return lvt_index;
+}
+
+void codesh::output::ir::load_instruction::emit(std::vector<unsigned char> &collector) const
+{
+    if (lvt_index <= 3)
+    {
+        collector.emplace_back(
+            static_cast<unsigned char>(opcode::I_LOAD_0)
+                + static_cast<unsigned char>(get_instruction_type()) * CONSTANT_INDEXES_COUNT
+                + lvt_index
+        );
+    }
+    else
+    {
+        collector.emplace_back(
+            static_cast<unsigned char>(opcode::I_LOAD) + static_cast<unsigned char>(get_instruction_type())
+        );
+
+        collector.emplace_back(lvt_index);
+    }
+}
+
+codesh::output::ir::return_instruction::return_instruction() : instruction(opcode::RETURN)
+{
 }
