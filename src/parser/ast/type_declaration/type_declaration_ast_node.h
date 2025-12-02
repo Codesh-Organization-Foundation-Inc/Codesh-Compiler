@@ -10,6 +10,7 @@
 #include "../../../output/jvm_target/constant_pool.h"
 #include "../impl/i_resolvable.h"
 #include "../type/custom_type_ast_node.h"
+#include "../method/constructor_declaration_ast_node.h"
 
 namespace codesh::ast::type_decl
 {
@@ -19,11 +20,15 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
     std::unique_ptr<type::custom_type_ast_node> super_class;
+    //TODO: Add implements
 
     const std::string name;
     std::optional<std::string> resolved_name;
 
     std::unique_ptr<attributes_ast_node> attributes;
+
+
+    std::list<std::unique_ptr<method::method_declaration_ast_node>> methods;
 
 protected:
     [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
@@ -49,6 +54,10 @@ public:
 
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
+
+
+    [[nodiscard]] std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_methods();
+    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_methods() const;
 };
 
 }

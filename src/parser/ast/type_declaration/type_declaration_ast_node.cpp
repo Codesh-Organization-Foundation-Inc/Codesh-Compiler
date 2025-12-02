@@ -62,3 +62,15 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(
 {
     this->constant_pool = std::make_unique<output::jvm_target::constant_pool>(std::move(constant_pool));
 }
+
+std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
+    type_declaration_ast_node::get_methods()
+{
+    return methods;
+}
+
+const std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
+    type_declaration_ast_node::get_methods() const
+{
+    return methods;
+}

@@ -5,14 +5,3 @@ codesh::ast::type_decl::class_declaration_ast_node::class_declaration_ast_node(c
 {
 }
 
-std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
-    class_declaration_ast_node::get_methods()
-{
-    return methods;
-}
-
-const std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
-    class_declaration_ast_node::get_methods() const
-{
-    return methods;
-}
