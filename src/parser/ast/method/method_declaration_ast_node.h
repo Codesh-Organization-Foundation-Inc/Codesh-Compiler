@@ -3,7 +3,7 @@
 #include "../../../output/jvm_target/class_file_builder.h"
 #include "../impl/ast_node.h"
 #include "../impl/i_descriptor_emitter.h"
-#include "../impl/ir_convertable_ast_node.h"
+#include "../impl/ir_emitting_ast_node.h"
 #include "../local_variable_declaration_ast_node.h"
 #include "../type/type_ast_node.h"
 #include "../type_declaration/attributes_ast_node.h"
@@ -27,7 +27,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
 
-    std::list<std::unique_ptr<impl::ir_convertable_ast_node>> body;
+    std::list<std::unique_ptr<impl::ir_emitting_ast_node>> body;
 
 
     [[nodiscard]] std::string generate_unresolved_parameter_descriptors() const;
@@ -48,8 +48,8 @@ public:
     [[nodiscard]] type::type_ast_node *get_return_type() const;
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
 
-    [[nodiscard]] std::list<std::unique_ptr<impl::ir_convertable_ast_node>> &get_body();
-    [[nodiscard]] const std::list<std::unique_ptr<impl::ir_convertable_ast_node>> &get_body() const;
+    [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();
+    [[nodiscard]] const std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body() const;
 
 
     [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameters() const;

@@ -1,11 +1,11 @@
 #include "while_ast_node.h"
 
-codesh::ast::method::operation::while_ast_node::while_ast_node(std::unique_ptr<impl::ir_convertable_ast_node> condition)
+codesh::ast::method::operation::while_ast_node::while_ast_node(std::unique_ptr<impl::ir_emitting_ast_node> condition)
     : condition(std::move(condition))
 {
 }
 
-codesh::ast::impl::ir_convertable_ast_node *codesh::ast::method::operation::while_ast_node::get_condition() const
+codesh::ast::impl::ir_emitting_ast_node *codesh::ast::method::operation::while_ast_node::get_condition() const
 {
     return this->condition.get();
 }
@@ -15,7 +15,7 @@ codesh::ast::impl::ir_convertable_ast_node *codesh::ast::method::operation::whil
 //     return this->block.get();
 // }
 
-void codesh::ast::method::operation::while_ast_node::set_condition(std::unique_ptr<impl::ir_convertable_ast_node> condition)
+void codesh::ast::method::operation::while_ast_node::set_condition(std::unique_ptr<impl::ir_emitting_ast_node> condition)
 {
     this->condition = std::move(condition);
 }

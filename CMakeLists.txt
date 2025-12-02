@@ -21,12 +21,12 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/binary_ast_node.h
         src/parser/ast/method/operation/while_ast_node.cpp
         src/parser/ast/method/operation/while_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp

@@ -22,7 +22,7 @@ namespace codesh::ast::impl
 /**
  * An AST node that can be converted to method IR
  */
-class ir_convertable_ast_node : public ast_node
+class ir_emitting_ast_node : public ast_node
 {
     /**
      * @return The IR representation of this AST node
