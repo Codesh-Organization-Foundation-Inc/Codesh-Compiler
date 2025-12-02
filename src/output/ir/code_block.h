@@ -27,7 +27,7 @@ class code_block
     std::list<std::unique_ptr<instruction>> instructions;
 
 public:
-    static code_block build_from_method(const ast::method::method_declaration_ast_node &method,
+    [[nodiscard]] static code_block build_from_method(const ast::method::method_declaration_ast_node &method,
             const semantic_analyzer::symbol_table &symbol_table,
             const ast::type_decl::type_declaration_ast_node &containing_type);
 

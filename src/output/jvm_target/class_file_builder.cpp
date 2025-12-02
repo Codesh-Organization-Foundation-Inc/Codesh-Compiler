@@ -5,6 +5,7 @@
 #include "../../parser/ast/method/method_declaration_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
+#include "../ir/code_block.h"
 #include "constant_pool.h"
 
 #include "./defs/attribute_info_entry.h"
@@ -124,30 +125,26 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     util::put_int_bytes(code_attr->max_stack, 2, 1);
     util::put_int_bytes(code_attr->max_locals, 2, 1);
 
-    // Actual bytecode
-    //TODO: This should already be integrated in constructor's IR.
-    if (dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
-    {
-        code_attr->code.push_back(0x2A);
-        {
-            const unsigned char super_call[] = {
-                0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
-                    super_class_cpi,
-                    constant_pool_.get_name_and_type_index(
-                        constant_pool_.get_utf8_index("<init>"),
-                        constant_pool_.get_utf8_index("()V")
-                    )
-                ))
-            };
 
-            for (const unsigned char bytecode : super_call)
-            {
-                code_attr->code.push_back(bytecode);
-            }
-        }
+    // Convert the method to IR
+    const auto code_block = ir::code_block::build_from_method(
+        method_decl,
+        root_node.get_symbol_table().value(),
+        type_decl
+    );
+
+    std::list<unsigned char> bytecode_collector;
+    for (const auto &instruction : code_block.get_instructions())
+    {
+        instruction->emit(bytecode_collector);
     }
 
-    code_attr->code.push_back(0xB1);
+    code_attr->code.reserve(bytecode_collector.size());
+    code_attr->code.insert(
+        std::end(code_attr->code),
+        std::begin(code_attr->code),
+        std::end(code_attr->code)
+    );
 
 
     if (code_attr->code.size() > 0xFFFFFF)
