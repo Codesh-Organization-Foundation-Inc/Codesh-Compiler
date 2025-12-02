@@ -11,7 +11,11 @@
  */
 static void add_default_super_class(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_default_constructor(const codesh::ast::compilation_unit_ast_node &root_node);
+/**
+ * When found that a constructor does not call super, will automatically call it with no arguments.
+ */
 static void add_default_super_call(const codesh::ast::compilation_unit_ast_node &root_node);
+
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
@@ -61,8 +65,9 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
         if (!class_decl)
             continue;
 
-        //TODO: Check if there exists a constructor.
-        // Only then should one be added.
+        // Only add a default constructor if one does not exist
+        if (class_decl->get_constructors().empty())
+            continue;
 
         auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>();
 
