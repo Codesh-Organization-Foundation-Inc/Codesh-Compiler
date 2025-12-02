@@ -63,6 +63,24 @@ void codesh::output::ir::load_instruction::emit(std::vector<unsigned char> &coll
     }
 }
 
-codesh::output::ir::return_instruction::return_instruction() : instruction(opcode::RETURN)
+codesh::output::ir::return_instruction::return_instruction() :
+    instruction(opcode::RETURN)
 {
+}
+
+codesh::output::ir::invoke_special_instruction::invoke_special_instruction(const int method_cp_index) :
+    instruction(opcode::INVOKE_SPECIAL),
+    method_cp_index(method_cp_index)
+{
+}
+
+void codesh::output::ir::invoke_special_instruction::emit(std::vector<unsigned char> &collector) const
+{
+    instruction::emit(collector);
+    collector.emplace_back(method_cp_index);
+}
+
+int codesh::output::ir::invoke_special_instruction::get_method_cp_index() const
+{
+    return method_cp_index;
 }

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <variant>
 #include <vector>
 
 namespace codesh::output::jvm_target::defs
@@ -55,7 +53,7 @@ enum class opcode : unsigned char
 
     RETURN = 0xB1,
 
-    INVOKE_SPECIAL = 0xB7, // Calls a private method, constructor or this/super constructor
+    INVOKE_SPECIAL = 0xB7, // Calls a private method_cp_index, constructor or this/super constructor
 };
 
 enum class instruction_type
@@ -102,10 +100,10 @@ public:
 
 class load_instruction final : public typed_instruction
 {
+    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
+
     //TODO: Change to a Local Variable Table index pointer
     const unsigned char lvt_index;
-
-    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
 
 public:
     explicit load_instruction(instruction_type type, unsigned char lvt_index);
@@ -121,6 +119,19 @@ class return_instruction final : public instruction
 {
 public:
     return_instruction();
+};
+
+
+class invoke_special_instruction final : public instruction
+{
+    const int method_cp_index;
+
+public:
+    explicit invoke_special_instruction(int method_cp_index);
+
+    void emit(std::vector<unsigned char> &collector) const override;
+
+    [[nodiscard]] int get_method_cp_index() const;
 };
 
 }
