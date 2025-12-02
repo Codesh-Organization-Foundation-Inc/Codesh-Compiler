@@ -1,5 +1,6 @@
 #include "analyzer.h"
 
+#include "../parser/ast/method/operation/super_call_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
 #include "method_decl/resolve.h"
@@ -10,6 +11,7 @@
  */
 static void add_default_super_class(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_default_constructor(const codesh::ast::compilation_unit_ast_node &root_node);
+static void add_default_super_call(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
@@ -21,6 +23,7 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 {
     add_default_super_class(ast_root);
     add_default_constructor(ast_root);
+    add_default_super_call(ast_root);
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
@@ -40,15 +43,11 @@ static void add_default_super_class(const codesh::ast::compilation_unit_ast_node
 {
     for (const auto &type_decl : root_node.get_type_declarations())
     {
-        const auto class_decl = dynamic_cast<codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get());
-        if (!class_decl)
-            continue;
-
-        if (class_decl->get_super_class() != nullptr)
+        if (type_decl->get_super_class() != nullptr)
             continue;
 
 
-        class_decl->set_super_class(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+        type_decl->set_super_class(std::make_unique<codesh::ast::type::custom_type_ast_node>(
             codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME
         ));
     }
@@ -69,9 +68,39 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
 
         auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
-
         constructor_decl->set_attributes(std::move(attributes_node));
-        class_decl->get_methods().push_front(std::move(constructor_decl));
+
+        class_decl->get_methods().emplace_front(std::move(constructor_decl));
+    }
+}
+
+static void add_default_super_call(const codesh::ast::compilation_unit_ast_node &root_node)
+{
+    for (const auto &type_decl : root_node.get_type_declarations())
+    {
+        const auto class_decl = dynamic_cast<codesh::ast::type_decl::class_declaration_ast_node *>(type_decl.get());
+        if (!class_decl)
+            continue;
+
+        for (const auto &method : class_decl->get_methods())
+        {
+            const auto constructor =
+                dynamic_cast<codesh::ast::method::constructor_declaration_ast_node *>(method.get());
+
+            if (!constructor)
+                continue;
+
+            const auto &body = method->get_body();
+
+            // Only add super calls to those who lack it
+            //TODO: Support "this" calls
+            if (dynamic_cast<const codesh::ast::method::operation::super_call_ast_node *>(body.front().get()))
+                continue;
+
+            constructor->get_body().emplace_back(
+                std::make_unique<codesh::ast::method::operation::super_call_ast_node>()
+            );
+        }
     }
 }
 

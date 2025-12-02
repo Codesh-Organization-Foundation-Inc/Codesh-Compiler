@@ -4,7 +4,7 @@
 namespace codesh::ast::method::operation
 {
 
-class super_call_ast_node : impl::ir_emitting_ast_node
+class super_call_ast_node : public impl::ir_emitting_ast_node
 {
 //TODO: Add parameters
 
