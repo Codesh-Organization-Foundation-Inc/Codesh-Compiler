@@ -1,5 +1,7 @@
 #include "instruction.h"
 
+#include "../../util.h"
+
 codesh::output::ir::instruction::instruction(const opcode _opcode) :
     _opcode(_opcode)
 {
@@ -77,7 +79,14 @@ codesh::output::ir::invoke_special_instruction::invoke_special_instruction(const
 void codesh::output::ir::invoke_special_instruction::emit(std::vector<unsigned char> &collector) const
 {
     instruction::emit(collector);
-    collector.emplace_back(method_cp_index);
+
+    unsigned char buffer[2];
+    util::put_int_bytes(buffer, 2, method_cp_index);
+
+    for (unsigned char byte : buffer)
+    {
+        collector.emplace_back(byte);
+    }
 }
 
 int codesh::output::ir::invoke_special_instruction::get_method_cp_index() const
