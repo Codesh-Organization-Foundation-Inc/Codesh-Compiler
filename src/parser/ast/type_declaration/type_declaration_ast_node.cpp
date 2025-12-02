@@ -72,15 +72,15 @@ const std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node
 void codesh::ast::type_decl::type_declaration_ast_node::add_method(
     std::unique_ptr<method::method_declaration_ast_node> method)
 {
-    all_methods.push_front(std::move(method));
-    methods.push_back(all_methods.front().get());
+    all_methods.push_back(std::move(method));
+    methods.push_back(all_methods.back().get());
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::add_method(
     std::unique_ptr<method::constructor_declaration_ast_node> method)
 {
-    all_methods.push_back(std::move(method));
-    constructors.push_back(static_cast<method::constructor_declaration_ast_node *>(all_methods.back().get())); // NOLINT(*-pro-type-static-cast-downcast)
+    all_methods.push_front(std::move(method));
+    constructors.push_back(static_cast<method::constructor_declaration_ast_node *>(all_methods.front().get())); // NOLINT(*-pro-type-static-cast-downcast)
 }
 
 const std::list<codesh::ast::method::constructor_declaration_ast_node *> &codesh::ast::type_decl::

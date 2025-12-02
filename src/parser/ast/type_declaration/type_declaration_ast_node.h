@@ -59,7 +59,7 @@ public:
 
     /**
      * @return All methods, including constructors.
-     * Methods are placed first, then constructors.
+     * Constructors are placed first, then methods.
      */
     [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
     void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
