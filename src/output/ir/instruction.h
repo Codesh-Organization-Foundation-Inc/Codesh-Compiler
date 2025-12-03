@@ -1,5 +1,6 @@
 #pragma once
 
+#include <list>
 #include <vector>
 
 namespace codesh::output::jvm_target::defs
@@ -26,7 +27,7 @@ enum class opcode : unsigned char
     D_LOAD, // Loads a double variable from the local variable table at the specified index
     A_LOAD, // Loads a reference variable from the local variable table at the specified index
 
-    I_LOAD_0 = 0x1E, // Loads an integer variable from the local variable table at index 0
+    I_LOAD_0 = 0x1A, // Loads an integer variable from the local variable table at index 0
     I_LOAD_1, // Loads an integer variable from the local variable table at index 1
     I_LOAD_2, // Loads an integer variable from the local variable table at index 2
     I_LOAD_3, // Loads an integer variable from the local variable table at index 3
@@ -76,7 +77,7 @@ public:
 
     [[nodiscard]] opcode get_opcode() const;
 
-    virtual void emit(std::vector<unsigned char> &collector) const;
+    virtual void emit(std::list<unsigned char> &collector) const;
 };
 
 class typed_instruction : public instruction
@@ -110,7 +111,7 @@ public:
 
     [[nodiscard]] unsigned char get_lvt_index() const;
 
-    void emit(std::vector<unsigned char> &collector) const override;
+    void emit(std::list<unsigned char> &collector) const override;
 };
 
 
@@ -129,7 +130,7 @@ class invoke_special_instruction final : public instruction
 public:
     explicit invoke_special_instruction(int method_cp_index);
 
-    void emit(std::vector<unsigned char> &collector) const override;
+    void emit(std::list<unsigned char> &collector) const override;
 
     [[nodiscard]] int get_method_cp_index() const;
 };

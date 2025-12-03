@@ -7,13 +7,13 @@
 #include "../util.h"
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
-        const codesh::ast::method_declaration_ast_node &method_decl);
+        const codesh::ast::method::method_declaration_ast_node &method_decl);
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
                                                 type_symbol &containing_type)
 {
-    for (const auto &method_decl : class_decl.get_methods())
+    for (const auto &method_decl : class_decl.get_all_methods())
     {
         method_overloads_symbol &methods_container =
             util::get_method_overloads_symbol(method_decl->get_name(), containing_type);
@@ -41,7 +41,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 }
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
-        const codesh::ast::method_declaration_ast_node &method_decl)
+        const codesh::ast::method::method_declaration_ast_node &method_decl)
 {
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> result;
 

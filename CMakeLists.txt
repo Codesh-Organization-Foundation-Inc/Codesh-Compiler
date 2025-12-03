@@ -17,18 +17,16 @@ add_executable(Codesh_Compiler
         src/lexer/tokenizer.cpp
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
-        src/parser/ast/block_ast_node.cpp
-        src/parser/ast/block_ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/while_ast_node.cpp
-        src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/method/operation/while_ast_node.cpp
+        src/parser/ast/method/operation/while_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -152,6 +150,12 @@ add_executable(Codesh_Compiler
         src/output/ir/code_block.h
         src/output/ir/instruction.cpp
         src/output/ir/instruction.h
+        src/parser/ast/method/operation/return_ast_node.cpp
+        src/parser/ast/method/operation/return_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

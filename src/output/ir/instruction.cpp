@@ -14,7 +14,7 @@ codesh::output::ir::opcode codesh::output::ir::instruction::get_opcode() const
     return _opcode;
 }
 
-void codesh::output::ir::instruction::emit(std::vector<unsigned char> &collector) const
+void codesh::output::ir::instruction::emit(std::list<unsigned char> &collector) const
 {
     collector.emplace_back(static_cast<unsigned char>(_opcode));
 }
@@ -45,7 +45,7 @@ unsigned char codesh::output::ir::load_instruction::get_lvt_index() const
     return lvt_index;
 }
 
-void codesh::output::ir::load_instruction::emit(std::vector<unsigned char> &collector) const
+void codesh::output::ir::load_instruction::emit(std::list<unsigned char> &collector) const
 {
     if (lvt_index <= 3)
     {
@@ -76,7 +76,7 @@ codesh::output::ir::invoke_special_instruction::invoke_special_instruction(const
 {
 }
 
-void codesh::output::ir::invoke_special_instruction::emit(std::vector<unsigned char> &collector) const
+void codesh::output::ir::invoke_special_instruction::emit(std::list<unsigned char> &collector) const
 {
     instruction::emit(collector);
 

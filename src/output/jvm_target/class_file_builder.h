@@ -18,7 +18,10 @@ class constant_pool;
 }
 namespace codesh::ast
 {
+namespace method
+{
 class method_declaration_ast_node;
+}
 class compilation_unit_ast_node;
 }
 namespace codesh::output::jvm_target
@@ -61,7 +64,7 @@ class class_file_builder
 
 
     void add_constant_pool_entries() const;
-    void add_method(const ast::method_declaration_ast_node &method_decl) const;
+    void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
     void add_source_file() const;
 
     static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);

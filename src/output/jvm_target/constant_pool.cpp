@@ -37,24 +37,14 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
 void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         const ast::type_decl::class_declaration_ast_node &class_decl)
 {
-    const auto super_class = class_decl.get_super_class();
-
-    int super_class_cpi;
-
-    if (super_class == nullptr)
-    {
-        // If it doesn't extend anything, it extends Object.
-        super_class_cpi = goc_utf8_info("java/lang/Object");
-    }
-    else
-    {
-        super_class_cpi = goc_utf8_info(super_class->get_binary_name());
-    }
+    const int super_class_cpi = goc_utf8_info(
+        class_decl.get_super_class()->get_binary_name()
+    );
 
     const int super_class_constant = goc_class_info(super_class_cpi);
 
     // Add methods
-    for (const auto &method_decl : class_decl.get_methods())
+    for (const auto &method_decl : class_decl.get_all_methods())
     {
         goc_methodref_info(
             this_class_cpi,
