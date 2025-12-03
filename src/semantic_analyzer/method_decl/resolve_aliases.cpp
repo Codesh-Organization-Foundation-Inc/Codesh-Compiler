@@ -1,5 +1,6 @@
 #include "resolve_aliases.h"
 
+#include "../../blasphemies/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
@@ -52,9 +53,10 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
 
     if (!(is_public && is_static))
     {
-        // codesh::semantic_analyzer::collect_error( //TODO resolve
-        //     "The method 'בראשית' must be both public and static."
-        // );
+        codesh::error::get_blasphemy_collector().add_blasphemy(
+            "The method 'בראשית' must be both public and static.",
+            codesh::error::blasphemy_type::SEMANTIC
+        );
         return;
     }
 

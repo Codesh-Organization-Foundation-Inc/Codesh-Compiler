@@ -4,14 +4,16 @@
 #include <string>
 #include <vector>
 
-namespace codesh
+namespace codesh::error
 {
 
 enum class blasphemy_type
 {
-    Lexical,
-    Syntax,
-    Semantic
+    LEXICAL,
+    SYNTAX,
+    SEMANTIC,
+
+    UNKNOWN
 };
 
 struct code_position
@@ -23,7 +25,7 @@ struct code_position
 struct blasphemy
 {
     std::string message;
-    std::optional<blasphemy_type> type;
+    blasphemy_type type;
     std::optional<code_position> code_pos;
 };
 
@@ -39,11 +41,11 @@ public:
     /**
      * Add a new error name and type
      */
-    void add_blasphemy(blasphemy_type type, std::string msg);
+    void add_blasphemy(std::string msg, blasphemy_type type);
     /**
      * Add a new error, specifying its source location and type
      */
-    void add_blasphemy(blasphemy_type type,std::string msg, code_position code_pos);
+    void add_blasphemy(std::string msg, blasphemy_type type, code_position code_pos);
 
     /**
      * Whether any errors exist
@@ -61,6 +63,9 @@ private:
     static std::string type_to_string(blasphemy_type type);
 
 };
+
+
+blasphemy_collector &get_blasphemy_collector();
 
 }
 

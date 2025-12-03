@@ -2,9 +2,9 @@
 
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
-#include "errors/blasphemy_collector.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
+#include "../blasphemies/blasphemy_collector.h"
 
 static void add_default_constructors(const codesh::ast::compilation_unit_ast_node &root_node);
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -21,13 +21,9 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     method_declaration::resolve_methods(ast_root);
 
     add_this_param_to_non_static_methods(ast_root);
-    //TODO: When CALLING non-static methods, also add 'this' as first argument
-
-    blasphemy_collector error_storage;
+    // TODO: When CALLING non-static methods, also add 'this' as first argument
 
     resolve_aliases(ast_root); //TODO pass as parameters
-
-    error_storage.print_all_errors();
 }
 
 

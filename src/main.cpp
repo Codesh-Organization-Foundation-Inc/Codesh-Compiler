@@ -1,3 +1,4 @@
+#include "blasphemies/blasphemy_collector.h"
 #include "command_parser.h"
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
@@ -36,6 +37,12 @@ int main(const int argc, char **const argv)
     codesh::semantic_analyzer::prepare(*ast);
     ast->construct_symbol_table();
     codesh::semantic_analyzer::analyze(*ast);
+
+    if (codesh::error::get_blasphemy_collector().has_errors())
+    {
+        codesh::error::get_blasphemy_collector().print_all_errors();
+        return 1;
+    }
 
 
     // A class file represents a single file.
