@@ -146,6 +146,12 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
         src/semantic_analyzer/method_decl/resolve_aliases.h
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
+        src/output/ir/code_block.cpp
+        src/output/ir/code_block.h
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
 )
 
 # sudo dnf install boost-regex boost-devel
