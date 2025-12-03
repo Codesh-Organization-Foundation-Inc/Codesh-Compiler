@@ -7,7 +7,13 @@
 namespace codesh
 {
 
-// TODO: move the file out and make it that there will be error type (semantic, parser...)
+enum class blasphemy_type
+{
+    Lexical,
+    Syntax,
+    Semantic
+};
+
 struct code_position
 {
     size_t line;
@@ -17,6 +23,7 @@ struct code_position
 struct blasphemy
 {
     std::string message;
+    std::optional<blasphemy_type> type;
     std::optional<code_position> code_pos;
 };
 
@@ -26,13 +33,17 @@ class blasphemy_collector
 public:
 
     /**
-     * Add a new error
+     * Add a new error with only name
      */
     void add_blasphemy(std::string msg);
     /**
-     * Add a new error, specifying its source location
+     * Add a new error name and type
      */
-    void add_blasphemy(std::string msg, code_position code_pos);
+    void add_blasphemy(blasphemy_type type, std::string msg);
+    /**
+     * Add a new error, specifying its source location and type
+     */
+    void add_blasphemy(blasphemy_type type,std::string msg, code_position code_pos);
 
     /**
      * Whether any errors exist
@@ -46,6 +57,8 @@ public:
 
 private:
     std::vector<blasphemy> blasphemies;
+
+    static std::string type_to_string(blasphemy_type type);
 
 };
 
