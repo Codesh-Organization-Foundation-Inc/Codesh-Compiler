@@ -1,0 +1,26 @@
+#pragma once
+
+#include <list>
+#include <string>
+
+namespace codesh::definition
+{
+
+class fully_qualified_class_name
+{
+    std::list<std::string> parts;
+    bool _is_wildcard;
+
+public:
+    fully_qualified_class_name();
+
+    void add(std::string part);
+    [[nodiscard]] const std::list<std::string> &get_parts() const;
+
+    void set_is_wildcard(bool wildcard);
+    [[nodiscard]] bool is_wildcard() const;
+
+    [[nodiscard]] std::string join(char sep = '/') const;
+};
+
+}
