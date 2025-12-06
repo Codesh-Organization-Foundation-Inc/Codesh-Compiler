@@ -6,6 +6,11 @@
 namespace codesh::definition
 {
 
+/**
+ * Represents a Fully Qualified Class Name (FQCN).
+ *
+ * For example, `מסוף ל־אמר`, `java.lang.String`, etc.
+ */
 class fully_qualified_class_name
 {
     std::list<std::string> parts;
