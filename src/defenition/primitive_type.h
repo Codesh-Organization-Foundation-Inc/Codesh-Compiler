@@ -17,7 +17,9 @@ enum class primitive_type
     BYTE,
 
     CHAR,
-    BOOLEAN
+    BOOLEAN,
+
+    REFERENCE
 };
 
 }
