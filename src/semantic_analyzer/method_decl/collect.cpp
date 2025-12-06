@@ -31,7 +31,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
         {
             //TODO: Print full method declaration
             std::ostringstream os_string;
-            os_string << "Duplicate method declared: " << method_decl->get_name();
+            os_string << "הוכרז מעשה כפול: " << method_decl->get_name();
 
             codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str(), error::blasphemy_type::SEMANTIC);
         }

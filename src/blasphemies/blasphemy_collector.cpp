@@ -30,17 +30,17 @@ void blasphemy_collector::print_all_errors() const
 {
     for (const auto &[message,type, code_pos] : blasphemies)
     {
-        std::cerr << "Error ";
-        std::cerr << "of type: " << type_to_string(type);
+        std::cerr << "תועבה ";
+        std::cerr << "מסוג " << type_to_string(type);
 
         if (code_pos.has_value())
         {
             std::cerr
-                << "at line " << code_pos->line
-                << ", column " << code_pos->column;
+                << "בשורה: " << code_pos->line
+                << ", בטור: " << code_pos->column;
         }
 
-        std::cerr << ": " << message;
+        std::cerr << ": " << message << std::endl;
     }
 }
 std::string blasphemy_collector::type_to_string(const blasphemy_type type)
@@ -48,13 +48,13 @@ std::string blasphemy_collector::type_to_string(const blasphemy_type type)
     switch (type)
     {
     case blasphemy_type::LEXICAL:
-        return "Lexical";
+        return "ניתוח לקסיקלי";
     case blasphemy_type::SEMANTIC:
-        return "Semantic";
+        return "סמנטי";
     case blasphemy_type::SYNTAX:
-        return "Syntax";
+        return "תחביר";
     case blasphemy_type::UNKNOWN:
-        return "Unknown";
+        return "לא ידוע";
     }
 
     throw std::runtime_error("Unknown type");

@@ -54,7 +54,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     if (!(is_public && is_static))
     {
         codesh::error::get_blasphemy_collector().add_blasphemy(
-            "The method 'בראשית' must be both public and static.",
+            "הפעולה 'בראשית' חייבת להיות כללית וסטטית.",
             codesh::error::blasphemy_type::SEMANTIC
         );
         return;

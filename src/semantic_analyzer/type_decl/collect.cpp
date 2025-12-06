@@ -21,7 +21,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (!inserted)
         {
-            error::get_blasphemy_collector().add_blasphemy("Duplicate type declared: " + name, error::blasphemy_type::SEMANTIC);
+            error::get_blasphemy_collector().add_blasphemy("הוכרז עצם כפול: " + name, error::blasphemy_type::SEMANTIC);
         }
 
 
