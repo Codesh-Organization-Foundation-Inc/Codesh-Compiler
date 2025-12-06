@@ -62,6 +62,9 @@ private:
 
     static std::string type_to_string(blasphemy_type type);
 
+    [[nodiscard]] std::string get_blasphemy_message(blasphemy_type type, size_t line) const;
+    [[nodiscard]] std::string get_random_message() const;
+
 };
 
 
