@@ -12,7 +12,7 @@ class evaluable_ast_node : public value_ast_node
     T value;
 
 public:
-    explicit evaluable_ast_node(std::unique_ptr<type::type_ast_node> type);
+    evaluable_ast_node(std::unique_ptr<type::type_ast_node> type, T value);
 
     /**
      * @return The value.
