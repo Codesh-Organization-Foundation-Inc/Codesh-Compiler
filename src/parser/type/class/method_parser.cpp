@@ -6,7 +6,8 @@
 #include "../../ast/var_reference/evaluable_ast_node.h"
 #include "../../util.h"
 
-static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::operation::method_call_ast_node &method_call);
 
 void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -30,48 +31,43 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
 
 void codesh::parser::parse_methods_call(std::queue<std::unique_ptr<token>> &tokens)
 {
-    auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>();
+    const auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>();
 
     util::parse_fqcn(tokens, method_call_node->get_fqcn());
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {
 
-        parse_methods_call_parameters(tokens);
+        parse_methods_call_parameters(tokens, *method_call_node);
     }
-
-
-
-
 }
 
-static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::operation::method_call_ast_node &method_call)
+static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     while (tokens.front()->get_group() != codesh::token_group::CLOSE_PARENTHESIS)
     {
-        std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<std::string>> eval_ast_node;
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node;
 
         switch (tokens.front()->get_group())
         {
 
         case codesh::token_group::IDENTIFIER: {
-
-            auto content = codesh::parser::util::consume_identifier_token(tokens)->get_content();
-
-            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<std::string>>(
-                std::make_unique<codesh::ast::type::custom_type_ast_node>(content),
-                content
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::value_ast_node>(
+                std::make_unique<codesh::ast::type::custom_type_ast_node>(
+                    codesh::parser::util::consume_identifier_token(tokens)->get_content()
+                )
             );
 
             break;
         }
         case codesh::token_group::LITERAL_NUMBER_INT: {
-
             eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
                 std::make_unique<codesh::ast::type::primitive_type_ast_node>(
                     codesh::definition::primitive_type::INTEGER
                 ),
-                codesh::parser::util::consume_token(tokens)
+
+                std::stoi(codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content())
             );
 
             break;
@@ -86,21 +82,21 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
         }
 
         }
-        if (tokens.front()->get_group() == codesh::token_group::IDENTIFIER)
-        {
-        }
-        else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_INT)
-        {
-
-        }
-        else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_FLOAT)
-        {
-
-        }
-        else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_DOUBLE)
-        {
-
-        }
+        // if (tokens.front()->get_group() == codesh::token_group::IDENTIFIER)
+        // {
+        // }
+        // else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_INT)
+        // {
+        //
+        // }
+        // else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_FLOAT)
+        // {
+        //
+        // }
+        // else if (tokens.front()->get_group() == codesh::token_group::LITERAL_NUMBER_DOUBLE)
+        // {
+        //
+        // }
 
         method_call.get_arguments().push_back(std::move(eval_ast_node));
     }
