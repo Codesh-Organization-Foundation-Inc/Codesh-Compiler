@@ -4,6 +4,7 @@
 #include "import_parser.h"
 #include "type/type_parser.h"
 #include "util.h"
+#include "../blasphemies/blasphemy_collector.h"
 
 namespace ast = codesh::ast;
 
@@ -12,7 +13,9 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         const std::string &source_stem)
 {
     if (tokens.empty())
-        throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
+        error::get_blasphemy_collector().add_blasphemy(
+            "בַּסַּ\"ד אֵינוֹ"
+            , error::blasphemy_type::LEXICAL);
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
 
@@ -39,7 +42,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
             break;
 
-        default: throw std::runtime_error("Unexpected token: Expected ויהי"); //TODO: Convert to custom Codesh error
+        default: error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיְהִי", error::blasphemy_type::SYNTAX);
         }
     }
 
