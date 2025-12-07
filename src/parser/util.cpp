@@ -30,6 +30,21 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
     );
 }
 
+std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_identifier_token(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    std::unique_ptr<token> token = consume_token(tokens);
+
+    if (token::get_token_type(token->get_group()) != token_type::IDENTIFIER)
+    {
+        throw std::runtime_error("Unexpected token: Expected identifier");
+    }
+
+    return std::unique_ptr<identifier_token>(
+        static_cast<identifier_token *>(token.release()) // NOLINT(*-pro-type-static-cast-downcast)
+    );
+}
+
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_type(
     std::queue<std::unique_ptr<token>> &tokens)
 {
