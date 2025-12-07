@@ -1,6 +1,7 @@
 #include "blasphemy_collector.h"
 
 #include <iostream>
+#include <random>
 #include <utility>
 
 namespace codesh::error
@@ -57,7 +58,7 @@ std::string blasphemy_collector::type_to_string(const blasphemy_type type)
 }
 
 std::string blasphemy_collector::get_blasphemy_message(blasphemy_type type, size_t line,
-                                                       const std::string &file_name) const
+                                                       const std::string &file_name)
 {
     std::string msg = get_random_message();
 
@@ -76,7 +77,7 @@ std::string blasphemy_collector::get_blasphemy_message(blasphemy_type type, size
     return msg +" עבור \033[1;31m" + file_name + "\033[0m: ";
 }
 
-std::string blasphemy_collector::get_random_message() const
+std::string blasphemy_collector::get_random_message()
 {
     static const std::vector<std::string> messages = {
 
@@ -96,8 +97,10 @@ std::string blasphemy_collector::get_random_message() const
 
     };
 
-    const unsigned long index = rand() % messages.size();
-    return messages[index];
+    static std::mt19937 rng{ std::random_device{}() };
+    std::uniform_int_distribution<size_t> dist(0, messages.size() - 1);
+
+    return messages[dist(rng)];
 }
 
 
