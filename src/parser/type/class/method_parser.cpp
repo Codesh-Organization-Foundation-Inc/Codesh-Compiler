@@ -66,17 +66,58 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
                 std::make_unique<codesh::ast::type::primitive_type_ast_node>(
                     codesh::definition::primitive_type::INTEGER
                 ),
-
                 std::stoi(codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content())
             );
 
             break;
         }
         case codesh::token_group::LITERAL_NUMBER_FLOAT: {
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<float>>(
+                std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                    codesh::definition::primitive_type::FLOAT
+                ),
+                std::stof(codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content())
+            );
 
             break;
         }
         case codesh::token_group::LITERAL_NUMBER_DOUBLE: {
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<double>>(
+                std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                    codesh::definition::primitive_type::DOUBLE
+                ),
+                std::stod(codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content())
+            );
+
+            break;
+        }
+        case codesh::token_group::LITERAL_CHAR: {
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<char>>(
+                std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                    codesh::definition::primitive_type::CHAR
+                ),
+                codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content()[0]
+            );
+
+            break;
+        }
+        case codesh::token_group::KEYWORD_TRUE: {
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<bool>>(
+                std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                    codesh::definition::primitive_type::BOOLEAN
+                ),
+                true
+            );
+
+            break;
+        }
+        case codesh::token_group::KEYWORD_FALSE: {
+            eval_ast_node = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<bool>>(
+                std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                    codesh::definition::primitive_type::BOOLEAN
+                ),
+                false
+            );
 
             break;
         }
