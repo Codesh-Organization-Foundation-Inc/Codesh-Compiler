@@ -21,7 +21,9 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (!inserted)
         {
-            error::get_blasphemy_collector().add_blasphemy("הוכרז עצם כפול: " + name, error::blasphemy_type::SEMANTIC);
+            error::get_blasphemy_collector().add_blasphemy(
+            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי הָעֶצֶם " + name + " מֻגְדָּר מְסַפֵּר פְּעָמִים בְּאוֹתוֹ עַמּוּד",
+                error::blasphemy_type::SEMANTIC);
         }
 
 

@@ -30,7 +30,8 @@ void blasphemy_collector::print_all_errors() const
 {
     for (const auto &[message,type, code_pos] : blasphemies)
     {
-        std::cerr << get_blasphemy_message(type, 0 ); // TODO: move code_pos.value().line too
+        // TODO: move code_pos.value().line and file name
+        std::cerr << get_blasphemy_message(type, 0, "דוגמה.אמן" );
 
         // TODO: Add column place
 
@@ -43,26 +44,28 @@ std::string blasphemy_collector::type_to_string(const blasphemy_type type)
     switch (type)
     {
     case blasphemy_type::LEXICAL:
-        return "לקסיקלית";
+        return "לֶקְסִיקָלִית";
     case blasphemy_type::SEMANTIC:
-        return "סמנטית";
+        return "סֶמָנטִית";
     case blasphemy_type::SYNTAX:
-        return "תחבירית";
+        return "תַּחְבִּירִית";
     case blasphemy_type::UNKNOWN:
-        return "לא ידועה";
+        return "לֹא יְדוּעָה";
     }
 
-    throw std::runtime_error("Unknown type");
+    throw std::runtime_error("Unknown blasphemy type");
 }
-std::string blasphemy_collector::get_blasphemy_message(blasphemy_type type, size_t line) const
+
+std::string blasphemy_collector::get_blasphemy_message(blasphemy_type type, size_t line,
+                                                       const std::string &file_name) const
 {
     std::string msg = get_random_message();
 
     // Replace {line} with bolded line number
-    const std::string placeholder = "{line}";
-    size_t index = msg.find(placeholder);
+    const std::string line_placeholder = "{line}";
+    size_t index = msg.find(line_placeholder);
     if (index != std::string::npos)
-        msg.replace(index, placeholder.size(), "\033[1;31mפסוק " + std::to_string(line) + "\033[0m");
+        msg.replace(index, line_placeholder.size(), "\033[1;31mפָּסוּק " + std::to_string(line) + "\033[0m");
 
     // Replace {type} with bolded error type
     const std::string type_placeholder = "{type}";
@@ -70,30 +73,30 @@ std::string blasphemy_collector::get_blasphemy_message(blasphemy_type type, size
     if (index != std::string::npos)
         msg.replace(index, type_placeholder.size(), "\033[1;31m" + type_to_string(type) + "\033[0m");
 
-    return msg + ": ";
+    return msg +" עבור \033[1;31m" + file_name + "\033[0m: ";
 }
 
 std::string blasphemy_collector::get_random_message() const
 {
     static const std::vector<std::string> messages = {
 
-    "ויגער ה' ב־יוצר כי תועבה {type} נוצרה ב־{line}",
-    "ויחרד ה' כי ראה טעות {type} כאימת קודש ב־{line}",
-    "ויכעס ה' כי היוצר שם מילה ושכח אחרת כתועבה {type} ב־{line}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
-    "ויצעק ה' אל המקמפל לאמר מי זה עשה שגיאה {type} זו במקומו של {line}",
-    "וישאל ה אל־היוצר מדוע ביצעת תועבה {type} ב־{line} ומדוע נוצר",
-    "ויזהיר ה' את־היוצר כי יתקן מיד את התועבה ה{type} ב־{line}",
-    "ויתאכזב ה' פן ראה כי ה־יוצר אינו תיקן את השגיאה ה{type} השוכנת ב־{line}",
-    "ויקצף ה' ב־יוצר תמליל הקודש ויאמר אחי, תתקן את התועבה ה{type} ב־{type}",
-    "תועבה {type} נוצרה ב־{line}",
-    "ויאנח ה' ויאמר הלא אמרתי והנה תועבה {type} ב־{line}",
-    "ויתפלא ה' אל ה־יוצר כי איך הינך לא הבחנת בתועבה ה{type} ב־{line}"
+    "וְיִגְעַר ה' בַּיּוֹצֵר כִּי תּוֹעֵבָה {type} נוֹצְרָה בְּ־{line}",
+    "וְיֶחֱרַד ה' כִּי רָאָה תּוֹעֵבָה {type} כְּאֵימַת קֹדֶשׁ בְּ־{line}",
+    "וְיִכְעַס ה' כִּי הַיּוֹצֵר שָׂם מִלָּה וְשָׁכַח אֵחָרֵת כְּתוֹעֵבָה {type} בְּ־{line}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
+    "וְיִצְעַק ה' אֶל הַיּוֹצֵר לֵאמֹר מֵי זֶה עֲשֵׂה תּוֹעֵבָה {type} זוֹ בִּמְקוֹמוֹ שֶׁל {line}",
+    "וְיִשְׁאַל ה' אֶל־הַיּוֹצֵר מַדּוּעַ בִּצַּעְתָּ תּוֹעֵבָה {type} בְּ־{line}",
+    "וְיַזְהִיר ה' אֶת־הַיּוֹצֵר כִּי יְתַקֵּן בִּמְהֵרָה אֶת הַתּוֹעֵבָה הַ{type} בְּ־{line}",
+    "וְיִתְאַכְזֵב ה' פֶּן רָאָה כִּי הַיּוֹצֵר אֵינוֹ תִּקֵּן אֶת הַתּוֹעֵבָה ה{type} הַשּׁוֹכֶנֶת בְּ־{line}",
+    "וְקֶצֶף ה' בַּיּוֹצֵר תָמְלִיל הַקֹּדֶשׁ וְיֹאמַר אָחִי, תְּתַקֵּן אֶת הַתּוֹעֵבָה הַ{type} בְּ־{type}",
+    "תּוֹעֵבָה {type} נוֹצְרָה בְּ־{line}",
+    "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {type} בְּ־{line}",
+    "וְיִתְפַּלֵּא ה' אֶל הַיּוֹצֵר כִּי אֵיךְ הִנְּךָ לֹא הִבְחַנְתָּ בַּתּוֹעֵבָה הַ{type} בְּ־{line}"
 
     // "ויפתח ה' את לוחות הברית ולא ימצא שם דבריך הנמצאים בשורה {line}"
 
     };
 
-    unsigned long index = rand() % messages.size();
+    const unsigned long index = rand() % messages.size();
     return messages[index];
 }
 

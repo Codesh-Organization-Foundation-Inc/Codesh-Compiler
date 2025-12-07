@@ -19,7 +19,13 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
 {
     const auto bereshit = type.resolve("בראשית");
     if (!bereshit)
+    {
+        codesh::error::get_blasphemy_collector().add_blasphemy(
+            "בָּרָאשִׁית לֹא בָּרָא ה': וַדֵּא שֶׁקַּיָּם: מַעֲשֶׂה וְשָׂמוּ בָּרָאשִׁית לְכָל־נְגַלֶּה הָיָה וְיִקַּח כְּתוּבִים כִּמְסַדֵּר וְשָׂמוּ מִנָּחוּת",
+            codesh::error::blasphemy_type::SEMANTIC
+        );
         return;
+    }
 
     const auto bereshit_method_overloads = dynamic_cast<codesh::semantic_analyzer::method_overloads_symbol *>(&bereshit.value().get());
     if (!bereshit_method_overloads)
@@ -30,8 +36,13 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
             ->resolve_method("[Ljava/lang/String;");
 
     if (!bereshit_method.has_value())
+    {
+        codesh::error::get_blasphemy_collector().add_blasphemy(
+            "בָּרָאשִׁית לֹא בָּרָא ה': וַדֵּא שֶׁקַּיָּם: מַעֲשֶׂה וְשָׂמוּ בָּרָאשִׁית לְכָל־נְגַלֶּה הָיָה וְיִקַּח כְּתוּבִים כִּמְסַדֵּר וְשָׂמוּ מִנָּחוּת",
+            codesh::error::blasphemy_type::SEMANTIC
+        );
         return;
-
+    }
 
     codesh::ast::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
 
@@ -54,7 +65,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     if (!(is_public && is_static))
     {
         codesh::error::get_blasphemy_collector().add_blasphemy(
-            "הפעולה 'בראשית' חייבת להיות כללית וסטטית.",
+            "בָּרָאשִׁית לֹא בָּרָא ה': וַדֵּא שֶׁקַּיָּם: מַעֲשֶׂה וְשָׂמוּ בָּרָאשִׁית לְכָל־נְגַלֶּה הָיָה וְיִקַּח כְּתוּבִים כִּמְסַדֵּר וְשָׂמוּ מִנָּחוּת",
             codesh::error::blasphemy_type::SEMANTIC
         );
         return;
