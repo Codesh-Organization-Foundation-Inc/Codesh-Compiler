@@ -67,8 +67,6 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
         // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
         // or did not close the attribute statement with Shall Be.
         error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וְהֶיֶה");
-        error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
     }
 
     return node;

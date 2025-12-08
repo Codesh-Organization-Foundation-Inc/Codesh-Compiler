@@ -27,8 +27,6 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     if (util::consume_token(tokens)->get_group() != token_group::KEYWORD_NAME)
     {
         error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ", error::blasphemy_type::SYNTAX);
-        error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
     }
 
 
@@ -46,8 +44,6 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     if (util::consume_token(tokens)->get_group() != token_group::SCOPE_BEGIN)
     {
         error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיֹּאמֶר", error::blasphemy_type::SYNTAX);
-        error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
     }
 
     parse_class_scope(tokens, node.get());
@@ -105,8 +101,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
         }
     }
-    codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיַתָם", codesh::error::blasphemy_type::SYNTAX);
 
+    codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיַתָם", codesh::error::blasphemy_type::SYNTAX);
 }
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
@@ -138,8 +134,6 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
     {
         codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ", codesh::error::blasphemy_type::SYNTAX);
-        codesh::error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
     }
 
     // * (the name)
@@ -165,8 +159,6 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         {
             codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ",
                                                                    codesh::error::blasphemy_type::SYNTAX);
-            codesh::error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
         }
 
         // * (the name)
@@ -200,8 +192,6 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     {
         codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיֹּאמֶר",
                                                                codesh::error::blasphemy_type::SYNTAX);
-        codesh::error::get_blasphemy_collector().print_all_errors();
-        std::exit(EXIT_FAILURE);
     }
 
     parser::parse_method(tokens);
