@@ -97,8 +97,8 @@ std::string codesh::error::blasphemy_collector::get_random_message()
     return RANDOM_MESSAGE_POOL[dist(rng)];
 }
 
-codesh::error::blasphemy_collector &get_blasphemy_collector()
+codesh::error::blasphemy_collector &codesh::error::get_blasphemy_collector()
 {
-    static codesh::error::blasphemy_collector blasphemy_collector;
+    static blasphemy_collector blasphemy_collector;
     return blasphemy_collector;
 }
