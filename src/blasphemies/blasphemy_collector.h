@@ -35,25 +35,25 @@ class blasphemy_collector
 public:
 
     /**
-     * Add a new error with only name
+     * Adds a new error with only a name
      */
     void add_blasphemy(std::string msg);
     /**
-     * Add a new error name and type
+     * Adds a new typed error
      */
     void add_blasphemy(std::string msg, blasphemy_type type);
     /**
-     * Add a new error, specifying its source location and type
+     * Adds a new typed error with a known code position
      */
     void add_blasphemy(std::string msg, blasphemy_type type, code_position code_pos);
 
     /**
-     * Whether any errors exist
+     * Whether any error exists
      */
     [[nodiscard]] bool has_errors() const;
 
     /**
-     * Print all errors
+     * Prints all errors
      */
     void print_all_errors() const;
 
