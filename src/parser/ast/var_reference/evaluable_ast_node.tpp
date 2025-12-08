@@ -7,19 +7,13 @@ codesh::ast::var_reference::evaluable_ast_node<T>::evaluable_ast_node(std::uniqu
 }
 
 template <typename T>
-const codesh::ast::type::type_ast_node &codesh::ast::var_reference::evaluable_ast_node<T>::get_type() const
-{
-    return *type;
-}
-
-template <typename T>
 T codesh::ast::var_reference::evaluable_ast_node<T>::get_value() const
 {
-    return type;
+    return value;
 }
 
 template <typename T>
 void codesh::ast::var_reference::evaluable_ast_node<T>::set_value(T value)
 {
-    type = std::move(value);
+    this->value = std::move(value);
 }

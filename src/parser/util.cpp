@@ -197,26 +197,26 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 
 
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_value(
-        std::queue<std::unique_ptr<codesh::token>> &tokens)
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util::parse_value(
+        std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node;
+    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
 
     switch (tokens.front()->get_group())
     {
-    case codesh::token_group::IDENTIFIER: {
-        eval_ast_node = std::make_unique<codesh::ast::var_reference::value_ast_node>(
-            std::make_unique<codesh::ast::type::custom_type_ast_node>(
-                codesh::parser::util::consume_identifier_token(tokens)->get_content()
+    case token_group::IDENTIFIER: {
+        eval_ast_node = std::make_unique<ast::var_reference::value_ast_node>(
+            std::make_unique<ast::type::custom_type_ast_node>(
+                consume_identifier_token(tokens)->get_content()
             )
         );
 
         break;
     }
 
-    case codesh::token_group::LITERAL_NUMBER_INT: {
+    case token_group::LITERAL_NUMBER_INT: {
         eval_ast_node = make_evaluable<int>(
-            tokens, codesh::definition::primitive_type::INTEGER,
+            tokens, definition::primitive_type::INTEGER,
 
             [](const std::string &content) {
                 return std::stoi(content);
@@ -226,9 +226,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_value(
         break;
     }
 
-    case codesh::token_group::LITERAL_NUMBER_FLOAT: {
+    case token_group::LITERAL_NUMBER_FLOAT: {
         eval_ast_node = make_evaluable<float>(
-            tokens, codesh::definition::primitive_type::FLOAT,
+            tokens, definition::primitive_type::FLOAT,
 
             [](const std::string &content) {
                 return std::stof(content);
@@ -238,9 +238,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_value(
         break;
     }
 
-    case codesh::token_group::LITERAL_NUMBER_DOUBLE: {
+    case token_group::LITERAL_NUMBER_DOUBLE: {
         eval_ast_node = make_evaluable<double>(
-            tokens, codesh::definition::primitive_type::DOUBLE,
+            tokens, definition::primitive_type::DOUBLE,
 
             [](const std::string &content) {
                 return std::stod(content);
@@ -250,9 +250,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_value(
         break;
     }
 
-    case codesh::token_group::LITERAL_CHAR: {
+    case token_group::LITERAL_CHAR: {
         eval_ast_node = make_evaluable<char>(
-            tokens, codesh::definition::primitive_type::CHAR,
+            tokens, definition::primitive_type::CHAR,
 
             [](const std::string &content) {
                 return content[0];
@@ -262,13 +262,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_value(
         break;
     }
 
-    case codesh::token_group::KEYWORD_TRUE: {
+    case token_group::KEYWORD_TRUE: {
         eval_ast_node = make_bool_evaluable(tokens, true);
 
         break;
     }
 
-    case codesh::token_group::KEYWORD_FALSE: {
+    case token_group::KEYWORD_FALSE: {
         eval_ast_node = make_bool_evaluable(tokens, false);
 
         break;
