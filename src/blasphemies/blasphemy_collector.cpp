@@ -47,6 +47,11 @@ void codesh::error::blasphemy_collector::print_all_errors() const
     {
         std::cerr << PRETTY_PRINT_RED;
 
+        if (blasphemy.is_fatal)
+        {
+            //TODO: If this is a fatal blasphemy, notify it as like in [FATAL] but biblical
+        }
+
         // TODO: move code_pos.value().line and file name
         std::cerr << get_blasphemy_message(blasphemy.type, 0, "דוגמה.אמן");
 
