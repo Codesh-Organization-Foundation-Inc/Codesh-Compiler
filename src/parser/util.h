@@ -4,6 +4,7 @@
 #include <queue>
 
 #include "../token/token.h"
+#include "ast/var_reference/value_ast_node.h"
 
 namespace codesh
 {
@@ -64,5 +65,9 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
         std::queue<std::unique_ptr<token>> &tokens);
 
 [[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
+
+
+std::unique_ptr<ast::var_reference::value_ast_node> parse_value(
+        std::queue<std::unique_ptr<token>> &tokens);
 
 }
