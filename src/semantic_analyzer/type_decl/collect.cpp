@@ -22,8 +22,9 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
         if (!inserted)
         {
             error::get_blasphemy_collector().add_blasphemy(
-            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי הָעֶצֶם " + name + " מֻגְדָּר מְסַפֵּר פְּעָמִים בְּאוֹתוֹ עַמּוּד",
-                error::blasphemy_type::SEMANTIC);
+            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי מֻגְדָּר הָעֶצֶם " + name + " מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
+                error::blasphemy_type::SEMANTIC
+            );
         }
 
 

@@ -1,8 +1,6 @@
 #include "resolve_aliases.h"
 
-#include "../../blasphemies/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
 
 static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);

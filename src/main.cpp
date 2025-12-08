@@ -41,7 +41,7 @@ int main(const int argc, char **const argv)
     if (codesh::error::get_blasphemy_collector().has_errors())
     {
         codesh::error::get_blasphemy_collector().print_all_errors();
-        return 1;
+        return EXIT_FAILURE;
     }
 
 
@@ -62,7 +62,7 @@ int main(const int argc, char **const argv)
         codesh::output::jvm_target::write_to_file(*class_file, *ast, *type_declaration, args.dest_path);
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static std::string read_file(const std::string &file_name)

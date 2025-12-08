@@ -116,8 +116,10 @@ static void resolve_parameters(
                 << " בְּמַעֲשֶׂה " << method.get_name()
                 << " בְּעֶצֶם " << class_name;
 
-            codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str(),
-                                                                   codesh::error::blasphemy_type::SEMANTIC);
+            codesh::error::get_blasphemy_collector().add_blasphemy(
+                os_string.str(),
+                codesh::error::blasphemy_type::SEMANTIC
+            );
         }
     }
 }

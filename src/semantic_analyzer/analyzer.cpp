@@ -48,7 +48,7 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
     // TODO: When CALLING non-static methods, also add 'this' as first argument
 
-    resolve_aliases(ast_root); //TODO pass as parameters
+    resolve_aliases(ast_root);
 }
 
 
