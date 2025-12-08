@@ -13,9 +13,14 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         const std::string &source_stem)
 {
     if (tokens.empty())
+    {
         error::get_blasphemy_collector().add_blasphemy(
-            "בַּסַּ\"ד אֵינוֹ"
-            , error::blasphemy_type::LEXICAL);
+            "בַּסַּ\"ד אֵינוֹ",
+            error::blasphemy_type::LEXICAL,
+            std::nullopt,
+            true
+        );
+    }
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
 
