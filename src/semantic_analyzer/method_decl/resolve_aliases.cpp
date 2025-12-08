@@ -7,7 +7,7 @@
 
 static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
-                          codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name);
+                          codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_aliases(type_symbol &type)
@@ -44,7 +44,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
         return;
     }
 
-    codesh::ast::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
+    codesh::ast::method::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
 
 
     // Validate flags
@@ -77,7 +77,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
 
 
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
-                          codesh::ast::method_declaration_ast_node &method_node, const std::string &new_name)
+                          codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name)
 {
     // Get the original method names' overloads
     codesh::semantic_analyzer::method_overloads_symbol &source_method_overloads =

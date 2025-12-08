@@ -30,11 +30,10 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
     }
 
 
-    util::parse_fqcn(tokens, import_node->get_package_name(), true);
+    util::parse_fqcn(tokens, import_node->get_package_name());
 
-    if (import_node->get_package_name().back() == "*")
+    if (import_node->get_package_name().is_wildcard())
     {
-        import_node->get_package_name().pop_back();
         import_node->set_is_on_demand(true);
     }
 

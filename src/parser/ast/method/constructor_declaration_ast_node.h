@@ -2,7 +2,7 @@
 
 #include "method_declaration_ast_node.h"
 
-namespace codesh::ast
+namespace codesh::ast::method
 {
 
 class constructor_declaration_ast_node : public method_declaration_ast_node

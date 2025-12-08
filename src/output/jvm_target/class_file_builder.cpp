@@ -5,6 +5,7 @@
 #include "../../parser/ast/method/method_declaration_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
+#include "../ir/code_block.h"
 #include "constant_pool.h"
 
 #include "./defs/attribute_info_entry.h"
@@ -28,8 +29,7 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::co
         constant_pool_.get_utf8_index(type_decl.get_binary_name())
     )),
     super_class_cpi(constant_pool_.get_class_index(
-        //TODO: Support "extends"
-        constant_pool_.get_utf8_index("java/lang/Object")
+        constant_pool_.get_utf8_index(type_decl.get_super_class()->get_binary_name())
     ))
 {}
 
@@ -71,14 +71,14 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
     const ast::type_decl::class_declaration_ast_node &class_decl) const
 {
-    for (const auto &method_decl : class_decl.get_methods())
+    for (const auto &method_decl : class_decl.get_all_methods())
     {
         add_method(*method_decl);
     }
 
     util::put_int_bytes(
         class_file->methods_count, 2,
-        static_cast<int>(class_decl.get_methods().size())
+        static_cast<int>(class_decl.get_all_methods().size())
     );
 }
 
@@ -99,7 +99,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_method(const ast::method_declaration_ast_node &method_decl)
+void codesh::output::jvm_target::class_file_builder::add_method(const ast::method::method_declaration_ast_node &method_decl)
     const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
@@ -125,30 +125,26 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     util::put_int_bytes(code_attr->max_stack, 2, 1);
     util::put_int_bytes(code_attr->max_locals, 2, 1);
 
-    // Actual bytecode
-    //TODO: This should already be integrated in constructor's IR.
-    if (dynamic_cast<const ast::constructor_declaration_ast_node *>(&method_decl))
-    {
-        code_attr->code.push_back(0x2A);
-        {
-            const unsigned char super_call[] = {
-                0xB7, 0x00, static_cast<unsigned char>(constant_pool_.get_methodref_index(
-                    super_class_cpi,
-                    constant_pool_.get_name_and_type_index(
-                        constant_pool_.get_utf8_index("<init>"),
-                        constant_pool_.get_utf8_index("()V")
-                    )
-                ))
-            };
 
-            for (const unsigned char bytecode : super_call)
-            {
-                code_attr->code.push_back(bytecode);
-            }
-        }
+    // Convert the method to IR
+    const auto code_block = ir::code_block::build_from_method(
+        method_decl,
+        root_node.get_symbol_table().value(),
+        type_decl
+    );
+
+    std::list<unsigned char> bytecode_collector;
+    for (const auto &instruction : code_block.get_instructions())
+    {
+        instruction->emit(bytecode_collector);
     }
 
-    code_attr->code.push_back(0xB1);
+    code_attr->code.reserve(bytecode_collector.size());
+    code_attr->code.insert(
+        std::end(code_attr->code),
+        std::begin(bytecode_collector),
+        std::end(bytecode_collector)
+    );
 
 
     if (code_attr->code.size() > 0xFFFFFF)

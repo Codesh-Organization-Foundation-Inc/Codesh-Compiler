@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "../defenition/definitions.h"
+#include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
 
@@ -112,8 +114,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 }
 
 
-void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn,
-        const bool allow_wildcard)
+void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_class_name &fqcn_out)
 {
     while (!tokens.empty())
     {
@@ -121,9 +122,9 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 
         if (id->get_group() != token_group::IDENTIFIER)
         {
-            if (allow_wildcard && id->get_group() == token_group::PUNCTUATION_WILDCARD)
+            if (id->get_group() == token_group::PUNCTUATION_WILDCARD)
             {
-                fqcn.emplace_back("*");
+                fqcn_out.set_is_wildcard(true);
             }
             else
             {
@@ -132,15 +133,26 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
         }
         else
         {
-            fqcn.push_back(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
+            fqcn_out.add(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
         }
 
 
-        if (!tokens.empty() && tokens.front()->get_group() == token_group::PUNCTUATION_DOT)
+        if (!tokens.empty())
         {
-            // Consume the dot
-            tokens.pop();
-            continue;
+            if (tokens.front()->get_group() == token_group::PUNCTUATION_DOT)
+            {
+                // Consume the dot
+                tokens.pop();
+                continue;
+            }
+
+            const bool is_last_item = tokens.front()->get_group() == token_group::PUNCTUATION_END_OP;
+
+            // If the user has put a wildcard yet still attempts to add more shit
+            if (!is_last_item && fqcn_out.is_wildcard())
+            {
+                throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+            }
         }
 
         break;

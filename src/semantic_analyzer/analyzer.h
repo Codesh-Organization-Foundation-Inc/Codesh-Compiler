@@ -8,6 +8,8 @@ class symbol_table;
 }
 namespace codesh::semantic_analyzer
 {
+extern const std::string DEFAULT_SUPER_CLASS_NAME;
+
 /**
  * This runs before the symbol table is constructed.
  */

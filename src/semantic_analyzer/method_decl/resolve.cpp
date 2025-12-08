@@ -9,13 +9,13 @@
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
+    const codesh::ast::method::method_declaration_ast_node &method_decl,
     const std::string &class_name
 );
 
 static void resolve_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method,
+    const codesh::ast::method::method_declaration_ast_node &method,
     const std::string &class_name
 );
 
@@ -33,7 +33,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
         // Get type symbol
         const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        for (const auto &method_decl : class_node->get_methods())
+        for (const auto &method_decl : class_node->get_all_methods())
         {
             method_overloads_symbol &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
                 &type.resolve(method_decl->get_name()).value().get()
@@ -60,7 +60,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
+    const codesh::ast::method::method_declaration_ast_node &method_decl,
     const std::string &class_name
 ) {
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
@@ -92,7 +92,7 @@ static void resolve_return_type(
 
 static void resolve_parameters(
         const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method_declaration_ast_node &method,
+        const codesh::ast::method::method_declaration_ast_node &method,
         const std::string &class_name)
 {
     for (const auto &param : method.get_parameters())

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <list>
 #include <memory>
 #include <queue>
 
@@ -8,6 +7,10 @@
 
 namespace codesh
 {
+namespace definition
+{
+class fully_qualified_class_name;
+}
 namespace ast::type
 {
 class type_ast_node;
@@ -33,8 +36,7 @@ void ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens);
 /**
  * Parses a Fully Qualified Class Name
  */
-void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, std::list<std::string> &fqcn,
-        bool allow_wildcard = false);
+void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_class_name &fqcn_out);
 /**
  * Ensures a colon exists at the current token, and consumes it.
  */

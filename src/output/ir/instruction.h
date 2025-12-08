@@ -1,0 +1,138 @@
+#pragma once
+
+#include <list>
+#include <vector>
+
+namespace codesh::output::jvm_target::defs
+{
+class cp_info;
+}
+namespace codesh::semantic_analyzer
+{
+class symbol;
+}
+
+
+namespace codesh::output::ir
+{
+
+enum class opcode : unsigned char
+{
+    NOP = 0x00, // No operation
+
+
+    I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
+    L_LOAD, // Loads a long variable from the local variable table at the specified index
+    F_LOAD, // Loads a float variable from the local variable table at the specified index
+    D_LOAD, // Loads a double variable from the local variable table at the specified index
+    A_LOAD, // Loads a reference variable from the local variable table at the specified index
+
+    I_LOAD_0 = 0x1A, // Loads an integer variable from the local variable table at index 0
+    I_LOAD_1, // Loads an integer variable from the local variable table at index 1
+    I_LOAD_2, // Loads an integer variable from the local variable table at index 2
+    I_LOAD_3, // Loads an integer variable from the local variable table at index 3
+
+    L_LOAD_0, // Loads a long variable from the local variable table at index 0
+    L_LOAD_1, // Loads a long variable from the local variable table at index 1
+    L_LOAD_2, // Loads a long variable from the local variable table at index 2
+    L_LOAD_3, // Loads a long variable from the local variable table at index 3
+
+    F_LOAD_0, // Loads a float variable from the local variable table at index 0
+    F_LOAD_1, // Loads a float variable from the local variable table at index 1
+    F_LOAD_2, // Loads a float variable from the local variable table at index 2
+    F_LOAD_3, // Loads a float variable from the local variable table at index 3
+
+    D_LOAD_0, // Loads a double variable from the local variable table at index 0
+    D_LOAD_1, // Loads a double variable from the local variable table at index 1
+    D_LOAD_2, // Loads a double variable from the local variable table at index 2
+    D_LOAD_3, // Loads a double variable from the local variable table at index 3
+
+    A_LOAD_0, // Loads a variable from the local variable table at index 0
+    A_LOAD_1, // Loads a variable from the local variable table at index 1
+    A_LOAD_2, // Loads a variable from the local variable table at index 2
+    A_LOAD_3, // Loads a variable from the local variable table at index 3
+
+    RETURN = 0xB1,
+
+    INVOKE_SPECIAL = 0xB7, // Calls a private method_cp_index, constructor or this/super constructor
+};
+
+enum class instruction_type
+{
+    INT,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    REFERENCE
+};
+
+
+class instruction
+{
+    const opcode _opcode;
+
+public:
+    explicit instruction(opcode _opcode);
+    virtual ~instruction();
+
+    [[nodiscard]] opcode get_opcode() const;
+
+    virtual void emit(std::list<unsigned char> &collector) const;
+};
+
+class typed_instruction : public instruction
+{
+    instruction_type type;
+
+public:
+    typed_instruction(opcode _opcode, instruction_type type);
+
+    [[nodiscard]] instruction_type get_instruction_type() const;
+};
+
+
+
+class nop_instruction final : public instruction
+{
+public:
+    nop_instruction();
+};
+
+
+class load_instruction final : public typed_instruction
+{
+    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
+
+    //TODO: Change to a Local Variable Table index pointer
+    const unsigned char lvt_index;
+
+public:
+    explicit load_instruction(instruction_type type, unsigned char lvt_index);
+
+    [[nodiscard]] unsigned char get_lvt_index() const;
+
+    void emit(std::list<unsigned char> &collector) const override;
+};
+
+
+//TODO: Make typed version
+class return_instruction final : public instruction
+{
+public:
+    return_instruction();
+};
+
+
+class invoke_special_instruction final : public instruction
+{
+    const int method_cp_index;
+
+public:
+    explicit invoke_special_instruction(int method_cp_index);
+
+    void emit(std::list<unsigned char> &collector) const override;
+
+    [[nodiscard]] int get_method_cp_index() const;
+};
+
+}

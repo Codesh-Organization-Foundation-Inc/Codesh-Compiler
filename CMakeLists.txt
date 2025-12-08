@@ -17,18 +17,16 @@ add_executable(Codesh_Compiler
         src/lexer/tokenizer.cpp
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
-        src/parser/ast/block_ast_node.cpp
-        src/parser/ast/block_ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/while_ast_node.cpp
-        src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/method/operation/while_ast_node.cpp
+        src/parser/ast/method/operation/while_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -146,6 +144,25 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/resolve_aliases.h
         src/blasphemies/blasphemy_collector.h
         src/blasphemies/blasphemy_collector.cpp
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
+        src/output/ir/code_block.cpp
+        src/output/ir/code_block.h
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
+        src/parser/ast/method/operation/return_ast_node.cpp
+        src/parser/ast/method/operation/return_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.h
+        src/parser/ast/var_reference/evaluable_ast_node.tpp
+        src/parser/ast/var_reference/evaluable_ast_node.h
+        src/parser/ast/var_reference/value_ast_node.h
+        src/parser/ast/method/operation/method_call_ast_node.cpp
+        src/parser/ast/method/operation/method_call_ast_node.h
+        src/defenition/fully_qualified_class_name.cpp
+        src/defenition/fully_qualified_class_name.h
 )
 
 # sudo dnf install boost-regex boost-devel

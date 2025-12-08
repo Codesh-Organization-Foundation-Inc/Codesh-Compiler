@@ -9,7 +9,7 @@
 
 void codesh::test::descriptor()
 {
-    ast::method_declaration_ast_node method;
+    ast::method::method_declaration_ast_node method;
 
     // Normal return type
     method.set_return_type(std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE));
