@@ -88,11 +88,19 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
 bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)
 {
-    if (tokens.empty() || tokens.front()->get_group() != token_group)
-        return false;
+    if (peeking_check(tokens, token_group))
+    {
+        tokens.pop();
+        return true;
+    }
 
-    tokens.pop();
-    return true;
+    return false;
+}
+
+bool codesh::parser::util::peeking_check(const std::queue<std::unique_ptr<token>> &tokens,
+        const token_group token_group)
+{
+    return !tokens.empty() && tokens.front()->get_group() == token_group;
 }
 
 void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens)

@@ -17,7 +17,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
 
-static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
@@ -68,7 +68,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             case codesh::token_group::KEYWORD_METHOD:
             {
                 class_node->add_method(
-                    parse_method_signature_scope(tokens)
+                    parse_method_signature(tokens)
                 );
 
                 break;
@@ -125,13 +125,13 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     throw std::runtime_error("Fields not yet supported");
 }
 
-static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     tokens.pop();
 
     // ושמו
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+    if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
         codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ", codesh::error::blasphemy_type::SYNTAX);
     }
@@ -147,18 +147,18 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     method_node->set_attributes(parser::parse_modifiers(tokens));
 
 
-    while (tokens.front()->get_group() == codesh::token_group::KEYWORD_TAKES)
+    while (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_TAKES))
     {
-        tokens.pop();
-
         // Parse parameter type
         std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
 
         // ושמו
         if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
         {
-            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ",
-                                                                   codesh::error::blasphemy_type::SYNTAX);
+            codesh::error::get_blasphemy_collector().add_blasphemy(
+                "נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ",
+                codesh::error::blasphemy_type::SYNTAX
+            );
         }
 
         // * (the name)
@@ -173,9 +173,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 
 
     // If no וישב, return type = void:
-    if (tokens.front()->get_group() == codesh::token_group::KEYWORD_RETURN)
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_RETURN))
     {
-        tokens.pop();
         method_node->set_return_type(parser::util::parse_type(tokens));
     }
     else
@@ -188,10 +187,12 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     }
 
 
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    if (!parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
     {
-        codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיֹּאמֶר",
-                                                               codesh::error::blasphemy_type::SYNTAX);
+        codesh::error::get_blasphemy_collector().add_blasphemy(
+            "נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיֹּאמֶר",
+            codesh::error::blasphemy_type::SYNTAX
+        );
     }
 
     parser::parse_method(tokens);

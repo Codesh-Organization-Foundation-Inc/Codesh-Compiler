@@ -32,7 +32,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
 
     // Optionally parse imports
-    while (!tokens.empty() && tokens.front()->get_group() == token_group::KEYWORD_IMPORT)
+    while (util::peeking_check(tokens, token_group::KEYWORD_IMPORT))
     {
         root_node->get_import_declarations().push_back(parse_import(tokens));
     }
@@ -47,7 +47,10 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
             break;
 
-        default: error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיְהִי", error::blasphemy_type::SYNTAX);
+        default:
+            error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיְהִי", error::blasphemy_type::SYNTAX);
+            tokens.pop();
+            break;
         }
     }
 

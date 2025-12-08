@@ -29,6 +29,11 @@ namespace codesh::parser::util
  */
 bool consuming_check(std::queue<std::unique_ptr<token>> &tokens, token_group token_group);
 /**
+ * Checks whether the group of the first token matches the requested one.
+ * @return Whether the token group matches the requested
+ */
+bool peeking_check(const std::queue<std::unique_ptr<token>> &tokens, token_group token_group);
+/**
  * Ensures the provided tokens list is not empty.
  * If not, raises a parsing error.
  */
