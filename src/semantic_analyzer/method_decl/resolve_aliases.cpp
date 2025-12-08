@@ -19,13 +19,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
 {
     const auto bereshit = type.resolve("בראשית");
     if (!bereshit)
-    {
-        codesh::error::get_blasphemy_collector().add_blasphemy(
-            "בָּרָאשִׁית לֹא בָּרָא ה': וַדֵּא שֶׁקַּיָּם: מַעֲשֶׂה וְשָׂמוּ בָּרָאשִׁית לְכָל־נְגַלֶּה הָיָה וְיִקַּח כְּתוּבִים כִּמְסַדֵּר וְשָׂמוּ מִנָּחוּת",
-            codesh::error::blasphemy_type::SEMANTIC
-        );
         return;
-    }
 
     const auto bereshit_method_overloads = dynamic_cast<codesh::semantic_analyzer::method_overloads_symbol *>(&bereshit.value().get());
     if (!bereshit_method_overloads)
