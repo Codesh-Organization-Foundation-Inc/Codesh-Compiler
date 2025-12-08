@@ -17,17 +17,17 @@ static const std::vector<std::string> RANDOM_MESSAGE_POOL = {
     "וְקֶצֶף ה' בְּיּוֹצֵר תָמְלִיל הַקֹּדֶשׁ וְיֹאמַר לוֹ אָחִי, תַקֵּן אֶת הַתּוֹעֵבָה הַ{type}",
     "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {type}",
     "וְיִתְפַּלֵּא ה' בְּיּוֹצֵר כִּי־אֵיךְ לֹא הִבְחִין בַּתּוֹעֵבָה הַ{type}",
-    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד ה{type}"
+    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד ה{type}" //FIXME: Type is feminine while it shouldn't be here
 };
 
-static constexpr std::string PRETTY_PRINT_BOLD = "\033[1;31m";
+static constexpr std::string PRETTY_PRINT_RED = "\033[1;31m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
-void codesh::error::blasphemy_collector::add_blasphemy(std::string msg, blasphemy_type type,
+void codesh::error::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
         std::optional<code_position> code_pos, const bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(msg), type, code_pos, is_fatal);
+    blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
 
     if (is_fatal)
     {
@@ -45,13 +45,16 @@ void codesh::error::blasphemy_collector::print_all_errors() const
 {
     for (const auto &blasphemy : blasphemies)
     {
+        std::cerr << PRETTY_PRINT_RED;
+
         // TODO: move code_pos.value().line and file name
-        std::cerr << get_blasphemy_message(blasphemy.type, 0, "דוגמה.אמן" );
+        std::cerr << get_blasphemy_message(blasphemy.type, 0, "דוגמה.אמן");
 
         // TODO: Add column place
 
+        std::cerr << blasphemy.details;
 
-        std::cerr << blasphemy.message << std::endl;
+        std::cerr << PRETTY_PRINT_END << std::endl;
     }
 }
 std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_type type)
@@ -79,14 +82,14 @@ std::string codesh::error::blasphemy_collector::get_blasphemy_message(const blas
     {
         msg.replace(
             index, TYPE_PLACEHOLDER.size(),
-            PRETTY_PRINT_BOLD + type_to_string(type) + PRETTY_PRINT_END
+            type_to_string(type)
         );
     }
 
     // Blasphemies always provide the line position at the very end
-    msg += "בְּפָּסוּק " + std::to_string(line) + PRETTY_PRINT_END;
+    msg += " בְּפָּסוּק " + std::to_string(line);
 
-    return msg + " עֲבוּר " + file_name + PRETTY_PRINT_END + ": ";
+    return msg + " עֲבוּר " + file_name + ": ";
 }
 
 std::string codesh::error::blasphemy_collector::get_random_message()

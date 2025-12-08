@@ -24,7 +24,7 @@ struct code_position
 
 struct blasphemy
 {
-    std::string message;
+    std::string details;
     blasphemy_type type;
     std::optional<code_position> code_pos;
 
@@ -37,12 +37,12 @@ class blasphemy_collector
 public:
     /**
      * Adds a new blasphemy
-     * @param msg The message to display
+     * @param details The message to display
      * @param type The blasphemy type
      * @param code_pos The location in the source code where the error was initiated from
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
-    void add_blasphemy(std::string msg, blasphemy_type type = blasphemy_type::UNKNOWN,
+    void add_blasphemy(std::string details, blasphemy_type type = blasphemy_type::UNKNOWN,
             std::optional<code_position> code_pos = std::nullopt, bool is_fatal = false);
 
     /**
