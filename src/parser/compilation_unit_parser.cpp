@@ -1,5 +1,6 @@
 #include "compilation_unit_parser.h"
 
+#include "../blasphemies/blasphemy_collector.h"
 #include "../token/token.h"
 #include "../token/token_group.h"
 #include "ast/compilation_unit_ast_node.h"
@@ -40,7 +41,16 @@ static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<
     case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
     case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
 
-    default: throw std::runtime_error("Unexpected token: Expected BASAD declaration"); //TODO: Convert to custom Codesh error
+    default: {
+        codesh::error::get_blasphemy_collector().add_blasphemy(
+            "בַּסַּ\"ד אֵינוֹ",
+            codesh::error::blasphemy_type::LEXICAL,
+            std::nullopt,
+            true
+        );
+
+        return codesh::definition::basad_type::MISSING;
+    }
     }
 }
 
