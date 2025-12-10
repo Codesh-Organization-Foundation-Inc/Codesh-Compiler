@@ -10,7 +10,7 @@ void codesh::output::local_variable_table::add_entry(local_variable_table_entry 
     entries.emplace_back(std::move(entry));
 }
 
-const codesh::output::local_variable_table_entry &codesh::output::local_variable_table::get_entry(const size_t index)
+const codesh::output::local_variable_table_entry &codesh::output::local_variable_table::get(const size_t index)
     const
 {
     return entries.at(index);
