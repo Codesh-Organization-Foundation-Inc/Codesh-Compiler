@@ -1,7 +1,6 @@
 #include "resolve_aliases.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../errors/errors.h"
 #include "../util.h"
 

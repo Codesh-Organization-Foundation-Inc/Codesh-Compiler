@@ -166,11 +166,17 @@ public:
 //TODO: Handle producing node
 class method_scope_symbol final : public symbol
 {
-    std::unordered_map<std::string, std::unique_ptr<variable_symbol>> local_variables;
+    std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
     explicit method_scope_symbol(ast::impl::ast_node *producing_node = nullptr);
+
+    [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
+    [[nodiscard]] std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables();
+
+    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes() const;
+    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes();
 };
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
@@ -195,7 +201,7 @@ public:
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
-    [[nodiscard]] method_scope_symbol &get_scopes();
+    [[nodiscard]] method_scope_symbol &get_scope();
 
     [[nodiscard]] ast::method::method_declaration_ast_node *get_producing_node() const override;
 };

@@ -8,10 +8,12 @@
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
+static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
+                                    codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
-                                                type_symbol &containing_type)
+                                                    type_symbol &containing_type)
 {
     for (const auto &method_decl : class_decl.get_all_methods())
     {
@@ -36,7 +38,23 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
             collect_error(os_string.str());
         }
 
-        //TODO: Collect local variables
+        collect_local_variables(*method_decl, it);
+    }
+}
+
+static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
+                                    codesh::semantic_analyzer::method_symbol &method_symbol)
+{
+    // Parameters
+    //TODO: Resolve
+    for (const auto &param : method_decl.get_parameters())
+    {
+        method_symbol.get_scope().get_variables().emplace(
+            param->get_name(),
+            std::make_unique<codesh::semantic_analyzer::local_variable_symbol>(
+                param->get_type()->clone()
+            )
+        );
     }
 }
 
