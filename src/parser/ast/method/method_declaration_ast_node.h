@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../output/jvm_target/class_file_builder.h"
+#include "../../../output/local_variable_table.h"
 #include "../impl/ast_node.h"
 #include "../impl/i_descriptor_emitter.h"
 #include "../impl/ir_emitting_ast_node.h"
@@ -27,6 +28,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
 
+    output::local_variable_table local_variables;
     std::list<std::unique_ptr<impl::ir_emitting_ast_node>> body;
 
 
@@ -47,6 +49,9 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_return_type() const;
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
+
+
+    [[nodiscard]] const output::local_variable_table &get_local_variables() const;
 
     [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();
     [[nodiscard]] const std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body() const;
