@@ -3,7 +3,12 @@
 #include "defs/class_file.h"
 
 #include <filesystem>
+#include <list>
 
+namespace codesh::semantic_analyzer
+{
+class method_scope_symbol;
+}
 namespace codesh::ast::type_decl
 {
 class class_declaration_ast_node;
@@ -68,6 +73,9 @@ class class_file_builder
     void add_source_file() const;
 
     static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);
+
+    void add_local_variables(std::list<std::unique_ptr<defs::local_variable_table_entry>> &lvt,
+            semantic_analyzer::method_scope_symbol &scope, int code_length_total) const;
 
 public:
     class_file_builder(defs::class_file &class_file_out,

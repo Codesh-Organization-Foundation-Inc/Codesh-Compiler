@@ -1,6 +1,6 @@
 #include "util.h"
 
-void codesh::util::replaceAll(std::string &str, const std::string &from, const std::string &to)
+void codesh::util::replace_all(std::string &str, const std::string &from, const std::string &to)
 {
     if (from.empty())
         return;

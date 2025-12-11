@@ -17,7 +17,6 @@
 #include <list>
 #include <ranges>
 
-
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
@@ -177,37 +176,33 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         constant_pool_.get_utf8_index("LocalVariableTable")
     );
 
-    // Add parameters
-    int index = 0;
-    for (const auto &param_node : method_decl.get_parameters())
+    std::list<std::unique_ptr<defs::local_variable_table_entry>> lvt_entries;
+    add_local_variables(
+        lvt_entries,
+        method_decl.get_symbol().get_scope(),
+        static_cast<int>(code_attr->code.size())
+    );
+
+    if (lvt_entries.size() > 0xFFFF)
+        throw std::runtime_error("Too many local variables in method " + method_decl.get_name() + "; Max amount is 65535");
+
+
+    local_variable_table->local_variable_table.reserve(lvt_entries.size());
+    for (auto &lvt_entry : lvt_entries)
     {
-        auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
-        util::put_int_bytes(lvt_entry->start_pc, 2, 0);
-        util::put_int_bytes(lvt_entry->length, 2, static_cast<int>(code_attr->code.size()));
-
-        util::put_int_bytes(
-            lvt_entry->name_index, 2,
-            constant_pool_.get_utf8_index(param_node->get_name())
-        );
-        util::put_int_bytes(
-            lvt_entry->descriptor_index, 2,
-            constant_pool_.get_utf8_index(param_node->get_type()->generate_descriptor())
-        );
-
-        util::put_int_bytes(lvt_entry->index, 2, index++);
         local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
     }
 
-    //TODO: Account for local variables too
-    const int local_vars_count = static_cast<int>(method_decl.get_parameters().size());
 
-    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, local_vars_count);
+    const int lvt_size = static_cast<int>(lvt_entries.size());
+    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
 
     util::put_int_bytes(
         local_variable_table->attribute_length, 4,
-        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * local_vars_count
+        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size
     );
     code_attr->attributes.push_back(std::move(local_variable_table));
+
 
 
     util::put_int_bytes(
@@ -248,4 +243,43 @@ void codesh::output::jvm_target::class_file_builder::set_access_flags(
     }
 
     util::put_int_bytes(buffer, 2, value);
+}
+
+void codesh::output::jvm_target::class_file_builder::add_local_variables(
+        std::list<std::unique_ptr<defs::local_variable_table_entry>> &lvt, semantic_analyzer::method_scope_symbol &scope,
+        const int code_length_total) const
+{
+    for (const auto &[var_name, var] : scope.get_variables())
+    {
+        auto entry = std::make_unique<defs::local_variable_table_entry>();
+
+        //TODO: Fill per scope info:
+        util::put_int_bytes(entry->start_pc, 2, 0);
+        util::put_int_bytes(entry->length, 2, code_length_total);
+
+        util::put_int_bytes(
+            entry->name_index,
+            2,
+            constant_pool_.get_utf8_index(
+                var_name
+            )
+        );
+        util::put_int_bytes(
+            entry->descriptor_index,
+            2,
+            constant_pool_.get_utf8_index(
+                var->get_type()->generate_descriptor()
+            )
+        );
+
+        util::put_int_bytes(entry->index, 2, static_cast<int>(lvt.size()));
+
+        lvt.push_back(std::move(entry));
+    }
+
+
+    for (const auto &inner_scope : scope.get_inner_scopes())
+    {
+        add_local_variables(lvt, *inner_scope, code_length_total);
+    }
 }

@@ -179,8 +179,8 @@ public:
     [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
     [[nodiscard]] std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables();
 
-    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes() const;
-    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes();
+    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes() const;
+    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
 };
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>

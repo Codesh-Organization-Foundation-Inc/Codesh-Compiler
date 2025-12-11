@@ -198,13 +198,13 @@ std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::local
 }
 
 const std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &codesh::semantic_analyzer::
-    method_scope_symbol::get_inner_method_scopes() const
+    method_scope_symbol::get_inner_scopes() const
 {
     return inner_method_scopes;
 }
 
 std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &codesh::semantic_analyzer::
-    method_scope_symbol::get_inner_method_scopes()
+    method_scope_symbol::get_inner_scopes()
 {
     return inner_method_scopes;
 }
