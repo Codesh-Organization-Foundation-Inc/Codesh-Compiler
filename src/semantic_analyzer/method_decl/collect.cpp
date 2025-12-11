@@ -8,6 +8,7 @@
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
+
 static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
                                     codesh::semantic_analyzer::method_symbol &method_symbol);
 
