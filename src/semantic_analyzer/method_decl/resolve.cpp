@@ -53,6 +53,8 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 &type.resolve(method_decl->get_name()).value().get()
             );
 
+            // Get relevant method symbol from the method overloads map
+            // Then cast it to method_symbol
             std::unique_ptr<method_symbol> method(
                 static_cast<method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
                     method_overloads.resolve_and_move(method_decl->generate_parameters_descriptor(false))
