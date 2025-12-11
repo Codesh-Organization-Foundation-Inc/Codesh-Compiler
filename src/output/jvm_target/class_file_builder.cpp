@@ -121,7 +121,6 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
     util::put_int_bytes(code_attr->max_stack, 2, 1);
-    util::put_int_bytes(code_attr->max_locals, 2, 1);
 
 
     // Convert the method to IR
@@ -170,12 +169,6 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     // Local variables
-    auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
-    util::put_int_bytes(
-        local_variable_table->attribute_name_index, 2,
-        constant_pool_.get_utf8_index("LocalVariableTable")
-    );
-
     std::list<std::unique_ptr<defs::local_variable_table_entry>> lvt_entries;
     add_local_variables(
         lvt_entries,
@@ -186,6 +179,16 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     if (lvt_entries.size() > 0xFFFF)
         throw std::runtime_error("Too many local variables in method " + method_decl.get_name() + "; Max amount is 65535");
 
+    const int lvt_size = static_cast<int>(lvt_entries.size());
+    util::put_int_bytes(code_attr->max_locals, 2, lvt_size);
+
+
+    // Local Variables Table
+    auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
+    util::put_int_bytes(
+        local_variable_table->attribute_name_index, 2,
+        constant_pool_.get_utf8_index("LocalVariableTable")
+    );
 
     local_variable_table->local_variable_table.reserve(lvt_entries.size());
     for (auto &lvt_entry : lvt_entries)
@@ -194,20 +197,18 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     }
 
 
-    const int lvt_size = static_cast<int>(lvt_entries.size());
     util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
 
-    util::put_int_bytes(
-        local_variable_table->attribute_length, 4,
-        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size
-    );
+    const int lvt_attr_length = 2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size;
+    util::put_int_bytes(local_variable_table->attribute_length, 4, lvt_attr_length);
+
     code_attr->attributes.push_back(std::move(local_variable_table));
 
 
 
     util::put_int_bytes(
         code_attr->attribute_length, 4,
-        30 + static_cast<int>(code_attr->code.size())
+        18 + lvt_attr_length + static_cast<int>(code_attr->code.size())
     );
     util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
