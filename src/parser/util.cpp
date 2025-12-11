@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include "../blasphemies/blasphemy_collector.h"
 #include "../defenition/definitions.h"
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
@@ -22,7 +23,8 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        throw std::runtime_error("Unexpected token: Expected identifier");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
+        return nullptr; // TODO: check if this return nullptr is okay
     }
 
     return std::unique_ptr<identifier_token>(
@@ -72,7 +74,8 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        throw std::runtime_error("Unexpected token: Invalid type name");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סוּג מִשְׁתַּנֶּה");
+        return nullptr;
     }
 
 
@@ -107,7 +110,7 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
 {
     if (tokens.empty())
     {
-        throw std::runtime_error("Unexpected EOF"); //TODO: Convert to custom Codesh error
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־אֲסִימוֹן");
     }
 }
 
@@ -115,7 +118,8 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (tokens.empty() || tokens.front()->get_group() != token_group::PUNCTUATION_END_OP)
     {
-        throw std::runtime_error("Unexpected token: Expected colon"); //TODO: Convert to custom Codesh error
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סִיּוּם שׁוּרָה");
+        return;
     }
 
     tokens.pop();
@@ -136,7 +140,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                throw std::runtime_error("Unexpected token: Expected identifier"); //TODO: Convert to custom Codesh error
+                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
             }
         }
         else
@@ -159,7 +163,8 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             // If the user has put a wildcard yet still attempts to add more shit
             if (!is_last_item && fqcn_out.is_wildcard())
             {
-                throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+                // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
             }
         }
 

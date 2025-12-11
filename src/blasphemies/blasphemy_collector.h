@@ -53,7 +53,7 @@ public:
     /**
      * Prints all errors
      */
-    void print_all_errors() const;
+    void print_all_blasphemies() const;
 
 private:
     std::vector<blasphemy> blasphemies;

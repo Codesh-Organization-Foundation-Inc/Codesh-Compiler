@@ -2,6 +2,7 @@
 
 #include "../../defenition/definitions.h"
 #include "../../util.h"
+#include "../../blasphemies/blasphemy_collector.h"
 
 #include <unordered_set>
 
@@ -112,7 +113,10 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     codesh::output::jvm_target::constant_pool::utf8_info(const std::string &utf8)
 {
     if (utf8.size() > 0xFFFF)
-        throw std::runtime_error("String size is longer than possible; max length is 65535");
+    {
+        error::blasphemy_collector().add_blasphemy("זֶה לֹא כְּתוּבִים - זֹאת מְגִלָּה! הַמַּקְסִימוּם הוּא 65535",
+            error::blasphemy_type::UNKNOWN, std::nullopt, true);
+    }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();
     util::put_int_bytes(utf8_info->length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)

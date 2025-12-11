@@ -5,6 +5,7 @@
 #include "regex.h"
 #include "trie/keywords.h"
 #include "trie/trie.h"
+#include "../blasphemies/blasphemy_collector.h"
 #include <unicode/uchar.h>
 
 namespace trie = codesh::lexer::trie;
@@ -130,7 +131,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            throw std::runtime_error("Error tokenizing file: No matching keywords found");
+            error::blasphemy_collector().add_blasphemy("שְׁגִיאָה בְּעִבּוּד הַקּוֹבֶץ: אֵין מִלּוֹת־מַפְתֵּחַ מַתְאִימוֹת");
         }
     }
 
@@ -161,7 +162,7 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
             //TODO: Convert word error token or alike
-            throw std::runtime_error("Unenclosed multiline comment");
+            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סְגִירַת הָעֵרָה מְרוּבַּת פְּסוּקִים");
         }
 
         default: {

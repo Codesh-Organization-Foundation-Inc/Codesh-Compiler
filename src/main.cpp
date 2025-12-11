@@ -40,7 +40,7 @@ int main(const int argc, char **const argv)
 
     if (codesh::error::get_blasphemy_collector().has_errors())
     {
-        codesh::error::get_blasphemy_collector().print_all_errors();
+        codesh::error::get_blasphemy_collector().print_all_blasphemies();
         return EXIT_FAILURE;
     }
 
@@ -72,7 +72,8 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        throw std::runtime_error("Couldn't open " + file_name);
+        codesh::error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ:  " + file_name,
+            codesh::error::blasphemy_type::UNKNOWN, std::nullopt, true);
     }
 
     std::stringstream buffer;

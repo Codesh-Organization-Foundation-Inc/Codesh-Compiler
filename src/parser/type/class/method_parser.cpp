@@ -14,7 +14,8 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
             tokens.pop();
             return;
 
-        default: throw std::runtime_error("Unexpected token");
+        default: error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: מִלָּה לֹא צְפוּיָה",
+            error::blasphemy_type::SYNTAX);
         }
     }
 

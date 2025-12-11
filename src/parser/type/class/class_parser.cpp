@@ -102,7 +102,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         }
     }
 
-    codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיַתָם", codesh::error::blasphemy_type::SYNTAX);
+    codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיַתָם",
+        codesh::error::blasphemy_type::SYNTAX);
 }
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
@@ -117,7 +118,8 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
         if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
         {
-            throw std::runtime_error("Unexpected token");
+            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־אַסִּימוֹן אַחֵר",
+                codesh::error::blasphemy_type::SYNTAX);
         }
     }
 
@@ -133,7 +135,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     // ושמו
     if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
-        codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ", codesh::error::blasphemy_type::SYNTAX);
+        codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וּשְׁמוֹ",
+            codesh::error::blasphemy_type::SYNTAX);
     }
 
     // * (the name)

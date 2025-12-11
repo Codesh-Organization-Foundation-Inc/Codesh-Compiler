@@ -31,7 +31,7 @@ void codesh::error::blasphemy_collector::add_blasphemy(std::string details, blas
 
     if (is_fatal)
     {
-        print_all_errors();
+        print_all_blasphemies();
         std::exit(EXIT_FAILURE);
     }
 }
@@ -41,7 +41,7 @@ bool codesh::error::blasphemy_collector::has_errors() const
     return !blasphemies.empty();
 }
 
-void codesh::error::blasphemy_collector::print_all_errors() const
+void codesh::error::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
     {

@@ -1,6 +1,7 @@
 #include "import_parser.h"
 
 #include "ast/import_declaration_ast_node.h"
+#include "../blasphemies/blasphemy_collector.h"
 #include "util.h"
 
 namespace ast = codesh::ast;
@@ -8,14 +9,11 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
-    if (tokens.empty())
-    {
-        throw std::runtime_error("Expected identifier"); //TODO: Convert to custom Codesh error
-    }
 
     std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
 
     // Check if is a static import
+    util::ensure_tokens_exist(tokens); // TODO: provide reason
     switch (tokens.front()->get_group())
     {
     case token_group::KEYWORD_IMPORT_STATIC:
@@ -26,7 +24,9 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
         // Already not static
         break;
 
-    default: throw std::runtime_error("Unexpected token: Expected import type");
+    default:
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סוּג יְבוּא");
+
     }
 
 
