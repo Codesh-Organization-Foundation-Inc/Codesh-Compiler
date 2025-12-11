@@ -18,10 +18,6 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
         const codesh::ast::method::method_declaration_ast_node &method,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-static void collect_method_error(const std::string &details,
-        const codesh::ast::method::method_declaration_ast_node &method_decl,
-        const codesh::ast::type_decl::class_declaration_ast_node &class_node);
-
 static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
@@ -72,7 +68,13 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 }
                 catch (const std::runtime_error &e)
                 {
-                    collect_method_error(e.what(), *method_decl, *class_node);
+                    std::ostringstream os_string;
+
+                    os_string << e.what()
+                        << " in method " << method_decl->get_name()
+                        << " of type " << class_node->get_name();
+
+                    collect_error(os_string.str());
                 }
             }
 
@@ -81,18 +83,6 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
         }
 
     }
-}
-
-static void collect_method_error(const std::string &details,
-        const codesh::ast::method::method_declaration_ast_node &method_decl,
-        const codesh::ast::type_decl::class_declaration_ast_node &class_node)
-{
-    std::ostringstream os_string;
-    os_string << details
-        << " in method " << method_decl.get_name()
-        << " of type " << class_node.get_name();
-
-    codesh::semantic_analyzer::collect_error(os_string.str());
 }
 
 
