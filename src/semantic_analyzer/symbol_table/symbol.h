@@ -121,6 +121,8 @@ class variable_symbol : public symbol
 
 public:
     variable_symbol(symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
+
+    [[nodiscard]] ast::type::type_ast_node *get_type() const;
 };
 
 //TODO: Attach ast node

@@ -106,10 +106,14 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
 }
 
 codesh::semantic_analyzer::variable_symbol::variable_symbol(const symbol_type _symbol_type,
-        std::unique_ptr<ast::type::type_ast_node> type) :
-    symbol(_symbol_type),
-    type(std::move(type))
+                                                            std::unique_ptr<ast::type::type_ast_node> type)
+    : symbol(_symbol_type), type(std::move(type))
 {
+}
+
+codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::get_type() const
+{
+    return type.get();
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(std::vector<output::jvm_target::access_flag> access_flags,

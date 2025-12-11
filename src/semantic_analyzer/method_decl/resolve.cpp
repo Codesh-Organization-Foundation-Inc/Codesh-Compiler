@@ -7,6 +7,8 @@
 #include "../errors/errors.h"
 #include "../util.h"
 
+#include <ranges>
+
 static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
@@ -18,6 +20,9 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
 static void collect_method_error(const std::string &details,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::ast::type_decl::class_declaration_ast_node &class_node);
+
+static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
@@ -57,6 +62,14 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
             try
             {
                 resolve_parameters(root, *method_decl, *method);
+            }
+            catch (const std::runtime_error &e)
+            {
+                collect_method_error(e.what(), *method_decl, *class_node);
+            }
+            try
+            {
+                resolve_local_variables(root, *method);
             }
             catch (const std::runtime_error &e)
             {
@@ -113,18 +126,17 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
         const codesh::ast::method::method_declaration_ast_node &method,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        root.get_symbol_table().value().get().resolve_country("").value()
+    };
+
     size_t i = 0;
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
-
         if (!custom_param)
             continue;
-
-        //TODO: Use actual countries
-        const std::vector lookup_countries = {
-            root.get_symbol_table().value().get().resolve_country("").value()
-        };
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
             lookup_countries,
@@ -135,5 +147,28 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
         }
 
         ++i;
+    }
+}
+
+static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::semantic_analyzer::method_symbol &method_symbol)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        root.get_symbol_table().value().get().resolve_country("").value()
+    };
+
+    for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
+    {
+        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        if (!custom_param)
+            continue;
+
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+            lookup_countries,
+            *custom_param
+        )) {
+            throw std::runtime_error("Unknown type " + custom_param->get_name());
+        };
     }
 }
