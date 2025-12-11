@@ -19,5 +19,5 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
         }
     }
 
-    error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיַתָם", error::blasphemy_type::SYNTAX);
+    error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה וַיַתָם", error::blasphemy_type::SYNTAX);
 }

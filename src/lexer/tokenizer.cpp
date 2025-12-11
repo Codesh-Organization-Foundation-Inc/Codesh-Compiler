@@ -131,7 +131,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            error::blasphemy_collector().add_blasphemy("שְׁגִיאָה בְּעִבּוּד הַקּוֹבֶץ: אֵין מִלּוֹת־מַפְתֵּחַ מַתְאִימוֹת");
+            error::blasphemy_collector().add_blasphemy("אֵין מִלּוֹת מַפְתֵּחַ מַתְאִימוֹת", error::blasphemy_type::LEXICAL);
         }
     }
 

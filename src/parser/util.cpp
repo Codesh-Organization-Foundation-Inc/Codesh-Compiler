@@ -74,7 +74,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סוּג מִשְׁתַּנֶּה");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה");
         return nullptr;
     }
 
@@ -110,7 +110,7 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
 {
     if (tokens.empty())
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־אֲסִימוֹן");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: סוֹף הָעוֹלָם אֵינוֹ קָרֵב");
     }
 }
 
@@ -118,7 +118,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (tokens.empty() || tokens.front()->get_group() != token_group::PUNCTUATION_END_OP)
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סִיּוּם שׁוּרָה");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻפָּה סִיֹּמֶת שׁוּרָה");
         return;
     }
 
@@ -140,7 +140,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
+                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית");
             }
         }
         else
@@ -164,7 +164,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             if (!is_last_item && fqcn_out.is_wildcard())
             {
                 // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
-                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
+                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה מִלָּה חָפְשִׁית");
             }
         }
 

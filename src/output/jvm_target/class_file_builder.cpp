@@ -89,7 +89,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 
     if (constant_pool_size > 0xFFFF)
     {
-        error::get_blasphemy_collector().add_blasphemy("אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא 65535",
+        error::get_blasphemy_collector().add_blasphemy("אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף",
             error::blasphemy_type::SEMANTIC, std::nullopt, true);
     }
 
@@ -153,7 +153,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     if (code_attr->code.size() > 0xFFFFFF)
     {
-        error::blasphemy_collector().add_blasphemy("נוּ, מַה זֶּה? מֶתּוֹדָה אוֹ הַתָּנ״ךְ? תְּקַצֵּר!",
+        error::blasphemy_collector().add_blasphemy("נוּ, מַה זֶּה? מַעֲשֶׂה אוֹ הַתָּנ״ךְ עַצְמוֹ? קַצֵּר!",
             error::blasphemy_type::SEMANTIC, std::nullopt, true);
     }
 

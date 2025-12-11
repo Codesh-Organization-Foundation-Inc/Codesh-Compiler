@@ -114,7 +114,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
 {
     if (utf8.size() > 0xFFFF)
     {
-        error::blasphemy_collector().add_blasphemy("זֶה לֹא כְּתוּבִים - זֹאת מְגִלָּה! הַמַּקְסִימוּם הוּא 65535",
+        error::blasphemy_collector().add_blasphemy("אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים תָּוִים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה תָּוִים וְשִׁשִּׁים אָלֶף תָּוִים בִּכְתֻבִים",
             error::blasphemy_type::UNKNOWN, std::nullopt, true);
     }
 
