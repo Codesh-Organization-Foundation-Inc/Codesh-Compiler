@@ -32,10 +32,10 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
         if (!inserted)
         {
             //TODO: Print full method declaration
-            std::ostringstream os_string;
-            os_string << "Duplicate method declared: " << method_decl->get_name();
+            std::ostringstream builder;
+            builder << "Duplicate method declared: " << method_decl->get_name();
 
-            collect_error(os_string.str());
+            collect_error(builder.str());
         }
 
         collect_local_variables(*method_decl, it);

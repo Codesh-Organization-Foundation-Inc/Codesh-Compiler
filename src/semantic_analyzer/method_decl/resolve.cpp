@@ -70,13 +70,13 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 }
                 catch (const std::runtime_error &e)
                 {
-                    std::ostringstream os_string;
+                    std::ostringstream builder;
 
-                    os_string << e.what()
+                    builder << e.what()
                         << " in method " << method_decl->get_name()
                         << " of type " << class_node->get_name();
 
-                    collect_error(os_string.str());
+                    collect_error(builder.str());
                 }
             }
 
