@@ -9,14 +9,12 @@
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method_decl,
-    const std::string &class_name
+    const codesh::ast::method::method_declaration_ast_node &method_decl
 );
 
 static void resolve_parameters(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method,
-    const std::string &class_name
+    const codesh::ast::method::method_declaration_ast_node &method
 );
 
 
@@ -46,9 +44,20 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 )
             );
 
-            resolve_return_type(root, *method_decl, class_node->get_name());
-            resolve_parameters(root, *method_decl, class_node->get_name());
+            try
+            {
+                resolve_return_type(root, *method_decl);
+                resolve_parameters(root, *method_decl);
+            }
+            catch (const std::runtime_error &e)
+            {
+                std::ostringstream os_string;
+                os_string << e.what()
+                    << " in method " << method_decl->get_name()
+                    << " of type " << class_node->get_name();
 
+                collect_error(os_string.str());
+            }
 
             // Move to a new overloads entry now that the parameters' descriptors are real
             method_overloads.add_symbol(method_decl->generate_parameters_descriptor(), std::move(method));
@@ -60,8 +69,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
 static void resolve_return_type(
     const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method_decl,
-    const std::string &class_name
+    const codesh::ast::method::method_declaration_ast_node &method_decl
 ) {
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
 
@@ -71,28 +79,20 @@ static void resolve_return_type(
         return;
     }
 
-
     //TODO: Use actual countries
     const std::vector lookup_countries = {
         root.get_symbol_table().value().get().resolve_country("").value()
     };
 
-
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
     {
-        std::ostringstream os_string;
-        os_string << "Unknown return type " << return_type->get_name()
-            << " in method " << method_decl.get_name()
-            << " of type " << class_name;
-
-        codesh::semantic_analyzer::collect_error(os_string.str());
+        throw std::runtime_error("Unknown return type " + return_type->get_name());
     }
 }
 
 static void resolve_parameters(
         const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method::method_declaration_ast_node &method,
-        const std::string &class_name)
+        const codesh::ast::method::method_declaration_ast_node &method)
 {
     for (const auto &param : method.get_parameters())
     {
@@ -101,21 +101,14 @@ static void resolve_parameters(
         if (!custom_param)
             continue;
 
-
         //TODO: Use actual countries
         const std::vector lookup_countries = {
             root.get_symbol_table().value().get().resolve_country("").value()
         };
 
-
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
         {
-            std::ostringstream os_string;
-            os_string << "Unknown return type " << custom_param->get_name()
-                << " in method " << method.get_name()
-                << " of type " << class_name;
-
-            codesh::semantic_analyzer::collect_error(os_string.str());
+            throw std::runtime_error("Unknown return type " + custom_param->get_name());
         }
     }
 }
