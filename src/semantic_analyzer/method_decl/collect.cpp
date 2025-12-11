@@ -50,7 +50,6 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
                                     codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     // Parameters
-    //TODO: Resolve
     for (const auto &param : method_decl.get_parameters())
     {
         method_symbol.get_scope().get_variables().emplace(
