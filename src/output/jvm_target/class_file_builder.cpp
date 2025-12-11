@@ -18,9 +18,10 @@
 #include <ranges>
 
 
-codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node,
+codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
+        const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
-    class_file(std::make_unique<defs::class_file>()),
+    class_file(class_file_out),
     root_node(root_node),
     type_decl(type_decl),
     constant_pool_(type_decl.get_constant_pool()->get()),
@@ -33,23 +34,23 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::co
     ))
 {}
 
-std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jvm_target::class_file_builder::build()
+void codesh::output::jvm_target::class_file_builder::build() const
 {
-    util::put_bytes(class_file->magic, {0xCA, 0xFE, 0xBA, 0xBE});
+    util::put_bytes(class_file.magic, {0xCA, 0xFE, 0xBA, 0xBE});
 
-    util::put_int_bytes(class_file->minor_version, 2, 0);
-    util::put_int_bytes(class_file->major_version, 2, JAVA_TARGET_VERSION);
+    util::put_int_bytes(class_file.minor_version, 2, 0);
+    util::put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
     add_constant_pool_entries();
 
     //TODO: Set by class attributes
-    set_access_flags(class_file->access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
+    set_access_flags(class_file.access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
-    util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
-    util::put_int_bytes(class_file->super_class, 2, super_class_cpi);
+    util::put_int_bytes(class_file.this_class, 2, this_class_cpi);
+    util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
-    util::put_int_bytes(class_file->interfaces_count, 2, 0);
-    util::put_int_bytes(class_file->fields_count, 2, 0);
+    util::put_int_bytes(class_file.interfaces_count, 2, 0);
+    util::put_int_bytes(class_file.fields_count, 2, 0);
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -58,14 +59,12 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     else
     {
         // TODO: Handle
-        util::put_int_bytes(class_file->methods_count, 2, 0);
+        util::put_int_bytes(class_file.methods_count, 2, 0);
     }
 
-    util::put_int_bytes(class_file->attribute_count, 2, 1);
+    util::put_int_bytes(class_file.attribute_count, 2, 1);
 
     add_source_file();
-
-    return std::move(class_file);
 }
 
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
@@ -77,7 +76,7 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
     }
 
     util::put_int_bytes(
-        class_file->methods_count, 2,
+        class_file.methods_count, 2,
         static_cast<int>(class_decl.get_all_methods().size())
     );
 }
@@ -89,12 +88,12 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     if (constant_pool_size > 0xFFFF)
         throw std::runtime_error("Too many constant pool entries; max amount is 65535");
 
-    util::put_int_bytes(class_file->constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+    util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 
 
     for (const auto &constant_pool_entry : constant_pool_.get_literals())
     {
-        class_file->constant_pool.push_back(constant_pool_entry);
+        class_file.constant_pool.push_back(constant_pool_entry);
     }
 }
 
@@ -218,7 +217,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     method_entry->attribute_info.push_back(std::move(code_attr));
-    class_file->methods_info.push_back(std::move(method_entry));
+    class_file.methods_info.push_back(std::move(method_entry));
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
@@ -234,7 +233,7 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
     constant_pool_.get_utf8_index(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION)
     );
 
-    class_file->attribute_info.push_back(std::move(source_file_entry));
+    class_file.attribute_info.push_back(std::move(source_file_entry));
 }
 
 void codesh::output::jvm_target::class_file_builder::set_access_flags(

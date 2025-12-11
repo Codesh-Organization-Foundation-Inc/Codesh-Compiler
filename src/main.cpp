@@ -45,13 +45,15 @@ int main(const int argc, char **const argv) {
         type_declaration->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast, *type_declaration));
 
         // BUILDING
-        const auto class_file = codesh::output::jvm_target::class_file_builder(
+        codesh::output::jvm_target::defs::class_file class_file;
+        codesh::output::jvm_target::class_file_builder(
+            class_file,
             *ast,
             *type_declaration
         ).build();
 
         // WRITING
-        codesh::output::jvm_target::write_to_file(*class_file, *ast, *type_declaration, args.dest_path);
+        codesh::output::jvm_target::write_to_file(class_file, *ast, *type_declaration, args.dest_path);
     }
 
     return 0;
