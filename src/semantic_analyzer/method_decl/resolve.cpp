@@ -7,6 +7,7 @@
 #include "../errors/errors.h"
 #include "../util.h"
 
+#include <functional>
 #include <ranges>
 
 static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
@@ -22,7 +23,19 @@ static void collect_method_error(const std::string &details,
         const codesh::ast::type_decl::class_declaration_ast_node &class_node);
 
 static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
+
+
+static const std::function<
+        void(const codesh::ast::compilation_unit_ast_node &root,
+             const codesh::ast::method::method_declaration_ast_node &method_decl,
+             const codesh::semantic_analyzer::method_symbol &method_symbol)
+    > METHOD_RESOLVERS[] = {
+    resolve_return_type,
+    resolve_parameters,
+    resolve_local_variables,
+};
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
@@ -51,29 +64,16 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 )
             );
 
-            try
+            for (const auto &resolver : METHOD_RESOLVERS)
             {
-                resolve_return_type(root, *method_decl, *method);
-            }
-            catch (const std::runtime_error &e)
-            {
-                collect_method_error(e.what(), *method_decl, *class_node);
-            }
-            try
-            {
-                resolve_parameters(root, *method_decl, *method);
-            }
-            catch (const std::runtime_error &e)
-            {
-                collect_method_error(e.what(), *method_decl, *class_node);
-            }
-            try
-            {
-                resolve_local_variables(root, *method);
-            }
-            catch (const std::runtime_error &e)
-            {
-                collect_method_error(e.what(), *method_decl, *class_node);
+                try
+                {
+                    resolver(root, *method_decl, *method);
+                }
+                catch (const std::runtime_error &e)
+                {
+                    collect_method_error(e.what(), *method_decl, *class_node);
+                }
             }
 
             // Move to a new overloads entry now that the parameters' descriptors are real
@@ -151,6 +151,7 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
 }
 
 static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::ast::method::method_declaration_ast_node &,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     //TODO: Use actual countries
