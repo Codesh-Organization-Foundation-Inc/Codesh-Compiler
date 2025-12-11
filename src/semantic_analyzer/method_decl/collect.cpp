@@ -39,6 +39,9 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
             collect_error(builder.str());
         }
 
+        method_decl->set_symbol(it);
+
+
         collect_local_variables(*method_decl, it);
     }
 }

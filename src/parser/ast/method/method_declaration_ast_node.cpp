@@ -87,6 +87,19 @@ void codesh::ast::method::method_declaration_ast_node::set_return_type(std::uniq
     this->return_type = std::move(return_type);
 }
 
+codesh::semantic_analyzer::method_symbol &codesh::ast::method::method_declaration_ast_node::get_symbol() const
+{
+    if (!symbol)
+        throw std::runtime_error("No symbol attached to the method declaration node");
+
+    return symbol.value();
+}
+
+void codesh::ast::method::method_declaration_ast_node::set_symbol(semantic_analyzer::method_symbol &symbol)
+{
+    this->symbol.emplace(symbol);
+}
+
 const codesh::output::local_variable_table &codesh::ast::method::method_declaration_ast_node::get_local_variables()
     const
 {
