@@ -87,12 +87,6 @@ void codesh::ast::method::method_declaration_ast_node::set_return_type(std::uniq
     this->return_type = std::move(return_type);
 }
 
-const codesh::output::local_variable_table &codesh::ast::method::method_declaration_ast_node::get_local_variables()
-    const
-{
-    return local_variables;
-}
-
 std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_body()
 {
