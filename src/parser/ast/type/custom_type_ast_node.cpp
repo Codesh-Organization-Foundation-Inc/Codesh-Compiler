@@ -7,7 +7,7 @@ codesh::ast::type::custom_type_ast_node::custom_type_ast_node(std::string name) 
 {
 }
 
-std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name()
+std::optional<std::string> &codesh::ast::type::custom_type_ast_node::_get_resolved_name()
 {
     return resolved_name;
 }
@@ -31,7 +31,7 @@ std::string codesh::ast::type::custom_type_ast_node::get_name() const
     return name;
 }
 
-const std::optional<std::string> &codesh::ast::type::custom_type_ast_node::get_resolved_name() const
+const std::optional<std::string> &codesh::ast::type::custom_type_ast_node::_get_resolved_name() const
 {
     return resolved_name;
 }

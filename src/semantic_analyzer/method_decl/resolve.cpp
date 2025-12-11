@@ -8,10 +8,12 @@
 #include "../util.h"
 
 static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method::method_declaration_ast_node &method_decl);
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method::method_declaration_ast_node &method);
+        const codesh::ast::method::method_declaration_ast_node &method,
+        const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 static void collect_method_error(const std::string &details,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
@@ -46,7 +48,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
             try
             {
-                resolve_return_type(root, *method_decl);
+                resolve_return_type(root, *method_decl, *method);
             }
             catch (const std::runtime_error &e)
             {
@@ -54,7 +56,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
             }
             try
             {
-                resolve_parameters(root, *method_decl);
+                resolve_parameters(root, *method_decl, *method);
             }
             catch (const std::runtime_error &e)
             {
@@ -82,7 +84,8 @@ static void collect_method_error(const std::string &details,
 
 
 static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method_decl)
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
 
@@ -97,15 +100,20 @@ static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &ro
         root.get_symbol_table().value().get().resolve_country("").value()
     };
 
-    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
-    {
+    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+        lookup_countries,
+        *return_type,
+        method_symbol.get_return_type()
+    )) {
         throw std::runtime_error("Unknown return type " + return_type->get_name());
     }
 }
 
 static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method::method_declaration_ast_node &method)
+        const codesh::ast::method::method_declaration_ast_node &method,
+        const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    size_t i = 0;
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
@@ -118,9 +126,14 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
             root.get_symbol_table().value().get().resolve_country("").value()
         };
 
-        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
-        {
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+            lookup_countries,
+            *custom_param,
+            *method_symbol.get_parameter_types()[i]
+        )) {
             throw std::runtime_error("Unknown return type " + custom_param->get_name());
         }
+
+        ++i;
     }
 }

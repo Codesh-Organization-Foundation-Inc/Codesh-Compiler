@@ -27,7 +27,8 @@ std::optional<std::string> resolve_custom_type(const std::vector<std::reference_
  * @return Whether the type was successfully resolved
  */
 bool resolve_custom_type_node(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        ast::type::custom_type_ast_node &custom_type_node);
+        ast::type::custom_type_ast_node &custom_type_node,
+        ast::type::type_ast_node &symbol_type_node);
 
 /**
  * Either creates or returns the requested method overloads symbol.

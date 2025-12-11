@@ -18,13 +18,15 @@ std::optional<std::string> codesh::semantic_analyzer::util::resolve_custom_type(
 
 bool codesh::semantic_analyzer::util::resolve_custom_type_node(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        ast::type::custom_type_ast_node &custom_type_node)
+        ast::type::custom_type_ast_node &custom_type_node,
+        ast::type::type_ast_node &symbol_type_node)
 {
     const auto resolved_name = resolve_custom_type(lookup_countries, custom_type_node.get_name());
     if (!resolved_name)
         return false;
 
     custom_type_node.set_resolved_name(resolved_name.value());
+    static_cast<ast::type::custom_type_ast_node *>(&symbol_type_node)->set_resolved_name(resolved_name.value()); // NOLINT(*-pro-type-static-cast-downcast)
     return true;
 }
 

@@ -1,6 +1,6 @@
 #include "method_call_ast_node.h"
 
-std::optional<std::string> &codesh::ast::method::operation::method_call_ast_node::get_resolved_name()
+std::optional<std::string> &codesh::ast::method::operation::method_call_ast_node::_get_resolved_name()
 {
     return resolved_name;
 }
@@ -10,7 +10,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::get_name() con
     return fqcn.join();
 }
 
-const std::optional<std::string> &codesh::ast::method::operation::method_call_ast_node::get_resolved_name() const
+const std::optional<std::string> &codesh::ast::method::operation::method_call_ast_node::_get_resolved_name() const
 {
     return resolved_name;
 }
