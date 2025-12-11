@@ -115,7 +115,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     if (utf8.size() > 0xFFFF)
     {
         error::blasphemy_collector().add_blasphemy("אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים תָּוִים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה תָּוִים וְשִׁשִּׁים אָלֶף תָּוִים בִּכְתֻבִים",
-            error::blasphemy_type::UNKNOWN, std::nullopt, true);
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();

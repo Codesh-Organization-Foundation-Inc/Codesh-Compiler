@@ -72,8 +72,8 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        codesh::error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ:  " + file_name,
-            codesh::error::blasphemy_type::UNKNOWN, std::nullopt, true);
+        codesh::error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ: " + file_name,
+            codesh::error::blasphemy_type::INIT, std::nullopt, true);
     }
 
     std::stringstream buffer;

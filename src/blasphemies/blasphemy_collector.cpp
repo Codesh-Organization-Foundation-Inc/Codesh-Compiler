@@ -64,9 +64,11 @@ std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_t
 {
     switch (type)
     {
+    case blasphemy_type::INIT: return "רִאשׁוֹנִית";
     case blasphemy_type::LEXICAL: return "לֶקְסִיקָלִית";
     case blasphemy_type::SEMANTIC: return "סֶמָנטִית";
     case blasphemy_type::SYNTAX: return "תַּחְבִּירִית";
+    case blasphemy_type::OUTPUT: return "דְּבָרִים ל\"ד";
     case blasphemy_type::UNKNOWN: return "לֹא יְדוּעָה";
 
     default: throw std::runtime_error("Unknown blasphemy type");

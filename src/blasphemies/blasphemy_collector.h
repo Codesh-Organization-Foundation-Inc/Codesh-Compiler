@@ -9,9 +9,13 @@ namespace codesh::error
 
 enum class blasphemy_type
 {
+    INIT,
+
     LEXICAL,
     SYNTAX,
     SEMANTIC,
+
+    OUTPUT,
 
     UNKNOWN
 };

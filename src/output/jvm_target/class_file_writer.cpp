@@ -30,8 +30,8 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     if (!destination_file)
     {
-        error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַפֶּלֶט",
-            error::blasphemy_type::UNKNOWN, std::nullopt, true);
+        error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַמּוֹצָא",
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
 
