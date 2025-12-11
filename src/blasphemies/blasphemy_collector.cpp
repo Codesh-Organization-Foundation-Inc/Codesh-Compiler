@@ -45,7 +45,6 @@ void codesh::error::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
     {
-        std::cerr << PRETTY_PRINT_RED;
 
         if (blasphemy.is_fatal)
         {
@@ -57,9 +56,8 @@ void codesh::error::blasphemy_collector::print_all_blasphemies() const
 
         // TODO: Add column place
 
-        std::cerr << blasphemy.details;
+        std::cerr << blasphemy.details << std::endl;
 
-        std::cerr << PRETTY_PRINT_END << std::endl;
     }
 }
 std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_type type)
@@ -92,9 +90,9 @@ std::string codesh::error::blasphemy_collector::get_blasphemy_message(const blas
     }
 
     // Blasphemies always provide the line position at the very end
-    msg += " בְּפָּסוּק " + std::to_string(line);
+    msg += PRETTY_PRINT_RED + " בְּפָּסוּק " + std::to_string(line) + PRETTY_PRINT_END;
 
-    return msg + " עֲבוּר " + file_name + ": ";
+    return msg + " עֲבוּר " + PRETTY_PRINT_RED + file_name + ": " + PRETTY_PRINT_END;
 }
 
 std::string codesh::error::blasphemy_collector::get_random_message()
