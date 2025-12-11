@@ -7,15 +7,15 @@
 #include "../errors/errors.h"
 #include "../util.h"
 
-static void resolve_return_type(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method_decl
-);
+static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::ast::method::method_declaration_ast_node &method_decl);
 
-static void resolve_parameters(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method
-);
+static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
+        const codesh::ast::method::method_declaration_ast_node &method);
+
+static void collect_method_error(const std::string &details,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::ast::type_decl::class_declaration_ast_node &class_node);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
@@ -24,7 +24,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
     for (const auto &type_decl : root.get_type_declarations())
     {
-        auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
+        const auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
         if (!class_node)
             continue;
 
@@ -47,16 +47,18 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
             try
             {
                 resolve_return_type(root, *method_decl);
+            }
+            catch (const std::runtime_error &e)
+            {
+                collect_method_error(e.what(), *method_decl, *class_node);
+            }
+            try
+            {
                 resolve_parameters(root, *method_decl);
             }
             catch (const std::runtime_error &e)
             {
-                std::ostringstream os_string;
-                os_string << e.what()
-                    << " in method " << method_decl->get_name()
-                    << " of type " << class_node->get_name();
-
-                collect_error(os_string.str());
+                collect_method_error(e.what(), *method_decl, *class_node);
             }
 
             // Move to a new overloads entry now that the parameters' descriptors are real
@@ -66,11 +68,22 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
     }
 }
 
+static void collect_method_error(const std::string &details,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::ast::type_decl::class_declaration_ast_node &class_node)
+{
+    std::ostringstream os_string;
+    os_string << details
+        << " in method " << method_decl.get_name()
+        << " of type " << class_node.get_name();
 
-static void resolve_return_type(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method::method_declaration_ast_node &method_decl
-) {
+    codesh::semantic_analyzer::collect_error(os_string.str());
+}
+
+
+static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
+    const codesh::ast::method::method_declaration_ast_node &method_decl)
+{
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
 
     if (!return_type)
@@ -90,8 +103,7 @@ static void resolve_return_type(
     }
 }
 
-static void resolve_parameters(
-        const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
         const codesh::ast::method::method_declaration_ast_node &method)
 {
     for (const auto &param : method.get_parameters())
