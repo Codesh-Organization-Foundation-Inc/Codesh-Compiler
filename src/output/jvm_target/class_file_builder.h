@@ -74,8 +74,8 @@ class class_file_builder
 
     static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);
 
-    void add_local_variables(std::list<std::unique_ptr<defs::local_variable_table_entry>> &lvt,
-            semantic_analyzer::method_scope_symbol &scope, int code_length_total) const;
+    void collect_local_variables(std::vector<std::unique_ptr<defs::local_variable_table_entry>> &results_out,
+            const ast::method::method_declaration_ast_node &method_decl, int code_length_total) const;
 
 public:
     class_file_builder(defs::class_file &class_file_out,

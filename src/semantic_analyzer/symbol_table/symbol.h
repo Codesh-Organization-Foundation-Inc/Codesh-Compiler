@@ -167,16 +167,19 @@ public:
 };
 
 
+using local_variable_entry = std::pair<const std::string, std::unique_ptr<local_variable_symbol>>;
+
 //TODO: Handle producing node
 class method_scope_symbol final : public symbol
 {
     std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
-    std::vector<local_variable_symbol *> &index_to_local_variable;
+    std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable;
 
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    method_scope_symbol(symbol *parent_symbol, std::vector<local_variable_symbol *> &index_to_local_variable,
+    method_scope_symbol(symbol *parent_symbol,
+            std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
             ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
@@ -197,7 +200,7 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
-    std::vector<local_variable_symbol *> index_to_local_variable;
+    std::vector<std::reference_wrapper<local_variable_entry>> local_variables;
     method_scope_symbol method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
@@ -215,7 +218,7 @@ public:
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
 
-    [[nodiscard]] const std::vector<local_variable_symbol *> &get_variables_indexed() const;
+    [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_entry>> &get_all_local_variables() const;
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
     [[nodiscard]] method_scope_symbol &get_scope();

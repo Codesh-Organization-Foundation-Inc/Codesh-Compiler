@@ -169,17 +169,11 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     // Local variables
-    std::list<std::unique_ptr<defs::local_variable_table_entry>> lvt_entries;
-    add_local_variables(
-        lvt_entries,
-        method_decl.get_symbol().get_scope(),
-        static_cast<int>(code_attr->code.size())
-    );
-
-    if (lvt_entries.size() > 0xFFFF)
+    const size_t local_vars_count = method_decl.get_symbol().get_all_local_variables().size();
+    if (local_vars_count > 0xFFFF)
         throw std::runtime_error("Too many local variables in method " + method_decl.get_name() + "; Max amount is 65535");
 
-    const int lvt_size = static_cast<int>(lvt_entries.size());
+    const int lvt_size = static_cast<int>(local_vars_count);
     util::put_int_bytes(code_attr->max_locals, 2, lvt_size);
 
 
@@ -190,12 +184,11 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         constant_pool_.get_utf8_index("LocalVariableTable")
     );
 
-    local_variable_table->local_variable_table.reserve(lvt_entries.size());
-    for (auto &lvt_entry : lvt_entries)
-    {
-        local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
-    }
-
+    collect_local_variables(
+        local_variable_table->local_variable_table,
+        method_decl,
+        static_cast<int>(code_attr->code.size())
+    );
 
     util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
 
@@ -246,12 +239,16 @@ void codesh::output::jvm_target::class_file_builder::set_access_flags(
     util::put_int_bytes(buffer, 2, value);
 }
 
-void codesh::output::jvm_target::class_file_builder::add_local_variables(
-        std::list<std::unique_ptr<defs::local_variable_table_entry>> &lvt, semantic_analyzer::method_scope_symbol &scope,
+void codesh::output::jvm_target::class_file_builder::collect_local_variables(
+        std::vector<std::unique_ptr<defs::local_variable_table_entry>> &results_out,
+        const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    for (const auto &[var_name, var] : scope.get_variables())
+    const auto &local_vars = method_decl.get_symbol().get_all_local_variables();
+    for (int i = 0; i < local_vars.size(); i++)
     {
+        const auto &[name, var] = local_vars.at(i).get();
+
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
         //TODO: Fill per scope info:
@@ -262,7 +259,7 @@ void codesh::output::jvm_target::class_file_builder::add_local_variables(
             entry->name_index,
             2,
             constant_pool_.get_utf8_index(
-                var_name
+                name
             )
         );
         util::put_int_bytes(
@@ -273,14 +270,8 @@ void codesh::output::jvm_target::class_file_builder::add_local_variables(
             )
         );
 
-        util::put_int_bytes(entry->index, 2, static_cast<int>(lvt.size()));
+        util::put_int_bytes(entry->index, 2, i);
 
-        lvt.push_back(std::move(entry));
-    }
-
-
-    for (const auto &inner_scope : scope.get_inner_scopes())
-    {
-        add_local_variables(lvt, *inner_scope, code_length_total);
+        results_out.push_back(std::move(entry));
     }
 }
