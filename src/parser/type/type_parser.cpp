@@ -31,14 +31,14 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     std::unique_ptr<ast::type_decl::attributes_ast_node> node = std::make_unique<ast::type_decl::attributes_ast_node>();
 
     // Attributes are optional, so check whether they exist at all.
-    if (tokens.empty() || tokens.front()->get_group() == token_group::SCOPE_BEGIN)
-        return node;
+    bool attributes_exist = false;
 
 
     // Optional 1: Static
     if (util::consuming_check(tokens, token_group::KEYWORD_STATIC))
     {
         node->set_is_static(true);
+        attributes_exist = true;
     }
 
     // Optional 2: Visibility
@@ -46,25 +46,31 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     {
         node->set_visibility(visibility.value());
         tokens.pop();
+        attributes_exist = true;
     }
 
     // Optional 3: Abstract
     if (util::consuming_check(tokens, token_group::KEYWORD_ABSTRACT))
     {
         node->set_is_abstract(true);
+        attributes_exist = true;
     }
 
     // Optional 4: Final
     if (util::consuming_check(tokens, token_group::KEYWORD_FINAL))
     {
         node->set_is_final(true);
+        attributes_exist = true;
     }
 
 
+    if (!attributes_exist)
+        return node;
+
+    // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
+    // or did not close the attribute statement with Shall Be.
     if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
-        // If the last keyword wasn't Shall Be, it means that the user entered a nonsensical keyword before,
-        // or did not close the attribute statement with Shall Be.
         throw std::runtime_error("Unexpected token: Expected attribute list enclosed by היה");
     }
 
