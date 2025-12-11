@@ -180,8 +180,10 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 }
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(symbol *const parent_symbol,
+        std::vector<local_variable_symbol *> &index_to_local_variable,
         ast::impl::ast_node *producing_node) :
-    symbol(parent_symbol, symbol_type::METHOD_SCOPE)
+    symbol(parent_symbol, symbol_type::METHOD_SCOPE),
+    index_to_local_variable(index_to_local_variable)
 {
 }
 
@@ -191,10 +193,15 @@ const std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer:
     return local_variables;
 }
 
-std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::local_variable_symbol>> &codesh::
-    semantic_analyzer::method_scope_symbol::get_variables()
+size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(std::string name,
+        std::unique_ptr<local_variable_symbol> variable)
 {
-    return local_variables;
+    local_variables.emplace(std::move(name), std::move(variable));
+
+    const size_t index = index_to_local_variable.size();
+    index_to_local_variable.push_back(local_variables.at(name).get());
+
+    return index;
 }
 
 const std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &codesh::semantic_analyzer::
@@ -217,7 +224,7 @@ codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_sym
     access_flags(access_flags),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
-    method_scope(this),
+    method_scope(this, index_to_local_variable),
     producing_node(producing_node)
 {
 }
@@ -237,6 +244,12 @@ const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::se
 codesh::ast::type::type_ast_node &codesh::semantic_analyzer::method_symbol::get_return_type() const
 {
     return *return_type;
+}
+
+const std::vector<codesh::semantic_analyzer::local_variable_symbol *> &codesh::semantic_analyzer::method_symbol::
+    get_variables_indexed() const
+{
+    return index_to_local_variable;
 }
 
 const codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_symbol::get_scope() const

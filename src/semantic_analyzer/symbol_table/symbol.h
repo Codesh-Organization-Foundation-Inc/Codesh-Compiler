@@ -171,13 +171,20 @@ public:
 class method_scope_symbol final : public symbol
 {
     std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
+    std::vector<local_variable_symbol *> &index_to_local_variable;
+
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    method_scope_symbol(symbol *parent_symbol, ast::impl::ast_node *producing_node = nullptr);
+    method_scope_symbol(symbol *parent_symbol, std::vector<local_variable_symbol *> &index_to_local_variable,
+            ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
-    [[nodiscard]] std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables();
+
+    /**
+     * @returns The new variable's index
+     */
+    size_t add_variable(std::string name, std::unique_ptr<local_variable_symbol> variable);
 
     [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes() const;
     [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
@@ -190,6 +197,7 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
+    std::vector<local_variable_symbol *> index_to_local_variable;
     method_scope_symbol method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
@@ -203,6 +211,8 @@ public:
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
+
+    [[nodiscard]] const std::vector<local_variable_symbol *> &get_variables_indexed() const;
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
     [[nodiscard]] method_scope_symbol &get_scope();
