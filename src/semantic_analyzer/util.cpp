@@ -45,6 +45,6 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
     const std::string &name, type_symbol &containing_type)
 {
     return containing_type.add_symbol(
-        name, std::make_unique<method_overloads_symbol>()
+        name, std::make_unique<method_overloads_symbol>(&containing_type)
     ).first;
 }

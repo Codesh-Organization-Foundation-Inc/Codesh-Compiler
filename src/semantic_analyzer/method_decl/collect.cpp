@@ -23,6 +23,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 
         const auto [it, inserted] = methods_container.add_symbol(
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
+                &containing_type,
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone(),
@@ -52,9 +53,12 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
     // Parameters
     for (const auto &param : method_decl.get_parameters())
     {
-        method_symbol.get_scope().get_variables().emplace(
+        auto &method_scope = method_symbol.get_scope();
+
+        method_scope.get_variables().emplace(
             param->get_name(),
             std::make_unique<codesh::semantic_analyzer::local_variable_symbol>(
+                &method_scope,
                 param->get_type()->clone()
             )
         );
