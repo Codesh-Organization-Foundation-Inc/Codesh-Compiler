@@ -207,6 +207,9 @@ public:
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node);
 
+    [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
+
+
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;

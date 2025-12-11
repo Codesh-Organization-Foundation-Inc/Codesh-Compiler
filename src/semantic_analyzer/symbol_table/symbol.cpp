@@ -229,6 +229,12 @@ codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_sym
 {
 }
 
+std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
+    create_method_scope(symbol &parent_scope)
+{
+    return std::make_unique<method_scope_symbol>(&parent_scope, index_to_local_variable);
+}
+
 const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_analyzer::method_symbol::get_access_flags()
     const
 {
