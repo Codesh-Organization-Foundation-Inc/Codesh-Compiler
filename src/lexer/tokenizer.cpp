@@ -131,7 +131,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            error::blasphemy_collector().add_blasphemy("אֵין מִלּוֹת מַפְתֵּחַ מַתְאִימוֹת", error::blasphemy_type::LEXICAL);
+            error::blasphemy_collector().add_blasphemy("מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית", error::blasphemy_type::LEXICAL);
         }
     }
 
@@ -162,7 +162,7 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
             //TODO: Convert word error token or alike
-            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־סְגִירַת הָעֵרָה מְרוּבַּת פְּסוּקִים");
+            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים");
         }
 
         default: {

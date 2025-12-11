@@ -23,7 +23,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־מְזַהֶה");
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית");
         return nullptr; // TODO: check if this return nullptr is okay
     }
 

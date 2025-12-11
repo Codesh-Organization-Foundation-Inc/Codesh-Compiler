@@ -48,7 +48,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             break;
 
         default:
-            error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה לְ־וַיְהִי", error::blasphemy_type::SYNTAX);
+            error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה ויהי", error::blasphemy_type::SYNTAX);
             tokens.pop();
             break;
         }
