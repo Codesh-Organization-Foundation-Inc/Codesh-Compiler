@@ -162,6 +162,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/method/operation/method_call_ast_node.h
         src/defenition/fully_qualified_class_name.cpp
         src/defenition/fully_qualified_class_name.h
+        src/blasphemies/blasphemy_details.h
+        src/blasphemies/blasphemy_details.cpp
 )
 
 # sudo dnf install boost-regex boost-devel
