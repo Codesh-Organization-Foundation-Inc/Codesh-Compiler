@@ -25,16 +25,18 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
     }
 }
 
-void codesh::parser::parse_methods_call(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> parse_methods_call(
+    std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    const auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>();
+    const auto method_call_node = std::make_unique<codesh::ast::method::operation::method_call_ast_node>();
 
-    util::parse_fqcn(tokens, method_call_node->get_fqcn());
+    codesh::parser::util::parse_fqcn(tokens, method_call_node->get_fqcn());
 
-    if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
+    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::OPEN_PARENTHESIS))
     {
         parse_methods_call_parameters(tokens, *method_call_node);
     }
+    return method_call_node;
 }
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
