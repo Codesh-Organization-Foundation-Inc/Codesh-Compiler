@@ -48,7 +48,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
 
     // Start scope
-    if (util::consuming_check(tokens, token_group::SCOPE_BEGIN))
+    if (!util::consuming_check(tokens, token_group::SCOPE_BEGIN))
     {
         error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_SCOPE_BEGIN,
             error::blasphemy_type::SYNTAX);
@@ -165,7 +165,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
 
         // ושמו
-        if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+        if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
         {
             codesh::error::get_blasphemy_collector().add_blasphemy(
                 codesh::error::blasphemy_details::NO_KEYWORD_NAME,
