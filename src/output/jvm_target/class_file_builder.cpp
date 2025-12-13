@@ -164,7 +164,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     util::put_int_bytes(code_attr->exception_table_length, 2, 0);
 
     //TODO: Re-add line number table
-
+    //
     // // Line number table
     // auto line_number_table_attr = std::make_unique<codesh::output::jvm_target::defs::line_number_table_attribute_entry>();
     // codesh::util::put_int_bytes(line_number_table_attr->attribute_name_index, 2, 10);

@@ -21,7 +21,8 @@ class custom_type_ast_node : public type_ast_node, public impl::i_resolvable
     std::optional<std::string> resolved_name;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
+    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
 
 public:
     explicit custom_type_ast_node(std::string name);
@@ -30,7 +31,6 @@ public:
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
     [[nodiscard]] std::string get_name() const override;
-    [[nodiscard]] const std::optional<std::string> &get_resolved_name() const override;
 
     [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
 };

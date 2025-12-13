@@ -2,7 +2,7 @@
 
 #include <utility>
 
-std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name()
+std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::_get_resolved_name()
 {
     return resolved_name;
 }
@@ -16,7 +16,7 @@ std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descript
     return "L" + get_binary_name(resolved) + ";";
 }
 
-const std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::get_resolved_name() const
+const std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::_get_resolved_name() const
 {
     return resolved_name;
 }

@@ -20,11 +20,11 @@ class method_call_ast_node : public impl::ir_emitting_ast_node, public impl::i_r
     std::list<std::unique_ptr<var_reference::value_ast_node>> arguments;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
+    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
 
 public:
     [[nodiscard]] std::string get_name() const override;
-    [[nodiscard]] const std::optional<std::string> &get_resolved_name() const override;
 
     [[nodiscard]] definition::fully_qualified_class_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_class_name &get_fqcn() const;

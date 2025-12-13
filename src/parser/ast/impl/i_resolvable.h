@@ -9,7 +9,8 @@ namespace codesh::ast::impl
 class i_resolvable
 {
 protected:
-    [[nodiscard]] virtual std::optional<std::string> &get_resolved_name() = 0;
+    [[nodiscard]] virtual std::optional<std::string> &_get_resolved_name() = 0;
+    [[nodiscard]] virtual const std::optional<std::string> &_get_resolved_name() const = 0;
 
 public:
     virtual ~i_resolvable();
@@ -20,7 +21,7 @@ public:
     [[nodiscard]] virtual std::string get_name() const = 0;
 
     void set_resolved_name(std::string resolved_name);
-    [[nodiscard]] virtual const std::optional<std::string> &get_resolved_name() const = 0;
+    [[nodiscard]] std::string get_resolved_name() const;
 
     /**
      * @return The resolved name prefixed by the package, separated by slashes.

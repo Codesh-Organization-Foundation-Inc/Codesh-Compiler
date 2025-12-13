@@ -106,10 +106,14 @@ const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_ana
 }
 
 codesh::semantic_analyzer::variable_symbol::variable_symbol(const symbol_type _symbol_type,
-        std::unique_ptr<ast::type::type_ast_node> type) :
-    symbol(_symbol_type),
-    type(std::move(type))
+                                                            std::unique_ptr<ast::type::type_ast_node> type)
+    : symbol(_symbol_type), type(std::move(type))
 {
+}
+
+codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::get_type() const
+{
+    return type.get();
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(std::vector<output::jvm_target::access_flag> access_flags,
@@ -170,6 +174,30 @@ codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(ast::impl::a
 {
 }
 
+const std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::local_variable_symbol>> &codesh::
+    semantic_analyzer::method_scope_symbol::get_variables() const
+{
+    return local_variables;
+}
+
+std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::local_variable_symbol>> &codesh::
+    semantic_analyzer::method_scope_symbol::get_variables()
+{
+    return local_variables;
+}
+
+const std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &codesh::semantic_analyzer::
+    method_scope_symbol::get_inner_method_scopes() const
+{
+    return inner_method_scopes;
+}
+
+std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &codesh::semantic_analyzer::
+    method_scope_symbol::get_inner_method_scopes()
+{
+    return inner_method_scopes;
+}
+
 codesh::semantic_analyzer::method_symbol::method_symbol(
          const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
@@ -204,7 +232,7 @@ const codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer:
     return method_scope;
 }
 
-codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_symbol::get_scopes()
+codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_symbol::get_scope()
 {
     return method_scope;
 }

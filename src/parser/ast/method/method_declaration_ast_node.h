@@ -48,6 +48,7 @@ public:
     [[nodiscard]] type::type_ast_node *get_return_type() const;
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
 
+
     [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();
     [[nodiscard]] const std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body() const;
 

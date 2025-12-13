@@ -33,7 +33,8 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<method::constructor_declaration_ast_node *> constructors;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
+    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
 
 public:
     explicit type_declaration_ast_node(std::string name);
@@ -46,7 +47,6 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const std::optional<std::string> &get_resolved_name() const override;
     [[nodiscard]] std::string get_name() const override;
 
 
