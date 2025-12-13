@@ -8,8 +8,8 @@ namespace codesh::error::blasphemy_details
 //TODO: Add all details here
 
 // INIT
-extern const std::string CANT_OPEN_SOURCE_FILE;
-extern const std::string CANT_OPEN_FILE;
+extern const std::string SOURCE_FILE_OPEN_ERROR;
+extern const std::string OUTPUT_FILE_OPEN_ERROR;
 extern const std::string NO_MAIN_ARGS;
 
 // LEXICAL

@@ -31,7 +31,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     if (!destination_file)
     {
-        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::CANT_OPEN_SOURCE_FILE,
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::SOURCE_FILE_OPEN_ERROR,
             error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 

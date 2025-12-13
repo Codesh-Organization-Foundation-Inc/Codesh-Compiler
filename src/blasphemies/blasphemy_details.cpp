@@ -1,8 +1,8 @@
 #include "blasphemy_details.h"
 
 // INIT
-const std::string codesh::error::blasphemy_details::CANT_OPEN_SOURCE_FILE = "לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַמּוֹצָא";
-const std::string codesh::error::blasphemy_details::CANT_OPEN_FILE = "לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ: ";
+const std::string codesh::error::blasphemy_details::SOURCE_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַמּוֹצָא";
+const std::string codesh::error::blasphemy_details::OUTPUT_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ: ";
 const std::string codesh::error::blasphemy_details::NO_MAIN_ARGS = "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
 
 // LEXICAL

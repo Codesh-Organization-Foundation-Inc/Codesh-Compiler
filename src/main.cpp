@@ -73,7 +73,7 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        codesh::error::blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::CANT_OPEN_FILE
+        codesh::error::blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::OUTPUT_FILE_OPEN_ERROR
             + file_name,
             codesh::error::blasphemy_type::INIT, std::nullopt, true);
     }
