@@ -1,12 +1,21 @@
 #include "command_parser.h"
-#include <stdexcept>
+
+#include "blasphemies/blasphemy_details.h"
+#include "blasphemies/blasphemy_collector.h"
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
 
     if (argc < 2)
-        throw std::runtime_error("Missing arguments: Required input and output paths");
+    {
+        error::get_blasphemy_collector().add_blasphemy(
+            error::blasphemy_details::NO_MAIN_ARGS,
+            error::blasphemy_type::INIT,
+            std::nullopt,
+            true
+        );
+    }
 
     result.src_path = argv[1];
     result.dest_path = argv[2];

@@ -2,6 +2,8 @@
 
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
+#include "../../../blasphemies/blasphemy_collector.h"
+#include "../../../blasphemies/blasphemy_details.h"
 #include "../../util.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -23,9 +25,13 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
             tokens.pop();
             return;
 
-        default: throw std::runtime_error("Unexpected token");
+        default: error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::UNEXPECTED_TOKEN,
+            error::blasphemy_type::SYNTAX);
         }
     }
+
+    error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_SCOPE_END,
+        error::blasphemy_type::SYNTAX);
 }
 
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(

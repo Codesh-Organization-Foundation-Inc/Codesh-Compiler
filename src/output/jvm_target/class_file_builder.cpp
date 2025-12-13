@@ -1,5 +1,7 @@
 #include "class_file_builder.h"
 
+#include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/method/method_declaration_ast_node.h"
@@ -87,7 +89,10 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     const size_t constant_pool_size = constant_pool_.size() + 1;
 
     if (constant_pool_size > 0xFFFF)
-        throw std::runtime_error("Too many constant pool entries; max amount is 65535");
+    {
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::CONSTANT_POOL_TOO_BIG,
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
+    }
 
     util::put_int_bytes(class_file->constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 
@@ -148,7 +153,10 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     if (code_attr->code.size() > 0xFFFFFF)
-        throw std::runtime_error("Method code is too long");
+    {
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::METHOD_TOO_BIG,
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
+    }
 
     util::put_int_bytes(code_attr->code_length, 4, code_attr->code.size()); // NOLINT(*-narrowing-conversions)
 

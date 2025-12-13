@@ -1,8 +1,6 @@
 #include "resolve_aliases.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
 #include "../util.h"
 
 static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);
@@ -32,7 +30,6 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     if (!bereshit_method.has_value())
         return;
 
-
     codesh::ast::method::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
 
 
@@ -52,12 +49,7 @@ static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type
     }
 
     if (!(is_public && is_static))
-    {
-        codesh::semantic_analyzer::collect_error(
-            "The method 'בראשית' must be both public and static."
-        );
         return;
-    }
 
 
     rename_method(type, method_node, "main");
