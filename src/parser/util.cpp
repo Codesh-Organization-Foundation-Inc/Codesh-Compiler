@@ -1,14 +1,16 @@
 #include "util.h"
 
-#include "../defenition/definitions.h"
+#include "../blasphemies/blasphemy_collector.h"
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
+#include "../blasphemies/blasphemy_details.h"
 
-std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
+        const std::string &no_tokens_blasphemy_details)
 {
     // TODO: Request custom error message
-    ensure_tokens_exist(tokens);
+    ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
 
     std::unique_ptr<token> token = std::move(tokens.front());
     tokens.pop();
@@ -16,13 +18,15 @@ std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<st
 }
 
 std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifier_token(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens, const std::string &no_tokens_blasphemy_details)
 {
-    std::unique_ptr<token> token = consume_token(tokens);
+    std::unique_ptr<token> token = consume_token(tokens, no_tokens_blasphemy_details);
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        throw std::runtime_error("Unexpected token: Expected identifier");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+            error::blasphemy_type::SYNTAX, std::nullopt);
+        return nullptr; // TODO: check if this return nullptr is okay
     }
 
     return std::unique_ptr<identifier_token>(
@@ -31,11 +35,11 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_type(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     std::unique_ptr<ast::type::type_ast_node> result;
 
-    const auto type_token = consume_token(tokens);
+    const auto type_token = consume_token(tokens, error::blasphemy_details::NO_TYPE);
 
     switch (type_token->get_group())
     {
@@ -72,7 +76,9 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        throw std::runtime_error("Unexpected token: Invalid type name");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_TYPE,
+            error::blasphemy_type::SYNTAX, std::nullopt);
+        return nullptr;
     }
 
 
@@ -88,18 +94,29 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
 bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)
 {
-    if (!tokens.empty() && tokens.front()->get_group() != token_group)
-        return false;
+    if (peeking_check(tokens, token_group))
+    {
+        tokens.pop();
+        return true;
+    }
 
-    tokens.pop();
-    return true;
+    return false;
 }
 
-void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens)
+bool codesh::parser::util::peeking_check(const std::queue<std::unique_ptr<token>> &tokens,
+        const token_group token_group)
+{
+    return !tokens.empty() && tokens.front()->get_group() == token_group;
+}
+
+void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
+        const std::string &no_tokens_blasphemy_details)
 {
     if (tokens.empty())
     {
-        throw std::runtime_error("Unexpected EOF"); //TODO: Convert to custom Codesh error
+        // TODO: Switch error message to take from parameter
+        error::get_blasphemy_collector().add_blasphemy(no_tokens_blasphemy_details,
+            error::blasphemy_type::SYNTAX, std::nullopt, true);
     }
 }
 
@@ -107,7 +124,9 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (tokens.empty() || tokens.front()->get_group() != token_group::PUNCTUATION_END_OP)
     {
-        throw std::runtime_error("Unexpected token: Expected colon"); //TODO: Convert to custom Codesh error
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_PUNCTUATION_END_OP,
+            error::blasphemy_type::SYNTAX);
+        return;
     }
 
     tokens.pop();
@@ -118,7 +137,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 {
     while (!tokens.empty())
     {
-        std::unique_ptr<token> id = consume_token(tokens);
+        std::unique_ptr<token> id = consume_token(tokens, error::blasphemy_details::NO_IDENTIFIER);
 
         if (id->get_group() != token_group::IDENTIFIER)
         {
@@ -128,7 +147,8 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                throw std::runtime_error("Unexpected token: Expected identifier"); //TODO: Convert to custom Codesh error
+                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+                    error::blasphemy_type::SYNTAX);
             }
         }
         else
@@ -151,11 +171,12 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             // If the user has put a wildcard yet still attempts to add more shit
             if (!is_last_item && fqcn_out.is_wildcard())
             {
-                throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+                // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+                    error::blasphemy_type::SYNTAX);
             }
         }
 
         break;
     }
-
 }

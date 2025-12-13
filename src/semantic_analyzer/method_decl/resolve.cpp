@@ -4,7 +4,7 @@
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
+#include "../../blasphemies/blasphemy_collector.h"
 #include "../util.h"
 
 static void resolve_return_type(
@@ -81,11 +81,12 @@ static void resolve_return_type(
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
     {
         std::ostringstream os_string;
-        os_string << "Unknown return type " << return_type->get_name()
-            << " in method " << method_decl.get_name()
-            << " of type " << class_name;
+        os_string << "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ: " << return_type->get_name()
+            << " בְּמַעֲשֶׂה " << method_decl.get_name()
+            << " בְּעֶצֶם " << class_name;
 
-        codesh::semantic_analyzer::collect_error(os_string.str());
+        codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str(),
+                                                               codesh::error::blasphemy_type::SEMANTIC);
     }
 }
 
@@ -111,11 +112,14 @@ static void resolve_parameters(
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
         {
             std::ostringstream os_string;
-            os_string << "Unknown return type " << custom_param->get_name()
-                << " in method " << method.get_name()
-                << " of type " << class_name;
+            os_string << "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג פָּרָמֶטֶר לֹא יָדוּעַ: " << custom_param->get_name()
+                << " בְּמַעֲשֶׂה " << method.get_name()
+                << " בְּעֶצֶם " << class_name;
 
-            codesh::semantic_analyzer::collect_error(os_string.str());
+            codesh::error::get_blasphemy_collector().add_blasphemy(
+                os_string.str(),
+                codesh::error::blasphemy_type::SEMANTIC
+            );
         }
     }
 }
