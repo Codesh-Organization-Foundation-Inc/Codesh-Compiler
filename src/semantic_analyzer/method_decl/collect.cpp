@@ -13,8 +13,8 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
                                     codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
-void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::type_decl::class_declaration_ast_node &class_decl,
-                                                    type_symbol &containing_type)
+void codesh::semantic_analyzer::method_declaration::collect_methods(
+        const ast::type_decl::class_declaration_ast_node &class_decl, type_symbol &containing_type)
 {
     for (const auto &method_decl : class_decl.get_all_methods())
     {
@@ -23,6 +23,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
 
         const auto [it, inserted] = methods_container.add_symbol(
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
+                &methods_container,
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone(),
@@ -39,6 +40,9 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const ast::t
             error::get_blasphemy_collector().add_blasphemy(builder.str(), error::blasphemy_type::SEMANTIC);
         }
 
+        method_decl->set_symbol(it);
+
+
         collect_local_variables(*method_decl, it);
     }
 }
@@ -49,9 +53,12 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
     // Parameters
     for (const auto &param : method_decl.get_parameters())
     {
-        method_symbol.get_scope().get_variables().emplace(
+        auto &method_scope = method_symbol.get_scope();
+
+        method_scope.add_variable(
             param->get_name(),
             std::make_unique<codesh::semantic_analyzer::local_variable_symbol>(
+                &method_scope,
                 param->get_type()->clone()
             )
         );

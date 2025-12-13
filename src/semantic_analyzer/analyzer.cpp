@@ -39,14 +39,15 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
     add_default_super_call(ast_root);
 
     add_default_return_statement(ast_root);
+
+    add_this_param_to_non_static_methods(ast_root);
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
     method_declaration::resolve_methods(ast_root);
 
-    add_this_param_to_non_static_methods(ast_root);
-    // TODO: When CALLING non-static methods, also add 'this' as first argument
+    //TODO: When CALLING non-static methods, also add 'this' as first argument
 
     resolve_aliases(ast_root);
 }
@@ -172,7 +173,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     this_param->set_name("this");
     this_param->set_is_final(true);
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_binary_name());
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_binary_name(false));
     this_param->set_type(std::move(this_class_type));
 
     return std::move(this_param);

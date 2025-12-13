@@ -19,10 +19,10 @@
 #include <list>
 #include <ranges>
 
-
-codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::compilation_unit_ast_node &root_node,
+codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
+        const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
-    class_file(std::make_unique<defs::class_file>()),
+    class_file(class_file_out),
     root_node(root_node),
     type_decl(type_decl),
     constant_pool_(type_decl.get_constant_pool()->get()),
@@ -35,23 +35,23 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(const ast::co
     ))
 {}
 
-std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jvm_target::class_file_builder::build()
+void codesh::output::jvm_target::class_file_builder::build() const
 {
-    util::put_bytes(class_file->magic, {0xCA, 0xFE, 0xBA, 0xBE});
+    util::put_bytes(class_file.magic, {0xCA, 0xFE, 0xBA, 0xBE});
 
-    util::put_int_bytes(class_file->minor_version, 2, 0);
-    util::put_int_bytes(class_file->major_version, 2, JAVA_TARGET_VERSION);
+    util::put_int_bytes(class_file.minor_version, 2, 0);
+    util::put_int_bytes(class_file.major_version, 2, JAVA_TARGET_VERSION);
 
     add_constant_pool_entries();
 
     //TODO: Set by class attributes
-    set_access_flags(class_file->access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
+    set_access_flags(class_file.access_flags, {access_flag::ACC_SUPER, access_flag::ACC_PUBLIC});
 
-    util::put_int_bytes(class_file->this_class, 2, this_class_cpi);
-    util::put_int_bytes(class_file->super_class, 2, super_class_cpi);
+    util::put_int_bytes(class_file.this_class, 2, this_class_cpi);
+    util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
-    util::put_int_bytes(class_file->interfaces_count, 2, 0);
-    util::put_int_bytes(class_file->fields_count, 2, 0);
+    util::put_int_bytes(class_file.interfaces_count, 2, 0);
+    util::put_int_bytes(class_file.fields_count, 2, 0);
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -60,14 +60,12 @@ std::unique_ptr<codesh::output::jvm_target::defs::class_file> codesh::output::jv
     else
     {
         // TODO: Handle
-        util::put_int_bytes(class_file->methods_count, 2, 0);
+        util::put_int_bytes(class_file.methods_count, 2, 0);
     }
 
-    util::put_int_bytes(class_file->attribute_count, 2, 1);
+    util::put_int_bytes(class_file.attribute_count, 2, 1);
 
     add_source_file();
-
-    return std::move(class_file);
 }
 
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
@@ -79,7 +77,7 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
     }
 
     util::put_int_bytes(
-        class_file->methods_count, 2,
+        class_file.methods_count, 2,
         static_cast<int>(class_decl.get_all_methods().size())
     );
 }
@@ -94,12 +92,12 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
             error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
-    util::put_int_bytes(class_file->constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
+    util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
 
 
     for (const auto &constant_pool_entry : constant_pool_.get_literals())
     {
-        class_file->constant_pool.push_back(constant_pool_entry);
+        class_file.constant_pool.push_back(constant_pool_entry);
     }
 }
 
@@ -128,7 +126,6 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
     util::put_int_bytes(code_attr->max_stack, 2, 1);
-    util::put_int_bytes(code_attr->max_locals, 2, 1);
 
 
     // Convert the method to IR
@@ -180,53 +177,44 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     // Local variables
+    const size_t local_vars_count = method_decl.get_symbol().get_all_local_variables().size();
+    if (local_vars_count > 0xFFFF)
+        throw std::runtime_error("Too many local variables in method " + method_decl.get_name() + "; Max amount is 65535");
+
+    const int lvt_size = static_cast<int>(local_vars_count);
+    util::put_int_bytes(code_attr->max_locals, 2, lvt_size);
+
+
+    // Local Variables Table
     auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
     util::put_int_bytes(
         local_variable_table->attribute_name_index, 2,
         constant_pool_.get_utf8_index("LocalVariableTable")
     );
 
-    // Add parameters
-    int index = 0;
-    for (const auto &param_node : method_decl.get_parameters())
-    {
-        auto lvt_entry = std::make_unique<defs::local_variable_table_entry>();
-        util::put_int_bytes(lvt_entry->start_pc, 2, 0);
-        util::put_int_bytes(lvt_entry->length, 2, static_cast<int>(code_attr->code.size()));
-
-        util::put_int_bytes(
-            lvt_entry->name_index, 2,
-            constant_pool_.get_utf8_index(param_node->get_name())
-        );
-        util::put_int_bytes(
-            lvt_entry->descriptor_index, 2,
-            constant_pool_.get_utf8_index(param_node->get_type()->generate_descriptor())
-        );
-
-        util::put_int_bytes(lvt_entry->index, 2, index++);
-        local_variable_table->local_variable_table.push_back(std::move(lvt_entry));
-    }
-
-    //TODO: Account for local variables too
-    const int local_vars_count = static_cast<int>(method_decl.get_parameters().size());
-
-    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, local_vars_count);
-
-    util::put_int_bytes(
-        local_variable_table->attribute_length, 4,
-        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * local_vars_count
+    collect_local_variables(
+        local_variable_table->local_variable_table,
+        method_decl,
+        static_cast<int>(code_attr->code.size())
     );
+
+    util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
+
+    const int lvt_attr_length = 2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size;
+    util::put_int_bytes(local_variable_table->attribute_length, 4, lvt_attr_length);
+
     code_attr->attributes.push_back(std::move(local_variable_table));
+
 
 
     util::put_int_bytes(
         code_attr->attribute_length, 4,
-        30 + static_cast<int>(code_attr->code.size())
+        18 + lvt_attr_length + static_cast<int>(code_attr->code.size())
     );
     util::put_int_bytes(code_attr->attribute_count, 2, 1);
 
     method_entry->attribute_info.push_back(std::move(code_attr));
-    class_file->methods_info.push_back(std::move(method_entry));
+    class_file.methods_info.push_back(std::move(method_entry));
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
@@ -242,7 +230,7 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
     constant_pool_.get_utf8_index(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION)
     );
 
-    class_file->attribute_info.push_back(std::move(source_file_entry));
+    class_file.attribute_info.push_back(std::move(source_file_entry));
 }
 
 void codesh::output::jvm_target::class_file_builder::set_access_flags(
@@ -257,4 +245,41 @@ void codesh::output::jvm_target::class_file_builder::set_access_flags(
     }
 
     util::put_int_bytes(buffer, 2, value);
+}
+
+void codesh::output::jvm_target::class_file_builder::collect_local_variables(
+        std::vector<std::unique_ptr<defs::local_variable_table_entry>> &results_out,
+        const ast::method::method_declaration_ast_node &method_decl,
+        const int code_length_total) const
+{
+    const auto &local_vars = method_decl.get_symbol().get_all_local_variables();
+    for (int i = 0; i < local_vars.size(); i++)
+    {
+        const auto &[name, var] = local_vars.at(i).get();
+
+        auto entry = std::make_unique<defs::local_variable_table_entry>();
+
+        //TODO: Fill per scope info:
+        util::put_int_bytes(entry->start_pc, 2, 0);
+        util::put_int_bytes(entry->length, 2, code_length_total);
+
+        util::put_int_bytes(
+            entry->name_index,
+            2,
+            constant_pool_.get_utf8_index(
+                name
+            )
+        );
+        util::put_int_bytes(
+            entry->descriptor_index,
+            2,
+            constant_pool_.get_utf8_index(
+                var->get_type()->generate_descriptor()
+            )
+        );
+
+        util::put_int_bytes(entry->index, 2, i);
+
+        results_out.push_back(std::move(entry));
+    }
 }

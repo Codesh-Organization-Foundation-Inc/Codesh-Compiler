@@ -3,7 +3,12 @@
 #include "defs/class_file.h"
 
 #include <filesystem>
+#include <list>
 
+namespace codesh::semantic_analyzer
+{
+class method_scope_symbol;
+}
 namespace codesh::ast::type_decl
 {
 class class_declaration_ast_node;
@@ -48,7 +53,7 @@ enum class access_flag : uint16_t
 
 class class_file_builder
 {
-    std::unique_ptr<defs::class_file> class_file;
+    defs::class_file &class_file;
 
     const ast::compilation_unit_ast_node &root_node;
     const ast::type_decl::type_declaration_ast_node &type_decl;
@@ -69,11 +74,15 @@ class class_file_builder
 
     static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);
 
+    void collect_local_variables(std::vector<std::unique_ptr<defs::local_variable_table_entry>> &results_out,
+            const ast::method::method_declaration_ast_node &method_decl, int code_length_total) const;
+
 public:
-    class_file_builder(const ast::compilation_unit_ast_node &root_node,
+    class_file_builder(defs::class_file &class_file_out,
+            const ast::compilation_unit_ast_node &root_node,
             const ast::type_decl::type_declaration_ast_node &type_decl);
 
-    [[nodiscard]] std::unique_ptr<defs::class_file> build();
+    void build() const;
 };
 
 }

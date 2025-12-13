@@ -12,6 +12,10 @@
 #include <memory>
 #include <string>
 
+namespace codesh::semantic_analyzer
+{
+class method_symbol;
+}
 namespace codesh::ast::method
 {
 
@@ -26,8 +30,10 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     // "throws" declaration
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
-
     std::list<std::unique_ptr<impl::ir_emitting_ast_node>> body;
+
+
+    std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> symbol;
 
 
     [[nodiscard]] std::string generate_unresolved_parameter_descriptors() const;
@@ -47,6 +53,10 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_return_type() const;
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
+
+
+    [[nodiscard]] semantic_analyzer::method_symbol &get_symbol() const;
+    void set_symbol(semantic_analyzer::method_symbol &symbol);
 
 
     [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();

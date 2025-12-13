@@ -209,7 +209,7 @@ static void on_regex_token(codesh::token *token)
 
 static void escape_characters(std::string &str, const std::string &word)
 {
-    codesh::util::replaceAll(
+    codesh::util::replace_all(
         str,
         std::string(trie::keyword::STRING_ESCAPE) + word,
         word

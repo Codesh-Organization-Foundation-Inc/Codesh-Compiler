@@ -31,12 +31,14 @@ enum class symbol_type
 class symbol
 {
     symbol_type _symbol_type;
+    symbol *const parent_symbol;
 
 public:
-    explicit symbol(symbol_type symbol_type);
+    symbol(symbol *parent_symbol, symbol_type symbol_type);
     virtual ~symbol();
 
     [[nodiscard]] symbol_type get_symbol_type() const;
+    [[nodiscard]] symbol *get_parent_symbol() const;
 };
 
 
@@ -83,7 +85,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    explicit country_symbol(ast::impl::ast_node *producing_node = nullptr);
+    explicit country_symbol(symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 };
@@ -105,7 +107,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
+    type_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
@@ -120,7 +122,7 @@ class variable_symbol : public symbol
     const std::unique_ptr<ast::type::type_ast_node> type;
 
 public:
-    variable_symbol(symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
+    variable_symbol(symbol *parent_symbol, symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
 
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
 };
@@ -131,7 +133,7 @@ class field_symbol final : public variable_symbol
     const std::vector<output::jvm_target::access_flag> access_flags;
 
 public:
-    field_symbol(std::vector<output::jvm_target::access_flag> access_flags,
+    field_symbol(symbol *parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
             std::unique_ptr<ast::type::type_ast_node> type, ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
@@ -141,7 +143,7 @@ public:
 class local_variable_symbol final : public variable_symbol
 {
 public:
-    explicit local_variable_symbol(std::unique_ptr<ast::type::type_ast_node> type,
+    explicit local_variable_symbol(symbol *parent_symbol, std::unique_ptr<ast::type::type_ast_node> type,
             ast::impl::ast_node *producing_node = nullptr);
 };
 
@@ -157,7 +159,7 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    method_overloads_symbol();
+    explicit method_overloads_symbol(symbol *parent_symbol);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 
@@ -165,20 +167,30 @@ public:
 };
 
 
+using local_variable_entry = std::pair<const std::string, std::unique_ptr<local_variable_symbol>>;
+
 //TODO: Handle producing node
 class method_scope_symbol final : public symbol
 {
     std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
+    std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable;
+
     std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
 
 public:
-    explicit method_scope_symbol(ast::impl::ast_node *producing_node = nullptr);
+    method_scope_symbol(symbol *parent_symbol,
+            std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
+            ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
-    [[nodiscard]] std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables();
 
-    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes() const;
-    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_method_scopes();
+    /**
+     * @returns The new variable's index
+     */
+    size_t add_variable(std::string name, std::unique_ptr<local_variable_symbol> variable);
+
+    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes() const;
+    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
 };
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
@@ -188,19 +200,25 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
+    std::vector<std::reference_wrapper<local_variable_entry>> local_variables;
     method_scope_symbol method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
 
 public:
-    method_symbol(const std::vector<output::jvm_target::access_flag> &access_flags,
+    method_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node);
+
+    [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
+
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
+
+    [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_entry>> &get_all_local_variables() const;
 
     [[nodiscard]] const method_scope_symbol &get_scope() const;
     [[nodiscard]] method_scope_symbol &get_scope();
