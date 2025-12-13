@@ -103,7 +103,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         }
 
         default: {
-            codesh::error::get_blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::TOKEN_NOT_EXIST,
+            codesh::error::get_blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::TOKEN_DOESNT_EXIST,
                                                                    codesh::error::blasphemy_type::SYNTAX);
             return;
         }

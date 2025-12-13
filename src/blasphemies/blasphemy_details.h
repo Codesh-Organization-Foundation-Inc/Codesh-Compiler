@@ -14,7 +14,7 @@ extern const std::string NO_MAIN_ARGS;
 
 // LEXICAL
 extern const std::string NO_BASAD;
-extern const std::string TOKEN_NOT_EXIST;
+extern const std::string TOKEN_DOESNT_EXIST;
 
 
 // SYNTAX

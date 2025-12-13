@@ -8,7 +8,7 @@ const std::string codesh::error::blasphemy_details::NO_MAIN_ARGS = "מִנְחו
 //LEXICAL
 const std::string codesh::error::blasphemy_details::NO_BASAD = "בַּסַּ\"ד אֵינוֹ";
 // Add עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה if needed
-const std::string codesh::error::blasphemy_details::TOKEN_NOT_EXIST = "מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית";
+const std::string codesh::error::blasphemy_details::TOKEN_DOESNT_EXIST = "מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית";
 
 // SYNTAX
 // נבוא שקרי
