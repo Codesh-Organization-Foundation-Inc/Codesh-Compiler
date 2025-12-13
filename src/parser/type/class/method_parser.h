@@ -6,10 +6,17 @@
 #include <memory>
 #include <queue>
 
+namespace codesh::ast::method
+{
+class method_declaration_ast_node;
+}
+
 namespace codesh::parser
 {
 
-void parse_method(std::queue<std::unique_ptr<token>> &tokens);
-std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
+void parse_method(std::queue<std::unique_ptr<token>> &tokens, ast::method::method_declaration_ast_node &method_decl);
+
+[[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
     std::queue<std::unique_ptr<token>> &tokens);
+
 }

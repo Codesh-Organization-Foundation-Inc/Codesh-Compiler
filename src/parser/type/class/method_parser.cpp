@@ -1,12 +1,14 @@
 #include "method_parser.h"
 
+#include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../util.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
-void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
+void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_declaration_ast_node &method_decl)
 {
     while (!tokens.empty())
     {
@@ -14,7 +16,8 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
-            parse_methods_call(tokens);
+            method_decl.get_body().push_back(parse_methods_call(tokens));
+            break;
 
         case token_group::SCOPE_END:
             tokens.pop();
@@ -25,17 +28,19 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens)
     }
 }
 
-std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> parse_methods_call(
-    std::queue<std::unique_ptr<codesh::token>> &tokens)
+std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
+    std::queue<std::unique_ptr<token>> &tokens)
 {
-    const auto method_call_node = std::make_unique<codesh::ast::method::operation::method_call_ast_node>();
+    auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>();
 
-    codesh::parser::util::parse_fqcn(tokens, method_call_node->get_fqcn());
+    util::parse_fqcn(tokens, method_call_node->get_fqcn());
 
-    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::OPEN_PARENTHESIS))
+    if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {
         parse_methods_call_parameters(tokens, *method_call_node);
     }
+
+    util::ensure_end_op(tokens);
     return method_call_node;
 }
 

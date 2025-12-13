@@ -183,7 +183,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         throw std::runtime_error("Expected start of scope");
     }
 
-    parser::parse_method(tokens);
+    parser::parse_method(tokens, *method_node.get());
 
-    return std::move(method_node);
+    return method_node;
 }
