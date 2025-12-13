@@ -7,8 +7,10 @@
 
 #include <vector>
 
-#include "defs/methods_info_entry.h"
+#include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "defs/methods_info_entry.h"
 
 #include "./defs/attribute_info_entry.h"
 #include "defs/class_file.h"
@@ -28,7 +30,10 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     std::ofstream destination_file(destination / (type_decl.get_name() + ".class"), std::ios::binary);
 
     if (!destination_file)
-        throw std::runtime_error("Unable to open output file");
+    {
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::SOURCE_FILE_OPEN_ERROR,
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
+    }
 
 
     write_bytes(destination_file, class_file.magic, 4);

@@ -17,8 +17,6 @@ class token
     const token_type type;
     const token_group group;
 
-    static token_type get_token_type(token_group name);
-
 public:
     token(token_type type, token_group group);
     virtual ~token();
@@ -27,6 +25,8 @@ public:
 
     [[nodiscard]] token_type get_type() const;
     [[nodiscard]] token_group get_group() const;
+
+    static token_type get_token_type(token_group name);
 };
 
 class identifier_token final : public token
@@ -34,7 +34,7 @@ class identifier_token final : public token
     std::string content;
 
 public:
-    identifier_token(token_type type, token_group group, std::string content);
+    identifier_token(token_group group, std::string content);
 
     [[nodiscard]] std::string get_content() const;
     void set_content(std::string content);

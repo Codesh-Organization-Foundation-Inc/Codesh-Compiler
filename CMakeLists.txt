@@ -26,7 +26,6 @@ add_executable(Codesh_Compiler
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -126,8 +125,6 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/collect.h
         src/semantic_analyzer/method_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
-        src/semantic_analyzer/errors/errors.h
-        src/semantic_analyzer/errors/errors.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
         src/semantic_analyzer/util.cpp
@@ -144,6 +141,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
         src/semantic_analyzer/method_decl/resolve_aliases.h
+        src/blasphemies/blasphemy_collector.h
+        src/blasphemies/blasphemy_collector.cpp
         src/output/ir/instruction.cpp
         src/output/ir/instruction.h
         src/output/ir/code_block.cpp
@@ -163,6 +162,9 @@ add_executable(Codesh_Compiler
         src/parser/ast/method/operation/method_call_ast_node.h
         src/defenition/fully_qualified_class_name.cpp
         src/defenition/fully_qualified_class_name.h
+        src/parser/ast/var_reference/value_ast_node.cpp
+        src/blasphemies/blasphemy_details.h
+        src/blasphemies/blasphemy_details.cpp
 )
 
 # sudo dnf install boost-regex boost-devel

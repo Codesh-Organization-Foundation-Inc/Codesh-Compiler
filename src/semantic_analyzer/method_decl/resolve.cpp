@@ -4,7 +4,7 @@
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
+#include "../../blasphemies/blasphemy_collector.h"
 #include "../util.h"
 
 #include <functional>
@@ -70,13 +70,13 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
                 }
                 catch (const std::runtime_error &e)
                 {
-                    std::ostringstream builder;
+                    std::ostringstream os_string;
+                    os_string << e.what()
+                        << " בְּמַעֲשֶׂה " << method_decl->get_name()
+                        << " בְּעֶצֶם " << class_node->get_name();
 
-                    builder << e.what()
-                        << " in method " << method_decl->get_name()
-                        << " of type " << class_node->get_name();
+                    error::get_blasphemy_collector().add_blasphemy(os_string.str());
 
-                    collect_error(builder.str());
                 }
             }
 
@@ -135,7 +135,7 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
             *custom_param,
             *method_symbol.get_parameter_types()[i]
         )) {
-            throw std::runtime_error("Unknown return type " + custom_param->get_name());
+            throw std::runtime_error("עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ " + custom_param->get_name());
         }
 
         ++i;
@@ -161,7 +161,7 @@ static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node
             lookup_countries,
             *custom_param
         )) {
-            throw std::runtime_error("Unknown type " + custom_param->get_name());
+            throw std::runtime_error("עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה " + custom_param->get_name());
         };
     }
 }

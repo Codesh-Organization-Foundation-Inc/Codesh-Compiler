@@ -7,6 +7,7 @@
 #include "aliases.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
+#include "../blasphemies/blasphemy_collector.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
@@ -45,7 +46,7 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     method_declaration::resolve_methods(ast_root);
 
     add_this_param_to_non_static_methods(ast_root);
-    //TODO: When CALLING non-static methods, also add 'this' as first argument
+    // TODO: When CALLING non-static methods, also add 'this' as first argument
 
     resolve_aliases(ast_root);
 }
