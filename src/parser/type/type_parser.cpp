@@ -1,5 +1,7 @@
 #include "type_parser.h"
 
+#include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../defenition/visibility.h"
 #include "../ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
@@ -13,14 +15,14 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
 {
     tokens.pop();
 
-    switch (util::consume_token(tokens)->get_group())
+    switch (util::consume_token(tokens, error::blasphemy_details::UNEXPECTED_DECLARATION)->get_group())
     {
     case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
     case token_group::KEYWORD_INTERFACE:; //TODO
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
-    default: throw std::runtime_error("Unexpected token: Expected class, interface, enum or annotation");
+    default: throw std::runtime_error(error::blasphemy_details::UNEXPECTED_DECLARATION);
     }
 }
 
@@ -71,7 +73,8 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     // or did not close the attribute statement with Shall Be.
     if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
-        throw std::runtime_error("Unexpected token: Expected attribute list enclosed by היה");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_SHALL_BE,
+            error::blasphemy_type::SYNTAX);
     }
 
     return node;

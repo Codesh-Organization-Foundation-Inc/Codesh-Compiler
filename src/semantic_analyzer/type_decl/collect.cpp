@@ -1,8 +1,9 @@
 #include "collect.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../errors/errors.h"
 #include "../method_decl/collect.h"
+
+#include "../../blasphemies/blasphemy_collector.h"
 
 void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compilation_unit_ast_node &root_node,
         country_symbol &containing_country)
@@ -21,7 +22,10 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
 
         if (!inserted)
         {
-            collect_error("Duplicate type declared: " + name);
+            error::get_blasphemy_collector().add_blasphemy(
+            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי מֻגְדָּר הָעֶצֶם " + name + " מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
+                error::blasphemy_type::SEMANTIC
+            );
         }
 
 

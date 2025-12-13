@@ -7,6 +7,7 @@
 #include "aliases.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
+#include "../blasphemies/blasphemy_collector.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
