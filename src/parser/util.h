@@ -4,6 +4,7 @@
 #include <queue>
 
 #include "../token/token.h"
+#include "ast/var_reference/value_ast_node.h"
 
 namespace codesh
 {
@@ -60,9 +61,19 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  * If the token is not an identifier, throws.
  * @return The consumed token
  */
-[[nodiscard]] std::unique_ptr<identifier_token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens,
-        const std::string &no_tokens_blasphemy_details);
+[[nodiscard]] std::unique_ptr<identifier_token> consume_identifier_token(std::queue<std::unique_ptr<token>> &tokens);
+
+/**
+ * Pops the latest token from the queue and returns it, transferring its ownership to the caller.
+ * If the token is not an identifier OR a literal, throws.
+ * @return The consumed token
+ */
+[[nodiscard]] std::unique_ptr<identifier_token> consume_alnum_identifier_token(
+        std::queue<std::unique_ptr<token>> &tokens, const std::string &no_tokens_blasphemy_details);
 
 [[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
+
+
+std::unique_ptr<ast::var_reference::value_ast_node> parse_value(std::queue<std::unique_ptr<token>> &tokens);
 
 }
