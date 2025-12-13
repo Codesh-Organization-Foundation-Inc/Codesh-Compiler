@@ -7,11 +7,11 @@ const std::string codesh::error::blasphemy_details::NO_MAIN_ARGS = "מִנְחו
 
 //LEXICAL
 const std::string codesh::error::blasphemy_details::NO_BASAD = "בַּסַּ\"ד אֵינוֹ";
-// Add עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה if needed
 const std::string codesh::error::blasphemy_details::TOKEN_DOESNT_EXIST = "מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית";
+//TODO: Throw when interoperability & type checks exist
+const std::string codesh::error::blasphemy_details::UNRECOGNIZED_TYPE = "עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה";
 
 // SYNTAX
-// נבוא שקרי
 const std::string codesh::error::blasphemy_details::NO_IDENTIFIER = "נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית";
 const std::string codesh::error::blasphemy_details::NO_IMPORT_TYPE = "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג יְבוּא";
 const std::string codesh::error::blasphemy_details::NO_KEYWORD_LET = "נָבוֹא שְׁקָרַי: צֻּפָּה ויהי";
