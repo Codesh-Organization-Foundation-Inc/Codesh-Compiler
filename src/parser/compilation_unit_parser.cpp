@@ -36,7 +36,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilatio
 
 static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    switch (parser::util::consume_token(tokens)->get_group())
+    switch (parser::util::consume_token(tokens, codesh::error::blasphemy_details::NO_BASAD)->get_group())
     {
     case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
     case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;

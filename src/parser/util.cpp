@@ -6,10 +6,11 @@
 #include "ast/type/primitive_type_ast_node.h"
 #include "../blasphemies/blasphemy_details.h"
 
-std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
+        const std::string &no_tokens_blasphemy_details)
 {
     // TODO: Request custom error message
-    ensure_tokens_exist(tokens);
+    ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
 
     std::unique_ptr<token> token = std::move(tokens.front());
     tokens.pop();
@@ -17,9 +18,9 @@ std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<st
 }
 
 std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifier_token(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens, const std::string &no_tokens_blasphemy_details)
 {
-    std::unique_ptr<token> token = consume_token(tokens);
+    std::unique_ptr<token> token = consume_token(tokens, no_tokens_blasphemy_details);
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
@@ -34,11 +35,11 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_type(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     std::unique_ptr<ast::type::type_ast_node> result;
 
-    const auto type_token = consume_token(tokens);
+    const auto type_token = consume_token(tokens, error::blasphemy_details::NO_TYPE);
 
     switch (type_token->get_group())
     {
@@ -108,12 +109,13 @@ bool codesh::parser::util::peeking_check(const std::queue<std::unique_ptr<token>
     return !tokens.empty() && tokens.front()->get_group() == token_group;
 }
 
-void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens)
+void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
+        const std::string &no_tokens_blasphemy_details)
 {
     if (tokens.empty())
     {
         // TODO: Switch error message to take from parameter
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: סוֹף הָעוֹלָם אֵינוֹ קָרֵב",
+        error::get_blasphemy_collector().add_blasphemy(no_tokens_blasphemy_details,
             error::blasphemy_type::SYNTAX, std::nullopt, true);
     }
 }
@@ -135,7 +137,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 {
     while (!tokens.empty())
     {
-        std::unique_ptr<token> id = consume_token(tokens);
+        std::unique_ptr<token> id = consume_token(tokens, error::blasphemy_details::NO_IDENTIFIER);
 
         if (id->get_group() != token_group::IDENTIFIER)
         {

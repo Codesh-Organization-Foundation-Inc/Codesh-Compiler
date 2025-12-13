@@ -33,7 +33,8 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     }
 
     // Get name
-    const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens);
+    const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens,
+        error::blasphemy_details::NO_IDENTIFIER);
     if (!name_token)
     {
         error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
@@ -48,7 +49,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
 
     // Start scope
-    if (util::consume_token(tokens)->get_group() != token_group::SCOPE_BEGIN)
+    if (util::consuming_check(tokens, token_group::SCOPE_BEGIN))
     {
         error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_SCOPE_BEGIN,
             error::blasphemy_type::SYNTAX);
@@ -116,7 +117,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    const codesh::token_group type_token = parser::util::consume_token(tokens)->get_group();
+    const codesh::token_group type_token = parser::util::consume_token(tokens,
+            codesh::error::blasphemy_details::NO_TYPE)->get_group();
 
 
     if (type_token != codesh::token_group::IDENTIFIER)
@@ -148,7 +150,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     }
 
     // * (the name)
-    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
+    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens,
+        codesh::error::blasphemy_details::NO_IDENTIFIER);
 
     auto method_node = std::make_unique<ast::method::method_declaration_ast_node>();
 
@@ -164,7 +167,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
 
         // ושמו
-        if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+        if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
         {
             codesh::error::get_blasphemy_collector().add_blasphemy(
                 codesh::error::blasphemy_details::NO_KEYWORD_NAME,
@@ -173,7 +176,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         }
 
         // * (the name)
-        const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
+        const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens,
+            codesh::error::blasphemy_details::NO_IDENTIFIER);
 
         auto param = std::make_unique<ast::local_variable_declaration_ast_node>();
         param->set_type(std::move(param_type));

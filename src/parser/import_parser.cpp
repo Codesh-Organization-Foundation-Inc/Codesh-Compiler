@@ -14,7 +14,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
     std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
 
     // Check if is a static import
-    util::ensure_tokens_exist(tokens); // TODO: provide reason
+    util::ensure_tokens_exist(tokens, error::blasphemy_details::NO_IMPORT_TYPE); // TODO: provide better reason
     switch (tokens.front()->get_group())
     {
     case token_group::KEYWORD_IMPORT_STATIC:

@@ -15,14 +15,14 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
 {
     tokens.pop();
 
-    switch (util::consume_token(tokens)->get_group())
+    switch (util::consume_token(tokens, error::blasphemy_details::UNEXPECTED_DECLARATION)->get_group())
     {
     case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
     case token_group::KEYWORD_INTERFACE:; //TODO
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
-    default: throw std::runtime_error("Unexpected token: Expected class, interface, enum or annotation");
+    default: throw std::runtime_error(error::blasphemy_details::UNEXPECTED_DECLARATION);
     }
 }
 
