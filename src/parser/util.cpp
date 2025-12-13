@@ -1,10 +1,10 @@
 #include "util.h"
 
 #include "../blasphemies/blasphemy_collector.h"
-#include "../defenition/definitions.h"
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
+#include "../blasphemies/blasphemy_details.h"
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -23,7 +23,8 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+            error::blasphemy_type::SYNTAX, std::nullopt);
         return nullptr; // TODO: check if this return nullptr is okay
     }
 
@@ -74,7 +75,8 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_TYPE,
+            error::blasphemy_type::SYNTAX, std::nullopt);
         return nullptr;
     }
 
@@ -110,7 +112,9 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
 {
     if (tokens.empty())
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: סוֹף הָעוֹלָם אֵינוֹ קָרֵב");
+        // TODO: Switch error message to take from parameter
+        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: סוֹף הָעוֹלָם אֵינוֹ קָרֵב",
+            error::blasphemy_type::SYNTAX, std::nullopt, true);
     }
 }
 
@@ -118,7 +122,8 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (tokens.empty() || tokens.front()->get_group() != token_group::PUNCTUATION_END_OP)
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻפָּה סִיֹּמֶת שׁוּרָה");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_PUNCTUATION_END_OP,
+            error::blasphemy_type::SYNTAX);
         return;
     }
 
@@ -140,7 +145,8 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית");
+                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+                    error::blasphemy_type::SYNTAX);
             }
         }
         else
@@ -164,7 +170,8 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             if (!is_last_item && fqcn_out.is_wildcard())
             {
                 // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
-                error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צִפָּה מִלָּה חָפְשִׁית");
+                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
+                    error::blasphemy_type::SYNTAX);
             }
         }
 

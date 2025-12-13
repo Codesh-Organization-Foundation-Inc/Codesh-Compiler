@@ -1,7 +1,8 @@
 #include "import_parser.h"
 
-#include "ast/import_declaration_ast_node.h"
 #include "../blasphemies/blasphemy_collector.h"
+#include "../blasphemies/blasphemy_details.h"
+#include "ast/import_declaration_ast_node.h"
 #include "util.h"
 
 namespace ast = codesh::ast;
@@ -25,7 +26,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
         break;
 
     default:
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה סוּג יְבוּא");
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IMPORT_TYPE);
 
     }
 

@@ -7,9 +7,10 @@
 
 #include <vector>
 
-#include "defs/methods_info_entry.h"
-#include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
+#include "../../parser/ast/compilation_unit_ast_node.h"
+#include "defs/methods_info_entry.h"
 
 #include "./defs/attribute_info_entry.h"
 #include "defs/class_file.h"
@@ -30,7 +31,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     if (!destination_file)
     {
-        error::blasphemy_collector().add_blasphemy("לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַמּוֹצָא",
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::CANT_OPEN_SOURCE_FILE,
             error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 

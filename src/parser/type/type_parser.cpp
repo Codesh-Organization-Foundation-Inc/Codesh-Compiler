@@ -1,6 +1,7 @@
 #include "type_parser.h"
 
 #include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../defenition/visibility.h"
 #include "../ast/type_declaration/class_declaration_ast_node.h"
 #include "../util.h"
@@ -72,7 +73,8 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     // or did not close the attribute statement with Shall Be.
     if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
-        error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה היה", error::blasphemy_type::SYNTAX);
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_SHALL_BE,
+            error::blasphemy_type::SYNTAX);
     }
 
     return node;

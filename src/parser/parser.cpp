@@ -1,10 +1,11 @@
 #include "parser.h"
 
+#include "../blasphemies/blasphemy_collector.h"
+#include "../blasphemies/blasphemy_details.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
 #include "type/type_parser.h"
 #include "util.h"
-#include "../blasphemies/blasphemy_collector.h"
 
 namespace ast = codesh::ast;
 
@@ -15,7 +16,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
     if (tokens.empty())
     {
         error::get_blasphemy_collector().add_blasphemy(
-            "בַּסַּ\"ד אֵינוֹ",
+            error::blasphemy_details::NO_BASAD,
             error::blasphemy_type::LEXICAL,
             std::nullopt,
             true
@@ -48,7 +49,8 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             break;
 
         default:
-            error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה ויהי", error::blasphemy_type::SYNTAX);
+            error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_SHALL_BE,
+                error::blasphemy_type::SYNTAX);
             tokens.pop();
             break;
         }

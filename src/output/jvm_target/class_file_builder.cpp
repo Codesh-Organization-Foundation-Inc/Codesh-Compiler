@@ -1,10 +1,11 @@
 #include "class_file_builder.h"
 
+#include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/method/method_declaration_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../../blasphemies/blasphemy_collector.h"
 #include "../../util.h"
 #include "../ir/code_block.h"
 #include "constant_pool.h"
@@ -89,7 +90,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 
     if (constant_pool_size > 0xFFFF)
     {
-        error::get_blasphemy_collector().add_blasphemy("אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף",
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::CONSTANT_POOL_TOO_BIG,
             error::blasphemy_type::SEMANTIC, std::nullopt, true);
     }
 
@@ -153,7 +154,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     if (code_attr->code.size() > 0xFFFFFF)
     {
-        error::blasphemy_collector().add_blasphemy("נוּ, מַה זֶּה? מַעֲשֶׂה אוֹ הַתָּנ״ךְ עַצְמוֹ? קַצֵּר!",
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::METHOD_TOO_BIG,
             error::blasphemy_type::SEMANTIC, std::nullopt, true);
     }
 

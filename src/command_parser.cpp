@@ -1,5 +1,6 @@
 #include "command_parser.h"
 
+#include "blasphemies/blasphemy_details.h"
 #include "blasphemies/blasphemy_collector.h"
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
@@ -9,7 +10,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     if (argc < 2)
     {
         error::get_blasphemy_collector().add_blasphemy(
-            "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים",
+            error::blasphemy_details::NO_MAIN_ARGS,
             error::blasphemy_type::INIT,
             std::nullopt,
             true

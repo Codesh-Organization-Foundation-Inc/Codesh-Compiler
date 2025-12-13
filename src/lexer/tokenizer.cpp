@@ -6,6 +6,7 @@
 #include "trie/keywords.h"
 #include "trie/trie.h"
 #include "../blasphemies/blasphemy_collector.h"
+#include "../blasphemies/blasphemy_details.h"
 #include <unicode/uchar.h>
 
 namespace trie = codesh::lexer::trie;
@@ -131,7 +132,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            error::blasphemy_collector().add_blasphemy("מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית", error::blasphemy_type::LEXICAL);
+            error::blasphemy_collector().add_blasphemy(error::blasphemy_details::TOKEN_NOT_EXIST,
+                error::blasphemy_type::LEXICAL);
         }
     }
 
@@ -162,7 +164,8 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
             //TODO: Convert word error token or alike
-            codesh::error::get_blasphemy_collector().add_blasphemy("נָבוֹא שְׁקָרַי: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים");
+            codesh::error::get_blasphemy_collector().add_blasphemy(
+                codesh::error::blasphemy_details::NO_CLOSE_MULTI_COMMENT , codesh::error::blasphemy_type::SYNTAX);
         }
 
         default: {

@@ -1,8 +1,9 @@
 #include "constant_pool.h"
 
+#include "../../blasphemies/blasphemy_collector.h"
+#include "../../blasphemies/blasphemy_details.h"
 #include "../../defenition/definitions.h"
 #include "../../util.h"
-#include "../../blasphemies/blasphemy_collector.h"
 
 #include <unordered_set>
 
@@ -114,7 +115,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
 {
     if (utf8.size() > 0xFFFF)
     {
-        error::blasphemy_collector().add_blasphemy("אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים תָּוִים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה תָּוִים וְשִׁשִּׁים אָלֶף תָּוִים בִּכְתֻבִים",
+        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::STRING_TOO_BIG,
             error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
@@ -162,7 +163,7 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 {
     const auto result = literals_lookup_map.find(&literal);
     if (result == literals_lookup_map.end())
-        throw std::runtime_error("Could not find literal in constant pool");
+        throw std::runtime_error("Could not find literal in constant pool"); // shouldn't be printed to user
 
     return result->second;
 }
