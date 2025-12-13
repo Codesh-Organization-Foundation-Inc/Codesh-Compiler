@@ -15,7 +15,6 @@ extern const std::string NO_MAIN_ARGS;
 // LEXICAL
 extern const std::string NO_BASAD;
 extern const std::string TOKEN_DOESNT_EXIST;
-extern const std::string UNRECOGNIZED_TYPE;
 
 // SYNTAX
 extern const std::string NO_IDENTIFIER;
@@ -32,11 +31,12 @@ extern const std::string UNEXPECTED_DECLARATION;
 extern const std::string UNEXPECTED_TOKEN;
 
 // SEMANTIC
+extern const std::string UNRECOGNIZED_TYPE;
+
+// OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
 extern const std::string METHOD_TOO_BIG;
 extern const std::string STRING_TOO_BIG;
-
-// OUTPUT
 
 
 }

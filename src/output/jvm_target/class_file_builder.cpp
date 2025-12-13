@@ -91,7 +91,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     if (constant_pool_size > 0xFFFF)
     {
         error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::CONSTANT_POOL_TOO_BIG,
-            error::blasphemy_type::SEMANTIC, std::nullopt, true);
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
     util::put_int_bytes(class_file->constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
@@ -155,7 +155,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     if (code_attr->code.size() > 0xFFFFFF)
     {
         error::blasphemy_collector().add_blasphemy(error::blasphemy_details::METHOD_TOO_BIG,
-            error::blasphemy_type::SEMANTIC, std::nullopt, true);
+            error::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
     util::put_int_bytes(code_attr->code_length, 4, code_attr->code.size()); // NOLINT(*-narrowing-conversions)
