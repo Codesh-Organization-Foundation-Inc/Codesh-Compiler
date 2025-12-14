@@ -1,16 +1,17 @@
 #include "method_parser.h"
 
-#include "../../ast/method/method_declaration_ast_node.h"
-#include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../../blasphemies/blasphemy_collector.h"
 #include "../../../blasphemies/blasphemy_details.h"
+#include "../../ast/method/method_declaration_ast_node.h"
+#include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../util.h"
+#include "../type_parser.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_declaration_ast_node &method_decl)
+        ast::method::method_declaration_ast_node &method_decl)
 {
     while (!tokens.empty())
     {
@@ -22,7 +23,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
             break;
 
         case token_group::KEYWORD_LET:
-            method_decl.get_parameters().push_back(parse_variable_declaration(tokens));
+            method_decl.get_local_variables().push_back(parse_variable_declaration(tokens));
             break;
 
         case token_group::SCOPE_END:
@@ -39,7 +40,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
 }
 
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
 
@@ -56,34 +57,36 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     return method_call_node;
 }
 
-std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> parse_variable_declaration(
-    std::queue<std::unique_ptr<codesh::token>> &tokens)
+std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
 
-    auto variable_decl_ast_node_type = codesh::parser::util::parse_type(tokens);
+    auto variable_decl_ast_node_type = util::parse_type(tokens);
 
-    auto variable_decl_ast_node = std::make_unique<codesh::ast::local_variable_declaration_ast_node>();
+    auto variable_decl_ast_node = std::make_unique<ast::local_variable_declaration_ast_node>();
 
     variable_decl_ast_node->set_type(std::move(variable_decl_ast_node_type));
 
-    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
-        codesh::error::get_blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::NO_KEYWORD_NAME,
-            codesh::error::blasphemy_type::SYNTAX);
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_NAME,
+            error::blasphemy_type::SYNTAX);
     }
 
-    const auto name_token = codesh::parser::util::consume_identifier_token(tokens);
+    const auto name_token = util::consume_identifier_token(tokens);
 
     variable_decl_ast_node->set_name(name_token->get_content());
 
-    if (tokens.front()->get_group() == codesh::token_group::KEYWORD_LET)
+    variable_decl_ast_node->set_attributes(parse_modifiers(tokens));
+
+    if (tokens.front()->get_group() == token_group::KEYWORD_LET)
     {
         tokens.pop();
-        variable_decl_ast_node->set_value(codesh::parser::util::parse_value(tokens));
+        variable_decl_ast_node->set_value(util::parse_value(tokens));
     }
 
-    codesh::parser::util::ensure_end_op(tokens);
+    util::ensure_end_op(tokens);
     return variable_decl_ast_node;
 }
 

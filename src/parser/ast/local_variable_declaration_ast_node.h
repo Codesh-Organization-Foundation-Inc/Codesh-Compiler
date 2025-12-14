@@ -2,16 +2,14 @@
 
 #include "impl/ast_node.h"
 #include "type/type_ast_node.h"
+#include "type_declaration/attributes_ast_node.h"
+#include "var_reference/value_ast_node.h"
 
 #include <memory>
 #include <string>
 
 namespace codesh::ast
 {
-namespace var_reference
-{
-class value_ast_node;
-}
 
 class local_variable_declaration_ast_node : public impl::ast_node
 {
@@ -19,11 +17,9 @@ class local_variable_declaration_ast_node : public impl::ast_node
     std::unique_ptr<type::type_ast_node> type;
     std::unique_ptr<var_reference::value_ast_node> value;
     
-    bool final;
+    std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
 public:
-    local_variable_declaration_ast_node();
-
     [[nodiscard]] std::string get_name() const;
     void set_name(const std::string &name);
 
@@ -33,8 +29,8 @@ public:
     [[nodiscard]] var_reference::value_ast_node *get_value() const;
     void set_value(std::unique_ptr<var_reference::value_ast_node> value);
 
-    [[nodiscard]] bool is_final() const;
-    void set_is_final(bool is_final);
+    [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
+    void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);
 };
 
 }

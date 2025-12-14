@@ -111,6 +111,17 @@ const std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codes
 {
     return body;
 }
+std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_local_variables()
+{
+    return local_variables;
+}
+
+const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_local_variables() const
+{
+    return local_variables;
+}
 
 const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_parameters() const
