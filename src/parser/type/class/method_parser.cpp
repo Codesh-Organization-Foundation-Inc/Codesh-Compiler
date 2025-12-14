@@ -59,8 +59,6 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> parse_variable_declaration(
     std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    //ויהי שלם ושמו ב ויהי 1:
-    //  ויהי שלם ושמו הבא:
     tokens.pop();
 
     auto variable_decl_ast_node_type = codesh::parser::util::parse_type(tokens);
@@ -81,7 +79,8 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> parse_variable
 
     if (tokens.front()->get_group() == codesh::token_group::KEYWORD_LET)
     {
-        // How do I check if 1 is int and "bob" is str
+        tokens.pop();
+        variable_decl_ast_node->set_value(codesh::parser::util::parse_value(tokens));
     }
 
     codesh::parser::util::ensure_end_op(tokens);
