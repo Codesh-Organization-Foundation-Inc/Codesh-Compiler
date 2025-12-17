@@ -22,6 +22,10 @@ static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
+static void resolve_method_signature(const codesh::ast::compilation_unit_ast_node &root,
+                                     const codesh::ast::method::method_declaration_ast_node &method_decl,
+                                     const codesh::semantic_analyzer::type_symbol &type);
+
 
 static const std::function<
         void(const codesh::ast::compilation_unit_ast_node &root,
@@ -40,53 +44,55 @@ void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::c
 
     for (const auto &type_decl : root.get_type_declarations())
     {
-        const auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
-        if (!class_node)
-            continue;
-
         // Get type symbol
         const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        for (const auto &method_decl : class_node->get_all_methods())
+        for (const auto &method_decl : type_decl->get_all_methods())
         {
-            method_overloads_symbol &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                &type.resolve(method_decl->get_name()).value().get()
-            );
-
-            // Get relevant method symbol from the method overloads map
-            // Then cast it to method_symbol
-            std::unique_ptr<method_symbol> method(
-                static_cast<method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                    method_overloads.resolve_and_move(method_decl->generate_parameters_descriptor(false))
-                        .release()
-                )
-            );
-
-            for (const auto &resolver : METHOD_RESOLVERS)
-            {
-                try
-                {
-                    resolver(root, *method_decl, *method);
-                }
-                catch (const std::runtime_error &e)
-                {
-                    std::ostringstream os_string;
-                    os_string << e.what()
-                        << " בְּמַעֲשֶׂה " << method_decl->get_name()
-                        << " בְּעֶצֶם " << class_node->get_name();
-
-                    error::get_blasphemy_collector().add_blasphemy(os_string.str());
-
-                }
-            }
-
-            // Move to a new overloads entry now that the parameters' descriptors are real
-            method_overloads.add_symbol(method_decl->generate_parameters_descriptor(), std::move(method));
+            resolve_method_signature(root, *method_decl, type);
         }
-
     }
 }
 
+static void resolve_method_signature(const codesh::ast::compilation_unit_ast_node &root,
+                                     const codesh::ast::method::method_declaration_ast_node &method_decl,
+                                     const codesh::semantic_analyzer::type_symbol &type)
+{
+    auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+        &type.resolve(method_decl.get_name()).value().get()
+    );
+
+    // Get relevant method symbol from the method overloads map
+    // Then cast it to method_symbol
+    std::unique_ptr<codesh::semantic_analyzer::method_symbol> method(
+        static_cast<codesh::semantic_analyzer::method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+            method_overloads.resolve_and_move(method_decl.generate_parameters_descriptor(false))
+                .release()
+        )
+    );
+
+    for (const auto &resolver : METHOD_RESOLVERS)
+    {
+        try
+        {
+            resolver(root, method_decl, *method);
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::ostringstream os_string;
+            os_string << e.what()
+                << " בְּמַעֲשֶׂה " << method_decl.get_name()
+                //TODO:
+                // << " בְּעֶצֶם " << type_decl->get_name();
+                ;
+
+            codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str());
+        }
+    }
+
+    // Move to a new overloads entry, now that the parameters' descriptors are real
+    method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
+}
 
 static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
