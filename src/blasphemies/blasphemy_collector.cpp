@@ -53,11 +53,19 @@ void codesh::error::blasphemy_collector::print_all_blasphemies() const
             std::cerr << "חֵטְא נוֹרָא: ";
         }
 
-        fmt::println(stderr,
-            "{} בְּפָּסוּק {} עֲבוּר {}: {}",
+        std::cerr << get_blasphemy_message(blasphemy.type);
 
-            get_blasphemy_message(blasphemy.type),
-            std::to_string(blasphemy.code_pos->line),
+        if (blasphemy.code_pos.has_value())
+        {
+            fmt::println(stderr,
+                " בְּפָּסוּק {}",
+                std::to_string(blasphemy.code_pos->line)
+            );
+        }
+
+        fmt::println(stderr,
+            " עֲבוּר {}: {}",
+
             // TODO: Add file name to blasphemy
             "דוגמה.אמן",
             blasphemy.details
