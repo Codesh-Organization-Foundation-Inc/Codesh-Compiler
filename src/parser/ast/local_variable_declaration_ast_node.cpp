@@ -1,9 +1,5 @@
 #include "local_variable_declaration_ast_node.h"
 
-codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() : final(false)
-{
-}
-
 std::string codesh::ast::local_variable_declaration_ast_node::get_name() const
 {
     return name;
@@ -24,12 +20,24 @@ void codesh::ast::local_variable_declaration_ast_node::set_type(std::unique_ptr<
     this->type = std::move(type);
 }
 
-bool codesh::ast::local_variable_declaration_ast_node::is_final() const
+codesh::ast::var_reference::value_ast_node *codesh::ast::local_variable_declaration_ast_node::get_value() const
 {
-    return final;
+    return value.get();
 }
 
-void codesh::ast::local_variable_declaration_ast_node::set_is_final(bool is_final)
+void codesh::ast::local_variable_declaration_ast_node::set_value(std::unique_ptr<var_reference::value_ast_node> value)
 {
-    this->final = is_final;
+    this->value = std::move(value);
 }
+
+codesh::ast::type_decl::attributes_ast_node *codesh::ast::local_variable_declaration_ast_node::get_attributes() const
+{
+    return attributes.get();
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_attributes(
+    std::unique_ptr<type_decl::attributes_ast_node> attributes)
+{
+    this->attributes = std::move(attributes);
+}
+

@@ -4,6 +4,7 @@
 #include "../parser/ast/method/operation/super_call_ast_node.h"
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "aliases.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
@@ -171,10 +172,13 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
 {
     auto this_param = std::make_unique<codesh::ast::local_variable_declaration_ast_node>();
     this_param->set_name("this");
-    this_param->set_is_final(true);
+
+    auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    attributes_node->set_is_final(true);
+    this_param->set_attributes(std::move(attributes_node));
 
     auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_binary_name(false));
     this_param->set_type(std::move(this_class_type));
 
-    return std::move(this_param);
+    return this_param;
 }

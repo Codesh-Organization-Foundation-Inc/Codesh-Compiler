@@ -31,6 +31,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
     std::list<std::unique_ptr<impl::ir_emitting_ast_node>> body;
+    std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
 
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> symbol;
@@ -62,6 +63,8 @@ public:
     [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();
     [[nodiscard]] const std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body() const;
 
+    [[nodiscard]] std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables();
+    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables() const;
 
     [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameters() const;
     [[nodiscard]] const std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;

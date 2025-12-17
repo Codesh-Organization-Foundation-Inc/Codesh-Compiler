@@ -1,16 +1,17 @@
 #include "method_parser.h"
 
-#include "../../ast/method/method_declaration_ast_node.h"
-#include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../../blasphemies/blasphemy_collector.h"
 #include "../../../blasphemies/blasphemy_details.h"
+#include "../../ast/method/method_declaration_ast_node.h"
+#include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../util.h"
+#include "../type_parser.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_declaration_ast_node &method_decl)
+        ast::method::method_declaration_ast_node &method_decl)
 {
     while (!tokens.empty())
     {
@@ -19,6 +20,10 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         {
         case token_group::KEYWORD_FUNCTION_CALL:
             method_decl.get_body().push_back(parse_methods_call(tokens));
+            break;
+
+        case token_group::KEYWORD_LET:
+            method_decl.get_local_variables().push_back(parse_variable_declaration(tokens));
             break;
 
         case token_group::SCOPE_END:
@@ -35,8 +40,10 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
 }
 
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
-    std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens)
 {
+    tokens.pop();
+
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>();
 
     util::parse_fqcn(tokens, method_call_node->get_fqcn());
@@ -48,6 +55,39 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     util::ensure_end_op(tokens);
     return method_call_node;
+}
+
+std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    tokens.pop();
+
+    auto variable_decl_ast_node_type = util::parse_type(tokens);
+
+    auto variable_decl_ast_node = std::make_unique<ast::local_variable_declaration_ast_node>();
+
+    variable_decl_ast_node->set_type(std::move(variable_decl_ast_node_type));
+
+    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
+    {
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_NAME,
+            error::blasphemy_type::SYNTAX);
+    }
+
+    const auto name_token = util::consume_identifier_token(tokens);
+
+    variable_decl_ast_node->set_name(name_token->get_content());
+
+    variable_decl_ast_node->set_attributes(parse_modifiers(tokens));
+
+    if (tokens.front()->get_group() == token_group::KEYWORD_LET)
+    {
+        tokens.pop();
+        variable_decl_ast_node->set_value(util::parse_value(tokens));
+    }
+
+    util::ensure_end_op(tokens);
+    return variable_decl_ast_node;
 }
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
