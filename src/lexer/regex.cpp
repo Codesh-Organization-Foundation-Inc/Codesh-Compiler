@@ -1,6 +1,7 @@
 #include "regex.h"
 
 #include "../token/token.h"
+#include "fmt/xchar.h"
 
 #include <format>
 #include <sstream>
@@ -33,25 +34,21 @@ static std::string build_lexer_regex()
     if (TOKEN_REGEXES.empty())
         return "";
 
-    std::ostringstream oss;
+    std::ostringstream builder;
 
-    oss << build_single_regex(TOKEN_REGEXES[0]);
+    builder << build_single_regex(TOKEN_REGEXES[0]);
 
     for (size_t i = 1; i < TOKEN_REGEXES.size(); ++i)
     {
-        oss << '|' << build_single_regex(TOKEN_REGEXES[i]);
+        builder << '|' << build_single_regex(TOKEN_REGEXES[i]);
     }
 
-    return oss.str();
+    return builder.str();
 }
 
 static std::string build_single_regex(const std::pair<token_group, std::string> &token_regex)
 {
-    std::ostringstream oss;
-
-    oss << '(' << token_regex.second << ')';
-
-    return oss.str();
+    return fmt::format("({})", token_regex.second);
 }
 
 

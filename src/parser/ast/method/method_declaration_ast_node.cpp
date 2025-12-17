@@ -1,20 +1,20 @@
 #include "method_declaration_ast_node.h"
 
 #include "../local_variable_declaration_ast_node.h"
+#include "fmt/xchar.h"
 
 #include <sstream>
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    std::ostringstream result;
+    // In JVM, a method descriptor is defined as such:
+    // (args...)return_type
 
-    // Argument types
-    result << '(' << generate_parameters_descriptor(resolved) << ')';
-
-    // Return type
-    result << get_return_type()->generate_descriptor(resolved);
-
-    return result.str();
+    return fmt::format(
+        "({}){}",
+        generate_parameters_descriptor(resolved),
+        get_return_type()->generate_descriptor(resolved)
+    );
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_parameters_descriptor(const bool resolved) const

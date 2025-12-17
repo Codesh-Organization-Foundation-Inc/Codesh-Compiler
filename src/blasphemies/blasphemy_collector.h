@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fmt/base.h"
+#include "fmt/xchar.h"
 
 #include <optional>
 #include <string>

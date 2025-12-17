@@ -34,10 +34,15 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(
         if (!inserted)
         {
             //TODO: Print full method declaration
-            std::ostringstream builder;
-            builder << "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: " << method_decl->get_name() << " בְּעֶצֶם: " << class_decl.get_name();
+            error::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {} בְּעֶצֶם: {}",
 
-            error::get_blasphemy_collector().add_blasphemy(builder.str(), error::blasphemy_type::SEMANTIC);
+                    method_decl->get_name(),
+                    class_decl.get_name()
+                ),
+                error::blasphemy_type::SEMANTIC
+            );
         }
 
         method_decl->set_symbol(it);

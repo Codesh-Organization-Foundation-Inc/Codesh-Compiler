@@ -1,8 +1,7 @@
 #include "blasphemy_collector.h"
 
-#include "fmt/os.h"
+#include "fmt/xchar.h"
 
-#include <format>
 #include <iostream>
 #include <random>
 #include <utility>

@@ -79,15 +79,16 @@ static void resolve_method_signature(const codesh::ast::compilation_unit_ast_nod
         }
         catch (const std::runtime_error &e)
         {
-            std::ostringstream os_string;
-            os_string << e.what()
-                << " בְּמַעֲשֶׂה " << method_decl.get_name()
-                //TODO:
-                // << " בְּעֶצֶם " << type_decl->get_name();
-                ;
+            //TODO: Add class name
+            codesh::error::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    "{} בְּמַעֲשֶׂה {}",
 
-            codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str(),
-                codesh::error::blasphemy_type::SEMANTIC);
+                    e.what(),
+                    method_decl.get_name()
+                ),
+                codesh::error::blasphemy_type::SEMANTIC
+            );
         }
     }
 
