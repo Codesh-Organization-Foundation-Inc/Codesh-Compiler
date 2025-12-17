@@ -165,6 +165,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/value_ast_node.cpp
         src/blasphemies/blasphemy_details.h
         src/blasphemies/blasphemy_details.cpp
+        src/semantic_analyzer/method_call/resolve.cpp
+        src/semantic_analyzer/method_call/resolve.h
 )
 
 # sudo dnf install boost-regex boost-devel

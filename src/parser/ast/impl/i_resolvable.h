@@ -20,6 +20,7 @@ public:
    */
     [[nodiscard]] virtual std::string get_name() const = 0;
 
+    //FIXME: This should be FQCN
     void set_resolved_name(std::string resolved_name);
     [[nodiscard]] std::string get_resolved_name() const;
 
