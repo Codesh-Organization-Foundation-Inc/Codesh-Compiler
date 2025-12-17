@@ -1,10 +1,9 @@
 #include "resolve.h"
 
+#include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../../blasphemies/blasphemy_collector.h"
 #include "../util.h"
 
 #include <functional>
@@ -80,14 +79,14 @@ static void resolve_method_signature(const codesh::ast::compilation_unit_ast_nod
         catch (const std::runtime_error &e)
         {
             //TODO: Add class name
-            codesh::error::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
                 fmt::format(
                     "{} בְּמַעֲשֶׂה {}",
 
                     e.what(),
                     method_decl.get_name()
                 ),
-                codesh::error::blasphemy_type::SEMANTIC
+                codesh::blasphemy::blasphemy_type::SEMANTIC
             );
         }
     }

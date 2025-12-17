@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "../../blasphemies/blasphemy_collector.h"
-#include "../../blasphemies/blasphemy_details.h"
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "defs/methods_info_entry.h"
 
@@ -31,8 +31,8 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     if (!destination_file)
     {
-        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::SOURCE_FILE_OPEN_ERROR,
-            error::blasphemy_type::OUTPUT, std::nullopt, true);
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::SOURCE_FILE_OPEN_ERROR,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
 

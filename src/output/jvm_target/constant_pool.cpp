@@ -1,7 +1,7 @@
 #include "constant_pool.h"
 
-#include "../../blasphemies/blasphemy_collector.h"
-#include "../../blasphemies/blasphemy_details.h"
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../defenition/definitions.h"
 #include "../../util.h"
 
@@ -115,8 +115,8 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
 {
     if (utf8.size() > 0xFFFF)
     {
-        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::STRING_TOO_BIG,
-            error::blasphemy_type::OUTPUT, std::nullopt, true);
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::STRING_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();

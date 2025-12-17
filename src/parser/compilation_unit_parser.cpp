@@ -1,7 +1,7 @@
 #include "compilation_unit_parser.h"
 
-#include "../blasphemies/blasphemy_collector.h"
-#include "../blasphemies/blasphemy_details.h"
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "../token/token.h"
 #include "../token/token_group.h"
 #include "ast/compilation_unit_ast_node.h"
@@ -36,16 +36,16 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilatio
 
 static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    switch (parser::util::consume_token(tokens, codesh::error::blasphemy_details::NO_BASAD)->get_group())
+    switch (parser::util::consume_token(tokens, codesh::blasphemy::details::NO_BASAD)->get_group())
     {
     case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
     case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
     case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
 
     default: {
-        codesh::error::get_blasphemy_collector().add_blasphemy(
-            codesh::error::blasphemy_details::NO_BASAD,
-            codesh::error::blasphemy_type::LEXICAL,
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_BASAD,
+            codesh::blasphemy::blasphemy_type::LEXICAL,
             std::nullopt,
             true
         );

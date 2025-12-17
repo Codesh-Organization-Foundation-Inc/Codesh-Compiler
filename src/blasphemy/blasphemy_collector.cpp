@@ -24,7 +24,7 @@ static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
-void codesh::error::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
+void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
         std::optional<code_position> code_pos, const bool is_fatal)
 {
     blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
@@ -36,12 +36,12 @@ void codesh::error::blasphemy_collector::add_blasphemy(std::string details, blas
     }
 }
 
-bool codesh::error::blasphemy_collector::has_errors() const
+bool codesh::blasphemy::blasphemy_collector::has_errors() const
 {
     return !blasphemies.empty();
 }
 
-void codesh::error::blasphemy_collector::print_all_blasphemies() const
+void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
     {
@@ -73,7 +73,7 @@ void codesh::error::blasphemy_collector::print_all_blasphemies() const
         std::cerr << PRETTY_PRINT_END;
     }
 }
-std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_type type)
+std::string codesh::blasphemy::blasphemy_collector::type_to_string(const blasphemy_type type)
 {
     switch (type)
     {
@@ -88,12 +88,12 @@ std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_t
     }
 }
 
-std::string codesh::error::blasphemy_collector::get_blasphemy_message(const blasphemy_type type)
+std::string codesh::blasphemy::blasphemy_collector::get_blasphemy_message(const blasphemy_type type)
 {
     return fmt::format(get_random_message(), type_to_string(type));
 }
 
-fmt::format_string<std::string> codesh::error::blasphemy_collector::get_random_message()
+fmt::format_string<std::string> codesh::blasphemy::blasphemy_collector::get_random_message()
 {
     static std::mt19937 rng{ std::random_device{}() };
     std::uniform_int_distribution<size_t> dist(0, RANDOM_MESSAGE_POOL.size() - 1);
@@ -101,7 +101,7 @@ fmt::format_string<std::string> codesh::error::blasphemy_collector::get_random_m
     return RANDOM_MESSAGE_POOL[dist(rng)];
 }
 
-codesh::error::blasphemy_collector &codesh::error::get_blasphemy_collector()
+codesh::blasphemy::blasphemy_collector &codesh::blasphemy::get_blasphemy_collector()
 {
     static blasphemy_collector blasphemy_collector;
     return blasphemy_collector;

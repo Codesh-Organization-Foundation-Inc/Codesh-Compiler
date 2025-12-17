@@ -1,14 +1,14 @@
 #include "analyzer.h"
 
+#include "../blasphemy/blasphemy_collector.h"
 #include "../parser/ast/method/operation/return_ast_node.h"
 #include "../parser/ast/method/operation/super_call_ast_node.h"
 #include "../parser/ast/type/primitive_type_ast_node.h"
-#include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
+#include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
 #include "method_decl/resolve.h"
 #include "symbol_table/symbol.h"
-#include "../blasphemies/blasphemy_collector.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.

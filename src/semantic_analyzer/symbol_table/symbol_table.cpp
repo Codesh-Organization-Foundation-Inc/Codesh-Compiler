@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../blasphemy/blasphemy_collector.h"
 #include "../type_decl/collect.h"
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::symbol_table::
@@ -18,7 +18,11 @@ codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_uni
     auto &global_country = resolve_country("")->get();
 
     //TODO: Iterate over each and every country, then collect types.
-    type_declaration::collect_types(root_node, global_country);
+    type_declaration::collect_types(
+        root_node,
+        global_country,
+        blasphemy::semantic_consumer
+    );
 }
 
 const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map() const

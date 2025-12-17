@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace codesh::error
+namespace codesh::blasphemy
 {
 
 enum class blasphemy_type
@@ -28,7 +28,7 @@ struct code_position
     size_t column;
 };
 
-struct blasphemy
+struct blasphemy_info
 {
     std::string details;
     blasphemy_type type;
@@ -62,7 +62,7 @@ public:
     void print_all_blasphemies() const;
 
 private:
-    std::vector<blasphemy> blasphemies;
+    std::vector<blasphemy_info> blasphemies;
 
     static std::string type_to_string(blasphemy_type type);
 

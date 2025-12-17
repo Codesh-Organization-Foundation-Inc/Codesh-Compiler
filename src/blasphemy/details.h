@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace codesh::error::blasphemy_details
+namespace codesh::blasphemy::details
 {
 
 //TODO: Add all details here

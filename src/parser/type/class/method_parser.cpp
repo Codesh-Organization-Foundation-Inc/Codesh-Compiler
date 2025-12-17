@@ -1,7 +1,7 @@
 #include "method_parser.h"
 
-#include "../../../blasphemies/blasphemy_collector.h"
-#include "../../../blasphemies/blasphemy_details.h"
+#include "../../../blasphemy/blasphemy_collector.h"
+#include "../../../blasphemy/details.h"
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../util.h"
@@ -30,13 +30,13 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
             tokens.pop();
             return;
 
-        default: error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::UNEXPECTED_TOKEN,
-            error::blasphemy_type::SYNTAX);
+        default: blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
+            blasphemy::blasphemy_type::SYNTAX);
         }
     }
 
-    error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_SCOPE_END,
-        error::blasphemy_type::SYNTAX);
+    blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_SCOPE_END,
+        blasphemy::blasphemy_type::SYNTAX);
 }
 
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
@@ -70,8 +70,8 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser
 
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_NAME,
-            error::blasphemy_type::SYNTAX);
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
+            blasphemy::blasphemy_type::SYNTAX);
     }
 
     const auto name_token = util::consume_identifier_token(tokens);
