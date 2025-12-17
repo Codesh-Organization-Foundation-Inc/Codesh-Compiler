@@ -1,26 +1,27 @@
 #include "blasphemy_collector.h"
 
+#include "fmt/os.h"
+
+#include <format>
 #include <iostream>
 #include <random>
 #include <utility>
 
-static constexpr std::string TYPE_PLACEHOLDER = "{type}";
-
-static const std::vector<std::string> RANDOM_MESSAGE_POOL = {
-    "וְיִגְעַר ה' בַּיּוֹצֵר כִּי תּוֹעֵבָה {type} נוֹצְרָה",
-    "וְיֶחֱרַד ה' כִּי רָאָה תּוֹעֵבָה {type} כְּאֵימַת קֹדֶשׁ",
-    "וְיִכְעַס ה' כִּי הַיּוֹצֵר שָׂם מִלָּה וְשָׁכַח אֵחָרֵת כְּתוֹעֵבָה {type}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
-    "וַיַּרְא ה' הַיּוֹצֵר לֵאמֹר מֵי זֶה עֲשֵׂה תּוֹעֵבָה {type}",
-    "וְיִשְׁאַל ה' אֶת־יּוֹצֵר לֵאמֹר מַדּוּעַ בִּצַּעְתָּ תּוֹעֵבָה {type}",
-    "וְיַזְהִיר ה' אֶת יּוֹצֵר כִּי־יְתַקֵּן בִּמְהֵרָה אֶת הַתּוֹעֵבָה הַ{type}",
-    "וְיַחֲזֶה ה' בַּתַּמְלִיל לֵאמֹר וְיִתְאַכְזֵב וּמְאַכְזֵב יִהְיֶה פֶּן־רָאָה כִּי הַיּוֹצֵר לֹא תֶּקֶן אֶת הַתּוֹעֵבָה ה{type} הַשּׁוֹכֶנֶת",
-    "וְקֶצֶף ה' בְּיּוֹצֵר תָמְלִיל הַקֹּדֶשׁ וְיֹאמַר לוֹ אָחִי, תַקֵּן אֶת הַתּוֹעֵבָה הַ{type}",
-    "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {type}",
-    "וְיִתְפַּלֵּא ה' בְּיּוֹצֵר כִּי־אֵיךְ לֹא הִבְחִין בַּתּוֹעֵבָה הַ{type}",
-    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד ה{type}" //FIXME: Type is feminine while it shouldn't be here
+static const std::vector<fmt::format_string<std::string>> RANDOM_MESSAGE_POOL = {
+    "וְיִגְעַר ה' בַּיּוֹצֵר כִּי תּוֹעֵבָה {} נוֹצְרָה",
+    "וְיֶחֱרַד ה' כִּי רָאָה תּוֹעֵבָה {} כְּאֵימַת קֹדֶשׁ",
+    "וְיִכְעַס ה' כִּי הַיּוֹצֵר שָׂם מִלָּה וְשָׁכַח אֵחָרֵת כְּתוֹעֵבָה {}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
+    "וַיַּרְא ה' הַיּוֹצֵר לֵאמֹר מֵי זֶה עֲשֵׂה תּוֹעֵבָה {}",
+    "וְיִשְׁאַל ה' אֶת־יּוֹצֵר לֵאמֹר מַדּוּעַ בִּצַּעְתָּ תּוֹעֵבָה {}",
+    "וְיַזְהִיר ה' אֶת יּוֹצֵר כִּי־יְתַקֵּן בִּמְהֵרָה אֶת הַתּוֹעֵבָה הַ{}",
+    "וְיַחֲזֶה ה' בַּתַּמְלִיל לֵאמֹר וְיִתְאַכְזֵב וּמְאַכְזֵב יִהְיֶה פֶּן־רָאָה כִּי הַיּוֹצֵר לֹא תֶּקֶן אֶת הַתּוֹעֵבָה ה{} הַשּׁוֹכֶנֶת",
+    "וְקֶצֶף ה' בְּיּוֹצֵר תָמְלִיל הַקֹּדֶשׁ וְיֹאמַר לוֹ אָחִי, תַקֵּן אֶת הַתּוֹעֵבָה הַ{}",
+    "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {}",
+    "וְיִתְפַּלֵּא ה' בְּיּוֹצֵר כִּי־אֵיךְ לֹא הִבְחִין בַּתּוֹעֵבָה הַ{}",
+    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד ה{}" //FIXME: Type is feminine while it shouldn't be here
 };
 
-static constexpr std::string PRETTY_PRINT_RED = "\033[1;31m";
+static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
@@ -45,19 +46,24 @@ void codesh::error::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
     {
+        std::cerr << PRETTY_PRINT_RED;
 
         if (blasphemy.is_fatal)
         {
-            std::cerr << PRETTY_PRINT_RED << "חֵטְא נוֹרָא: " << PRETTY_PRINT_END;
+            std::cerr << "חֵטְא נוֹרָא: ";
         }
 
-        // TODO: move code_pos.value().line and file name
-        std::cerr << get_blasphemy_message(blasphemy.type, 0, "דוגמה.אמן");
+        fmt::println(stderr,
+            "{} בְּפָּסוּק {} עֲבוּר {}: {}",
 
-        // TODO: Add column place
+            get_blasphemy_message(blasphemy.type),
+            std::to_string(blasphemy.code_pos->line),
+            // TODO: Add file name to blasphemy
+            "דוגמה.אמן",
+            blasphemy.details
+        );
 
-        std::cerr << blasphemy.details << std::endl;
-
+        std::cerr << PRETTY_PRINT_END;
     }
 }
 std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_type type)
@@ -75,29 +81,12 @@ std::string codesh::error::blasphemy_collector::type_to_string(const blasphemy_t
     }
 }
 
-std::string codesh::error::blasphemy_collector::get_blasphemy_message(const blasphemy_type type, const size_t line,
-                                                       const std::string &file_name)
+std::string codesh::error::blasphemy_collector::get_blasphemy_message(const blasphemy_type type)
 {
-    std::string msg = get_random_message();
-
-    // Replace any {type} placeholders with the given type
-    const size_t index = msg.find(TYPE_PLACEHOLDER);
-
-    if (index != std::string::npos)
-    {
-        msg.replace(
-            index, TYPE_PLACEHOLDER.size(),
-            type_to_string(type)
-        );
-    }
-
-    // Blasphemies always provide the line position at the very end
-    msg += PRETTY_PRINT_RED + " בְּפָּסוּק " + std::to_string(line) + PRETTY_PRINT_END;
-
-    return msg + " עֲבוּר " + PRETTY_PRINT_RED + file_name + ": " + PRETTY_PRINT_END;
+    return fmt::format(get_random_message(), type_to_string(type));
 }
 
-std::string codesh::error::blasphemy_collector::get_random_message()
+fmt::format_string<std::string> codesh::error::blasphemy_collector::get_random_message()
 {
     static std::mt19937 rng{ std::random_device{}() };
     std::uniform_int_distribution<size_t> dist(0, RANDOM_MESSAGE_POOL.size() - 1);

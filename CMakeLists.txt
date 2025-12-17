@@ -170,19 +170,28 @@ add_executable(Codesh_Compiler
 )
 
 # sudo dnf install boost-regex boost-devel
-
 find_package(Boost REQUIRED COMPONENTS regex headers)
+
 target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
-
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
+
 target_link_libraries(Codesh_Compiler
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
 )
 
-
+# fmt
 include(FetchContent)
+
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 12.1.0
+)
+
+FetchContent_MakeAvailable(fmt)
+target_link_libraries(Codesh_Compiler fmt::fmt)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fmt/base.h"
+
 #include <optional>
 #include <string>
 #include <vector>
@@ -64,10 +66,9 @@ private:
 
     static std::string type_to_string(blasphemy_type type);
 
-    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type, size_t line,
-                                                    const std::string &file_name);
+    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
 
-    [[nodiscard]] static std::string get_random_message();
+    [[nodiscard]] static fmt::format_string<std::string> get_random_message();
 
 };
 
