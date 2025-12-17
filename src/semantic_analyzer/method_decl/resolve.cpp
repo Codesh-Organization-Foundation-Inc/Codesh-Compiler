@@ -86,7 +86,8 @@ static void resolve_method_signature(const codesh::ast::compilation_unit_ast_nod
                 // << " בְּעֶצֶם " << type_decl->get_name();
                 ;
 
-            codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str());
+            codesh::error::get_blasphemy_collector().add_blasphemy(os_string.str(),
+                codesh::error::blasphemy_type::SEMANTIC);
         }
     }
 

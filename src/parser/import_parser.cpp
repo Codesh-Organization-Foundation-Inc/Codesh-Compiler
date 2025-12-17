@@ -26,7 +26,8 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
         break;
 
     default:
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IMPORT_TYPE);
+        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IMPORT_TYPE,
+            error::blasphemy_type::SYNTAX);
 
     }
 
