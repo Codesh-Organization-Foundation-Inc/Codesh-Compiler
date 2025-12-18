@@ -23,12 +23,12 @@ std::pair<bool, codesh::definition::fully_qualified_class_name> codesh::semantic
     return {true, fqcn};
 }
 
-std::optional<codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_method_call(
+std::pair<bool, codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_method_call(
     const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
     const definition::fully_qualified_class_name &fqcn)
 {
     //TODO: Implement
-    return fqcn;
+    return {true, fqcn};
 }
 
 bool codesh::semantic_analyzer::util::resolve_custom_type_node(

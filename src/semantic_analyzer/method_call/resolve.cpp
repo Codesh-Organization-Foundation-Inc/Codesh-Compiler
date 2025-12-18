@@ -15,8 +15,10 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
         if (method_call == nullptr)
             continue;
 
-        const auto resolved_name = util::resolve_method_call(context.lookup_countries, method_call->get_fqcn());
-        if (!resolved_name.has_value())
+        const auto [was_resolved, resolved_name] =
+            util::resolve_method_call(context.lookup_countries, method_call->get_fqcn());
+
+        if (!was_resolved)
         {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
@@ -24,6 +26,6 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
             ));
         }
 
-        method_call->set_resolved_name(resolved_name.value());
+        method_call->set_resolved_name(resolved_name);
     }
 }
