@@ -5,7 +5,7 @@
 #include "../semantic_context.h"
 #include "fmt/xchar.h"
 
-void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context &context)
+void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context &context, const country_symbol &country)
 {
     for (const auto &type_decl : context.root.get_type_declarations())
     {

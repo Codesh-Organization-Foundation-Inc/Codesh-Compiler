@@ -1,5 +1,9 @@
 #pragma once
 
+namespace codesh::semantic_analyzer
+{
+class country_symbol;
+}
 namespace codesh::ast::type_decl
 {
 class type_declaration_ast_node;
@@ -16,6 +20,5 @@ class type_symbol;
 
 namespace codesh::semantic_analyzer::type_declaration
 {
-void resolve_aliases(const semantic_context &context, type_symbol &type,
-        const ast::type_decl::type_declaration_ast_node &type_decl);
+void resolve_aliases(const semantic_context &context, const country_symbol &country);
 }

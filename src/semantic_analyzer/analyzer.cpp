@@ -59,15 +59,11 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     const country_symbol &country = ast_root.get_symbol_table()->get().resolve_country("").value();
 
 
-    type_declaration::resolve(context);
+    type_declaration::resolve(context, country);
 
     //TODO: When CALLING non-static methods, also add 'this' as first argument
 
-    for (const auto &type_decl : ast_root.get_type_declarations())
-    {
-        type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
-        type_declaration::resolve_aliases(context, type, *type_decl);
-    }
+    type_declaration::resolve_aliases(context, country);
 }
 
 
