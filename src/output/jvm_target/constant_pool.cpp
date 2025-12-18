@@ -49,13 +49,9 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
     // Add methods
     for (const auto &method_decl : class_decl.get_all_methods())
     {
-        goc_methodref_info(
-            this_class_cpi,
-
-            goc_name_and_type_info(
-                goc_utf8_info(method_decl->get_name()),
-                goc_utf8_info(method_decl->generate_descriptor())
-            )
+        goc_name_and_type_info(
+            goc_utf8_info(method_decl->get_name()),
+            goc_utf8_info(method_decl->generate_descriptor())
         );
 // TODO: move to other func in private
         // Add parameters
