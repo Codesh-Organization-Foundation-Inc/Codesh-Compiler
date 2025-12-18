@@ -18,19 +18,11 @@ std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type
 
 std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(const bool resolved) const
 {
-    std::ostringstream builder;
-
-    for (size_t i = 0; i < this->get_array_dimensions(); i++)
-    {
-        builder << '[';
-    }
-
-    builder << fmt::format(
-        "L{};",
+    return fmt::format(
+        "{}L{};",
+        std::string(get_array_dimensions(), '['),
         get_name(resolved).join()
     );
-
-    return builder.str();
 }
 
 const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_type_ast_node::get_name() const
