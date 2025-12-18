@@ -12,8 +12,9 @@ std::optional<codesh::definition::fully_qualified_class_name> codesh::semantic_a
         throw std::runtime_error("Non-single FQCNs not yet supported");
     }
 
-    const std::string raw_name;
+    const std::string raw_name = fqcn.get_last_part();
 
+    //TODO: Move to aliasing, NOT resolving
     if (raw_name == "כתובים")
         return "java/lang/String";
 
