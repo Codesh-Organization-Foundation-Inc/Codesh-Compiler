@@ -88,6 +88,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     if (!method_overloads_raw)
     {
         //TODO: Throw "name doesn't exist"
+        context.blasphemy_consumer(fmt::format(
+            "היי אלירןןןןןן תעשה את השם בבקשה השגיאה היא שהדבר לא נמצא"
+        ));
         return std::nullopt;
     }
 
@@ -95,6 +98,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     if (!method_overloads)
     {
         //TODO: Throw "is not a method"
+        context.blasphemy_consumer(fmt::format(
+            "אליצ'אאאןןן >w< איייי!! נאני גה־סוקי? זוהי לא מתודה, יורימו אנאטה?"
+        ));
         return std::nullopt;
     }
 
@@ -126,6 +132,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
     //TODO: Throw "mismatched argument types"
+    context.blasphemy_consumer(fmt::format(
+        "מאסתי"
+    ));
     return std::nullopt;
 }
 
