@@ -33,14 +33,16 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const semantic_context &context, const type_symbol &type,
     const ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto &method = resolve_method_signature(context, method_decl, type);
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_name());
+
+    const auto &method = resolve_method_signature(new_context, method_decl, type);
 
     // Resolve body statements
     for (const auto &statement : method_decl.get_body())
     {
         if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(statement.get()))
         {
-            method_call::resolve(context, *method_call, method);
+            method_call::resolve(new_context, *method_call, method);
         }
     }
 }
@@ -50,13 +52,9 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::type_symbol &type)
 {
-    const std::string name = method_decl.get_name();
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", name);
-
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.resolve(name).value().get()
+        &type.resolve(method_decl.get_name()).value().get()
     );
-
 
     // Get relevant method symbol from the method overloads map
     // Then cast it to method_symbol
@@ -67,12 +65,11 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         )
     );
 
-    resolve_return_type(new_context, method_decl, *method);
-    resolve_parameters(new_context, method_decl, *method);
-    resolve_local_variables(new_context, *method);
+    resolve_return_type(context, method_decl, *method);
+    resolve_parameters(context, method_decl, *method);
+    resolve_local_variables(context, *method);
 
-
-    // Move to a new overloads entry, now that the parameters' descriptors are real
+    // Move to a new overloads entry, now that the parameters' descriptors are valid
     const auto insert_result =
         method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
 

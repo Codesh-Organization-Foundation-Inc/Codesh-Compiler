@@ -20,7 +20,7 @@ struct semantic_context
 
     const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries;
     const ast::compilation_unit_ast_node &root;
-    const blasphemy::blasphemy_consumer &blasphemy_consumer;
+    const blasphemy::blasphemy_consumer blasphemy_consumer;
 
     [[nodiscard]] semantic_context with_consumer(const blasphemy::blasphemy_consumer &blasphemy_consumer) const;
 
