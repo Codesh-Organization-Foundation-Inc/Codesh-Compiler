@@ -32,7 +32,6 @@ static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
         const std::string &no_tokens_blasphemy_details)
 {
-    // TODO: Request custom error message
     ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
 
     std::unique_ptr<token> token = std::move(tokens.front());

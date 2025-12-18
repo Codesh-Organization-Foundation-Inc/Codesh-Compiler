@@ -135,8 +135,6 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/i_resolvable.h
         src/parser/ast/impl/i_descriptor_emitter.cpp
         src/parser/ast/impl/i_resolvable.cpp
-        src/semantic_analyzer/aliases.cpp
-        src/semantic_analyzer/aliases.h
         src/semantic_analyzer/method_decl/resolve.cpp
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
@@ -173,6 +171,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/type_decl/resolve.h
         src/semantic_analyzer/semantic_context.h
         src/semantic_analyzer/semantic_context.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.h
 )
 
 # sudo dnf install boost-regex boost-devel

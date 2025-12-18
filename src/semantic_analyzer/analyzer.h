@@ -2,8 +2,6 @@
 
 #include "../parser/ast/compilation_unit_ast_node.h"
 
-#include <functional>
-
 namespace codesh::semantic_analyzer
 {
 class symbol_table;

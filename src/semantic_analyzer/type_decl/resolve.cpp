@@ -7,9 +7,6 @@
 
 void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context &context)
 {
-    //TODO: Properly get country of origin
-    const country_symbol &country = context.root.get_symbol_table()->get().resolve_country("").value();
-
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         const std::string name = type_decl->get_name();
