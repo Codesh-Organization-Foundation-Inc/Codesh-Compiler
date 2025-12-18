@@ -37,21 +37,11 @@ static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_co
 
 
     // Validate flags
-    bool is_public = false;
-    bool is_static = false;
+    const auto &attributes = bereshit_method->get().get_attributes();
 
-    for (auto &method_access_flag : bereshit_method->get().get_access_flags())
-    {
-        if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_PUBLIC)
-            is_public = true;
-        if (method_access_flag == codesh::output::jvm_target::access_flag::ACC_STATIC)
-            is_static = true;
-
-        if (is_public && is_static)
-            break;
-    }
-
-    if (!(is_public && is_static))
+    if (attributes.get_visibility() != codesh::definition::visibility::PUBLIC)
+        return;
+    if (!attributes.get_is_static())
         return;
 
 

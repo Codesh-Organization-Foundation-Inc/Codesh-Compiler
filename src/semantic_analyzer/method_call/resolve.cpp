@@ -70,6 +70,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     method_call.set_resolved_name(
         parent_type.get_full_name().with(name.get_last_part())
     );
+    method_call.set_referred_method(method.value());
 
     return method;
 }

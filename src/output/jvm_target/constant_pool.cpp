@@ -53,7 +53,8 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
             goc_utf8_info(method_decl->get_name()),
             goc_utf8_info(method_decl->generate_descriptor())
         );
-// TODO: move to other func in private
+
+        // TODO: move to other func in private
         // Add parameters
         for (const auto &param_node : method_decl->get_parameters())
         {
@@ -76,10 +77,10 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
                 // }
 
                 goc_methodref_info(
-                    goc_class_info(goc_utf8_info(method_call->get_binary_name())),
+                    goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
                     goc_name_and_type_info(
-                        goc_utf8_info(method_call->get_name()),
-                        goc_utf8_info(method_call->generate_descriptor()) // i need to get this descriptor
+                        goc_utf8_info(method_call->get_name().join()),
+                        goc_utf8_info(method_call->generate_descriptor())
                     )
                 );
             }
