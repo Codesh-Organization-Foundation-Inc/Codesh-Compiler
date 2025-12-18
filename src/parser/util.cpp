@@ -2,6 +2,7 @@
 
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
+#include "../defenition/definitions.h"
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
@@ -80,7 +81,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token()
 {
-    return std::make_unique<codesh::identifier_token>(codesh::token_group::IDENTIFIER, ERROR_IDENTIFIER_CONTENT);
+    return std::make_unique<codesh::identifier_token>(codesh::token_group::IDENTIFIER, codesh::definition::ERROR_IDENTIFIER_CONTENT);
 }
 
 
