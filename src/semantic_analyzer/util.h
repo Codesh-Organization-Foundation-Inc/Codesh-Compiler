@@ -20,6 +20,9 @@ class compilation_unit_ast_node;
 
 namespace codesh::semantic_analyzer::util
 {
+//FIXME: Do not return optional: return an std::pair of whether succeed and the provided name as-is.
+//FIXME: Use FQCNs, NOT strings.
+
 /**
  * @returns the Fully Qualified Class Name of the given type name (which isn't a descriptor).
  * If unresolved, returns {@link std::nullopt}
