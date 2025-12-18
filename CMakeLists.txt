@@ -163,6 +163,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/value_ast_node.cpp
         src/blasphemy/details.h
         src/blasphemy/details.cpp
+        src/semantic_analyzer/method_call/resolve.cpp
+        src/semantic_analyzer/method_call/resolve.h
         src/blasphemy/blasphemy_consumer.h
         src/blasphemy/blasphemy_consumer.cpp
         src/semantic_analyzer/type_decl/resolve.cpp
