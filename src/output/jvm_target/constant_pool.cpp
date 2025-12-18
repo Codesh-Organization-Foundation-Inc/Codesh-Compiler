@@ -80,7 +80,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
                 // }
 
                 goc_methodref_info(
-                    goc_class_info(goc_utf8_info(method_call->get_binary_name())), // check if its like a/b/c
+                    goc_class_info(goc_utf8_info(method_call->get_binary_name())),
                     goc_name_and_type_info(
                         goc_utf8_info(method_call->get_name()),
                         goc_utf8_info(method_call->generate_descriptor()) // i need to get this descriptor
