@@ -1,7 +1,7 @@
 #include "command_parser.h"
 
-#include "blasphemies/blasphemy_details.h"
-#include "blasphemies/blasphemy_collector.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -9,9 +9,9 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
     if (argc < 2)
     {
-        error::get_blasphemy_collector().add_blasphemy(
-            error::blasphemy_details::NO_MAIN_ARGS,
-            error::blasphemy_type::INIT,
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_MAIN_ARGS,
+            blasphemy::blasphemy_type::INIT,
             std::nullopt,
             true
         );

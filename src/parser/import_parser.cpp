@@ -1,7 +1,7 @@
 #include "import_parser.h"
 
-#include "../blasphemies/blasphemy_collector.h"
-#include "../blasphemies/blasphemy_details.h"
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "ast/import_declaration_ast_node.h"
 #include "util.h"
 
@@ -14,7 +14,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
     std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
 
     // Check if is a static import
-    util::ensure_tokens_exist(tokens, error::blasphemy_details::NO_IMPORT_TYPE); // TODO: provide better reason
+    util::ensure_tokens_exist(tokens, blasphemy::details::NO_IMPORT_TYPE); // TODO: provide better reason
     switch (tokens.front()->get_group())
     {
     case token_group::KEYWORD_IMPORT_STATIC:
@@ -26,7 +26,8 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
         break;
 
     default:
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IMPORT_TYPE);
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IMPORT_TYPE,
+            blasphemy::blasphemy_type::SYNTAX);
 
     }
 

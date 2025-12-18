@@ -1,20 +1,20 @@
 #include "method_declaration_ast_node.h"
 
 #include "../local_variable_declaration_ast_node.h"
+#include "fmt/xchar.h"
 
-#include <sstream>
+#include <ranges>
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    std::ostringstream result;
+    // In JVM, a method descriptor is defined as such:
+    // (args...)return_type
 
-    // Argument types
-    result << '(' << generate_parameters_descriptor(resolved) << ')';
-
-    // Return type
-    result << get_return_type()->generate_descriptor(resolved);
-
-    return result.str();
+    return fmt::format(
+        "({}){}",
+        generate_parameters_descriptor(resolved),
+        get_return_type()->generate_descriptor(resolved)
+    );
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_parameters_descriptor(const bool resolved) const
@@ -22,37 +22,41 @@ std::string codesh::ast::method::method_declaration_ast_node::generate_parameter
     if (!resolved)
         return generate_unresolved_parameter_descriptors();
 
+    fmt::memory_buffer out;
+    const auto &params = get_parameters();
 
-    std::ostringstream result;
+    auto it = params.begin();
 
-    bool is_first = true;
-    for (const auto &var_node : get_parameters())
-    {
-        if (is_first && !attributes->get_is_static())
-        {
-            // The first parameter of a non-static must be 'this', so just ignore it.
-            is_first = false;
-            continue;
-        }
-
-        result << var_node->get_type()->generate_descriptor();
-
-        is_first = false;
+    // If the method isn't static, skip the first parameter ('this').
+    if (!attributes->get_is_static()) {
+        ++it;
     }
 
-    return result.str();
+    for (; it != params.end(); ++it)
+    {
+        const auto &param = **it;
+
+        fmt::format_to(
+            std::back_inserter(out),
+            "{}",
+            param.get_type()->generate_descriptor()
+        );
+    }
+
+    return fmt::to_string(out);
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_unresolved_parameter_descriptors() const
 {
-    std::ostringstream result;
+    auto descriptors = get_parameters()
+        | std::views::transform([](const std::unique_ptr<local_variable_declaration_ast_node> &var) {
+            return var->get_type()->generate_descriptor(false);
+        });
 
-    for (const auto &var_node : get_parameters())
-    {
-        result << var_node->get_type()->generate_descriptor(false);
-    }
-
-    return result.str();
+    return fmt::format(
+        "{}",
+        fmt::join(descriptors, "")
+    );
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::get_name() const

@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+namespace codesh::definition
+{
+class fully_qualified_class_name;
+}
 namespace codesh::ast
 {
 namespace type
@@ -16,13 +20,17 @@ class compilation_unit_ast_node;
 
 namespace codesh::semantic_analyzer::util
 {
+//FIXME: Do not return optional: return an std::pair of whether succeed and the provided name as-is.
+//FIXME: Use FQCNs, NOT strings.
+
 /**
- * @returns the Fully Qualified Class Name of the given type name (which isn't a descriptor).
- * If unresolved, returns {@link std::nullopt}
+ * @returns the Fully Qualified Class Name of the given type name.
+ * If unresolved, returns {@code false} and the originally passed name.
+ * Otherwise, returns {@code true} and the resolved name.
  */
-std::optional<std::string> resolve_custom_type(
+[[nodiscard]] std::pair<bool, definition::fully_qualified_class_name> resolve_custom_type(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        const std::string &name);
+        const definition::fully_qualified_class_name &fqcn);
 
 /**
  * @return Whether the type was successfully resolved

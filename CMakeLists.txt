@@ -135,14 +135,12 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/i_resolvable.h
         src/parser/ast/impl/i_descriptor_emitter.cpp
         src/parser/ast/impl/i_resolvable.cpp
-        src/semantic_analyzer/aliases.cpp
-        src/semantic_analyzer/aliases.h
         src/semantic_analyzer/method_decl/resolve.cpp
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
         src/semantic_analyzer/method_decl/resolve_aliases.h
-        src/blasphemies/blasphemy_collector.h
-        src/blasphemies/blasphemy_collector.cpp
+        src/blasphemy/blasphemy_collector.h
+        src/blasphemy/blasphemy_collector.cpp
         src/output/ir/instruction.cpp
         src/output/ir/instruction.h
         src/output/ir/code_block.cpp
@@ -163,24 +161,43 @@ add_executable(Codesh_Compiler
         src/defenition/fully_qualified_class_name.cpp
         src/defenition/fully_qualified_class_name.h
         src/parser/ast/var_reference/value_ast_node.cpp
-        src/blasphemies/blasphemy_details.h
-        src/blasphemies/blasphemy_details.cpp
+        src/blasphemy/details.h
+        src/blasphemy/details.cpp
+        src/semantic_analyzer/method_call/resolve.cpp
+        src/semantic_analyzer/method_call/resolve.h
+        src/blasphemy/blasphemy_consumer.h
+        src/blasphemy/blasphemy_consumer.cpp
+        src/semantic_analyzer/type_decl/resolve.cpp
+        src/semantic_analyzer/type_decl/resolve.h
+        src/semantic_analyzer/semantic_context.h
+        src/semantic_analyzer/semantic_context.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.h
 )
 
 # sudo dnf install boost-regex boost-devel
-
 find_package(Boost REQUIRED COMPONENTS regex headers)
+
 target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
-
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
+
 target_link_libraries(Codesh_Compiler
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
 )
 
-
+# fmt
 include(FetchContent)
+
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 12.1.0
+)
+
+FetchContent_MakeAvailable(fmt)
+target_link_libraries(Codesh_Compiler fmt::fmt)

@@ -1,7 +1,7 @@
 #include "parser.h"
 
-#include "../blasphemies/blasphemy_collector.h"
-#include "../blasphemies/blasphemy_details.h"
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
 #include "type/type_parser.h"
@@ -15,9 +15,9 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 {
     if (tokens.empty())
     {
-        error::get_blasphemy_collector().add_blasphemy(
-            error::blasphemy_details::NO_BASAD,
-            error::blasphemy_type::LEXICAL,
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_BASAD,
+            blasphemy::blasphemy_type::LEXICAL,
             std::nullopt,
             true
         );
@@ -49,8 +49,8 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             break;
 
         default:
-            error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_KEYWORD_SHALL_BE,
-                error::blasphemy_type::SYNTAX);
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
+                blasphemy::blasphemy_type::SYNTAX);
             tokens.pop();
             break;
         }

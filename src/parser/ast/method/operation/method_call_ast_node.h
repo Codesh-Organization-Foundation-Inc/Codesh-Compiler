@@ -8,30 +8,31 @@
 #include "../../var_reference/value_ast_node.h"
 
 #include <memory>
+#include <vector>
 
 namespace codesh::ast::method::operation
 {
 
 class method_call_ast_node : public impl::ir_emitting_ast_node, public impl::i_resolvable
 {
-    definition::fully_qualified_class_name fqcn;
-    std::optional<std::string> resolved_name;
+    definition::fully_qualified_class_name name;
+    std::optional<definition::fully_qualified_class_name> resolved_name;
 
-    std::list<std::unique_ptr<var_reference::value_ast_node>> arguments;
+    std::vector<std::unique_ptr<var_reference::value_ast_node>> arguments;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
+    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
 
 public:
-    [[nodiscard]] std::string get_name() const override;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
 
     [[nodiscard]] definition::fully_qualified_class_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_class_name &get_fqcn() const;
 
 
-    [[nodiscard]] const std::list<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
-    [[nodiscard]] std::list<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
+    [[nodiscard]] const std::vector<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
+    [[nodiscard]] std::vector<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
 
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

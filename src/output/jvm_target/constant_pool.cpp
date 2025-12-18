@@ -1,7 +1,7 @@
 #include "constant_pool.h"
 
-#include "../../blasphemies/blasphemy_collector.h"
-#include "../../blasphemies/blasphemy_details.h"
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../defenition/definitions.h"
 #include "../../util.h"
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
@@ -19,7 +19,7 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
     index(1),
     this_class_cpi(
         goc_class_info(
-            goc_utf8_info(type_decl.get_binary_name())
+            goc_utf8_info(type_decl.get_resolved_name().join())
         )
     )
 {
@@ -41,7 +41,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         const ast::type_decl::class_declaration_ast_node &class_decl)
 {
     const int super_class_cpi = goc_utf8_info(
-        class_decl.get_super_class()->get_binary_name()
+        class_decl.get_super_class()->get_resolved_name().join()
     );
 
     const int super_class_constant = goc_class_info(super_class_cpi);
@@ -136,8 +136,8 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
 {
     if (utf8.size() > 0xFFFF)
     {
-        error::blasphemy_collector().add_blasphemy(error::blasphemy_details::STRING_TOO_BIG,
-            error::blasphemy_type::OUTPUT, std::nullopt, true);
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::STRING_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();
