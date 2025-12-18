@@ -48,7 +48,12 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    type_declaration::resolve(semantic_context(ast_root, blasphemy::semantic_consumer));
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        ast_root.get_symbol_table().value().get().resolve_country("").value()
+    };
+
+    type_declaration::resolve(semantic_context(lookup_countries, ast_root, blasphemy::semantic_consumer));
 
     //TODO: When CALLING non-static methods, also add 'this' as first argument
 

@@ -2,9 +2,9 @@
 
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
 #include "../util.h"
+#include "../semantic_context.h"
 
-void codesh::semantic_analyzer::method_call::resolve(
-        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+void codesh::semantic_analyzer::method_call::resolve(const semantic_context &context,
         const ast::method::method_declaration_ast_node &method_decl,
         method_symbol &method)
 {
@@ -14,7 +14,7 @@ void codesh::semantic_analyzer::method_call::resolve(
         if (method_call == nullptr)
             continue;
 
-        const auto resolved_name = util::resolve_method_call(lookup_countries, method_call->get_fqcn());
+        const auto resolved_name = util::resolve_method_call(context.lookup_countries, method_call->get_fqcn());
         if (!resolved_name.has_value())
         {
             //FIXME: DONT THROW, WRAP ERROR AS BLASPHEMY

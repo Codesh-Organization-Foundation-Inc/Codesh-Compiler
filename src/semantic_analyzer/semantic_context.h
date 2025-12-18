@@ -10,12 +10,15 @@ class compilation_unit_ast_node;
 
 namespace codesh::semantic_analyzer
 {
+class country_symbol;
 
 struct semantic_context
 {
-    semantic_context(const ast::compilation_unit_ast_node &root,
+    semantic_context(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+            const ast::compilation_unit_ast_node &root,
             const blasphemy::blasphemy_consumer &blasphemy_consumer);
 
+    const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries;
     const ast::compilation_unit_ast_node &root;
     const blasphemy::blasphemy_consumer &blasphemy_consumer;
 

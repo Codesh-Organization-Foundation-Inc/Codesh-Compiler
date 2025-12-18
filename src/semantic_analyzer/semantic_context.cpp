@@ -2,8 +2,10 @@
 
 #include "fmt/xchar.h"
 
-codesh::semantic_analyzer::semantic_context::semantic_context(const ast::compilation_unit_ast_node &root,
-                                                              const blasphemy::blasphemy_consumer &blasphemy_consumer) :
+codesh::semantic_analyzer::semantic_context::semantic_context(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+        const ast::compilation_unit_ast_node &root,
+        const blasphemy::blasphemy_consumer &blasphemy_consumer) :
+    lookup_countries(lookup_countries),
     root(root),
     blasphemy_consumer(blasphemy_consumer)
 {
@@ -12,7 +14,7 @@ codesh::semantic_analyzer::semantic_context::semantic_context(const ast::compila
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(
     const blasphemy::blasphemy_consumer &blasphemy_consumer) const
 {
-    return {root, blasphemy_consumer};
+    return {lookup_countries, root, blasphemy_consumer};
 }
 
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(

@@ -74,13 +74,8 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
         return;
     }
 
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        context.root.get_symbol_table().value().get().resolve_country("").value()
-    };
-
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-        lookup_countries,
+        context.lookup_countries,
         *return_type,
         method_symbol.get_return_type()
     )) {
@@ -95,11 +90,6 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
         const codesh::ast::method::method_declaration_ast_node &method,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        context.root.get_symbol_table()->get().resolve_country("").value()
-    };
-
     size_t i = 0;
     for (const auto &param : method.get_parameters())
     {
@@ -108,7 +98,7 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            lookup_countries,
+            context.lookup_countries,
             *custom_param,
             *method_symbol.get_parameter_types()[i]
         )) {
@@ -125,11 +115,6 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        context.root.get_symbol_table()->get().resolve_country("").value()
-    };
-
     for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
@@ -137,7 +122,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            lookup_countries,
+            context.lookup_countries,
             *custom_param
         )) {
             context.blasphemy_consumer(fmt::format(
