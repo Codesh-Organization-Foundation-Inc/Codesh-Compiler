@@ -11,7 +11,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_c
 {
     for (const auto &type_decl : context.root.get_type_declarations())
     {
-        const std::string name = type_decl->get_name();
+        const std::string name = type_decl->get_name().get_last_part();
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
 

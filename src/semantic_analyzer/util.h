@@ -27,10 +27,9 @@ namespace codesh::semantic_analyzer::util
  * @returns the Fully Qualified Class Name of the given type name (which isn't a descriptor).
  * If unresolved, returns {@link std::nullopt}
  */
-[[nodiscard]] std::optional<std::string> resolve_custom_type(
+[[nodiscard]] std::optional<definition::fully_qualified_class_name> resolve_custom_type(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        //FIXME: This should get an FQCN
-        const std::string &name);
+        const definition::fully_qualified_class_name &fqcn);
 
 /**
  * @return Whether the type was successfully resolved

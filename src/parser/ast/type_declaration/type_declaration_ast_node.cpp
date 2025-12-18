@@ -2,26 +2,30 @@
 
 #include <utility>
 
-std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::_get_resolved_name()
+std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type_decl::type_declaration_ast_node::
+    _get_resolved_name()
 {
     return resolved_name;
 }
 
-codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(std::string name) : name(std::move(name))
+codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
+        definition::fully_qualified_class_name name) : name(std::move(name))
 {
 }
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    return "L" + get_binary_name(resolved) + ";";
+    return "L" + get_name(resolved).join() + ";";
 }
 
-const std::optional<std::string> &codesh::ast::type_decl::type_declaration_ast_node::_get_resolved_name() const
+const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type_decl::type_declaration_ast_node::
+    _get_resolved_name() const
 {
     return resolved_name;
 }
 
-std::string codesh::ast::type_decl::type_declaration_ast_node::get_name() const
+const codesh::definition::fully_qualified_class_name &codesh::ast::type_decl::type_declaration_ast_node::get_name()
+    const
 {
     return this->name;
 }

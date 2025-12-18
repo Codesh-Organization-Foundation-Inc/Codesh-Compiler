@@ -17,20 +17,21 @@ class attributes_ast_node;
 
 class custom_type_ast_node : public type_ast_node, public impl::i_resolvable
 {
-    const std::string name;
-    std::optional<std::string> resolved_name;
+    const definition::fully_qualified_class_name name;
+    std::optional<definition::fully_qualified_class_name> resolved_name;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
+    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
 
 public:
-    explicit custom_type_ast_node(std::string name);
+    explicit custom_type_ast_node(definition::fully_qualified_class_name name);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] std::string get_name() const override;
+    using i_resolvable::get_name;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
 
     [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
 };

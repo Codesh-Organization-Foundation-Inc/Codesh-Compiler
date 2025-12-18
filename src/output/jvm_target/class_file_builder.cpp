@@ -28,10 +28,10 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_f
     constant_pool_(type_decl.get_constant_pool()->get()),
 
     this_class_cpi(constant_pool_.get_class_index(
-        constant_pool_.get_utf8_index(type_decl.get_binary_name())
+        constant_pool_.get_utf8_index(type_decl.get_resolved_name().join())
     )),
     super_class_cpi(constant_pool_.get_class_index(
-        constant_pool_.get_utf8_index(type_decl.get_super_class()->get_binary_name())
+        constant_pool_.get_utf8_index(type_decl.get_super_class()->get_resolved_name().join())
     ))
 {}
 

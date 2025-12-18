@@ -18,7 +18,7 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
     index(1),
     this_class_cpi(
         goc_class_info(
-            goc_utf8_info(type_decl.get_binary_name())
+            goc_utf8_info(type_decl.get_resolved_name().join())
         )
     )
 {
@@ -40,7 +40,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         const ast::type_decl::class_declaration_ast_node &class_decl)
 {
     const int super_class_cpi = goc_utf8_info(
-        class_decl.get_super_class()->get_binary_name()
+        class_decl.get_super_class()->get_resolved_name().join()
     );
 
     const int super_class_constant = goc_class_info(super_class_cpi);

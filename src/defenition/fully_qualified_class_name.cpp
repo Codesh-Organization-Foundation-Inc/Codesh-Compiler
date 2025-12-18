@@ -7,6 +7,28 @@ codesh::definition::fully_qualified_class_name::fully_qualified_class_name() :
 {
 }
 
+codesh::definition::fully_qualified_class_name::fully_qualified_class_name(const char *binary_fqcn) :
+    fully_qualified_class_name()
+{
+    std::istringstream ss(binary_fqcn);
+
+    // Split by '/'
+    std::string item;
+    while (std::getline(ss, item, '/'))
+    {
+        if (!item.empty())
+        {
+            add(item);
+        }
+    }
+}
+
+codesh::definition::fully_qualified_class_name::fully_qualified_class_name(std::string part) :
+    fully_qualified_class_name()
+{
+    add(std::move(part));
+}
+
 void codesh::definition::fully_qualified_class_name::add(std::string part)
 {
     parts.emplace_back(std::move(part));
@@ -25,6 +47,16 @@ void codesh::definition::fully_qualified_class_name::set_is_wildcard(bool wildca
 bool codesh::definition::fully_qualified_class_name::is_wildcard() const
 {
     return _is_wildcard;
+}
+
+bool codesh::definition::fully_qualified_class_name::is_single_part() const
+{
+    return parts.size() == 1;
+}
+
+std::string codesh::definition::fully_qualified_class_name::get_last_part() const
+{
+    return parts.back();
 }
 
 std::string codesh::definition::fully_qualified_class_name::join(const char sep) const

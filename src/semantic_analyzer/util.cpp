@@ -2,17 +2,24 @@
 
 #include "../parser/ast/compilation_unit_ast_node.h"
 
-std::optional<std::string> codesh::semantic_analyzer::util::resolve_custom_type(
-        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries, const std::string &name)
+std::optional<codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_custom_type(
+        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+        const definition::fully_qualified_class_name &fqcn)
 {
-    if (name == "כתובים")
+    if (!fqcn.is_single_part())
+    {
+        //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
+        throw std::runtime_error("Non-single FQCNs not yet supported");
+    }
+
+    const std::string raw_name;
+
+    if (raw_name == "כתובים")
         return "java/lang/String";
 
     //TODO: Implement when implementing countries.
-    // This method should return the Fully Qualified Class Name of the given type name (which isn't a descriptor).
 
-    return name;
-    //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
+    return fqcn;
 }
 
 bool codesh::semantic_analyzer::util::resolve_custom_type_node(

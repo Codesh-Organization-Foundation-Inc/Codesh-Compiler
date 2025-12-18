@@ -40,7 +40,9 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
             blasphemy::blasphemy_type::SYNTAX);
     }
 
-    auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(name_token->get_content());
+    auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
+        definition::fully_qualified_class_name(name_token->get_content())
+    );
 
 
     // Get attributes

@@ -19,7 +19,7 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
     const int super_constructor_cp_index = constant_pool.get_methodref_index(
         constant_pool.get_class_index(
             constant_pool.get_utf8_index(
-                containing_type_decl.get_super_class()->get_binary_name()
+                containing_type_decl.get_super_class()->get_resolved_name().join()
             )
         ),
 
