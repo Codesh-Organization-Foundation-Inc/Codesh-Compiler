@@ -97,12 +97,11 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
     {
         method_call.get_arguments().push_back(codesh::parser::util::parse_value(tokens));
 
-        if (codesh::parser::util::peeking_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR) ||
-            codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
-        {
-            tokens.pop();
-        }
-        else
+        if (codesh::parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR))
+            continue;
+
+        // If there are no more arguments, there shouldn't be anything else besides a closing parenthesis.
+        if (!codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
         {
             throw std::runtime_error("Unexpected token"); //TODO: Convert to custom Codesh error
         }
