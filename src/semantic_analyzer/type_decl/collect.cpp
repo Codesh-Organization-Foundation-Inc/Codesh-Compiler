@@ -11,14 +11,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const ast::compi
     for (const auto &type_decl : root_node.get_type_declarations())
     {
         const std::string name = type_decl->get_name();
-
-        blasphemy::blasphemy_consumer type_bc = [&blasphemy_consumer, &name](std::string details) {
-            blasphemy_consumer(fmt::format(
-                "{} בָּעֶצֶם {}",
-                std::move(details),
-                name
-            ));
-        };
+        blasphemy::blasphemy_consumer type_bc = blasphemy::create_nested_consumer(blasphemy_consumer, "בָּעֶצֶם", name);
 
 
         const auto [it, inserted] = containing_country.add_symbol(

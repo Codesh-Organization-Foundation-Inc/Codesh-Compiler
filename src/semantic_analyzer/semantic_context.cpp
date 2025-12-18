@@ -16,14 +16,7 @@ codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_
 }
 
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(
-    std::string wrapper_name, std::string object_name) const
+    const std::string &wrapper_name, const std::string &object_name) const
 {
-    return with_consumer([this, &object_name, &wrapper_name](std::string details) {
-        this->blasphemy_consumer(fmt::format(
-            "{} {} {}",
-            std::move(details),
-            std::move(wrapper_name),
-            std::move(object_name)
-        ));
-    });
+    return with_consumer(blasphemy::create_nested_consumer(blasphemy_consumer, wrapper_name, object_name));
 }
