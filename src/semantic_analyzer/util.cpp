@@ -31,6 +31,14 @@ std::optional<codesh::definition::fully_qualified_class_name> codesh::semantic_a
     return fqcn;
 }
 
+std::optional<codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_method_call(
+    const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+    const definition::fully_qualified_class_name &fqcn)
+{
+    //TODO: Implement
+    return fqcn;
+}
+
 bool codesh::semantic_analyzer::util::resolve_custom_type_node(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
         ast::type::custom_type_ast_node &symbol_type_node)
