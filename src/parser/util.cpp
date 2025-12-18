@@ -177,7 +177,6 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
             blasphemy::blasphemy_type::SYNTAX);
-        return;
     }
 }
 
@@ -229,7 +228,6 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
         break;
     }
 }
-
 
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util::parse_value(
