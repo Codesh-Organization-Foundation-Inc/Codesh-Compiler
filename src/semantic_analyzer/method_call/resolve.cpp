@@ -32,12 +32,7 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     );
 
     if (!result.has_value())
-    {
-        context.blasphemy_consumer(fmt::format(
-            "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-            method_call.get_name().join()
-        ));
-    }
+        return;
 
     //TODO: Resolve aliases
 }
