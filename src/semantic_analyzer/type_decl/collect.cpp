@@ -27,7 +27,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_c
         {
             new_context.blasphemy_consumer(fmt::format(
                 "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-                name
+                type_decl->get_name().join()
             ));
         }
 

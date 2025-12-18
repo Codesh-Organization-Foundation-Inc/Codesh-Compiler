@@ -20,10 +20,10 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
         {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                method_call->get_name()
+                method_call->get_name().join()
             ));
         }
 
-        method_call->set_resolved_name(resolved_name->join());
+        method_call->set_resolved_name(resolved_name.value());
     }
 }
