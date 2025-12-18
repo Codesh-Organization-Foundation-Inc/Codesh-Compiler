@@ -29,13 +29,13 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::method::opera
     return name;
 }
 
-const std::list<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
+const std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments() const
 {
     return arguments;
 }
 
-std::list<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
+std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments()
 {
     return arguments;

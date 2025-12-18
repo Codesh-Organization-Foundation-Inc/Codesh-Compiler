@@ -14,7 +14,7 @@ const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_anal
 codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_unit_ast_node &root_node)
 {
     // Add global scope to symbol table
-    add_symbol("", std::make_unique<country_symbol>());
+    add_symbol("", std::make_unique<country_symbol>(""));
 
 
     //TODO: Resolve all countries of origin

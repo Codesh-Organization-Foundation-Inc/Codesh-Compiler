@@ -18,6 +18,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_c
         const auto [it, inserted] = country.add_symbol(
             name, std::make_unique<type_symbol>(
                 &country,
+                country.get_full_name().with(name),
                 type_decl->get_attributes()->get_access_flags(),
                 type_decl.get()
             )
@@ -27,7 +28,7 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_c
         {
             new_context.blasphemy_consumer(fmt::format(
                 "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-                name
+                type_decl->get_name().join()
             ));
         }
 

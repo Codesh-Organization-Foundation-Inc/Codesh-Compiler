@@ -23,6 +23,11 @@ public:
     fully_qualified_class_name(const char *binary_fqcn); // NOLINT(*-explicit-constructor)
     explicit fully_qualified_class_name(std::string part);
 
+    /**
+     * Clones this FQCN and appends the provided part to it
+     */
+    [[nodiscard]] fully_qualified_class_name with(std::string part) const;
+
 
     void add(std::string part);
     [[nodiscard]] const std::list<std::string> &get_parts() const;

@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include "../parser/ast/compilation_unit_ast_node.h"
+#include "../parser/ast/method/operation/method_call_ast_node.h"
 
 std::pair<bool, codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_custom_type(
         const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
@@ -51,7 +52,7 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(
 }
 
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(
-    const std::string &name, type_symbol &containing_type)
+        const std::string &name, type_symbol &containing_type)
 {
     return containing_type.add_symbol(
         name, std::make_unique<method_overloads_symbol>(&containing_type)

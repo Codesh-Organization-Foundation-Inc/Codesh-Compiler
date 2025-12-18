@@ -5,7 +5,7 @@
 codesh::blasphemy::blasphemy_consumer codesh::blasphemy::create_nested_consumer(
         const blasphemy_consumer &parent_consumer, const std::string &wrapper_name, const std::string &object_name)
 {
-    return [&parent_consumer, &wrapper_name, &object_name](std::string details) {
+    return [&parent_consumer, wrapper_name, object_name](std::string details) {
         parent_consumer(fmt::format(
             "{} {} {}",
             std::move(details),

@@ -26,6 +26,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
         const auto [it, inserted] = methods_container.add_symbol(
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
                 &methods_container,
+                containing_type,
                 method_decl->get_attributes()->get_access_flags(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone(),

@@ -31,6 +31,15 @@ codesh::definition::fully_qualified_class_name::fully_qualified_class_name(std::
     add(std::move(part));
 }
 
+codesh::definition::fully_qualified_class_name codesh::definition::fully_qualified_class_name::with(std::string part)
+    const
+{
+    fully_qualified_class_name result = *this;
+    result.add(std::move(part));
+
+    return result;
+}
+
 void codesh::definition::fully_qualified_class_name::add(std::string part)
 {
     parts.emplace_back(std::move(part));
