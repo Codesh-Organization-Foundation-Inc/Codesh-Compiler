@@ -1,5 +1,7 @@
 #include "fully_qualified_class_name.h"
 
+#include "fmt/xchar.h"
+
 #include <sstream>
 
 codesh::definition::fully_qualified_class_name::fully_qualified_class_name() :
@@ -61,12 +63,5 @@ std::string codesh::definition::fully_qualified_class_name::get_last_part() cons
 
 std::string codesh::definition::fully_qualified_class_name::join(const char sep) const
 {
-    std::ostringstream builder;
-
-    for (const auto &part : parts)
-    {
-        builder << sep << part;
-    }
-
-    return builder.str();
+    return fmt::format("{}", fmt::join(parts, std::string(1, sep)));
 }
