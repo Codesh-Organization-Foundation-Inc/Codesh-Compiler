@@ -66,14 +66,21 @@ const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::cou
     return scopes;
 }
 
+const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::country_symbol::get_full_name() const
+{
+    return full_name;
+}
+
 codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::country_symbol::get_symbol_map()
 {
     return scopes;
 }
 
-codesh::semantic_analyzer::country_symbol::country_symbol(symbol *const parent_symbol,
+codesh::semantic_analyzer::country_symbol::country_symbol(definition::fully_qualified_class_name full_name,
+        symbol *const parent_symbol,
         ast::impl::ast_node *producing_node) :
-    symbol(parent_symbol, symbol_type::COUNTRY)
+    symbol(parent_symbol, symbol_type::COUNTRY),
+    full_name(std::move(full_name))
 {
 }
 
@@ -99,12 +106,19 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symb
 }
 
 codesh::semantic_analyzer::type_symbol::type_symbol(symbol *const parent_symbol,
+        definition::fully_qualified_class_name full_name,
         const std::vector<output::jvm_target::access_flag> &access_flags,
         ast::type_decl::type_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::TYPE),
+    full_name(std::move(full_name)),
     producing_node(producing_node),
     access_flags(access_flags)
 {
+}
+
+const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::type_symbol::get_full_name() const
+{
+    return full_name;
 }
 
 const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_analyzer::type_symbol::get_access_flags()
@@ -169,9 +183,9 @@ const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::met
 }
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> codesh::semantic_analyzer::
-    method_overloads_symbol::resolve_method(const std::string &name) const
+    method_overloads_symbol::resolve_method(const std::string &params_descriptor) const
 {
-    const auto result = resolve(name);
+    const auto result = resolve(params_descriptor);
 
     if (!result.has_value())
         return std::nullopt;
@@ -216,7 +230,7 @@ std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &code
     return inner_method_scopes;
 }
 
-codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_symbol,
+codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_symbol, type_symbol &parent_type,
         const std::vector<output::jvm_target::access_flag> &access_flags,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
         std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node) :
@@ -225,7 +239,8 @@ codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_sym
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
     method_scope(this, local_variables),
-    producing_node(producing_node)
+    producing_node(producing_node),
+    parent_type(parent_type)
 {
 }
 
@@ -271,6 +286,11 @@ codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::metho
 codesh::ast::method::method_declaration_ast_node *codesh::semantic_analyzer::method_symbol::get_producing_node() const
 {
     return producing_node;
+}
+
+codesh::semantic_analyzer::type_symbol &codesh::semantic_analyzer::method_symbol::get_parent_type() const
+{
+    return parent_type;
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::country_symbol::ALLOWED_SYMBOL_TYPES = {

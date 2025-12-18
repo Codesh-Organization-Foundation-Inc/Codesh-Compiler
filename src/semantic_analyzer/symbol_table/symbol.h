@@ -77,6 +77,8 @@ public:
 //TODO: Attach ast node
 class country_symbol final : public symbol, public i_scope_containing_symbol
 {
+    const definition::fully_qualified_class_name full_name;
+
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
 
@@ -85,16 +87,22 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    explicit country_symbol(symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
+    explicit country_symbol(definition::fully_qualified_class_name full_name, symbol *parent_symbol = nullptr,
+            ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_ast_node_produced<ast::type_decl::type_declaration_ast_node>
 {
+    const definition::fully_qualified_class_name full_name;
+
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
+
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
@@ -107,8 +115,11 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+    type_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+            const std::vector<output::jvm_target::access_flag> &access_flags,
             ast::type_decl::type_declaration_ast_node *producing_node);
+
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 
     [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
 
@@ -163,7 +174,8 @@ public:
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(const std::string &name) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(
+            const std::string &params_descriptor) const;
 };
 
 
@@ -204,11 +216,14 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
     method_scope_symbol method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
+    type_symbol &parent_type;
 
 public:
-    method_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+    method_symbol(symbol *parent_symbol, type_symbol &parent_type,
+            const std::vector<output::jvm_target::access_flag> &access_flags,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-            std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node);
+            std::unique_ptr<ast::type::type_ast_node> return_type,
+            ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
@@ -224,6 +239,9 @@ public:
     [[nodiscard]] method_scope_symbol &get_scope();
 
     [[nodiscard]] ast::method::method_declaration_ast_node *get_producing_node() const override;
+
+
+    [[nodiscard]] type_symbol &get_parent_type() const;
 };
 
 }

@@ -1,18 +1,20 @@
 #pragma once
-#include "../../parser/ast/method/method_declaration_ast_node.h"
 
+namespace codesh::ast::method::operation
+{
+class method_call_ast_node;
+}
 namespace codesh::semantic_analyzer
 {
 struct semantic_context;
 }
 namespace codesh::semantic_analyzer
 {
-class country_symbol;
 class method_symbol;
 }
 
 namespace codesh::semantic_analyzer::method_call
 {
-void resolve(const semantic_context &context, const ast::method::method_declaration_ast_node &method_decl,
-        method_symbol &method);
+void resolve(const semantic_context &context, ast::method::operation::method_call_ast_node &method_call,
+        const method_symbol &containing_method);
 }
