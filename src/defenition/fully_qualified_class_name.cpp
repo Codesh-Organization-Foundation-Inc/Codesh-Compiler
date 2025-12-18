@@ -12,11 +12,11 @@ codesh::definition::fully_qualified_class_name::fully_qualified_class_name() :
 codesh::definition::fully_qualified_class_name::fully_qualified_class_name(const char *binary_fqcn) :
     fully_qualified_class_name()
 {
-    std::istringstream ss(binary_fqcn);
+    std::istringstream fqcn_stream(binary_fqcn);
 
     // Split by '/'
     std::string item;
-    while (std::getline(ss, item, '/'))
+    while (std::getline(fqcn_stream, item, '/'))
     {
         if (!item.empty())
         {
@@ -63,5 +63,7 @@ std::string codesh::definition::fully_qualified_class_name::get_last_part() cons
 
 std::string codesh::definition::fully_qualified_class_name::join(const char sep) const
 {
-    return fmt::format("{}", fmt::join(parts, std::string(1, sep)));
+    return fmt::format("{}",
+        fmt::join(parts, std::string(1, sep))
+    );
 }

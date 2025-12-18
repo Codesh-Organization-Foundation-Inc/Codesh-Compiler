@@ -80,7 +80,7 @@ static std::string read_file(const std::string &file_name)
             codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
     }
 
-    std::stringstream buffer;
+    std::ostringstream buffer;
     buffer << file.rdbuf();
     file.close();
 

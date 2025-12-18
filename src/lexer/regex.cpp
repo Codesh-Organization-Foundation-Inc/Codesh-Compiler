@@ -4,6 +4,7 @@
 #include "fmt/xchar.h"
 
 #include <format>
+#include <ranges>
 #include <sstream>
 #include <vector>
 
@@ -34,16 +35,12 @@ static std::string build_lexer_regex()
     if (TOKEN_REGEXES.empty())
         return "";
 
-    std::ostringstream builder;
+    auto regexes = TOKEN_REGEXES | std::views::transform(build_single_regex);
 
-    builder << build_single_regex(TOKEN_REGEXES[0]);
-
-    for (size_t i = 1; i < TOKEN_REGEXES.size(); ++i)
-    {
-        builder << '|' << build_single_regex(TOKEN_REGEXES[i]);
-    }
-
-    return builder.str();
+    return fmt::format(
+        "{}",
+        fmt::join(regexes, "|")
+    );
 }
 
 static std::string build_single_regex(const std::pair<token_group, std::string> &token_regex)
