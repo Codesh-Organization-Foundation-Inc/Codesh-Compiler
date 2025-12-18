@@ -1,5 +1,5 @@
-#include "blasphemies/blasphemy_collector.h"
-#include "blasphemies/blasphemy_details.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
 #include "command_parser.h"
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
@@ -39,9 +39,9 @@ int main(const int argc, char **const argv)
     ast->construct_symbol_table();
     codesh::semantic_analyzer::analyze(*ast);
 
-    if (codesh::error::get_blasphemy_collector().has_errors())
+    if (codesh::blasphemy::get_blasphemy_collector().has_errors())
     {
-        codesh::error::get_blasphemy_collector().print_all_blasphemies();
+        codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
         return EXIT_FAILURE;
     }
 
@@ -75,9 +75,9 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        codesh::error::blasphemy_collector().add_blasphemy(codesh::error::blasphemy_details::OUTPUT_FILE_OPEN_ERROR
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR
             + file_name,
-            codesh::error::blasphemy_type::INIT, std::nullopt, true);
+            codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
     }
 
     std::stringstream buffer;

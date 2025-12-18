@@ -1,9 +1,11 @@
 #include "collect.h"
 
+#include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../../blasphemies/blasphemy_collector.h"
+#include "../analyzer.h"
+#include "../semantic_context.h"
 #include "../util.h"
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
@@ -13,7 +15,7 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
                                     codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
-void codesh::semantic_analyzer::method_declaration::collect_methods(
+void codesh::semantic_analyzer::method_declaration::collect_methods(const semantic_context &context,
         const ast::type_decl::class_declaration_ast_node &class_decl, type_symbol &containing_type)
 {
     for (const auto &method_decl : class_decl.get_all_methods())
@@ -34,10 +36,10 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(
         if (!inserted)
         {
             //TODO: Print full method declaration
-            std::ostringstream builder;
-            builder << "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: " << method_decl->get_name() << " בְּעֶצֶם: " << class_decl.get_name();
-
-            error::get_blasphemy_collector().add_blasphemy(builder.str(), error::blasphemy_type::SEMANTIC);
+            context.blasphemy_consumer(fmt::format(
+                "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
+                method_decl->get_name()
+            ));
         }
 
         method_decl->set_symbol(it);

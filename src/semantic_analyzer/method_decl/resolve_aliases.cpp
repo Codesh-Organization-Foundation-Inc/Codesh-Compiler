@@ -1,19 +1,22 @@
 #include "resolve_aliases.h"
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../semantic_context.h"
 #include "../util.h"
 
-static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type);
+static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::semantic_analyzer::type_symbol &type);
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
                           codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name);
 
 
-void codesh::semantic_analyzer::method_declaration::resolve_aliases(type_symbol &type)
+void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semantic_context &context, type_symbol &type)
 {
-    handle_bereshit_aliases(type);
+    handle_bereshit_aliases(context, type);
 }
 
-static void handle_bereshit_aliases(codesh::semantic_analyzer::type_symbol &type)
+static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,
+        codesh::semantic_analyzer::type_symbol &type)
 {
     const auto bereshit = type.resolve("בראשית");
     if (!bereshit)

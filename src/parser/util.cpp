@@ -1,10 +1,11 @@
 #include "util.h"
 
-#include "../blasphemies/blasphemy_collector.h"
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
+#include "../defenition/definitions.h"
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
-#include "../blasphemies/blasphemy_details.h"
 #include "ast/var_reference/evaluable_ast_node.h"
 
 #include <functional>
@@ -27,16 +28,10 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> mak
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
 
-/**
- * The identifier used when there was an error parsing an identifier
- */
-static const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
-
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
         const std::string &no_tokens_blasphemy_details)
 {
-    // TODO: Request custom error message
     ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
 
     std::unique_ptr<token> token = std::move(tokens.front());
@@ -47,12 +42,12 @@ std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<st
 std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifier_token(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<token> token = consume_token(tokens, error::blasphemy_details::NO_IDENTIFIER);
+    std::unique_ptr<token> token = consume_token(tokens, blasphemy::details::NO_IDENTIFIER);
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
-            error::blasphemy_type::SYNTAX, std::nullopt);
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX, std::nullopt);
 
         return make_error_identifier_token();
     }
@@ -69,9 +64,9 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
 
     if (token::get_token_type(token->get_group()) != token_type::IDENTIFIER)
     {
-        error::get_blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_blasphemy(
             no_tokens_blasphemy_details,
-            error::blasphemy_type::SYNTAX,
+            blasphemy::blasphemy_type::SYNTAX,
             std::nullopt
         );
 
@@ -85,7 +80,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token()
 {
-    return std::make_unique<codesh::identifier_token>(codesh::token_group::IDENTIFIER, ERROR_IDENTIFIER_CONTENT);
+    return std::make_unique<codesh::identifier_token>(codesh::token_group::IDENTIFIER, codesh::definition::ERROR_IDENTIFIER_CONTENT);
 }
 
 
@@ -94,7 +89,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 {
     std::unique_ptr<ast::type::type_ast_node> result;
 
-    const auto type_token = consume_token(tokens, error::blasphemy_details::NO_TYPE);
+    const auto type_token = consume_token(tokens, blasphemy::details::NO_TYPE);
 
     switch (type_token->get_group())
     {
@@ -131,8 +126,8 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_TYPE,
-            error::blasphemy_type::SYNTAX, std::nullopt);
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_TYPE,
+            blasphemy::blasphemy_type::SYNTAX, std::nullopt);
         return nullptr;
     }
 
@@ -170,8 +165,8 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
     if (tokens.empty())
     {
         // TODO: Switch error message to take from parameter
-        error::get_blasphemy_collector().add_blasphemy(no_tokens_blasphemy_details,
-            error::blasphemy_type::SYNTAX, std::nullopt, true);
+        blasphemy::get_blasphemy_collector().add_blasphemy(no_tokens_blasphemy_details,
+            blasphemy::blasphemy_type::SYNTAX, std::nullopt, true);
     }
 }
 
@@ -179,9 +174,8 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (!consuming_check(tokens, token_group::PUNCTUATION_END_OP))
     {
-        error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_PUNCTUATION_END_OP,
-            error::blasphemy_type::SYNTAX);
-        return;
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
+            blasphemy::blasphemy_type::SYNTAX);
     }
 }
 
@@ -190,7 +184,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 {
     while (!tokens.empty())
     {
-        std::unique_ptr<token> id = consume_token(tokens, error::blasphemy_details::NO_IDENTIFIER);
+        std::unique_ptr<token> id = consume_token(tokens, blasphemy::details::NO_IDENTIFIER);
 
         if (id->get_group() != token_group::IDENTIFIER)
         {
@@ -200,8 +194,8 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
-                    error::blasphemy_type::SYNTAX);
+                blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
+                    blasphemy::blasphemy_type::SYNTAX);
             }
         }
         else
@@ -225,15 +219,14 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             if (!is_last_item && fqcn_out.is_wildcard())
             {
                 // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
-                error::get_blasphemy_collector().add_blasphemy(error::blasphemy_details::NO_IDENTIFIER,
-                    error::blasphemy_type::SYNTAX);
+                blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
+                    blasphemy::blasphemy_type::SYNTAX);
             }
         }
 
         break;
     }
 }
-
 
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util::parse_value(

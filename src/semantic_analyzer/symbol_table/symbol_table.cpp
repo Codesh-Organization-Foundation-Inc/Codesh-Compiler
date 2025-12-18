@@ -1,7 +1,9 @@
 #include "symbol_table.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/blasphemy_consumer.h"
 #include "../type_decl/collect.h"
+#include "../semantic_context.h"
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::symbol_table::
     allowed_symbol_types() const
@@ -14,11 +16,21 @@ codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_uni
     // Add global scope to symbol table
     add_symbol("", std::make_unique<country_symbol>());
 
+
     //TODO: Resolve all countries of origin
-    auto &global_country = resolve_country("")->get();
+    const std::vector lookup_countries = {
+        resolve_country("").value()
+    };
+
+    const semantic_context context = {lookup_countries, root_node, blasphemy::semantic_consumer};
+
+    country_symbol &country = lookup_countries.back();
 
     //TODO: Iterate over each and every country, then collect types.
-    type_declaration::collect_types(root_node, global_country);
+    type_declaration::collect_types(
+        context,
+        country
+    );
 }
 
 const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map() const
