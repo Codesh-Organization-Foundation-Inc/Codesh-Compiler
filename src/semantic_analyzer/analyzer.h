@@ -10,7 +10,7 @@ class symbol_table;
 
 namespace codesh::semantic_analyzer
 {
-extern const std::string DEFAULT_SUPER_CLASS_NAME;
+extern const definition::fully_qualified_class_name DEFAULT_SUPER_CLASS_NAME;
 
 /**
  * This runs before the symbol table is constructed.

@@ -22,8 +22,8 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<type::custom_type_ast_node> super_class;
     //TODO: Add implements
 
-    const std::string name;
-    std::optional<std::string> resolved_name;
+    const definition::fully_qualified_class_name name;
+    std::optional<definition::fully_qualified_class_name> resolved_name;
 
     std::unique_ptr<attributes_ast_node> attributes;
 
@@ -33,11 +33,11 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<method::constructor_declaration_ast_node *> constructors;
 
 protected:
-    [[nodiscard]] std::optional<std::string> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<std::string> &_get_resolved_name() const override;
+    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
+    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
 
 public:
-    explicit type_declaration_ast_node(std::string name);
+    explicit type_declaration_ast_node(definition::fully_qualified_class_name name);
 
     [[nodiscard]] std::optional<std::reference_wrapper<const output::jvm_target::constant_pool>> get_constant_pool()
         const;
@@ -47,7 +47,8 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] std::string get_name() const override;
+    using i_resolvable::get_name;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
 
 
     [[nodiscard]] type::custom_type_ast_node *get_super_class() const;

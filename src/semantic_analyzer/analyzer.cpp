@@ -32,7 +32,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
-const std::string codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+const codesh::definition::fully_qualified_class_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
@@ -190,7 +190,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     attributes_node->set_is_final(true);
     this_param->set_attributes(std::move(attributes_node));
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_binary_name(false));
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_name());
     this_param->set_type(std::move(this_class_type));
 
     return this_param;

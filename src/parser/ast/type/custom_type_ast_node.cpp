@@ -1,18 +1,22 @@
 #include "custom_type_ast_node.h"
 
+#include "fmt/chrono.h"
+
 #include <iostream>
 #include <sstream>
 
-codesh::ast::type::custom_type_ast_node::custom_type_ast_node(std::string name) : name(std::move(name))
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(definition::fully_qualified_class_name name) :
+    name(std::move(name))
 {
 }
 
-std::optional<std::string> &codesh::ast::type::custom_type_ast_node::_get_resolved_name()
+std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type::custom_type_ast_node::
+    _get_resolved_name()
 {
     return resolved_name;
 }
 
-std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(bool resolved) const
+std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(const bool resolved) const
 {
     std::ostringstream builder;
 
@@ -21,17 +25,21 @@ std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(bool re
         builder << '[';
     }
 
-    builder << "L" << get_binary_name(resolved) << ";";
+    builder << fmt::format(
+        "L{};",
+        get_name(resolved).join()
+    );
 
     return builder.str();
 }
 
-std::string codesh::ast::type::custom_type_ast_node::get_name() const
+const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_type_ast_node::get_name() const
 {
     return name;
 }
 
-const std::optional<std::string> &codesh::ast::type::custom_type_ast_node::_get_resolved_name() const
+const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type::custom_type_ast_node::
+    _get_resolved_name() const
 {
     return resolved_name;
 }

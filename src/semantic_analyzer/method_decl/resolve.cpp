@@ -81,7 +81,7 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
     )) {
         context.blasphemy_consumer(fmt::format(
             "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ {}",
-            return_type->get_name()
+            return_type->get_name().join()
         ));
     }
 }
@@ -104,7 +104,7 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
         )) {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה {}",
-                custom_param->get_name()
+                custom_param->get_name().get_last_part()
             ));
         }
 
@@ -127,7 +127,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
         )) {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                custom_param->get_name()
+                custom_param->get_name().get_last_part()
             ));
         }
     }

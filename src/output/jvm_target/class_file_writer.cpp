@@ -27,7 +27,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     const ast::compilation_unit_ast_node &root_node,
     const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination / (type_decl.get_name() + ".class"), std::ios::binary);
+    std::ofstream destination_file(destination / (type_decl.get_name().get_last_part() + ".class"), std::ios::binary);
 
     if (!destination_file)
     {

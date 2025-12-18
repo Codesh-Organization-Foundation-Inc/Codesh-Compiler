@@ -89,9 +89,10 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 {
     std::unique_ptr<ast::type::type_ast_node> result;
 
-    const auto type_token = consume_token(tokens, blasphemy::details::NO_TYPE);
+    ensure_tokens_exist(tokens, blasphemy::details::NO_TYPE);
+    const auto token_group = tokens.front()->get_group();
 
-    switch (type_token->get_group())
+    switch (token_group)
     {
     case token_group::KEYWORD_INTEGER:
         result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
@@ -120,7 +121,9 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     case token_group::IDENTIFIER:
     {
-        const std::string name = static_cast<identifier_token *>(type_token.get())->get_content(); // NOLINT(*-pro-type-static-cast-downcast)
+        definition::fully_qualified_class_name name;
+        parse_fqcn(tokens, name);
+
         result = std::make_unique<ast::type::custom_type_ast_node>(name);
         break;
     }
@@ -129,6 +132,14 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_TYPE,
             blasphemy::blasphemy_type::SYNTAX, std::nullopt);
         return nullptr;
+    }
+
+
+    // Only an identifier type does not consume tokens (as the FQCN parser does it).
+    // Hence, if it isn't, manually consume it:
+    if (token_group != token_group::IDENTIFIER)
+    {
+        tokens.pop();
     }
 
 
@@ -237,10 +248,11 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util
     switch (tokens.front()->get_group())
     {
     case token_group::IDENTIFIER: {
+        definition::fully_qualified_class_name value;
+        parse_fqcn(tokens, value);
+
         eval_ast_node = std::make_unique<ast::var_reference::value_ast_node>(
-            std::make_unique<ast::type::custom_type_ast_node>(
-                consume_identifier_token(tokens)->get_content()
-            )
+            std::make_unique<ast::type::custom_type_ast_node>(value)
         );
 
         break;
