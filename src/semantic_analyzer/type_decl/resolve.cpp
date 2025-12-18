@@ -13,21 +13,14 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         const std::string name = type_decl->get_name();
-
-        blasphemy::blasphemy_consumer type_bc = [&context, &name](std::string details) {
-            context.blasphemy_consumer(fmt::format(
-                "{} בָּעֶצֶם {}",
-                std::move(details),
-                name
-            ));
-        };
+        const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
         const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
 
         for (const auto &method_decl : type_decl->get_all_methods())
         {
-            method_declaration::resolve(context.with_consumer(type_bc), type, *method_decl);
+            method_declaration::resolve(new_context, type, *method_decl);
         }
     }
 }

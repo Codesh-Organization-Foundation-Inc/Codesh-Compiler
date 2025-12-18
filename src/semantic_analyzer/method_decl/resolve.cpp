@@ -19,23 +19,11 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::method_declaration_ast_node &method_decl,
-        const codesh::semantic_analyzer::method_symbol &method_symbol);
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 static void resolve_method_signature(const codesh::semantic_analyzer::semantic_context &context,
                                      const codesh::ast::method::method_declaration_ast_node &method_decl,
                                      const codesh::semantic_analyzer::type_symbol &type);
-
-
-static const std::function<
-        void(const codesh::semantic_analyzer::semantic_context &context,
-             const codesh::ast::method::method_declaration_ast_node &method_decl,
-             const codesh::semantic_analyzer::method_symbol &method_symbol)
-    > METHOD_RESOLVERS[] = {
-    resolve_return_type,
-    resolve_parameters,
-    resolve_local_variables,
-};
 
 
 void codesh::semantic_analyzer::method_declaration::resolve(
@@ -49,9 +37,13 @@ static void resolve_method_signature(const codesh::semantic_analyzer::semantic_c
                                      const codesh::ast::method::method_declaration_ast_node &method_decl,
                                      const codesh::semantic_analyzer::type_symbol &type)
 {
+    const std::string name = method_decl.get_name();
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", name);
+
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.resolve(method_decl.get_name()).value().get()
+        &type.resolve(name).value().get()
     );
+
 
     // Get relevant method symbol from the method overloads map
     // Then cast it to method_symbol
@@ -62,26 +54,9 @@ static void resolve_method_signature(const codesh::semantic_analyzer::semantic_c
         )
     );
 
-    for (const auto &resolver : METHOD_RESOLVERS)
-    {
-        try
-        {
-            resolver(context, method_decl, *method);
-        }
-        catch (const std::runtime_error &e)
-        {
-            //TODO: Add class name
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                fmt::format(
-                    "{} בְּמַעֲשֶׂה {}",
-
-                    e.what(),
-                    method_decl.get_name()
-                ),
-                codesh::blasphemy::blasphemy_type::SEMANTIC
-            );
-        }
-    }
+    resolve_return_type(new_context, method_decl, *method);
+    resolve_parameters(new_context, method_decl, *method);
+    resolve_local_variables(new_context, *method);
 
     // Move to a new overloads entry, now that the parameters' descriptors are real
     method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
@@ -142,8 +117,7 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
 }
 
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::method_declaration_ast_node &,
-        const codesh::semantic_analyzer::method_symbol &method_symbol)
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     //TODO: Use actual countries
     const std::vector lookup_countries = {
