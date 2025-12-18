@@ -56,7 +56,7 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    const country_symbol &country = ast_root.get_symbol_table()->get().resolve_country("").value();
+    const country_symbol &country = lookup_countries.back();
 
 
     type_declaration::resolve(context, country);
