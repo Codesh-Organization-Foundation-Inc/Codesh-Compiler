@@ -27,11 +27,6 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> mak
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
 
-/**
- * The identifier used when there was an error parsing an identifier
- */
-static const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
-
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
         const std::string &no_tokens_blasphemy_details)
