@@ -21,7 +21,6 @@ std::pair<bool, codesh::definition::fully_qualified_class_name> codesh::semantic
     //TODO: Implement when implementing countries.
 
     return {true, fqcn};
-
 }
 
 bool codesh::semantic_analyzer::util::resolve_custom_type_node(
