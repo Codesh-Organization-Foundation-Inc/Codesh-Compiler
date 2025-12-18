@@ -182,7 +182,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         param->set_type(std::move(param_type));
         param->set_name(token_name->get_content());
 
-        method_node->get_parameters().push_back(std::move(param));
+        method_node->add_parameter(std::move(param));
     }
 
 

@@ -207,7 +207,7 @@ public:
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
 {
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
@@ -220,7 +220,7 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
 
 public:
     method_symbol(symbol *parent_symbol, type_symbol &parent_type,
-            const std::vector<output::jvm_target::access_flag> &access_flags,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type,
             ast::method::method_declaration_ast_node *producing_node);
@@ -228,7 +228,7 @@ public:
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+    [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;

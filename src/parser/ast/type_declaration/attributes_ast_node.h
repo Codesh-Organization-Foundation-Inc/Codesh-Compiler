@@ -3,6 +3,7 @@
 #include "../../../defenition/visibility.h"
 #include "../impl/ast_node.h"
 
+#include <memory>
 #include <vector>
 
 namespace codesh::output::jvm_target
@@ -21,6 +22,9 @@ class attributes_ast_node final : public impl::ast_node
 
 public:
     attributes_ast_node();
+
+    [[nodiscard]] std::unique_ptr<attributes_ast_node> clone() const;
+
 
     [[nodiscard]] std::vector<output::jvm_target::access_flag> get_access_flags() const;
 
