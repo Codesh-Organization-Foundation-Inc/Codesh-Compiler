@@ -84,7 +84,10 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
         *return_type,
         method_symbol.get_return_type()
     )) {
-        throw std::runtime_error("עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ " + return_type->get_name());
+        context.blasphemy_consumer(fmt::format(
+            "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ {}",
+            return_type->get_name()
+        ));
     }
 }
 
@@ -109,7 +112,10 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
             *custom_param,
             *method_symbol.get_parameter_types()[i]
         )) {
-            throw std::runtime_error("עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה " + custom_param->get_name());
+            context.blasphemy_consumer(fmt::format(
+                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה {}",
+                custom_param->get_name()
+            ));
         }
 
         ++i;
@@ -134,7 +140,10 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
             lookup_countries,
             *custom_param
         )) {
-            throw std::runtime_error("עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ " + custom_param->get_name());
+            context.blasphemy_consumer(fmt::format(
+                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
+                custom_param->get_name()
+            ));
         }
     }
 }
