@@ -113,6 +113,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             continue;
 
 
+        // If they're both 0-args long, then they're a perfect match.
+        if (method_params.empty())
+        {
+            return method;
+        }
+
+
         for (size_t i = 0; i < method_params.size(); i++)
         {
             const auto method_param_type = method_params.at(i).get();
