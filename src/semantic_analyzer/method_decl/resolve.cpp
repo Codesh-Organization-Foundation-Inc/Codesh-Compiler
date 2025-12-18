@@ -5,29 +5,30 @@
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../util.h"
+#include "../semantic_context.h"
 
 #include <functional>
 #include <ranges>
 
-static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_return_type(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-static void resolve_method_signature(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_method_signature(const codesh::semantic_analyzer::semantic_context &context,
                                      const codesh::ast::method::method_declaration_ast_node &method_decl,
                                      const codesh::semantic_analyzer::type_symbol &type);
 
 
 static const std::function<
-        void(const codesh::ast::compilation_unit_ast_node &root,
+        void(const codesh::semantic_analyzer::semantic_context &context,
              const codesh::ast::method::method_declaration_ast_node &method_decl,
              const codesh::semantic_analyzer::method_symbol &method_symbol)
     > METHOD_RESOLVERS[] = {
@@ -37,23 +38,14 @@ static const std::function<
 };
 
 
-void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
-    //TODO: Properly get country of origin
-    const country_symbol &country = root.get_symbol_table()->get().resolve_country("").value();
-
-    for (const auto &type_decl : root.get_type_declarations())
-    {
-        // Get type symbol
-        const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        for (const auto &method_decl : type_decl->get_all_methods())
-        {
-            resolve_method_signature(root, *method_decl, type);
-        }
-    }
+void codesh::semantic_analyzer::method_declaration::resolve(
+    const semantic_context &context, const type_symbol &type,
+    const ast::method::method_declaration_ast_node &method_decl)
+{
+    resolve_method_signature(context, method_decl, type);
 }
 
-static void resolve_method_signature(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_method_signature(const codesh::semantic_analyzer::semantic_context &context,
                                      const codesh::ast::method::method_declaration_ast_node &method_decl,
                                      const codesh::semantic_analyzer::type_symbol &type)
 {
@@ -74,7 +66,7 @@ static void resolve_method_signature(const codesh::ast::compilation_unit_ast_nod
     {
         try
         {
-            resolver(root, method_decl, *method);
+            resolver(context, method_decl, *method);
         }
         catch (const std::runtime_error &e)
         {
@@ -95,7 +87,7 @@ static void resolve_method_signature(const codesh::ast::compilation_unit_ast_nod
     method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
 }
 
-static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_return_type(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
@@ -109,7 +101,7 @@ static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &ro
 
     //TODO: Use actual countries
     const std::vector lookup_countries = {
-        root.get_symbol_table().value().get().resolve_country("").value()
+        context.root.get_symbol_table().value().get().resolve_country("").value()
     };
 
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
@@ -121,13 +113,13 @@ static void resolve_return_type(const codesh::ast::compilation_unit_ast_node &ro
     }
 }
 
-static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     //TODO: Use actual countries
     const std::vector lookup_countries = {
-        root.get_symbol_table().value().get().resolve_country("").value()
+        context.root.get_symbol_table()->get().resolve_country("").value()
     };
 
     size_t i = 0;
@@ -149,13 +141,13 @@ static void resolve_parameters(const codesh::ast::compilation_unit_ast_node &roo
     }
 }
 
-static void resolve_local_variables(const codesh::ast::compilation_unit_ast_node &root,
+static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &,
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     //TODO: Use actual countries
     const std::vector lookup_countries = {
-        root.get_symbol_table().value().get().resolve_country("").value()
+        context.root.get_symbol_table()->get().resolve_country("").value()
     };
 
     for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)

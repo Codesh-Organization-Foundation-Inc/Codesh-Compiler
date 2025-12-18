@@ -1,14 +1,16 @@
 #include "analyzer.h"
 
 #include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/blasphemy_consumer.h"
 #include "../parser/ast/method/operation/return_ast_node.h"
 #include "../parser/ast/method/operation/super_call_ast_node.h"
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
-#include "method_decl/resolve.h"
+#include "semantic_context.h"
 #include "symbol_table/symbol.h"
+#include "type_decl/resolve.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
@@ -46,7 +48,7 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    method_declaration::resolve_methods(ast_root);
+    type_declaration::resolve(semantic_context(ast_root, blasphemy::semantic_consumer));
 
     //TODO: When CALLING non-static methods, also add 'this' as first argument
 
