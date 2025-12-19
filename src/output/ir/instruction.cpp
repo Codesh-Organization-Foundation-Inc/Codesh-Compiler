@@ -2,6 +2,8 @@
 
 #include "../../util.h"
 
+#include <stdexcept>
+
 codesh::output::ir::instruction::instruction(const opcode _opcode) :
     _opcode(_opcode)
 {
@@ -19,7 +21,7 @@ void codesh::output::ir::instruction::emit(std::list<unsigned char> &collector) 
     collector.emplace_back(static_cast<unsigned char>(_opcode));
 }
 
-codesh::output::ir::typed_instruction::typed_instruction(const opcode _opcode, const instruction_type type) :
+codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type, const opcode _opcode) :
     instruction(_opcode),
     type(type)
 {
@@ -35,7 +37,7 @@ codesh::output::ir::nop_instruction::nop_instruction() : instruction(opcode::NOP
 }
 
 codesh::output::ir::load_instruction::load_instruction(const instruction_type type, const unsigned char lvt_index) :
-    typed_instruction(opcode::A_LOAD, type),
+    typed_instruction(type),
     lvt_index(lvt_index)
 {
 }
@@ -70,15 +72,29 @@ codesh::output::ir::return_instruction::return_instruction() :
 {
 }
 
-codesh::output::ir::invoke_special_instruction::invoke_special_instruction(const int method_cp_index) :
-    instruction(opcode::INVOKE_SPECIAL),
+codesh::output::ir::invoke_instruction::invoke_instruction(const invokation_type type, const int method_cp_index) :
+    type(type),
     method_cp_index(method_cp_index)
 {
 }
 
-void codesh::output::ir::invoke_special_instruction::emit(std::list<unsigned char> &collector) const
+void codesh::output::ir::invoke_instruction::emit(std::list<unsigned char> &collector) const
 {
-    instruction::emit(collector);
+    opcode instruction;
+
+    switch (type)
+    {
+        case invokation_type::DYNAMIC: instruction = opcode::INVOKE_SPECIAL; break;
+        case invokation_type::INTERFACE: instruction = opcode::INVOKE_INTERFACE; break;
+        case invokation_type::SPECIAL: instruction = opcode::INVOKE_SPECIAL; break;
+        case invokation_type::STATIC: instruction = opcode::INVOKE_STATIC; break;
+        case invokation_type::VIRTUAL: instruction = opcode::INVOKE_VIRTUAL; break;
+
+        default: throw std::runtime_error("Unknown instruction");
+    }
+
+    collector.push_back(static_cast<unsigned char>(instruction));
+
 
     unsigned char buffer[2];
     util::put_int_bytes(buffer, 2, method_cp_index);
@@ -89,7 +105,7 @@ void codesh::output::ir::invoke_special_instruction::emit(std::list<unsigned cha
     }
 }
 
-int codesh::output::ir::invoke_special_instruction::get_method_cp_index() const
+int codesh::output::ir::invoke_instruction::get_method_cp_index() const
 {
     return method_cp_index;
 }

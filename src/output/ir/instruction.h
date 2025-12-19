@@ -54,7 +54,11 @@ enum class opcode : unsigned char
 
     RETURN = 0xB1,
 
-    INVOKE_SPECIAL = 0xB7, // Calls a private method_cp_index, constructor or this/super constructor
+    INVOKE_DYNAMIC = 0xBA,
+    INVOKE_INTERFACE = 0xB9,
+    INVOKE_SPECIAL = 0xB7,
+    INVOKE_STATIC = 0xB8,
+    INVOKE_VIRTUAL = 0xB6
 };
 
 enum class instruction_type
@@ -66,13 +70,22 @@ enum class instruction_type
     REFERENCE
 };
 
+enum class invokation_type
+{
+    DYNAMIC,
+    INTERFACE,
+    SPECIAL, // Calls a private method_cp_index, constructor or this/super constructor
+    STATIC,
+    VIRTUAL
+};
+
 
 class instruction
 {
     const opcode _opcode;
 
 public:
-    explicit instruction(opcode _opcode);
+    explicit instruction(opcode _opcode = opcode::NOP);
     virtual ~instruction();
 
     [[nodiscard]] opcode get_opcode() const;
@@ -85,7 +98,7 @@ class typed_instruction : public instruction
     instruction_type type;
 
 public:
-    typed_instruction(opcode _opcode, instruction_type type);
+    explicit typed_instruction(instruction_type type, opcode _opcode = opcode::NOP);
 
     [[nodiscard]] instruction_type get_instruction_type() const;
 };
@@ -123,12 +136,13 @@ public:
 };
 
 
-class invoke_special_instruction final : public instruction
+class invoke_instruction final : public instruction
 {
+    const invokation_type type;
     const int method_cp_index;
 
 public:
-    explicit invoke_special_instruction(int method_cp_index);
+    invoke_instruction(invokation_type type, int method_cp_index);
 
     void emit(std::list<unsigned char> &collector) const override;
 
