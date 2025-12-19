@@ -108,7 +108,7 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 
     //TODO: Add super type
     // const std::unique_ptr<ast::type::type_ast_node> super_type;
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 protected:
     [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
@@ -116,12 +116,12 @@ protected:
 
 public:
     type_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
-            const std::vector<output::jvm_target::access_flag> &access_flags,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+    [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
@@ -207,7 +207,9 @@ public:
 
 class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
 {
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const definition::fully_qualified_class_name full_name;
+
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
@@ -220,15 +222,18 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
 
 public:
     method_symbol(symbol *parent_symbol, type_symbol &parent_type,
-            const std::vector<output::jvm_target::access_flag> &access_flags,
+            definition::fully_qualified_class_name full_name,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type,
             ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+
+    [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;

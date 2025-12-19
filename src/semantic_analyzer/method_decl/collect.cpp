@@ -20,6 +20,8 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
 {
     for (const auto &method_decl : class_decl.get_all_methods())
     {
+        const std::string method_name = method_decl->get_name();
+
         method_overloads_symbol &methods_container =
             util::get_method_overloads_symbol(method_decl->get_name(), containing_type);
 
@@ -27,9 +29,12 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
                 &methods_container,
                 containing_type,
-                method_decl->get_attributes()->get_access_flags(),
+                containing_type.get_full_name().with(method_name),
+
+                method_decl->get_attributes()->clone(),
                 clone_parameter_types(*method_decl),
                 method_decl->get_return_type()->clone(),
+
                 method_decl.get()
             )
         );
@@ -39,7 +44,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
             //TODO: Print full method declaration
             context.blasphemy_consumer(fmt::format(
                 "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
-                method_decl->get_name()
+                method_name
             ));
         }
 

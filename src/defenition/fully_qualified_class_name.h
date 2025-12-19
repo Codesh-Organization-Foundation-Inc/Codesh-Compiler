@@ -1,7 +1,7 @@
 #pragma once
 
-#include <list>
 #include <string>
+#include <vector>
 
 namespace codesh::definition
 {
@@ -13,7 +13,7 @@ namespace codesh::definition
  */
 class fully_qualified_class_name
 {
-    std::list<std::string> parts;
+    std::vector<std::string> parts;
     bool _is_wildcard;
 
 public:
@@ -30,7 +30,7 @@ public:
 
 
     void add(std::string part);
-    [[nodiscard]] const std::list<std::string> &get_parts() const;
+    [[nodiscard]] const std::vector<std::string> &get_parts() const;
 
     void set_is_wildcard(bool wildcard);
     [[nodiscard]] bool is_wildcard() const;
@@ -38,7 +38,7 @@ public:
     [[nodiscard]] bool is_single_part() const;
     [[nodiscard]] std::string get_last_part() const;
 
-    [[nodiscard]] std::string join(char sep = '/') const;
+    [[nodiscard]] std::string join(const std::string &sep = "/") const;
 };
 
 }

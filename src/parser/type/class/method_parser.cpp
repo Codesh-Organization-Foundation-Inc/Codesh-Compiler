@@ -103,7 +103,10 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
         // If there are no more arguments, there shouldn't be anything else besides a closing parenthesis.
         if (!codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
         {
-            throw std::runtime_error("Unexpected token"); //TODO: Convert to custom Codesh error
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::UNEXPECTED_TOKEN,
+                codesh::blasphemy::blasphemy_type::SYNTAX
+            );
         }
     }
 }

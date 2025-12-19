@@ -4,6 +4,7 @@
 #include "../../blasphemy/details.h"
 #include "../../defenition/definitions.h"
 #include "../../util.h"
+#include "../../parser/ast/method/operation/method_call_ast_node.h"
 
 #include <unordered_set>
 
@@ -53,11 +54,36 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
             goc_utf8_info(method_decl->generate_descriptor())
         );
 
+        // TODO: move to other func in private
         // Add parameters
         for (const auto &param_node : method_decl->get_parameters())
         {
             goc_utf8_info(param_node->get_name());
             goc_utf8_info(param_node->get_type()->generate_descriptor());
+        }
+
+        for (const auto &ir_emmiting_node : method_decl->get_body())
+        {
+            const auto *method_call =
+                dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emmiting_node.get());
+
+            if (method_call) // maybe move out of this if
+            {
+
+                // TODO: remove it if not needed or switch goc_utf8_info(method_call->get_binary_name())
+                // for (auto name : method_call->get_fqcn().get_parts())
+                // {
+                //     goc_utf8_info(name);
+                // }
+
+                goc_methodref_info(
+                    goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
+                    goc_name_and_type_info(
+                        goc_utf8_info(method_call->get_name().join()),
+                        goc_utf8_info(method_call->generate_descriptor())
+                    )
+                );
+            }
         }
     }
 
@@ -119,7 +145,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     util::put_int_bytes(utf8_info->length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
     utf8_info->bytes.insert(utf8_info->bytes.end(), utf8.begin(), utf8.end());
 
-    return std::move(utf8_info);
+    return utf8_info;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
@@ -130,7 +156,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
     util::put_int_bytes(const_methodref->class_index, 2, class_index);
     util::put_int_bytes(const_methodref->name_and_type_index, 2, name_and_type_index);
 
-    return std::move(const_methodref);
+    return const_methodref;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>
@@ -141,7 +167,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>
     util::put_int_bytes(const_name_and_type->name_index, 2, name_index);
     util::put_int_bytes(const_name_and_type->descriptor_index, 2, descriptor_index);
 
-    return std::move(const_name_and_type);
+    return const_name_and_type;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
@@ -151,7 +177,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
 
     util::put_int_bytes(const_class->name_index, 2, name_index);
 
-    return std::move(const_class);
+    return const_class;
 }
 
 

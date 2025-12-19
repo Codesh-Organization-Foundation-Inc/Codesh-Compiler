@@ -5,7 +5,7 @@ codesh::ast::var_reference::value_ast_node::value_ast_node(std::unique_ptr<type:
 {
 }
 
-const codesh::ast::type::type_ast_node &codesh::ast::var_reference::value_ast_node::get_type() const
+const codesh::ast::type::type_ast_node *codesh::ast::var_reference::value_ast_node::get_type() const
 {
-    return *type;
+    return type.get();
 }
