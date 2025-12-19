@@ -105,12 +105,31 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     {
         if (const auto prim_arg = dynamic_cast<const type::primitive_type_ast_node *>(argument->get_type()))
         {
-            if (prim_arg->get_type() == definition::primitive_type::INTEGER)
+            switch (prim_arg->get_type())
             {
+            case definition::primitive_type::INTEGER: {
                 containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
                     static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value()
                 ));
+
+                break;
             }
+
+            default: throw std::runtime_error("Unsupported primitive type");
+            }
+        }
+
+        if (argument->get_type()->generate_descriptor() == "java/lang/String")
+        {
+            const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>(
+                argument.get()
+            )->get_value();
+
+
+            //TODO: Add LDC:
+            // containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
+            //     static_cast<const var_reference::evaluable_ast_node<std::string> *>(argument.get())->get_value()
+            // ));
         }
     }
 
