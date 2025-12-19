@@ -5,7 +5,7 @@
 #include "symbol_table/symbol_table.h"
 
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
-static void add_class_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
+static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
@@ -38,10 +38,10 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
 
 
     // Functions
-    add_class_emor(massof_symbol);
+    add_method_emor(massof_symbol);
 }
 
-static void add_class_emor(codesh::semantic_analyzer::type_symbol &massof_symbol)
+static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol)
 {
     auto &emor_overloads = massof_symbol.add_symbol(
         METHOD_EMOR,
