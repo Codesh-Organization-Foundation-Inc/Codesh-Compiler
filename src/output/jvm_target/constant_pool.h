@@ -22,10 +22,6 @@ class class_declaration_ast_node;
 }
 namespace codesh::ast
 {
-namespace method
-{
-class method_declaration_ast_node;
-}
 class compilation_unit_ast_node;
 }
 namespace codesh::output::jvm_target::defs
@@ -55,8 +51,6 @@ class constant_pool
     > literals_lookup_map;
 
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
-    void traverse_method_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
-    void traverse_method_body(const ast::method::method_declaration_ast_node  &method_decl);
 
     int index;
     const int this_class_cpi;
