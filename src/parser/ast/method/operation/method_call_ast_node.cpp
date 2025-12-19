@@ -125,11 +125,9 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
                 argument.get()
             )->get_value();
 
-
-            //TODO: Add LDC:
-            // containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
-            //     static_cast<const var_reference::evaluable_ast_node<std::string> *>(argument.get())->get_value()
-            // ));
+             containing_block.add_instruction(std::make_unique<output::ir::load_constant_pool_instruction>(
+                 cp.get_string_index(cp.get_utf8_index(string))
+             ));
         }
     }
 
