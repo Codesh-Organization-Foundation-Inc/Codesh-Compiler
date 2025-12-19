@@ -57,7 +57,7 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
 
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types;
     parameter_types.reserve(1);
-    parameter_types.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>("Ljava/lang/String;"));
+    parameter_types.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>("java/lang/String"));
 
     auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID);
 

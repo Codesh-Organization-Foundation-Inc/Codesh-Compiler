@@ -19,8 +19,6 @@ enum class primitive_type
     CHAR,
     BOOLEAN,
 
-    STRING,
-
     REFERENCE
 };
 

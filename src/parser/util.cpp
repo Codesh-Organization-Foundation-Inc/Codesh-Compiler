@@ -260,12 +260,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util
     }
 
     case token_group::LITERAL_STRING: {
-        eval_ast_node = make_evaluable<std::string>(
-            tokens, definition::primitive_type::STRING,
+        eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
+            std::make_unique<ast::type::custom_type_ast_node>("java/lang/String"),
 
-            [](const std::string &content) {
-                return content;
-            }
+            consume_alnum_identifier_token(
+                tokens, "לא אמור לקרות"
+            )->get_content()
         );
 
         break;
@@ -356,8 +356,9 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
         std::make_unique<codesh::ast::type::primitive_type_ast_node>(primitive_type),
         mapper(
             codesh::parser::util::consume_alnum_identifier_token(
-            tokens, "לא אמור לקרות"
-        )->get_content())
+                tokens, "לא אמור לקרות"
+            )->get_content()
+        )
     );
 }
 
