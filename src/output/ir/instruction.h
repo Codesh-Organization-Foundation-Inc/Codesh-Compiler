@@ -31,6 +31,7 @@ enum class opcode : unsigned char
     B_IPUSH = 0x10,
     S_IPUSH, // >255
 
+    LDC = 0x12,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     L_LOAD, // Loads a long variable from the local variable table at the specified index
@@ -166,6 +167,16 @@ class load_constant_instruction final : public instruction
 
 public:
     explicit load_constant_instruction(int constant);
+
+    void emit(std::list<unsigned char> &collector) const override;
+};
+
+class load_constant_pool_instruction final : public instruction
+{
+    const int constant_pool_index;
+
+public:
+    explicit load_constant_pool_instruction(int constant_pool_index);
 
     void emit(std::list<unsigned char> &collector) const override;
 };

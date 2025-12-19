@@ -138,7 +138,17 @@ void codesh::output::ir::load_constant_instruction::emit(std::list<unsigned char
     }
 }
 
+codesh::output::ir::load_constant_pool_instruction::load_constant_pool_instruction(const int constant_pool_index) :
+    instruction(opcode::LDC),
+    constant_pool_index(constant_pool_index)
+{
+}
 
+void codesh::output::ir::load_constant_pool_instruction::emit(std::list<unsigned char> &collector) const
+{
+    instruction::emit(collector);
+    collector.push_back(constant_pool_index);
+}
 
 static void push_int_bytes(std::list<unsigned char> &collector, const int width, const int num)
 {
