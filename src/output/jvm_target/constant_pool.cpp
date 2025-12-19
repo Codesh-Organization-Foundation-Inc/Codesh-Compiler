@@ -46,46 +46,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
 
     const int super_class_constant = goc_class_info(super_class_cpi);
 
-    // Add methods
-    for (const auto &method_decl : class_decl.get_all_methods())
-    {
-        goc_name_and_type_info(
-            goc_utf8_info(method_decl->get_name()),
-            goc_utf8_info(method_decl->generate_descriptor())
-        );
-
-        // TODO: move to other func in private
-        // Add parameters
-        for (const auto &param_node : method_decl->get_parameters())
-        {
-            goc_utf8_info(param_node->get_name());
-            goc_utf8_info(param_node->get_type()->generate_descriptor());
-        }
-
-        for (const auto &ir_emmiting_node : method_decl->get_body())
-        {
-            const auto *method_call =
-                dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emmiting_node.get());
-
-            if (method_call) // maybe move out of this if
-            {
-
-                // TODO: remove it if not needed or switch goc_utf8_info(method_call->get_binary_name())
-                // for (auto name : method_call->get_fqcn().get_parts())
-                // {
-                //     goc_utf8_info(name);
-                // }
-
-                goc_methodref_info(
-                    goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
-                    goc_name_and_type_info(
-                        goc_utf8_info(method_call->get_name().join()),
-                        goc_utf8_info(method_call->generate_descriptor())
-                    )
-                );
-            }
-        }
-    }
+    traverse_method_decl(class_decl);
 
     // Add super constructor method reference
     //TODO: Move to IR
@@ -98,6 +59,49 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
             goc_utf8_info("()V")
         )
     );
+}
+
+void codesh::output::jvm_target::constant_pool::traverse_method_decl(
+    const ast::type_decl::class_declaration_ast_node &class_decl)
+{
+    for (const auto &method_decl : class_decl.get_all_methods())
+    {
+        goc_name_and_type_info(
+            goc_utf8_info(method_decl->get_name()),
+            goc_utf8_info(method_decl->generate_descriptor())
+        );
+
+        //TODO: Add parameters (it was here i dont know what it means)
+        for (const auto &param_node : method_decl->get_parameters())
+        {
+            goc_utf8_info(param_node->get_name());
+            goc_utf8_info(param_node->get_type()->generate_descriptor());
+        }
+
+        traverse_method_body(*method_decl);
+    }
+}
+
+void codesh::output::jvm_target::constant_pool::traverse_method_body(
+    const ast::method::method_declaration_ast_node &method_decl) // TODO: change to unique_ptr if needed
+{
+    for (const auto &ir_emitting_node : method_decl.get_body())
+    {
+        const auto *method_call =
+            dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emitting_node.get());
+
+        if (method_call)
+        {
+            goc_methodref_info(
+                goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
+
+                goc_name_and_type_info(
+                    goc_utf8_info(method_call->get_name().join()),
+                    goc_utf8_info(method_call->generate_descriptor())
+                )
+            );
+        }
+    }
 }
 
 
