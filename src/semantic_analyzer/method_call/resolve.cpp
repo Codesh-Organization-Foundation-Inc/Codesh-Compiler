@@ -158,7 +158,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             const auto method_param_type = method_params.at(i).get();
             const auto argument_value = method_call.get_arguments().at(i).get();
 
-            if (are_types_compatible(argument_value->get_type(), *method_param_type))
+            // Make sure this isn't an error argument
+            if (argument_value->get_type() == nullptr)
+                return std::nullopt;
+
+
+            if (are_types_compatible(*argument_value->get_type(), *method_param_type))
             {
                 //TODO: Consider "best match", don't just return (casting etc.)
                 return method;

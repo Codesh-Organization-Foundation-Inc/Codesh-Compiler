@@ -6,6 +6,7 @@
 #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
+#include "ast/var_reference/error_value_ast_node.h"
 #include "ast/var_reference/evaluable_ast_node.h"
 
 #include <functional>
@@ -318,8 +319,15 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util
         break;
     }
 
-    default:
-        throw std::runtime_error("Unexpected token"); //TODO: Convert to custom Codesh error
+    default: {
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>();
+        tokens.pop();
+
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::UNEXPECTED_TOKEN,
+            blasphemy::blasphemy_type::SYNTAX
+        );
+    }
     }
 
     return eval_ast_node;

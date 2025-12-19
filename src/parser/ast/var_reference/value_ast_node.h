@@ -13,7 +13,7 @@ class value_ast_node : public impl::ast_node
 public:
     explicit value_ast_node(std::unique_ptr<type::type_ast_node> type);
 
-    [[nodiscard]] const type::type_ast_node &get_type() const;
+    [[nodiscard]] const type::type_ast_node *get_type() const;
 };
 
 }
