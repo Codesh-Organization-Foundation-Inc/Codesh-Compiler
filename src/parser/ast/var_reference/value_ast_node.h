@@ -1,12 +1,13 @@
 #pragma once
 
 #include "../impl/ast_node.h"
+#include "../impl/ir_emitting_ast_node.h"
 #include "../type/type_ast_node.h"
 
 namespace codesh::ast::var_reference
 {
 
-class value_ast_node : public impl::ast_node
+class value_ast_node : public impl::ir_emitting_ast_node
 {
     const std::unique_ptr<type::type_ast_node> type;
 
