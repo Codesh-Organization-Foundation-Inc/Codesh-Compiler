@@ -2,7 +2,11 @@
 
 #include "../../util.h"
 
+#include <limits>
 #include <stdexcept>
+
+static void push_int_bytes(std::list<unsigned char> &collector, int width, int num);
+
 
 codesh::output::ir::instruction::instruction(const opcode _opcode) :
     _opcode(_opcode)
@@ -94,18 +98,55 @@ void codesh::output::ir::invoke_instruction::emit(std::list<unsigned char> &coll
     }
 
     collector.push_back(static_cast<unsigned char>(instruction));
-
-
-    unsigned char buffer[2];
-    util::put_int_bytes(buffer, 2, method_cp_index);
-
-    for (unsigned char byte : buffer)
-    {
-        collector.emplace_back(byte);
-    }
+    push_int_bytes(collector, 2, method_cp_index);
 }
 
 int codesh::output::ir::invoke_instruction::get_method_cp_index() const
 {
     return method_cp_index;
+}
+
+codesh::output::ir::load_constant_instruction::load_constant_instruction(const int constant) :
+    constant(constant)
+{
+}
+
+void codesh::output::ir::load_constant_instruction::emit(std::list<unsigned char> &collector) const
+{
+    if (-1 <= constant && constant <= 5)
+    {
+        collector.push_back(
+            static_cast<unsigned char>(opcode::I_CONST_M1) + (constant + 1)
+        );
+
+        return;
+    }
+
+    if (std::numeric_limits<int8_t>::min() <= constant && constant <= std::numeric_limits<int8_t>::max())
+    {
+        collector.push_back(static_cast<unsigned char>(opcode::B_IPUSH));
+        collector.push_back(constant);
+    }
+    else if (std::numeric_limits<int16_t>::min() <= constant && constant <= std::numeric_limits<int16_t>::max())
+    {
+        collector.push_back(static_cast<unsigned char>(opcode::S_IPUSH));
+        push_int_bytes(collector, 2, constant);
+    }
+    else
+    {
+        throw std::runtime_error("Integer value too long for me right now check back later i.e load from constant pool");
+    }
+}
+
+
+
+static void push_int_bytes(std::list<unsigned char> &collector, const int width, const int num)
+{
+    std::vector<unsigned char> buffer(width);
+    codesh::util::put_int_bytes(buffer.data(), width, num);
+
+    for (const unsigned char byte : buffer)
+    {
+        collector.push_back(byte);
+    }
 }

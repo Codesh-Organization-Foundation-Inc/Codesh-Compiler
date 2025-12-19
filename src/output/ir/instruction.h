@@ -20,6 +20,17 @@ enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
 
+    I_CONST_M1 = 0x02,
+    I_CONST_0,
+    I_CONST_1,
+    I_CONST_2,
+    I_CONST_3,
+    I_CONST_4,
+    I_CONST_5,
+
+    B_IPUSH = 0x10,
+    S_IPUSH, // >255
+
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     L_LOAD, // Loads a long variable from the local variable table at the specified index
@@ -147,6 +158,16 @@ public:
     void emit(std::list<unsigned char> &collector) const override;
 
     [[nodiscard]] int get_method_cp_index() const;
+};
+
+class load_constant_instruction final : public instruction
+{
+    const int constant;
+
+public:
+    explicit load_constant_instruction(int constant);
+
+    void emit(std::list<unsigned char> &collector) const override;
 };
 
 }

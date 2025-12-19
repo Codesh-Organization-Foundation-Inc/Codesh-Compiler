@@ -2,8 +2,12 @@
 
 #include "../../../../output/ir/code_block.h"
 #include "../../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../../type/primitive_type_ast_node.h"
+#include "../../var_reference/evaluable_ast_node.h"
 #include "../util.h"
 #include "fmt/xchar.h"
+
+#include <any>
 
 std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::method::operation::method_call_ast_node::
     _get_resolved_name()
@@ -95,6 +99,23 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
         throw std::runtime_error("Calling non-static methods not yet supported");
     }
 
+
+    // Load parameters
+    for (const auto &argument : arguments)
+    {
+        if (const auto prim_arg = dynamic_cast<const type::primitive_type_ast_node *>(argument->get_type()))
+        {
+            if (prim_arg->get_type() == definition::primitive_type::INTEGER)
+            {
+                containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
+                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value()
+                ));
+            }
+        }
+    }
+
+
+    // Call method
 
     const int method_cpi = cp.get_methodref_index(
         cp.get_class_index(
