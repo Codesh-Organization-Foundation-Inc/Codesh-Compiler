@@ -27,6 +27,7 @@ public:
      * Clones this FQCN and appends the provided part to it
      */
     [[nodiscard]] fully_qualified_class_name with(std::string part) const;
+    [[nodiscard]] fully_qualified_class_name omit_last() const;
 
 
     void add(std::string part);

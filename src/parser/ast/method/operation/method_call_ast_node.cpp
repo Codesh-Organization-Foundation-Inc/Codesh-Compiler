@@ -1,5 +1,6 @@
 #include "method_call_ast_node.h"
 
+#include "../../../../output/ir/code_block.h"
 #include "../../../../semantic_analyzer/symbol_table/symbol.h"
 #include "../util.h"
 #include "fmt/xchar.h"
@@ -62,7 +63,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
-        param_types.push_back(*param.get());
+        param_types.emplace_back(*param);
     }
 
     return util::generate_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
@@ -80,9 +81,34 @@ std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh
     return arguments;
 }
 
+
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    //TODO
+    const auto &method = get_referred_method();
+    const auto &cp = containing_type_decl.get_constant_pool()->get();
+
+    if (!method.get_attributes().get_is_static())
+    {
+        //TODO: Handle passing 'this' instances
+        throw std::runtime_error("Calling non-static methods not yet supported");
+    }
+
+
+    const int method_cpi = cp.get_methodref_index(
+        cp.get_class_index(
+            cp.get_utf8_index(get_resolved_name().omit_last().join())
+        ),
+
+        cp.get_name_and_type_index(
+            cp.get_utf8_index(get_resolved_name().get_last_part()),
+            cp.get_utf8_index(generate_descriptor())
+        )
+    );
+
+    containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
+        output::ir::invokation_type::STATIC,
+        method_cpi
+    ));
 }

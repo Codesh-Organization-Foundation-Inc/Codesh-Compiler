@@ -93,7 +93,9 @@ void codesh::output::jvm_target::constant_pool::traverse_method_body(
         if (method_call)
         {
             goc_methodref_info(
-                goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
+                goc_class_info(
+                    goc_utf8_info(method_call->get_resolved_name().omit_last().join())
+                ),
 
                 goc_name_and_type_info(
                     goc_utf8_info(method_call->get_name().join()),
