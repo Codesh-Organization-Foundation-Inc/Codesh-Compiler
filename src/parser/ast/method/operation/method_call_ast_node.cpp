@@ -116,7 +116,6 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 
 
     // Call method
-
     const int method_cpi = cp.get_methodref_index(
         cp.get_class_index(
             cp.get_utf8_index(get_resolved_name().omit_last().join())

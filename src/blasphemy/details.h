@@ -5,8 +5,6 @@
 namespace codesh::blasphemy::details
 {
 
-//TODO: Add all details here
-
 // INIT
 extern const std::string SOURCE_FILE_OPEN_ERROR;
 extern const std::string OUTPUT_FILE_OPEN_ERROR;
@@ -37,6 +35,6 @@ extern const std::string UNRECOGNIZED_TYPE;
 extern const std::string CONSTANT_POOL_TOO_BIG;
 extern const std::string METHOD_TOO_BIG;
 extern const std::string STRING_TOO_BIG;
-
+extern const std::string NUMBER_TOO_BIG;
 
 }

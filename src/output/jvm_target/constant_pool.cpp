@@ -9,7 +9,9 @@
 #include <unordered_set>
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "../../parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
@@ -83,29 +85,62 @@ void codesh::output::jvm_target::constant_pool::traverse_method_decl(
 }
 
 void codesh::output::jvm_target::constant_pool::traverse_method_body(
-    const ast::method::method_declaration_ast_node &method_decl) // TODO: change to unique_ptr if needed
+    const ast::method::method_declaration_ast_node &method_decl)
 {
     for (const auto &ir_emitting_node : method_decl.get_body())
     {
+        //TODO: Refactor to traverse_method_call
         const auto *method_call =
             dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emitting_node.get());
 
         if (method_call)
         {
-            goc_methodref_info(
-                goc_class_info(
-                    goc_utf8_info(method_call->get_resolved_name().omit_last().join())
-                ),
-
-                goc_name_and_type_info(
-                    goc_utf8_info(method_call->get_name().join()),
-                    goc_utf8_info(method_call->generate_descriptor())
-                )
-            );
+            traverse_method_call(method_decl, *method_call);
         }
     }
 }
 
+void codesh::output::jvm_target::constant_pool::traverse_method_call(
+        const ast::method::method_declaration_ast_node &method_decl,
+        const ast::method::operation::method_call_ast_node &method_call)
+{
+    goc_methodref_info(
+        goc_class_info(
+            goc_utf8_info(method_call.get_resolved_name().omit_last().join())
+        ),
+
+        goc_name_and_type_info(
+            goc_utf8_info(method_call.get_name().join()),
+            goc_utf8_info(method_call.generate_descriptor())
+        )
+    );
+
+    // Add constant arguments
+    for (const auto &argument : method_call.get_arguments())
+    {
+        if (const auto prim_arg = dynamic_cast<const ast::type::primitive_type_ast_node *>(argument->get_type()))
+        {
+            switch (prim_arg->get_type())
+            {
+            case definition::primitive_type::INTEGER: {
+                const int num = static_cast<const ast::var_reference::evaluable_ast_node<int> *>(
+                    argument.get()
+                )->get_value();
+
+                // Only save numbers greater than 16 bits
+                if (std::numeric_limits<int16_t>::min() > num || num > std::numeric_limits<int16_t>::max())
+                {
+                    goc_integer_info(num);
+                }
+
+                break;
+            }
+
+            default: throw std::runtime_error("Unsupported primitive type");
+            }
+        }
+    }
+}
 
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
@@ -123,6 +158,16 @@ int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs
 int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)
 {
     return goc_constant(utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_index)
+{
+    return goc_constant(string_info(utf8_index));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_integer_info(int num)
+{
+    return goc_constant(integer_info(num));
 }
 
 int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
@@ -148,10 +193,31 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();
+
     util::put_int_bytes(utf8_info->length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
     utf8_info->bytes.insert(utf8_info->bytes.end(), utf8.begin(), utf8.end());
 
     return utf8_info;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_String_info> codesh::output::jvm_target::constant_pool::
+    string_info(const int utf8_index)
+{
+    auto const_string = std::make_unique<defs::CONSTANT_String_info>();
+
+    util::put_int_bytes(const_string->string_index, 2, utf8_index);
+
+    return const_string;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Integer_info> codesh::output::jvm_target::constant_pool::
+    integer_info(const int num)
+{
+    auto const_integer = std::make_unique<defs::CONSTANT_Integer_info>();
+
+    util::put_int_bytes(const_integer->bytes, 4, num);
+
+    return const_integer;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
@@ -199,6 +265,16 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 int codesh::output::jvm_target::constant_pool::get_utf8_index(const std::string &utf8) const
 {
     return get_index(*utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::get_string_index(const int utf8_index) const
+{
+    return get_index(*string_info(utf8_index));
+}
+
+int codesh::output::jvm_target::constant_pool::get_integer_index(const int num) const
+{
+    return get_index(*integer_info(num));
 }
 
 int codesh::output::jvm_target::constant_pool::get_methodref_index(const int class_index,
