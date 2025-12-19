@@ -6,7 +6,7 @@
 #include "../semantic_context.h"
 #include "../../blasphemy/blasphemy_collector.h"
 
-void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_context &context,
+void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
         country_symbol &country)
 {
     for (const auto &type_decl : context.root.get_type_declarations())
@@ -19,7 +19,8 @@ void codesh::semantic_analyzer::type_declaration::collect_types(const semantic_c
             name, std::make_unique<type_symbol>(
                 &country,
                 country.get_full_name().with(name),
-                type_decl->get_attributes()->get_access_flags(),
+
+                type_decl->get_attributes()->clone(),
                 type_decl.get()
             )
         );

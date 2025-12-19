@@ -8,8 +8,10 @@
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "aliases.h"
+#include "builtins.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol.h"
+#include "type_decl/collect.h"
 #include "type_decl/resolve.h"
 #include "type_decl/resolve_aliases.h"
 
@@ -49,16 +51,23 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
+    const symbol_table &table = ast_root.get_symbol_table().value();
+
     //TODO: Use actual countries
     const std::vector lookup_countries = {
-        ast_root.get_symbol_table().value().get().resolve_country("").value()
+        table.resolve_country("").value()
     };
+    country_symbol &country = lookup_countries.back();
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    const country_symbol &country = lookup_countries.back();
+
+    //FIXME: This should be entirely replaced with Talmud Codesh once interoperability is implemented
+    builtins::add_builtins(table);
 
 
+    //TODO: Iterate over each and every country, then INSIDE do the following:
+    type_declaration::collect(context,country);
     type_declaration::resolve(context, country);
 
     //TODO: When CALLING non-static methods, also add 'this' as first argument

@@ -107,12 +107,12 @@ codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symb
 
 codesh::semantic_analyzer::type_symbol::type_symbol(symbol *const parent_symbol,
         definition::fully_qualified_class_name full_name,
-        const std::vector<output::jvm_target::access_flag> &access_flags,
+        std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         ast::type_decl::type_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::TYPE),
     full_name(std::move(full_name)),
     producing_node(producing_node),
-    access_flags(access_flags)
+    attributes(std::move(attributes))
 {
 }
 
@@ -121,10 +121,10 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
     return full_name;
 }
 
-const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_analyzer::type_symbol::get_access_flags()
+const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::type_symbol::get_attributes()
     const
 {
-    return access_flags;
+    return *attributes;
 }
 
 codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol *const parent_symbol, const symbol_type _symbol_type,
@@ -231,10 +231,12 @@ std::list<std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol>> &code
 }
 
 codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_symbol, type_symbol &parent_type,
+        definition::fully_qualified_class_name full_name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
         std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD),
+    full_name(std::move(full_name)),
     attributes(std::move(attributes)),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
@@ -248,6 +250,11 @@ std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic
     create_method_scope(symbol &parent_scope)
 {
     return std::make_unique<method_scope_symbol>(&parent_scope, local_variables);
+}
+
+const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::method_symbol::get_full_name() const
+{
+    return full_name;
 }
 
 const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::method_symbol::get_attributes() const
