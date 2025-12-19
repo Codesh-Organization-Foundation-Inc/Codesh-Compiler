@@ -259,6 +259,18 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util
         break;
     }
 
+    case token_group::LITERAL_STRING: {
+        eval_ast_node = make_evaluable<std::string>(
+            tokens, definition::primitive_type::STRING,
+
+            [](const std::string &content) {
+                return content;
+            }
+        );
+
+        break;
+    }
+
     case token_group::LITERAL_NUMBER_INT: {
         eval_ast_node = make_evaluable<int>(
             tokens, definition::primitive_type::INTEGER,
