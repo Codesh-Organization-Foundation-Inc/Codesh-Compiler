@@ -60,6 +60,7 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         )
     );
 }
+
 void codesh::output::jvm_target::constant_pool::traverse_method_decl(
     const ast::type_decl::class_declaration_ast_node &class_decl)
 {
@@ -84,15 +85,16 @@ void codesh::output::jvm_target::constant_pool::traverse_method_decl(
 void codesh::output::jvm_target::constant_pool::traverse_method_body(
     const ast::method::method_declaration_ast_node &method_decl) // TODO: change to unique_ptr if needed
 {
-    for (const auto &ir_emmiting_node : method_decl.get_body())
+    for (const auto &ir_emitting_node : method_decl.get_body())
     {
         const auto *method_call =
-            dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emmiting_node.get());
+            dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emitting_node.get());
 
         if (method_call)
         {
             goc_methodref_info(
                 goc_class_info(goc_utf8_info(method_call->get_resolved_name().join())),
+
                 goc_name_and_type_info(
                     goc_utf8_info(method_call->get_name().join()),
                     goc_utf8_info(method_call->generate_descriptor())

@@ -74,8 +74,6 @@ class constant_pool
     static std::unique_ptr<defs::CONSTANT_NameAndType_info> name_and_type_info(int name_index, int descriptor_index);
     static std::unique_ptr<defs::CONSTANT_Class_info> class_info(int name_index);
 
-
-
 public:
     /**
      * Constructs a new constant pool using the provided AST node
