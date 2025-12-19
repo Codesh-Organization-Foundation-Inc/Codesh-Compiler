@@ -138,6 +138,17 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
 
             default: throw std::runtime_error("Unsupported primitive type");
             }
+
+            continue;
+        }
+
+        if (argument->get_type()->generate_descriptor() == "java/lang/String")
+        {
+            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>(
+                argument.get()
+            )->get_value();
+
+            goc_string_info(goc_utf8_info(string));
         }
     }
 }
