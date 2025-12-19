@@ -2,6 +2,7 @@
 
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
 #include "../semantic_context.h"
+#include "../symbol_table/symbol_table.h"
 #include "../util.h"
 #include "fmt/color.h"
 
@@ -44,27 +45,60 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto &name = method_call.get_name();
+    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
-    if (!name.is_single_part())
+    if (name.is_single_part())
     {
-        //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
-        throw std::runtime_error("Non-single FQCNs not yet supported");
+        // Since this is a single-part FQCN (name only), the method must either be the classes' or a static import.
+        //TODO: Handle static imports
+
+        parent_type = &containing_method.get_parent_type();
+    }
+    else
+    {
+        const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+            context,
+            name.get_parts().begin(),
+            // Ignore the last part of the name, which points to the method overloads.
+            // get_called_method_as_symbol already handles it.
+            name.get_parts().end() - 1
+        );
+
+        if (!type_symbol.has_value())
+        {
+            context.blasphemy_consumer(fmt::format(
+                "השם {} אינו קיים",
+                name.join(" ל־")
+            ));
+
+            return std::nullopt;
+        }
+
+        // A method must be contained in a type
+        parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
+
+        // If it isn't, then this supposed "method" cannot exist.
+        if (parent_type == nullptr)
+        {
+            context.blasphemy_consumer(fmt::format(
+                "{} אינו קיים",
+                name.join(" ל־")
+            ));
+
+            return std::nullopt;
+        }
     }
 
-    // Since this is a single-part FQCN (name only), the method must either be the classes' or a static import.
 
-    // THIS:
-    const auto &parent_type = containing_method.get_parent_type();
     const auto method = get_called_method_as_symbol(
         context,
-        parent_type,
+        *parent_type,
         method_call
     );
 
-    //TODO: Handle static imports
-
     if (!method.has_value())
         return std::nullopt;
+
 
     // Update the AST node to the found result
     method_call.set_resolved_name(method->get().get_full_name());
