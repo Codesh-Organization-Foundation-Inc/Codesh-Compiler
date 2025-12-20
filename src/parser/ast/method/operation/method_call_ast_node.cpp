@@ -120,7 +120,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
         ),
 
         cp.get_name_and_type_index(
-            cp.get_utf8_index(get_resolved_name().get_last_part()),
+            cp.get_utf8_index(get_last_name(true)),
             cp.get_utf8_index(generate_descriptor())
         )
     );

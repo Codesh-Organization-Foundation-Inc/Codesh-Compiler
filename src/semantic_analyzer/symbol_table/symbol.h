@@ -211,7 +211,7 @@ public:
 
 class method_symbol final : public symbol, public i_resolveable_symbol<ast::method::method_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    definition::fully_qualified_class_name full_name;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
@@ -235,6 +235,7 @@ public:
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    void set_full_name (definition::fully_qualified_class_name name);
 
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;

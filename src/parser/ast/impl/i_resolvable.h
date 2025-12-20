@@ -39,6 +39,7 @@ public:
      * When false, behaves like {@link get_unresolved_name}
      */
     [[nodiscard]] const definition::fully_qualified_class_name &get_name(bool resolved) const;
+    [[nodiscard]] std::string get_last_name(bool resolved) const;
 
     virtual void set_resolved(T &symbol) = 0;
     [[nodiscard]] T &get_resolved() const;

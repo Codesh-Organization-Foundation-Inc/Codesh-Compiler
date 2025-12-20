@@ -32,7 +32,7 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const semantic_context &context, const type_symbol &type,
     const ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_name());
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
 
     const auto &method = resolve_method_signature(new_context, method_decl, type);
 
@@ -52,7 +52,7 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::semantic_analyzer::type_symbol &type)
 {
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.resolve(method_decl.get_name()).value().get()
+        &type.resolve(method_decl.get_last_name(false)).value().get()
     );
 
     // Get relevant method symbol from the method overloads map

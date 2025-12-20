@@ -70,7 +70,7 @@ void codesh::output::jvm_target::constant_pool::traverse_method_decl(
     for (const auto &method_decl : class_decl.get_all_methods())
     {
         goc_name_and_type_info(
-            goc_utf8_info(method_decl->get_name()),
+            goc_utf8_info(method_decl->get_last_name(true)),
             goc_utf8_info(method_decl->generate_descriptor())
         );
 

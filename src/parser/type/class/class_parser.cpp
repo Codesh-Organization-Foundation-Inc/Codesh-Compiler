@@ -153,9 +153,9 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     // * (the name)
     const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
-    auto method_node = std::make_unique<ast::method::method_declaration_ast_node>();
-
-    method_node->set_name(name_token->get_content());
+    auto method_node = std::make_unique<ast::method::method_declaration_ast_node>(
+        codesh::definition::fully_qualified_class_name(name_token->get_content())
+    );
 
     // Get attributes
     method_node->set_attributes(parser::parse_modifiers(tokens));

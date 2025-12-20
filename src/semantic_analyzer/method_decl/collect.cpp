@@ -20,10 +20,9 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
 {
     for (const auto &method_decl : type_decl.get_all_methods())
     {
-        const std::string method_name = method_decl->get_name();
+        const std::string method_name = method_decl->get_last_name(false);
 
-        method_overloads_symbol &methods_container =
-            util::get_method_overloads_symbol(method_decl->get_name(), containing_type);
+        method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
 
         const auto [it, inserted] = methods_container.add_symbol(
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
@@ -48,7 +47,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
             ));
         }
 
-        method_decl->set_symbol(it);
+        method_decl->set_resolved(it);
 
 
         collect_local_variables(*method_decl, it);

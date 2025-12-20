@@ -111,7 +111,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     util::put_int_bytes(
         method_entry->name_index, 2,
-        constant_pool_.get_utf8_index(method_decl.get_name())
+        constant_pool_.get_utf8_index(method_decl.get_last_name(true))
     );
     util::put_int_bytes(
         method_entry->descriptor_index, 2,
@@ -177,9 +177,10 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     // Local variables
-    const size_t local_vars_count = method_decl.get_symbol().get_all_local_variables().size();
+    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().size();
     if (local_vars_count > 0xFFFF)
-        throw std::runtime_error("Too many local variables in method " + method_decl.get_name() + "; Max amount is 65535");
+        //TODO: Convert to Codesh error
+        throw std::runtime_error("Too many local variables in method " + method_decl.get_unresolved_name().join() + "; Max amount is 65535");
 
     const int lvt_size = static_cast<int>(local_vars_count);
     util::put_int_bytes(code_attr->max_locals, 2, lvt_size);
@@ -252,7 +253,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    const auto &local_vars = method_decl.get_symbol().get_all_local_variables();
+    const auto &local_vars = method_decl.get_resolved().get_all_local_variables();
     for (int i = 0; i < local_vars.size(); i++)
     {
         const auto &[name, var] = local_vars.at(i).get();

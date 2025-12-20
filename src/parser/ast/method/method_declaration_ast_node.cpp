@@ -1,10 +1,22 @@
 #include "method_declaration_ast_node.h"
 
 #include "../local_variable_declaration_ast_node.h"
+#include "../../../semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
 #include "util.h"
 
 #include <ranges>
+
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::
+    method_declaration_ast_node::_get_resolved() const
+{
+    return resolved_symbol;
+}
+
+codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
+    definition::fully_qualified_class_name name) : name(std::move(name))
+{
+}
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
@@ -16,14 +28,15 @@ std::string codesh::ast::method::method_declaration_ast_node::generate_parameter
     return util::generate_parameters_descriptor(resolved, parameter_types, *attributes);
 }
 
-std::string codesh::ast::method::method_declaration_ast_node::get_name() const
+void codesh::ast::method::method_declaration_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
 {
-    return name;
+    resolved_symbol.emplace(symbol);
 }
 
-void codesh::ast::method::method_declaration_ast_node::set_name(const std::string &name)
+const codesh::definition::fully_qualified_class_name &codesh::ast::method::method_declaration_ast_node::
+    get_unresolved_name() const
 {
-    this->name = name;
+    return name;
 }
 
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::method::method_declaration_ast_node::get_attributes()
@@ -46,19 +59,6 @@ codesh::ast::type::type_ast_node *codesh::ast::method::method_declaration_ast_no
 void codesh::ast::method::method_declaration_ast_node::set_return_type(std::unique_ptr<type::type_ast_node> return_type)
 {
     this->return_type = std::move(return_type);
-}
-
-codesh::semantic_analyzer::method_symbol &codesh::ast::method::method_declaration_ast_node::get_symbol() const
-{
-    if (!symbol)
-        throw std::runtime_error("No symbol attached to the method declaration node");
-
-    return symbol.value();
-}
-
-void codesh::ast::method::method_declaration_ast_node::set_symbol(semantic_analyzer::method_symbol &symbol)
-{
-    this->symbol.emplace(symbol);
 }
 
 std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::

@@ -34,6 +34,12 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::impl::i_resol
 }
 
 template <typename T>
+std::string codesh::ast::impl::i_resolvable<T>::get_last_name(const bool resolved) const
+{
+    return (resolved ? get_resolved_name() : get_unresolved_name()).get_last_part();
+}
+
+template <typename T>
 T &codesh::ast::impl::i_resolvable<T>::get_resolved() const
 {
     return _get_resolved().value();
