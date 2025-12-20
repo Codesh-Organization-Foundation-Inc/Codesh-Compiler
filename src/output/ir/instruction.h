@@ -3,6 +3,10 @@
 #include <list>
 #include <vector>
 
+namespace codesh::output::jvm_target
+{
+class constant_pool;
+}
 namespace codesh::output::jvm_target::defs
 {
 class cp_info;
@@ -164,9 +168,10 @@ public:
 class load_constant_instruction final : public instruction
 {
     const int constant;
+    const jvm_target::constant_pool &fallback_constant_pool;
 
 public:
-    explicit load_constant_instruction(int constant);
+    load_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
 
     void emit(std::list<unsigned char> &collector) const override;
 };

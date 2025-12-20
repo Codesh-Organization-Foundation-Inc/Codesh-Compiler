@@ -90,7 +90,8 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
             {
             case definition::primitive_type::INTEGER: {
                 containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
-                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value() // NOLINT(*-pro-type-static-cast-downcast)
+                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value(), // NOLINT(*-pro-type-static-cast-downcast)
+                    cp
                 ));
 
                 break;

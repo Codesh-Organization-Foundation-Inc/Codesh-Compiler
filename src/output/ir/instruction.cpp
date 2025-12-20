@@ -1,6 +1,7 @@
 #include "instruction.h"
 
 #include "../../util.h"
+#include "../jvm_target/constant_pool.h"
 
 #include <limits>
 #include <stdexcept>
@@ -106,8 +107,10 @@ int codesh::output::ir::invoke_instruction::get_method_cp_index() const
     return method_cp_index;
 }
 
-codesh::output::ir::load_constant_instruction::load_constant_instruction(const int constant) :
-    constant(constant)
+codesh::output::ir::load_constant_instruction::load_constant_instruction(const int constant,
+        const jvm_target::constant_pool &fallback_constant_pool) :
+    constant(constant),
+    fallback_constant_pool(fallback_constant_pool)
 {
 }
 
@@ -134,7 +137,9 @@ void codesh::output::ir::load_constant_instruction::emit(std::list<unsigned char
     }
     else
     {
-        throw std::runtime_error("Integer value too long for me right now check back later i.e load from constant pool");
+        // If the number is greater than int16, then it is saved in the constant pool.
+        collector.push_back(static_cast<unsigned char>(opcode::LDC));
+        collector.push_back(fallback_constant_pool.get_integer_index(constant));
     }
 }
 
