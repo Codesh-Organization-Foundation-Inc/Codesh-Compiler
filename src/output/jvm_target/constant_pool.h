@@ -58,8 +58,7 @@ class constant_pool
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
     void traverse_method_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
     void traverse_method_body(const ast::method::method_declaration_ast_node &method_decl);
-    void traverse_method_call(const ast::method::method_declaration_ast_node &method_decl,
-            const ast::method::operation::method_call_ast_node &method_call);
+    void traverse_method_call(const ast::method::operation::method_call_ast_node &method_call);
 
     int index;
     const int this_class_cpi;

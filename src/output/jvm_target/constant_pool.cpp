@@ -90,19 +90,17 @@ void codesh::output::jvm_target::constant_pool::traverse_method_body(
 {
     for (const auto &ir_emitting_node : method_decl.get_body())
     {
-        //TODO: Refactor to traverse_method_call
         const auto *method_call =
             dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emitting_node.get());
 
         if (method_call)
         {
-            traverse_method_call(method_decl, *method_call);
+            traverse_method_call(*method_call);
         }
     }
 }
 
 void codesh::output::jvm_target::constant_pool::traverse_method_call(
-        const ast::method::method_declaration_ast_node &method_decl,
         const ast::method::operation::method_call_ast_node &method_call)
 {
     goc_methodref_info(
@@ -111,7 +109,7 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
         ),
 
         goc_name_and_type_info(
-            goc_utf8_info(method_call.get_unresolved_name().join()),
+            goc_utf8_info(method_call.get_last_name(true)),
             goc_utf8_info(method_call.generate_descriptor())
         )
     );
