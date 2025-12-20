@@ -5,9 +5,11 @@
 #include "symbol_table/symbol_table.h"
 #include "../parser/ast/type/custom_type_ast_node.h"
 
+static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
+static constexpr std::string ALIAS_KTUVIM = "כתובים";
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
 
@@ -16,7 +18,27 @@ void codesh::semantic_analyzer::builtins::add_builtins(const symbol_table &table
 {
     country_symbol &country = table.resolve_country("").value();
 
+    add_alias_ktuvim(country);
     add_class_massof(country);
+}
+
+static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
+{
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    attributes->set_is_final(true);
+
+    country.add_symbol(
+        ALIAS_KTUVIM,
+        std::make_unique<codesh::semantic_analyzer::type_symbol>(
+            &country,
+            "java/lang/String",
+
+            std::move(attributes),
+
+            nullptr
+        )
+    );
 }
 
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
