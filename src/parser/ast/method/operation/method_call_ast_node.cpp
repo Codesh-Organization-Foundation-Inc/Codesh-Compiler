@@ -100,7 +100,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
             }
         }
 
-        if (argument->get_type()->generate_descriptor() == "java/lang/String")
+        if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
         {
             const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
                 argument.get()

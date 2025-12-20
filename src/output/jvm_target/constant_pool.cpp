@@ -124,7 +124,7 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
             switch (prim_arg->get_type())
             {
             case definition::primitive_type::INTEGER: {
-                const int num = static_cast<const ast::var_reference::evaluable_ast_node<int> *>(
+                const int num = static_cast<const ast::var_reference::evaluable_ast_node<int> *>( // NOLINT(*-pro-type-static-cast-downcast)
                     argument.get()
                 )->get_value();
 
@@ -143,9 +143,9 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
             continue;
         }
 
-        if (argument->get_type()->generate_descriptor() == "java/lang/String")
+        if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
         {
-            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>(
+            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
                 argument.get()
             )->get_value();
 
