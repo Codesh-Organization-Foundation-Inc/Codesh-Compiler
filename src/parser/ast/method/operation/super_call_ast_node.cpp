@@ -14,19 +14,19 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
     ));
 
 
-    const output::jvm_target::constant_pool &constant_pool = containing_type_decl.get_constant_pool().value();
+    const auto &cp = containing_type_decl.get_constant_pool();
 
-    const int super_constructor_cp_index = constant_pool.get_methodref_index(
-        constant_pool.get_class_index(
-            constant_pool.get_utf8_index(
+    const int super_constructor_cp_index = cp.get_methodref_index(
+        cp.get_class_index(
+            cp.get_utf8_index(
                 containing_type_decl.get_super_class()->get_resolved_name().join()
             )
         ),
 
-        constant_pool.get_name_and_type_index(
-            constant_pool.get_utf8_index("<init>"),
+        cp.get_name_and_type_index(
+            cp.get_utf8_index("<init>"),
             //TODO: Match parameters list
-            constant_pool.get_utf8_index("()V")
+            cp.get_utf8_index("()V")
         )
     );
 

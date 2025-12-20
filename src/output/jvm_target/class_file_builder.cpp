@@ -25,7 +25,7 @@ codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_f
     class_file(class_file_out),
     root_node(root_node),
     type_decl(type_decl),
-    constant_pool_(type_decl.get_constant_pool()->get()),
+    constant_pool_(type_decl.get_constant_pool()),
 
     this_class_cpi(constant_pool_.get_class_index(
         constant_pool_.get_utf8_index(type_decl.get_resolved_name().join())
@@ -131,7 +131,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     // Convert the method to IR
     const auto code_block = ir::code_block::build_from_method(
         method_decl,
-        root_node.get_symbol_table().value(),
+        root_node.get_symbol_table(),
         type_decl
     );
 

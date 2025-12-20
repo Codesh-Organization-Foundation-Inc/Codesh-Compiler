@@ -91,7 +91,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
     const auto &method = get_referred_method();
-    const auto &cp = containing_type_decl.get_constant_pool()->get();
+    const auto &cp = containing_type_decl.get_constant_pool();
 
     if (!method.get_attributes().get_is_static())
     {
@@ -109,7 +109,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
             {
             case definition::primitive_type::INTEGER: {
                 containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
-                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value()
+                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value() // NOLINT(*-pro-type-static-cast-downcast)
                 ));
 
                 break;
@@ -121,7 +121,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 
         if (argument->get_type()->generate_descriptor() == "java/lang/String")
         {
-            const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>(
+            const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
                 argument.get()
             )->get_value();
 

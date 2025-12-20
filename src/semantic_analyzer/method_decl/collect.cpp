@@ -16,9 +16,9 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const semantic_context &context,
-        const ast::type_decl::class_declaration_ast_node &class_decl, type_symbol &containing_type)
+        const ast::type_decl::type_declaration_ast_node &type_decl, type_symbol &containing_type)
 {
-    for (const auto &method_decl : class_decl.get_all_methods())
+    for (const auto &method_decl : type_decl.get_all_methods())
     {
         const std::string method_name = method_decl->get_name();
 

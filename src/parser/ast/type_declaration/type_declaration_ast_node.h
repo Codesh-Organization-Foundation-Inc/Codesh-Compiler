@@ -39,8 +39,7 @@ protected:
 public:
     explicit type_declaration_ast_node(definition::fully_qualified_class_name name);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const output::jvm_target::constant_pool>> get_constant_pool()
-        const;
+    [[nodiscard]] const output::jvm_target::constant_pool &get_constant_pool() const;
     void set_constant_pool(output::jvm_target::constant_pool constant_pool);
 
 

@@ -52,11 +52,11 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_attributes(
     this->attributes = std::move(attributes);
 }
 
-std::optional<std::reference_wrapper<const codesh::output::jvm_target::constant_pool>> codesh::ast::type_decl::
+const codesh::output::jvm_target::constant_pool &codesh::ast::type_decl::
     type_declaration_ast_node::get_constant_pool() const
 {
     if (constant_pool == nullptr)
-        return std::nullopt;
+        throw std::runtime_error("Attempted to get constant pool in type, yet it was uninitialized");
 
     return *constant_pool;
 }

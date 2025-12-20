@@ -33,10 +33,6 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
             ));
         }
 
-
-        if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(type_decl.get()))
-        {
-            method_declaration::collect_methods(new_context, *class_decl, it.get());
-        }
+        method_declaration::collect_methods(new_context, *type_decl, it.get());
     }
 }
