@@ -5,6 +5,7 @@
 #include "../../defenition/definitions.h"
 #include "../../util.h"
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
 
 #include <unordered_set>
 
@@ -110,7 +111,7 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
         ),
 
         goc_name_and_type_info(
-            goc_utf8_info(method_call.get_name().join()),
+            goc_utf8_info(method_call.get_unresolved_name().join()),
             goc_utf8_info(method_call.generate_descriptor())
         )
     );

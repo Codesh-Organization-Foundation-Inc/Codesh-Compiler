@@ -44,7 +44,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::method_symbol &containing_method,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto &name = method_call.get_name();
+    const auto &name = method_call.get_unresolved_name();
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
     if (name.is_single_part())
@@ -101,8 +101,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 
     // Update the AST node to the found result
-    method_call.set_resolved_name(method->get().get_full_name());
-    method_call.set_referred_method(method.value());
+    method_call.set_resolved(method.value());
 
     return method;
 }
@@ -112,7 +111,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto method_overloads_raw = type.resolve(method_call.get_name().get_last_part());
+    const auto method_overloads_raw = type.resolve(method_call.get_unresolved_name().get_last_part());
     if (!method_overloads_raw)
     {
         //TODO: Throw "name doesn't exist"

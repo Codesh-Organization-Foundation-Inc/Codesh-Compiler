@@ -7,7 +7,7 @@
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "aliases.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
 #include "builtins.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol.h"
@@ -51,7 +51,7 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    const symbol_table &table = ast_root.get_symbol_table().value();
+    const symbol_table &table = ast_root.get_symbol_table();
 
     //TODO: Use actual countries
     const std::vector lookup_countries = {
@@ -199,7 +199,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     attributes_node->set_is_final(true);
     this_param->set_attributes(std::move(attributes_node));
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_name());
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_unresolved_name());
     this_param->set_type(std::move(this_class_type));
 
     return this_param;

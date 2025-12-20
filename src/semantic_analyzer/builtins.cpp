@@ -3,6 +3,7 @@
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "symbol_table/symbol.h"
 #include "symbol_table/symbol_table.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
 
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);

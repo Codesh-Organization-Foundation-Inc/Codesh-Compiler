@@ -11,7 +11,7 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
 {
     for (const auto &type_decl : context.root.get_type_declarations())
     {
-        const std::string name = type_decl->get_name().get_last_part();
+        const std::string name = type_decl->get_unresolved_name().get_last_part();
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
 
@@ -29,7 +29,7 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
         {
             new_context.blasphemy_consumer(fmt::format(
                 "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-                type_decl->get_name().join()
+                type_decl->get_unresolved_name().join()
             ));
         }
 

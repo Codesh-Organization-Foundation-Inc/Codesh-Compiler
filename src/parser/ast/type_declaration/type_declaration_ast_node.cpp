@@ -1,16 +1,25 @@
 #include "type_declaration_ast_node.h"
 
+#include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../type/custom_type_ast_node.h"
+
 #include <utility>
 
-std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type_decl::type_declaration_ast_node::
-    _get_resolved_name()
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type_decl::
+    type_declaration_ast_node::_get_resolved() const
 {
-    return resolved_name;
+    return resolved_symbol;
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
         definition::fully_qualified_class_name name) : name(std::move(name))
 {
+}
+codesh::ast::type_decl::type_declaration_ast_node::~type_declaration_ast_node() = default;
+
+void codesh::ast::type_decl::type_declaration_ast_node::set_resolved(semantic_analyzer::type_symbol &symbol)
+{
+    resolved_symbol.emplace(symbol);
 }
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor(const bool resolved) const
@@ -18,13 +27,7 @@ std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descript
     return "L" + get_name(resolved).join() + ";";
 }
 
-const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type_decl::type_declaration_ast_node::
-    _get_resolved_name() const
-{
-    return resolved_name;
-}
-
-const codesh::definition::fully_qualified_class_name &codesh::ast::type_decl::type_declaration_ast_node::get_name()
+const codesh::definition::fully_qualified_class_name &codesh::ast::type_decl::type_declaration_ast_node::get_unresolved_name()
     const
 {
     return this->name;

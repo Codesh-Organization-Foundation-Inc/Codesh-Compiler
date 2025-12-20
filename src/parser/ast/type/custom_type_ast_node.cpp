@@ -1,19 +1,22 @@
 #include "custom_type_ast_node.h"
 
 #include "fmt/chrono.h"
+#include "../../../semantic_analyzer/symbol_table/symbol.h"
 
-#include <iostream>
-#include <sstream>
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type::
+    custom_type_ast_node::_get_resolved() const
+{
+    return resolved_symbol;
+}
 
 codesh::ast::type::custom_type_ast_node::custom_type_ast_node(definition::fully_qualified_class_name name) :
     name(std::move(name))
 {
 }
 
-std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type::custom_type_ast_node::
-    _get_resolved_name()
+void codesh::ast::type::custom_type_ast_node::set_resolved(semantic_analyzer::type_symbol &symbol)
 {
-    return resolved_name;
+    resolved_symbol.emplace(symbol);
 }
 
 std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(const bool resolved) const
@@ -25,15 +28,9 @@ std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(const b
     );
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_type_ast_node::get_name() const
+const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_type_ast_node::get_unresolved_name() const
 {
     return name;
-}
-
-const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::type::custom_type_ast_node::
-    _get_resolved_name() const
-{
-    return resolved_name;
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const

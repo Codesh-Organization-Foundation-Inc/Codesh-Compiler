@@ -1,7 +1,9 @@
 #include "super_call_ast_node.h"
 
 #include "../../../../output/ir/code_block.h"
-#include "../../type_declaration/class_declaration_ast_node.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "../../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../../type/custom_type_ast_node.h"
 
 void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

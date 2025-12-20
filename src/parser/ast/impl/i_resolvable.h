@@ -6,12 +6,20 @@
 
 namespace codesh::ast::impl
 {
+class ast_node;
+}
 
+namespace codesh::ast::impl
+{
+
+/**
+ * @tparam T The symbol type. Must extend {@link i_resolveable_symbol}.
+ */
+template <typename T>
 class i_resolvable
 {
 protected:
-    [[nodiscard]] virtual std::optional<definition::fully_qualified_class_name> &_get_resolved_name() = 0;
-    [[nodiscard]] virtual const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const = 0;
+    [[nodiscard]] const virtual std::optional<std::reference_wrapper<T>> &_get_resolved() const = 0;
 
 public:
     virtual ~i_resolvable();
@@ -19,15 +27,23 @@ public:
     /**
      * @returns The unresolved type name
      */
-    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_name() const = 0;
+    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_unresolved_name() const = 0;
     /**
-     * @param resolved When true, behaves like {@link get_resolved_name}. When false, behaves like {@link get_name}
+     * @returns The resolved type name.
+     * Shorthand for {@code {@link i_resolveable_symbol<T>::get_full_name}}
+     */
+    [[nodiscard]] const definition::fully_qualified_class_name &get_resolved_name() const;
+
+    /**
+     * @param resolved When true, behaves like {@link get_resolved_name}.
+     * When false, behaves like {@link get_unresolved_name}
      */
     [[nodiscard]] const definition::fully_qualified_class_name &get_name(bool resolved) const;
 
-    //FIXME: This should be FQCN
-    void set_resolved_name(definition::fully_qualified_class_name resolved_name);
-    [[nodiscard]] const definition::fully_qualified_class_name &get_resolved_name() const;
+    virtual void set_resolved(T &symbol) = 0;
+    [[nodiscard]] T &get_resolved() const;
 };
 
 }
+
+#include "i_resolvable.tpp"

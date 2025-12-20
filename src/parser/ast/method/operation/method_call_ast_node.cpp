@@ -7,24 +7,21 @@
 #include "../util.h"
 #include "fmt/xchar.h"
 
-#include <any>
-
-std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::method::operation::method_call_ast_node::
-    _get_resolved_name()
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
+    method_call_ast_node::_get_resolved() const
 {
-    return resolved_name;
+    return resolved_symbol;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_name()
+void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
+{
+    resolved_symbol.emplace(symbol);
+}
+
+const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
     const
 {
     return name;
-}
-
-const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::method::operation::
-    method_call_ast_node::_get_resolved_name() const
-{
-    return resolved_name;
 }
 
 codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
@@ -38,22 +35,6 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::method::opera
     return name;
 }
 
-codesh::semantic_analyzer::method_symbol &codesh::ast::method::operation::
-    method_call_ast_node::get_referred_method() const
-{
-    if (!referred_method.has_value())
-    {
-        throw std::runtime_error("Attempted to get unresolved method call");
-    }
-
-    return referred_method.value();
-}
-
-void codesh::ast::method::operation::method_call_ast_node::set_referred_method(semantic_analyzer::method_symbol &method)
-{
-    referred_method.emplace(method);
-}
-
 std::string codesh::ast::method::operation::method_call_ast_node::generate_descriptor(const bool resolved) const
 {
     if (!resolved)
@@ -62,7 +43,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     }
 
 
-    const auto &method = get_referred_method();
+    const auto &method = get_resolved();
 
     std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
@@ -90,7 +71,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    const auto &method = get_referred_method();
+    const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
     if (!method.get_attributes().get_is_static())

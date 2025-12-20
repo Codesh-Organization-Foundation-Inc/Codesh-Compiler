@@ -9,13 +9,22 @@
 
 #include "../../../output/jvm_target/constant_pool.h"
 #include "../impl/i_resolvable.h"
-#include "../type/custom_type_ast_node.h"
 #include "../method/constructor_declaration_ast_node.h"
+
+namespace codesh::semantic_analyzer
+{
+class type_symbol;
+}
+namespace codesh::ast::type
+{
+class custom_type_ast_node;
+}
 
 namespace codesh::ast::type_decl
 {
 
-class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter, public impl::i_resolvable
+class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
+    public impl::i_resolvable<semantic_analyzer::type_symbol>
 {
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
@@ -23,7 +32,7 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     //TODO: Add implements
 
     const definition::fully_qualified_class_name name;
-    std::optional<definition::fully_qualified_class_name> resolved_name;
+    std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
     std::unique_ptr<attributes_ast_node> attributes;
 
@@ -33,11 +42,14 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<method::constructor_declaration_ast_node *> constructors;
 
 protected:
-    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
+    [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
+        const override;
 
 public:
     explicit type_declaration_ast_node(definition::fully_qualified_class_name name);
+    ~type_declaration_ast_node() override;
+
+    void set_resolved(semantic_analyzer::type_symbol &symbol) override;
 
     [[nodiscard]] const output::jvm_target::constant_pool &get_constant_pool() const;
     void set_constant_pool(output::jvm_target::constant_pool constant_pool);
@@ -46,8 +58,7 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    using i_resolvable::get_name;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
 
 
     [[nodiscard]] type::custom_type_ast_node *get_super_class() const;

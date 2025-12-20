@@ -5,6 +5,7 @@
 #include "../../defenition/definitions.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/method/method_declaration_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
 #include "../ir/code_block.h"
@@ -14,7 +15,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <fstream>
 
 #include <list>
 #include <ranges>
