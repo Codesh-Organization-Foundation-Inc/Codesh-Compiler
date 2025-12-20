@@ -35,7 +35,7 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     if (!result.has_value())
         return;
 
-    //TODO: Resolve aliases
+    //TODO: When calling non-static methods, also add 'this' as first argument
 }
 
 
@@ -103,7 +103,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto method_overloads_raw = type.resolve(method_call.get_unresolved_name().get_last_part());
+    const auto method_overloads_raw = type.resolve(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
         //TODO: Throw "name doesn't exist"

@@ -4,7 +4,6 @@
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
 #include "../semantic_context.h"
 #include "../util.h"
 
@@ -33,17 +32,7 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const ast::method::method_declaration_ast_node &method_decl)
 {
     const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
-
-    const auto &method = resolve_method_signature(new_context, method_decl, type);
-
-    // Resolve body statements
-    for (const auto &statement : method_decl.get_body())
-    {
-        if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(statement.get()))
-        {
-            method_call::resolve(new_context, *method_call, method);
-        }
-    }
+    resolve_method_signature(new_context, method_decl, type);
 }
 
 static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
