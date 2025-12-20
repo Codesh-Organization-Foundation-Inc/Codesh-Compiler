@@ -3,8 +3,6 @@
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/primitive_type_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../analyzer.h"
 #include "../semantic_context.h"
 #include "../util.h"
 
@@ -21,6 +19,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
     for (const auto &method_decl : type_decl.get_all_methods())
     {
         const std::string method_name = method_decl->get_last_name(false);
+        const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
 
         method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
 
@@ -41,7 +40,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
         if (!inserted)
         {
             //TODO: Print full method declaration
-            context.blasphemy_consumer(fmt::format(
+            new_context.blasphemy_consumer(fmt::format(
                 "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
                 method_name
             ));
