@@ -89,7 +89,7 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
     }
 
     if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-        context.lookup_countries,
+        context,
         *return_type,
         method_symbol.get_return_type()
     )) {
@@ -112,7 +112,7 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            context.lookup_countries,
+            context,
             *custom_param,
             *method_symbol.get_parameter_types()[i]
         )) {
@@ -136,7 +136,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            context.lookup_countries,
+            context,
             *custom_param
         )) {
             context.blasphemy_consumer(fmt::format(

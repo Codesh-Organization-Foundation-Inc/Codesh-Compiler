@@ -48,21 +48,26 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
 
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
-    resolve_from_imports(const semantic_context &context,
-        const std::vector<std::string>::const_iterator fqcn_start,
-        const std::vector<std::string>::const_iterator fqcn_end)
+    resolve_from_imports(const semantic_context &context, const definition::fully_qualified_class_name &full_name,
+                         const std::optional<std::vector<std::string>::const_iterator> name_end,
+                         const std::optional<std::vector<std::string>::const_iterator> name_start)
 {
     for (const auto &country : context.lookup_countries)
     {
          const auto result = resolve_method_from_scope_container(
              country,
-             fqcn_start,
-             fqcn_end
+             name_start.value_or(full_name.get_parts().begin()),
+             name_end.value_or(full_name.get_parts().end())
          );
 
         if (result.has_value())
             return result.value();
     }
+
+    context.blasphemy_consumer(fmt::format(
+        "השם {} אינו קיים",
+        full_name.join(" ל־")
+    ));
 
     return std::nullopt;
 }

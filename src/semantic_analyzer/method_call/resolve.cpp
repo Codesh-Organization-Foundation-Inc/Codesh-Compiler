@@ -57,8 +57,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     else
     {
         const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
-            context,
-            name.get_parts().begin(),
+            context, name,
             // Ignore the last part of the name, which points to the method overloads.
             // get_called_method_as_symbol already handles it.
             name.get_parts().end() - 1
