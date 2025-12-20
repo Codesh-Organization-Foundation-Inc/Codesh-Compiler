@@ -65,7 +65,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     }
 
     context.blasphemy_consumer(fmt::format(
-        "השם {} אינו קיים",
+        "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
         full_name.join(" ל־")
     ));
 

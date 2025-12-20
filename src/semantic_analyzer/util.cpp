@@ -20,7 +20,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     if (!result)
     {
         context.blasphemy_consumer(fmt::format(
-            "{} אינו סוג",
+            "{} אינו עצם",
             full_name.join(" ל־")
         ));
         return std::nullopt;

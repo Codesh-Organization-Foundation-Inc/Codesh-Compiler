@@ -5,7 +5,6 @@
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../semantic_context.h"
 #include "../util.h"
 
@@ -88,16 +87,11 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
         return;
     }
 
-    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+    codesh::semantic_analyzer::util::resolve_custom_type_node(
         context,
         *return_type,
         method_symbol.get_return_type()
-    )) {
-        context.blasphemy_consumer(fmt::format(
-            "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ {}",
-            return_type->get_unresolved_name().join()
-        ));
-    }
+    );
 }
 
 static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
@@ -105,22 +99,18 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     size_t i = 0;
+
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
         if (!custom_param)
             continue;
 
-        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+        codesh::semantic_analyzer::util::resolve_custom_type_node(
             context,
             *custom_param,
             *method_symbol.get_parameter_types()[i]
-        )) {
-            context.blasphemy_consumer(fmt::format(
-                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה {}",
-                custom_param->get_unresolved_name().join()
-            ));
-        }
+        );
 
         ++i;
     }
@@ -129,20 +119,30 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    // Skip erroring the first parameters_count variables, as they are a copy of the parameters.
+    // This avoids double error reporting.
+    const size_t parameters_count = method_symbol.get_parameter_types().size();
+    size_t i = 0;
+
     for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
     {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
-        if (!custom_param)
+        auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        if (!var_type)
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
             context,
-            *custom_param
+            *var_type
         )) {
-            context.blasphemy_consumer(fmt::format(
-                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                custom_param->get_unresolved_name().join()
-            ));
+            if (i >= parameters_count)
+            {
+                context.blasphemy_consumer(fmt::format(
+                    "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
+                    var_type->get_unresolved_name().join()
+                ));
+            }
         }
+
+        ++i;
     }
 }

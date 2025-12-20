@@ -64,14 +64,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         );
 
         if (!type_symbol.has_value())
-        {
-            context.blasphemy_consumer(fmt::format(
-                "השם {} אינו קיים",
-                name.join(" ל־")
-            ));
-
             return std::nullopt;
-        }
 
         // A method must be contained in a type
         parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
