@@ -89,7 +89,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
             switch (prim_arg->get_type())
             {
             case definition::primitive_type::INTEGER: {
-                containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
+                containing_block.add_instruction(std::make_unique<output::ir::load_int_constant_instruction>(
                     static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value(), // NOLINT(*-pro-type-static-cast-downcast)
                     cp
                 ));
@@ -128,6 +128,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
         output::ir::invokation_type::STATIC,
-        method_cpi
+        method_cpi,
+        arguments.size()
     ));
 }

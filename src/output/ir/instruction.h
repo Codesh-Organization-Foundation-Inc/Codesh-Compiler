@@ -96,17 +96,49 @@ enum class invokation_type
 };
 
 
+constexpr unsigned char operator*(const opcode op)
+{
+    return static_cast<unsigned char>(op);
+}
+constexpr unsigned char operator*(const instruction_type instr_type)
+{
+    return static_cast<unsigned char>(instr_type);
+}
+
+
+struct instruction_container
+{
+    std::vector<unsigned char> opcodes;
+
+    /**
+     * Signals the change in stack size this instruction commits.
+     */
+    int size_delta;
+
+    instruction_container(std::vector<unsigned char> opcodes, int size_delta);
+    instruction_container(unsigned char opcode, int size_delta);
+};
+
 class instruction
 {
-    const opcode _opcode;
-
 public:
-    explicit instruction(opcode _opcode = opcode::NOP);
     virtual ~instruction();
 
-    [[nodiscard]] opcode get_opcode() const;
+    virtual void emit(std::list<instruction_container> &collector) const = 0;
+};
 
-    virtual void emit(std::list<unsigned char> &collector) const;
+class simple_instruction : public instruction
+{
+    const opcode _opcode;
+    const int stack_delta;
+
+public:
+    simple_instruction(opcode _opcode, int stack_delta);
+
+    [[nodiscard]] opcode get_opcode() const;
+    [[nodiscard]] int get_stack_delta() const;
+
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 class typed_instruction : public instruction
@@ -114,14 +146,14 @@ class typed_instruction : public instruction
     instruction_type type;
 
 public:
-    explicit typed_instruction(instruction_type type, opcode _opcode = opcode::NOP);
+    explicit typed_instruction(instruction_type type);
 
     [[nodiscard]] instruction_type get_instruction_type() const;
 };
 
 
 
-class nop_instruction final : public instruction
+class nop_instruction final : public simple_instruction
 {
 public:
     nop_instruction();
@@ -140,12 +172,12 @@ public:
 
     [[nodiscard]] unsigned char get_lvt_index() const;
 
-    void emit(std::list<unsigned char> &collector) const override;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 
 //TODO: Make typed version
-class return_instruction final : public instruction
+class return_instruction final : public simple_instruction
 {
 public:
     return_instruction();
@@ -156,24 +188,25 @@ class invoke_instruction final : public instruction
 {
     const invokation_type type;
     const int method_cp_index;
+    const int parameters_count;
 
 public:
-    invoke_instruction(invokation_type type, int method_cp_index);
+    invoke_instruction(invokation_type type, int method_cp_index, int parameters_count);
 
-    void emit(std::list<unsigned char> &collector) const override;
+    void emit(std::list<instruction_container> &collector) const override;
 
     [[nodiscard]] int get_method_cp_index() const;
 };
 
-class load_constant_instruction final : public instruction
+class load_int_constant_instruction final : public instruction
 {
     const int constant;
     const jvm_target::constant_pool &fallback_constant_pool;
 
 public:
-    load_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
+    load_int_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
 
-    void emit(std::list<unsigned char> &collector) const override;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 class load_constant_pool_instruction final : public instruction
@@ -183,7 +216,7 @@ class load_constant_pool_instruction final : public instruction
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
 
-    void emit(std::list<unsigned char> &collector) const override;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 }

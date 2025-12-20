@@ -34,6 +34,7 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
         output::ir::invokation_type::SPECIAL,
-        super_constructor_cp_index
+        super_constructor_cp_index,
+        0
     ));
 }
