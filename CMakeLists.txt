@@ -179,6 +179,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/builtins.h
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/reference_value_ast_node.cpp
+        src/parser/ast/var_reference/reference_value_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

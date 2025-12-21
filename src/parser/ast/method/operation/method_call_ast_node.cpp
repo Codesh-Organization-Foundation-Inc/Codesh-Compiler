@@ -54,13 +54,13 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     return util::generate_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
 }
 
-const std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
+const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments() const
 {
     return arguments;
 }
 
-std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
+std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments()
 {
     return arguments;

@@ -85,7 +85,7 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
     auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID);
 
     // Make the method symbol point to the original PrintStream's println
-    auto &emor_symbol = emor_overloads.add_symbol(
+    emor_overloads.add_symbol(
         "(Ljava/lang/String;)V",
         std::make_unique<codesh::semantic_analyzer::method_symbol>(
             &emor_overloads,
@@ -98,5 +98,5 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
 
             nullptr
         )
-    ).first.get();
+    );
 }

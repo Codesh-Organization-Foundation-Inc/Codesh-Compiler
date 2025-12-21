@@ -9,3 +9,8 @@ const codesh::ast::type::type_ast_node *codesh::ast::var_reference::value_ast_no
 {
     return type.get();
 }
+
+void codesh::ast::var_reference::value_ast_node::set_type(std::unique_ptr<type::type_ast_node> type)
+{
+    this->type = std::move(type);
+}

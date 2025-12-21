@@ -35,7 +35,15 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     if (!result.has_value())
         return;
 
-    //TODO: When calling non-static methods, also add 'this' as first argument
+    //TODO: When calling non-static methods, also add 'this' as the first argument
+
+
+    //TODO: Remove this once Talmud Codesh implements this method by itself:
+    // Manually pass System.in to every מסוף ל־אמר call
+    // if (method_call.get_unresolved_name().join() == "מסוף/אמר")
+    // {
+    //     method_call.get_arguments().
+    // }
 }
 
 

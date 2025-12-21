@@ -8,7 +8,6 @@
 
 #include <list>
 #include <optional>
-#include <stack>
 #include <unordered_map>
 
 namespace codesh::semantic_analyzer
