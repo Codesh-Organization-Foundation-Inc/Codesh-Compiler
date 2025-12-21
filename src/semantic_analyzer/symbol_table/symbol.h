@@ -64,7 +64,7 @@ public:
 };
 
 /**
- * @tparam T The producing node type. Must extend {@link ast_node}.
+ * @tparam T The producing node type. Must extend @link ast_node \endlink.
  */
 template <typename T>
 class i_resolveable_symbol
@@ -142,15 +142,19 @@ public:
 };
 
 //TODO: Attach ast node
+//TODO: Make resolveable
 class field_symbol final : public variable_symbol
 {
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const definition::fully_qualified_class_name full_name;
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
-    field_symbol(symbol *parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
+    field_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::unique_ptr<ast::type::type_ast_node> type, ast::impl::ast_node *producing_node = nullptr);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+    [[nodiscard]] ast::type_decl::attributes_ast_node &get_attributes() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
 
 //TODO: Attach ast node
