@@ -10,7 +10,7 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
 // static const std::string ALIAS_INPUT_STREAM = "זרם־קליטה";
-static constexpr std::string ALIAS_STD_IN = "שמע";
+static constexpr std::string ALIAS_STD_OUT = "פלט";
 
 static constexpr std::string ALIAS_KTUVIM = "כתובים";
 static constexpr std::string CLASS_MASSOF = "מסוף";
@@ -64,21 +64,20 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     ).first.get();
 
 
-    // Add System.in
+    // Add System.out
     auto is_attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
     is_attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     is_attributes->set_is_final(true);
     is_attributes->set_is_static(true);
 
     massof_symbol.add_symbol(
-        ALIAS_STD_IN,
+        ALIAS_STD_OUT,
         std::make_unique<codesh::semantic_analyzer::field_symbol>(
             &massof_symbol,
-            "java/lang/System/in",
+            "java/lang/System/out",
 
             std::move(is_attributes),
-            // std::make_unique<codesh::ast::type::custom_type_ast_node>(ALIAS_INPUT_STREAM.data())
-            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/InputStream")
+            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/PrintStream")
         )
     );
 
