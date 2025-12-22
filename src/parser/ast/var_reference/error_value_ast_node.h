@@ -8,7 +8,7 @@ namespace codesh::ast::var_reference
 class error_value_ast_node : public value_ast_node
 {
 public:
-    error_value_ast_node();
+    [[nodiscard]] type::type_ast_node *get_type() const override;
 };
 
 }

@@ -9,10 +9,13 @@ namespace codesh::ast::var_reference
 template <typename T>
 class evaluable_ast_node : public value_ast_node
 {
+    const std::unique_ptr<type::type_ast_node> type;
     T value;
 
 public:
     evaluable_ast_node(std::unique_ptr<type::type_ast_node> type, T value);
+
+    [[nodiscard]] type::type_ast_node *get_type() const override;
 
     /**
      * @return The value.
