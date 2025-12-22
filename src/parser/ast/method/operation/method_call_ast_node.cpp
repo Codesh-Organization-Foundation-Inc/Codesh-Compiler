@@ -97,8 +97,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
         )
     );
 
+
+    //FIXME: Specifically make sout calls virtual because no non-static support yet exists
+    const bool is_sout = get_unresolved_name().join() == "מסוף/אמר";
+
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
-        output::ir::invokation_type::STATIC,
+        is_sout ? output::ir::invokation_type::VIRTUAL : output::ir::invokation_type::STATIC,
         method_cpi,
         arguments.size()
     ));
