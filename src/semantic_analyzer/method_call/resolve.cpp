@@ -1,6 +1,8 @@
 #include "resolve.h"
 
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
+#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 #include "../semantic_context.h"
 #include "../symbol_table/symbol_table.h"
 #include "../util.h"
@@ -40,10 +42,15 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
     // Manually pass System.in to every מסוף ל־אמר call
-    // if (method_call.get_unresolved_name().join() == "מסוף/אמר")
-    // {
-    //     method_call.get_arguments().
-    // }
+    if (method_call.get_unresolved_name().join() == "מסוף/אמר")
+    {
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>("שמע");
+        system_in_reference->set_resolved(
+            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "שמע")->get()) // NOLINT(*-pro-type-static-cast-downcast)
+        );
+
+        method_call.get_arguments().push_front(std::move(system_in_reference));
+    }
 }
 
 
