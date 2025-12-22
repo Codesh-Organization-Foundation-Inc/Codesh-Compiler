@@ -70,6 +70,8 @@ enum class opcode : unsigned char
 
     RETURN = 0xB1,
 
+    GET_STATIC = 0xB2,
+
     INVOKE_DYNAMIC = 0xBA,
     INVOKE_INTERFACE = 0xB9,
     INVOKE_SPECIAL = 0xB7,
@@ -215,6 +217,16 @@ class load_constant_pool_instruction final : public instruction
 
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class get_static_instruction final : public instruction
+{
+    const int constant_pool_index;
+
+public:
+    explicit get_static_instruction(int constant_pool_index);
 
     void emit(std::list<instruction_container> &collector) const override;
 };
