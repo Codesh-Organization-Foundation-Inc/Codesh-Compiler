@@ -44,9 +44,9 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     // Manually pass System.in to every מסוף ל־אמר call
     if (method_call.get_unresolved_name().join() == "מסוף/אמר")
     {
-        auto system_in_reference = std::make_unique<variable_reference_ast_node>("שמע");
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>("מסוף/שמע");
         system_in_reference->set_resolved(
-            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "שמע")->get()) // NOLINT(*-pro-type-static-cast-downcast)
+            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "מסוף/שמע")->get()) // NOLINT(*-pro-type-static-cast-downcast)
         );
 
         method_call.get_arguments().push_front(std::move(system_in_reference));

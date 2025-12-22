@@ -9,8 +9,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
-static void add_system_in(codesh::semantic_analyzer::country_symbol &country);
-
+// static const std::string ALIAS_INPUT_STREAM = "זרם־קליטה";
 static constexpr std::string ALIAS_STD_IN = "שמע";
 
 static constexpr std::string ALIAS_KTUVIM = "כתובים";
@@ -23,29 +22,8 @@ void codesh::semantic_analyzer::builtins::add_builtins(const symbol_table &table
     //TODO: Properly wrap in countries
     country_symbol &country = table.resolve_country("").value();
 
-    add_system_in(country);
-
     add_alias_ktuvim(country);
     add_class_massof(country);
-}
-
-static void add_system_in(codesh::semantic_analyzer::country_symbol &country)
-{
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
-    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
-    attributes->set_is_final(true);
-    attributes->set_is_static(true);
-
-    country.add_symbol(
-        ALIAS_STD_IN,
-        std::make_unique<codesh::semantic_analyzer::field_symbol>(
-            &country,
-            "java/lang/System/in",
-
-            std::move(attributes),
-            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/InputStream")
-        )
-    );
 }
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
@@ -84,6 +62,25 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
             nullptr
         )
     ).first.get();
+
+
+    // Add System.in
+    auto is_attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    is_attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    is_attributes->set_is_final(true);
+    is_attributes->set_is_static(true);
+
+    massof_symbol.add_symbol(
+        ALIAS_STD_IN,
+        std::make_unique<codesh::semantic_analyzer::field_symbol>(
+            &massof_symbol,
+            "java/lang/System/in",
+
+            std::move(is_attributes),
+            // std::make_unique<codesh::ast::type::custom_type_ast_node>(ALIAS_INPUT_STREAM.data())
+            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/InputStream")
+        )
+    );
 
 
     // Functions
