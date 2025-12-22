@@ -55,6 +55,7 @@ class constant_pool
         defs::cp_info_ptr_hash, defs::cp_info_ptr_equal
     > literals_lookup_map;
 
+    //TODO: Move these to the actual nodes as an interface
     void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
     void traverse_method_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
     void traverse_method_body(const ast::method::method_declaration_ast_node &method_decl);

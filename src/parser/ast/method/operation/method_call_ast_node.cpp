@@ -2,9 +2,7 @@
 
 #include "../../../../output/ir/code_block.h"
 #include "../../../../semantic_analyzer/symbol_table/symbol.h"
-#include "../../type/primitive_type_ast_node.h"
 #include "../../var_reference/evaluable_ast_node.h"
-#include "../../var_reference/variable_reference_ast_node.h"
 #include "../util.h"
 #include "fmt/xchar.h"
 
@@ -81,61 +79,11 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
         throw std::runtime_error("Calling non-static methods not yet supported");
     }
 
-
-    // Load parameters
+    // Load arguments
     for (const auto &argument : arguments)
     {
-        if (const auto prim_arg = dynamic_cast<const type::primitive_type_ast_node *>(argument->get_type()))
-        {
-            switch (prim_arg->get_type())
-            {
-            case definition::primitive_type::INTEGER: {
-                containing_block.add_instruction(std::make_unique<output::ir::load_int_constant_instruction>(
-                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value(), // NOLINT(*-pro-type-static-cast-downcast)
-                    cp
-                ));
-
-                break;
-            }
-
-            default: throw std::runtime_error("Unsupported primitive type");
-            }
-        }
-
-        else if (const auto ref_arg = dynamic_cast<const variable_reference_ast_node *>(argument.get()))
-        {
-            //TODO: Expand beyond static
-            containing_block.add_instruction(std::make_unique<output::ir::get_static_instruction>(
-                cp.get_fieldref_index(
-                    cp.get_class_index(
-                        cp.get_class_index(cp.get_utf8_index(ref_arg->get_resolved_name().omit_last().join()))
-                    ),
-
-                    cp.get_name_and_type_index(
-                        cp.get_utf8_index(ref_arg->get_last_name(true)),
-                        cp.get_utf8_index(ref_arg->get_resolved().get_type()->generate_descriptor())
-                    )
-                )
-            ));
-        }
-
-        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
-        {
-            const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
-                argument.get()
-            )->get_value();
-
-             containing_block.add_instruction(std::make_unique<output::ir::load_constant_pool_instruction>(
-                 cp.get_string_index(cp.get_utf8_index(string))
-             ));
-        }
-
-        else
-        {
-            throw std::runtime_error("Unsupported parameter type");
-        }
+        argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
-
 
     // Call method
     const int method_cpi = cp.get_methodref_index(

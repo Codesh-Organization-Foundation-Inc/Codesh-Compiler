@@ -22,10 +22,14 @@ protected:
     _get_resolved() const override;
 
 public:
+    explicit variable_reference_ast_node(codesh::definition::fully_qualified_class_name name);
+
     [[nodiscard]] const codesh::definition::fully_qualified_class_name &get_unresolved_name() const override;
     void set_resolved(codesh::semantic_analyzer::field_symbol &symbol) override;
 
     [[nodiscard]] codesh::ast::type::type_ast_node *get_type() const override;
 
-    explicit variable_reference_ast_node(codesh::definition::fully_qualified_class_name name);
+    void emit_ir(codesh::output::ir::code_block &containing_block,
+                 const codesh::semantic_analyzer::symbol_table &symbol_table,
+                 const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl) const override;
 };
