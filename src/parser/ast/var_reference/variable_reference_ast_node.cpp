@@ -7,7 +7,7 @@ variable_reference_ast_node::variable_reference_ast_node(codesh::definition::ful
 {
 }
 
-const std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> &variable_reference_ast_node::
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::field_symbol>> &variable_reference_ast_node::
     _get_resolved() const
 {
     return resolved_symbol;
@@ -18,7 +18,7 @@ const codesh::definition::fully_qualified_class_name &variable_reference_ast_nod
     return name;
 }
 
-void variable_reference_ast_node::set_resolved(codesh::semantic_analyzer::variable_symbol &symbol)
+void variable_reference_ast_node::set_resolved(codesh::semantic_analyzer::field_symbol &symbol)
 {
     resolved_symbol.emplace(symbol);
 }

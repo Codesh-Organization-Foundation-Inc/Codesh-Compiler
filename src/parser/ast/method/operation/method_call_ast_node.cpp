@@ -4,6 +4,7 @@
 #include "../../../../semantic_analyzer/symbol_table/symbol.h"
 #include "../../type/primitive_type_ast_node.h"
 #include "../../var_reference/evaluable_ast_node.h"
+#include "../../var_reference/variable_reference_ast_node.h"
 #include "../util.h"
 #include "fmt/xchar.h"
 
@@ -51,7 +52,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
         param_types.emplace_back(*param);
     }
 
-    return util::generate_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
+    return util::generate_method_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
 }
 
 const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
@@ -101,7 +102,24 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
             }
         }
 
-        if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
+        else if (const auto ref_arg = dynamic_cast<const variable_reference_ast_node *>(argument.get()))
+        {
+            //TODO: Expand beyond static
+            containing_block.add_instruction(std::make_unique<output::ir::get_static_instruction>(
+                cp.get_fieldref_index(
+                    cp.get_class_index(
+                        cp.get_class_index(cp.get_utf8_index(ref_arg->get_resolved_name().omit_last().join()))
+                    ),
+
+                    cp.get_name_and_type_index(
+                        cp.get_utf8_index(ref_arg->get_last_name(true)),
+                        cp.get_utf8_index(ref_arg->get_resolved().get_type()->generate_descriptor())
+                    )
+                )
+            ));
+        }
+
+        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
         {
             const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
                 argument.get()
@@ -110,6 +128,11 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
              containing_block.add_instruction(std::make_unique<output::ir::load_constant_pool_instruction>(
                  cp.get_string_index(cp.get_utf8_index(string))
              ));
+        }
+
+        else
+        {
+            throw std::runtime_error("Unsupported parameter type");
         }
     }
 

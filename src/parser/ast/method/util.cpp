@@ -8,7 +8,7 @@
         const std::vector<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types);
 
 
-std::string codesh::ast::method::util::generate_descriptor(
+std::string codesh::ast::method::util::generate_method_descriptor(
         const bool resolved, const type::type_ast_node &return_type,
         const std::vector<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes)
