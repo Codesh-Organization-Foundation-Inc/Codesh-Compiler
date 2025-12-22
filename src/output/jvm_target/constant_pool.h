@@ -74,6 +74,7 @@ class constant_pool
     int goc_methodref_info(int class_index, int name_and_type_index);
     int goc_name_and_type_info(int name_index, int descriptor_index);
     int goc_class_info(int name_index);
+    int goc_fieldref_info(int class_index, int name_and_type_index);
 
 
     static std::unique_ptr<defs::CONSTANT_Utf8_info> utf8_info(const std::string &utf8);
@@ -83,6 +84,7 @@ class constant_pool
     static std::unique_ptr<defs::CONSTANT_Methodref_info> methodref_info(int class_index, int name_and_type_index);
     static std::unique_ptr<defs::CONSTANT_NameAndType_info> name_and_type_info(int name_index, int descriptor_index);
     static std::unique_ptr<defs::CONSTANT_Class_info> class_info(int name_index);
+    static std::unique_ptr<defs::CONSTANT_Fieldref_info> fieldref_info(int class_index, int name_and_type_index);
 
 public:
     /**
@@ -100,6 +102,7 @@ public:
     [[nodiscard]] int get_methodref_index(int class_index, int name_and_type_index) const;
     [[nodiscard]] int get_name_and_type_index(int name_index, int descriptor_index) const;
     [[nodiscard]] int get_class_index(int name_index) const;
+    [[nodiscard]] int get_fieldref_index(int class_index, int name_and_type_index) const;
 
     /**
      * @return All string literals by the order of their index

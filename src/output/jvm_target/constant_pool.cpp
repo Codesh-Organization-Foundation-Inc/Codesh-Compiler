@@ -175,7 +175,7 @@ int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_in
     return goc_constant(string_info(utf8_index));
 }
 
-int codesh::output::jvm_target::constant_pool::goc_integer_info(int num)
+int codesh::output::jvm_target::constant_pool::goc_integer_info(const int num)
 {
     return goc_constant(integer_info(num));
 }
@@ -191,6 +191,10 @@ int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int 
 int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
 {
     return goc_constant(class_info(name_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_fieldref_info(const int class_index, const int name_and_type_index)
+{
+    return goc_constant(fieldref_info(class_index, name_and_type_index));
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
@@ -262,6 +266,16 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
     return const_class;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh::output::jvm_target::constant_pool::
+    fieldref_info(const int class_index, const int name_and_type_index)
+{
+    auto const_fieldref = std::make_unique<defs::CONSTANT_Fieldref_info>();
+
+    util::put_int_bytes(const_fieldref->class_index, 2, class_index);
+    util::put_int_bytes(const_fieldref->name_and_type_index, 2, name_and_type_index);
+
+    return const_fieldref;
+}
 
 int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &literal) const
 {
@@ -304,6 +318,11 @@ int codesh::output::jvm_target::constant_pool::get_class_index(const int name_in
     return get_index(*class_info(name_index));
 }
 
+int codesh::output::jvm_target::constant_pool::get_fieldref_index(const int class_index,
+                                                                  const int name_and_type_index) const
+{
+    return get_index(*fieldref_info(class_index, name_and_type_index));
+}
 
 std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_info>>
     codesh::output::jvm_target::constant_pool::get_literals() const
