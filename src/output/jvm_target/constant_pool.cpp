@@ -13,6 +13,7 @@
 #include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "../../parser/ast/var_reference/evaluable_ast_node.h"
+#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
@@ -137,11 +138,23 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
 
             default: throw std::runtime_error("Unsupported primitive type");
             }
-
-            continue;
         }
 
-        if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
+        else if (const auto ref_arg = dynamic_cast<const variable_reference_ast_node *>(argument.get()))
+        {
+            goc_fieldref_info(
+                goc_class_info(
+                    goc_class_info(goc_utf8_info(ref_arg->get_resolved_name().omit_last().join()))
+                ),
+
+                goc_name_and_type_info(
+                    goc_utf8_info(ref_arg->get_last_name(true)),
+                    goc_utf8_info(ref_arg->get_resolved().get_type()->generate_descriptor())
+                )
+            );
+        }
+
+        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
         {
             const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
                 argument.get()
