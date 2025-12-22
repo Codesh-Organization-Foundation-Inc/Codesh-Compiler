@@ -143,9 +143,7 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
         else if (const auto ref_arg = dynamic_cast<const variable_reference_ast_node *>(argument.get()))
         {
             goc_fieldref_info(
-                goc_class_info(
-                    goc_class_info(goc_utf8_info(ref_arg->get_resolved_name().omit_last().join()))
-                ),
+                goc_class_info(goc_utf8_info(ref_arg->get_resolved_name().omit_last().join())),
 
                 goc_name_and_type_info(
                     goc_utf8_info(ref_arg->get_last_name(true)),

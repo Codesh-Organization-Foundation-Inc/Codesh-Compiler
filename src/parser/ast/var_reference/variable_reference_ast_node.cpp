@@ -41,9 +41,7 @@ void variable_reference_ast_node::emit_ir(
     //TODO: Expand beyond static
     containing_block.add_instruction(std::make_unique<codesh::output::ir::get_static_instruction>(
         cp.get_fieldref_index(
-            cp.get_class_index(
-                cp.get_class_index(cp.get_utf8_index(get_resolved_name().omit_last().join()))
-            ),
+            cp.get_class_index(cp.get_utf8_index(get_resolved_name().omit_last().join())),
 
             cp.get_name_and_type_index(
                 cp.get_utf8_index(get_last_name(true)),
