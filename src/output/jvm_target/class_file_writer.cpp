@@ -97,6 +97,11 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
         {
             write_bytes(out, string_info->string_index, 2);
         }
+        else if (const auto fieldref_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Fieldref_info *>(&info.get()))
+        {
+            write_bytes(out, fieldref_info->class_index, 2);
+            write_bytes(out, fieldref_info->name_and_type_index, 2);
+        }
         else
         {
             throw std::runtime_error("Unknown constant pool type");

@@ -160,7 +160,6 @@ add_executable(Codesh_Compiler
         src/parser/ast/method/operation/method_call_ast_node.h
         src/defenition/fully_qualified_class_name.cpp
         src/defenition/fully_qualified_class_name.h
-        src/parser/ast/var_reference/value_ast_node.cpp
         src/blasphemy/details.h
         src/blasphemy/details.cpp
         src/semantic_analyzer/method_call/resolve.cpp
@@ -179,6 +178,8 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/builtins.h
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/variable_reference_ast_node.cpp
+        src/parser/ast/var_reference/variable_reference_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

@@ -1,6 +1,8 @@
 #include "resolve.h"
 
 #include "../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
+#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 #include "../semantic_context.h"
 #include "../symbol_table/symbol_table.h"
 #include "../util.h"
@@ -35,7 +37,20 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     if (!result.has_value())
         return;
 
-    //TODO: When calling non-static methods, also add 'this' as first argument
+    //TODO: When calling non-static methods, also add 'this' as the first argument
+
+
+    //TODO: Remove this once Talmud Codesh implements this method by itself:
+    // Manually pass System.out to every מסוף ל־אמר call
+    if (method_call.get_unresolved_name().join() == "מסוף/אמר")
+    {
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>("מסוף/פלט");
+        system_in_reference->set_resolved(
+            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "מסוף/פלט")->get()) // NOLINT(*-pro-type-static-cast-downcast)
+        );
+
+        method_call.get_arguments().push_front(std::move(system_in_reference));
+    }
 }
 
 

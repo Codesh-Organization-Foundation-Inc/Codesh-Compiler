@@ -18,8 +18,8 @@ class fully_qualified_class_name
 
 public:
     fully_qualified_class_name();
-    // ReSharper disable once CppNonExplicitConvertingConstructor
 
+    // ReSharper disable once CppNonExplicitConvertingConstructor
     fully_qualified_class_name(const char *binary_fqcn); // NOLINT(*-explicit-constructor)
     explicit fully_qualified_class_name(std::string part);
 

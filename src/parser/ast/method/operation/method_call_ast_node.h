@@ -8,12 +8,13 @@
 #include "../../var_reference/value_ast_node.h"
 
 #include <memory>
-#include <vector>
+#include <deque>
 
 namespace codesh::semantic_analyzer
 {
 class method_symbol;
 }
+
 namespace codesh::ast::method::operation
 {
 
@@ -24,7 +25,7 @@ class method_call_ast_node : public impl::ir_emitting_ast_node,
     definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
-    std::vector<std::unique_ptr<var_reference::value_ast_node>> arguments;
+    std::deque<std::unique_ptr<var_reference::value_ast_node>> arguments;
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
@@ -42,8 +43,8 @@ public:
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
 
-    [[nodiscard]] const std::vector<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
-    [[nodiscard]] std::vector<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
+    [[nodiscard]] const std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
+    [[nodiscard]] std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
 
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

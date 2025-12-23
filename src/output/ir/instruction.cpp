@@ -190,3 +190,18 @@ void codesh::output::ir::load_constant_pool_instruction::emit(std::list<instruct
         1
     );
 }
+
+codesh::output::ir::get_static_instruction::get_static_instruction(int constant_pool_index) :
+    constant_pool_index(constant_pool_index)
+{
+}
+
+void codesh::output::ir::get_static_instruction::emit(std::list<instruction_container> &collector) const
+{
+    std::vector<unsigned char> opcodes(3);
+
+    opcodes[0] = *opcode::GET_STATIC;
+    util::put_int_bytes(opcodes.data() + 1, 2, constant_pool_index);
+
+    collector.emplace_back(std::move(opcodes), 1);
+}

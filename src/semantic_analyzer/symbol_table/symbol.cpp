@@ -128,8 +128,9 @@ const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::ty
 }
 
 codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol *const parent_symbol, const symbol_type _symbol_type,
-                                                            std::unique_ptr<ast::type::type_ast_node> type)
-    : symbol(parent_symbol, _symbol_type), type(std::move(type))
+                                                            std::unique_ptr<ast::type::type_ast_node> type) :
+    symbol(parent_symbol, _symbol_type),
+    type(std::move(type))
 {
 }
 
@@ -139,18 +140,24 @@ codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::ge
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(symbol *const parent_symbol,
-                                                      std::vector<output::jvm_target::access_flag> access_flags,
+                                                      definition::fully_qualified_class_name full_name,
+                                                      std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
                                                       std::unique_ptr<ast::type::type_ast_node> type,
                                                       ast::impl::ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::FIELD, std::move(type)),
-    access_flags(std::move(access_flags))
+    full_name(std::move(full_name)),
+    attributes(std::move(attributes))
 {
 }
 
-const std::vector<codesh::output::jvm_target::access_flag> &codesh::semantic_analyzer::field_symbol::get_access_flags()
-    const
+codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::field_symbol::get_attributes() const
 {
-    return access_flags;
+    return *attributes;
+}
+
+const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::field_symbol::get_full_name() const
+{
+    return full_name;
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *const parent_symbol,

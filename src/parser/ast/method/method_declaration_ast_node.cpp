@@ -20,7 +20,7 @@ codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    return util::generate_descriptor(resolved, *return_type, parameter_types, *attributes);
+    return util::generate_method_descriptor(resolved, *return_type, parameter_types, *attributes);
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_parameters_descriptor(const bool resolved) const

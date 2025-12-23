@@ -8,6 +8,7 @@
 #include "ast/type/primitive_type_ast_node.h"
 #include "ast/var_reference/error_value_ast_node.h"
 #include "ast/var_reference/evaluable_ast_node.h"
+#include "ast/var_reference/variable_reference_ast_node.h"
 
 #include <functional>
 
@@ -252,9 +253,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util
         definition::fully_qualified_class_name value;
         parse_fqcn(tokens, value);
 
-        eval_ast_node = std::make_unique<ast::var_reference::value_ast_node>(
-            std::make_unique<ast::type::custom_type_ast_node>(value)
-        );
+        eval_ast_node = std::make_unique<variable_reference_ast_node>(value);
 
         break;
     }

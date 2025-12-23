@@ -9,6 +9,9 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
+// static const std::string ALIAS_INPUT_STREAM = "זרם־קליטה";
+static constexpr std::string ALIAS_STD_OUT = "פלט";
+
 static constexpr std::string ALIAS_KTUVIM = "כתובים";
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
@@ -16,6 +19,7 @@ static constexpr std::string METHOD_EMOR = "אמר";
 
 void codesh::semantic_analyzer::builtins::add_builtins(const symbol_table &table)
 {
+    //TODO: Properly wrap in countries
     country_symbol &country = table.resolve_country("").value();
 
     add_alias_ktuvim(country);
@@ -60,6 +64,24 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     ).first.get();
 
 
+    // Add System.out
+    auto is_attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    is_attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    is_attributes->set_is_final(true);
+    is_attributes->set_is_static(true);
+
+    massof_symbol.add_symbol(
+        ALIAS_STD_OUT,
+        std::make_unique<codesh::semantic_analyzer::field_symbol>(
+            &massof_symbol,
+            "java/lang/System/out",
+
+            std::move(is_attributes),
+            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/PrintStream")
+        )
+    );
+
+
     // Functions
     add_method_emor(massof_symbol);
 }
@@ -85,7 +107,7 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
     auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID);
 
     // Make the method symbol point to the original PrintStream's println
-    auto &emor_symbol = emor_overloads.add_symbol(
+    emor_overloads.add_symbol(
         "(Ljava/lang/String;)V",
         std::make_unique<codesh::semantic_analyzer::method_symbol>(
             &emor_overloads,
@@ -98,5 +120,5 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
 
             nullptr
         )
-    ).first.get();
+    );
 }
