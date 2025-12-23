@@ -1,11 +1,9 @@
 #pragma once
 
 #include "../../defenition/basad_type.h"
-#include "../../defenition/definitions.h"
 #include "../../semantic_analyzer/symbol_table/symbol_table.h"
 #include "impl/ast_node.h"
 #include "import_declaration_ast_node.h"
-#include "type_declaration/class_declaration_ast_node.h"
 #include "type_declaration/type_declaration_ast_node.h"
 
 #include <list>
@@ -44,8 +42,8 @@ public:
     [[nodiscard]] const std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations() const;
 
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const semantic_analyzer::symbol_table>> get_symbol_table() const;
-    [[nodiscard]] std::optional<std::reference_wrapper<semantic_analyzer::symbol_table>> get_symbol_table();
+    [[nodiscard]] const semantic_analyzer::symbol_table &get_symbol_table() const;
+    [[nodiscard]] semantic_analyzer::symbol_table &get_symbol_table();
     void construct_symbol_table();
 };
 

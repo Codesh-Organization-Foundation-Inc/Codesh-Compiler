@@ -8,30 +8,43 @@
 #include "../../var_reference/value_ast_node.h"
 
 #include <memory>
+#include <deque>
+
+namespace codesh::semantic_analyzer
+{
+class method_symbol;
+}
 
 namespace codesh::ast::method::operation
 {
 
-class method_call_ast_node : public impl::ir_emitting_ast_node, public impl::i_resolvable
+class method_call_ast_node : public impl::ir_emitting_ast_node,
+    public impl::i_resolvable<semantic_analyzer::method_symbol>,
+    public impl::i_descriptor_emitter
 {
     definition::fully_qualified_class_name name;
-    std::optional<definition::fully_qualified_class_name> resolved_name;
+    std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
-    std::list<std::unique_ptr<var_reference::value_ast_node>> arguments;
+    std::deque<std::unique_ptr<var_reference::value_ast_node>> arguments;
 
 protected:
-    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
+    [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
+        override;
 
 public:
-    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
+    void set_resolved(semantic_analyzer::method_symbol &symbol) override;
+
+    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
 
     [[nodiscard]] definition::fully_qualified_class_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_class_name &get_fqcn() const;
 
+    using i_descriptor_emitter::generate_descriptor;
+    [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const std::list<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
-    [[nodiscard]] std::list<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
+
+    [[nodiscard]] const std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
+    [[nodiscard]] std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
 
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

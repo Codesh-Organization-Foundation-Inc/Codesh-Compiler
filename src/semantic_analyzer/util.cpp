@@ -1,57 +1,58 @@
 #include "util.h"
 
 #include "../parser/ast/compilation_unit_ast_node.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
+#include "./symbol_table/symbol.h"
+#include "fmt/compile.h"
+#include "semantic_context.h"
 
-std::pair<bool, codesh::definition::fully_qualified_class_name> codesh::semantic_analyzer::util::resolve_custom_type(
-        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        const definition::fully_qualified_class_name &fqcn)
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
+    ::resolve_custom_type(
+        const semantic_context &context,
+        const definition::fully_qualified_class_name &full_name)
 {
-    if (!fqcn.is_single_part())
+    const auto result_raw = symbol_table::resolve_from_imports(context, full_name);
+
+    if (!result_raw.has_value())
+        return std::nullopt;
+
+    const auto result = dynamic_cast<type_symbol *>(&result_raw->get());
+    if (!result)
     {
-        //TODO: If it is found the the name is an FQCN itself, start the search from the top of the symbol table.
-        throw std::runtime_error("Non-single FQCNs not yet supported");
+        context.blasphemy_consumer(fmt::format(
+            "{} אינו עצם",
+            full_name.join(" ל־")
+        ));
+        return std::nullopt;
     }
 
-    const std::string raw_name = fqcn.get_last_part();
-
-    //TODO: Move to aliasing, NOT resolving
-    if (raw_name == "כתובים")
-        return {true, "java/lang/String"};
-
-    //TODO: Implement when implementing countries.
-
-    return {true, fqcn};
+    return *result;
 }
 
-bool codesh::semantic_analyzer::util::resolve_custom_type_node(
-        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        ast::type::custom_type_ast_node &symbol_type_node)
-{
-    const auto [did_resolve, resolved_name] =
-        resolve_custom_type(lookup_countries, symbol_type_node.get_name());
-
-    symbol_type_node.set_resolved_name(resolved_name);
-    return did_resolve;
-}
-
-bool codesh::semantic_analyzer::util::resolve_custom_type_node(
-        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_context &context,
         ast::type::custom_type_ast_node &custom_type_node,
-        ast::type::type_ast_node &symbol_type_node)
+        const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
 {
-    const auto [did_resolve, resolved_name] =
-        resolve_custom_type(lookup_countries, custom_type_node.get_name());
+    const auto result = resolve_custom_type(context,
+        custom_type_node.get_unresolved_name());
 
-    auto &custom_type = *static_cast<ast::type::custom_type_ast_node *>(&symbol_type_node); // NOLINT(*-pro-type-static-cast-downcast)
+    if (!result.has_value())
+        return false;
 
-    custom_type_node.set_resolved_name(resolved_name);
-    custom_type.set_resolved_name(resolved_name);
 
-    return did_resolve;
+    custom_type_node.set_resolved(result.value());
+
+    if (related_type_node.has_value())
+    {
+        auto &custom_type = *static_cast<ast::type::custom_type_ast_node *>(&related_type_node->get()); // NOLINT(*-pro-type-static-cast-downcast)
+        custom_type.set_resolved(result.value());
+    }
+
+    return true;
 }
 
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(
-    const std::string &name, type_symbol &containing_type)
+        const std::string &name, type_symbol &containing_type)
 {
     return containing_type.add_symbol(
         name, std::make_unique<method_overloads_symbol>(&containing_type)

@@ -1,0 +1,192 @@
+#include "resolve.h"
+
+#include "../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
+#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
+#include "../semantic_context.h"
+#include "../symbol_table/symbol_table.h"
+#include "../util.h"
+#include "fmt/color.h"
+
+#include <ranges>
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        codesh::ast::method::operation::method_call_ast_node &method_call);
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type,
+        const codesh::ast::method::operation::method_call_ast_node &method_call);
+
+static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
+        const codesh::ast::type::type_ast_node &to);
+
+
+void codesh::semantic_analyzer::method_call::resolve(const semantic_context &context,
+                                                     ast::method::operation::method_call_ast_node &method_call,
+                                                     const method_symbol &containing_method)
+{
+    const auto result = resolve_method_call(
+        context,
+        containing_method,
+        method_call
+    );
+
+    if (!result.has_value())
+        return;
+
+    //TODO: When calling non-static methods, also add 'this' as the first argument
+
+
+    //TODO: Remove this once Talmud Codesh implements this method by itself:
+    // Manually pass System.out to every מסוף ל־אמר call
+    if (method_call.get_unresolved_name().join() == "מסוף/אמר")
+    {
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>("מסוף/פלט");
+        system_in_reference->set_resolved(
+            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "מסוף/פלט")->get()) // NOLINT(*-pro-type-static-cast-downcast)
+        );
+
+        method_call.get_arguments().push_front(std::move(system_in_reference));
+    }
+}
+
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto &name = method_call.get_unresolved_name();
+    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
+
+    if (name.is_single_part())
+    {
+        // Since this is a single-part FQCN (name only), the method must either be the classes' or a static import.
+        //TODO: Handle static imports
+
+        parent_type = &containing_method.get_parent_type();
+    }
+    else
+    {
+        const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+            context, name,
+            // Ignore the last part of the name, which points to the method overloads.
+            // get_called_method_as_symbol already handles it.
+            name.get_parts().end() - 1
+        );
+
+        if (!type_symbol.has_value())
+            return std::nullopt;
+
+        // A method must be contained in a type
+        parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
+
+        // If it isn't, then this supposed "method" cannot exist.
+        if (parent_type == nullptr)
+        {
+            context.blasphemy_consumer(fmt::format(
+                "{} אינו קיים",
+                name.join(" ל־")
+            ));
+
+            return std::nullopt;
+        }
+    }
+
+
+    const auto method = get_called_method_as_symbol(
+        context,
+        *parent_type,
+        method_call
+    );
+
+    if (!method.has_value())
+        return std::nullopt;
+
+
+    // Update the AST node to the found result
+    method_call.set_resolved(method.value());
+
+    return method;
+}
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto method_overloads_raw = type.resolve(method_call.get_last_name(false));
+    if (!method_overloads_raw)
+    {
+        //TODO: Throw "name doesn't exist"
+        context.blasphemy_consumer(fmt::format(
+            "היי אלירןןןןןן תעשה את השם בבקשה השגיאה היא שהדבר לא נמצא"
+        ));
+        return std::nullopt;
+    }
+
+    const auto *method_overloads = dynamic_cast<const codesh::semantic_analyzer::method_overloads_symbol *>(&method_overloads_raw->get());
+    if (!method_overloads)
+    {
+        //TODO: Throw "is not a method"
+        context.blasphemy_consumer(fmt::format(
+            "אליצ'אאאןןן >w< איייי!! נאני גה־סוקי? זוהי לא מתודה, יורימו אנאטה?"
+        ));
+        return std::nullopt;
+    }
+
+
+    // Verify parameter types
+
+    for (const auto &symbol : method_overloads->get_symbol_map() | std::views::values)
+    {
+        auto &method = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+        const auto &method_params = method.get_parameter_types();
+        const auto &arguments = method_call.get_arguments();
+
+        if (method_params.size() != arguments.size())
+            continue;
+
+
+        // If they're both 0-args long, then they're a perfect match.
+        if (method_params.empty())
+        {
+            return method;
+        }
+
+
+        for (size_t i = 0; i < method_params.size(); i++)
+        {
+            const auto method_param_type = method_params.at(i).get();
+            const auto argument_value = method_call.get_arguments().at(i).get();
+
+            // Make sure this isn't an error argument
+            if (argument_value->get_type() == nullptr)
+                return std::nullopt;
+
+
+            if (are_types_compatible(*argument_value->get_type(), *method_param_type))
+            {
+                //TODO: Consider "best match", don't just return (casting etc.)
+                return method;
+            }
+        }
+    }
+
+    //TODO: Throw "mismatched argument types"
+    context.blasphemy_consumer(fmt::format(
+        "מאסתי"
+    ));
+    return std::nullopt;
+}
+
+static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
+        const codesh::ast::type::type_ast_node &to)
+{
+    //FIXME: Should check for auto conversions if not an exact match.
+    return from.generate_descriptor() == to.generate_descriptor();
+}

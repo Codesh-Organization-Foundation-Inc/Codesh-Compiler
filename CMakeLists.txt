@@ -134,7 +134,7 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol.tpp
         src/parser/ast/impl/i_resolvable.h
         src/parser/ast/impl/i_descriptor_emitter.cpp
-        src/parser/ast/impl/i_resolvable.cpp
+        src/parser/ast/impl/i_resolvable.tpp
         src/semantic_analyzer/method_decl/resolve.cpp
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
@@ -160,9 +160,10 @@ add_executable(Codesh_Compiler
         src/parser/ast/method/operation/method_call_ast_node.h
         src/defenition/fully_qualified_class_name.cpp
         src/defenition/fully_qualified_class_name.h
-        src/parser/ast/var_reference/value_ast_node.cpp
         src/blasphemy/details.h
         src/blasphemy/details.cpp
+        src/semantic_analyzer/method_call/resolve.cpp
+        src/semantic_analyzer/method_call/resolve.h
         src/blasphemy/blasphemy_consumer.h
         src/blasphemy/blasphemy_consumer.cpp
         src/semantic_analyzer/type_decl/resolve.cpp
@@ -171,6 +172,14 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/semantic_context.cpp
         src/semantic_analyzer/type_decl/resolve_aliases.cpp
         src/semantic_analyzer/type_decl/resolve_aliases.h
+        src/parser/ast/method/util.cpp
+        src/parser/ast/method/util.h
+        src/semantic_analyzer/builtins.cpp
+        src/semantic_analyzer/builtins.h
+        src/parser/ast/var_reference/error_value_ast_node.cpp
+        src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/variable_reference_ast_node.cpp
+        src/parser/ast/var_reference/variable_reference_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

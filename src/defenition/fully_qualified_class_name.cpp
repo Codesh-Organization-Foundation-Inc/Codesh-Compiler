@@ -31,12 +31,29 @@ codesh::definition::fully_qualified_class_name::fully_qualified_class_name(std::
     add(std::move(part));
 }
 
+codesh::definition::fully_qualified_class_name codesh::definition::fully_qualified_class_name::with(std::string part)
+    const
+{
+    fully_qualified_class_name result = *this;
+    result.add(std::move(part));
+
+    return result;
+}
+
+codesh::definition::fully_qualified_class_name codesh::definition::fully_qualified_class_name::omit_last() const
+{
+    fully_qualified_class_name result = *this;
+    result.parts.pop_back();
+
+    return result;
+}
+
 void codesh::definition::fully_qualified_class_name::add(std::string part)
 {
     parts.emplace_back(std::move(part));
 }
 
-const std::list<std::string> &codesh::definition::fully_qualified_class_name::get_parts() const
+const std::vector<std::string> &codesh::definition::fully_qualified_class_name::get_parts() const
 {
     return parts;
 }
@@ -61,9 +78,9 @@ std::string codesh::definition::fully_qualified_class_name::get_last_part() cons
     return parts.back();
 }
 
-std::string codesh::definition::fully_qualified_class_name::join(const char sep) const
+std::string codesh::definition::fully_qualified_class_name::join(const std::string &sep) const
 {
     return fmt::format("{}",
-        fmt::join(parts, std::string(1, sep))
+        fmt::join(parts, sep)
     );
 }

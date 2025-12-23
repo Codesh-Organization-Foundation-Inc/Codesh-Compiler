@@ -8,7 +8,6 @@
 
 #include <list>
 #include <optional>
-#include <stack>
 #include <unordered_map>
 
 namespace codesh::semantic_analyzer
@@ -64,19 +63,25 @@ public:
     void remove_symbol(const std::string &name);
 };
 
-template <std::derived_from<ast::impl::ast_node> T>
-class i_ast_node_produced
+/**
+ * @tparam T The producing node type. Must extend @link ast_node \endlink.
+ */
+template <typename T>
+class i_resolveable_symbol
 {
 public:
-    virtual ~i_ast_node_produced();
+    virtual ~i_resolveable_symbol();
 
     [[nodiscard]] virtual T *get_producing_node() const = 0;
+    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
 };
 
 
 //TODO: Attach ast node
 class country_symbol final : public symbol, public i_scope_containing_symbol
 {
+    const definition::fully_qualified_class_name full_name;
+
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
 
@@ -85,32 +90,41 @@ protected:
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    explicit country_symbol(symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
+    explicit country_symbol(definition::fully_qualified_class_name full_name, symbol *parent_symbol = nullptr,
+            ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
-        public i_ast_node_produced<ast::type_decl::type_declaration_ast_node>
+        public i_resolveable_symbol<ast::type_decl::type_declaration_ast_node>
 {
+    const definition::fully_qualified_class_name full_name;
+
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_scope_map scopes;
+
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
     //TODO: Add super type
     // const std::unique_ptr<ast::type::type_ast_node> super_type;
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 protected:
     [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
     [[nodiscard]] named_scope_map &get_symbol_map() override;
 
 public:
-    type_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+    type_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+
+    [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
@@ -128,15 +142,19 @@ public:
 };
 
 //TODO: Attach ast node
+//TODO: Make resolveable
 class field_symbol final : public variable_symbol
 {
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    const definition::fully_qualified_class_name full_name;
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
-    field_symbol(symbol *parent_symbol, std::vector<output::jvm_target::access_flag> access_flags,
+    field_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::unique_ptr<ast::type::type_ast_node> type, ast::impl::ast_node *producing_node = nullptr);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+    [[nodiscard]] ast::type_decl::attributes_ast_node &get_attributes() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
 
 //TODO: Attach ast node
@@ -163,7 +181,8 @@ public:
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(const std::string &name) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(
+            const std::string &params_descriptor) const;
 };
 
 
@@ -193,9 +212,11 @@ public:
     [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
 };
 
-class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
+class method_symbol final : public symbol, public i_resolveable_symbol<ast::method::method_declaration_ast_node>
 {
-    const std::vector<output::jvm_target::access_flag> access_flags;
+    definition::fully_qualified_class_name full_name;
+
+    const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
@@ -204,16 +225,23 @@ class method_symbol final : public symbol, public i_ast_node_produced<ast::metho
     method_scope_symbol method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
+    type_symbol &parent_type;
 
 public:
-    method_symbol(symbol *parent_symbol, const std::vector<output::jvm_target::access_flag> &access_flags,
+    method_symbol(symbol *parent_symbol, type_symbol &parent_type,
+            definition::fully_qualified_class_name full_name,
+            std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-            std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node);
+            std::unique_ptr<ast::type::type_ast_node> return_type,
+            ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    void set_full_name (definition::fully_qualified_class_name name);
 
-    [[nodiscard]] const std::vector<output::jvm_target::access_flag> &get_access_flags() const;
+
+    [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
@@ -224,6 +252,9 @@ public:
     [[nodiscard]] method_scope_symbol &get_scope();
 
     [[nodiscard]] ast::method::method_declaration_ast_node *get_producing_node() const override;
+
+
+    [[nodiscard]] type_symbol &get_parent_type() const;
 };
 
 }

@@ -133,6 +133,7 @@ enum class token_group : int
 
     // REGEX Matches
 
+    //TODO: Match with definition::primitive_type
     LITERAL_NUMBER_FLOAT, // x.y צף | x צף
     LITERAL_NUMBER_DOUBLE, // x.y
     LITERAL_NUMBER_INT, // x

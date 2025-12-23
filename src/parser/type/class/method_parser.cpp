@@ -93,20 +93,20 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    //TODO: Convert the following to utilize util::peeking_check (once blasphemies is merged: !28)
-    while (tokens.front()->get_group() != codesh::token_group::CLOSE_PARENTHESIS)
+    while (!codesh::parser::util::consuming_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
     {
         method_call.get_arguments().push_back(codesh::parser::util::parse_value(tokens));
 
-        if (!tokens.empty() && tokens.front()->get_group() == codesh::token_group::PUNCTUATION_ARG_SEPARATOR ||
-            tokens.front()->get_group() == codesh::token_group::CLOSE_PARENTHESIS)
+        if (codesh::parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR))
+            continue;
+
+        // If there are no more arguments, there shouldn't be anything else besides a closing parenthesis.
+        if (!codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
         {
-            tokens.pop();
-        }
-        else
-        {
-            throw std::runtime_error("Unexpected token"); //TODO: Convert to custom Codesh error
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::UNEXPECTED_TOKEN,
+                codesh::blasphemy::blasphemy_type::SYNTAX
+            );
         }
     }
 }
-

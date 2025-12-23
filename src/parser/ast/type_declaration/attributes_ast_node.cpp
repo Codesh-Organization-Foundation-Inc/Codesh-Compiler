@@ -7,6 +7,11 @@ codesh::ast::type_decl::attributes_ast_node::attributes_ast_node()
 {
 }
 
+std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> codesh::ast::type_decl::attributes_ast_node::clone() const
+{
+    return std::make_unique<attributes_ast_node>(*this);
+}
+
 std::vector<codesh::output::jvm_target::access_flag> codesh::ast::type_decl::attributes_ast_node::get_access_flags() const
 {
     std::vector<output::jvm_target::access_flag> result;
