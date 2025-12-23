@@ -2,31 +2,15 @@
 
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
-#include "../defenition/definitions.h"
-#include "../defenition/fully_qualified_class_name.h"
+    #include "../defenition/definitions.h"
+    #include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
-#include "ast/var_reference/error_value_ast_node.h"
 #include "ast/var_reference/evaluable_ast_node.h"
-#include "ast/var_reference/variable_reference_ast_node.h"
 
 #include <functional>
 
-template <typename T>
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::definition::primitive_type primitive_type,
-        const std::function<T(const std::string &)> &mapper);
 
-template <typename T>
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::definition::primitive_type primitive_type,
-        T value);
-
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> make_bool_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        bool value);
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
 
@@ -242,148 +226,5 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 }
 
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::util::parse_value(
-        std::queue<std::unique_ptr<token>> &tokens)
-{
-    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
-
-    switch (tokens.front()->get_group())
-    {
-    case token_group::IDENTIFIER: {
-        definition::fully_qualified_class_name value;
-        parse_fqcn(tokens, value);
-
-        eval_ast_node = std::make_unique<variable_reference_ast_node>(value);
-
-        break;
-    }
-
-    case token_group::LITERAL_STRING: {
-        eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
-            std::make_unique<ast::type::custom_type_ast_node>("java/lang/String"),
-
-            consume_alnum_identifier_token(
-                tokens, "לא אמור לקרות"
-            )->get_content()
-        );
-
-        break;
-    }
-
-    case token_group::LITERAL_NUMBER_INT: {
-        eval_ast_node = make_evaluable<int>(
-            tokens, definition::primitive_type::INTEGER,
-
-            [](const std::string &content) {
-                return std::stoi(content);
-            }
-        );
-
-        break;
-    }
-
-    case token_group::LITERAL_NUMBER_FLOAT: {
-        eval_ast_node = make_evaluable<float>(
-            tokens, definition::primitive_type::FLOAT,
-
-            [](const std::string &content) {
-                return std::stof(content);
-            }
-        );
-
-        break;
-    }
-
-    case token_group::LITERAL_NUMBER_DOUBLE: {
-        eval_ast_node = make_evaluable<double>(
-            tokens, definition::primitive_type::DOUBLE,
-
-            [](const std::string &content) {
-                return std::stod(content);
-            }
-        );
-
-        break;
-    }
-
-    case token_group::LITERAL_CHAR: {
-        eval_ast_node = make_evaluable<char>(
-            tokens, definition::primitive_type::CHAR,
-
-            [](const std::string &content) {
-                return content[0];
-            }
-        );
-
-        break;
-    }
-
-    case token_group::KEYWORD_TRUE: {
-        eval_ast_node = make_bool_evaluable(tokens, true);
-
-        break;
-    }
-
-    case token_group::KEYWORD_FALSE: {
-        eval_ast_node = make_bool_evaluable(tokens, false);
-
-        break;
-    }
-
-    default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>();
-        tokens.pop();
-
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::UNEXPECTED_TOKEN,
-            blasphemy::blasphemy_type::SYNTAX
-        );
-    }
-    }
-
-    return eval_ast_node;
-}
 
 
-template <typename T>
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::definition::primitive_type primitive_type,
-        const std::function<T(const std::string &)> &mapper)
-{
-    return std::make_unique<codesh::ast::var_reference::evaluable_ast_node<T>>(
-        std::make_unique<codesh::ast::type::primitive_type_ast_node>(primitive_type),
-        mapper(
-            codesh::parser::util::consume_alnum_identifier_token(
-                tokens, "לא אמור לקרות"
-            )->get_content()
-        )
-    );
-}
-
-template <typename T>
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::definition::primitive_type primitive_type,
-        T value)
-{
-    tokens.pop();
-
-    return std::make_unique<codesh::ast::var_reference::evaluable_ast_node<T>>(
-        std::make_unique<codesh::ast::type::primitive_type_ast_node>(primitive_type),
-        std::move(value)
-    );
-}
-
-static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> make_bool_evaluable(
-        std::queue<std::unique_ptr<codesh::token>> &tokens,
-        const bool value)
-{
-    tokens.pop();
-
-    return make_evaluable<bool>(
-        tokens,
-        codesh::definition::primitive_type::BOOLEAN,
-        value
-    );
-}
