@@ -14,32 +14,29 @@ namespace codesh::semantic_analyzer
 {
 class method_symbol;
 }
-
 namespace codesh::ast::method::operation
 {
 
-class method_call_ast_node : public impl::ir_emitting_ast_node, public impl::i_resolvable,
+class method_call_ast_node : public impl::ir_emitting_ast_node,
+    public impl::i_resolvable<semantic_analyzer::method_symbol>,
     public impl::i_descriptor_emitter
 {
     definition::fully_qualified_class_name name;
-    std::optional<definition::fully_qualified_class_name> resolved_name;
-
-    std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> referred_method;
+    std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
     std::vector<std::unique_ptr<var_reference::value_ast_node>> arguments;
 
 protected:
-    [[nodiscard]] std::optional<definition::fully_qualified_class_name> &_get_resolved_name() override;
-    [[nodiscard]] const std::optional<definition::fully_qualified_class_name> &_get_resolved_name() const override;
+    [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
+        override;
 
 public:
-    [[nodiscard]] const definition::fully_qualified_class_name &get_name() const override;
+    void set_resolved(semantic_analyzer::method_symbol &symbol) override;
+
+    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
 
     [[nodiscard]] definition::fully_qualified_class_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_class_name &get_fqcn() const;
-
-    [[nodiscard]] semantic_analyzer::method_symbol &get_referred_method() const;
-    void set_referred_method(semantic_analyzer::method_symbol &method);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

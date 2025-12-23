@@ -31,3 +31,4 @@ const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE = "עֶצֶם ב
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG = "אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף";
 const std::string codesh::blasphemy::details::METHOD_TOO_BIG = "נוּ, מַה זֶּה? מַעֲשֶׂה אוֹ הַתָּנ״ךְ עַצְמוֹ? קַצֵּר!";
 const std::string codesh::blasphemy::details::STRING_TOO_BIG = "אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים תָּוִים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה תָּוִים וְשִׁשִּׁים אָלֶף תָּוִים בִּכְתֻבִים";
+const std::string codesh::blasphemy::details::NUMBER_TOO_BIG = "אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים ספרות וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה ספרות וְשִׁשִּׁים אָלֶף ספרות בִּכְתֻבִים"; //TODO: לדוד לא היה כל כך הרבה נשים

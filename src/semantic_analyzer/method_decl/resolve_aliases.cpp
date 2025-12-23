@@ -52,10 +52,12 @@ static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_co
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
                           codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name)
 {
+    const std::string old_name = method_node.get_last_name(false);
+
     // Get the original method names' overloads
     codesh::semantic_analyzer::method_overloads_symbol &source_method_overloads =
         *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-            &type.resolve(method_node.get_name())->get()
+            &type.resolve(old_name)->get()
         );
 
     // And the new one
@@ -63,16 +65,17 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
         codesh::semantic_analyzer::util::get_method_overloads_symbol(new_name, type);
 
 
-    // Move the method symbol from the old overloads table to the new one.
-    // This will rename it since the `dest_method_overloads` is only accessible via the updated method's name.
-    dest_method_overloads.add_symbol(
+    // Move the method symbol from the old overloads table to the new one
+    auto &method = dest_method_overloads.add_symbol(
         method_node.generate_parameters_descriptor(),
         source_method_overloads.resolve_and_move(method_node.generate_parameters_descriptor())
-    );
+    ).first.get();
 
-    // Rename the method node as well
-    const std::string old_name = method_node.get_name();
-    method_node.set_name(new_name);
+
+    // Perform the actual renaming
+    static_cast<codesh::semantic_analyzer::method_symbol *>(&method)->set_full_name( // NOLINT(*-pro-type-static-cast-downcast)
+        type.get_full_name().with(new_name)
+    );
 
 
     // Clean method overloads if no more overloads exist

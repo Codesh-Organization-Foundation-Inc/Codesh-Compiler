@@ -32,9 +32,9 @@ public:
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 
     [[nodiscard]] static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(
-            const semantic_context &context,
-            std::vector<std::string>::const_iterator fqcn_start,
-            std::vector<std::string>::const_iterator fqcn_end);
+            const semantic_context &context, const definition::fully_qualified_class_name &full_name,
+            std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
+            std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt);
 
 
     [[nodiscard]] const named_scope_map &get_symbol_map() const override;

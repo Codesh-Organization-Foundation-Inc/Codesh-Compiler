@@ -4,8 +4,6 @@
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../semantic_context.h"
 #include "../util.h"
 
@@ -33,18 +31,8 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const semantic_context &context, const type_symbol &type,
     const ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_name());
-
-    const auto &method = resolve_method_signature(new_context, method_decl, type);
-
-    // Resolve body statements
-    for (const auto &statement : method_decl.get_body())
-    {
-        if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(statement.get()))
-        {
-            method_call::resolve(new_context, *method_call, method);
-        }
-    }
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+    resolve_method_signature(new_context, method_decl, type);
 }
 
 static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
@@ -53,7 +41,7 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::semantic_analyzer::type_symbol &type)
 {
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.resolve(method_decl.get_name()).value().get()
+        &type.resolve(method_decl.get_last_name(false)).value().get()
     );
 
     // Get relevant method symbol from the method overloads map
@@ -88,16 +76,11 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
         return;
     }
 
-    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-        context.lookup_countries,
+    codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context,
         *return_type,
         method_symbol.get_return_type()
-    )) {
-        context.blasphemy_consumer(fmt::format(
-            "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג הֶחְזֵר לֹא יָדוּעַ {}",
-            return_type->get_name().join()
-        ));
-    }
+    );
 }
 
 static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
@@ -105,22 +88,18 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
         const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     size_t i = 0;
+
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
         if (!custom_param)
             continue;
 
-        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            context.lookup_countries,
+        codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context,
             *custom_param,
             *method_symbol.get_parameter_types()[i]
-        )) {
-            context.blasphemy_consumer(fmt::format(
-                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג מִנְחָה לֹא יְדוּעָה {}",
-                custom_param->get_name().join()
-            ));
-        }
+        );
 
         ++i;
     }
@@ -129,20 +108,30 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    // Skip erroring the first parameters_count variables, as they are a copy of the parameters.
+    // This avoids double error reporting.
+    const size_t parameters_count = method_symbol.get_parameter_types().size();
+    size_t i = 0;
+
     for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
     {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
-        if (!custom_param)
+        auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        if (!var_type)
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
-            context.lookup_countries,
-            *custom_param
+            context,
+            *var_type
         )) {
-            context.blasphemy_consumer(fmt::format(
-                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                custom_param->get_name().join()
-            ));
+            if (i >= parameters_count)
+            {
+                context.blasphemy_consumer(fmt::format(
+                    "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
+                    var_type->get_unresolved_name().join()
+                ));
+            }
         }
+
+        ++i;
     }
 }

@@ -64,13 +64,17 @@ public:
     void remove_symbol(const std::string &name);
 };
 
-template <std::derived_from<ast::impl::ast_node> T>
-class i_ast_node_produced
+/**
+ * @tparam T The producing node type. Must extend {@link ast_node}.
+ */
+template <typename T>
+class i_resolveable_symbol
 {
 public:
-    virtual ~i_ast_node_produced();
+    virtual ~i_resolveable_symbol();
 
     [[nodiscard]] virtual T *get_producing_node() const = 0;
+    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
 };
 
 
@@ -96,7 +100,7 @@ public:
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
-        public i_ast_node_produced<ast::type_decl::type_declaration_ast_node>
+        public i_resolveable_symbol<ast::type_decl::type_declaration_ast_node>
 {
     const definition::fully_qualified_class_name full_name;
 
@@ -119,7 +123,7 @@ public:
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
@@ -205,9 +209,9 @@ public:
     [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
 };
 
-class method_symbol final : public symbol, public i_ast_node_produced<ast::method::method_declaration_ast_node>
+class method_symbol final : public symbol, public i_resolveable_symbol<ast::method::method_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    definition::fully_qualified_class_name full_name;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
@@ -230,7 +234,8 @@ public:
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    void set_full_name (definition::fully_qualified_class_name name);
 
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;

@@ -3,6 +3,10 @@
 #include <list>
 #include <vector>
 
+namespace codesh::output::jvm_target
+{
+class constant_pool;
+}
 namespace codesh::output::jvm_target::defs
 {
 class cp_info;
@@ -20,6 +24,18 @@ enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
 
+    I_CONST_M1 = 0x02,
+    I_CONST_0,
+    I_CONST_1,
+    I_CONST_2,
+    I_CONST_3,
+    I_CONST_4,
+    I_CONST_5,
+
+    B_IPUSH = 0x10,
+    S_IPUSH, // >255
+
+    LDC = 0x12,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     L_LOAD, // Loads a long variable from the local variable table at the specified index
@@ -54,7 +70,11 @@ enum class opcode : unsigned char
 
     RETURN = 0xB1,
 
-    INVOKE_SPECIAL = 0xB7, // Calls a private method_cp_index, constructor or this/super constructor
+    INVOKE_DYNAMIC = 0xBA,
+    INVOKE_INTERFACE = 0xB9,
+    INVOKE_SPECIAL = 0xB7,
+    INVOKE_STATIC = 0xB8,
+    INVOKE_VIRTUAL = 0xB6
 };
 
 enum class instruction_type
@@ -66,13 +86,22 @@ enum class instruction_type
     REFERENCE
 };
 
+enum class invokation_type
+{
+    DYNAMIC,
+    INTERFACE,
+    SPECIAL, // Calls a private method_cp_index, constructor or this/super constructor
+    STATIC,
+    VIRTUAL
+};
+
 
 class instruction
 {
     const opcode _opcode;
 
 public:
-    explicit instruction(opcode _opcode);
+    explicit instruction(opcode _opcode = opcode::NOP);
     virtual ~instruction();
 
     [[nodiscard]] opcode get_opcode() const;
@@ -85,7 +114,7 @@ class typed_instruction : public instruction
     instruction_type type;
 
 public:
-    typed_instruction(opcode _opcode, instruction_type type);
+    explicit typed_instruction(instruction_type type, opcode _opcode = opcode::NOP);
 
     [[nodiscard]] instruction_type get_instruction_type() const;
 };
@@ -123,16 +152,38 @@ public:
 };
 
 
-class invoke_special_instruction final : public instruction
+class invoke_instruction final : public instruction
 {
+    const invokation_type type;
     const int method_cp_index;
 
 public:
-    explicit invoke_special_instruction(int method_cp_index);
+    invoke_instruction(invokation_type type, int method_cp_index);
 
     void emit(std::list<unsigned char> &collector) const override;
 
     [[nodiscard]] int get_method_cp_index() const;
+};
+
+class load_constant_instruction final : public instruction
+{
+    const int constant;
+    const jvm_target::constant_pool &fallback_constant_pool;
+
+public:
+    load_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
+
+    void emit(std::list<unsigned char> &collector) const override;
+};
+
+class load_constant_pool_instruction final : public instruction
+{
+    const int constant_pool_index;
+
+public:
+    explicit load_constant_pool_instruction(int constant_pool_index);
+
+    void emit(std::list<unsigned char> &collector) const override;
 };
 
 }

@@ -257,6 +257,11 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
     return full_name;
 }
 
+void codesh::semantic_analyzer::method_symbol::set_full_name(definition::fully_qualified_class_name name)
+{
+    full_name = std::move(name);
+}
+
 const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::method_symbol::get_attributes() const
 {
     return *attributes;

@@ -40,6 +40,14 @@ codesh::definition::fully_qualified_class_name codesh::definition::fully_qualifi
     return result;
 }
 
+codesh::definition::fully_qualified_class_name codesh::definition::fully_qualified_class_name::omit_last() const
+{
+    fully_qualified_class_name result = *this;
+    result.parts.pop_back();
+
+    return result;
+}
+
 void codesh::definition::fully_qualified_class_name::add(std::string part)
 {
     parts.emplace_back(std::move(part));

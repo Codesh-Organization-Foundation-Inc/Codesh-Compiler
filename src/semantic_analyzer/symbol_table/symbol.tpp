@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-template <std::derived_from<codesh::ast::impl::ast_node> T>
-codesh::semantic_analyzer::i_ast_node_produced<T>::~i_ast_node_produced() = default;
+template <typename T>
+codesh::semantic_analyzer::i_resolveable_symbol<T>::~i_resolveable_symbol() = default;
 
 template <std::derived_from<codesh::semantic_analyzer::symbol> T>
 std::pair<std::reference_wrapper<T>, bool> codesh::semantic_analyzer::i_scope_containing_symbol::add_symbol(

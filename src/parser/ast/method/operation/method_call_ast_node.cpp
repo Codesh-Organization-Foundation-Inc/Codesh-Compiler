@@ -1,25 +1,27 @@
 #include "method_call_ast_node.h"
 
+#include "../../../../output/ir/code_block.h"
 #include "../../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../../type/primitive_type_ast_node.h"
+#include "../../var_reference/evaluable_ast_node.h"
 #include "../util.h"
 #include "fmt/xchar.h"
 
-std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::method::operation::method_call_ast_node::
-    _get_resolved_name()
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
+    method_call_ast_node::_get_resolved() const
 {
-    return resolved_name;
+    return resolved_symbol;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_name()
+void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
+{
+    resolved_symbol.emplace(symbol);
+}
+
+const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
     const
 {
     return name;
-}
-
-const std::optional<codesh::definition::fully_qualified_class_name> &codesh::ast::method::operation::
-    method_call_ast_node::_get_resolved_name() const
-{
-    return resolved_name;
 }
 
 codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
@@ -33,22 +35,6 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::method::opera
     return name;
 }
 
-codesh::semantic_analyzer::method_symbol &codesh::ast::method::operation::
-    method_call_ast_node::get_referred_method() const
-{
-    if (!referred_method.has_value())
-    {
-        throw std::runtime_error("Attempted to get unresolved method call");
-    }
-
-    return referred_method.value();
-}
-
-void codesh::ast::method::operation::method_call_ast_node::set_referred_method(semantic_analyzer::method_symbol &method)
-{
-    referred_method.emplace(method);
-}
-
 std::string codesh::ast::method::operation::method_call_ast_node::generate_descriptor(const bool resolved) const
 {
     if (!resolved)
@@ -57,12 +43,12 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     }
 
 
-    const auto &method = get_referred_method();
+    const auto &method = get_resolved();
 
     std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
-        param_types.push_back(*param.get());
+        param_types.emplace_back(*param);
     }
 
     return util::generate_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
@@ -80,9 +66,68 @@ std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh
     return arguments;
 }
 
+
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    //TODO
+    const auto &method = get_resolved();
+    const auto &cp = containing_type_decl.get_constant_pool();
+
+    if (!method.get_attributes().get_is_static())
+    {
+        //TODO: Handle passing 'this' instances
+        throw std::runtime_error("Calling non-static methods not yet supported");
+    }
+
+
+    // Load parameters
+    for (const auto &argument : arguments)
+    {
+        if (const auto prim_arg = dynamic_cast<const type::primitive_type_ast_node *>(argument->get_type()))
+        {
+            switch (prim_arg->get_type())
+            {
+            case definition::primitive_type::INTEGER: {
+                containing_block.add_instruction(std::make_unique<output::ir::load_constant_instruction>(
+                    static_cast<const var_reference::evaluable_ast_node<int> *>(argument.get())->get_value(), // NOLINT(*-pro-type-static-cast-downcast)
+                    cp
+                ));
+
+                break;
+            }
+
+            default: throw std::runtime_error("Unsupported primitive type");
+            }
+        }
+
+        if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
+        {
+            const auto string = static_cast<const var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
+                argument.get()
+            )->get_value();
+
+             containing_block.add_instruction(std::make_unique<output::ir::load_constant_pool_instruction>(
+                 cp.get_string_index(cp.get_utf8_index(string))
+             ));
+        }
+    }
+
+
+    // Call method
+    const int method_cpi = cp.get_methodref_index(
+        cp.get_class_index(
+            cp.get_utf8_index(get_resolved_name().omit_last().join())
+        ),
+
+        cp.get_name_and_type_index(
+            cp.get_utf8_index(get_last_name(true)),
+            cp.get_utf8_index(generate_descriptor())
+        )
+    );
+
+    containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
+        output::ir::invokation_type::STATIC,
+        method_cpi
+    ));
 }

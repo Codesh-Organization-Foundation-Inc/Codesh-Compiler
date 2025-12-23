@@ -7,8 +7,9 @@
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "aliases.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
 #include "builtins.h"
+#include "method_call/resolve.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol.h"
 #include "type_decl/collect.h"
@@ -34,6 +35,9 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
+static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context);
+
+
 const codesh::definition::fully_qualified_class_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
 
 
@@ -51,7 +55,7 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
 {
-    const symbol_table &table = ast_root.get_symbol_table().value();
+    const symbol_table &table = ast_root.get_symbol_table();
 
     //TODO: Use actual countries
     const std::vector lookup_countries = {
@@ -70,9 +74,34 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     type_declaration::collect(context,country);
     type_declaration::resolve(context, country);
 
-    //TODO: When CALLING non-static methods, also add 'this' as first argument
+    // Only after resolving all methods should we resolve all methods' bodies:
+    resolve_method_bodies(context);
+
 
     type_declaration::resolve_aliases(context, country);
+}
+
+
+static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context)
+{
+    // It's long because we need to get veeery deep up until we reach each method:
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        const auto type_context = context.with_consumer("בָּעֶצֶם", type_decl->get_last_name(false));
+
+        for (const auto &method_decl : type_decl->get_all_methods())
+        {
+            const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
+
+            for (const auto &statement : method_decl->get_body())
+            {
+                if (const auto method_call = dynamic_cast<codesh::ast::method::operation::method_call_ast_node *>(statement.get()))
+                {
+                    codesh::semantic_analyzer::method_call::resolve(method_context, *method_call, method_decl->get_resolved());
+                }
+            }
+        }
+    }
 }
 
 
@@ -199,7 +228,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     attributes_node->set_is_final(true);
     this_param->set_attributes(std::move(attributes_node));
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_name());
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_unresolved_name());
     this_param->set_type(std::move(this_class_type));
 
     return this_param;

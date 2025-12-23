@@ -27,7 +27,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     const ast::compilation_unit_ast_node &root_node,
     const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination / (type_decl.get_name().get_last_part() + ".class"), std::ios::binary);
+    std::ofstream destination_file(destination / (type_decl.get_last_name(false) + ".class"), std::ios::binary);
 
     if (!destination_file)
     {
@@ -88,6 +88,14 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
         {
             write_bytes(out, nat_info->name_index, 2);
             write_bytes(out, nat_info->descriptor_index, 2);
+        }
+        else if (const auto integer_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Integer_info *>(&info.get()))
+        {
+            write_bytes(out, integer_info->bytes, 4);
+        }
+        else if (const auto string_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_String_info *>(&info.get()))
+        {
+            write_bytes(out, string_info->string_index, 2);
         }
         else
         {

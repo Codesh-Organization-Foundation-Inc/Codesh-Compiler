@@ -35,7 +35,7 @@ void codesh::semantic_analyzer::method_call::resolve(const semantic_context &con
     if (!result.has_value())
         return;
 
-    //TODO: Resolve aliases
+    //TODO: When calling non-static methods, also add 'this' as first argument
 }
 
 
@@ -44,7 +44,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::method_symbol &containing_method,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto &name = method_call.get_name();
+    const auto &name = method_call.get_unresolved_name();
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
     if (name.is_single_part())
@@ -57,22 +57,14 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     else
     {
         const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
-            context,
-            name.get_parts().begin(),
+            context, name,
             // Ignore the last part of the name, which points to the method overloads.
             // get_called_method_as_symbol already handles it.
             name.get_parts().end() - 1
         );
 
         if (!type_symbol.has_value())
-        {
-            context.blasphemy_consumer(fmt::format(
-                "השם {} אינו קיים",
-                name.join(" ל־")
-            ));
-
             return std::nullopt;
-        }
 
         // A method must be contained in a type
         parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
@@ -101,8 +93,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 
     // Update the AST node to the found result
-    method_call.set_resolved_name(method->get().get_full_name());
-    method_call.set_referred_method(method.value());
+    method_call.set_resolved(method.value());
 
     return method;
 }
@@ -112,7 +103,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto method_overloads_raw = type.resolve(method_call.get_name().get_last_part());
+    const auto method_overloads_raw = type.resolve(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
         //TODO: Throw "name doesn't exist"
