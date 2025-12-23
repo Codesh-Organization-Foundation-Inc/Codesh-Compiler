@@ -1,5 +1,11 @@
 #pragma once
 
+#include "../analyzer.h"
+
+namespace codesh::semantic_analyzer
+{
+struct semantic_context;
+}
 namespace codesh::semantic_analyzer
 {
 class country_symbol;
@@ -12,5 +18,5 @@ class compilation_unit_ast_node;
 
 namespace codesh::semantic_analyzer::type_declaration
 {
-void collect_types(const ast::compilation_unit_ast_node &root_node, country_symbol &containing_country);
+void collect(const semantic_context &context, country_symbol &country);
 }

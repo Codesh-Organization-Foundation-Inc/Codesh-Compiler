@@ -9,36 +9,75 @@
 
 #include "../../../output/jvm_target/constant_pool.h"
 #include "../impl/i_resolvable.h"
+#include "../method/constructor_declaration_ast_node.h"
+
+namespace codesh::semantic_analyzer
+{
+class type_symbol;
+}
+namespace codesh::ast::type
+{
+class custom_type_ast_node;
+}
 
 namespace codesh::ast::type_decl
 {
 
-class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter, public impl::i_resolvable
+class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
+    public impl::i_resolvable<semantic_analyzer::type_symbol>
 {
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
-    const std::string name;
-    std::optional<std::string> resolved_name;
+    std::unique_ptr<type::custom_type_ast_node> super_class;
+    //TODO: Add implements
+
+    const definition::fully_qualified_class_name name;
+    std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
     std::unique_ptr<attributes_ast_node> attributes;
 
+
+    std::list<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
+    std::list<method::method_declaration_ast_node *> methods;
+    std::list<method::constructor_declaration_ast_node *> constructors;
+
 protected:
-    [[nodiscard]] std::optional<std::string> &get_resolved_name() override;
+    [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
+        const override;
 
 public:
-    explicit type_declaration_ast_node(std::string name);
+    explicit type_declaration_ast_node(definition::fully_qualified_class_name name);
+    ~type_declaration_ast_node() override;
+
+    void set_resolved(semantic_analyzer::type_symbol &symbol) override;
+
+    [[nodiscard]] const output::jvm_target::constant_pool &get_constant_pool() const;
+    void set_constant_pool(output::jvm_target::constant_pool constant_pool);
+
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const std::optional<std::string> &get_resolved_name() const override;
-    [[nodiscard]] std::string get_name() const override;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
+
+
+    [[nodiscard]] type::custom_type_ast_node *get_super_class() const;
+    void set_super_class(std::unique_ptr<type::custom_type_ast_node> super_class);
+
 
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const output::jvm_target::constant_pool>> get_constant_pool() const;
-    void set_constant_pool(output::jvm_target::constant_pool constant_pool);
+    /**
+     * @return All methods, including constructors.
+     * Constructors are placed first, then methods.
+     */
+    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
+    void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
+    void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
+
+    [[nodiscard]] const std::list<method::constructor_declaration_ast_node *> &get_constructors() const;
+    [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
 };
 
 }

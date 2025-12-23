@@ -7,7 +7,9 @@ enum class basad_type
 {
     BASAD,
     BH,
-    IAW
+    IAW,
+
+    MISSING
 };
 
 }

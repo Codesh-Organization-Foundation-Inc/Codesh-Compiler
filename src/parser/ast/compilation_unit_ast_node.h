@@ -4,7 +4,6 @@
 #include "../../semantic_analyzer/symbol_table/symbol_table.h"
 #include "impl/ast_node.h"
 #include "import_declaration_ast_node.h"
-#include "type_declaration/class_declaration_ast_node.h"
 #include "type_declaration/type_declaration_ast_node.h"
 
 #include <list>
@@ -20,7 +19,7 @@ class compilation_unit_ast_node final : public impl::ast_node
     const std::string source_stem;
 
     const definition::basad_type basad_type;
-    std::list<std::string> package_name;
+    definition::fully_qualified_class_name package_name;
     std::list<std::unique_ptr<import_declaration_ast_node>> import_declarations;
     std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> type_declarations;
 
@@ -33,18 +32,18 @@ public:
     [[nodiscard]] std::string get_source_stem() const;
 
     [[nodiscard]] definition::basad_type get_basad_type() const;
-    [[nodiscard]] std::list<std::string> &get_package_name();
+    [[nodiscard]] definition::fully_qualified_class_name &get_package_name();
     [[nodiscard]] std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations();
     [[nodiscard]] std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations();
 
 
-    [[nodiscard]] const std::list<std::string> &get_package_name() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_package_name() const;
     [[nodiscard]] const std::list<std::unique_ptr<import_declaration_ast_node>> &get_import_declarations() const;
     [[nodiscard]] const std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> &get_type_declarations() const;
 
 
-    [[nodiscard]] std::optional<std::reference_wrapper<const semantic_analyzer::symbol_table>> get_symbol_table() const;
-    [[nodiscard]] std::optional<std::reference_wrapper<semantic_analyzer::symbol_table>> get_symbol_table();
+    [[nodiscard]] const semantic_analyzer::symbol_table &get_symbol_table() const;
+    [[nodiscard]] semantic_analyzer::symbol_table &get_symbol_table();
     void construct_symbol_table();
 };
 

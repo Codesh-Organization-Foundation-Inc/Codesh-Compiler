@@ -1,12 +1,19 @@
 #include "constant_pool.h"
 
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../defenition/definitions.h"
 #include "../../util.h"
+#include "../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../parser/ast/type/custom_type_ast_node.h"
 
 #include <unordered_set>
 
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "../../parser/ast/var_reference/evaluable_ast_node.h"
+#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
@@ -16,7 +23,7 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
     index(1),
     this_class_cpi(
         goc_class_info(
-            goc_utf8_info(type_decl.get_binary_name())
+            goc_utf8_info(type_decl.get_resolved_name().join())
         )
     )
 {
@@ -37,41 +44,13 @@ codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_
 void codesh::output::jvm_target::constant_pool::traverse_class_decl(
         const ast::type_decl::class_declaration_ast_node &class_decl)
 {
-    const auto super_class = class_decl.get_super_class();
-
-    int super_class_cpi;
-
-    if (super_class == nullptr)
-    {
-        // If it doesn't extend anything, it extends Object.
-        super_class_cpi = goc_utf8_info("java/lang/Object");
-    }
-    else
-    {
-        super_class_cpi = goc_utf8_info(super_class->get_binary_name());
-    }
+    const int super_class_cpi = goc_utf8_info(
+        class_decl.get_super_class()->get_resolved_name().join()
+    );
 
     const int super_class_constant = goc_class_info(super_class_cpi);
 
-    // Add methods
-    for (const auto &method_decl : class_decl.get_methods())
-    {
-        goc_methodref_info(
-            this_class_cpi,
-
-            goc_name_and_type_info(
-                goc_utf8_info(method_decl->get_name()),
-                goc_utf8_info(method_decl->generate_descriptor())
-            )
-        );
-
-        // Add parameters
-        for (const auto &param_node : method_decl->get_parameters())
-        {
-            goc_utf8_info(param_node->get_name());
-            goc_utf8_info(param_node->get_type()->generate_descriptor());
-        }
-    }
+    traverse_method_decl(class_decl);
 
     // Add super constructor method reference
     //TODO: Move to IR
@@ -86,6 +65,103 @@ void codesh::output::jvm_target::constant_pool::traverse_class_decl(
     );
 }
 
+void codesh::output::jvm_target::constant_pool::traverse_method_decl(
+    const ast::type_decl::class_declaration_ast_node &class_decl)
+{
+    for (const auto &method_decl : class_decl.get_all_methods())
+    {
+        goc_name_and_type_info(
+            goc_utf8_info(method_decl->get_last_name(true)),
+            goc_utf8_info(method_decl->generate_descriptor())
+        );
+
+        //TODO: Add parameters (it was here i dont know what it means)
+        for (const auto &param_node : method_decl->get_parameters())
+        {
+            goc_utf8_info(param_node->get_name());
+            goc_utf8_info(param_node->get_type()->generate_descriptor());
+        }
+
+        traverse_method_body(*method_decl);
+    }
+}
+
+void codesh::output::jvm_target::constant_pool::traverse_method_body(
+    const ast::method::method_declaration_ast_node &method_decl)
+{
+    for (const auto &ir_emitting_node : method_decl.get_body())
+    {
+        const auto *method_call =
+            dynamic_cast<const ast::method::operation::method_call_ast_node *>(ir_emitting_node.get());
+
+        if (method_call)
+        {
+            traverse_method_call(*method_call);
+        }
+    }
+}
+
+void codesh::output::jvm_target::constant_pool::traverse_method_call(
+        const ast::method::operation::method_call_ast_node &method_call)
+{
+    goc_methodref_info(
+        goc_class_info(
+            goc_utf8_info(method_call.get_resolved_name().omit_last().join())
+        ),
+
+        goc_name_and_type_info(
+            goc_utf8_info(method_call.get_last_name(true)),
+            goc_utf8_info(method_call.generate_descriptor())
+        )
+    );
+
+    // Add constant arguments
+    for (const auto &argument : method_call.get_arguments())
+    {
+        if (const auto prim_arg = dynamic_cast<const ast::type::primitive_type_ast_node *>(argument->get_type()))
+        {
+            switch (prim_arg->get_type())
+            {
+            case definition::primitive_type::INTEGER: {
+                const int num = static_cast<const ast::var_reference::evaluable_ast_node<int> *>( // NOLINT(*-pro-type-static-cast-downcast)
+                    argument.get()
+                )->get_value();
+
+                // Only save numbers greater than 16 bits
+                if (std::numeric_limits<int16_t>::min() > num || num > std::numeric_limits<int16_t>::max())
+                {
+                    goc_integer_info(num);
+                }
+
+                break;
+            }
+
+            default: throw std::runtime_error("Unsupported primitive type");
+            }
+        }
+
+        else if (const auto ref_arg = dynamic_cast<const variable_reference_ast_node *>(argument.get()))
+        {
+            goc_fieldref_info(
+                goc_class_info(goc_utf8_info(ref_arg->get_resolved_name().omit_last().join())),
+
+                goc_name_and_type_info(
+                    goc_utf8_info(ref_arg->get_last_name(true)),
+                    goc_utf8_info(ref_arg->get_resolved().get_type()->generate_descriptor())
+                )
+            );
+        }
+
+        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
+        {
+            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
+                argument.get()
+            )->get_value();
+
+            goc_string_info(goc_utf8_info(string));
+        }
+    }
+}
 
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
@@ -105,6 +181,16 @@ int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &
     return goc_constant(utf8_info(utf8));
 }
 
+int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_index)
+{
+    return goc_constant(string_info(utf8_index));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_integer_info(const int num)
+{
+    return goc_constant(integer_info(num));
+}
+
 int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
 {
     return goc_constant(methodref_info(class_index, name_and_type_index));
@@ -117,18 +203,46 @@ int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_ind
 {
     return goc_constant(class_info(name_index));
 }
+int codesh::output::jvm_target::constant_pool::goc_fieldref_info(const int class_index, const int name_and_type_index)
+{
+    return goc_constant(fieldref_info(class_index, name_and_type_index));
+}
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     codesh::output::jvm_target::constant_pool::utf8_info(const std::string &utf8)
 {
     if (utf8.size() > 0xFFFF)
-        throw std::runtime_error("String size is longer than possible; max length is 65535");
+    {
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::STRING_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+    }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();
+
     util::put_int_bytes(utf8_info->length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
     utf8_info->bytes.insert(utf8_info->bytes.end(), utf8.begin(), utf8.end());
 
-    return std::move(utf8_info);
+    return utf8_info;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_String_info> codesh::output::jvm_target::constant_pool::
+    string_info(const int utf8_index)
+{
+    auto const_string = std::make_unique<defs::CONSTANT_String_info>();
+
+    util::put_int_bytes(const_string->string_index, 2, utf8_index);
+
+    return const_string;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Integer_info> codesh::output::jvm_target::constant_pool::
+    integer_info(const int num)
+{
+    auto const_integer = std::make_unique<defs::CONSTANT_Integer_info>();
+
+    util::put_int_bytes(const_integer->bytes, 4, num);
+
+    return const_integer;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
@@ -139,7 +253,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
     util::put_int_bytes(const_methodref->class_index, 2, class_index);
     util::put_int_bytes(const_methodref->name_and_type_index, 2, name_and_type_index);
 
-    return std::move(const_methodref);
+    return const_methodref;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>
@@ -150,7 +264,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>
     util::put_int_bytes(const_name_and_type->name_index, 2, name_index);
     util::put_int_bytes(const_name_and_type->descriptor_index, 2, descriptor_index);
 
-    return std::move(const_name_and_type);
+    return const_name_and_type;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
@@ -160,15 +274,25 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
 
     util::put_int_bytes(const_class->name_index, 2, name_index);
 
-    return std::move(const_class);
+    return const_class;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh::output::jvm_target::constant_pool::
+    fieldref_info(const int class_index, const int name_and_type_index)
+{
+    auto const_fieldref = std::make_unique<defs::CONSTANT_Fieldref_info>();
+
+    util::put_int_bytes(const_fieldref->class_index, 2, class_index);
+    util::put_int_bytes(const_fieldref->name_and_type_index, 2, name_and_type_index);
+
+    return const_fieldref;
+}
 
 int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &literal) const
 {
     const auto result = literals_lookup_map.find(&literal);
     if (result == literals_lookup_map.end())
-        throw std::runtime_error("Could not find literal in constant pool");
+        throw std::runtime_error("Could not find literal in constant pool"); // shouldn't be printed to user
 
     return result->second;
 }
@@ -176,6 +300,16 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 int codesh::output::jvm_target::constant_pool::get_utf8_index(const std::string &utf8) const
 {
     return get_index(*utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::get_string_index(const int utf8_index) const
+{
+    return get_index(*string_info(utf8_index));
+}
+
+int codesh::output::jvm_target::constant_pool::get_integer_index(const int num) const
+{
+    return get_index(*integer_info(num));
 }
 
 int codesh::output::jvm_target::constant_pool::get_methodref_index(const int class_index,
@@ -195,6 +329,11 @@ int codesh::output::jvm_target::constant_pool::get_class_index(const int name_in
     return get_index(*class_info(name_index));
 }
 
+int codesh::output::jvm_target::constant_pool::get_fieldref_index(const int class_index,
+                                                                  const int name_and_type_index) const
+{
+    return get_index(*fieldref_info(class_index, name_and_type_index));
+}
 
 std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_info>>
     codesh::output::jvm_target::constant_pool::get_literals() const

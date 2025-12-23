@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
 #include "type/type_parser.h"
@@ -12,7 +14,14 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         const std::string &source_stem)
 {
     if (tokens.empty())
-        throw std::runtime_error("Missing BASAD declaration"); //TODO: Convert to custom Codesh error
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_BASAD,
+            blasphemy::blasphemy_type::LEXICAL,
+            std::nullopt,
+            true
+        );
+    }
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
 
@@ -24,7 +33,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
 
     // Optionally parse imports
-    while (!tokens.empty() && tokens.front()->get_group() == token_group::KEYWORD_IMPORT)
+    while (util::peeking_check(tokens, token_group::KEYWORD_IMPORT))
     {
         root_node->get_import_declarations().push_back(parse_import(tokens));
     }
@@ -39,7 +48,11 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
             break;
 
-        default: throw std::runtime_error("Unexpected token: Expected ויהי"); //TODO: Convert to custom Codesh error
+        default:
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
+                blasphemy::blasphemy_type::SYNTAX);
+            tokens.pop();
+            break;
         }
     }
 

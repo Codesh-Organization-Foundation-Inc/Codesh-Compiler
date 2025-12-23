@@ -1,3 +1,5 @@
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
 #include "command_parser.h"
 #include "lexer/tokenizer.h"
 #include "output/jvm_target/class_file_builder.h"
@@ -15,7 +17,8 @@
 static std::string read_file(const std::string &file_name);
 
 
-int main(const int argc, char **const argv) {
+int main(const int argc, char **const argv)
+{
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
     const std::string amen_file = read_file(std::string(args.src_path));
@@ -36,6 +39,12 @@ int main(const int argc, char **const argv) {
     ast->construct_symbol_table();
     codesh::semantic_analyzer::analyze(*ast);
 
+    if (codesh::blasphemy::get_blasphemy_collector().has_errors())
+    {
+        codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
+        return EXIT_FAILURE;
+    }
+
 
     // A class file represents a single file.
     // So for each type declaration, build one class file:
@@ -45,16 +54,18 @@ int main(const int argc, char **const argv) {
         type_declaration->set_constant_pool(codesh::output::jvm_target::constant_pool(*ast, *type_declaration));
 
         // BUILDING
-        const auto class_file = codesh::output::jvm_target::class_file_builder(
+        codesh::output::jvm_target::defs::class_file class_file;
+        codesh::output::jvm_target::class_file_builder(
+            class_file,
             *ast,
             *type_declaration
         ).build();
 
         // WRITING
-        codesh::output::jvm_target::write_to_file(*class_file, *ast, *type_declaration, args.dest_path);
+        codesh::output::jvm_target::write_to_file(class_file, *ast, *type_declaration, args.dest_path);
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static std::string read_file(const std::string &file_name)
@@ -64,10 +75,12 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        throw std::runtime_error("Couldn't open " + file_name);
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR
+            + file_name,
+            codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
     }
 
-    std::stringstream buffer;
+    std::ostringstream buffer;
     buffer << file.rdbuf();
     file.close();
 

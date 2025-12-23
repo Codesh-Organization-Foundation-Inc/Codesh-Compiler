@@ -1,11 +1,14 @@
 #include "class_parser.h"
 
+#include "../../../blasphemy/blasphemy_collector.h"
+#include "../../../blasphemy/details.h"
 #include "../../ast/local_variable_declaration_ast_node.h"
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/type/primitive_type_ast_node.h"
 #include "../../ast/type_declaration/class_declaration_ast_node.h"
 #include "../../util.h"
 #include "../type_parser.h"
+
 #include "method_parser.h"
 
 namespace ast = codesh::ast;
@@ -16,23 +19,30 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
 
-static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    if (util::consume_token(tokens)->get_group() != token_group::KEYWORD_NAME)
+    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
-        throw std::runtime_error("Unexpected token: Expected ושמו");
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
+            blasphemy::blasphemy_type::SYNTAX);
     }
-
 
     // Get name
     const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens);
+    if (!name_token)
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX);
+    }
 
-    auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(name_token->get_content());
+    auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
+        definition::fully_qualified_class_name(name_token->get_content())
+    );
 
 
     // Get attributes
@@ -40,9 +50,10 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
 
     // Start scope
-    if (util::consume_token(tokens)->get_group() != token_group::SCOPE_BEGIN)
+    if (!util::consuming_check(tokens, token_group::SCOPE_BEGIN))
     {
-        throw std::runtime_error("Unexpected token: Expected start of scope (ויאמר:)");
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_SCOPE_BEGIN,
+            blasphemy::blasphemy_type::SYNTAX);
     }
 
     parse_class_scope(tokens, node.get());
@@ -66,8 +77,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             {
             case codesh::token_group::KEYWORD_METHOD:
             {
-                class_node->get_methods().push_back(
-                    parse_method_signature_scope(tokens)
+                class_node->add_method(
+                    parse_method_signature(tokens)
                 );
 
                 break;
@@ -92,15 +103,23 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             return;
         }
 
-        default: throw std::runtime_error("Unexpected token");
+        default: {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
+                                                                   codesh::blasphemy::blasphemy_type::SYNTAX);
+            return;
+        }
+
         }
     }
-    throw std::runtime_error("Unexpected EOF: Expected end of scope (ויתם:)");
+
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_SCOPE_END,
+        codesh::blasphemy::blasphemy_type::SYNTAX);
 }
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    const codesh::token_group type_token = parser::util::consume_token(tokens)->get_group();
+    const codesh::token_group type_token = parser::util::consume_token(tokens,
+            codesh::blasphemy::details::NO_TYPE)->get_group();
 
 
     if (type_token != codesh::token_group::IDENTIFIER)
@@ -110,7 +129,8 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
         if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
         {
-            throw std::runtime_error("Unexpected token");
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_IDENTIFIER,
+                codesh::blasphemy::blasphemy_type::SYNTAX);
         }
     }
 
@@ -118,38 +138,42 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     throw std::runtime_error("Fields not yet supported");
 }
 
-static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_scope(
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     tokens.pop();
 
     // ושמו
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
+    if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
-        throw std::runtime_error("Unexpected token: Expected ושמו");
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_KEYWORD_NAME,
+            codesh::blasphemy::blasphemy_type::SYNTAX);
     }
 
     // * (the name)
     const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
-    auto method_node = std::make_unique<ast::method_declaration_ast_node>();
-
-    method_node->set_name(name_token->get_content());
+    auto method_node = std::make_unique<ast::method::method_declaration_ast_node>(
+        codesh::definition::fully_qualified_class_name(name_token->get_content())
+    );
 
     // Get attributes
     method_node->set_attributes(parser::parse_modifiers(tokens));
 
 
-    while (tokens.front()->get_group() == codesh::token_group::KEYWORD_TAKES)
+    while (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_TAKES))
     {
-        tokens.pop();
-
         // Parse parameter type
         std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
 
         // ושמו
-        if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::KEYWORD_NAME)
-            throw std::runtime_error("Expected ושמו");
+        if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::NO_KEYWORD_NAME,
+                codesh::blasphemy::blasphemy_type::SYNTAX
+            );
+        }
 
         // * (the name)
         const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
@@ -158,14 +182,13 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
         param->set_type(std::move(param_type));
         param->set_name(token_name->get_content());
 
-        method_node->get_parameters().push_back(std::move(param));
+        method_node->add_parameter(std::move(param));
     }
 
 
     // If no וישב, return type = void:
-    if (tokens.front()->get_group() == codesh::token_group::KEYWORD_RETURN)
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_RETURN))
     {
-        tokens.pop();
         method_node->set_return_type(parser::util::parse_type(tokens));
     }
     else
@@ -178,12 +201,15 @@ static std::unique_ptr<ast::method_declaration_ast_node> parse_method_signature_
     }
 
 
-    if (parser::util::consume_token(tokens)->get_group() != codesh::token_group::SCOPE_BEGIN)
+    if (!parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
     {
-        throw std::runtime_error("Expected start of scope");
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_SCOPE_BEGIN,
+            codesh::blasphemy::blasphemy_type::SYNTAX
+        );
     }
 
-    parser::parse_method(tokens);
+    parser::parse_method(tokens, *method_node.get());
 
-    return std::move(method_node);
+    return method_node;
 }

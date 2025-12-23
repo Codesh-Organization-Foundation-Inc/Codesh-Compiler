@@ -3,8 +3,15 @@
 #include "symbol_table/symbol.h"
 
 #include <string>
-#include <vector>
 
+namespace codesh::semantic_analyzer
+{
+struct semantic_context;
+}
+namespace codesh::definition
+{
+class fully_qualified_class_name;
+}
 namespace codesh::ast
 {
 namespace type
@@ -17,17 +24,19 @@ class compilation_unit_ast_node;
 namespace codesh::semantic_analyzer::util
 {
 /**
- * @returns the Fully Qualified Class Name of the given type name (which isn't a descriptor).
- * If unresolved, returns {@link std::nullopt}
+ * @returns the Fully Qualified Class Name of the given type name.
+ * If unresolved, returns {@code false} and the originally passed name.
+ * Otherwise, returns {@code true} and the resolved name.
  */
-std::optional<std::string> resolve_custom_type(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        const std::string &name);
+[[nodiscard]] std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type(const semantic_context &context,
+        const definition::fully_qualified_class_name &full_name);
 
 /**
  * @return Whether the type was successfully resolved
+ * @param related_type_node A 2nd node that will get resolved with the exact same result, if found.
  */
-bool resolve_custom_type_node(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
-        ast::type::custom_type_ast_node &custom_type_node);
+bool resolve_custom_type_node(const semantic_context &context, ast::type::custom_type_ast_node &custom_type_node,
+        std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node = std::nullopt);
 
 /**
  * Either creates or returns the requested method overloads symbol.

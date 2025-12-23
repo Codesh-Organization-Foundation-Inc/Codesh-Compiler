@@ -1,5 +1,7 @@
 #include "import_parser.h"
 
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "ast/import_declaration_ast_node.h"
 #include "util.h"
 
@@ -8,14 +10,11 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
-    if (tokens.empty())
-    {
-        throw std::runtime_error("Expected identifier"); //TODO: Convert to custom Codesh error
-    }
 
     std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
 
     // Check if is a static import
+    util::ensure_tokens_exist(tokens, blasphemy::details::NO_IMPORT_TYPE); // TODO: provide better reason
     switch (tokens.front()->get_group())
     {
     case token_group::KEYWORD_IMPORT_STATIC:
@@ -26,15 +25,17 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(s
         // Already not static
         break;
 
-    default: throw std::runtime_error("Unexpected token: Expected import type");
+    default:
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IMPORT_TYPE,
+            blasphemy::blasphemy_type::SYNTAX);
+
     }
 
 
-    util::parse_fqcn(tokens, import_node->get_package_name(), true);
+    util::parse_fqcn(tokens, import_node->get_package_name());
 
-    if (import_node->get_package_name().back() == "*")
+    if (import_node->get_package_name().is_wildcard())
     {
-        import_node->get_package_name().pop_back();
         import_node->set_is_on_demand(true);
     }
 

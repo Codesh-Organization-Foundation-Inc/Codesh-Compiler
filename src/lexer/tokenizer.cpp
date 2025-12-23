@@ -1,5 +1,7 @@
 #include "tokenizer.h"
 
+#include "../blasphemy/blasphemy_collector.h"
+#include "../blasphemy/details.h"
 #include "../token/token.h"
 #include "../util.h"
 #include "regex.h"
@@ -71,6 +73,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
     {
         if (isspace(code[i]))
         {
+            //TODO: If this space is a newline, add newline++
+            //TODO: Add char counter, If newline++, then char_count = 0;
             i++;
             continue;
         }
@@ -128,7 +132,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            throw std::runtime_error("Error tokenizing file: No matching keywords found");
+            blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::TOKEN_DOESNT_EXIST,
+                blasphemy::blasphemy_type::LEXICAL);
         }
     }
 
@@ -159,7 +164,8 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
             //TODO: Convert word error token or alike
-            throw std::runtime_error("Unenclosed multiline comment");
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT , codesh::blasphemy::blasphemy_type::SYNTAX);
         }
 
         default: {
@@ -203,7 +209,7 @@ static void on_regex_token(codesh::token *token)
 
 static void escape_characters(std::string &str, const std::string &word)
 {
-    codesh::util::replaceAll(
+    codesh::util::replace_all(
         str,
         std::string(trie::keyword::STRING_ESCAPE) + word,
         word

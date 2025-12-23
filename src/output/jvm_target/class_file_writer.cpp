@@ -7,8 +7,10 @@
 
 #include <vector>
 
-#include "defs/methods_info_entry.h"
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
+#include "defs/methods_info_entry.h"
 
 #include "./defs/attribute_info_entry.h"
 #include "defs/class_file.h"
@@ -25,10 +27,13 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     const ast::compilation_unit_ast_node &root_node,
     const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination / (type_decl.get_name() + ".class"), std::ios::binary);
+    std::ofstream destination_file(destination / (type_decl.get_last_name(false) + ".class"), std::ios::binary);
 
     if (!destination_file)
-        throw std::runtime_error("Unable to open output file");
+    {
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::SOURCE_FILE_OPEN_ERROR,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+    }
 
 
     write_bytes(destination_file, class_file.magic, 4);
@@ -83,6 +88,19 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
         {
             write_bytes(out, nat_info->name_index, 2);
             write_bytes(out, nat_info->descriptor_index, 2);
+        }
+        else if (const auto integer_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Integer_info *>(&info.get()))
+        {
+            write_bytes(out, integer_info->bytes, 4);
+        }
+        else if (const auto string_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_String_info *>(&info.get()))
+        {
+            write_bytes(out, string_info->string_index, 2);
+        }
+        else if (const auto fieldref_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Fieldref_info *>(&info.get()))
+        {
+            write_bytes(out, fieldref_info->class_index, 2);
+            write_bytes(out, fieldref_info->name_and_type_index, 2);
         }
         else
         {

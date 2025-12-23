@@ -17,18 +17,15 @@ add_executable(Codesh_Compiler
         src/lexer/tokenizer.cpp
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
-        src/parser/ast/block_ast_node.cpp
-        src/parser/ast/block_ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/while_ast_node.cpp
-        src/parser/ast/while_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
+        src/parser/ast/method/operation/while_ast_node.cpp
+        src/parser/ast/method/operation/while_ast_node.h
+        src/parser/ast/impl/ir_emitting_ast_node.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
         src/parser/ast/compilation_unit_ast_node.h
-        src/parser/ast/impl/ir_convertable_ast_node.h
         src/parser/ast/operator/math/addition_operator_ast_node.cpp
         src/parser/ast/operator/math/addition_operator_ast_node.h
         src/parser/ast/operator/math/subtraction_operator_ast_node.cpp
@@ -128,8 +125,6 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/collect.h
         src/semantic_analyzer/method_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
-        src/semantic_analyzer/errors/errors.h
-        src/semantic_analyzer/errors/errors.cpp
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
         src/semantic_analyzer/util.cpp
@@ -139,29 +134,77 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol.tpp
         src/parser/ast/impl/i_resolvable.h
         src/parser/ast/impl/i_descriptor_emitter.cpp
-        src/parser/ast/impl/i_resolvable.cpp
-        src/semantic_analyzer/aliases.cpp
-        src/semantic_analyzer/aliases.h
+        src/parser/ast/impl/i_resolvable.tpp
         src/semantic_analyzer/method_decl/resolve.cpp
         src/semantic_analyzer/method_decl/resolve.h
         src/semantic_analyzer/method_decl/resolve_aliases.cpp
         src/semantic_analyzer/method_decl/resolve_aliases.h
+        src/blasphemy/blasphemy_collector.h
+        src/blasphemy/blasphemy_collector.cpp
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
+        src/output/ir/code_block.cpp
+        src/output/ir/code_block.h
+        src/output/ir/instruction.cpp
+        src/output/ir/instruction.h
+        src/parser/ast/method/operation/return_ast_node.cpp
+        src/parser/ast/method/operation/return_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.h
+        src/parser/ast/operator/boolean/not_operator_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.cpp
+        src/parser/ast/method/operation/super_call_ast_node.h
+        src/parser/ast/var_reference/evaluable_ast_node.tpp
+        src/parser/ast/var_reference/evaluable_ast_node.h
+        src/parser/ast/var_reference/value_ast_node.h
+        src/parser/ast/method/operation/method_call_ast_node.cpp
+        src/parser/ast/method/operation/method_call_ast_node.h
+        src/defenition/fully_qualified_class_name.cpp
+        src/defenition/fully_qualified_class_name.h
+        src/blasphemy/details.h
+        src/blasphemy/details.cpp
+        src/semantic_analyzer/method_call/resolve.cpp
+        src/semantic_analyzer/method_call/resolve.h
+        src/blasphemy/blasphemy_consumer.h
+        src/blasphemy/blasphemy_consumer.cpp
+        src/semantic_analyzer/type_decl/resolve.cpp
+        src/semantic_analyzer/type_decl/resolve.h
+        src/semantic_analyzer/semantic_context.h
+        src/semantic_analyzer/semantic_context.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.cpp
+        src/semantic_analyzer/type_decl/resolve_aliases.h
+        src/parser/ast/method/util.cpp
+        src/parser/ast/method/util.h
+        src/semantic_analyzer/builtins.cpp
+        src/semantic_analyzer/builtins.h
+        src/parser/ast/var_reference/error_value_ast_node.cpp
+        src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/variable_reference_ast_node.cpp
+        src/parser/ast/var_reference/variable_reference_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
-
 find_package(Boost REQUIRED COMPONENTS regex headers)
+
 target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
-
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
+
 target_link_libraries(Codesh_Compiler
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
 )
 
-
+# fmt
 include(FetchContent)
+
+FetchContent_Declare(
+        fmt
+        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+        GIT_TAG 12.1.0
+)
+
+FetchContent_MakeAvailable(fmt)
+target_link_libraries(Codesh_Compiler fmt::fmt)

@@ -37,7 +37,7 @@ std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(const int grou
     switch (const token_type type = get_token_type(group))
     {
     case token_type::IDENTIFIER:
-        return std::make_unique<identifier_token>(type, group, content);
+        return std::make_unique<identifier_token>(group, content);
 
     default:
         return std::make_unique<token>(type, group);
@@ -54,8 +54,8 @@ token_group codesh::token::get_group() const
     return this->group;
 }
 
-codesh::identifier_token::identifier_token(const token_type type, const token_group group, std::string content)
-    : token(type, group), content(std::move(content))
+codesh::identifier_token::identifier_token(const token_group group, std::string content)
+    : token(token_type::IDENTIFIER, group), content(std::move(content))
 {
 }
 
@@ -64,7 +64,7 @@ std::string codesh::identifier_token::get_content() const
     return this->content;
 }
 
-void codesh::identifier_token::set_content(const std::string &content)
+void codesh::identifier_token::set_content(std::string content)
 {
-    this->content = content;
+    this->content = std::move(content);
 }

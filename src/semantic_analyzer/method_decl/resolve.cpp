@@ -1,68 +1,73 @@
 #include "resolve.h"
+#include "../method_call/resolve.h"
 
+#include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"
 #include "../../parser/ast/type/custom_type_ast_node.h"
-#include "../../parser/ast/type/primitive_type_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../errors/errors.h"
+#include "../semantic_context.h"
 #include "../util.h"
 
-static void resolve_return_type(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
-    const std::string &class_name
-);
+#include <functional>
+#include <ranges>
 
-static void resolve_parameters(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method,
-    const std::string &class_name
-);
+static void resolve_return_type(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::method_symbol &method_symbol);
 
+static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method,
+        const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-void codesh::semantic_analyzer::method_declaration::resolve_methods(const ast::compilation_unit_ast_node &root) {
-    //TODO: Properly get country of origin
-    const country_symbol &country = root.get_symbol_table()->get().resolve_country("").value();
+static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-    for (const auto &type_decl : root.get_type_declarations())
-    {
-        auto *class_node = dynamic_cast<ast::type_decl::class_declaration_ast_node *>(type_decl.get());
-        if (!class_node)
-            continue;
-
-        // Get type symbol
-        const type_symbol &type = *static_cast<type_symbol *>(&country.resolve(type_decl->get_name()).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        for (const auto &method_decl : class_node->get_methods())
-        {
-            method_overloads_symbol &method_overloads = *static_cast<method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                &type.resolve(method_decl->get_name()).value().get()
-            );
-
-            std::unique_ptr<method_symbol> method(
-                static_cast<method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                    method_overloads.resolve_and_move(method_decl->generate_parameters_descriptor(false))
-                        .release()
-                )
-            );
-
-            resolve_return_type(root, *method_decl, class_node->get_name());
-            resolve_parameters(root, *method_decl, class_node->get_name());
+static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::type_symbol &type);
 
 
-            // Move to a new overloads entry now that the parameters' descriptors are real
-            method_overloads.add_symbol(method_decl->generate_parameters_descriptor(), std::move(method));
-        }
-
-    }
+void codesh::semantic_analyzer::method_declaration::resolve(
+    const semantic_context &context, const type_symbol &type,
+    const ast::method::method_declaration_ast_node &method_decl)
+{
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+    resolve_method_signature(new_context, method_decl, type);
 }
 
+static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::type_symbol &type)
+{
+    auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+        &type.resolve(method_decl.get_last_name(false)).value().get()
+    );
 
-static void resolve_return_type(
-    const codesh::ast::compilation_unit_ast_node &root,
-    const codesh::ast::method_declaration_ast_node &method_decl,
-    const std::string &class_name
-) {
+    // Get relevant method symbol from the method overloads map
+    // Then cast it to method_symbol
+    std::unique_ptr<codesh::semantic_analyzer::method_symbol> method(
+        static_cast<codesh::semantic_analyzer::method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+            method_overloads.resolve_and_move(method_decl.generate_parameters_descriptor(false))
+                .release()
+        )
+    );
+
+    resolve_return_type(context, method_decl, *method);
+    resolve_parameters(context, method_decl, *method);
+    resolve_local_variables(context, *method);
+
+    // Move to a new overloads entry, now that the parameters' descriptors are valid
+    const auto insert_result =
+        method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
+
+    return insert_result.first.get();
+}
+
+static void resolve_return_type(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl,
+        const codesh::semantic_analyzer::method_symbol &method_symbol)
+{
     auto *return_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(method_decl.get_return_type());
 
     if (!return_type)
@@ -71,51 +76,62 @@ static void resolve_return_type(
         return;
     }
 
-
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        root.get_symbol_table().value().get().resolve_country("").value()
-    };
-
-
-    if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *return_type))
-    {
-        std::ostringstream os_string;
-        os_string << "Unknown return type " << return_type->get_name()
-            << " in method " << method_decl.get_name()
-            << " of type " << class_name;
-
-        codesh::semantic_analyzer::collect_error(os_string.str());
-    }
+    codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context,
+        *return_type,
+        method_symbol.get_return_type()
+    );
 }
 
-static void resolve_parameters(
-        const codesh::ast::compilation_unit_ast_node &root,
-        const codesh::ast::method_declaration_ast_node &method,
-        const std::string &class_name)
+static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method,
+        const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    size_t i = 0;
+
     for (const auto &param : method.get_parameters())
     {
         auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
-
         if (!custom_param)
             continue;
 
+        codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context,
+            *custom_param,
+            *method_symbol.get_parameter_types()[i]
+        );
 
-        //TODO: Use actual countries
-        const std::vector lookup_countries = {
-            root.get_symbol_table().value().get().resolve_country("").value()
-        };
+        ++i;
+    }
+}
 
+static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol)
+{
+    // Skip erroring the first parameters_count variables, as they are a copy of the parameters.
+    // This avoids double error reporting.
+    const size_t parameters_count = method_symbol.get_parameter_types().size();
+    size_t i = 0;
 
-        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(lookup_countries, *custom_param))
-        {
-            std::ostringstream os_string;
-            os_string << "Unknown return type " << custom_param->get_name()
-                << " in method " << method.get_name()
-                << " of type " << class_name;
+    for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
+    {
+        auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        if (!var_type)
+            continue;
 
-            codesh::semantic_analyzer::collect_error(os_string.str());
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context,
+            *var_type
+        )) {
+            if (i >= parameters_count)
+            {
+                context.blasphemy_consumer(fmt::format(
+                    "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
+                    var_type->get_unresolved_name().join()
+                ));
+            }
         }
+
+        ++i;
     }
 }
