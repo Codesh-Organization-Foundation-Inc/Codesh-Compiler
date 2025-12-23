@@ -123,9 +123,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     // Code
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
-
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
-    util::put_int_bytes(code_attr->max_stack, 2, 1);
 
 
     // Convert the method to IR
@@ -135,18 +133,34 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         type_decl
     );
 
-    std::list<unsigned char> bytecode_collector;
+    std::list<ir::instruction_container> bytecode_collector;
     for (const auto &instruction : code_block.get_instructions())
     {
         instruction->emit(bytecode_collector);
     }
 
     code_attr->code.reserve(bytecode_collector.size());
-    code_attr->code.insert(
-        std::end(code_attr->code),
-        std::begin(bytecode_collector),
-        std::end(bytecode_collector)
-    );
+    int max_stack = 0;
+    int current_stack = 0;
+
+    for (const auto &[opcodes, stack_delta] : bytecode_collector)
+    {
+        for (const auto opcode : opcodes)
+        {
+            code_attr->code.push_back(opcode);
+        }
+
+        // Each opcode may alter the method stack.
+        // Count it here:
+        current_stack += stack_delta;
+
+        if (current_stack < 0)
+            throw std::runtime_error("Stack underflow: Attempted to emit an opcode that pops the stack more than it can");
+
+        max_stack = std::max(max_stack, current_stack);
+    }
+
+    util::put_int_bytes(code_attr->max_stack, 2, max_stack);
 
 
     if (code_attr->code.size() > 0xFFFFFF)
