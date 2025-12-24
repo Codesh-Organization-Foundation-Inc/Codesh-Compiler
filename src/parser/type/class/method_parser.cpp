@@ -6,6 +6,7 @@
 #include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../util.h"
 #include "../type_parser.h"
+#include "../../value_parser.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
@@ -25,6 +26,14 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         case token_group::KEYWORD_LET:
             method_decl.get_local_variables().push_back(parse_variable_declaration(tokens));
             break;
+
+        case token_group::OPERATOR_ADDITION:
+        case token_group::OPERATOR_SUBTRACTION:
+        case token_group::OPERATOR_MULTIPLICATION:
+        case token_group::OPERATOR_DIVISION:
+        case token_group::OPERATOR_MODULO:
+            parse_mathematics_operation(tokens); //TODO: use it.. or not
+
 
         case token_group::SCOPE_END:
             tokens.pop();
@@ -83,11 +92,17 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser
     if (tokens.front()->get_group() == token_group::KEYWORD_LET)
     {
         tokens.pop();
-        variable_decl_ast_node->set_value(util::parse_value(tokens));
+        variable_decl_ast_node->set_value(parse_value(tokens));
     }
 
     util::ensure_end_op(tokens);
     return variable_decl_ast_node;
+}
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_mathematics_operation(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    //TODO: continue
 }
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -95,7 +110,7 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
 {
     while (!codesh::parser::util::consuming_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
     {
-        method_call.get_arguments().push_back(codesh::parser::util::parse_value(tokens));
+        method_call.get_arguments().push_back(codesh::parser::parse_value(tokens));
 
         if (codesh::parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR))
             continue;
