@@ -1,6 +1,5 @@
 #pragma once
 #include "../var_reference/value_ast_node.h"
-#include "ir_emitting_ast_node.h"
 
 #include <memory>
 
