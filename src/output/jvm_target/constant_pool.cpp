@@ -17,23 +17,22 @@
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
-    root_node(root_node),
-    type_decl(type_decl),
-
-    index(1),
-    this_class_cpi(
-        goc_class_info(
-            goc_utf8_info(type_decl.get_resolved_name().join())
-        )
-    )
+    index(1)
 {
-    goc_utf8_info("SourceFile");
+    // Add metadata used in the classfile:
+    // This class
+    goc_class_info(
+        goc_utf8_info(type_decl.get_resolved_name().join())
+    );
+    goc_utf8_info(type_decl.generate_descriptor());
+
+    // Filename
     goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);
 
+    // More bs
+    goc_utf8_info("SourceFile");
     goc_utf8_info("Code");
     goc_utf8_info("LocalVariableTable");
-
-    goc_utf8_info(type_decl.generate_descriptor());
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -152,62 +151,6 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
             );
         }
 
-        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
-        {
-            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
-                argument.get()
-            )->get_value();
-
-            goc_string_info(goc_utf8_info(string));
-        }
-    }
-}
-
-int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
-{
-    const auto [it, inserted] = literals.emplace(std::move(constant_info));
-
-    if (inserted)
-    {
-        literals_lookup_map.emplace(it->get(), index);
-        return index++;
-    }
-
-    return literals_lookup_map.at(it->get());
-}
-
-int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)
-{
-    return goc_constant(utf8_info(utf8));
-}
-
-int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_index)
-{
-    return goc_constant(string_info(utf8_index));
-}
-
-int codesh::output::jvm_target::constant_pool::goc_integer_info(const int num)
-{
-    return goc_constant(integer_info(num));
-}
-
-int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
-{
-    return goc_constant(methodref_info(class_index, name_and_type_index));
-}
-int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int name_index, const int descriptor_index)
-{
-    return goc_constant(name_and_type_info(name_index, descriptor_index));
-}
-int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
-{
-    return goc_constant(class_info(name_index));
-}
-int codesh::output::jvm_target::constant_pool::goc_fieldref_info(const int class_index, const int name_and_type_index)
-{
-    return goc_constant(fieldref_info(class_index, name_and_type_index));
-}
-
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     codesh::output::jvm_target::constant_pool::utf8_info(const std::string &utf8)
 {
@@ -277,15 +220,35 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
     return const_class;
 }
 
-std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh::output::jvm_target::constant_pool::
-    fieldref_info(const int class_index, const int name_and_type_index)
+int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
-    auto const_fieldref = std::make_unique<defs::CONSTANT_Fieldref_info>();
+    const auto [it, inserted] = literals.emplace(std::move(constant_info));
 
-    util::put_int_bytes(const_fieldref->class_index, 2, class_index);
-    util::put_int_bytes(const_fieldref->name_and_type_index, 2, name_and_type_index);
+    if (inserted)
+    {
+        literals_lookup_map.emplace(it->get(), index);
+        return index++;
+    }
 
-    return const_fieldref;
+    return literals_lookup_map.at(it->get());
+}
+
+int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &utf8)
+{
+    return goc_constant(utf8_info(utf8));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
+{
+    return goc_constant(methodref_info(class_index, name_and_type_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int name_index, const int descriptor_index)
+{
+    return goc_constant(name_and_type_info(name_index, descriptor_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
+{
+    return goc_constant(class_info(name_index));
 }
 
 int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &literal) const

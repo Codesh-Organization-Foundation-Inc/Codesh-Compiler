@@ -39,9 +39,6 @@ namespace codesh::output::jvm_target
 {
 class constant_pool
 {
-    const ast::compilation_unit_ast_node &root_node;
-    const ast::type_decl::type_declaration_ast_node &type_decl;
-
     std::unordered_set<
         std::unique_ptr<const defs::cp_info>,
         defs::cp_info_unique_ptr_hash, defs::cp_info_unique_ptr_equal
@@ -62,21 +59,10 @@ class constant_pool
     void traverse_method_call(const ast::method::operation::method_call_ast_node &method_call);
 
     int index;
-    const int this_class_cpi;
 
 
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
     int goc_constant(std::unique_ptr<defs::cp_info> constant_info);
-
-    int goc_utf8_info(const std::string &utf8);
-    int goc_string_info(int utf8_index);
-    int goc_integer_info(int num);
-
-    int goc_methodref_info(int class_index, int name_and_type_index);
-    int goc_name_and_type_info(int name_index, int descriptor_index);
-    int goc_class_info(int name_index);
-    int goc_fieldref_info(int class_index, int name_and_type_index);
-
 
     static std::unique_ptr<defs::CONSTANT_Utf8_info> utf8_info(const std::string &utf8);
     static std::unique_ptr<defs::CONSTANT_String_info> string_info(int utf8_index);
@@ -93,6 +79,15 @@ public:
      */
     constant_pool(const ast::compilation_unit_ast_node &root_node,
             const ast::type_decl::type_declaration_ast_node &type_decl);
+
+    int goc_utf8_info(const std::string &utf8);
+    int goc_string_info(int utf8_index);
+    int goc_integer_info(int num);
+
+    int goc_methodref_info(int class_index, int name_and_type_index);
+    int goc_name_and_type_info(int name_index, int descriptor_index);
+    int goc_class_info(int name_index);
+    int goc_fieldref_info(int class_index, int name_and_type_index);
 
     [[nodiscard]] int get_index(const defs::cp_info &literal) const;
 
