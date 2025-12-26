@@ -2,7 +2,6 @@
 
 #include "../../../output/ir/instruction.h"
 #include "../../../output/ir/code_block.h"
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
 #include "../var_reference/evaluable_ast_node.h"
 #include "../var_reference/variable_reference_ast_node.h"
 
