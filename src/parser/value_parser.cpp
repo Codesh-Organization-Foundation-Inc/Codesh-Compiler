@@ -126,9 +126,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_ADDITION: {
         tokens.pop();
 
+        auto left_value_node = parse_value(tokens);
+        auto right_value_node = parse_value(tokens);
+
         eval_ast_node = std::make_unique<ast::op::addition_operator_ast_node>(
-            std::move(parse_value(tokens)), // TODO: remove std::move if not needed
-            std::move(parse_value(tokens))
+            std::move(left_value_node), // TODO: remove std::move if not needed
+            std::move(right_value_node)
         );
 
         break;
@@ -137,9 +140,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_SUBTRACTION: {
         tokens.pop();
 
+        auto left_value_node = parse_value(tokens);
+        auto right_value_node = parse_value(tokens);
+
         eval_ast_node = std::make_unique<ast::op::subtraction_operator_ast_node>(
-            std::move(parse_value(tokens)),
-            std::move(parse_value(tokens))
+            std::move(left_value_node),
+            std::move(right_value_node)
         );
 
         break;
@@ -229,7 +235,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
 
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>();
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // TODO: does problems
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(

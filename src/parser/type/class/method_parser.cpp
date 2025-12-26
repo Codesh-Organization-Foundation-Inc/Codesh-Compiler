@@ -33,6 +33,12 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         case token_group::OPERATOR_DIVISION:
         case token_group::OPERATOR_MODULO:
             method_decl.get_body().push_back(parse_value(tokens));
+            if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
+            {
+                blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
+                blasphemy::blasphemy_type::SYNTAX);
+                tokens.pop(); // TODO: remove it in the future if not needed
+            }
             break;
 
 
@@ -42,6 +48,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
 
         default: blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
             blasphemy::blasphemy_type::SYNTAX);
+            tokens.pop(); // TODO: remove it in the future if not needed
         }
     }
 
