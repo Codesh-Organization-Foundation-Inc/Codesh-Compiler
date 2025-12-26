@@ -52,14 +52,7 @@ class constant_pool
         defs::cp_info_ptr_hash, defs::cp_info_ptr_equal
     > literals_lookup_map;
 
-    //TODO: Move these to the actual nodes as an interface
-    void traverse_class_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
-    void traverse_method_decl(const ast::type_decl::class_declaration_ast_node &class_decl);
-    void traverse_method_body(const ast::method::method_declaration_ast_node &method_decl);
-    void traverse_method_call(const ast::method::operation::method_call_ast_node &method_call);
-
     int index;
-
 
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
     int goc_constant(std::unique_ptr<defs::cp_info> constant_info);

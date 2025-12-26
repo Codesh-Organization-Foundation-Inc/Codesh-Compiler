@@ -65,6 +65,29 @@ std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh:
     return arguments;
 }
 
+void codesh::ast::method::operation::method_call_ast_node::emit_constants(
+    const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool) const
+{
+    constant_pool.goc_methodref_info(
+        constant_pool.goc_class_info(
+            constant_pool.goc_utf8_info(get_resolved_name().omit_last().join())
+        ),
+
+        constant_pool.goc_name_and_type_info(
+            constant_pool.goc_utf8_info(get_last_name(true)),
+            constant_pool.goc_utf8_info(generate_descriptor())
+        )
+    );
+
+    // Emit arguments
+    for (const auto &argument : get_arguments())
+    {
+        if (const auto constant_emitter = dynamic_cast<const i_constant_pool_emitter *>(argument.get()))
+        {
+            constant_emitter->emit_constants(root_node, constant_pool);
+        }
+    }
+}
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

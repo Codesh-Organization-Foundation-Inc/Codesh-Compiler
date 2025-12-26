@@ -33,6 +33,24 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::set_value(T value)
 }
 
 template <typename T>
+void codesh::ast::var_reference::evaluable_ast_node<T>::emit_constants(
+    const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool) const
+{
+    if constexpr (std::is_same_v<T, int>)
+    {
+        // Only save numbers greater than 16 bits
+        if (std::numeric_limits<int16_t>::min() > value || value > std::numeric_limits<int16_t>::max())
+        {
+            constant_pool.goc_integer_info(value);
+        }
+    }
+    else if constexpr (std::is_same_v<T, std::string>)
+    {
+        constant_pool.goc_string_info(constant_pool.goc_utf8_info(value));
+    }
+}
+
+template <typename T>
 void codesh::ast::var_reference::evaluable_ast_node<T>::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const

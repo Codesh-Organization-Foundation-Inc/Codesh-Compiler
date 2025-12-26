@@ -32,6 +32,20 @@ codesh::ast::type::type_ast_node *variable_reference_ast_node::get_type() const
     return get_resolved().get_type();
 }
 
+void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
+                                                 codesh::output::jvm_target::constant_pool &constant_pool) const
+{
+    //TODO: Expand beyond static
+    constant_pool.goc_fieldref_info(
+        constant_pool.goc_class_info(constant_pool.goc_utf8_info(get_resolved_name().omit_last().join())),
+
+        constant_pool.goc_name_and_type_info(
+            constant_pool.goc_utf8_info(get_last_name(true)),
+            constant_pool.goc_utf8_info(get_resolved().get_type()->generate_descriptor())
+        )
+    );
+}
+
 void variable_reference_ast_node::emit_ir(
     codesh::output::ir::code_block &containing_block, const codesh::semantic_analyzer::symbol_table &symbol_table,
     const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl) const

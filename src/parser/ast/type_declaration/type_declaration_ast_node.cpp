@@ -1,6 +1,8 @@
 #include "type_declaration_ast_node.h"
 
+#include "../../../defenition/definitions.h"
 #include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../compilation_unit_ast_node.h"
 #include "../type/custom_type_ast_node.h"
 
 #include <utility>
@@ -102,3 +104,50 @@ const std::list<codesh::ast::method::method_declaration_ast_node *> &codesh::ast
     return methods;
 }
 
+void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
+        const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool) const
+{
+    emit_metadata(root_node, constant_pool);
+
+    // This class
+    constant_pool.goc_class_info(
+        constant_pool.goc_utf8_info(get_resolved_name().join())
+    );
+    constant_pool.goc_utf8_info(generate_descriptor());
+
+    // Superclass
+    const int super_class_cpi = constant_pool.goc_utf8_info(
+        get_super_class()->get_resolved_name().join()
+    );
+    const int super_class_constant = constant_pool.goc_class_info(super_class_cpi);
+
+    // Add super constructor method reference
+    //TODO: Move to IR
+    constant_pool.goc_methodref_info(
+        super_class_constant,
+
+        constant_pool.goc_name_and_type_info(
+            constant_pool.goc_utf8_info("<init>"),
+            //TODO: Actually check super call params
+            constant_pool.goc_utf8_info("()V")
+        )
+    );
+
+    // Emit methods
+    for (const auto &method_decl : get_all_methods())
+    {
+        method_decl->emit_constants(root_node, constant_pool);
+    }
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::emit_metadata(const compilation_unit_ast_node &root_node,
+        output::jvm_target::constant_pool &constant_pool) const
+{
+    // Filename
+    constant_pool.goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);
+
+    // More bs
+    constant_pool.goc_utf8_info("SourceFile");
+    constant_pool.goc_utf8_info("Code");
+    constant_pool.goc_utf8_info("LocalVariableTable");
+}
