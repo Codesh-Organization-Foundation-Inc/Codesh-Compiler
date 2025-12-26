@@ -20,6 +20,7 @@ extern const std::string NO_IMPORT_TYPE;
 extern const std::string NO_KEYWORD_LET;
 extern const std::string NO_KEYWORD_NAME;
 extern const std::string NO_CLOSE_MULTI_COMMENT;
+extern const std::string NO_CLOSE_PARENTHESIS;
 extern const std::string NO_SCOPE_BEGIN;
 extern const std::string NO_SCOPE_END;
 extern const std::string NO_KEYWORD_SHALL_BE;

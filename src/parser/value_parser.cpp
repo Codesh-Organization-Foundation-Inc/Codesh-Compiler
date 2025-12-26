@@ -211,6 +211,22 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
 
+    case token_group::OPEN_PARENTHESIS: {
+        tokens.pop();
+
+        auto inner = parse_value(tokens);
+
+        if (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS)) {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_CLOSE_PARENTHESIS,
+                blasphemy::blasphemy_type::SYNTAX
+            );
+        }
+
+        eval_ast_node = std::move(inner);
+        break;
+    }
+
 
     default: {
         eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>();
