@@ -151,6 +151,17 @@ void codesh::output::jvm_target::constant_pool::traverse_method_call(
             );
         }
 
+        else if (argument->get_type()->generate_descriptor() == "Ljava/lang/String;")
+        {
+            const auto string = static_cast<const ast::var_reference::evaluable_ast_node<std::string> *>( // NOLINT(*-pro-type-static-cast-downcast)
+                argument.get()
+            )->get_value();
+
+            goc_string_info(goc_utf8_info(string));
+        }
+    }
+}
+
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     codesh::output::jvm_target::constant_pool::utf8_info(const std::string &utf8)
 {
@@ -220,6 +231,17 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Class_info>
     return const_class;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh::output::jvm_target::constant_pool::
+    fieldref_info(const int class_index, const int name_and_type_index)
+{
+    auto const_fieldref = std::make_unique<defs::CONSTANT_Fieldref_info>();
+
+    util::put_int_bytes(const_fieldref->class_index, 2, class_index);
+    util::put_int_bytes(const_fieldref->name_and_type_index, 2, name_and_type_index);
+
+    return const_fieldref;
+}
+
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
     const auto [it, inserted] = literals.emplace(std::move(constant_info));
@@ -238,6 +260,16 @@ int codesh::output::jvm_target::constant_pool::goc_utf8_info(const std::string &
     return goc_constant(utf8_info(utf8));
 }
 
+int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_index)
+{
+    return goc_constant(string_info(utf8_index));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_integer_info(const int num)
+{
+    return goc_constant(integer_info(num));
+}
+
 int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
 {
     return goc_constant(methodref_info(class_index, name_and_type_index));
@@ -249,6 +281,10 @@ int codesh::output::jvm_target::constant_pool::goc_name_and_type_info(const int 
 int codesh::output::jvm_target::constant_pool::goc_class_info(const int name_index)
 {
     return goc_constant(class_info(name_index));
+}
+int codesh::output::jvm_target::constant_pool::goc_fieldref_info(const int class_index, const int name_and_type_index)
+{
+    return goc_constant(fieldref_info(class_index, name_and_type_index));
 }
 
 int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &literal) const
