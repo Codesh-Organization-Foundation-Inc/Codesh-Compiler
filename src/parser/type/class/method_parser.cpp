@@ -32,7 +32,8 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         case token_group::OPERATOR_MULTIPLICATION:
         case token_group::OPERATOR_DIVISION:
         case token_group::OPERATOR_MODULO:
-            parse_mathematics_operation(tokens); //TODO: use it.. or not
+            method_decl.get_body().push_back(parse_value(tokens));
+            break;
 
 
         case token_group::SCOPE_END:
@@ -97,12 +98,6 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser
 
     util::ensure_end_op(tokens);
     return variable_decl_ast_node;
-}
-
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_mathematics_operation(
-        std::queue<std::unique_ptr<token>> &tokens)
-{
-    //TODO: continue
 }
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
