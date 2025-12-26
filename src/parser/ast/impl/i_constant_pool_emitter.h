@@ -19,7 +19,7 @@ public:
     virtual ~i_constant_pool_emitter() = default;
 
     virtual void emit_constants(const compilation_unit_ast_node &root_node,
-                                output::jvm_target::constant_pool &constant_pool) const = 0;
+                                output::jvm_target::constant_pool &constant_pool) = 0;
 };
 
 }

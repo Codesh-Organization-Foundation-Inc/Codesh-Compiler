@@ -53,7 +53,7 @@ public:
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,
-                        output::jvm_target::constant_pool &constant_pool) const override;
+                        output::jvm_target::constant_pool &constant_pool) override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
                  const type_decl::type_declaration_ast_node &containing_type_decl) const override;

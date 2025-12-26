@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <optional>
 #include <vector>
 
 namespace codesh::output::jvm_target
@@ -203,10 +204,14 @@ public:
 class load_int_constant_instruction final : public instruction
 {
     const int constant;
-    const jvm_target::constant_pool &fallback_constant_pool;
+    const std::optional<int> constant_cpi;
 
 public:
-    load_int_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
+    /**
+     * @param constant
+     * @param constant_cpi The constant pool index of a big integer. If passed, uses this and disregards the constant.
+     */
+    load_int_constant_instruction(int constant, std::optional<int> constant_cpi);
 
     void emit(std::list<instruction_container> &collector) const override;
 };

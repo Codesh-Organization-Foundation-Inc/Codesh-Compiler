@@ -110,7 +110,7 @@ std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::metho
 }
 
 void codesh::ast::method::method_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
-        output::jvm_target::constant_pool &constant_pool) const
+        output::jvm_target::constant_pool &constant_pool)
 {
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),
@@ -127,7 +127,7 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
     // Emit for body
     for (const auto &statement : get_body())
     {
-        if (const auto *consatnt_emitter = dynamic_cast<const i_constant_pool_emitter *>(statement.get()))
+        if (auto *consatnt_emitter = dynamic_cast<i_constant_pool_emitter *>(statement.get()))
         {
             consatnt_emitter->emit_constants(root_node, constant_pool);
         }

@@ -77,7 +77,7 @@ public:
     [[nodiscard]] std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
 
     void emit_constants(const compilation_unit_ast_node &root_node,
-                        output::jvm_target::constant_pool &constant_pool) const override;
+                        output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

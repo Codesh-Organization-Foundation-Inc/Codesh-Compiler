@@ -85,7 +85,7 @@ public:
     [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
 
     void emit_constants(const compilation_unit_ast_node &root_node,
-                        output::jvm_target::constant_pool &constant_pool) const override;
+                        output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

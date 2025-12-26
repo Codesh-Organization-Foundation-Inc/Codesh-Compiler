@@ -71,7 +71,7 @@ public:
      * Constructs a new constant pool using the provided AST node
      */
     constant_pool(const ast::compilation_unit_ast_node &root_node,
-            const ast::type_decl::type_declaration_ast_node &type_decl);
+                  ast::type_decl::type_declaration_ast_node &type_decl);
 
     int goc_utf8_info(const std::string &utf8);
     int goc_string_info(int utf8_index);

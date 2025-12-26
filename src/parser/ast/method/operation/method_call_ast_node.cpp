@@ -66,7 +66,7 @@ std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh:
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_constants(
-    const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool) const
+    const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
 {
     constant_pool.goc_methodref_info(
         constant_pool.goc_class_info(
@@ -82,7 +82,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
     // Emit arguments
     for (const auto &argument : get_arguments())
     {
-        if (const auto constant_emitter = dynamic_cast<const i_constant_pool_emitter *>(argument.get()))
+        if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(argument.get()))
         {
             constant_emitter->emit_constants(root_node, constant_pool);
         }

@@ -10,7 +10,7 @@
 #include "../../parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
-        const ast::type_decl::type_declaration_ast_node &type_decl) :
+        ast::type_decl::type_declaration_ast_node &type_decl) :
     index(1)
 {
     type_decl.emit_constants(root_node, *this);

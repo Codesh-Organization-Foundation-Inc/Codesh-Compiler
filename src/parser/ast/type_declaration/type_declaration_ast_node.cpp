@@ -105,7 +105,7 @@ const std::list<codesh::ast::method::method_declaration_ast_node *> &codesh::ast
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
-        const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool) const
+        const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
 {
     emit_metadata(root_node, constant_pool);
 

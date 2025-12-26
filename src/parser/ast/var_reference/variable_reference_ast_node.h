@@ -23,6 +23,8 @@ class variable_reference_ast_node : public codesh::ast::var_reference::value_ast
     const codesh::definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<codesh::semantic_analyzer::field_symbol>> resolved_symbol;
 
+    std::optional<int> var_cpi;
+
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<codesh::semantic_analyzer::field_symbol>> &
     _get_resolved() const override;
@@ -37,7 +39,7 @@ public:
 
 
     void emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
-                        codesh::output::jvm_target::constant_pool &constant_pool) const override;
+                        codesh::output::jvm_target::constant_pool &constant_pool) override;
 
     void emit_ir(codesh::output::ir::code_block &containing_block,
                  const codesh::semantic_analyzer::symbol_table &symbol_table,
