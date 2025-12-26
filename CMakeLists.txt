@@ -180,6 +180,7 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
+        src/parser/ast/impl/i_constant_pool_emitter.h
 )
 
 # sudo dnf install boost-regex boost-devel
