@@ -36,8 +36,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-                blasphemy::blasphemy_type::SYNTAX);
-                tokens.pop(); // TODO: remove it in the future if not needed
+                    blasphemy::blasphemy_type::SYNTAX);
             }
             break;
 

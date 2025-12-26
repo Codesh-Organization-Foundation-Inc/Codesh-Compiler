@@ -121,17 +121,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
 
-    // mathematics operations
+    // Math operations:
 
     case token_group::OPERATOR_ADDITION: {
         tokens.pop();
 
-        auto left_value_node = parse_value(tokens);
-        auto right_value_node = parse_value(tokens);
-
         eval_ast_node = std::make_unique<ast::op::addition_operator_ast_node>(
-            std::move(left_value_node), // TODO: remove std::move if not needed
-            std::move(right_value_node)
+            parse_value(tokens),
+            parse_value(tokens)
         );
 
         break;
@@ -140,12 +137,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_SUBTRACTION: {
         tokens.pop();
 
-        auto left_value_node = parse_value(tokens);
-        auto right_value_node = parse_value(tokens);
-
         eval_ast_node = std::make_unique<ast::op::subtraction_operator_ast_node>(
-            std::move(left_value_node),
-            std::move(right_value_node)
+            parse_value(tokens),
+            parse_value(tokens)
         );
 
         break;

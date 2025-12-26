@@ -22,7 +22,7 @@ public:
     void set_left(std::unique_ptr<ir_emitting_ast_node> node);
     void set_right(std::unique_ptr<ir_emitting_ast_node> node);
 
-    type::type_ast_node *get_type() const override;
+    [[nodiscard]] type::type_ast_node *get_type() const override;
 };
 
 
