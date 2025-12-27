@@ -67,10 +67,10 @@ public:
  * @tparam T The producing node type. Must extend @link ast_node \endlink.
  */
 template <typename T>
-class i_resolveable_symbol
+class i_resolvable_symbol
 {
 public:
-    virtual ~i_resolveable_symbol();
+    virtual ~i_resolvable_symbol();
 
     [[nodiscard]] virtual T *get_producing_node() const = 0;
     [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
@@ -99,7 +99,7 @@ public:
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
-        public i_resolveable_symbol<ast::type_decl::type_declaration_ast_node>
+        public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
 {
     const definition::fully_qualified_class_name full_name;
 
@@ -141,7 +141,7 @@ public:
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
 };
 
-//TODO: Make resolveable
+//TODO: Make resolvable
 class field_symbol final : public variable_symbol
 {
     const definition::fully_qualified_class_name full_name;
@@ -157,7 +157,7 @@ public:
 };
 
 class local_variable_symbol final : public variable_symbol,
-    public i_resolveable_symbol<ast::variable_declaration_ast_node>
+    public i_resolvable_symbol<ast::variable_declaration_ast_node>
 {
     definition::fully_qualified_class_name full_name;
     ast::variable_declaration_ast_node *producing_node;
@@ -218,7 +218,7 @@ public:
     [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
 };
 
-class method_symbol final : public symbol, public i_resolveable_symbol<ast::method::method_declaration_ast_node>
+class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>
 {
     definition::fully_qualified_class_name full_name;
 

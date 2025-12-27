@@ -13,7 +13,7 @@ namespace codesh::ast::impl
 {
 
 /**
- * @tparam T The symbol type. Must extend {@link i_resolveable_symbol}.
+ * @tparam T The symbol type. Must extend {@link i_resolvable_symbol}.
  */
 template <typename T>
 class i_resolvable
@@ -30,7 +30,7 @@ public:
     [[nodiscard]] virtual const definition::fully_qualified_class_name &get_unresolved_name() const = 0;
     /**
      * @returns The resolved type name.
-     * Shorthand for {@code {@link i_resolveable_symbol<T>::get_full_name}}
+     * Shorthand for {@code {@link i_resolvable_symbol<T>::get_full_name}}
      */
     [[nodiscard]] const definition::fully_qualified_class_name &get_resolved_name() const;
 
