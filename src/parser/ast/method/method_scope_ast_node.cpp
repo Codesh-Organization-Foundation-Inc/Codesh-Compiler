@@ -56,6 +56,11 @@ void codesh::ast::method::method_scope_ast_node::mark_end() const
 void codesh::ast::method::method_scope_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                                 output::jvm_target::constant_pool &constant_pool)
 {
+    for (const auto &local_var : local_variables)
+    {
+        local_var->emit_constants(root_node, constant_pool);
+    }
+
     for (const auto &statement : get_body())
     {
         if (auto *constant_emitter = dynamic_cast<i_constant_pool_emitter *>(statement.get()))
