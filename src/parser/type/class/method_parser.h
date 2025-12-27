@@ -21,9 +21,6 @@ namespace codesh::parser
 
 void parse_method(std::queue<std::unique_ptr<token>> &tokens, ast::method::method_declaration_ast_node &method_decl);
 
-[[nodiscard]] std::unique_ptr<ast::var_reference::value_ast_node> parse_mathematics_operation(
-    std::queue<std::unique_ptr<token>> &tokens);
-
 [[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
     std::queue<std::unique_ptr<token>> &tokens);
 

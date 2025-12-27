@@ -121,7 +121,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
 
-    // mathematics operations
+    // Math operations:
 
     case token_group::OPERATOR_ADDITION: {
         tokens.pop();

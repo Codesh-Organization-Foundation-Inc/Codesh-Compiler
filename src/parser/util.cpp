@@ -2,15 +2,10 @@
 
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
-    #include "../defenition/definitions.h"
-    #include "../defenition/fully_qualified_class_name.h"
+#include "../defenition/definitions.h"
+#include "../defenition/fully_qualified_class_name.h"
 #include "ast/type/custom_type_ast_node.h"
 #include "ast/type/primitive_type_ast_node.h"
-#include "ast/var_reference/evaluable_ast_node.h"
-
-#include <functional>
-
-
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
 
