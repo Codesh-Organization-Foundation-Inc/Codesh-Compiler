@@ -10,15 +10,22 @@ codesh::ast::impl::ir_emitting_ast_node *codesh::ast::impl::binary_ast_node::get
 {
     return this->left.get();
 }
+
 codesh::ast::impl::ir_emitting_ast_node *codesh::ast::impl::binary_ast_node::get_right() const
 {
     return this->right.get();
+}
+
+codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const
+{
+    return this->type.get();
 }
 
 void codesh::ast::impl::binary_ast_node::set_left(std::unique_ptr<ir_emitting_ast_node> node)
 {
     this->left = std::move(node);
 }
+
 void codesh::ast::impl::binary_ast_node::set_right(std::unique_ptr<ir_emitting_ast_node> node)
 {
     this->right = std::move(node);
