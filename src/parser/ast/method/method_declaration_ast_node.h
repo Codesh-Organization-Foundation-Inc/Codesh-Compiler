@@ -2,6 +2,7 @@
 
 #include "../../../output/jvm_target/class_file_builder.h"
 #include "../impl/ast_node.h"
+#include "../impl/i_constant_pool_emitter.h"
 #include "../impl/i_descriptor_emitter.h"
 #include "../impl/i_resolvable.h"
 #include "../impl/ir_emitting_ast_node.h"
@@ -22,7 +23,7 @@ namespace codesh::ast::method
 {
 
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
-        public impl::i_resolvable<semantic_analyzer::method_symbol>
+        public impl::i_resolvable<semantic_analyzer::method_symbol>, public impl::i_constant_pool_emitter
 {
     const definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
@@ -74,6 +75,9 @@ public:
 
     [[nodiscard]] const std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
     [[nodiscard]] std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+                        output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

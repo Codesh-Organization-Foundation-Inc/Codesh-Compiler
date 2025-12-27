@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../method/constructor_declaration_ast_node.h"
 #include "type_declaration_ast_node.h"
 
 namespace codesh::ast::type_decl
