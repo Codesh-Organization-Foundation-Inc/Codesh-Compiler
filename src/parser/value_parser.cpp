@@ -130,8 +130,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::addition_operator_ast_node>(
-            std::move(left_value_node), // TODO: remove std::move if not needed
-            std::move(right_value_node)
+            std::move(right_value_node),
+            std::move(left_value_node)
         );
 
         break;
@@ -144,8 +144,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::subtraction_operator_ast_node>(
-            std::move(left_value_node),
-            std::move(right_value_node)
+            std::move(right_value_node),
+            std::move(left_value_node)
         );
 
         break;
@@ -166,8 +166,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::multiplication_operator_ast_node>(
-            std::move(left_value_node),
-            std::move(right_value_node)
+            std::move(right_value_node),
+            std::move(left_value_node)
         );
 
         break;
@@ -188,8 +188,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::division_operator_ast_node>(
-            std::move(left_value_node),
-            std::move(right_value_node)
+            std::move(right_value_node),
+            std::move(left_value_node)
         );
 
         break;
@@ -210,8 +210,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::modulu_operator_ast_node>(
-            std::move(left_value_node),
-            std::move(right_value_node)
+            std::move(right_value_node),
+            std::move(left_value_node)
         );
 
         break;
@@ -235,7 +235,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
 
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // TODO: does problems
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
