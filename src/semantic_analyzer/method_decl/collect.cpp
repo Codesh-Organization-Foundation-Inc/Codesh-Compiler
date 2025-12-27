@@ -59,15 +59,7 @@ static void collect_local_variables(codesh::ast::method::method_declaration_ast_
     // Parameters
     for (const auto &param : method_decl.get_parameters())
     {
-        auto &method_scope = method_symbol.get_scope();
-
-        method_scope.add_variable(
-            param->get_name(),
-            std::make_unique<codesh::semantic_analyzer::local_variable_symbol>(
-                &method_scope,
-                param->get_type()->clone()
-            )
-        );
+        param->add_to_scope(method_symbol.get_scope());
     }
 }
 
