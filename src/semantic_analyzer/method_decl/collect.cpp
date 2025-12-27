@@ -46,9 +46,6 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
             ));
         }
 
-        method_decl->set_resolved(it);
-
-
         collect_local_variables(*method_decl, it);
     }
 }
