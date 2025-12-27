@@ -1,6 +1,5 @@
 #include "method_declaration_ast_node.h"
 
-#include "../local_variable_declaration_ast_node.h"
 #include "../../../semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
 #include "util.h"
@@ -61,30 +60,18 @@ void codesh::ast::method::method_declaration_ast_node::set_return_type(std::uniq
     this->return_type = std::move(return_type);
 }
 
-std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_body()
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope()
 {
-    return body;
+    return method_scope;
 }
 
-const std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_body() const
+const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope()
+    const
 {
-    return body;
-}
-std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
-    method_declaration_ast_node::get_local_variables()
-{
-    return local_variables;
+    return method_scope;
 }
 
-const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
-    method_declaration_ast_node::get_local_variables() const
-{
-    return local_variables;
-}
-
-const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_parameters() const
 {
     return parameters;
@@ -93,8 +80,10 @@ const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_no
 void codesh::ast::method::method_declaration_ast_node::add_parameter(
     std::unique_ptr<local_variable_declaration_ast_node> parameter)
 {
-    parameter_types.push_back(*parameter->get_type());
-    parameters.push_back(std::move(parameter));
+    parameter_types.emplace_back(*parameter->get_type());
+    parameters.emplace_back(*parameter);
+
+    method_scope.add_local_variable(std::move(parameter));
 }
 
 const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
@@ -117,19 +106,5 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
         constant_pool.goc_utf8_info(generate_descriptor())
     );
 
-    for (const auto &param_node : get_parameters())
-    {
-        constant_pool.goc_utf8_info(param_node->get_name());
-        constant_pool.goc_utf8_info(param_node->get_type()->generate_descriptor());
-
-    }
-
-    // Emit for body
-    for (const auto &statement : get_body())
-    {
-        if (auto *consatnt_emitter = dynamic_cast<i_constant_pool_emitter *>(statement.get()))
-        {
-            consatnt_emitter->emit_constants(root_node, constant_pool);
-        }
-    }
+    method_scope.emit_constants(root_node, constant_pool);
 }

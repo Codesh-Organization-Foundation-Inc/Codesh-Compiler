@@ -1,5 +1,23 @@
 #include "local_variable_declaration_ast_node.h"
 
+#include "../../semantic_analyzer/symbol_table/symbol.h"
+
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
+    local_variable_declaration_ast_node::_get_resolved() const
+{
+    return resolved_variable;
+}
+
+codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() :
+    accessible_up_to(-1)
+{
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_resolved(semantic_analyzer::local_variable_symbol &symbol)
+{
+    resolved_variable.emplace(symbol);
+}
+
 std::string codesh::ast::local_variable_declaration_ast_node::get_name() const
 {
     return name;
@@ -41,3 +59,28 @@ void codesh::ast::local_variable_declaration_ast_node::set_attributes(
     this->attributes = std::move(attributes);
 }
 
+int codesh::ast::local_variable_declaration_ast_node::get_accessible_up_to() const
+{
+    return accessible_up_to;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_accessible_up_to(const int available_to)
+{
+    this->accessible_up_to = available_to;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::add_to_scope(semantic_analyzer::method_scope_symbol &scope)
+{
+    scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
+        &scope,
+        type->clone(),
+        this
+    ));
+}
+
+void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
+                                                                      output::jvm_target::constant_pool &constant_pool)
+{
+    constant_pool.goc_utf8_info(get_name());
+    constant_pool.goc_utf8_info(get_type()->generate_descriptor());
+}

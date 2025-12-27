@@ -8,8 +8,12 @@ codesh::output::ir::code_block codesh::output::ir::code_block::build_from_method
 {
     code_block result;
 
-    for (const auto &ir_emitter : method.get_body())
+    for (const auto &method_op : method.get_method_scope().get_body())
     {
+        const auto ir_emitter = dynamic_cast<ast::impl::i_ir_emitter *>(method_op.get());
+        if (!ir_emitter)
+            continue;
+
         ir_emitter->emit_ir(result, symbol_table, containing_type);
     }
 
