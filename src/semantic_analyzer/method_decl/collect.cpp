@@ -9,7 +9,7 @@
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
 
-static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
+static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
                                     codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
@@ -53,13 +53,12 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
     }
 }
 
-static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
+static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
                                     codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    // Parameters
-    for (const auto &param : method_decl.get_parameters())
+    for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
     {
-        param->add_to_scope(method_symbol.get_scope());
+        var_decl->add_to_scope(method_symbol.get_scope());
     }
 }
 
@@ -70,7 +69,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 
     for (const auto &param_node : method_decl.get_parameters())
     {
-        result.push_back(param_node->get_type()->clone());
+        result.push_back(param_node.get().get_type()->clone());
     }
 
     return result;

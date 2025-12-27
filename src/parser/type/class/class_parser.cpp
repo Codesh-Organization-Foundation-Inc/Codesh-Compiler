@@ -2,10 +2,10 @@
 
 #include "../../../blasphemy/blasphemy_collector.h"
 #include "../../../blasphemy/details.h"
+#include "../../ast/local_variable_declaration_ast_node.h"
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/type/primitive_type_ast_node.h"
 #include "../../ast/type_declaration/class_declaration_ast_node.h"
-#include "../../ast/variable_declaration_ast_node.h"
 #include "../../util.h"
 #include "../type_parser.h"
 
@@ -178,7 +178,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         // * (the name)
         const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
 
-        auto param = std::make_unique<ast::variable_declaration_ast_node>();
+        auto param = std::make_unique<ast::local_variable_declaration_ast_node>();
         param->set_type(std::move(param_type));
         param->set_name(token_name->get_content());
 
@@ -209,7 +209,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         );
     }
 
-    parser::parse_method(tokens, *method_node.get());
+    parser::parse_method_scope(tokens, method_node->get_method_scope());
 
     return method_node;
 }

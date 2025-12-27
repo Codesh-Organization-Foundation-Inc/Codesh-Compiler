@@ -163,14 +163,14 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *const parent_symbol,
         definition::fully_qualified_class_name full_name,
         std::unique_ptr<ast::type::type_ast_node> type,
-        ast::variable_declaration_ast_node *producing_node) :
+        ast::local_variable_declaration_ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type)),
     full_name(std::move(full_name)),
     producing_node(producing_node)
 {
 }
 
-codesh::ast::variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node() const
+codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node() const
 {
     return producing_node;
 }

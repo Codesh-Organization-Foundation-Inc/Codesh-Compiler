@@ -1,24 +1,24 @@
 #pragma once
-#include "ir_emitting_ast_node.h"
+#include "i_ir_emitter.h"
 
 #include <memory>
 
 namespace codesh::ast::impl
 {
 
-class binary_ast_node : public ir_emitting_ast_node
+class binary_ast_node : public i_ir_emitter
 {
-    std::unique_ptr<ir_emitting_ast_node> left, right;
+    std::unique_ptr<i_ir_emitter> left, right;
 
 protected:
-    binary_ast_node(std::unique_ptr<ir_emitting_ast_node> left, std::unique_ptr<ir_emitting_ast_node> right);
+    binary_ast_node(std::unique_ptr<i_ir_emitter> left, std::unique_ptr<i_ir_emitter> right);
 
 public:
-    [[nodiscard]] ir_emitting_ast_node *get_left() const;
-    [[nodiscard]] ir_emitting_ast_node *get_right() const;
+    [[nodiscard]] i_ir_emitter *get_left() const;
+    [[nodiscard]] i_ir_emitter *get_right() const;
 
-    void set_left(std::unique_ptr<ir_emitting_ast_node> node);
-    void set_right(std::unique_ptr<ir_emitting_ast_node> node);
+    void set_left(std::unique_ptr<i_ir_emitter> node);
+    void set_right(std::unique_ptr<i_ir_emitter> node);
 };
 
 

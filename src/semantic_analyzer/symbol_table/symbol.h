@@ -157,17 +157,17 @@ public:
 };
 
 class local_variable_symbol final : public variable_symbol,
-    public i_resolvable_symbol<ast::variable_declaration_ast_node>
+    public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
 {
     definition::fully_qualified_class_name full_name;
-    ast::variable_declaration_ast_node *producing_node;
+    ast::local_variable_declaration_ast_node *producing_node;
 
 public:
     explicit local_variable_symbol(symbol *parent_symbol,
             definition::fully_qualified_class_name full_name, std::unique_ptr<ast::type::type_ast_node> type,
-            ast::variable_declaration_ast_node *producing_node = nullptr);
+            ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
-    [[nodiscard]] ast::variable_declaration_ast_node *get_producing_node() const override;
+    [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
 };
 
