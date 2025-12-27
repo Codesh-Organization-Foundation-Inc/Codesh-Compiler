@@ -8,6 +8,10 @@
 #include <memory>
 #include <string>
 
+namespace codesh::semantic_analyzer
+{
+class method_scope_symbol;
+}
 namespace codesh::ast
 {
 
@@ -31,6 +35,9 @@ public:
 
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);
+
+
+    void add_to_scope(semantic_analyzer::method_scope_symbol &scope);
 };
 
 }

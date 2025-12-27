@@ -1,5 +1,7 @@
 #include "variable_declaration_ast_node.h"
 
+#include "../../semantic_analyzer/symbol_table/symbol.h"
+
 std::string codesh::ast::variable_declaration_ast_node::get_name() const
 {
     return name;
@@ -41,3 +43,11 @@ void codesh::ast::variable_declaration_ast_node::set_attributes(
     this->attributes = std::move(attributes);
 }
 
+void codesh::ast::variable_declaration_ast_node::add_to_scope(semantic_analyzer::method_scope_symbol &scope)
+{
+    scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
+        &scope,
+        type->clone(),
+        this
+    ));
+}
