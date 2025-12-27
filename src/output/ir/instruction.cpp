@@ -131,14 +131,23 @@ int codesh::output::ir::invoke_instruction::get_method_cp_index() const
 }
 
 codesh::output::ir::load_int_constant_instruction::load_int_constant_instruction(const int constant,
-        const jvm_target::constant_pool &fallback_constant_pool) :
+        const std::optional<int> constant_cpi) :
     constant(constant),
-    fallback_constant_pool(fallback_constant_pool)
+    constant_cpi(constant_cpi)
 {
 }
 
 void codesh::output::ir::load_int_constant_instruction::emit(std::list<instruction_container> &collector) const
 {
+    if (constant_cpi.has_value())
+    {
+        load_constant_pool_instruction(constant_cpi.value())
+            .emit(collector);
+
+        return;
+    }
+
+
     if (-1 <= constant && constant <= 5)
     {
         collector.emplace_back(
@@ -169,9 +178,8 @@ void codesh::output::ir::load_int_constant_instruction::emit(std::list<instructi
     }
     else
     {
-        // If the number is greater than int16, then it is saved in the constant pool.
-        load_constant_pool_instruction(fallback_constant_pool.get_integer_index(constant))
-            .emit(collector);
+        // If the number is greater than int16, then it must be saved in the constant pool.
+        throw std::runtime_error("Attempted to load a number greater than int16 without a constant pool entry");
     }
 }
 
