@@ -233,6 +233,26 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
 
+    case token_group::OPERATOR_EQUALS: {
+
+    }
+    case token_group::OPERATOR_NOT_EQUALS: {
+
+    }
+    case token_group::OPERATOR_GREATER: {
+
+    }
+    case token_group::OPERATOR_GREATER_EQUAL: {
+
+    }
+    case token_group::OPERATOR_LESS: {
+
+    }
+    case token_group::OPERATOR_LESS_EQUAL: {
+
+    }
+
+
 
     default: {
         eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
@@ -247,7 +267,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
     return eval_ast_node;
 }
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_boolean_value(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
 
+    return eval_ast_node;
+}
 
 template <typename T>
 static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_evaluable(
