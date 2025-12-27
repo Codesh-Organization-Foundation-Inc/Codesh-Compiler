@@ -11,7 +11,7 @@
 namespace codesh::ast
 {
 
-class local_variable_declaration_ast_node : public impl::ast_node
+class variable_declaration_ast_node : public impl::ast_node
 {
     std::string name;
     std::unique_ptr<type::type_ast_node> type;

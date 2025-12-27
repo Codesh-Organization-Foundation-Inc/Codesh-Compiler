@@ -1,7 +1,7 @@
 #include "method_declaration_ast_node.h"
 
-#include "../local_variable_declaration_ast_node.h"
 #include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "../variable_declaration_ast_node.h"
 #include "fmt/xchar.h"
 #include "util.h"
 
@@ -72,26 +72,26 @@ const std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codes
 {
     return body;
 }
-std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+std::list<std::unique_ptr<codesh::ast::variable_declaration_ast_node>> &codesh::ast::method::
     method_declaration_ast_node::get_local_variables()
 {
     return local_variables;
 }
 
-const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+const std::list<std::unique_ptr<codesh::ast::variable_declaration_ast_node>> &codesh::ast::method::
     method_declaration_ast_node::get_local_variables() const
 {
     return local_variables;
 }
 
-const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_parameters() const
 {
     return parameters;
 }
 
 void codesh::ast::method::method_declaration_ast_node::add_parameter(
-    std::unique_ptr<local_variable_declaration_ast_node> parameter)
+    std::unique_ptr<variable_declaration_ast_node> parameter)
 {
     parameter_types.push_back(*parameter->get_type());
     parameters.push_back(std::move(parameter));

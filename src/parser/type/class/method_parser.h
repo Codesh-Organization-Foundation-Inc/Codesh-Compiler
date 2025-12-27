@@ -8,7 +8,7 @@
 
 namespace codesh::ast
 {
-class local_variable_declaration_ast_node;
+class variable_declaration_ast_node;
 }
 
 namespace codesh::ast::method
@@ -24,7 +24,7 @@ void parse_method(std::queue<std::unique_ptr<token>> &tokens, ast::method::metho
 [[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
     std::queue<std::unique_ptr<token>> &tokens);
 
-[[nodiscard]] std::unique_ptr<ast::local_variable_declaration_ast_node> parse_variable_declaration(
+[[nodiscard]] std::unique_ptr<ast::variable_declaration_ast_node> parse_variable_declaration(
     std::queue<std::unique_ptr<token>> &tokens);
 
 }

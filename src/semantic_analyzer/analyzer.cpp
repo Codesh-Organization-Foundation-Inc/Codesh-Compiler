@@ -32,7 +32,7 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
 static void add_default_return_statement(const codesh::ast::compilation_unit_ast_node &root_node);
 
 static void add_this_param_to_non_static_methods(const codesh::ast::compilation_unit_ast_node &root_node);
-static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
+static std::unique_ptr<codesh::ast::variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
 static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context);
@@ -218,10 +218,10 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
     }
 }
 
-static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
+static std::unique_ptr<codesh::ast::variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl)
 {
-    auto this_param = std::make_unique<codesh::ast::local_variable_declaration_ast_node>();
+    auto this_param = std::make_unique<codesh::ast::variable_declaration_ast_node>();
     this_param->set_name("this");
 
     auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();

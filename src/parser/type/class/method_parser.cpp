@@ -57,14 +57,14 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     return method_call_node;
 }
 
-std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
+std::unique_ptr<codesh::ast::variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
 
     auto variable_decl_ast_node_type = util::parse_type(tokens);
 
-    auto variable_decl_ast_node = std::make_unique<ast::local_variable_declaration_ast_node>();
+    auto variable_decl_ast_node = std::make_unique<ast::variable_declaration_ast_node>();
 
     variable_decl_ast_node->set_type(std::move(variable_decl_ast_node_type));
 
