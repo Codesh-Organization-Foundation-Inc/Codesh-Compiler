@@ -25,6 +25,7 @@ extern const std::string NO_SCOPE_BEGIN;
 extern const std::string NO_SCOPE_END;
 extern const std::string NO_KEYWORD_SHALL_BE;
 extern const std::string NO_KEYWORD_BY;
+extern const std::string NO_KEYWORD_AGAINST;
 extern const std::string NO_PUNCTUATION_END_OP;
 extern const std::string NO_TYPE;
 extern const std::string UNEXPECTED_DECLARATION;

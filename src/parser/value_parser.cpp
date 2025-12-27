@@ -3,6 +3,12 @@
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
 #include "../defenition/primitive_type.h"
+#include "ast/operator/boolean/equals_operator_ast_node.h"
+#include "ast/operator/boolean/greater_equals_operator_ast_node.h"
+#include "ast/operator/boolean/greater_operator_ast_node.h"
+#include "ast/operator/boolean/less_equals_operator_ast_node.h"
+#include "ast/operator/boolean/less_operator_ast_node.h"
+#include "ast/operator/boolean/not_equals_operator_ast_node.h"
 #include "ast/operator/math/addition_operator_ast_node.h"
 #include "ast/operator/math/division_operator_ast_node.h"
 #include "ast/operator/math/modulu_operator_ast_node.h"
@@ -32,6 +38,8 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
 static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> make_bool_evaluable(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         bool value);
+
+static bool check_against(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
@@ -233,26 +241,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
 
-    case token_group::OPERATOR_EQUALS: {
-
-    }
-    case token_group::OPERATOR_NOT_EQUALS: {
-
-    }
-    case token_group::OPERATOR_GREATER: {
-
-    }
-    case token_group::OPERATOR_GREATER_EQUAL: {
-
-    }
-    case token_group::OPERATOR_LESS: {
-
-    }
-    case token_group::OPERATOR_LESS_EQUAL: {
-
-    }
-
-
+    case token_group::OPERATOR_EQUALS:
+    case token_group::OPERATOR_NOT_EQUALS:
+    case token_group::OPERATOR_GREATER:
+    case token_group::OPERATOR_GREATER_EQUAL:
+    case token_group::OPERATOR_LESS:
+    case token_group::OPERATOR_LESS_EQUAL:
+        parse_boolean_value(tokens);
+        break;
 
     default: {
         eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
@@ -272,7 +268,145 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 {
     std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
 
+    switch (tokens.front()->get_group())
+    {
+        case token_group::OPERATOR_EQUALS: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::equals_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        case token_group::OPERATOR_NOT_EQUALS: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::not_equals_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        case token_group::OPERATOR_GREATER: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::greater_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        case token_group::OPERATOR_GREATER_EQUAL: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::greater_equals_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        case token_group::OPERATOR_LESS: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::less_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        case token_group::OPERATOR_LESS_EQUAL: {
+            tokens.pop();
+
+            auto left_value_node  = parse_value(tokens);
+
+            if (!check_against(tokens))
+            {
+                return std::make_unique<ast::var_reference::error_value_ast_node>();
+            }
+
+            auto right_value_node = parse_value(tokens);
+
+            eval_ast_node = std::make_unique<ast::op::less_equals_operator_ast_node>(
+                std::move(left_value_node),
+                std::move(right_value_node)
+            );
+
+            break;
+        }
+        default: {
+            eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
+            tokens.pop();
+
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::UNEXPECTED_TOKEN,
+                blasphemy::blasphemy_type::SYNTAX
+            );
+        }
+    }
     return eval_ast_node;
+}
+
+static bool check_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_AGAINST)) {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_AGAINST,
+            codesh::blasphemy::blasphemy_type::SYNTAX
+        );
+        return false;
+    }
+    return true;
 }
 
 template <typename T>
