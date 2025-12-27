@@ -47,6 +47,7 @@ void codesh::ast::variable_declaration_ast_node::add_to_scope(semantic_analyzer:
 {
     scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
         &scope,
+        definition::fully_qualified_class_name(name),
         type->clone(),
         this
     ));

@@ -141,7 +141,6 @@ public:
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
 };
 
-//TODO: Attach ast node
 //TODO: Make resolveable
 class field_symbol final : public variable_symbol
 {
@@ -157,12 +156,19 @@ public:
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
 
-//TODO: Attach ast node
-class local_variable_symbol final : public variable_symbol
+class local_variable_symbol final : public variable_symbol,
+    public i_resolveable_symbol<ast::variable_declaration_ast_node>
 {
+    definition::fully_qualified_class_name full_name;
+    ast::variable_declaration_ast_node *producing_node;
+
 public:
-    explicit local_variable_symbol(symbol *parent_symbol, std::unique_ptr<ast::type::type_ast_node> type,
-            ast::impl::ast_node *producing_node = nullptr);
+    explicit local_variable_symbol(symbol *parent_symbol,
+            definition::fully_qualified_class_name full_name, std::unique_ptr<ast::type::type_ast_node> type,
+            ast::variable_declaration_ast_node *producing_node = nullptr);
+
+    [[nodiscard]] ast::variable_declaration_ast_node *get_producing_node() const override;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
 };
 
 
