@@ -1,5 +1,16 @@
 #include "method_scope_ast_node.h"
 
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_scope_symbol>> &codesh::ast::method::
+    method_scope_ast_node::_get_resolved() const
+{
+    return scope_symbol;
+}
+
+void codesh::ast::method::method_scope_ast_node::set_resolved(semantic_analyzer::method_scope_symbol &symbol)
+{
+    scope_symbol.emplace(symbol);
+}
+
 const std::list<std::unique_ptr<codesh::ast::method::operation::method_operation_ast_node>> &codesh::ast::method::
     method_scope_ast_node::get_body() const
 {

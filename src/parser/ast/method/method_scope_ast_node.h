@@ -10,14 +10,21 @@
 namespace codesh::ast::method
 {
 
-class method_scope_ast_node : public impl::ast_node, public impl::i_constant_pool_emitter
+class method_scope_ast_node : public impl::ast_node, public impl::i_constant_pool_emitter,
+    public impl::i_symbolically_linked<semantic_analyzer::method_scope_symbol>
 {
+    std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> scope_symbol;
+
     std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
     std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
-    //TODO: Add inner scopes
+    // TODO: Add inner scopes
+protected:
+    [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> &_get_resolved()
+        const override;
 
 public:
+    void set_resolved(semantic_analyzer::method_scope_symbol &symbol) override;
 
     [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);

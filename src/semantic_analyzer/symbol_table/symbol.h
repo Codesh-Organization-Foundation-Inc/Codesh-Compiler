@@ -64,15 +64,24 @@ public:
 };
 
 /**
- * @tparam T The producing node type. Must extend @link ast_node \endlink.
+ * @tparam T The producing node type. Must extend @link i_symbolically_linked \endlink.
  */
 template <typename T>
-class i_resolvable_symbol
+class i_ast_produced
 {
 public:
-    virtual ~i_resolvable_symbol();
+    virtual ~i_ast_produced();
 
     [[nodiscard]] virtual T *get_producing_node() const = 0;
+};
+
+/**
+ * @tparam T The producing node type. Must extend @link i_resolvable \endlink.
+ */
+template <typename T>
+class i_resolvable_symbol : public i_ast_produced<T>
+{
+public:
     [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
 };
 
@@ -157,18 +166,15 @@ public:
 };
 
 class local_variable_symbol final : public variable_symbol,
-    public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
+    public i_ast_produced<ast::local_variable_declaration_ast_node>
 {
-    definition::fully_qualified_class_name full_name;
     ast::local_variable_declaration_ast_node *producing_node;
 
 public:
-    explicit local_variable_symbol(symbol *parent_symbol,
-            definition::fully_qualified_class_name full_name, std::unique_ptr<ast::type::type_ast_node> type,
+    local_variable_symbol(symbol *parent_symbol, std::unique_ptr<ast::type::type_ast_node> type,
             ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
 };
 
 
@@ -194,9 +200,10 @@ public:
 
 using local_variable_entry = std::pair<const std::string, std::unique_ptr<local_variable_symbol>>;
 
-//TODO: Handle producing node
-class method_scope_symbol final : public symbol
+class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>
 {
+    ast::method::method_scope_ast_node *producing_node;
+
     std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
     std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable;
 
@@ -205,9 +212,11 @@ class method_scope_symbol final : public symbol
 public:
     method_scope_symbol(symbol *parent_symbol,
             std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
-            ast::impl::ast_node *producing_node = nullptr);
+            ast::method::method_scope_ast_node *producing_node = nullptr);
 
     [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
+
+    [[nodiscard]] ast::method::method_scope_ast_node *get_producing_node() const override;
 
     /**
      * @returns The new variable's index
@@ -244,7 +253,7 @@ public:
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(symbol &parent_scope);
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
-    void set_full_name (definition::fully_qualified_class_name name);
+    void set_full_name(definition::fully_qualified_class_name name);
 
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;

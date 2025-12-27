@@ -161,11 +161,9 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *const parent_symbol,
-        definition::fully_qualified_class_name full_name,
         std::unique_ptr<ast::type::type_ast_node> type,
         ast::local_variable_declaration_ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type)),
-    full_name(std::move(full_name)),
     producing_node(producing_node)
 {
 }
@@ -173,12 +171,6 @@ codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *
 codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node() const
 {
     return producing_node;
-}
-
-const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::local_variable_symbol::get_full_name()
-    const
-{
-    return full_name;
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::method_overloads_symbol::
@@ -216,8 +208,9 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(symbol *const parent_symbol,
         std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
-        ast::impl::ast_node *producing_node) :
+        ast::method::method_scope_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD_SCOPE),
+    producing_node(producing_node),
     index_to_local_variable(index_to_local_variable)
 {
 }
@@ -226,6 +219,11 @@ const std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer:
     semantic_analyzer::method_scope_symbol::get_variables() const
 {
     return local_variables;
+}
+
+codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_scope_symbol::get_producing_node() const
+{
+    return producing_node;
 }
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(std::string name,

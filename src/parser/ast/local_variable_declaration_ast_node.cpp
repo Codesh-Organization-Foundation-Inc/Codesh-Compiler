@@ -2,9 +2,20 @@
 
 #include "../../semantic_analyzer/symbol_table/symbol.h"
 
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
+    local_variable_declaration_ast_node::_get_resolved() const
+{
+    return resolved_variable;
+}
+
 codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() :
     accessible_up_to(-1)
 {
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_resolved(semantic_analyzer::local_variable_symbol &symbol)
+{
+    resolved_variable.emplace(symbol);
 }
 
 std::string codesh::ast::local_variable_declaration_ast_node::get_name() const
@@ -62,7 +73,6 @@ void codesh::ast::local_variable_declaration_ast_node::add_to_scope(semantic_ana
 {
     scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
         &scope,
-        definition::fully_qualified_class_name(name),
         type->clone(),
         this
     ));
