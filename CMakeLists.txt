@@ -183,6 +183,8 @@ add_executable(Codesh_Compiler
         src/parser/value_parser.cpp
         src/parser/value_parser.h
         src/parser/ast/impl/i_constant_pool_emitter.h
+        src/parser/ast/operator/math/minus_operator_ast_node.cpp
+        src/parser/ast/operator/math/minus_operator_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

@@ -11,6 +11,7 @@
 #include "ast/operator/boolean/not_equals_operator_ast_node.h"
 #include "ast/operator/math/addition_operator_ast_node.h"
 #include "ast/operator/math/division_operator_ast_node.h"
+#include "ast/operator/math/minus_operator_ast_node.h"
 #include "ast/operator/math/modulu_operator_ast_node.h"
 #include "ast/operator/math/multiplication_operator_ast_node.h"
 #include "ast/operator/math/subtraction_operator_ast_node.h"
@@ -238,6 +239,16 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         }
 
         eval_ast_node = std::move(inner);
+        break;
+    }
+
+    case token_group::OPERATOR_MINUS: {
+        tokens.pop();
+
+        auto child = parse_value(tokens);
+
+        eval_ast_node = std::make_unique<ast::op::minus_operator_ast_node>(
+                    std::move(child));
         break;
     }
 

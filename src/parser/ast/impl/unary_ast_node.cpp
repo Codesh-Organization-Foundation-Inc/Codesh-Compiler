@@ -9,3 +9,7 @@ codesh::ast::impl::ir_emitting_ast_node *codesh::ast::impl::unary_ast_node::get_
 {
     return child.get();
 }
+codesh::ast::type::type_ast_node *codesh::ast::impl::unary_ast_node::get_type() const
+{
+    return this->type.get();
+}
