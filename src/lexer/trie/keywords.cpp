@@ -54,6 +54,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::OPERATOR_MULTIPLICATION, "ויוכפל", word_boundary::BOTH},
     {token_group::OPERATOR_DIVISION, "ויחולק", word_boundary::BOTH},
     {token_group::OPERATOR_MODULO, "ויושרה", word_boundary::BOTH},
+    {token_group::OPERATOR_MINUS, "ויחזק את־לב", word_boundary::BOTH},
     {token_group::OPERATOR_BY, "פי־", word_boundary::BEFORE},
 
     {token_group::OPERATOR_ADDITION_ASSIGNMENT, "ויסף", word_boundary::BOTH},

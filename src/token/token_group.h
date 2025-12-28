@@ -56,6 +56,7 @@ enum class token_group : int
     OPERATOR_MULTIPLICATION, // ויוכפל
     OPERATOR_DIVISION, // ויחולק
     OPERATOR_MODULO, // ויושרה
+    OPERATOR_MINUS, // ויחזק את־לב
     OPERATOR_BY, // פי־
 
     OPERATOR_ADDITION_ASSIGNMENT, //ויסף
