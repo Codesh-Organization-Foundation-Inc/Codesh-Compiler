@@ -105,6 +105,18 @@ codesh::ast::type_decl::type_declaration_ast_node *codesh::semantic_analyzer::ty
     return producing_node;
 }
 
+codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol *parent_symbol, symbol_type _symbol_type,
+                                                            std::unique_ptr<ast::type::type_ast_node> type) :
+    symbol(parent_symbol, _symbol_type),
+    type(std::move(type))
+{
+}
+
+codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::get_type() const
+{
+    return type.get();
+}
+
 codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::type_symbol::get_symbol_map()
 {
     return scopes;
@@ -130,32 +142,20 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
     return full_name;
 }
 
-const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::type_symbol::get_attributes()
-    const
+const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::type_symbol::get_attributes() const
 {
     return *attributes;
 }
 
-codesh::semantic_analyzer::variable_symbol::variable_symbol(symbol *const parent_symbol, const symbol_type _symbol_type,
-                                                            std::unique_ptr<ast::type::type_ast_node> type) :
-    symbol(parent_symbol, _symbol_type),
-    type(std::move(type))
-{
-}
-
-codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::get_type() const
-{
-    return type.get();
-}
-
-codesh::semantic_analyzer::field_symbol::field_symbol(symbol *const parent_symbol,
+codesh::semantic_analyzer::field_symbol::field_symbol(symbol *parent_symbol,
                                                       definition::fully_qualified_class_name full_name,
                                                       std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
                                                       std::unique_ptr<ast::type::type_ast_node> type,
-                                                      ast::impl::ast_node *producing_node) :
+                                                      ast::local_variable_declaration_ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::FIELD, std::move(type)),
     full_name(std::move(full_name)),
-    attributes(std::move(attributes))
+    attributes(std::move(attributes)),
+    producing_node(producing_node)
 {
 }
 
@@ -167,6 +167,11 @@ codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::field_sy
 const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::field_symbol::get_full_name() const
 {
     return full_name;
+}
+
+codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::field_symbol::get_producing_node() const
+{
+    return producing_node;
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *const parent_symbol,
@@ -181,7 +186,8 @@ codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *
     }
 }
 
-codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node() const
+codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node()
+    const
 {
     return producing_node;
 }

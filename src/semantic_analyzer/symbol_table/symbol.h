@@ -139,7 +139,6 @@ public:
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
 };
 
-
 class variable_symbol : public symbol
 {
     const std::unique_ptr<ast::type::type_ast_node> type;
@@ -150,19 +149,23 @@ public:
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
 };
 
-//TODO: Make resolvable
-class field_symbol final : public variable_symbol
+class field_symbol final : public variable_symbol, public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
 {
     const definition::fully_qualified_class_name full_name;
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
+    ast::local_variable_declaration_ast_node *producing_node;
+
 public:
     field_symbol(symbol *parent_symbol, definition::fully_qualified_class_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
-            std::unique_ptr<ast::type::type_ast_node> type, ast::impl::ast_node *producing_node = nullptr);
+            std::unique_ptr<ast::type::type_ast_node> type,
+            ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::type_decl::attributes_ast_node &get_attributes() const;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
+    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+
+    [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
 };
 
 class local_variable_symbol final : public variable_symbol,

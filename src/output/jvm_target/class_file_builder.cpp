@@ -242,7 +242,7 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
 
     util::put_int_bytes(source_file_entry->attribute_length, 4, 2);
     util::put_int_bytes(source_file_entry->sourcefile_index, 2,
-    constant_pool_.get_utf8_index(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION)
+        constant_pool_.get_utf8_index(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION)
     );
 
     class_file.attribute_info.push_back(std::move(source_file_entry));

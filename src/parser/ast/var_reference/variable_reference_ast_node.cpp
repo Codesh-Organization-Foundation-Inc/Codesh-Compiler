@@ -8,18 +8,13 @@ variable_reference_ast_node::variable_reference_ast_node(codesh::definition::ful
 {
 }
 
-const std::optional<std::reference_wrapper<codesh::semantic_analyzer::field_symbol>> &variable_reference_ast_node::
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> &variable_reference_ast_node::
     _get_resolved() const
 {
     return resolved_symbol;
 }
 
-const codesh::definition::fully_qualified_class_name &variable_reference_ast_node::get_unresolved_name() const
-{
-    return name;
-}
-
-void variable_reference_ast_node::set_resolved(codesh::semantic_analyzer::field_symbol &symbol)
+void variable_reference_ast_node::set_resolved(codesh::semantic_analyzer::variable_symbol &symbol)
 {
     resolved_symbol.emplace(symbol);
 }
@@ -36,14 +31,19 @@ void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_
                                                  codesh::output::jvm_target::constant_pool &constant_pool)
 {
     //TODO: Expand beyond static
-    var_cpi = constant_pool.goc_fieldref_info(
-        constant_pool.goc_class_info(constant_pool.goc_utf8_info(get_resolved_name().omit_last().join())),
+    if (const auto &field_symbol = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved()))
+    {
+        var_cpi = constant_pool.goc_fieldref_info(
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(field_symbol->get_full_name().omit_last().join())
+            ),
 
-        constant_pool.goc_name_and_type_info(
-            constant_pool.goc_utf8_info(get_last_name(true)),
-            constant_pool.goc_utf8_info(get_resolved().get_type()->generate_descriptor())
-        )
-    );
+            constant_pool.goc_name_and_type_info(
+                constant_pool.goc_utf8_info(field_symbol->get_full_name().get_last_part()),
+                constant_pool.goc_utf8_info(get_resolved().get_type()->generate_descriptor())
+            )
+        );
+    }
 }
 
 void variable_reference_ast_node::emit_ir(
