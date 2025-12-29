@@ -3,6 +3,7 @@
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
 #include "../defenition/primitive_type.h"
+#include "ast/operator/boolean/and_operator_ast_node.h"
 #include "ast/operator/boolean/equals_operator_ast_node.h"
 #include "ast/operator/boolean/greater_equals_operator_ast_node.h"
 #include "ast/operator/boolean/greater_operator_ast_node.h"
@@ -10,6 +11,7 @@
 #include "ast/operator/boolean/less_operator_ast_node.h"
 #include "ast/operator/boolean/not_equals_operator_ast_node.h"
 #include "ast/operator/boolean/not_operator_ast_node.h"
+#include "ast/operator/boolean/or_operator_ast_node.h"
 #include "ast/operator/math/addition_operator_ast_node.h"
 #include "ast/operator/math/division_operator_ast_node.h"
 #include "ast/operator/math/minus_operator_ast_node.h"
@@ -420,12 +422,27 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
     std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node
 )
 {
-    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_NOT))
+    switch (tokens.front()->get_group())
     {
-
-        return std::make_unique<codesh::ast::op::not_operator_ast_node>(std::move(eval_ast_node));
+        case codesh::token_group::OPERATOR_NOT: {
+            tokens.pop();
+            return std::make_unique<codesh::ast::op::not_operator_ast_node>(std::move(eval_ast_node));
+        }
+        case codesh::token_group::OPERATOR_AND: {
+            tokens.pop();
+            return std::make_unique<codesh::ast::op::and_operator_ast_node>(std::move(eval_ast_node),
+                codesh::parser::parse_value(tokens));
+        }
+        case codesh::token_group::OPERATOR_OR: {
+            tokens.pop();
+            return std::make_unique<codesh::ast::op::or_operator_ast_node>(std::move(eval_ast_node),
+                codesh::parser::parse_value(tokens));
+        }
+        default: {
+            return eval_ast_node;
+        }
     }
-    return eval_ast_node;
+
 }
 
 static bool check_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
@@ -474,8 +491,6 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> mak
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         const bool value)
 {
-    tokens.pop();
-
     return make_evaluable<bool>(
         tokens,
         codesh::definition::primitive_type::BOOLEAN,
