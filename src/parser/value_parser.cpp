@@ -9,6 +9,7 @@
 #include "ast/operator/boolean/less_equals_operator_ast_node.h"
 #include "ast/operator/boolean/less_operator_ast_node.h"
 #include "ast/operator/boolean/not_equals_operator_ast_node.h"
+#include "ast/operator/boolean/not_operator_ast_node.h"
 #include "ast/operator/math/addition_operator_ast_node.h"
 #include "ast/operator/math/division_operator_ast_node.h"
 #include "ast/operator/math/minus_operator_ast_node.h"
@@ -39,6 +40,11 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
 static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> make_bool_evaluable(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         bool value);
+
+static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
+    std::queue<std::unique_ptr<codesh::token>> &tokens,
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node
+);
 
 static bool check_against(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
@@ -272,8 +278,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
     }
 
-    return eval_ast_node;
+    return check_extras(tokens, std::move(eval_ast_node));
 }
+
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_boolean_value(
     std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -404,6 +411,19 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
                 blasphemy::blasphemy_type::SYNTAX
             );
         }
+    }
+    return eval_ast_node;
+}
+
+static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
+    std::queue<std::unique_ptr<codesh::token>> &tokens,
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node
+)
+{
+    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_NOT))
+    {
+
+        return std::make_unique<codesh::ast::op::not_operator_ast_node>(std::move(eval_ast_node));
     }
     return eval_ast_node;
 }
