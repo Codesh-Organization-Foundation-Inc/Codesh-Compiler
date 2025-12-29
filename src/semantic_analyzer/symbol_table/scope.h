@@ -1,12 +1,70 @@
 #pragma once
 
+#include "symbol_type.h"
+
+#include <list>
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace codesh::semantic_analyzer
 {
 class symbol;
 
-using named_scope_map = std::unordered_map<std::string, std::unique_ptr<symbol>>;
+class symbols_collection
+{
+protected:
+    const std::vector<symbol_type> allowed_symbol_types;
+
+public:
+    explicit symbols_collection(std::vector<symbol_type> allowed_symbol_types);
+    virtual ~symbols_collection();
+
+
+    [[nodiscard]] virtual std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const = 0;
+    /**
+     * Resolves the requested symbol, or nothing if not found.
+     */
+    [[nodiscard]] virtual std::unique_ptr<symbol> resolve_and_move(const std::string &name) = 0;
+};
+
+class named_symbol_map final : public symbols_collection
+{
+    std::unordered_map<std::string, std::unique_ptr<symbol>> symbols;
+
+public:
+    explicit named_symbol_map(std::vector<symbol_type> allowed_symbol_types);
+
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const override;
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name) override;
+
+
+    template <std::derived_from<symbol> T>
+    std::pair<std::reference_wrapper<T>, bool> add_symbol(std::string name, std::unique_ptr<T> entry);
+
+    void remove_symbol(const std::string &name);
+};
+
+class symbol_list final : public symbols_collection
+{
+    std::list<std::unique_ptr<symbol>> symbols;
+
+public:
+    explicit symbol_list(std::vector<symbol_type> allowed_symbol_types);
+
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const override;
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name) override;
+
+    template <std::derived_from<symbol> T>
+    /**
+     * @returns The same symbol and the index it was assigned to within the list.
+     */
+    std::pair<std::reference_wrapper<T>, size_t> add_symbol(std::unique_ptr<T> entry);
+    void remove_symbol(size_t index);
+};
+
 }
+
+#include "scope.tpp"

@@ -13,7 +13,7 @@ namespace codesh::semantic_analyzer
 class symbol_table final : public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_scope_map global_scope;
+    named_symbol_map global_scope;
 
     //TODO:
     // void static collect_countries(ast::compilation_unit_ast_node &root_node);
@@ -23,7 +23,7 @@ class symbol_table final : public i_scope_containing_symbol
 
 protected:
     [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
-    [[nodiscard]] named_scope_map &get_symbol_map() override;
+    [[nodiscard]] named_symbol_map &get_symbol_map() override;
 
 public:
     explicit symbol_table(const ast::compilation_unit_ast_node &root_node);
@@ -37,7 +37,7 @@ public:
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt);
 
 
-    [[nodiscard]] const named_scope_map &get_symbol_map() const override;
+    [[nodiscard]] const named_symbol_map &get_symbol_map() const override;
 };
 
 }

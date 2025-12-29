@@ -23,12 +23,12 @@ codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_uni
     add_symbol("", std::make_unique<country_symbol>(""));
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map() const
+const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_symbol_map() const
 {
     return global_scope;
 }
 
-codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map()
+codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_symbol_map()
 {
     return global_scope;
 }
