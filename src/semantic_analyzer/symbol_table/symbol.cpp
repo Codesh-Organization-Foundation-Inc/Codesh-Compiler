@@ -271,8 +271,10 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
     }
 
     // Add the only method scope.
-    // A method declaration can have at most only one scope
-    scope.add_symbol(create_method_scope(*this));
+    // (A method declaration can have at most only one scope)
+    method_scope = &scope.add_symbol(
+        create_method_scope(*this)
+    ).first.get();
 }
 
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
@@ -325,7 +327,7 @@ const codesh::semantic_analyzer::symbol_list &codesh::semantic_analyzer::method_
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(ast::local_variable_declaration_ast_node &variable)
 {
-    return  add_variable(variable.get_name(), std::make_unique<local_variable_symbol>(
+    return add_variable(variable.get_name(), std::make_unique<local_variable_symbol>(
         this,
         variable.get_type()->clone(),
         &variable

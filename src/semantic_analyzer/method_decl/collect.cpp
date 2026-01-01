@@ -10,7 +10,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
         const codesh::ast::method::method_declaration_ast_node &method_decl);
 
 static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    codesh::semantic_analyzer::method_symbol &method_symbol);
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
 void codesh::semantic_analyzer::method_declaration::collect_methods(const semantic_context &context,
@@ -51,7 +51,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
 }
 
 static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    codesh::semantic_analyzer::method_symbol &method_symbol)
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
     for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
     {
