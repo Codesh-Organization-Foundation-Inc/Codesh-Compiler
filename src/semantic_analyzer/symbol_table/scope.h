@@ -31,7 +31,7 @@ class named_symbol_map final : public symbols_collection
 public:
     explicit named_symbol_map(std::vector<symbol_type> allowed_symbol_types);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_local(const std::string &name) const;
     [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name);
 
     [[nodiscard]] bool is_empty() const override;

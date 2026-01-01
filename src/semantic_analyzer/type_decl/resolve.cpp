@@ -12,7 +12,7 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
         const std::string name = type_decl->get_last_name(false);
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
-        const type_symbol &type = *static_cast<type_symbol *>(&country.get_scope().resolve(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+        const type_symbol &type = *static_cast<type_symbol *>(&country.get_scope().resolve_local(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
 
         for (const auto &method_decl : type_decl->get_all_methods())

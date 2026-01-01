@@ -41,7 +41,7 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::semantic_analyzer::type_symbol &type)
 {
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.get_scope().resolve(method_decl.get_last_name(false)).value().get()
+        &type.get_scope().resolve_local(method_decl.get_last_name(false)).value().get()
     );
 
     // Get relevant method symbol from the method overloads map

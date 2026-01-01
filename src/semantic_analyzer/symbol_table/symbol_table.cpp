@@ -25,7 +25,7 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::sy
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> codesh::semantic_analyzer::
     symbol_table::resolve_country(const std::string &name) const
 {
-    const auto result = scope.resolve(name);
+    const auto result = scope.resolve_local(name);
 
     if (!result)
         return std::nullopt;
@@ -80,7 +80,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (named_scope_container == nullptr)
         return std::nullopt;
 
-    const auto symbol_raw = named_scope_container->resolve(*it);
+    const auto symbol_raw = named_scope_container->resolve_local(*it);
     if (!symbol_raw.has_value())
         return std::nullopt;
 

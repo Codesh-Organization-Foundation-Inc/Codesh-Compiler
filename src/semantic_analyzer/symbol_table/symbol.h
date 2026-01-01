@@ -30,7 +30,7 @@ public:
      * Attempts to find the symbol named `name`, and returns it.
      * Upon failure, consults the parent symbol.
      */
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_up(const std::string &name);
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_up(const std::string &name) const;
 
     [[nodiscard]] symbol_type get_symbol_type() const;
     [[nodiscard]] i_scope_containing_symbol *get_parent_symbol() const;

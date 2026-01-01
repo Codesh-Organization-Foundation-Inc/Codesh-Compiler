@@ -18,7 +18,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semant
 static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,
         codesh::semantic_analyzer::type_symbol &type)
 {
-    const auto bereshit = type.get_scope().resolve("בראשית");
+    const auto bereshit = type.get_scope().resolve_local("בראשית");
     if (!bereshit)
         return;
 
@@ -57,7 +57,7 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
     // Get the original method names' overloads
     codesh::semantic_analyzer::method_overloads_symbol &source_method_overloads =
         *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-            &type.get_scope().resolve(old_name)->get()
+            &type.get_scope().resolve_local(old_name)->get()
         );
 
     // And the new one

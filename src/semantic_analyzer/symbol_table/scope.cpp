@@ -15,7 +15,7 @@ codesh::semantic_analyzer::named_symbol_map::named_symbol_map(std::vector<symbol
 }
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
-    named_symbol_map::resolve(const std::string &name) const
+    named_symbol_map::resolve_local(const std::string &name) const
 {
     const auto result = symbols.find(name);
 
