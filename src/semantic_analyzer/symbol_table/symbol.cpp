@@ -268,19 +268,22 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
     if (producing_node != nullptr)
     {
         producing_node->set_resolved(*this);
+
+        // Add the only method scope.
+        // (A method declaration can have at most only one scope)
+        method_scope = &scope.add_symbol(
+            create_method_scope(*this, producing_node->get_method_scope())
+        ).first.get();
     }
 
-    // Add the only method scope.
-    // (A method declaration can have at most only one scope)
-    method_scope = &scope.add_symbol(
-        create_method_scope(*this)
-    ).first.get();
+    // If an AST didn't produce this node, then it was external.
+    // In which case, it doesn't have a scope (as in we don't care about it).
 }
 
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
-    create_method_scope(i_scope_containing_symbol &parent_scope)
+    create_method_scope(i_scope_containing_symbol &parent_scope, ast::method::method_scope_ast_node &scope_node)
 {
-    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables);
+    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &scope_node);
 }
 
 const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::method_symbol::get_full_name() const

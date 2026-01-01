@@ -30,8 +30,6 @@ codesh::ast::type::type_ast_node *variable_reference_ast_node::get_type() const
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                                                  codesh::output::jvm_target::constant_pool &constant_pool)
 {
-    const auto &scope = get_method_scope();
-
     //TODO: Expand beyond static
     if (const auto &field_symbol = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved()))
     {

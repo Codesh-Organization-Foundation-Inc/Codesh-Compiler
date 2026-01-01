@@ -243,7 +243,8 @@ public:
             std::unique_ptr<ast::type::type_ast_node> return_type,
             ast::method::method_declaration_ast_node *producing_node);
 
-    [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope);
+    [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope,
+            ast::method::method_scope_ast_node &scope_node);
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
     void set_full_name(definition::fully_qualified_class_name name);
