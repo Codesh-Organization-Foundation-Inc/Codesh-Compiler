@@ -53,6 +53,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
 static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
+    //TODO: Handle inner scopes
     for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
     {
         method_symbol.get_method_scope().add_variable(*var_decl);

@@ -192,8 +192,6 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/scope.cpp
         src/semantic_analyzer/symbol_table/scope.tpp
         src/semantic_analyzer/symbol_table/symbol_type.h
-        src/semantic_analyzer/statement/local_var_decl/resolve.cpp
-        src/semantic_analyzer/statement/local_var_decl/resolve.h
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/resolve.h
         src/semantic_analyzer/statement/resolve.h

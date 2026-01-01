@@ -13,10 +13,6 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::method_symbol &method_symbol);
 
-static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::method_declaration_ast_node &method,
-        const codesh::semantic_analyzer::method_symbol &method_symbol);
-
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol);
 
@@ -54,7 +50,6 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
     );
 
     resolve_return_type(context, method_decl, *method);
-    resolve_parameters(context, method_decl, *method);
     resolve_local_variables(context, *method);
 
     // Move to a new overloads entry, now that the parameters' descriptors are valid
@@ -83,55 +78,28 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
     );
 }
 
-static void resolve_parameters(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::method_declaration_ast_node &method,
-        const codesh::semantic_analyzer::method_symbol &method_symbol)
-{
-    size_t i = 0;
-
-    for (const auto &param : method.get_parameters())
-    {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get().get_type());
-        if (!custom_param)
-            continue;
-
-        codesh::semantic_analyzer::util::resolve_custom_type_node(
-            context,
-            *custom_param,
-            *method_symbol.get_parameter_types()[i]
-        );
-
-        ++i;
-    }
-}
-
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    // Skip erroring the first parameters_count variables, as they are a copy of the parameters.
-    // This avoids double error reporting.
-    const size_t parameters_count = method_symbol.get_parameter_types().size();
-    size_t i = 0;
-
     for (const auto &var_symbol : method_symbol.get_method_scope().get_variables() | std::views::values)
     {
         auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        //TODO: Embed this return safeguard (this is present elsewhere too)
         if (!var_type)
             continue;
 
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
             context,
-            *var_type
+            *var_type,
+            *var_symbol->get_producing_node()->get_type()
         )) {
-            if (i >= parameters_count)
-            {
-                context.blasphemy_consumer(fmt::format(
-                    "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                    var_type->get_unresolved_name().join()
-                ));
-            }
+            context.blasphemy_consumer(fmt::format(
+                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
+                var_type->get_unresolved_name().join()
+            ));
         }
 
-        ++i;
+        //TODO: Do value checks
+        //NOTE: You can get method_symbol via a new parameter if needed
     }
 }

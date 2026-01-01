@@ -74,7 +74,7 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     type_declaration::collect(context,country);
     type_declaration::resolve(context, country);
 
-    // Only after resolving all methods should we resolve all methods' bodies:
+    // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);
 
 
@@ -95,7 +95,11 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
 
             for (const auto &stmnt : method_decl->get_method_scope().get_body())
             {
-                codesh::semantic_analyzer::statement::resolve(method_context, *stmnt, method_decl->get_resolved());
+                codesh::semantic_analyzer::statement::resolve(
+                    method_context,
+                    *stmnt,
+                    method_decl->get_resolved()
+                );
             }
         }
     }
