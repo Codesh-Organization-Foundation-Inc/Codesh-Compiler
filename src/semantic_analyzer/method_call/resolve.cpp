@@ -118,7 +118,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto method_overloads_raw = type.resolve(method_call.get_last_name(false));
+    const auto method_overloads_raw = type.get_scope().resolve(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
         //TODO: Throw "name doesn't exist"
@@ -141,7 +141,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     // Verify parameter types
 
-    for (const auto &symbol : method_overloads->get_symbol_map() | std::views::values)
+    for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
     {
         auto &method = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 

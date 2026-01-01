@@ -1,5 +1,8 @@
 #pragma once
 
+namespace codesh::semantic_analyzer
+{
+
 enum class symbol_type
 {
     COUNTRY,
@@ -11,3 +14,5 @@ enum class symbol_type
     METHOD,
     METHOD_SCOPE
 };
+
+}

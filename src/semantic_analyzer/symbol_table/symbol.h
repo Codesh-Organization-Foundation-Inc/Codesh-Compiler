@@ -8,7 +8,6 @@
 #include "symbol.h"
 #include "symbol_type.h"
 
-#include <list>
 #include <optional>
 #include <unordered_map>
 
@@ -41,12 +40,12 @@ public:
 class i_scope_containing_symbol
 {
 protected:
-    [[nodiscard]] virtual named_symbol_map &get_symbol_map() = 0;
+    [[nodiscard]] virtual symbols_collection &get_scope() = 0;
 
 public:
     virtual ~i_scope_containing_symbol();
 
-    [[nodiscard]] virtual const named_symbol_map &get_symbol_map() const = 0;
+    [[nodiscard]] virtual const symbols_collection &get_scope() const = 0;
 };
 
 /**
@@ -78,17 +77,14 @@ class country_symbol final : public symbol, public i_scope_containing_symbol
     const definition::fully_qualified_class_name full_name;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_symbol_map scopes;
-
-protected:
-    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
-    [[nodiscard]] named_symbol_map &get_symbol_map() override;
+    named_symbol_map scope;
 
 public:
-    explicit country_symbol(definition::fully_qualified_class_name full_name, i_scope_containing_symbol *parent_symbol = nullptr,
-            ast::impl::ast_node *producing_node = nullptr);
+    explicit country_symbol(definition::fully_qualified_class_name full_name,
+            i_scope_containing_symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
 
-    [[nodiscard]] const named_symbol_map &get_symbol_map() const override;
+    [[nodiscard]] named_symbol_map &get_scope() override;
+    [[nodiscard]] const named_symbol_map &get_scope() const override;
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
 };
@@ -99,7 +95,7 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
     const definition::fully_qualified_class_name full_name;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_symbol_map scopes;
+    named_symbol_map scope;
 
 
     ast::type_decl::type_declaration_ast_node *producing_node;
@@ -107,10 +103,6 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
     //TODO: Add super type
     // const std::unique_ptr<ast::type::type_ast_node> super_type;
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
-
-protected:
-    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
-    [[nodiscard]] named_symbol_map &get_symbol_map() override;
 
 public:
     type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_class_name full_name,
@@ -121,7 +113,9 @@ public:
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
-    [[nodiscard]] const named_symbol_map &get_symbol_map() const override;
+    [[nodiscard]] named_symbol_map &get_scope() override;
+    [[nodiscard]] const named_symbol_map &get_scope() const override;
+
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
 };
 
@@ -170,17 +164,13 @@ public:
 class method_overloads_symbol final : public symbol, public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    // Maps parameter descriptors to method declaration
-    named_symbol_map scopes;
-
-protected:
-    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
-    [[nodiscard]] named_symbol_map &get_symbol_map() override;
+    named_symbol_map scope;
 
 public:
     explicit method_overloads_symbol(i_scope_containing_symbol *parent_symbol);
 
-    [[nodiscard]] const named_symbol_map &get_symbol_map() const override;
+    [[nodiscard]] named_symbol_map &get_scope() override;
+    [[nodiscard]] const named_symbol_map &get_scope() const override;
 
     [[nodiscard]] std::optional<std::reference_wrapper<method_symbol>> resolve_method(
             const std::string &params_descriptor) const;
@@ -189,14 +179,17 @@ public:
 
 using local_variable_entry = std::pair<const std::string, std::unique_ptr<local_variable_symbol>>;
 
-class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>
+class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>,
+    public i_scope_containing_symbol
 {
+    static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
+
     ast::method::method_scope_ast_node *producing_node;
 
     std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
     std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable;
 
-    std::list<std::unique_ptr<method_scope_symbol>> inner_method_scopes;
+    symbol_list scope;
 
 public:
     method_scope_symbol(i_scope_containing_symbol *parent_symbol,
@@ -211,9 +204,13 @@ public:
      * @returns The new variable's index
      */
     size_t add_variable(std::string name, std::unique_ptr<local_variable_symbol> variable);
+    /**
+     * @returns The new variable's index
+     */
+    size_t add_variable(ast::local_variable_declaration_ast_node &variable);
 
-    [[nodiscard]] const std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes() const;
-    [[nodiscard]] std::list<std::unique_ptr<method_scope_symbol>> &get_inner_scopes();
+    [[nodiscard]] symbol_list &get_scope() override;
+    [[nodiscard]] const symbol_list &get_scope() const override;
 };
 
 class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>,
@@ -227,14 +224,16 @@ class method_symbol final : public symbol, public i_resolvable_symbol<ast::metho
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
     std::vector<std::reference_wrapper<local_variable_entry>> local_variables;
-    method_scope_symbol method_scope;
+
+    static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
+    symbol_list scope;
+    method_scope_symbol *method_scope;
 
     ast::method::method_declaration_ast_node *producing_node;
     type_symbol &parent_type;
 
 protected:
-    [[nodiscard]] const std::vector<symbol_type> &allowed_symbol_types() const override;
-    [[nodiscard]] named_symbol_map &get_symbol_map() override;
+    [[nodiscard]] symbols_collection &get_scope() override;
 
 public:
     method_symbol(i_scope_containing_symbol *parent_symbol, type_symbol &parent_type,
@@ -245,7 +244,6 @@ public:
             ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope);
-    [[nodiscard]] const named_symbol_map &get_symbol_map() const override;
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
     void set_full_name(definition::fully_qualified_class_name name);
@@ -258,8 +256,8 @@ public:
 
     [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_entry>> &get_all_local_variables() const;
 
-    [[nodiscard]] const method_scope_symbol &get_scope() const;
-    [[nodiscard]] method_scope_symbol &get_scope();
+    [[nodiscard]] method_scope_symbol &get_method_scope() const;
+    [[nodiscard]] const symbol_list &get_scope() const override;
 
     [[nodiscard]] ast::method::method_declaration_ast_node *get_producing_node() const override;
 

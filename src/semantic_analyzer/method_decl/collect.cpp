@@ -23,7 +23,7 @@ void codesh::semantic_analyzer::method_declaration::collect_methods(const semant
 
         method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
 
-        const auto [it, inserted] = methods_container.add_symbol(
+        const auto [it, inserted] = methods_container.get_scope().add_symbol(
             method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
                 &methods_container,
                 containing_type,
@@ -55,7 +55,7 @@ static void collect_local_variables(const codesh::ast::method::method_declaratio
 {
     for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
     {
-        var_decl->add_to_scope(method_symbol.get_scope());
+        method_symbol.get_method_scope().add_variable(*var_decl);
     }
 }
 

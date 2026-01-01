@@ -23,8 +23,13 @@ std::pair<std::reference_wrapper<T>, bool> codesh::semantic_analyzer::named_symb
 }
 
 template <std::derived_from<codesh::semantic_analyzer::symbol> T>
-std::pair<std::reference_wrapper<T>, size_t> codesh::semantic_analyzer::symbol_list::add_symbol(
-        std::unique_ptr<T> entry)
+std::pair<std::reference_wrapper<T>, size_t>
+codesh::semantic_analyzer::symbol_list::add_symbol(std::unique_ptr<T> entry)
 {
-    return {symbols.emplace_back(std::move(entry)), symbols.size() - 1};
+    const size_t index = symbols.size();
+
+    T* raw = entry.get();
+    symbols.emplace_back(std::move(entry));
+
+    return { *raw, index };
 }

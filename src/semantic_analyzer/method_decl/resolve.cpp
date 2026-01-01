@@ -41,14 +41,15 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::semantic_analyzer::type_symbol &type)
 {
     auto &method_overloads = *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-        &type.resolve(method_decl.get_last_name(false)).value().get()
+        &type.get_scope().resolve(method_decl.get_last_name(false)).value().get()
     );
 
     // Get relevant method symbol from the method overloads map
     // Then cast it to method_symbol
     std::unique_ptr<codesh::semantic_analyzer::method_symbol> method(
         static_cast<codesh::semantic_analyzer::method_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-            method_overloads.resolve_and_move(method_decl.generate_parameters_descriptor(false))
+            method_overloads.get_scope()
+                .resolve_and_move(method_decl.generate_parameters_descriptor(false))
                 .release()
         )
     );
@@ -59,7 +60,7 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
 
     // Move to a new overloads entry, now that the parameters' descriptors are valid
     const auto insert_result =
-        method_overloads.add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
+        method_overloads.get_scope().add_symbol(method_decl.generate_parameters_descriptor(), std::move(method));
 
     return insert_result.first.get();
 }
@@ -113,7 +114,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
     const size_t parameters_count = method_symbol.get_parameter_types().size();
     size_t i = 0;
 
-    for (const auto &var_symbol : method_symbol.get_scope().get_variables() | std::views::values)
+    for (const auto &var_symbol : method_symbol.get_method_scope().get_variables() | std::views::values)
     {
         auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
         if (!var_type)

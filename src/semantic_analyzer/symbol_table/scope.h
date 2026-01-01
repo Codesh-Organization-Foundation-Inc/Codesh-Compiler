@@ -2,7 +2,6 @@
 
 #include "symbol_type.h"
 
-#include <list>
 #include <memory>
 #include <optional>
 #include <string>
@@ -22,12 +21,7 @@ public:
     explicit symbols_collection(std::vector<symbol_type> allowed_symbol_types);
     virtual ~symbols_collection();
 
-
-    [[nodiscard]] virtual std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const = 0;
-    /**
-     * Resolves the requested symbol, or nothing if not found.
-     */
-    [[nodiscard]] virtual std::unique_ptr<symbol> resolve_and_move(const std::string &name) = 0;
+    [[nodiscard]] virtual bool is_empty() const = 0;
 };
 
 class named_symbol_map final : public symbols_collection
@@ -37,8 +31,11 @@ class named_symbol_map final : public symbols_collection
 public:
     explicit named_symbol_map(std::vector<symbol_type> allowed_symbol_types);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const override;
-    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name) override;
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const;
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name);
+
+    [[nodiscard]] bool is_empty() const override;
+    [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<symbol>> &internals() const;
 
 
     template <std::derived_from<symbol> T>
@@ -49,13 +46,16 @@ public:
 
 class symbol_list final : public symbols_collection
 {
-    std::list<std::unique_ptr<symbol>> symbols;
+    std::vector<std::unique_ptr<symbol>> symbols;
 
 public:
     explicit symbol_list(std::vector<symbol_type> allowed_symbol_types);
 
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(const std::string &name) const override;
-    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(const std::string &name) override;
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(size_t index) const;
+    [[nodiscard]] std::unique_ptr<symbol> resolve_and_move(size_t index);
+
+    [[nodiscard]] bool is_empty() const override;
+
 
     template <std::derived_from<symbol> T>
     /**

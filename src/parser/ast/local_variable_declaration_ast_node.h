@@ -55,8 +55,6 @@ public:
     [[nodiscard]] int get_accessible_up_to() const;
     void set_accessible_up_to(int available_to);
 
-    void add_to_scope(semantic_analyzer::method_scope_symbol &scope);
-
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                 output::jvm_target::constant_pool &constant_pool) override;
