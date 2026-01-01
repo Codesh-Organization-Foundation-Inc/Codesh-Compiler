@@ -4,13 +4,13 @@
 #include "../blasphemy/blasphemy_consumer.h"
 #include "../parser/ast/method/operation/return_ast_node.h"
 #include "../parser/ast/method/operation/super_call_ast_node.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../parser/ast/type/custom_type_ast_node.h"
 #include "builtins.h"
-#include "method_call/resolve.h"
 #include "semantic_context.h"
+#include "statement/resolve.h"
 #include "symbol_table/symbol.h"
 #include "type_decl/collect.h"
 #include "type_decl/resolve.h"
@@ -93,12 +93,9 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
         {
             const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
 
-            for (const auto &statement : method_decl->get_method_scope().get_body())
+            for (const auto &stmnt : method_decl->get_method_scope().get_body())
             {
-                if (const auto method_call = dynamic_cast<codesh::ast::method::operation::method_call_ast_node *>(statement.get()))
-                {
-                    codesh::semantic_analyzer::method_call::resolve(method_context, *method_call, method_decl->get_resolved());
-                }
+                codesh::semantic_analyzer::statement::resolve(method_context, *stmnt, method_decl->get_resolved());
             }
         }
     }

@@ -162,8 +162,8 @@ add_executable(Codesh_Compiler
         src/defenition/fully_qualified_class_name.h
         src/blasphemy/details.h
         src/blasphemy/details.cpp
-        src/semantic_analyzer/method_call/resolve.cpp
-        src/semantic_analyzer/method_call/resolve.h
+        src/semantic_analyzer/statement/method_call/resolve.cpp
+        src/semantic_analyzer/statement/method_call/resolve.h
         src/blasphemy/blasphemy_consumer.h
         src/blasphemy/blasphemy_consumer.cpp
         src/semantic_analyzer/type_decl/resolve.cpp
@@ -192,6 +192,12 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/scope.cpp
         src/semantic_analyzer/symbol_table/scope.tpp
         src/semantic_analyzer/symbol_table/symbol_type.h
+        src/semantic_analyzer/statement/local_var_decl/resolve.cpp
+        src/semantic_analyzer/statement/local_var_decl/resolve.h
+        src/semantic_analyzer/statement/resolve.cpp
+        src/semantic_analyzer/statement/resolve.h
+        src/semantic_analyzer/statement/resolve.h
+        src/semantic_analyzer/statement/resolve.cpp
 )
 
 # sudo dnf install boost-regex boost-devel

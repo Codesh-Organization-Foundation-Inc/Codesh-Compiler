@@ -1,11 +1,11 @@
 #include "resolve.h"
 
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "../../parser/ast/type/custom_type_ast_node.h"
-#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../semantic_context.h"
-#include "../symbol_table/symbol_table.h"
-#include "../util.h"
+#include "../../../parser/ast/method/operation/method_call_ast_node.h"
+#include "../../../parser/ast/type/custom_type_ast_node.h"
+#include "../../../parser/ast/var_reference/variable_reference_ast_node.h"
+#include "../../semantic_context.h"
+#include "../../symbol_table/symbol_table.h"
+#include "../../util.h"
 #include "fmt/color.h"
 
 #include <ranges>
@@ -24,7 +24,7 @@ static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
         const codesh::ast::type::type_ast_node &to);
 
 
-void codesh::semantic_analyzer::method_call::resolve(const semantic_context &context,
+void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
                                                      ast::method::operation::method_call_ast_node &method_call,
                                                      const method_symbol &containing_method)
 {

@@ -1,5 +1,4 @@
 #include "resolve.h"
-#include "../method_call/resolve.h"
 
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../parser/ast/compilation_unit_ast_node.h"

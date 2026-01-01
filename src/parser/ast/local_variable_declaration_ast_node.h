@@ -17,6 +17,7 @@ class method_scope_symbol;
 namespace codesh::ast
 {
 
+//TODO: Move to method operations namespace & directory
 class local_variable_declaration_ast_node : public impl::i_constant_pool_emitter,
     public impl::i_symbolically_linked<semantic_analyzer::local_variable_symbol>
 {
