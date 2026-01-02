@@ -95,11 +95,10 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
         )) {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                var_type->get_unresolved_name().join()
+                var_type->get_unresolved_name().join(" ל־")
             ));
         }
 
         //TODO: Do value checks
-        //NOTE: You can get method_symbol via a new parameter if needed
     }
 }

@@ -93,12 +93,16 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
         {
             const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
 
-            for (const auto &stmnt : method_decl->get_method_scope().get_body())
+            //TODO: Handle multiple scopes
+            const codesh::ast::method::method_scope_ast_node &method_scope = method_decl->get_method_scope();
+
+            for (const auto &stmnt : method_scope.get_body())
             {
                 codesh::semantic_analyzer::statement::resolve(
                     method_context,
                     *stmnt,
-                    method_decl->get_resolved()
+                    method_decl->get_resolved(),
+                    method_scope.get_resolved()
                 );
             }
         }

@@ -26,12 +26,14 @@ static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
 
 static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call_node,
-        const codesh::semantic_analyzer::method_symbol &containing_method);
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
 void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
                                                      ast::method::operation::method_call_ast_node &method_call,
-                                                     const method_symbol &containing_method)
+                                                     const method_symbol &containing_method,
+                                                     const method_scope_symbol &scope)
 {
     const auto result = resolve_method_call(
         context,
@@ -42,7 +44,8 @@ void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     if (!result.has_value())
         return;
 
-    //TODO: When calling non-static methods, also add 'this' as the first argument
+
+    resolve_arguments(context, method_call, containing_method, scope);
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -102,33 +105,39 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
 
-    const auto method = get_called_method_as_symbol(
+    const auto resolved_method = get_called_method_as_symbol(
         context,
         *parent_type,
         method_call
     );
 
-    if (!method.has_value())
+    if (!resolved_method.has_value())
         return std::nullopt;
 
 
     // Update the AST node to the found result
-    method_call.set_resolved(method.value());
+    method_call.set_resolved(resolved_method.value());
 
-    resolve_arguments(context, method_call, containing_method);
-
-    return method;
+    return resolved_method;
 }
 
 static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call_node,
-        const codesh::semantic_analyzer::method_symbol &containing_method)
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
+    //TODO: When calling non-static methods, also add 'this' as the first argument
+
     for (const auto &arg : method_call_node.get_arguments())
     {
         if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
         {
-            codesh::semantic_analyzer::statement::variable_reference::resolve(context, *var_ref, containing_method);
+            codesh::semantic_analyzer::statement::variable_reference::resolve(
+                context,
+                *var_ref,
+                containing_method,
+                scope
+            );
         }
     }
 }
