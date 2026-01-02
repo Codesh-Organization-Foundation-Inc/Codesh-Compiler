@@ -1,4 +1,5 @@
 #include "resolve.h"
+#include "../variable_reference/resolve.h"
 
 #include "../../../parser/ast/method/operation/method_call_ast_node.h"
 #include "../../../parser/ast/type/custom_type_ast_node.h"
@@ -22,6 +23,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
         const codesh::ast::type::type_ast_node &to);
+
+static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+        const codesh::semantic_analyzer::method_symbol &containing_method);
 
 
 void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
@@ -110,7 +115,22 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     // Update the AST node to the found result
     method_call.set_resolved(method.value());
 
+    resolve_arguments(context, method_call, containing_method);
+
     return method;
+}
+
+static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+        const codesh::semantic_analyzer::method_symbol &containing_method)
+{
+    for (const auto &arg : method_call_node.get_arguments())
+    {
+        if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
+        {
+            codesh::semantic_analyzer::statement::variable_reference::resolve(context, *var_ref, containing_method);
+        }
+    }
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
