@@ -15,13 +15,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
-void codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
+bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
                                                                        variable_reference_ast_node &var_ref_node,
                                                                        const method_scope_symbol &scope)
 {
     const auto result = find_symbol_local_first(context, var_ref_node, scope);
     if (!result.has_value())
-        return;
+        return false;
 
     const auto var_symbol = dynamic_cast<variable_symbol *>(&result.value().get());
     if (var_symbol == nullptr)
@@ -32,10 +32,11 @@ void codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
             var_ref_node.get_unresolved_name().join(" ל־")
         ));
 
-        return;
+        return false;
     }
 
     var_ref_node.set_resolved(*var_symbol);
+    return true;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(

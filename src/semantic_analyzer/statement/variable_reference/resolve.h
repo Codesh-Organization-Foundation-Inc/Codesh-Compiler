@@ -17,6 +17,9 @@ class method_symbol;
 
 namespace codesh::semantic_analyzer::statement::variable_reference
 {
-void resolve(const semantic_context &context, variable_reference_ast_node &var_ref_node,
+/**
+ * @returns Whether the operation succeed
+ */
+bool resolve(const semantic_context &context, variable_reference_ast_node &var_ref_node,
              const method_scope_symbol &scope);
 }
