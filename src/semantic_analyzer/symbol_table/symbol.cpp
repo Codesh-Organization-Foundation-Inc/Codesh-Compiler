@@ -19,12 +19,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     const auto &parent = std::as_const(*parent_symbol);
     if (const auto &named_symbol_container = dynamic_cast<const named_symbol_map *>(&parent.get_scope()))
     {
-        // Check if the target is myself
+        // Check if the target is myself.
         // My name is defined within my parent:
         const auto &result = named_symbol_container->resolve_local(name);
         if (result.has_value())
         {
-            // Don't return "this" as we are supposed to be a const method.
+            // Don't return "this," as we are supposed to be a const method.
             // Instead, the resolve above gives us a non-const reference.
             return result;
         }

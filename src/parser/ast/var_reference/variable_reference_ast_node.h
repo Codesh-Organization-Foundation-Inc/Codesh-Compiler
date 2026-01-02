@@ -40,6 +40,9 @@ public:
     [[nodiscard]] codesh::ast::type::type_ast_node *get_type() const override;
 
 
+    [[nodiscard]] const codesh::definition::fully_qualified_class_name &get_unresolved_name() const;
+
+
     void emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                         codesh::output::jvm_target::constant_pool &constant_pool) override;
 

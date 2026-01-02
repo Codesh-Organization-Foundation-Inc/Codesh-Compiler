@@ -27,6 +27,11 @@ codesh::ast::type::type_ast_node *variable_reference_ast_node::get_type() const
     return get_resolved().get_type();
 }
 
+const codesh::definition::fully_qualified_class_name &variable_reference_ast_node::get_unresolved_name() const
+{
+    return name;
+}
+
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                                                  codesh::output::jvm_target::constant_pool &constant_pool)
 {

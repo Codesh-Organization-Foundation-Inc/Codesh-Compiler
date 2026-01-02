@@ -25,9 +25,8 @@ static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
         const codesh::ast::type::type_ast_node &to);
 
 static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::operation::method_call_ast_node &method_call_node,
-        const codesh::semantic_analyzer::method_symbol &containing_method,
-        const codesh::semantic_analyzer::method_scope_symbol &scope);
+                              const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+                              const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
 void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
@@ -45,7 +44,7 @@ void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
         return;
 
 
-    resolve_arguments(context, method_call, containing_method, scope);
+    resolve_arguments(context, method_call, scope);
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -122,9 +121,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 }
 
 static void resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::ast::method::operation::method_call_ast_node &method_call_node,
-        const codesh::semantic_analyzer::method_symbol &containing_method,
-        const codesh::semantic_analyzer::method_scope_symbol &scope)
+                              const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+                              const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     //TODO: When calling non-static methods, also add 'this' as the first argument
 
@@ -132,12 +130,7 @@ static void resolve_arguments(const codesh::semantic_analyzer::semantic_context 
     {
         if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
         {
-            codesh::semantic_analyzer::statement::variable_reference::resolve(
-                context,
-                *var_ref,
-                containing_method,
-                scope
-            );
+            codesh::semantic_analyzer::statement::variable_reference::resolve(context, *var_ref, scope);
         }
     }
 }
