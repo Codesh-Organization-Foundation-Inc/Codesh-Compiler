@@ -26,12 +26,6 @@ public:
     symbol(i_scope_containing_symbol *parent_symbol, symbol_type symbol_type);
     virtual ~symbol();
 
-    /**
-     * Attempts to find the symbol named `name`, and returns it.
-     * Upon failure, consults the parent symbol.
-     */
-    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_up(const std::string &name) const;
-
     [[nodiscard]] symbol_type get_symbol_type() const;
     [[nodiscard]] i_scope_containing_symbol *get_parent_symbol() const;
 };
@@ -46,6 +40,12 @@ public:
     virtual ~i_scope_containing_symbol();
 
     [[nodiscard]] virtual const symbols_collection &get_scope() const = 0;
+
+    /**
+     * Attempts to find the symbol named `name`, and returns it.
+     * Upon failure, consults the parent symbol.
+     */
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_up(const std::string &name) const;
 };
 
 /**

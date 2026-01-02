@@ -10,29 +10,6 @@ codesh::semantic_analyzer::symbol::symbol(i_scope_containing_symbol *const paren
 
 codesh::semantic_analyzer::symbol::~symbol() = default;
 
-std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol::resolve_up(
-    const std::string &name) const
-{
-    if (parent_symbol == nullptr)
-        return std::nullopt;
-
-    const auto &parent = std::as_const(*parent_symbol);
-    if (const auto &named_symbol_container = dynamic_cast<const named_symbol_map *>(&parent.get_scope()))
-    {
-        // Check if the target is myself.
-        // My name is defined within my parent:
-        const auto &result = named_symbol_container->resolve_local(name);
-        if (result.has_value())
-        {
-            // Don't return "this," as we are supposed to be a const method.
-            // Instead, the resolve above gives us a non-const reference.
-            return result;
-        }
-    }
-
-    return dynamic_cast<const symbol &>(parent).resolve_up(name);
-}
-
 codesh::semantic_analyzer::symbol_type codesh::semantic_analyzer::symbol::get_symbol_type() const
 {
     return _symbol_type;
@@ -44,6 +21,25 @@ codesh::semantic_analyzer::i_scope_containing_symbol *codesh::semantic_analyzer:
 }
 
 codesh::semantic_analyzer::i_scope_containing_symbol::~i_scope_containing_symbol() = default;
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
+    i_scope_containing_symbol::resolve_up(const std::string &name) const
+{
+    if (const auto &named_symbol_container = dynamic_cast<const named_symbol_map *>(&get_scope()))
+    {
+        const auto &result = named_symbol_container->resolve_local(name);
+
+        if (result.has_value())
+            return result;
+    }
+
+    if (const auto &parent = dynamic_cast<const symbol &>(*this).get_parent_symbol())
+    {
+        return parent->resolve_up(name);
+    }
+
+    return std::nullopt;
+}
 
 const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::country_symbol::get_full_name() const
 {
