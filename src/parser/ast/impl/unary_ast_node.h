@@ -10,13 +10,15 @@ namespace codesh::ast::impl
 
 class unary_ast_node : public var_reference::value_ast_node
 {
-    std::unique_ptr<i_ir_emitter> child;
+    std::unique_ptr<type::type_ast_node> type;
+    std::unique_ptr<value_ast_node> child;
 
 protected:
-    explicit unary_ast_node(std::unique_ptr<i_ir_emitter> child);
+    explicit unary_ast_node(std::unique_ptr<value_ast_node> child);
 
 public:
-    [[nodiscard]] i_ir_emitter *get_child() const;
+    [[nodiscard]] value_ast_node *get_child() const;
+    [[nodiscard]] type::type_ast_node *get_type() const override;
 };
 
 }

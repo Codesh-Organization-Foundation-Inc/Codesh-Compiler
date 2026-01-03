@@ -1,7 +1,7 @@
 #include "division_operator_ast_node.h"
 
-codesh::ast::op::division_operator_ast_node::division_operator_ast_node(std::unique_ptr<i_ir_emitter> left,
-                                                                           std::unique_ptr<i_ir_emitter> right) :
+codesh::ast::op::division_operator_ast_node::division_operator_ast_node(std::unique_ptr<value_ast_node> left,
+        std::unique_ptr<value_ast_node> right) :
     binary_ast_node(std::move(left), std::move(right))
 {
 }
