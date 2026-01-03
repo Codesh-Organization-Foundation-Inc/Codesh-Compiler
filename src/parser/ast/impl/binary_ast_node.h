@@ -19,8 +19,8 @@ protected:
     binary_ast_node(std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right);
 
 public:
-    [[nodiscard]] virtual value_ast_node *get_left() const;
-    [[nodiscard]] value_ast_node *get_right() const;
+    [[nodiscard]] virtual value_ast_node &get_left() const;
+    [[nodiscard]] value_ast_node &get_right() const;
 
     //FIXME: REMOVE THIS!!
     // Each node should set the type for itself.

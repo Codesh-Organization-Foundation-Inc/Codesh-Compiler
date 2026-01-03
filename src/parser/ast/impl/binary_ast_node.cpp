@@ -6,14 +6,14 @@ codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<value_ast_no
 {
 }
 
-codesh::ast::var_reference::value_ast_node *codesh::ast::impl::binary_ast_node::get_left() const
+codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::get_left() const
 {
-    return this->left.get();
+    return *this->left;
 }
 
-codesh::ast::var_reference::value_ast_node *codesh::ast::impl::binary_ast_node::get_right() const
+codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::get_right() const
 {
-    return this->right.get();
+    return *this->right;
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const

@@ -136,12 +136,13 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
 {
     //TODO: When calling non-static methods, also add 'this' as the first argument
 
-    bool allSucceed = true;
+    bool all_succeed = true;
+
     for (const auto &arg : method_call_node.get_arguments())
     {
         if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
         {
-            allSucceed &= codesh::semantic_analyzer::statement::resolve(
+            all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
                 *var_ref,
                 containing_method,
@@ -150,7 +151,7 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
         }
     }
 
-    return allSucceed;
+    return all_succeed;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
