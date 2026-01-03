@@ -35,16 +35,15 @@ const codesh::definition::fully_qualified_class_name &variable_reference_ast_nod
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                                                  codesh::output::jvm_target::constant_pool &constant_pool)
 {
-    //TODO: Expand beyond static
-    if (const auto &field_symbol = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved()))
+    if (const auto field = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved()))
     {
-        var_cpi = constant_pool.goc_fieldref_info(
+        field_cpi = constant_pool.goc_fieldref_info(
             constant_pool.goc_class_info(
-                constant_pool.goc_utf8_info(field_symbol->get_full_name().omit_last().join())
+                constant_pool.goc_utf8_info(field->get_full_name().omit_last().join())
             ),
 
             constant_pool.goc_name_and_type_info(
-                constant_pool.goc_utf8_info(field_symbol->get_full_name().get_last_part()),
+                constant_pool.goc_utf8_info(field->get_full_name().get_last_part()),
                 constant_pool.goc_utf8_info(get_resolved().get_type()->generate_descriptor())
             )
         );
@@ -55,6 +54,17 @@ void variable_reference_ast_node::emit_ir(
     codesh::output::ir::code_block &containing_block, const codesh::semantic_analyzer::symbol_table &symbol_table,
     const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    //TODO: Expand beyond static
-    containing_block.add_instruction(std::make_unique<codesh::output::ir::get_static_instruction>(*var_cpi));
+    if (field_cpi.has_value())
+    {
+        //TODO: Expand beyond static
+        containing_block.add_instruction(std::make_unique<codesh::output::ir::get_static_instruction>(*field_cpi));
+    }
+    else if (const auto local_var = dynamic_cast<const codesh::semantic_analyzer::local_variable_symbol *>(&get_resolved()))
+    {
+        containing_block.add_instruction(std::make_unique<codesh::output::ir::load_instruction>(
+            //TODO: Support more types
+            codesh::output::ir::instruction_type::REFERENCE,
+            local_var->get_index()
+        ));
+    }
 }

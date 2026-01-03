@@ -26,7 +26,7 @@ class variable_reference_ast_node : public codesh::ast::var_reference::value_ast
     const codesh::definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> resolved_symbol;
 
-    std::optional<int> var_cpi;
+    std::optional<int> field_cpi;
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> &
