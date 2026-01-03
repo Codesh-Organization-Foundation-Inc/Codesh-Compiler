@@ -3,6 +3,7 @@
 #include "../../../defenition/fully_qualified_class_name.h"
 #include "../impl/i_constant_pool_emitter.h"
 #include "../impl/i_resolvable.h"
+#include "../local_variable_declaration_ast_node.h"
 #include "value_ast_node.h"
 
 namespace codesh::semantic_analyzer
@@ -26,6 +27,8 @@ class variable_reference_ast_node : public codesh::ast::var_reference::value_ast
     const codesh::definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> resolved_symbol;
 
+    std::optional<std::reference_wrapper<const codesh::ast::local_variable_declaration_ast_node>> producing_declaration;
+
     std::optional<int> field_cpi;
 
 protected:
@@ -34,6 +37,19 @@ protected:
 
 public:
     explicit variable_reference_ast_node(codesh::definition::fully_qualified_class_name name);
+    /**
+    * When a local_variable_declaration_ast_node is created and assigned on the spot, it will create an
+    * assignment operator to later give it a value during runtime.
+    *
+    * In the AST, variable declaration (binding a name to a local slot) is modeled
+    * separately from assignment (storing a value into that slot). On the JVM,
+    * local variables correspond to fixed stack-frame slots determined at
+    * compile-time, while assignments are emitted as runtime store instructions.
+    *
+    * Hence, for better compilation times, we can just cache the declaration producing this node and then resolve
+    * it immediately after.
+    */
+    explicit variable_reference_ast_node(const codesh::ast::local_variable_declaration_ast_node &producing_declaration);
 
     void set_resolved(codesh::semantic_analyzer::variable_symbol &symbol) override;
 
@@ -41,6 +57,9 @@ public:
 
 
     [[nodiscard]] const codesh::definition::fully_qualified_class_name &get_unresolved_name() const;
+
+    [[nodiscard]] std::optional<std::reference_wrapper<const codesh::ast::local_variable_declaration_ast_node>>
+        get_producing_declaration() const;
 
 
     void emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
