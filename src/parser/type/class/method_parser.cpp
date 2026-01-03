@@ -11,6 +11,9 @@
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
+
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
 {
@@ -39,7 +42,9 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
                     blasphemy::blasphemy_type::SYNTAX);
             }
             break;
-
+        case token_group::KEYWORD_IF:
+            parse_if_statement(tokens, method_scope);
+            break;
 
         case token_group::SCOPE_END:
             tokens.pop();
@@ -74,6 +79,13 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     return method_call_node;
 }
 
+static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope)
+{
+    tokens.pop();
+
+
+}
 std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {

@@ -1,4 +1,4 @@
-#include "while_ast_node.h"
+#include "../while_ast_node.h"
 
 codesh::ast::method::operation::while_ast_node::while_ast_node(std::unique_ptr<impl::i_ir_emitter> condition)
     : condition(std::move(condition))
