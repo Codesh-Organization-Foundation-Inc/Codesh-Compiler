@@ -14,10 +14,43 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         const codesh::semantic_analyzer::semantic_context &context, variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
+static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
+        variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope);
+
 
 bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
                                                                        variable_reference_ast_node &var_ref_node,
                                                                        const method_scope_symbol &scope)
+{
+    if (!resolve_variable_reference(context, var_ref_node, scope))
+        return false;
+
+    //TODO: Add type checks
+
+    if (const auto &local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved()))
+    {
+        // Validate that the local variable referenced is accessed when it's supposed to
+        const auto &local_var_node = local_var->get_producing_node();
+
+        const size_t min = local_var_node->get_accessible_from();
+        const size_t max = local_var_node->get_accessible_to();
+        const size_t curr = var_ref_node.get_statement_index();
+
+        if (curr > max || curr < min)
+        {
+            //TODO: Proper message
+            context.blasphemy_consumer(fmt::format(
+                "אוזכר המשתנה {} שטרם נוצר",
+                local_var_node->get_name()
+            ));
+        }
+    }
+
+    return true;
+}
+
+static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
+        variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     if (var_ref_node.get_producing_declaration().has_value())
     {
@@ -32,7 +65,7 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
     if (!result.has_value())
         return false;
 
-    const auto var_symbol = dynamic_cast<variable_symbol *>(&result.value().get());
+    const auto var_symbol = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&result.value().get());
     if (var_symbol == nullptr)
     {
         //TODO: Add proper message

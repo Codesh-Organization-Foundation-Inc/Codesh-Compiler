@@ -15,6 +15,12 @@ codesh::ast::type::type_ast_node *codesh::ast::impl::unary_ast_node::get_type() 
     return this->type.get();
 }
 
+void codesh::ast::impl::unary_ast_node::set_statement_index(const size_t statement_index)
+{
+    value_ast_node::set_statement_index(statement_index);
+    child->set_statement_index(statement_index);
+}
+
 void codesh::ast::impl::unary_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                        output::jvm_target::constant_pool &constant_pool)
 {
