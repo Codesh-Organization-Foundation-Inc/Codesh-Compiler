@@ -20,13 +20,3 @@ codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type()
 {
     return this->type.get();
 }
-
-void codesh::ast::impl::binary_ast_node::set_left(std::unique_ptr<value_ast_node> node)
-{
-    this->left = std::move(node);
-}
-
-void codesh::ast::impl::binary_ast_node::set_right(std::unique_ptr<value_ast_node> node)
-{
-    this->right = std::move(node);
-}
