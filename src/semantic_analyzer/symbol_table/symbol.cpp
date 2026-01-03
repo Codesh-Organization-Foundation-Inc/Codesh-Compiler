@@ -150,10 +150,11 @@ codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::fie
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(i_scope_containing_symbol *const parent_symbol,
-        std::unique_ptr<ast::type::type_ast_node> type,
+        std::unique_ptr<ast::type::type_ast_node> type, const size_t index,
         ast::local_variable_declaration_ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type)),
-    producing_node(producing_node)
+    producing_node(producing_node),
+    index(index)
 {
     if (producing_node != nullptr)
     {
@@ -165,6 +166,11 @@ codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::loc
     const
 {
     return producing_node;
+}
+
+size_t codesh::semantic_analyzer::local_variable_symbol::get_index() const
+{
+    return index;
 }
 
 codesh::semantic_analyzer::method_overloads_symbol::method_overloads_symbol(
@@ -196,7 +202,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 }
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(i_scope_containing_symbol *const parent_symbol,
-        indexed_variables_container &index_to_local_variable,
+        indexed_locals_container &index_to_local_variable,
         ast::method::method_scope_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD_SCOPE),
     producing_node(producing_node),
@@ -217,10 +223,10 @@ codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_sc
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
                                                                     std::unique_ptr<local_variable_symbol> variable)
 {
-    const auto result = scope.add_symbol(name, std::move(variable));
+    const size_t index = variable->get_index();
 
-    const size_t index = index_to_local_variable.size();
-    index_to_local_variable.emplace_back(name, result.first);
+    const auto result = scope.add_symbol(name, std::move(variable));
+    index_to_local_variable.emplace(name, result.first);
 
     return index;
 }
@@ -307,7 +313,7 @@ codesh::ast::type::type_ast_node &codesh::semantic_analyzer::method_symbol::get_
     return *return_type;
 }
 
-const codesh::semantic_analyzer::indexed_variables_container &codesh::semantic_analyzer::method_symbol::
+const codesh::semantic_analyzer::indexed_locals_container &codesh::semantic_analyzer::method_symbol::
     get_all_local_variables() const
 {
     return local_variables;
@@ -328,6 +334,7 @@ size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(ast::local_v
     return add_variable(variable.get_name(), std::make_unique<local_variable_symbol>(
         this,
         variable.get_type()->clone(),
+        index_to_local_variable.size(),
         &variable
     ));
 }

@@ -8,8 +8,8 @@
 #include "symbol.h"
 #include "symbol_type.h"
 
+#include <map>
 #include <optional>
-#include <unordered_map>
 
 namespace codesh::semantic_analyzer
 {
@@ -154,12 +154,14 @@ class local_variable_symbol final : public variable_symbol,
     public i_ast_produced<ast::local_variable_declaration_ast_node>
 {
     ast::local_variable_declaration_ast_node *producing_node;
+    const size_t index;
 
 public:
     local_variable_symbol(i_scope_containing_symbol *parent_symbol, std::unique_ptr<ast::type::type_ast_node> type,
-            ast::local_variable_declaration_ast_node *producing_node = nullptr);
+            size_t index, ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
+    [[nodiscard]] size_t get_index() const;
 };
 
 
@@ -179,7 +181,7 @@ public:
 };
 
 
-using indexed_variables_container = std::vector<std::pair<const std::string, std::reference_wrapper<variable_symbol>>>;
+using indexed_locals_container = std::map<std::string, std::reference_wrapper<local_variable_symbol>>;
 
 class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>,
     public i_scope_containing_symbol
@@ -188,7 +190,7 @@ class method_scope_symbol final : public symbol, public i_ast_produced<ast::meth
 
     ast::method::method_scope_ast_node *producing_node;
 
-    indexed_variables_container &index_to_local_variable;
+    indexed_locals_container &index_to_local_variable;
 
     named_symbol_map scope;
     std::vector<std::unique_ptr<method_scope_symbol>> inner_scopes;
@@ -197,7 +199,7 @@ protected:
     [[nodiscard]] named_symbol_map &get_scope() override;
 
 public:
-    method_scope_symbol(i_scope_containing_symbol *parent_symbol, indexed_variables_container &index_to_local_variable,
+    method_scope_symbol(i_scope_containing_symbol *parent_symbol, indexed_locals_container &index_to_local_variable,
             ast::method::method_scope_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::method::method_scope_ast_node *get_producing_node() const override;
@@ -226,7 +228,7 @@ class method_symbol final : public symbol, public i_resolvable_symbol<ast::metho
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
-    indexed_variables_container local_variables;
+    indexed_locals_container local_variables;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     symbol_list scope;
@@ -258,7 +260,7 @@ public:
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
 
-    [[nodiscard]] const indexed_variables_container &get_all_local_variables() const;
+    [[nodiscard]] const indexed_locals_container &get_all_local_variables() const;
 
     [[nodiscard]] method_scope_symbol &get_method_scope() const;
     [[nodiscard]] const symbol_list &get_scope() const override;

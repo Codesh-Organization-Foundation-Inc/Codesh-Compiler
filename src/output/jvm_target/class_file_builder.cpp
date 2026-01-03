@@ -267,11 +267,8 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    const auto &local_vars = method_decl.get_resolved().get_all_local_variables();
-    for (int i = 0; i < local_vars.size(); i++)
+    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables())
     {
-        const auto &[name, var] = local_vars.at(i);
-
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
         //TODO: Fill per scope info:
@@ -293,7 +290,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
             )
         );
 
-        util::put_int_bytes(entry->index, 2, i);
+        util::put_int_bytes(entry->index, 2, var.get().get_index());
 
         results_out.push_back(std::move(entry));
     }
