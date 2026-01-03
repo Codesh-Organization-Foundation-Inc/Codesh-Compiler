@@ -20,6 +20,9 @@ public:
     [[nodiscard]] value_ast_node &get_child() const;
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
+    void set_statement_index(size_t statement_index) override;
+
+
     void emit_constants(const compilation_unit_ast_node &root_node,
             output::jvm_target::constant_pool &constant_pool) override;
 };

@@ -23,7 +23,10 @@ public:
     [[nodiscard]] virtual value_ast_node &get_left() const;
     [[nodiscard]] value_ast_node &get_right() const;
 
-    //FIXME: REMOVE THIS!!
+    void set_statement_index(size_t statement_index) override;
+
+
+    // FIXME: REMOVE THIS!!
     // Each node should set the type for itself.
     [[nodiscard]] type::type_ast_node *get_type() const override;
 

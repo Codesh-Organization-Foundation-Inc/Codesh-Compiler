@@ -16,6 +16,13 @@ codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::
     return *this->right;
 }
 
+void codesh::ast::impl::binary_ast_node::set_statement_index(const size_t statement_index)
+{
+    value_ast_node::set_statement_index(statement_index);
+    left->set_statement_index(statement_index);
+    right->set_statement_index(statement_index);
+}
+
 codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const
 {
     return this->type.get();
