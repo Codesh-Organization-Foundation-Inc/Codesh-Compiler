@@ -14,7 +14,7 @@ class unary_ast_node : public var_reference::value_ast_node
     std::unique_ptr<value_ast_node> child;
 
 protected:
-    explicit unary_ast_node(std::unique_ptr<i_ir_emitter> child);
+    explicit unary_ast_node(std::unique_ptr<value_ast_node> child);
 
 public:
     [[nodiscard]] value_ast_node *get_child() const;

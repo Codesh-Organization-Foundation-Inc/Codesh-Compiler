@@ -1,6 +1,6 @@
 #include "minus_operator_ast_node.h"
 
-codesh::ast::op::minus_operator_ast_node::minus_operator_ast_node(std::unique_ptr<ir_emitting_ast_node> child):
+codesh::ast::op::minus_operator_ast_node::minus_operator_ast_node(std::unique_ptr<value_ast_node> child):
     unary_ast_node(std::move(child))
 {
 }
