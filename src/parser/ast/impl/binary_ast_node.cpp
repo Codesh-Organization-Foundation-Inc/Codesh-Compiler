@@ -1,17 +1,17 @@
 #include "binary_ast_node.h"
 
-codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<i_ir_emitter> left,
-                                                       std::unique_ptr<i_ir_emitter> right) :
+codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<value_ast_node> left,
+                                                       std::unique_ptr<value_ast_node> right) :
     left(std::move(left)), right(std::move(right))
 {
 }
 
-codesh::ast::impl::i_ir_emitter *codesh::ast::impl::binary_ast_node::get_left() const
+codesh::ast::var_reference::value_ast_node *codesh::ast::impl::binary_ast_node::get_left() const
 {
     return this->left.get();
 }
 
-codesh::ast::impl::i_ir_emitter *codesh::ast::impl::binary_ast_node::get_right() const
+codesh::ast::var_reference::value_ast_node *codesh::ast::impl::binary_ast_node::get_right() const
 {
     return this->right.get();
 }
@@ -21,12 +21,12 @@ codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type()
     return this->type.get();
 }
 
-void codesh::ast::impl::binary_ast_node::set_left(std::unique_ptr<i_ir_emitter> node)
+void codesh::ast::impl::binary_ast_node::set_left(std::unique_ptr<value_ast_node> node)
 {
     this->left = std::move(node);
 }
 
-void codesh::ast::impl::binary_ast_node::set_right(std::unique_ptr<i_ir_emitter> node)
+void codesh::ast::impl::binary_ast_node::set_right(std::unique_ptr<value_ast_node> node)
 {
     this->right = std::move(node);
 }
