@@ -213,7 +213,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     //TODO: Throw "mismatched argument types"
     context.blasphemy_consumer(fmt::format(
-        "מאסתי"
+        "סוג המנחות אינו תואם לחותם המעשה"
     ));
     return std::nullopt;
 }

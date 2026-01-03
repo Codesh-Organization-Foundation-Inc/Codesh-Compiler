@@ -62,9 +62,12 @@ void variable_reference_ast_node::emit_ir(
     else if (const auto local_var = dynamic_cast<const codesh::semantic_analyzer::local_variable_symbol *>(&get_resolved()))
     {
         containing_block.add_instruction(std::make_unique<codesh::output::ir::load_instruction>(
-            //TODO: Support more types
-            codesh::output::ir::instruction_type::REFERENCE,
+            local_var->get_type()->to_instruction_type(),
             local_var->get_index()
         ));
+    }
+    else
+    {
+        throw std::runtime_error("Unsupported variable reference type");
     }
 }
