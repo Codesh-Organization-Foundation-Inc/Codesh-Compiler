@@ -81,9 +81,9 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    for (const auto &var_symbol : method_symbol.get_method_scope().get_variables() | std::views::values)
+    for (const auto &var_symbol : method_symbol.get_all_local_variables() | std::views::values)
     {
-        auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol->get_type());
+        auto *var_type = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(var_symbol.get().get_type());
         //TODO: Embed this return safeguard (this is present elsewhere too)
         if (!var_type)
             continue;
@@ -91,7 +91,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
         if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
             context,
             *var_type,
-            *var_symbol->get_producing_node()->get_type()
+            *var_symbol.get().get_producing_node()->get_type()
         )) {
             context.blasphemy_consumer(fmt::format(
                 "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",

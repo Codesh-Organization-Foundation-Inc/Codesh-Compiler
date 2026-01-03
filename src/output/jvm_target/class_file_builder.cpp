@@ -270,7 +270,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
     const auto &local_vars = method_decl.get_resolved().get_all_local_variables();
     for (int i = 0; i < local_vars.size(); i++)
     {
-        const auto &[name, var] = local_vars.at(i).get();
+        const auto &[name, var] = local_vars.at(i);
 
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
@@ -289,7 +289,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
             entry->descriptor_index,
             2,
             constant_pool_.get_utf8_index(
-                var->get_type()->generate_descriptor()
+                var.get().get_type()->generate_descriptor()
             )
         );
 

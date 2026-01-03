@@ -127,6 +127,8 @@ public:
     variable_symbol(i_scope_containing_symbol *parent_symbol, symbol_type _symbol_type, std::unique_ptr<ast::type::type_ast_node> type);
 
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
+
+    [[nodiscard]] virtual ast::local_variable_declaration_ast_node *get_producing_node() const = 0;
 };
 
 class field_symbol final : public variable_symbol, public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
@@ -177,7 +179,7 @@ public:
 };
 
 
-using local_variable_entry = std::pair<const std::string, std::unique_ptr<local_variable_symbol>>;
+using indexed_variables_container = std::vector<std::pair<const std::string, std::reference_wrapper<variable_symbol>>>;
 
 class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>,
     public i_scope_containing_symbol
@@ -186,31 +188,32 @@ class method_scope_symbol final : public symbol, public i_ast_produced<ast::meth
 
     ast::method::method_scope_ast_node *producing_node;
 
-    std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> local_variables;
-    std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable;
+    indexed_variables_container &index_to_local_variable;
 
-    symbol_list scope;
+    named_symbol_map scope;
+    std::vector<std::unique_ptr<method_scope_symbol>> inner_scopes;
+
+protected:
+    [[nodiscard]] named_symbol_map &get_scope() override;
 
 public:
-    method_scope_symbol(i_scope_containing_symbol *parent_symbol,
-            std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
+    method_scope_symbol(i_scope_containing_symbol *parent_symbol, indexed_variables_container &index_to_local_variable,
             ast::method::method_scope_ast_node *producing_node = nullptr);
-
-    [[nodiscard]] const std::unordered_map<std::string, std::unique_ptr<local_variable_symbol>> &get_variables() const;
 
     [[nodiscard]] ast::method::method_scope_ast_node *get_producing_node() const override;
 
     /**
      * @returns The new variable's index
      */
-    size_t add_variable(std::string name, std::unique_ptr<local_variable_symbol> variable);
+    size_t add_variable(const std::string &name, std::unique_ptr<local_variable_symbol> variable);
     /**
      * @returns The new variable's index
      */
     size_t add_variable(ast::local_variable_declaration_ast_node &variable);
 
-    [[nodiscard]] symbol_list &get_scope() override;
-    [[nodiscard]] const symbol_list &get_scope() const override;
+    [[nodiscard]] const named_symbol_map &get_scope() const override;
+
+    void add_inner_scope(std::unique_ptr<method_scope_symbol> method_scope);
 };
 
 class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>,
@@ -223,7 +226,7 @@ class method_symbol final : public symbol, public i_resolvable_symbol<ast::metho
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
 
-    std::vector<std::reference_wrapper<local_variable_entry>> local_variables;
+    indexed_variables_container local_variables;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     symbol_list scope;
@@ -255,7 +258,7 @@ public:
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
 
-    [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_entry>> &get_all_local_variables() const;
+    [[nodiscard]] const indexed_variables_container &get_all_local_variables() const;
 
     [[nodiscard]] method_scope_symbol &get_method_scope() const;
     [[nodiscard]] const symbol_list &get_scope() const override;
