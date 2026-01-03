@@ -1,10 +1,12 @@
 #pragma once
-#include "../../impl/ir_emitting_ast_node.h"
+
+#include "../../impl/i_ir_emitter.h"
+#include "method_operation_ast_node.h"
 
 namespace codesh::ast::method::operation
 {
 
-class super_call_ast_node : public impl::ir_emitting_ast_node
+class super_call_ast_node : public method_operation_ast_node
 {
 //TODO: Add parameters
 

@@ -93,7 +93,7 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
         {
             const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
 
-            for (const auto &statement : method_decl->get_body())
+            for (const auto &statement : method_decl->get_method_scope().get_body())
             {
                 if (const auto method_call = dynamic_cast<codesh::ast::method::operation::method_call_ast_node *>(statement.get()))
                 {
@@ -153,14 +153,15 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
 
         for (const auto constructor : class_decl->get_constructors())
         {
-            const auto &body = constructor->get_body();
+            auto &scope = constructor->get_method_scope();
+            const auto &body = scope.get_body();
 
             // Only add super calls to those who lack it
             //TODO: Also filter "this" calls
             if (!body.empty() && dynamic_cast<const codesh::ast::method::operation::super_call_ast_node *>(body.front().get()))
                 continue;
 
-            constructor->get_body().emplace_back(
+            scope.push_front_statement(
                 std::make_unique<codesh::ast::method::operation::super_call_ast_node>()
             );
         }
@@ -184,13 +185,14 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
                 continue;
 
 
-            const auto &body = method->get_body();
+            auto &scope = method->get_method_scope();
+            const auto &body = scope.get_body();
 
             //TODO: This SHOULD check all PATHS, not the last line alone.
             if (!body.empty() && dynamic_cast<const codesh::ast::method::operation::return_ast_node *>(body.front().get()))
                 continue;
 
-            method->get_body().emplace_back(
+            scope.add_statement(
                 std::make_unique<codesh::ast::method::operation::return_ast_node>()
             );
         }

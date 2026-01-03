@@ -82,6 +82,11 @@ codesh::semantic_analyzer::country_symbol::country_symbol(definition::fully_qual
     symbol(parent_symbol, symbol_type::COUNTRY),
     full_name(std::move(full_name))
 {
+    //TODO:
+    // if (producing_node != nullptr)
+    // {
+    //     producing_node->set_resolved(*this);
+    // }
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::type_symbol::allowed_symbol_types() const
@@ -114,6 +119,10 @@ codesh::semantic_analyzer::type_symbol::type_symbol(symbol *const parent_symbol,
     producing_node(producing_node),
     attributes(std::move(attributes))
 {
+    if (producing_node != nullptr)
+    {
+        producing_node->set_resolved(*this);
+    }
 }
 
 const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::type_symbol::get_full_name() const
@@ -162,9 +171,19 @@ const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer:
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(symbol *const parent_symbol,
         std::unique_ptr<ast::type::type_ast_node> type,
-        ast::impl::ast_node *producing_node) :
-    variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type))
+        ast::local_variable_declaration_ast_node *producing_node) :
+    variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type)),
+    producing_node(producing_node)
 {
+    if (producing_node != nullptr)
+    {
+        producing_node->set_resolved(*this);
+    }
+}
+
+codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::local_variable_symbol::get_producing_node() const
+{
+    return producing_node;
 }
 
 const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::method_overloads_symbol::
@@ -202,16 +221,26 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(symbol *const parent_symbol,
         std::vector<std::reference_wrapper<local_variable_entry>> &index_to_local_variable,
-        ast::impl::ast_node *producing_node) :
+        ast::method::method_scope_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD_SCOPE),
+    producing_node(producing_node),
     index_to_local_variable(index_to_local_variable)
 {
+    if (producing_node != nullptr)
+    {
+        producing_node->set_resolved(*this);
+    }
 }
 
 const std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::local_variable_symbol>> &codesh::
     semantic_analyzer::method_scope_symbol::get_variables() const
 {
     return local_variables;
+}
+
+codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_scope_symbol::get_producing_node() const
+{
+    return producing_node;
 }
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(std::string name,
@@ -247,10 +276,14 @@ codesh::semantic_analyzer::method_symbol::method_symbol(symbol *const parent_sym
     attributes(std::move(attributes)),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
-    method_scope(this, local_variables),
+    method_scope(this, local_variables, producing_node ? &producing_node->get_method_scope() : nullptr),
     producing_node(producing_node),
     parent_type(parent_type)
 {
+    if (producing_node != nullptr)
+    {
+        producing_node->set_resolved(*this);
+    }
 }
 
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::

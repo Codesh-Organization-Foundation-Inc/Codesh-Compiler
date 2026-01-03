@@ -11,8 +11,8 @@
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
-void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
-        ast::method::method_declaration_ast_node &method_decl)
+void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
+        ast::method::method_scope_ast_node &method_scope)
 {
     while (!tokens.empty())
     {
@@ -20,11 +20,11 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
-            method_decl.get_body().push_back(parse_methods_call(tokens));
+            method_scope.add_statement(parse_methods_call(tokens));
             break;
 
         case token_group::KEYWORD_LET:
-            method_decl.get_local_variables().push_back(parse_variable_declaration(tokens));
+            method_scope.add_local_variable(parse_variable_declaration(tokens));
             break;
 
         case token_group::OPERATOR_ADDITION:
@@ -32,7 +32,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
         case token_group::OPERATOR_MULTIPLICATION:
         case token_group::OPERATOR_DIVISION:
         case token_group::OPERATOR_MODULO:
-            method_decl.get_body().push_back(parse_value(tokens));
+            method_scope.add_statement(parse_value(tokens));
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
@@ -43,6 +43,7 @@ void codesh::parser::parse_method(std::queue<std::unique_ptr<token>> &tokens,
 
         case token_group::SCOPE_END:
             tokens.pop();
+            method_scope.mark_end();
             return;
 
         default: blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,

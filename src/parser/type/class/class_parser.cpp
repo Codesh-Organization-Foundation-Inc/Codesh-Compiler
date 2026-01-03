@@ -209,7 +209,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         );
     }
 
-    parser::parse_method(tokens, *method_node.get());
+    parser::parse_method_scope(tokens, method_node->get_method_scope());
 
     return method_node;
 }

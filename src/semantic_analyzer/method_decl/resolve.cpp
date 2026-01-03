@@ -91,7 +91,7 @@ static void resolve_parameters(const codesh::semantic_analyzer::semantic_context
 
     for (const auto &param : method.get_parameters())
     {
-        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param->get_type());
+        auto *custom_param = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(param.get().get_type());
         if (!custom_param)
             continue;
 
