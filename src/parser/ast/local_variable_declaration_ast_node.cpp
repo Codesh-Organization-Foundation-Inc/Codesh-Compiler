@@ -69,15 +69,6 @@ void codesh::ast::local_variable_declaration_ast_node::set_accessible_up_to(cons
     this->accessible_up_to = available_to;
 }
 
-void codesh::ast::local_variable_declaration_ast_node::add_to_scope(semantic_analyzer::method_scope_symbol &scope)
-{
-    scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
-        &scope,
-        type->clone(),
-        this
-    ));
-}
-
 void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                                       output::jvm_target::constant_pool &constant_pool)
 {

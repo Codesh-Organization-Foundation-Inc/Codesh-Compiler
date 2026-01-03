@@ -5,6 +5,10 @@
 
 #include <memory>
 
+namespace codesh::output::ir
+{
+enum class instruction_type;
+}
 namespace codesh::ast::type
 {
 
@@ -25,6 +29,8 @@ public:
     void set_array_dimensions(int array_dimensions);
 
     [[nodiscard]] virtual std::unique_ptr<type_ast_node> clone() const = 0;
+
+    [[nodiscard]] virtual output::ir::instruction_type to_instruction_type() const = 0;
 };
 
 }

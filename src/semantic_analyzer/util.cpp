@@ -54,7 +54,7 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(
         const std::string &name, type_symbol &containing_type)
 {
-    return containing_type.add_symbol(
+    return containing_type.get_scope().add_symbol(
         name, std::make_unique<method_overloads_symbol>(&containing_type)
     ).first;
 }

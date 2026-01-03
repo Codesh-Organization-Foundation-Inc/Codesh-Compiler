@@ -18,7 +18,7 @@ void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semant
 static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,
         codesh::semantic_analyzer::type_symbol &type)
 {
-    const auto bereshit = type.resolve("בראשית");
+    const auto bereshit = type.get_scope().resolve_local("בראשית");
     if (!bereshit)
         return;
 
@@ -57,7 +57,7 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
     // Get the original method names' overloads
     codesh::semantic_analyzer::method_overloads_symbol &source_method_overloads =
         *static_cast<codesh::semantic_analyzer::method_overloads_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-            &type.resolve(old_name)->get()
+            &type.get_scope().resolve_local(old_name)->get()
         );
 
     // And the new one
@@ -66,9 +66,9 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
 
 
     // Move the method symbol from the old overloads table to the new one
-    auto &method = dest_method_overloads.add_symbol(
+    auto &method = dest_method_overloads.get_scope().add_symbol(
         method_node.generate_parameters_descriptor(),
-        source_method_overloads.resolve_and_move(method_node.generate_parameters_descriptor())
+        source_method_overloads.get_scope().resolve_and_move(method_node.generate_parameters_descriptor())
     ).first.get();
 
 
@@ -81,11 +81,11 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
     // Clean method overloads if no more overloads exist
     const bool is_method_overloads_empty =
         static_cast<const codesh::semantic_analyzer::method_overloads_symbol &>(source_method_overloads)
-            .get_symbol_map()
-            .empty();
+            .get_scope()
+            .is_empty();
 
     if (is_method_overloads_empty)
     {
-        type.remove_symbol(old_name);
+        type.get_scope().remove_symbol(old_name);
     }
 }

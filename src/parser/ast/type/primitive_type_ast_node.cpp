@@ -1,5 +1,6 @@
 #include "primitive_type_ast_node.h"
 
+#include "../../../output/ir/instruction.h"
 #include "fmt/format.h"
 
 #include <sstream>
@@ -38,6 +39,29 @@ std::string codesh::ast::type::primitive_type_ast_node::generate_descriptor(bool
 codesh::definition::primitive_type codesh::ast::type::primitive_type_ast_node::get_type() const
 {
     return type;
+}
+
+codesh::output::ir::instruction_type codesh::ast::type::primitive_type_ast_node::to_instruction_type() const
+{
+    switch (get_type())
+    {
+    case definition::primitive_type::FLOAT: return output::ir::instruction_type::FLOAT;
+    case definition::primitive_type::DOUBLE: return output::ir::instruction_type::DOUBLE;
+    case definition::primitive_type::LONG: return output::ir::instruction_type::LONG;
+
+    case definition::primitive_type::INTEGER:
+    case definition::primitive_type::SHORT:
+    case definition::primitive_type::BYTE:
+    case definition::primitive_type::BOOLEAN:
+    case definition::primitive_type::CHAR:
+        return output::ir::instruction_type::INT;
+
+    case definition::primitive_type::VOID:
+        throw std::runtime_error("Void has no instruction type");
+
+    default: throw std::runtime_error("Unknown instruction type");
+    }
+
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const

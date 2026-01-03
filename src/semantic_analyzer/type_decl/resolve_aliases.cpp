@@ -12,7 +12,7 @@ void codesh::semantic_analyzer::type_declaration::resolve_aliases(const semantic
         const std::string name = type_decl->get_last_name(false);
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
-        type_symbol &type = *static_cast<type_symbol *>(&country.resolve(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
+        type_symbol &type = *static_cast<type_symbol *>(&country.get_scope().resolve_local(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
         method_declaration::resolve_aliases(new_context, type);
     }
 }

@@ -3,7 +3,6 @@
 codesh::ast::method::operation::method_operation_ast_node::method_operation_ast_node() :
     statement_index(-1)
 {
-
 }
 
 int codesh::ast::method::operation::method_operation_ast_node::get_statement_index() const
