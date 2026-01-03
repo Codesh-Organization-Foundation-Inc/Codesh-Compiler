@@ -8,6 +8,13 @@ variable_reference_ast_node::variable_reference_ast_node(codesh::definition::ful
 {
 }
 
+variable_reference_ast_node::variable_reference_ast_node(
+        const codesh::ast::local_variable_declaration_ast_node &producing_declaration) :
+    name(codesh::definition::fully_qualified_class_name(producing_declaration.get_name())),
+    producing_declaration(producing_declaration)
+{
+}
+
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> &variable_reference_ast_node::
     _get_resolved() const
 {
@@ -30,6 +37,12 @@ codesh::ast::type::type_ast_node *variable_reference_ast_node::get_type() const
 const codesh::definition::fully_qualified_class_name &variable_reference_ast_node::get_unresolved_name() const
 {
     return name;
+}
+
+std::optional<std::reference_wrapper<const codesh::ast::local_variable_declaration_ast_node>>
+    variable_reference_ast_node::get_producing_declaration() const
+{
+    return producing_declaration;
 }
 
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,

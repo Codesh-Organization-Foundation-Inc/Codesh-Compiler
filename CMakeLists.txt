@@ -200,6 +200,10 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.h
+        src/parser/ast/operator/assignment/assign_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/assign_operator_ast_node.h
+        src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/assignment_operator_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

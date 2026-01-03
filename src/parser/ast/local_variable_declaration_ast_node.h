@@ -25,7 +25,6 @@ class local_variable_declaration_ast_node : public impl::i_constant_pool_emitter
 
     std::string name;
     std::unique_ptr<type::type_ast_node> type;
-    std::unique_ptr<var_reference::value_ast_node> value;
     
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
@@ -46,9 +45,6 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_type() const;
     void set_type(std::unique_ptr<type::type_ast_node> type);
-
-    [[nodiscard]] var_reference::value_ast_node *get_value() const;
-    void set_value(std::unique_ptr<var_reference::value_ast_node> value);
 
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);

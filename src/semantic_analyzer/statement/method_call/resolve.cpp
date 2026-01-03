@@ -1,4 +1,5 @@
 #include "resolve.h"
+#include "../resolve.h"
 #include "../variable_reference/resolve.h"
 
 #include "../../../parser/ast/method/operation/method_call_ast_node.h"
@@ -29,18 +30,19 @@ static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
  */
 static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
                               const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+                              const codesh::semantic_analyzer::method_symbol &containing_method,
                               const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
-void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
+bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
                                                      ast::method::operation::method_call_ast_node &method_call,
                                                      const method_symbol &containing_method,
                                                      const method_scope_symbol &scope)
 {
     // We must first resolve the method's arguments
     // if we want to determine which argument types we pass forward (overloading)
-    if (!resolve_arguments(context, method_call, scope))
-        return;
+    if (!resolve_arguments(context, method_call, containing_method, scope))
+        return false;
 
     const auto result = resolve_method_call(
         context,
@@ -49,7 +51,7 @@ void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     );
 
     if (!result.has_value())
-        return;
+        return false;
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -63,6 +65,8 @@ void codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 
         method_call.get_arguments().push_front(std::move(system_in_reference));
     }
+
+    return true;
 }
 
 
@@ -127,24 +131,27 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
                               const codesh::ast::method::operation::method_call_ast_node &method_call_node,
+                              const codesh::semantic_analyzer::method_symbol &containing_method,
                               const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     //TODO: When calling non-static methods, also add 'this' as the first argument
 
-    bool allSucceed = true;
+    bool all_succeed = true;
+
     for (const auto &arg : method_call_node.get_arguments())
     {
         if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
         {
-            allSucceed &= codesh::semantic_analyzer::statement::variable_reference::resolve(
+            all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
                 *var_ref,
+                containing_method,
                 scope
             );
         }
     }
 
-    return allSucceed;
+    return all_succeed;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(

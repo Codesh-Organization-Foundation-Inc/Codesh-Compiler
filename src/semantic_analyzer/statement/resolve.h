@@ -21,6 +21,6 @@ class method_symbol;
 
 namespace codesh::semantic_analyzer::statement
 {
-void resolve(const semantic_context &context, ast::method::operation::method_operation_ast_node &stmnt,
+bool resolve(const semantic_context &context, ast::method::operation::method_operation_ast_node &stmnt,
         const method_symbol &containing_method, const method_scope_symbol &scope);
 }

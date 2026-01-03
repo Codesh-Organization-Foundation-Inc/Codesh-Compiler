@@ -19,6 +19,15 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
                                                                        variable_reference_ast_node &var_ref_node,
                                                                        const method_scope_symbol &scope)
 {
+    if (var_ref_node.get_producing_declaration().has_value())
+    {
+        // This node was produced as a result of a variable declaration.
+        // It is easily resolvable to the same symbol of the declaration itself.
+        var_ref_node.set_resolved(var_ref_node.get_producing_declaration()->get().get_resolved());
+        return true;
+    }
+
+
     const auto result = find_symbol_local_first(context, var_ref_node, scope);
     if (!result.has_value())
         return false;

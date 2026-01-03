@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../impl/i_ir_emitter.h"
 #include "../method/operation/method_operation_ast_node.h"
 #include "../type/type_ast_node.h"
 
