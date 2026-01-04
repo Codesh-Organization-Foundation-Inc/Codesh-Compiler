@@ -113,15 +113,16 @@ std::pair<
 
     std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment;
 
-    if (tokens.front()->get_group() == token_group::KEYWORD_LET)
+    if (!util::consuming_check(tokens, token_group::KEYWORD_LET))
     {
-        tokens.pop();
-
-        val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-            std::make_unique<variable_reference_ast_node>(*variable_decl_ast_node),
-            parse_value(tokens)
-        );
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
+            blasphemy::blasphemy_type::SYNTAX);
     }
+
+    val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+        std::make_unique<variable_reference_ast_node>(*variable_decl_ast_node),
+        parse_value(tokens)
+    );
 
     util::ensure_end_op(tokens);
 
