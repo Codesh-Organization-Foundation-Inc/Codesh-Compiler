@@ -192,7 +192,7 @@ static void on_regex_token(codesh::token *token)
         content = content
             .substr(
                 trie::keyword::STRING_OPEN.length(),
-                content.length() - trie::keyword::STRING_END.length()*2
+                content.length() - trie::keyword::STRING_OPEN.length() - trie::keyword::STRING_END.length()
             );
 
         // Replace escaped characters
