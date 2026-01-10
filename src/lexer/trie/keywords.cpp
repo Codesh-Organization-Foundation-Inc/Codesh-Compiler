@@ -128,3 +128,17 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::COMMENT_MULTILINE, "וכה הגה ה' לאמר:", word_boundary::BEFORE},
     {token_group::COMMENT_ONE_LINER, "ויאמר ה' לאמר", word_boundary::BOTH},
 };
+
+static std::unordered_map<codesh::token_group, std::string> token_to_name_map()
+{
+    std::unordered_map<codesh::token_group, std::string> result;
+
+    for (const auto &entry : codesh::lexer::trie::KEYWORDS)
+    {
+        result.emplace(entry.token, entry.keyword);
+    }
+
+    return result;
+}
+
+const std::unordered_map<codesh::token_group, std::string> codesh::lexer::trie::TOKEN_TO_NAME_MAP = token_to_name_map();

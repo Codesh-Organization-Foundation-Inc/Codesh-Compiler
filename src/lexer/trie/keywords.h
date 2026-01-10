@@ -2,12 +2,14 @@
 
 #include "keyword_info.h"
 
+#include <unordered_map>
 #include <vector>
 
 namespace codesh::lexer::trie
 {
 
 extern const std::vector<keyword_info> KEYWORDS;
+extern const std::unordered_map<token_group, std::string> TOKEN_TO_NAME_MAP;
 
 namespace keyword
 {
