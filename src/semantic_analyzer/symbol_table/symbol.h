@@ -1,6 +1,5 @@
 #pragma once
 
-#include "output/jvm_target/class_file_builder.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"

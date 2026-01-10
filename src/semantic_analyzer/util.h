@@ -25,8 +25,8 @@ namespace codesh::semantic_analyzer::util
 {
 /**
  * @returns the Fully Qualified Class Name of the given type name.
- * If unresolved, returns {@code false} and the originally passed name.
- * Otherwise, returns {@code true} and the resolved name.
+ * If unresolved, returns `false` and the originally passed name.
+ * Otherwise, returns `true` and the resolved name.
  */
 [[nodiscard]] std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type(const semantic_context &context,
         const definition::fully_qualified_class_name &full_name);

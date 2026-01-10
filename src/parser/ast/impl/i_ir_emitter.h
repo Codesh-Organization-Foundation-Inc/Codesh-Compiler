@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ast_node.h"
-
 namespace codesh::ast::type_decl
 {
 class type_declaration_ast_node;

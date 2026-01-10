@@ -50,7 +50,7 @@ public:
     void set_type(std::unique_ptr<type::type_ast_node> type);
 
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
-    void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);
+    void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> attributes);
 
     [[nodiscard]] size_t get_accessible_from() const;
     void set_accessible_from(size_t accessible_from);

@@ -2,7 +2,6 @@
 
 #include "defenition/fully_qualified_class_name.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
-#include "parser/ast/impl/i_resolvable.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "value_ast_node.h"
 

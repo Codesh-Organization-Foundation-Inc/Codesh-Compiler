@@ -141,7 +141,7 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::emit_metadata(const compilation_unit_ast_node &root_node,
-        output::jvm_target::constant_pool &constant_pool) const
+        output::jvm_target::constant_pool &constant_pool)
 {
     // Filename
     constant_pool.goc_utf8_info(root_node.get_source_stem() + definition::SOURCE_FILE_EXTENSION);

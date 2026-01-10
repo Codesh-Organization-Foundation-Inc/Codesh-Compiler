@@ -1,7 +1,6 @@
 #pragma once
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
-#include <memory>
 #include <string>
 
 namespace codesh::ast::method::util
