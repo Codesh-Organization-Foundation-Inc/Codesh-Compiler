@@ -1,7 +1,7 @@
 #pragma once
 
 #include "parser/ast/impl/i_resolvable.h"
-#include "parser/ast/type/type_ast_node.h"
+#include "type_ast_node.h"
 
 #include <optional>
 #include <string>

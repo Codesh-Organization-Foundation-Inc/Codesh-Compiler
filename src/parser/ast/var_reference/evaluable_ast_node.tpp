@@ -3,8 +3,8 @@
 #include "output/ir/instruction.h"
 #include "output/ir/code_block.h"
 #include "output/jvm_target/constant_pool.h"
-#include "parser/ast/var_reference/evaluable_ast_node.h"
-#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "evaluable_ast_node.h"
+#include "variable_reference_ast_node.h"
 
 #include <limits>
 

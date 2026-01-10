@@ -1,6 +1,6 @@
 #include "trie.h"
 
-#include "lexer/trie/keywords.h"
+#include "keywords.h"
 
 using namespace codesh::lexer::trie;
 

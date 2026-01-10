@@ -1,7 +1,7 @@
 #pragma once
 
 #include "token/token_group.h"
-#include "lexer/trie/word_boundary.h"
+#include "word_boundary.h"
 
 #include <string>
 

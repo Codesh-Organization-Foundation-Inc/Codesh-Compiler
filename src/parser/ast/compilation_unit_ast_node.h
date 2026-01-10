@@ -3,7 +3,7 @@
 #include "defenition/basad_type.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "parser/ast/impl/ast_node.h"
-#include "parser/ast/import_declaration_ast_node.h"
+#include "import_declaration_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
 #include <list>

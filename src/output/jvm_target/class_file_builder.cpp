@@ -9,7 +9,7 @@
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "util.h"
 #include "output/ir/code_block.h"
-#include "output/jvm_target/constant_pool.h"
+#include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
 

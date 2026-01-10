@@ -4,7 +4,7 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/compile.h"
-#include "semantic_analyzer/semantic_context.h"
+#include "semantic_context.h"
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
     ::resolve_custom_type(

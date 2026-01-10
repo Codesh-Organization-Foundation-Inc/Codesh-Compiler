@@ -23,4 +23,4 @@ public:
 
 }
 
-#include "parser/ast/impl/i_symbolically_linked.tpp"
+#include "i_symbolically_linked.tpp"

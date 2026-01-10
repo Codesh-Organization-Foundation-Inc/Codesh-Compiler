@@ -1,6 +1,6 @@
 #pragma once
 
-#include "output/ir/instruction.h"
+#include "instruction.h"
 
 #include <list>
 #include <memory>

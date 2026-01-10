@@ -9,7 +9,7 @@
 #include "parser/util.h"
 #include "parser/type/type_parser.h"
 
-#include "parser/type/class/method_parser.h"
+#include "method_parser.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;

@@ -4,7 +4,7 @@
 #include "blasphemy/details.h"
 #include "token/token.h"
 #include "util.h"
-#include "lexer/regex.h"
+#include "regex.h"
 #include "lexer/trie/keywords.h"
 #include "lexer/trie/trie.h"
 #include <unicode/uchar.h>

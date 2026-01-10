@@ -8,7 +8,7 @@
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/type/type_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
-#include "parser/ast/method/method_scope_ast_node.h"
+#include "method_scope_ast_node.h"
 
 #include <list>
 #include <memory>

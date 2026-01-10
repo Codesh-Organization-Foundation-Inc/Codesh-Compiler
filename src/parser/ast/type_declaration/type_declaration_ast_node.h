@@ -2,7 +2,7 @@
 
 #include "parser/ast/impl/ast_node.h"
 #include "parser/ast/impl/i_descriptor_emitter.h"
-#include "parser/ast/type_declaration/attributes_ast_node.h"
+#include "attributes_ast_node.h"
 
 #include <memory>
 #include <string>

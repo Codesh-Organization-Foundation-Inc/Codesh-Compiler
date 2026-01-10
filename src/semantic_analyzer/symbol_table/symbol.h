@@ -4,9 +4,9 @@
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
-#include "semantic_analyzer/symbol_table/scope.h"
-#include "semantic_analyzer/symbol_table/symbol.h"
-#include "semantic_analyzer/symbol_table/symbol_type.h"
+#include "scope.h"
+#include "symbol.h"
+#include "symbol_type.h"
 
 #include <map>
 #include <optional>
@@ -273,4 +273,4 @@ public:
 
 }
 
-#include "semantic_analyzer/symbol_table/symbol.tpp"
+#include "symbol.tpp"

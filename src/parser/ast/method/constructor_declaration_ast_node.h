@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parser/ast/method/method_declaration_ast_node.h"
+#include "method_declaration_ast_node.h"
 
 namespace codesh::ast::method
 {

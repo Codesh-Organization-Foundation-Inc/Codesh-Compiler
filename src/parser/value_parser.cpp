@@ -23,7 +23,7 @@
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
-#include "parser/util.h"
+#include "util.h"
 
 #include <functional>
 

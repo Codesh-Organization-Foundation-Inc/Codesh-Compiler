@@ -1,16 +1,13 @@
 #pragma once
 
-#include "parser/ast/method/operation/method_call_ast_node.h"
-#include "parser/ast/method/operation/method_operation_ast_node.h"
-
-#include "defenition/fully_qualified_class_name.h"
+#include "method_operation_ast_node.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
-#include "parser/ast/impl/i_ir_emitter.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 
-#include <memory>
 #include <deque>
+#include <memory>
 
 namespace codesh::ast
 {

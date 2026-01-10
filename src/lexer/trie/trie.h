@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lexer/trie/trie_node.h"
+#include "trie_node.h"
 
 #include <memory>
 

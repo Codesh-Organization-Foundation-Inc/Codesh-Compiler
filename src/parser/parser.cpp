@@ -2,10 +2,10 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
-#include "parser/compilation_unit_parser.h"
-#include "parser/import_parser.h"
+#include "compilation_unit_parser.h"
+#include "import_parser.h"
 #include "parser/type/type_parser.h"
-#include "parser/util.h"
+#include "util.h"
 
 namespace ast = codesh::ast;
 

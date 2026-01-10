@@ -1,6 +1,6 @@
 #include "blasphemy_consumer.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy_collector.h"
 
 codesh::blasphemy::blasphemy_consumer codesh::blasphemy::create_nested_consumer(
         const blasphemy_consumer &parent_consumer, const std::string &wrapper_name, const std::string &object_name)

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "token/token_group.h"
+#include "token_group.h"
 
 #include <memory>
 

@@ -1,6 +1,6 @@
 #include "scope.h"
 
-#include "semantic_analyzer/symbol_table/symbol.h"
+#include "symbol.h"
 
 codesh::semantic_analyzer::symbols_collection::symbols_collection(std::vector<symbol_type> allowed_symbol_types) :
     allowed_symbol_types(std::move(allowed_symbol_types))

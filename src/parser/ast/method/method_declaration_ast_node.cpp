@@ -2,7 +2,7 @@
 
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
-#include "parser/ast/method/util.h"
+#include "util.h"
 
 #include <ranges>
 
