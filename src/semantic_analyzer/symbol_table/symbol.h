@@ -66,32 +66,32 @@ template <typename T>
 class i_resolvable_symbol : public i_ast_produced<T>
 {
 public:
-    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
+    [[nodiscard]] virtual const definition::fully_qualified_name &get_full_name() const = 0;
 };
 
 
 //TODO: Attach ast node
 class country_symbol final : public symbol, public i_scope_containing_symbol
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
 public:
-    explicit country_symbol(definition::fully_qualified_class_name full_name,
+    explicit country_symbol(definition::fully_qualified_name full_name,
             i_scope_containing_symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
@@ -104,11 +104,11 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
-    type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+    type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
@@ -132,19 +132,19 @@ public:
 
 class field_symbol final : public variable_symbol, public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
     ast::local_variable_declaration_ast_node *producing_node;
 
 public:
-    field_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+    field_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::unique_ptr<ast::type::type_ast_node> type,
             ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::type_decl::attributes_ast_node &get_attributes() const;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
 };
@@ -220,7 +220,7 @@ public:
 class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>,
     public i_scope_containing_symbol
 {
-    definition::fully_qualified_class_name full_name;
+    definition::fully_qualified_name full_name;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
@@ -241,7 +241,7 @@ protected:
 
 public:
     method_symbol(i_scope_containing_symbol *parent_symbol, type_symbol &parent_type,
-            definition::fully_qualified_class_name full_name,
+            definition::fully_qualified_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type,
@@ -250,8 +250,8 @@ public:
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope,
             ast::method::method_scope_ast_node &scope_node);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
-    void set_full_name(definition::fully_qualified_class_name name);
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
+    void set_full_name(definition::fully_qualified_name name);
 
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;

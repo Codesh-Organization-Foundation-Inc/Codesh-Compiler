@@ -9,7 +9,7 @@
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
     ::resolve_custom_type(
         const semantic_context &context,
-        const definition::fully_qualified_class_name &full_name)
+        const definition::fully_qualified_name &full_name)
 {
     const auto result_raw = symbol_table::resolve_from_imports(context, full_name);
 

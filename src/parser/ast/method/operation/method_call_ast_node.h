@@ -26,7 +26,7 @@ class method_call_ast_node : public method_operation_ast_node,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
     public impl::i_descriptor_emitter
 {
-    definition::fully_qualified_class_name name;
+    definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
     std::deque<std::unique_ptr<var_reference::value_ast_node>> arguments;
@@ -38,10 +38,10 @@ protected:
 public:
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
-    [[nodiscard]] definition::fully_qualified_class_name &get_fqcn();
-    [[nodiscard]] const definition::fully_qualified_class_name &get_fqcn() const;
+    [[nodiscard]] definition::fully_qualified_name &get_fqcn();
+    [[nodiscard]] const definition::fully_qualified_name &get_fqcn() const;
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

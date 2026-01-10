@@ -5,7 +5,7 @@ codesh::ast::import_declaration_ast_node::import_declaration_ast_node() :
     is_on_demand(false), is_static(false)
 {}
 
-codesh::definition::fully_qualified_class_name &codesh::ast::import_declaration_ast_node::get_package_name()
+codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_package_name()
 {
     return this->package_name;
 }
@@ -21,7 +21,7 @@ bool codesh::ast::import_declaration_ast_node::get_is_static() const
 }
 
 void codesh::ast::import_declaration_ast_node::set_package_name(
-        const definition::fully_qualified_class_name &package_name)
+        const definition::fully_qualified_name &package_name)
 {
     this->package_name = package_name;
 }

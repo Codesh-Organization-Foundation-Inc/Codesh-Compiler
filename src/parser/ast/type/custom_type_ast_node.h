@@ -21,7 +21,7 @@ class attributes_ast_node;
 
 class custom_type_ast_node final : public type_ast_node, public impl::i_resolvable<semantic_analyzer::type_symbol>
 {
-    const definition::fully_qualified_class_name name;
+    const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
 protected:
@@ -29,14 +29,14 @@ protected:
         const override;
 
 public:
-    explicit custom_type_ast_node(definition::fully_qualified_class_name name);
+    explicit custom_type_ast_node(definition::fully_qualified_name name);
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
     [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
     [[nodiscard]] std::string to_pretty_string() const override;

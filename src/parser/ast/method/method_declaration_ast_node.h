@@ -25,7 +25,7 @@ namespace codesh::ast::method
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
         public impl::i_resolvable<semantic_analyzer::method_symbol>, public impl::i_constant_pool_emitter
 {
-    const definition::fully_qualified_class_name name;
+    const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
@@ -44,7 +44,7 @@ protected:
         const override;
 
 public:
-    explicit method_declaration_ast_node(definition::fully_qualified_class_name name);
+    explicit method_declaration_ast_node(definition::fully_qualified_name name);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
@@ -53,7 +53,7 @@ public:
 
 
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
 
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;

@@ -17,18 +17,18 @@ void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic
     resolved_symbol.emplace(symbol);
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
+const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
     const
 {
     return name;
 }
 
-codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
 {
     return name;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
     const
 {
     return name;

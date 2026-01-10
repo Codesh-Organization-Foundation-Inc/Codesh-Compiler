@@ -158,8 +158,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/value_ast_node.h
         src/parser/ast/method/operation/method_call_ast_node.cpp
         src/parser/ast/method/operation/method_call_ast_node.h
-        src/defenition/fully_qualified_class_name.cpp
-        src/defenition/fully_qualified_class_name.h
+        src/defenition/fully_qualified_name.cpp
+        src/defenition/fully_qualified_name.h
         src/blasphemy/details.h
         src/blasphemy/details.cpp
         src/semantic_analyzer/statement/method_call/resolve.cpp

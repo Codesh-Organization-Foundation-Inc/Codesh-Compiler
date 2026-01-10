@@ -10,7 +10,7 @@ struct semantic_context;
 }
 namespace codesh::definition
 {
-class fully_qualified_class_name;
+class fully_qualified_name;
 }
 namespace codesh::ast
 {
@@ -29,7 +29,7 @@ namespace codesh::semantic_analyzer::util
  * Otherwise, returns `true` and the resolved name.
  */
 [[nodiscard]] std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type(const semantic_context &context,
-        const definition::fully_qualified_class_name &full_name);
+        const definition::fully_qualified_name &full_name);
 
 /**
  * @return Whether the type was successfully resolved

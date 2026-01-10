@@ -3,7 +3,7 @@
 #include <iostream>
 
 template <typename T>
-const codesh::definition::fully_qualified_class_name &codesh::ast::impl::i_resolvable<T>::get_resolved_name() const
+const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<T>::get_resolved_name() const
 {
     const std::optional<std::reference_wrapper<T>> &resolved = this->_get_resolved();
 
@@ -20,7 +20,7 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::impl::i_resol
 }
 
 template <typename T>
-const codesh::definition::fully_qualified_class_name &codesh::ast::impl::i_resolvable<T>::get_name(
+const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<T>::get_name(
     const bool resolved) const
 {
     if (resolved)

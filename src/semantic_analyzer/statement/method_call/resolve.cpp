@@ -77,7 +77,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     if (name.is_single_part())
     {
-        // Since this is a single-part FQCN (name only), the method must either be the classes' or a static import.
+        // Since this is a single-part FQN (name only), the method must either be the classes' or a static import.
         //TODO: Handle static imports
 
         parent_type = &containing_method.get_parent_type();

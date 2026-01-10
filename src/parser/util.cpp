@@ -3,7 +3,7 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/definitions.h"
-#include "defenition/fully_qualified_class_name.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
@@ -102,7 +102,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     case token_group::IDENTIFIER:
     {
-        definition::fully_qualified_class_name name;
+        definition::fully_qualified_name name;
         parse_fqcn(tokens, name);
 
         result = std::make_unique<ast::type::custom_type_ast_node>(name);
@@ -116,7 +116,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
 
-    // Only an identifier type does not consume tokens (as the FQCN parser does it).
+    // Only an identifier type does not consume tokens (as the FQN parser does it).
     // Hence, if it isn't, manually consume it:
     if (token_group != token_group::IDENTIFIER)
     {
@@ -172,7 +172,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 }
 
 
-void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_class_name &fqcn_out)
+void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqcn_out)
 {
     while (!tokens.empty())
     {
@@ -210,7 +210,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             // If the user has put a wildcard yet still attempts to add more shit
             if (!is_last_item && fqcn_out.is_wildcard())
             {
-                // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQCN");
+                // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQN");
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
                     blasphemy::blasphemy_type::SYNTAX);
             }
