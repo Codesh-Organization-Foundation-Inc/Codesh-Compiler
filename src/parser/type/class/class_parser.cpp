@@ -41,7 +41,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
-        definition::fully_qualified_class_name(name_token->get_content())
+        definition::fully_qualified_name(name_token->get_content())
     );
 
 
@@ -154,7 +154,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
     auto method_node = std::make_unique<ast::method::method_declaration_ast_node>(
-        codesh::definition::fully_qualified_class_name(name_token->get_content())
+        codesh::definition::fully_qualified_name(name_token->get_content())
     );
 
     // Get attributes
