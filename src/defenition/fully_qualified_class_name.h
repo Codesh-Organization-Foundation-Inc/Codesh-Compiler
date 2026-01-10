@@ -40,7 +40,9 @@ public:
     [[nodiscard]] std::string get_last_part() const;
 
     [[nodiscard]] std::string join(const std::string &sep = "/") const;
-    // Joins strings with the ל־ seperator (the dot keyword)
+    /**
+     * Joins strings with the ל־ seperator (the dot keyword)
+     */
     [[nodiscard]] std::string holy_join() const;
 };
 
