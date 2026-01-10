@@ -14,7 +14,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
-        definition::fully_qualified_class_name name) : name(std::move(name))
+        definition::fully_qualified_name name) : name(std::move(name))
 {
 }
 codesh::ast::type_decl::type_declaration_ast_node::~type_declaration_ast_node() = default;
@@ -29,7 +29,7 @@ std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descript
     return "L" + get_name(resolved).join() + ";";
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::type_decl::type_declaration_ast_node::get_unresolved_name()
+const codesh::definition::fully_qualified_name &codesh::ast::type_decl::type_declaration_ast_node::get_unresolved_name()
     const
 {
     return this->name;

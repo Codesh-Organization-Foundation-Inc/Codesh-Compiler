@@ -41,12 +41,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     return std::nullopt;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::country_symbol::get_full_name() const
+const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::country_symbol::get_full_name() const
 {
     return full_name;
 }
 
-codesh::semantic_analyzer::country_symbol::country_symbol(definition::fully_qualified_class_name full_name,
+codesh::semantic_analyzer::country_symbol::country_symbol(definition::fully_qualified_name full_name,
                                                           i_scope_containing_symbol *const parent_symbol,
                                                           ast::impl::ast_node *producing_node)
     : symbol(parent_symbol, symbol_type::COUNTRY), full_name(std::move(full_name)), scope(ALLOWED_SYMBOL_TYPES)
@@ -97,7 +97,7 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::ty
 }
 
 codesh::semantic_analyzer::type_symbol::type_symbol(i_scope_containing_symbol *const parent_symbol,
-        definition::fully_qualified_class_name full_name,
+        definition::fully_qualified_name full_name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         ast::type_decl::type_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::TYPE),
@@ -112,7 +112,7 @@ codesh::semantic_analyzer::type_symbol::type_symbol(i_scope_containing_symbol *c
     }
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::type_symbol::get_full_name() const
+const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::type_symbol::get_full_name() const
 {
     return full_name;
 }
@@ -123,7 +123,7 @@ const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::ty
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(i_scope_containing_symbol *const parent_symbol,
-                                                      definition::fully_qualified_class_name full_name,
+                                                      definition::fully_qualified_name full_name,
                                                       std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
                                                       std::unique_ptr<ast::type::type_ast_node> type,
                                                       ast::local_variable_declaration_ast_node *producing_node) :
@@ -139,7 +139,7 @@ codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::field_sy
     return *attributes;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::field_symbol::get_full_name() const
+const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::field_symbol::get_full_name() const
 {
     return full_name;
 }
@@ -252,7 +252,7 @@ codesh::semantic_analyzer::symbols_collection &codesh::semantic_analyzer::method
 }
 
 codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbol *const parent_symbol, type_symbol &parent_type,
-        definition::fully_qualified_class_name full_name,
+        definition::fully_qualified_name full_name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
         std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node) :
@@ -287,12 +287,12 @@ std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic
     return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &scope_node);
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::method_symbol::get_full_name() const
+const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::method_symbol::get_full_name() const
 {
     return full_name;
 }
 
-void codesh::semantic_analyzer::method_symbol::set_full_name(definition::fully_qualified_class_name name)
+void codesh::semantic_analyzer::method_symbol::set_full_name(definition::fully_qualified_name name)
 {
     full_name = std::move(name);
 }

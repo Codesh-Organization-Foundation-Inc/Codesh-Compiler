@@ -38,7 +38,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
 static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context);
 
 
-const codesh::definition::fully_qualified_class_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)

@@ -36,7 +36,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
 
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
-    resolve_from_imports(const semantic_context &context, const definition::fully_qualified_class_name &full_name,
+    resolve_from_imports(const semantic_context &context, const definition::fully_qualified_name &full_name,
                          const std::optional<std::vector<std::string>::const_iterator> name_end,
                          const std::optional<std::vector<std::string>::const_iterator> name_start)
 {
@@ -87,7 +87,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (!symbol_raw.has_value())
         return std::nullopt;
 
-    // Successfully consumed the FQCN part
+    // Successfully consumed the FQN part
     ++it;
 
     if (it == end)
@@ -103,7 +103,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     }
 
 
-    // There are still more FQCN parts, yet we can't go to them.
+    // There are still more FQN parts, yet we can't go to them.
     // This means that it simply doesn't exist.
     return std::nullopt;
 }

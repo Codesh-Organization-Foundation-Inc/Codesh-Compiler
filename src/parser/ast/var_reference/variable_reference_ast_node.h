@@ -1,6 +1,6 @@
 #pragma once
 
-#include "defenition/fully_qualified_class_name.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "value_ast_node.h"
@@ -23,7 +23,7 @@ class variable_reference_ast_node : public codesh::ast::var_reference::value_ast
         public codesh::ast::impl::i_symbolically_linked<codesh::semantic_analyzer::variable_symbol>,
         public codesh::ast::impl::i_constant_pool_emitter
 {
-    const codesh::definition::fully_qualified_class_name name;
+    const codesh::definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<codesh::semantic_analyzer::variable_symbol>> resolved_symbol;
 
     std::optional<std::reference_wrapper<const codesh::ast::local_variable_declaration_ast_node>> producing_declaration;
@@ -35,7 +35,7 @@ protected:
     _get_resolved() const override;
 
 public:
-    explicit variable_reference_ast_node(codesh::definition::fully_qualified_class_name name);
+    explicit variable_reference_ast_node(codesh::definition::fully_qualified_name name);
     /**
     * When a local_variable_declaration_ast_node is created and assigned on the spot, it will create an
     * assignment operator to later give it a value during runtime.
@@ -55,7 +55,7 @@ public:
     [[nodiscard]] codesh::ast::type::type_ast_node *get_type() const override;
 
 
-    [[nodiscard]] const codesh::definition::fully_qualified_class_name &get_unresolved_name() const;
+    [[nodiscard]] const codesh::definition::fully_qualified_name &get_unresolved_name() const;
 
     [[nodiscard]] std::optional<std::reference_wrapper<const codesh::ast::local_variable_declaration_ast_node>>
         get_producing_declaration() const;

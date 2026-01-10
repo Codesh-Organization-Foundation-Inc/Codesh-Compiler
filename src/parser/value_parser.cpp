@@ -58,7 +58,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     switch (tokens.front()->get_group())
     {
     case token_group::IDENTIFIER: {
-        definition::fully_qualified_class_name value;
+        definition::fully_qualified_name value;
         util::parse_fqcn(tokens, value);
 
         eval_ast_node = std::make_unique<variable_reference_ast_node>(value);

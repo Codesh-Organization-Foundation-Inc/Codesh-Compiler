@@ -11,7 +11,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
     return resolved_symbol;
 }
 
-codesh::ast::type::custom_type_ast_node::custom_type_ast_node(definition::fully_qualified_class_name name) :
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(definition::fully_qualified_name name) :
     name(std::move(name))
 {
 }
@@ -30,7 +30,7 @@ std::string codesh::ast::type::custom_type_ast_node::generate_descriptor(const b
     );
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_type_ast_node::get_unresolved_name() const
+const codesh::definition::fully_qualified_name &codesh::ast::type::custom_type_ast_node::get_unresolved_name() const
 {
     return name;
 }
@@ -42,14 +42,14 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type
 
 std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const
 {
-    const definition::fully_qualified_class_name &fqcn = resolved_symbol.has_value()
+    const definition::fully_qualified_name &fqn = resolved_symbol.has_value()
         ? get_resolved().get_full_name()
         : get_unresolved_name();
 
-    if (fqcn.join() == "java/lang/String")
+    if (fqn.join() == "java/lang/String")
         return lexer::trie::keyword::ALIAS_STRING;
 
-    return fqcn.holy_join();
+    return fqn.holy_join();
 }
 
 codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::to_instruction_type() const

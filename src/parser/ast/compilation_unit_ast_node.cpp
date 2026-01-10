@@ -19,7 +19,7 @@ codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad
     return this->basad_type;
 }
 
-codesh::definition::fully_qualified_class_name &codesh::ast::compilation_unit_ast_node::get_package_name()
+codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_ast_node::get_package_name()
 {
     return this->package_name;
 }
@@ -36,7 +36,7 @@ std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &c
     return this->type_declarations;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::compilation_unit_ast_node::get_package_name() const
+const codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_ast_node::get_package_name() const
 {
     return this->package_name;
 }

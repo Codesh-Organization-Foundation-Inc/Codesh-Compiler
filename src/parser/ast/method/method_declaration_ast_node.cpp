@@ -13,7 +13,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-    definition::fully_qualified_class_name name) : name(std::move(name))
+    definition::fully_qualified_name name) : name(std::move(name))
 {
 }
 
@@ -32,7 +32,7 @@ void codesh::ast::method::method_declaration_ast_node::set_resolved(semantic_ana
     resolved_symbol.emplace(symbol);
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::method_declaration_ast_node::
+const codesh::definition::fully_qualified_name &codesh::ast::method::method_declaration_ast_node::
     get_unresolved_name() const
 {
     return name;
