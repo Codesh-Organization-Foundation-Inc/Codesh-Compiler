@@ -23,6 +23,7 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_BY = "נָבוֹא שׁ
 const std::string codesh::blasphemy::details::NO_KEYWORD_AGAINST = "נָבוֹא שְׁקָרַי: צֻּפָּה לנגד";
 const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP = "נָבוֹא שְׁקָרַי: צֻפָּה סִיֹּמֶת שׁוּרָה";
 const std::string codesh::blasphemy::details::UNEXPECTED_TOKEN = "נָבוֹא שְׁקָרַי: מִלָּה לֹא צְפוּיָה";
+const std::string codesh::blasphemy::details::EXPECTED_VARIABLE = "נָבוֹא שְׁקָרַי: צֻּפָּה משתנה";
 const std::string codesh::blasphemy::details::NO_TYPE = "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה";
 const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION = "נָבוֹא שְׁקָרַי: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
 

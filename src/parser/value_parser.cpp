@@ -3,6 +3,8 @@
 #include "../blasphemy/blasphemy_collector.h"
 #include "../blasphemy/details.h"
 #include "../defenition/primitive_type.h"
+#include "ast/operator/assignment/addition_assignment_operator_ast_node.h"
+#include "ast/operator/assignment/subtraction_assignment_operator_ast_node.h"
 #include "ast/operator/boolean/and_operator_ast_node.h"
 #include "ast/operator/boolean/equals_operator_ast_node.h"
 #include "ast/operator/boolean/greater_equals_operator_ast_node.h"
@@ -266,7 +268,15 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_GREATER_EQUALS:
     case token_group::OPERATOR_LESS:
     case token_group::OPERATOR_LESS_EQUALS:
-        parse_boolean_value(tokens);
+        eval_ast_node = parse_boolean_value(tokens);
+        break;
+
+    case token_group::OPERATOR_ADDITION_ASSIGNMENT:
+    case token_group::OPERATOR_DIVISION_ASSIGNMENT:
+    case token_group::OPERATOR_MODULO_ASSIGNMENT:
+    case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT:
+    case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
+        eval_ast_node = parse_assignment_operator(tokens);
         break;
 
     default: {
@@ -416,6 +426,69 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
     return eval_ast_node;
 }
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_assignment_operator(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
+
+    switch (tokens.front()->get_group())
+    {
+    case token_group::OPERATOR_ADDITION_ASSIGNMENT: {
+        tokens.pop();
+
+        // check ל־
+
+        auto raw_left = parse_value(tokens);
+        auto left_value_node  = std::make_unique<variable_reference_ast_node>(
+
+        );
+        auto right_value_node = parse_value(tokens);
+
+        eval_ast_node = std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
+            std::move(left_value_node),
+            std::move(right_value_node)
+        );
+
+        break;
+    }
+    case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT: {
+        tokens.pop();
+
+        // Check ל־
+
+        auto left_value_node  = parse_value(tokens);
+        auto right_value_node = parse_value(tokens);
+
+        // Left side must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, );
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        eval_ast_node = std::make_unique<ast::op::assignment::subtraction_assignment_operator_ast_node>(
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(right_value_node)
+        );
+
+        break;
+    }
+    case token_group::OPERATOR_DIVISION_ASSIGNMENT: {
+
+    }
+    case token_group::OPERATOR_MODULO_ASSIGNMENT: {
+
+    }
+    case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT: {
+        
+    }
+    default: {
+        return eval_ast_node;
+    }
+    }
+}
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
     std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -442,7 +515,6 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             return eval_ast_node;
         }
     }
-
 }
 
 static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
