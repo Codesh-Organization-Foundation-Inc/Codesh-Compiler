@@ -4,6 +4,9 @@
 #include "../blasphemy/details.h"
 #include "../defenition/primitive_type.h"
 #include "ast/operator/assignment/addition_assignment_operator_ast_node.h"
+#include "ast/operator/assignment/division_assignment_operator_ast_node.h"
+#include "ast/operator/assignment/modulo_assignment_operator_ast_node.h"
+#include "ast/operator/assignment/multiplication_assignment_operator_ast_node.h"
 #include "ast/operator/assignment/subtraction_assignment_operator_ast_node.h"
 #include "ast/operator/boolean/and_operator_ast_node.h"
 #include "ast/operator/boolean/equals_operator_ast_node.h"
@@ -432,16 +435,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_ADDITION_ASSIGNMENT: {
         tokens.pop();
 
-        // check ל־
-
-        auto raw_left = parse_value(tokens);
-        auto left_value_node  = std::make_unique<variable_reference_ast_node>(
-
-        );
+        auto left_value_node  = parse_value(tokens);
         auto right_value_node = parse_value(tokens);
 
+        // Left side must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
         eval_ast_node = std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
-            std::move(left_value_node),
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
             std::move(right_value_node)
         );
 
@@ -450,15 +457,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT: {
         tokens.pop();
 
-        // Check ל־
-
         auto left_value_node  = parse_value(tokens);
         auto right_value_node = parse_value(tokens);
 
         // Left side must be a variable
         if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
         {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, );
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
             return std::make_unique<ast::var_reference::error_value_ast_node>();
         }
 
@@ -472,18 +477,91 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_DIVISION_ASSIGNMENT: {
+        tokens.pop();
 
+        auto left_value_node  = parse_value(tokens);
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        auto right_value_node = parse_value(tokens);
+
+        // Left side must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        eval_ast_node = std::make_unique<ast::op::assignment::division_assignment_operator_ast_node>(
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(right_value_node)
+        );
+
+        break;
     }
     case token_group::OPERATOR_MODULO_ASSIGNMENT: {
+        tokens.pop();
 
+        auto left_value_node  = parse_value(tokens);
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        auto right_value_node = parse_value(tokens);
+
+        // Left side must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        eval_ast_node = std::make_unique<ast::op::assignment::modulo_assignment_operator_ast_node>(
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(right_value_node)
+        );
+
+        break;
     }
     case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT: {
-        
+        tokens.pop();
+
+        auto left_value_node  = parse_value(tokens);
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        auto right_value_node = parse_value(tokens);
+
+        // Left side must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
+        }
+
+        eval_ast_node = std::make_unique<ast::op::assignment::multiplication_assignment_operator_ast_node>(
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(right_value_node)
+        );
+
+        break;
     }
     default: {
-        return eval_ast_node;
+        std::make_unique<ast::var_reference::error_value_ast_node>();
     }
     }
+    return eval_ast_node;
 }
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
