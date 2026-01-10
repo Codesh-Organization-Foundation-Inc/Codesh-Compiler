@@ -1,5 +1,5 @@
 #pragma once
-#include "../type_declaration/type_declaration_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
 #include <memory>
 #include <string>

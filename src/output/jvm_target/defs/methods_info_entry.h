@@ -1,6 +1,6 @@
 #pragma once
 
-#include "attribute_info_entry.h"
+#include "output/jvm_target/defs/attribute_info_entry.h"
 
 namespace codesh::output::jvm_target::defs
 {

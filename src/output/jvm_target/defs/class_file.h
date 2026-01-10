@@ -1,8 +1,8 @@
 #pragma once
 
-#include "./cp_info.h"
-#include "./methods_info_entry.h"
-#include "attribute_info_entry.h"
+#include "output/jvm_target/defs/cp_info.h"
+#include "output/jvm_target/defs/methods_info_entry.h"
+#include "output/jvm_target/defs/attribute_info_entry.h"
 
 namespace codesh::output::jvm_target::defs
 {

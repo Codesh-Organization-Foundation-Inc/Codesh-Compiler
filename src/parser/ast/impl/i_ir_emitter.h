@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast_node.h"
+#include "parser/ast/impl/ast_node.h"
 
 namespace codesh::ast::type_decl
 {

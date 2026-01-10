@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../blasphemy/blasphemy_consumer.h"
+#include "blasphemy/blasphemy_consumer.h"
 
 namespace codesh::ast
 {

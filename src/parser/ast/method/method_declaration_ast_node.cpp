@@ -1,8 +1,8 @@
 #include "method_declaration_ast_node.h"
 
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
-#include "util.h"
+#include "parser/ast/method/util.h"
 
 #include <ranges>
 

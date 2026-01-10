@@ -1,6 +1,6 @@
 #pragma once
 
-#include "keyword_info.h"
+#include "lexer/trie/keyword_info.h"
 
 #include <memory>
 #include <optional>

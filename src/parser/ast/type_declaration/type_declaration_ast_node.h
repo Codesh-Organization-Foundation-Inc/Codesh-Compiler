@@ -1,16 +1,16 @@
 #pragma once
 
-#include "../impl/ast_node.h"
-#include "../impl/i_descriptor_emitter.h"
-#include "attributes_ast_node.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 
 #include <memory>
 #include <string>
 
-#include "../../../output/jvm_target/constant_pool.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../impl/i_resolvable.h"
-#include "../method/constructor_declaration_ast_node.h"
+#include "output/jvm_target/constant_pool.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/i_resolvable.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
 
 namespace codesh::semantic_analyzer
 {

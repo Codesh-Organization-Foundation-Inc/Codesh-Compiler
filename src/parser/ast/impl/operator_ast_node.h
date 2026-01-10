@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../var_reference/value_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
 
 namespace codesh::ast::impl
 {

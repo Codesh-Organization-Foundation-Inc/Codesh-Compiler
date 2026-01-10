@@ -1,6 +1,6 @@
 #include "binary_ast_node.h"
 
-#include "../../../semantic_analyzer/util.h"
+#include "semantic_analyzer/util.h"
 
 codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<value_ast_node> left,
                                                        std::unique_ptr<value_ast_node> right) :

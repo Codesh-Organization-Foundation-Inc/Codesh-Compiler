@@ -1,9 +1,9 @@
 #include "method_call_ast_node.h"
 
-#include "../../../../output/ir/code_block.h"
-#include "../../../../semantic_analyzer/symbol_table/symbol.h"
-#include "../../var_reference/evaluable_ast_node.h"
-#include "../util.h"
+#include "output/ir/code_block.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "parser/ast/method/util.h"
 #include "fmt/xchar.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::

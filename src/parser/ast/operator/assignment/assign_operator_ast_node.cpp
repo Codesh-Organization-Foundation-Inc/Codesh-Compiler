@@ -1,7 +1,7 @@
 #include "assign_operator_ast_node.h"
 
-#include "../../../../output/ir/code_block.h"
-#include "../../../../semantic_analyzer/symbol_table/symbol.h"
+#include "output/ir/code_block.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 codesh::ast::op::assignment::assign_operator_ast_node::assign_operator_ast_node(
         std::unique_ptr<variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right) :

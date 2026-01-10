@@ -1,12 +1,12 @@
 #include "tokenizer.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/details.h"
-#include "../token/token.h"
-#include "../util.h"
-#include "regex.h"
-#include "trie/keywords.h"
-#include "trie/trie.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "token/token.h"
+#include "util.h"
+#include "lexer/regex.h"
+#include "lexer/trie/keywords.h"
+#include "lexer/trie/trie.h"
 #include <unicode/uchar.h>
 
 namespace trie = codesh::lexer::trie;

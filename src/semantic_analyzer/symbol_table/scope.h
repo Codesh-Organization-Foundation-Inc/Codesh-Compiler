@@ -1,6 +1,6 @@
 #pragma once
 
-#include "symbol_type.h"
+#include "semantic_analyzer/symbol_table/symbol_type.h"
 
 #include <memory>
 #include <optional>
@@ -67,4 +67,4 @@ public:
 
 }
 
-#include "scope.tpp"
+#include "semantic_analyzer/symbol_table/scope.tpp"

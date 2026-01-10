@@ -1,13 +1,13 @@
 #include "resolve.h"
-#include "../resolve.h"
-#include "../variable_reference/resolve.h"
+#include "semantic_analyzer/statement/resolve.h"
+#include "semantic_analyzer/statement/variable_reference/resolve.h"
 
-#include "../../../parser/ast/method/operation/method_call_ast_node.h"
-#include "../../../parser/ast/type/custom_type_ast_node.h"
-#include "../../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../../semantic_context.h"
-#include "../../symbol_table/symbol_table.h"
-#include "../../util.h"
+#include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "semantic_analyzer/util.h"
 #include "fmt/color.h"
 
 #include <ranges>

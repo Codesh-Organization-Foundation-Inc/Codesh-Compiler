@@ -1,6 +1,6 @@
 #pragma once
 
-#include "symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <string>
 

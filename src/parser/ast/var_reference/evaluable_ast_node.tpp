@@ -1,9 +1,12 @@
 #pragma once
 
-#include "../../../output/ir/instruction.h"
-#include "../../../output/ir/code_block.h"
-#include "../var_reference/evaluable_ast_node.h"
-#include "../var_reference/variable_reference_ast_node.h"
+#include "output/ir/instruction.h"
+#include "output/ir/code_block.h"
+#include "output/jvm_target/constant_pool.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+
+#include <limits>
 
 template <typename T>
 codesh::ast::var_reference::evaluable_ast_node<T>::evaluable_ast_node(std::unique_ptr<type::type_ast_node> type,

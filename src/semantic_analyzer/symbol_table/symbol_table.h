@@ -1,6 +1,6 @@
 #pragma once
 
-#include "symbol.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 namespace codesh::semantic_analyzer
 {

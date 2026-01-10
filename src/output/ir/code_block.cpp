@@ -1,6 +1,6 @@
 #include "code_block.h"
 
-#include "../../parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 
 codesh::output::ir::code_block codesh::output::ir::code_block::build_from_method(
     const ast::method::method_declaration_ast_node &method, const semantic_analyzer::symbol_table &symbol_table,

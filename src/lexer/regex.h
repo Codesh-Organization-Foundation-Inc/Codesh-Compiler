@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/regex/icu.hpp>
-#include "../token/token.h"
+#include "token/token.h"
 
 namespace codesh::lexer
 {

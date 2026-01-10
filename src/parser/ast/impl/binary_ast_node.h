@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../var_reference/value_ast_node.h"
-#include "i_constant_pool_emitter.h"
-#include "operator_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/operator_ast_node.h"
 
 #include <memory>
 

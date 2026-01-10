@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../type/type_ast_node.h"
-#include "value_ast_node.h"
+#include "parser/ast/type/type_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
 
 namespace codesh::ast::var_reference
 {
@@ -36,4 +36,4 @@ public:
 
 }
 
-#include "evaluable_ast_node.tpp"
+#include "parser/ast/var_reference/evaluable_ast_node.tpp"

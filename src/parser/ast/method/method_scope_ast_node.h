@@ -1,11 +1,13 @@
 #pragma once
 
-#include "../impl/ast_node.h"
+#include "parser/ast/impl/ast_node.h"
 
-#include "../../../output/jvm_target/class_file_builder.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../local_variable_declaration_ast_node.h"
-#include "operation/method_operation_ast_node.h"
+#include "output/jvm_target/class_file_builder.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/operation/method_operation_ast_node.h"
+
+#include <list>
 
 namespace codesh::ast::method
 {

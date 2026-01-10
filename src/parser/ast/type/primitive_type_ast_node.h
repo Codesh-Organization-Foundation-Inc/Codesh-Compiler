@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../../defenition/primitive_type.h"
-#include "type_ast_node.h"
+#include "defenition/primitive_type.h"
+#include "parser/ast/type/type_ast_node.h"
 
 namespace codesh::ast::type
 {

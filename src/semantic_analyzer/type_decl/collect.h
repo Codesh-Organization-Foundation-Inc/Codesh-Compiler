@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../analyzer.h"
+#include "semantic_analyzer/analyzer.h"
 
 namespace codesh::semantic_analyzer
 {

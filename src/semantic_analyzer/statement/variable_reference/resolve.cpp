@@ -1,9 +1,9 @@
 #include "resolve.h"
 
-#include "../../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../../semantic_context.h"
-#include "../../symbol_table/symbol.h"
-#include "../../symbol_table/symbol_table.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "fmt/args.h"
 
 /**

@@ -1,11 +1,11 @@
 #include "compilation_unit_parser.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/details.h"
-#include "../token/token.h"
-#include "../token/token_group.h"
-#include "ast/compilation_unit_ast_node.h"
-#include "util.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "token/token.h"
+#include "token/token_group.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/util.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;

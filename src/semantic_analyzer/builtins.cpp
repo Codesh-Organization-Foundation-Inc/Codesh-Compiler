@@ -1,9 +1,9 @@
 #include "builtins.h"
 
-#include "../parser/ast/type/primitive_type_ast_node.h"
-#include "symbol_table/symbol.h"
-#include "symbol_table/symbol_table.h"
-#include "../parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);

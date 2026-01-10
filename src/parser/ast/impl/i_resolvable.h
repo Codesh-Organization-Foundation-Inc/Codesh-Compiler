@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../../defenition/fully_qualified_class_name.h"
-#include "i_symbolically_linked.h"
+#include "defenition/fully_qualified_class_name.h"
+#include "parser/ast/impl/i_symbolically_linked.h"
 
 namespace codesh::ast::impl
 {
@@ -38,4 +38,4 @@ public:
 
 }
 
-#include "i_resolvable.tpp"
+#include "parser/ast/impl/i_resolvable.tpp"

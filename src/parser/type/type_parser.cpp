@@ -1,11 +1,11 @@
 #include "type_parser.h"
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../defenition/visibility.h"
-#include "../ast/type_declaration/class_declaration_ast_node.h"
-#include "../util.h"
-#include "class/class_parser.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "defenition/visibility.h"
+#include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/util.h"
+#include "parser/type/class/class_parser.h"
 
 namespace ast = codesh::ast;
 

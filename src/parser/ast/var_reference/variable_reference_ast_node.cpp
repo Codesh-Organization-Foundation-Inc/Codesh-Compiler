@@ -1,7 +1,7 @@
 #include "variable_reference_ast_node.h"
 
-#include "../../../output/ir/code_block.h"
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "output/ir/code_block.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 variable_reference_ast_node::variable_reference_ast_node(codesh::definition::fully_qualified_class_name name) :
     name(std::move(name))

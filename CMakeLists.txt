@@ -236,4 +236,4 @@ target_link_libraries(Codesh_Compiler fmt::fmt)
 
 
 # Support includes starting from relative paths
-target_include_directories(Server PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(Codesh_Compiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
