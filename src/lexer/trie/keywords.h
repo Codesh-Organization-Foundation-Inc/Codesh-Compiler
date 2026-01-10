@@ -21,6 +21,9 @@ constexpr std::string_view STRING_END = " לאמר";
 constexpr std::string_view STRING_NEWLINE = " ש\"ח ";
 
 constexpr std::string_view STRING_ESCAPE = "ליטרלי ";
+
+
+static constexpr std::string ALIAS_STRING = "כתובים";
 }
 
 }

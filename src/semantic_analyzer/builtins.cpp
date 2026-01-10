@@ -1,18 +1,18 @@
 #include "builtins.h"
 
+#include "lexer/trie/keywords.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
-#include "parser/ast/type/custom_type_ast_node.h"
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
-// static const std::string ALIAS_INPUT_STREAM = "זרם־קליטה";
+//TODO: Remove:
 static constexpr std::string ALIAS_STD_OUT = "פלט";
 
-static constexpr std::string ALIAS_KTUVIM = "כתובים";
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
 
@@ -33,7 +33,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_is_final(true);
 
     country.get_scope().add_symbol(
-        ALIAS_KTUVIM,
+        codesh::lexer::trie::keyword::ALIAS_STRING,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/String",
