@@ -1,8 +1,8 @@
 #include "symbol_table.h"
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/blasphemy_consumer.h"
-#include "../semantic_context.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/blasphemy_consumer.h"
+#include "semantic_analyzer/semantic_context.h"
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(

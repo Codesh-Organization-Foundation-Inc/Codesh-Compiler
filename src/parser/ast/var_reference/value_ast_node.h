@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../method/operation/method_operation_ast_node.h"
-#include "../type/type_ast_node.h"
+#include "parser/ast/method/operation/method_operation_ast_node.h"
+#include "parser/ast/type/type_ast_node.h"
 
 namespace codesh::output::ir
 {

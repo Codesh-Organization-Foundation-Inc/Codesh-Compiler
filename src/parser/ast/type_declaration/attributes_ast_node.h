@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../../defenition/visibility.h"
-#include "../impl/ast_node.h"
+#include "defenition/visibility.h"
+#include "parser/ast/impl/ast_node.h"
 
 #include <memory>
 #include <vector>

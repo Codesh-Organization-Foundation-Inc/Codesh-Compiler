@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../impl/i_resolvable.h"
+#include "parser/ast/impl/i_resolvable.h"
 #include "type_ast_node.h"
 
 #include <optional>

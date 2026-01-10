@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../defenition/basad_type.h"
-#include "../../semantic_analyzer/symbol_table/symbol_table.h"
-#include "impl/ast_node.h"
+#include "defenition/basad_type.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "parser/ast/impl/ast_node.h"
 #include "import_declaration_ast_node.h"
-#include "type_declaration/type_declaration_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
 #include <list>
 #include <memory>

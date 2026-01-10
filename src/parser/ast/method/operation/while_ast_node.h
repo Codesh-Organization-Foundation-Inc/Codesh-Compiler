@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../impl/ast_node.h"
-#include "../../impl/i_ir_emitter.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_ir_emitter.h"
 
 #include <memory>
 

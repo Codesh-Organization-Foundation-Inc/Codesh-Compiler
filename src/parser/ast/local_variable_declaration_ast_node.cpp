@@ -1,6 +1,6 @@
 #include "local_variable_declaration_ast_node.h"
 
-#include "../../semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
     local_variable_declaration_ast_node::_get_resolved() const

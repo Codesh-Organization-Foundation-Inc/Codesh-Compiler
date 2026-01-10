@@ -1,9 +1,6 @@
 #pragma once
 
-#include "defs/class_file.h"
-
-#include <filesystem>
-#include <list>
+#include "output/jvm_target/defs/class_file.h"
 
 namespace codesh::semantic_analyzer
 {

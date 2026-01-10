@@ -1,10 +1,10 @@
 #pragma once
 
-#include "impl/i_constant_pool_emitter.h"
-#include "impl/i_symbolically_linked.h"
-#include "type/type_ast_node.h"
-#include "type_declaration/attributes_ast_node.h"
-#include "var_reference/value_ast_node.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/i_symbolically_linked.h"
+#include "parser/ast/type/type_ast_node.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
 
 #include <memory>
 #include <string>
@@ -50,7 +50,7 @@ public:
     void set_type(std::unique_ptr<type::type_ast_node> type);
 
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
-    void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);
+    void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> attributes);
 
     [[nodiscard]] size_t get_accessible_from() const;
     void set_accessible_from(size_t accessible_from);

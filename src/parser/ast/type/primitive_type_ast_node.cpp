@@ -1,10 +1,9 @@
 #include "primitive_type_ast_node.h"
 
-#include "../../../lexer/trie/keywords.h"
-#include "../../../output/ir/instruction.h"
+#include "lexer/trie/keywords.h"
+#include "output/ir/instruction.h"
 #include "fmt/format.h"
 
-#include <sstream>
 #include <stdexcept>
 
 codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const definition::primitive_type type) : type(type)

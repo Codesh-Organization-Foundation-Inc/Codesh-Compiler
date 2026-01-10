@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../impl/unary_ast_node.h"
+#include "parser/ast/impl/unary_ast_node.h"
 
 namespace codesh::ast::op
 {

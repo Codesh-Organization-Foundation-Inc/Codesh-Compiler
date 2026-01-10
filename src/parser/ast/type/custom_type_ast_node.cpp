@@ -1,7 +1,7 @@
 #include "custom_type_ast_node.h"
 
-#include "../../../output/ir/instruction.h"
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "output/ir/instruction.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/chrono.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type::

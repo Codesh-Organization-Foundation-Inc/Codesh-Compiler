@@ -1,11 +1,9 @@
 #include "regex.h"
 
-#include "../token/token.h"
 #include "fmt/xchar.h"
 
 #include <format>
 #include <ranges>
-#include <sstream>
 #include <vector>
 
 using codesh::token_group;

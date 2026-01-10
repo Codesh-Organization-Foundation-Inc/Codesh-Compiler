@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../impl/i_ir_emitter.h"
+#include "parser/ast/impl/i_ir_emitter.h"
 #include "method_operation_ast_node.h"
 
 namespace codesh::ast::method::operation

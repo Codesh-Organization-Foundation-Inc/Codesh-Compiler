@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../impl/binary_ast_node.h"
-#include "../../var_reference/variable_reference_ast_node.h"
+#include "parser/ast/impl/binary_ast_node.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
 
 namespace codesh::ast::op::assignment
 {

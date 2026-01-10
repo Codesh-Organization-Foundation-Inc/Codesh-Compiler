@@ -1,8 +1,8 @@
 #include "resolve_aliases.h"
-#include "../method_decl/resolve_aliases.h"
+#include "semantic_analyzer/method_decl/resolve_aliases.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../semantic_context.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
 
 void codesh::semantic_analyzer::type_declaration::resolve_aliases(const semantic_context &context,
                                                                   const country_symbol &country)

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../defenition/fully_qualified_class_name.h"
-#include "impl/ast_node.h"
+#include "defenition/fully_qualified_class_name.h"
+#include "parser/ast/impl/ast_node.h"
 
 namespace codesh::ast
 {

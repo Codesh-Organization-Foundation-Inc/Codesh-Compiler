@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../../output/jvm_target/class_file_builder.h"
-#include "../impl/ast_node.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../impl/i_descriptor_emitter.h"
-#include "../impl/i_resolvable.h"
-#include "../local_variable_declaration_ast_node.h"
-#include "../type/type_ast_node.h"
-#include "../type_declaration/attributes_ast_node.h"
+#include "output/jvm_target/class_file_builder.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
+#include "parser/ast/impl/i_resolvable.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/type/type_ast_node.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "method_scope_ast_node.h"
 
 #include <list>

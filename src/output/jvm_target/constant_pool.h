@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "defs/cp_info.h"
+#include "output/jvm_target/defs/cp_info.h"
 
 #include <memory>
 #include <string>
