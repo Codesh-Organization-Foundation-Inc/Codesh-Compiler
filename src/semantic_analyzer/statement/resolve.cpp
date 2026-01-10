@@ -41,10 +41,9 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         {
             //TODO: Improve message
             context.blasphemy_consumer(fmt::format(
-                "הסוג {} אינו תואם לפעולה {}",
+                "הסוג {} אינו תואם לפעולת {}",
                 unary_op->get_child().get_type()->to_pretty_string(),
-                //TODO:
-                "חסר מימוש"
+                unary_op->to_pretty_string()
             ));
             return false;
         }
@@ -65,11 +64,10 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
             {
                 //TODO: Improve message
                 context.blasphemy_consumer(fmt::format(
-                    "הסוגים {} ו־{} אינם תואמים לפעולה {}",
+                    "הסוגים {} ו־{} אינם תואמים לפעולת {}",
                     binary_op->get_left().get_type()->to_pretty_string(),
                     binary_op->get_right().get_type()->to_pretty_string(),
-                    //TODO:
-                    "חסר מימוש"
+                    binary_op->to_pretty_string()
                 ));
                 all_succeed = false;
             }
