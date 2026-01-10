@@ -52,6 +52,8 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
 
 static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
+static bool consume_by(std::queue<std::unique_ptr<codesh::token>> &tokens);
+
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -175,11 +177,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
         auto left_value_node = parse_value(tokens);
 
-        if (!util::consuming_check(tokens, token_group::OPERATOR_BY)) {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_KEYWORD_BY,
-                blasphemy::blasphemy_type::SYNTAX
-            );
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
         }
 
         auto right_value_node = parse_value(tokens);
@@ -197,11 +197,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
         auto left_value_node = parse_value(tokens);
 
-        if (!util::consuming_check(tokens, token_group::OPERATOR_BY)) {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_KEYWORD_BY,
-                blasphemy::blasphemy_type::SYNTAX
-            );
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
         }
 
         auto right_value_node = parse_value(tokens);
@@ -219,11 +217,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
         auto left_value_node  = parse_value(tokens);
 
-        if (!util::consuming_check(tokens, token_group::OPERATOR_BY)) {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_KEYWORD_BY,
-                blasphemy::blasphemy_type::SYNTAX
-            );
+        if (!consume_by(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>();
         }
 
         auto right_value_node = parse_value(tokens);
@@ -522,6 +518,20 @@ static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
     if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_AGAINST)) {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_KEYWORD_AGAINST,
+            codesh::blasphemy::blasphemy_type::SYNTAX
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+static bool consume_by(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_BY)) {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_BY,
             codesh::blasphemy::blasphemy_type::SYNTAX
         );
 
