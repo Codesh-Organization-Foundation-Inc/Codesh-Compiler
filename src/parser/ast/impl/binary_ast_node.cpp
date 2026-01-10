@@ -1,5 +1,7 @@
 #include "binary_ast_node.h"
 
+#include "../../../semantic_analyzer/util.h"
+
 codesh::ast::impl::binary_ast_node::binary_ast_node(std::unique_ptr<value_ast_node> left,
                                                        std::unique_ptr<value_ast_node> right) :
     left(std::move(left)), right(std::move(right))
@@ -21,6 +23,11 @@ void codesh::ast::impl::binary_ast_node::set_statement_index(const size_t statem
     value_ast_node::set_statement_index(statement_index);
     left->set_statement_index(statement_index);
     right->set_statement_index(statement_index);
+}
+
+bool codesh::ast::impl::binary_ast_node::is_value_valid() const
+{
+    return semantic_analyzer::util::are_types_compatible(*left->get_type(), *right->get_type());
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const

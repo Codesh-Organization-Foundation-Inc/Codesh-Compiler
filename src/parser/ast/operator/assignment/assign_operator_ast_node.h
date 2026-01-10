@@ -1,8 +1,7 @@
 #pragma once
 
-#include "assignment_operator_ast_node.h"
-#include "../../impl/binary_ast_node.h"
 #include "../../var_reference/variable_reference_ast_node.h"
+#include "assignment_operator_ast_node.h"
 
 namespace codesh::ast::op::assignment
 {
