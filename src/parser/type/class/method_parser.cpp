@@ -83,6 +83,8 @@ static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &token
         codesh::ast::method::method_scope_ast_node &method_scope)
 {
     tokens.pop();
+    (tokens)
+
 
 
 }
