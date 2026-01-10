@@ -22,9 +22,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
-static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
-        const codesh::ast::type::type_ast_node &to);
-
 /**
  * @returns Whether all arguments were successfully resolved.
  */
@@ -210,7 +207,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
                 return std::nullopt;
 
 
-            if (are_types_compatible(*argument_value->get_type(), *method_param_type))
+            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_value->get_type(), *method_param_type))
             {
                 //TODO: Consider "best match", don't just return (casting etc.)
                 return method;
@@ -223,11 +220,4 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         "סוג המנחות אינו תואם לחותם המעשה"
     ));
     return std::nullopt;
-}
-
-static bool are_types_compatible(const codesh::ast::type::type_ast_node &from,
-        const codesh::ast::type::type_ast_node &to)
-{
-    //FIXME: Should check for auto conversions if not an exact match.
-    return from.generate_descriptor() == to.generate_descriptor();
 }

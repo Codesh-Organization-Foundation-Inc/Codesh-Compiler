@@ -66,6 +66,13 @@ bool codesh::semantic_analyzer::util::resolve_type_node(
     );
 }
 
+bool codesh::semantic_analyzer::util::are_types_compatible(const ast::type::type_ast_node &from,
+                                                           const ast::type::type_ast_node &to)
+{
+    //FIXME: Should check for auto conversions (and convert!) if not an exact match.
+    return from.generate_descriptor() == to.generate_descriptor();
+}
+
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(
         const std::string &name, type_symbol &containing_type)
 {

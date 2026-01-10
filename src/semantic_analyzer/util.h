@@ -50,6 +50,8 @@ bool resolve_custom_type_node(const semantic_context &context, ast::type::custom
 bool resolve_type_node(const semantic_context &context, ast::type::type_ast_node &type_node,
         std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node = std::nullopt);
 
+bool are_types_compatible(const ast::type::type_ast_node &from, const ast::type::type_ast_node &to);
+
 /**
  * Either creates or returns the requested method overloads symbol.
  */
