@@ -4,7 +4,6 @@
 #include "blasphemy/details.h"
 #include "token/token.h"
 #include "token/token_group.h"
-#include "parser/ast/compilation_unit_ast_node.h"
 #include "util.h"
 
 namespace ast = codesh::ast;
