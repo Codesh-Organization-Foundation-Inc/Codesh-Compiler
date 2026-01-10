@@ -90,6 +90,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (!full_var_name.is_single_part())
         return codesh::semantic_analyzer::symbol_table::resolve_from_imports(context, full_var_name);
 
+
     // If the variable name is made only with a single part, it MUST be either a local variable, class member,
     //TODO: or static import.
 

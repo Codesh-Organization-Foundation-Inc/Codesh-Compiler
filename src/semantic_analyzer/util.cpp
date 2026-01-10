@@ -51,6 +51,21 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
     return true;
 }
 
+bool codesh::semantic_analyzer::util::resolve_type_node(
+    const semantic_context &context, ast::type::type_ast_node &type_node,
+    const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
+{
+    auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(&type_node);
+    if (!custom_type)
+        return true;
+
+    return resolve_custom_type_node(
+        context,
+        *custom_type,
+        related_type_node
+    );
+}
+
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(
         const std::string &name, type_symbol &containing_type)
 {

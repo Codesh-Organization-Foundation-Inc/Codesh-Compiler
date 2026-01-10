@@ -54,7 +54,7 @@ static bool resolve_if_var_ref(const codesh::semantic_analyzer::semantic_context
     if (var_ref == nullptr)
     {
         // "Already resolved"
-        // (Only variable references need to b resolved)
+        // (Only variable references need to be resolved)
         return true;
     }
 
