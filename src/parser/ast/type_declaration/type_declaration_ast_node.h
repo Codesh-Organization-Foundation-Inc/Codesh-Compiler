@@ -1,16 +1,16 @@
 #pragma once
 
-#include "../impl/ast_node.h"
-#include "../impl/i_descriptor_emitter.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
 #include "attributes_ast_node.h"
 
 #include <memory>
 #include <string>
 
-#include "../../../output/jvm_target/constant_pool.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../impl/i_resolvable.h"
-#include "../method/constructor_declaration_ast_node.h"
+#include "output/jvm_target/constant_pool.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/i_resolvable.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
 
 namespace codesh::semantic_analyzer
 {
@@ -42,9 +42,8 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<method::method_declaration_ast_node *> methods;
     std::list<method::constructor_declaration_ast_node *> constructors;
 
-
-    void emit_metadata(const compilation_unit_ast_node &root_node,
-            output::jvm_target::constant_pool &constant_pool) const;
+    static void emit_metadata(const compilation_unit_ast_node &root_node,
+            output::jvm_target::constant_pool &constant_pool);
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()

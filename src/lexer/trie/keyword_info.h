@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../token/token_group.h"
+#include "token/token_group.h"
 #include "word_boundary.h"
 
 #include <string>

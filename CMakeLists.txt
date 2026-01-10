@@ -204,6 +204,7 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assignment_operator_ast_node.h
+        src/parser/ast/impl/operator_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
@@ -232,3 +233,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(fmt)
 target_link_libraries(Codesh_Compiler fmt::fmt)
+
+
+# Support includes starting from relative paths
+target_include_directories(Codesh_Compiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

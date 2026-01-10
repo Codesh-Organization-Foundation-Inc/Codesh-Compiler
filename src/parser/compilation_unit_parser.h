@@ -1,5 +1,5 @@
 #pragma once
-#include "ast/compilation_unit_ast_node.h"
+#include "parser/ast/compilation_unit_ast_node.h"
 
 #include <memory>
 #include <queue>

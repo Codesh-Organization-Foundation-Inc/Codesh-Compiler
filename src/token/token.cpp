@@ -1,6 +1,6 @@
 #include "token.h"
 
-#include "../lexer/regex.h"
+#include "lexer/regex.h"
 
 #include <utility>
 

@@ -1,8 +1,9 @@
 #include "custom_type_ast_node.h"
 
-#include "../../../output/ir/instruction.h"
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/chrono.h"
+#include "lexer/trie/keywords.h"
+#include "output/ir/instruction.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type::
     custom_type_ast_node::_get_resolved() const
@@ -37,6 +38,18 @@ const codesh::definition::fully_qualified_class_name &codesh::ast::type::custom_
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const
 {
     return std::make_unique<custom_type_ast_node>(*this);
+}
+
+std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const
+{
+    const definition::fully_qualified_class_name &fqcn = resolved_symbol.has_value()
+        ? get_resolved().get_full_name()
+        : get_unresolved_name();
+
+    if (fqcn.join() == "java/lang/String")
+        return lexer::trie::keyword::ALIAS_STRING;
+
+    return fqcn.holy_join();
 }
 
 codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::to_instruction_type() const

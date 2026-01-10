@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../impl/ast_node.h"
-#include "../impl/i_descriptor_emitter.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
 
 #include <memory>
 
@@ -29,6 +29,7 @@ public:
     void set_array_dimensions(int array_dimensions);
 
     [[nodiscard]] virtual std::unique_ptr<type_ast_node> clone() const = 0;
+    [[nodiscard]] virtual std::string to_pretty_string() const = 0;
 
     [[nodiscard]] virtual output::ir::instruction_type to_instruction_type() const = 0;
 };

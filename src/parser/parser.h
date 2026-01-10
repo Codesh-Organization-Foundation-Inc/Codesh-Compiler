@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../token/token.h"
-#include "ast/compilation_unit_ast_node.h"
+#include "token/token.h"
+#include "parser/ast/compilation_unit_ast_node.h"
 
 #include <memory>
 #include <queue>

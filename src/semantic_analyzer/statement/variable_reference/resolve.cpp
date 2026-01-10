@@ -1,9 +1,9 @@
 #include "resolve.h"
 
-#include "../../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../../semantic_context.h"
-#include "../../symbol_table/symbol.h"
-#include "../../symbol_table/symbol_table.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "fmt/args.h"
 
 /**
@@ -71,7 +71,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
         //TODO: Add proper message
         context.blasphemy_consumer(fmt::format(
             "{} אינו משתנה",
-            var_ref_node.get_unresolved_name().join(" ל־")
+            var_ref_node.get_unresolved_name().holy_join()
         ));
 
         return false;
@@ -89,6 +89,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 
     if (!full_var_name.is_single_part())
         return codesh::semantic_analyzer::symbol_table::resolve_from_imports(context, full_var_name);
+
 
     // If the variable name is made only with a single part, it MUST be either a local variable, class member,
     //TODO: or static import.

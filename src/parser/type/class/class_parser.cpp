@@ -1,13 +1,13 @@
 #include "class_parser.h"
 
-#include "../../../blasphemy/blasphemy_collector.h"
-#include "../../../blasphemy/details.h"
-#include "../../ast/local_variable_declaration_ast_node.h"
-#include "../../ast/method/method_declaration_ast_node.h"
-#include "../../ast/type/primitive_type_ast_node.h"
-#include "../../ast/type_declaration/class_declaration_ast_node.h"
-#include "../../util.h"
-#include "../type_parser.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/util.h"
+#include "parser/type/type_parser.h"
 
 #include "method_parser.h"
 

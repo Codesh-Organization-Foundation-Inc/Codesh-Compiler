@@ -1,10 +1,10 @@
 #include "util.h"
 
-#include "../parser/ast/compilation_unit_ast_node.h"
-#include "../parser/ast/type/custom_type_ast_node.h"
-#include "./symbol_table/symbol.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "fmt/compile.h"
 #include "semantic_context.h"
+
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
     ::resolve_custom_type(
@@ -21,7 +21,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     {
         context.blasphemy_consumer(fmt::format(
             "{} אינו עצם",
-            full_name.join(" ל־")
+            full_name.holy_join()
         ));
         return std::nullopt;
     }
@@ -49,6 +49,28 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
     }
 
     return true;
+}
+
+bool codesh::semantic_analyzer::util::resolve_type_node(
+    const semantic_context &context, ast::type::type_ast_node &type_node,
+    const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
+{
+    auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(&type_node);
+    if (!custom_type)
+        return true;
+
+    return resolve_custom_type_node(
+        context,
+        *custom_type,
+        related_type_node
+    );
+}
+
+bool codesh::semantic_analyzer::util::are_types_compatible(const ast::type::type_ast_node &from,
+                                                           const ast::type::type_ast_node &to)
+{
+    //FIXME: Should check for auto conversions (and convert!) if not an exact match.
+    return from.generate_descriptor() == to.generate_descriptor();
 }
 
 codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::util::get_method_overloads_symbol(

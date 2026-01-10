@@ -1,17 +1,17 @@
 #include "class_file_builder.h"
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../defenition/definitions.h"
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../../parser/ast/method/method_declaration_ast_node.h"
-#include "../../parser/ast/type/custom_type_ast_node.h"
-#include "../../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../../util.h"
-#include "../ir/code_block.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "defenition/definitions.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "util.h"
+#include "output/ir/code_block.h"
 #include "constant_pool.h"
 
-#include "./defs/attribute_info_entry.h"
+#include "output/jvm_target/defs/attribute_info_entry.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -290,7 +290,23 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
             )
         );
 
-        util::put_int_bytes(entry->index, 2, var.get().get_index());
+
+        const size_t var_index = var.get().get_index();
+        if (var_index > 0xFFFF)
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    "יותר מידיי משתנים מקומיים במעשה {}",
+                    method_decl.get_resolved_name().holy_join()
+                ),
+                blasphemy::blasphemy_type::OUTPUT,
+                std::nullopt,
+                true
+            );
+        }
+
+        util::put_int_bytes(entry->index, 2, static_cast<int>(var_index));
+
 
         results_out.push_back(std::move(entry));
     }

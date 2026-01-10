@@ -21,6 +21,11 @@ void codesh::ast::impl::unary_ast_node::set_statement_index(const size_t stateme
     child->set_statement_index(statement_index);
 }
 
+bool codesh::ast::impl::unary_ast_node::is_value_valid() const
+{
+    return true;
+}
+
 void codesh::ast::impl::unary_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                        output::jvm_target::constant_pool &constant_pool)
 {

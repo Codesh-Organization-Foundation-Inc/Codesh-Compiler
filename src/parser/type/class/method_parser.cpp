@@ -1,16 +1,16 @@
 #include "method_parser.h"
 
-#include "../../../blasphemy/blasphemy_collector.h"
-#include "../../../blasphemy/details.h"
-#include "../../ast/method/method_declaration_ast_node.h"
-#include "../../ast/method/operation/method_call_ast_node.h"
-#include "../../ast/operator/assignment/assign_operator_ast_node.h"
-#include "../../util.h"
-#include "../../value_parser.h"
-#include "../type_parser.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/util.h"
+#include "parser/value_parser.h"
+#include "parser/type/type_parser.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
+
 
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)

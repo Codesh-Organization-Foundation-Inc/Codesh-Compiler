@@ -1,7 +1,7 @@
 #include "instruction.h"
 
-#include "../../util.h"
-#include "../jvm_target/constant_pool.h"
+#include "util.h"
+#include "output/jvm_target/constant_pool.h"
 
 #include <limits>
 #include <stdexcept>

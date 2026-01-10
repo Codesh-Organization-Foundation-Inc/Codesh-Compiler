@@ -1,10 +1,9 @@
 #include "import_declaration_ast_node.h"
 
-#include "../../defenition/fully_qualified_class_name.h"
 
 codesh::ast::import_declaration_ast_node::import_declaration_ast_node() :
     is_on_demand(false), is_static(false)
-{};
+{}
 
 codesh::definition::fully_qualified_class_name &codesh::ast::import_declaration_ast_node::get_package_name()
 {

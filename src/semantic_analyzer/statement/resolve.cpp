@@ -1,11 +1,14 @@
 #include "resolve.h"
-#include "method_call/resolve.h"
-#include "variable_reference/resolve.h"
+#include "semantic_analyzer/statement/method_call/resolve.h"
+#include "semantic_analyzer/statement/variable_reference/resolve.h"
 
-#include "../../parser/ast/impl/binary_ast_node.h"
-#include "../../parser/ast/impl/unary_ast_node.h"
-#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../../semantic_analyzer/symbol_table/symbol.h"
+#include "parser/ast/impl/binary_ast_node.h"
+#include "parser/ast/impl/unary_ast_node.h"
+#include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "fmt/xchar.h"
 
 static bool resolve_if_var_ref(const codesh::semantic_analyzer::semantic_context &context,
         codesh::ast::var_reference::value_ast_node &val_node,
@@ -28,9 +31,24 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     }
 
 
+    //TODO: Move operators to separate resolvers
     if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
     {
-        return resolve_if_var_ref(context, unary_op->get_child(), scope);
+        if (!resolve_if_var_ref(context, unary_op->get_child(), scope))
+            return false;
+
+        if (!unary_op->is_value_valid())
+        {
+            //TODO: Improve message
+            context.blasphemy_consumer(fmt::format(
+                "הסוג {} אינו תואם לפעולת {}",
+                unary_op->get_child().get_type()->to_pretty_string(),
+                unary_op->to_pretty_string()
+            ));
+            return false;
+        }
+
+        return true;
     }
 
     if (const auto binary_op = dynamic_cast<ast::impl::binary_ast_node *>(&stmnt))
@@ -38,6 +56,23 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         bool all_succeed = true;
         all_succeed &= resolve_if_var_ref(context, binary_op->get_left(), scope);
         all_succeed &= resolve_if_var_ref(context, binary_op->get_right(), scope);
+
+        // Do not perform value validation with an invalid variable reference
+        if (all_succeed)
+        {
+            if (!binary_op->is_value_valid())
+            {
+                //TODO: Improve message
+                context.blasphemy_consumer(fmt::format(
+                    "הסוגים {} ו־{} אינם תואמים לפעולת {}",
+                    binary_op->get_left().get_type()->to_pretty_string(),
+                    binary_op->get_right().get_type()->to_pretty_string(),
+                    binary_op->to_pretty_string()
+                ));
+                all_succeed = false;
+            }
+        }
+
         return all_succeed;
     }
 
@@ -54,7 +89,7 @@ static bool resolve_if_var_ref(const codesh::semantic_analyzer::semantic_context
     if (var_ref == nullptr)
     {
         // "Already resolved"
-        // (Only variable references need to b resolved)
+        // (Only variable references need to be resolved)
         return true;
     }
 

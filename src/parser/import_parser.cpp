@@ -1,8 +1,8 @@
 #include "import_parser.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/details.h"
-#include "ast/import_declaration_ast_node.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "parser/ast/import_declaration_ast_node.h"
 #include "util.h"
 
 namespace ast = codesh::ast;

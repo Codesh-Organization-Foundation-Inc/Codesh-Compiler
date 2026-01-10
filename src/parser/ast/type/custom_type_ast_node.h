@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../impl/i_resolvable.h"
+#include "parser/ast/impl/i_resolvable.h"
 #include "type_ast_node.h"
-#include "../type_declaration/type_declaration_ast_node.h"
 
 #include <optional>
 #include <string>
@@ -20,7 +19,7 @@ class attributes_ast_node;
 }
 
 
-class custom_type_ast_node : public type_ast_node, public impl::i_resolvable<semantic_analyzer::type_symbol>
+class custom_type_ast_node final : public type_ast_node, public impl::i_resolvable<semantic_analyzer::type_symbol>
 {
     const definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
@@ -40,6 +39,7 @@ public:
     [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
 
     [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
+    [[nodiscard]] std::string to_pretty_string() const override;
 
 
     [[nodiscard]] output::ir::instruction_type to_instruction_type() const override;

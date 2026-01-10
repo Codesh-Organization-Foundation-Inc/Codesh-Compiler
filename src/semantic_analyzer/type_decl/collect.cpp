@@ -1,10 +1,10 @@
 #include "collect.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../method_decl/collect.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "semantic_analyzer/method_decl/collect.h"
 
-#include "../semantic_context.h"
-#include "../../blasphemy/blasphemy_collector.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "blasphemy/blasphemy_collector.h"
 
 void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
         country_symbol &country)

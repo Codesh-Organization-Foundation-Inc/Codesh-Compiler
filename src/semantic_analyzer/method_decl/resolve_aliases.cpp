@@ -1,8 +1,8 @@
 #include "resolve_aliases.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../semantic_context.h"
-#include "../util.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &context,
         codesh::semantic_analyzer::type_symbol &type);

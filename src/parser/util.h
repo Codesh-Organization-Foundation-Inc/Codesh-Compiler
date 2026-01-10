@@ -3,8 +3,8 @@
 #include <memory>
 #include <queue>
 
-#include "../token/token.h"
-#include "ast/var_reference/value_ast_node.h"
+#include "token/token.h"
+#include "parser/ast/var_reference/value_ast_node.h"
 
 namespace codesh
 {

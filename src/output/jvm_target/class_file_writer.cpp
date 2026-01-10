@@ -7,13 +7,13 @@
 
 #include <vector>
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "defs/methods_info_entry.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "output/jvm_target/defs/methods_info_entry.h"
 
-#include "./defs/attribute_info_entry.h"
-#include "defs/class_file.h"
+#include "output/jvm_target/defs/attribute_info_entry.h"
+#include "output/jvm_target/defs/class_file.h"
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
 static void write_methods(std::ofstream &out,

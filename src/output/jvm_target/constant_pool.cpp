@@ -2,12 +2,12 @@
 
 #include <unordered_set>
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../util.h"
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../../parser/ast/var_reference/evaluable_ast_node.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "util.h"
+#include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         ast::type_decl::type_declaration_ast_node &type_decl) :
