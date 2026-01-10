@@ -84,3 +84,8 @@ std::string codesh::definition::fully_qualified_class_name::join(const std::stri
         fmt::join(parts, sep)
     );
 }
+
+std::string codesh::definition::fully_qualified_class_name::holy_join() const
+{
+    return join(" ל־");
+}

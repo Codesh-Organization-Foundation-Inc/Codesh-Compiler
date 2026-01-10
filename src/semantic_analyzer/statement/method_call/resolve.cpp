@@ -102,7 +102,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         {
             context.blasphemy_consumer(fmt::format(
                 "{} אינו קיים",
-                name.join(" ל־")
+                name.holy_join()
             ));
 
             return std::nullopt;

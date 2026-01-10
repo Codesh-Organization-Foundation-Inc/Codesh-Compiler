@@ -39,6 +39,15 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type
     return std::make_unique<custom_type_ast_node>(*this);
 }
 
+std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const
+{
+    const definition::fully_qualified_class_name &fqcn = resolved_symbol.has_value()
+        ? get_resolved().get_full_name()
+        : get_unresolved_name();
+
+    return fqcn.holy_join();
+}
+
 codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::to_instruction_type() const
 {
     return output::ir::instruction_type::REFERENCE;

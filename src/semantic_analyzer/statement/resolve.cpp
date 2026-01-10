@@ -41,8 +41,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
             //TODO: Improve message
             context.blasphemy_consumer(fmt::format(
                 "הסוג {} אינו תואם לפעולה {}",
-                //TODO: Pretty print this
-                unary_op->get_child().get_type()->generate_descriptor(),
+                unary_op->get_child().get_type()->to_pretty_string(),
                 //TODO:
                 "חסר מימוש"
             ));
@@ -66,9 +65,8 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
                 //TODO: Improve message
                 context.blasphemy_consumer(fmt::format(
                     "הסוגים {} ו־{} אינם תואמים לפעולה {}",
-                    //TODO: Pretty print this
-                    binary_op->get_left().get_type()->generate_descriptor(),
-                    binary_op->get_right().get_type()->generate_descriptor(),
+                    binary_op->get_left().get_type()->to_pretty_string(),
+                    binary_op->get_right().get_type()->to_pretty_string(),
                     //TODO:
                     "חסר מימוש"
                 ));

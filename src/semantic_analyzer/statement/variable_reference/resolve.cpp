@@ -71,7 +71,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
         //TODO: Add proper message
         context.blasphemy_consumer(fmt::format(
             "{} אינו משתנה",
-            var_ref_node.get_unresolved_name().join(" ל־")
+            var_ref_node.get_unresolved_name().holy_join()
         ));
 
         return false;
