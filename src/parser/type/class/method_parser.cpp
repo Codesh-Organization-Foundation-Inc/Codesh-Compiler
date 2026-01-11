@@ -128,7 +128,7 @@ static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &token
             auto else_if_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
             codesh::parser::parse_method_scope(tokens, *else_if_scope);
 
-            auto& else_if_scope_ref = *else_if_scope;
+            auto &else_if_scope_ref = *else_if_scope;
 
             auto else_if_node = std::make_unique<codesh::ast::block::if_ast_node>(
                 std::move(else_if_condition),
@@ -157,7 +157,7 @@ static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &token
             auto else_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
             codesh::parser::parse_method_scope(tokens, *else_scope);
 
-            auto& else_scope_ref = *else_scope;
+            auto &else_scope_ref = *else_scope;
 
             if_node->set_else_scope(else_scope_ref);
 
@@ -169,10 +169,8 @@ static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &token
     }
 
     method_scope.add_statement(std::move(if_node));
-
-
-
 }
+
 std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {

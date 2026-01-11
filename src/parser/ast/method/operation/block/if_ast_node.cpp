@@ -8,6 +8,12 @@ codesh::ast::block::if_ast_node::if_ast_node(
 {
 }
 
+void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
+    const semantic_analyzer::symbol_table &symbol_table,
+    const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+}
+
 const codesh::ast::var_reference::value_ast_node &codesh::ast::block::if_ast_node::get_condition() const
 {
     return *condition;
