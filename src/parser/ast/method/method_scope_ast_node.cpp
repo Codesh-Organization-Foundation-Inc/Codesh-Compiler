@@ -43,6 +43,11 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
     local_variables.emplace_back(std::move(statement));
 }
 
+void codesh::ast::method::method_scope_ast_node::add_method_scope(std::unique_ptr<method_scope_ast_node> method_scope)
+{
+    method_scopes.emplace_back(std::move(method_scope));
+}
+
 void codesh::ast::method::method_scope_ast_node::mark_end() const
 {
     const int last_statement_index = static_cast<int>(body.size()) - 1;

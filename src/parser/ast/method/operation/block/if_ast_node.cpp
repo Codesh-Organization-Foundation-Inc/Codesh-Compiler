@@ -26,10 +26,17 @@ std::optional<std::reference_wrapper<
 }
 
 void codesh::ast::block::if_ast_node::set_condition(
-    std::unique_ptr<codesh::ast::var_reference::value_ast_node> new_condition
+    std::unique_ptr<var_reference::value_ast_node> new_condition
 )
 {
     condition = std::move(new_condition);
+}
+
+void codesh::ast::block::if_ast_node::set_else_scope(
+    method::method_scope_ast_node& scope
+)
+{
+    else_scope = std::ref(scope);
 }
 
 void codesh::ast::block::if_ast_node::clear_else_scope()

@@ -36,6 +36,7 @@ public:
     [[nodiscard]] std::optional<std::reference_wrapper<method::method_scope_ast_node>> get_else_scope() const;
 
     void set_condition(std::unique_ptr<var_reference::value_ast_node> condition);
+    void set_else_scope(method::method_scope_ast_node& scope);
     void clear_else_scope();
 };
 }
