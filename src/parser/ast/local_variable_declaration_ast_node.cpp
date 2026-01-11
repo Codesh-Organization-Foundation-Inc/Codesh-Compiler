@@ -9,7 +9,8 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_vari
 }
 
 codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() :
-    accessible_up_to(-1)
+    accessible_from(-1),
+    accessible_to(-1)
 {
 }
 
@@ -38,16 +39,6 @@ void codesh::ast::local_variable_declaration_ast_node::set_type(std::unique_ptr<
     this->type = std::move(type);
 }
 
-codesh::ast::var_reference::value_ast_node *codesh::ast::local_variable_declaration_ast_node::get_value() const
-{
-    return value.get();
-}
-
-void codesh::ast::local_variable_declaration_ast_node::set_value(std::unique_ptr<var_reference::value_ast_node> value)
-{
-    this->value = std::move(value);
-}
-
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::local_variable_declaration_ast_node::get_attributes() const
 {
     return attributes.get();
@@ -59,23 +50,24 @@ void codesh::ast::local_variable_declaration_ast_node::set_attributes(
     this->attributes = std::move(attributes);
 }
 
-int codesh::ast::local_variable_declaration_ast_node::get_accessible_up_to() const
+size_t codesh::ast::local_variable_declaration_ast_node::get_accessible_to() const
 {
-    return accessible_up_to;
+    return accessible_to;
 }
 
-void codesh::ast::local_variable_declaration_ast_node::set_accessible_up_to(const int available_to)
+void codesh::ast::local_variable_declaration_ast_node::set_accessible_to(const size_t accessible_to)
 {
-    this->accessible_up_to = available_to;
+    this->accessible_to = accessible_to;
 }
 
-void codesh::ast::local_variable_declaration_ast_node::add_to_scope(semantic_analyzer::method_scope_symbol &scope)
+size_t codesh::ast::local_variable_declaration_ast_node::get_accessible_from() const
 {
-    scope.add_variable(name, std::make_unique<semantic_analyzer::local_variable_symbol>(
-        &scope,
-        type->clone(),
-        this
-    ));
+    return accessible_from;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_accessible_from(const size_t accessible_from)
+{
+    this->accessible_from = accessible_from;
 }
 
 void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,

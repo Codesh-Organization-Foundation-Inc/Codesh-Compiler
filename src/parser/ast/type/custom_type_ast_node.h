@@ -40,6 +40,9 @@ public:
     [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
 
     [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
+
+
+    [[nodiscard]] output::ir::instruction_type to_instruction_type() const override;
 };
 
 }

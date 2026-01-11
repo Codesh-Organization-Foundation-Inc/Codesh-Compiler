@@ -1,22 +1,30 @@
 #pragma once
 
-#include "i_ir_emitter.h"
 #include "../var_reference/value_ast_node.h"
+#include "i_constant_pool_emitter.h"
 
 #include <memory>
 
 namespace codesh::ast::impl
 {
 
-class unary_ast_node : public var_reference::value_ast_node
+class unary_ast_node : public var_reference::value_ast_node, i_constant_pool_emitter
 {
-    std::unique_ptr<i_ir_emitter> child;
+    std::unique_ptr<type::type_ast_node> type;
+    std::unique_ptr<value_ast_node> child;
 
 protected:
-    explicit unary_ast_node(std::unique_ptr<i_ir_emitter> child);
+    explicit unary_ast_node(std::unique_ptr<value_ast_node> child);
 
 public:
-    [[nodiscard]] i_ir_emitter *get_child() const;
+    [[nodiscard]] value_ast_node &get_child() const;
+    [[nodiscard]] type::type_ast_node *get_type() const override;
+
+    void set_statement_index(size_t statement_index) override;
+
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+            output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

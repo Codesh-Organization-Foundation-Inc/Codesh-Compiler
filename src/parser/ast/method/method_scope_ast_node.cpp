@@ -20,14 +20,25 @@ const std::list<std::unique_ptr<codesh::ast::method::operation::method_operation
 void codesh::ast::method::method_scope_ast_node::add_statement(
     std::unique_ptr<operation::method_operation_ast_node> statement)
 {
-    statement->set_statement_index(static_cast<int>(body.size()));
+    statement->set_statement_index(body.size());
     body.emplace_back(std::move(statement));
 }
 
 void codesh::ast::method::method_scope_ast_node::push_front_statement(
     std::unique_ptr<operation::method_operation_ast_node> statement)
 {
-    statement->set_statement_index(static_cast<int>(body.size()));
+    // Increment the index of each element by 1 (as we are pushing to the front)
+    for (const auto &stmnt : body)
+    {
+        stmnt->set_statement_index(stmnt->get_statement_index() + 1);
+    }
+    for (const auto &stmnt : local_variables)
+    {
+        stmnt->set_accessible_from(stmnt->get_accessible_from() + 1);
+        stmnt->set_accessible_to(stmnt->get_accessible_to() + 1);
+    }
+
+    statement->set_statement_index(0);
     body.emplace_front(std::move(statement));
 }
 
@@ -40,6 +51,7 @@ const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node
 void codesh::ast::method::method_scope_ast_node::add_local_variable(
     std::unique_ptr<local_variable_declaration_ast_node> statement)
 {
+    statement->set_accessible_from(body.size());
     local_variables.emplace_back(std::move(statement));
 }
 
@@ -50,11 +62,11 @@ void codesh::ast::method::method_scope_ast_node::add_method_scope(std::unique_pt
 
 void codesh::ast::method::method_scope_ast_node::mark_end() const
 {
-    const int last_statement_index = static_cast<int>(body.size()) - 1;
+    const size_t last_statement_index = body.size() - 1;
 
     for (const auto &local_var : local_variables)
     {
-        local_var->set_accessible_up_to(last_statement_index);
+        local_var->set_accessible_to(last_statement_index);
     }
 }
 

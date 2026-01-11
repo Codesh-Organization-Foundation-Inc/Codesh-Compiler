@@ -5,6 +5,7 @@
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/method/operation/block/if_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
+#include "../../ast/operator/assignment/assign_operator_ast_node.h"
 #include "../../util.h"
 #include "../../value_parser.h"
 #include "../type_parser.h"
@@ -27,9 +28,18 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             method_scope.add_statement(parse_methods_call(tokens));
             break;
 
-        case token_group::KEYWORD_LET:
-            method_scope.add_local_variable(parse_variable_declaration(tokens));
+        case token_group::KEYWORD_LET: {
+            auto result = parse_variable_declaration(tokens);
+            method_scope.add_local_variable(std::move(result.first));
+
+            // Add the produced assignment statement to the method body if one was generated
+            if (result.second != nullptr)
+            {
+                method_scope.add_statement(std::move(result.second));
+            }
+
             break;
+        }
 
         case token_group::OPERATOR_ADDITION:
         case token_group::OPERATOR_SUBTRACTION:
@@ -171,7 +181,10 @@ static void parse_if_statement(std::queue<std::unique_ptr<codesh::token>> &token
     method_scope.add_statement(std::move(if_node));
 }
 
-std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser::parse_variable_declaration(
+std::pair<
+    std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>,
+    std::unique_ptr<codesh::ast::op::assignment::assignment_operator_ast_node>
+> codesh::parser::parse_variable_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
@@ -194,14 +207,20 @@ std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> codesh::parser
 
     variable_decl_ast_node->set_attributes(parse_modifiers(tokens));
 
-    if (tokens.front()->get_group() == token_group::KEYWORD_LET)
+    if (!util::consuming_check(tokens, token_group::KEYWORD_LET))
     {
-        tokens.pop();
-        variable_decl_ast_node->set_value(parse_value(tokens));
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
+                                                           blasphemy::blasphemy_type::SYNTAX);
     }
 
+    auto val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+        std::make_unique<variable_reference_ast_node>(*variable_decl_ast_node),
+        parse_value(tokens)
+    );
+
     util::ensure_end_op(tokens);
-    return variable_decl_ast_node;
+
+    return {std::move(variable_decl_ast_node), std::move(val_assignment)};
 }
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,

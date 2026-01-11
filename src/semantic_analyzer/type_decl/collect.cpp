@@ -15,7 +15,7 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
 
-        const auto [it, inserted] = country.add_symbol(
+        const auto [it, inserted] = country.get_scope().add_symbol(
             name, std::make_unique<type_symbol>(
                 &country,
                 country.get_full_name().with(name),

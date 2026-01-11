@@ -32,7 +32,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
-    country.add_symbol(
+    country.get_scope().add_symbol(
         ALIAS_KTUVIM,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
@@ -51,7 +51,7 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
-    auto &massof_symbol = country.add_symbol(
+    auto &massof_symbol = country.get_scope().add_symbol(
         CLASS_MASSOF,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
@@ -70,7 +70,7 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     is_attributes->set_is_final(true);
     is_attributes->set_is_static(true);
 
-    massof_symbol.add_symbol(
+    massof_symbol.get_scope().add_symbol(
         ALIAS_STD_OUT,
         std::make_unique<codesh::semantic_analyzer::field_symbol>(
             &massof_symbol,
@@ -88,7 +88,7 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
 
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol)
 {
-    auto &emor_overloads = massof_symbol.add_symbol(
+    auto &emor_overloads = massof_symbol.get_scope().add_symbol(
         METHOD_EMOR,
         std::make_unique<codesh::semantic_analyzer::method_overloads_symbol>(
             &massof_symbol
@@ -107,7 +107,7 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
     auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID);
 
     // Make the method symbol point to the original PrintStream's println
-    emor_overloads.add_symbol(
+    emor_overloads.get_scope().add_symbol(
         "(Ljava/lang/String;)V",
         std::make_unique<codesh::semantic_analyzer::method_symbol>(
             &emor_overloads,

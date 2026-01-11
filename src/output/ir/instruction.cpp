@@ -41,8 +41,9 @@ void codesh::output::ir::simple_instruction::emit(std::list<instruction_containe
     collector.emplace_back(*_opcode, stack_delta);
 }
 
-codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type) :
-    type(type)
+codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type, const unsigned char index) :
+    type(type),
+    index(index)
 {
 }
 
@@ -51,29 +52,16 @@ codesh::output::ir::instruction_type codesh::output::ir::typed_instruction::get_
     return type;
 }
 
-codesh::output::ir::nop_instruction::nop_instruction() : simple_instruction(opcode::NOP, 0)
+void codesh::output::ir::typed_instruction::emit(std::list<instruction_container> &collector) const
 {
-}
-
-codesh::output::ir::load_instruction::load_instruction(const instruction_type type, const unsigned char lvt_index) :
-    typed_instruction(type),
-    lvt_index(lvt_index)
-{
-}
-
-unsigned char codesh::output::ir::load_instruction::get_lvt_index() const
-{
-    return lvt_index;
-}
-
-void codesh::output::ir::load_instruction::emit(std::list<instruction_container> &collector) const
-{
-    if (lvt_index <= 3)
+    if (index <= 3)
     {
+        const unsigned char first_non_generic = *first_generic() + CONSTANT_INDEXES_COUNT + 1;
+
         collector.emplace_back(
-            *opcode::I_LOAD_0
+            first_non_generic
                 + *get_instruction_type() * CONSTANT_INDEXES_COUNT
-                + lvt_index,
+                + index,
             1
         );
     }
@@ -81,12 +69,26 @@ void codesh::output::ir::load_instruction::emit(std::list<instruction_container>
     {
         collector.emplace_back(
             std::vector {
-                static_cast<unsigned char>(*opcode::I_LOAD + *get_instruction_type()),
-                lvt_index,
+                static_cast<unsigned char>(*first_generic() + *get_instruction_type()),
+                index,
             },
             1
         );
     }
+}
+
+codesh::output::ir::nop_instruction::nop_instruction() : simple_instruction(opcode::NOP, 0)
+{
+}
+
+codesh::output::ir::opcode codesh::output::ir::load_instruction::first_generic() const
+{
+    return opcode::I_LOAD;
+}
+
+codesh::output::ir::load_instruction::load_instruction(const instruction_type type, const unsigned char local_var_index) :
+    typed_instruction(type, local_var_index)
+{
 }
 
 codesh::output::ir::return_instruction::return_instruction() :
@@ -199,7 +201,18 @@ void codesh::output::ir::load_constant_pool_instruction::emit(std::list<instruct
     );
 }
 
-codesh::output::ir::get_static_instruction::get_static_instruction(int constant_pool_index) :
+codesh::output::ir::opcode codesh::output::ir::store_in_local_var_instruction::first_generic() const
+{
+    return opcode::I_STORE;
+}
+
+codesh::output::ir::store_in_local_var_instruction::store_in_local_var_instruction(const instruction_type type,
+                                                                                   const int local_var_index) :
+    typed_instruction(type, local_var_index)
+{
+}
+
+codesh::output::ir::get_static_instruction::get_static_instruction(const int constant_pool_index) :
     constant_pool_index(constant_pool_index)
 {
 }

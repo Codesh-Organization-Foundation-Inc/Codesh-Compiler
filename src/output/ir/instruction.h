@@ -26,12 +26,6 @@ enum class opcode : unsigned char
     NOP = 0x00, // No operation
 
     I_CONST_M1 = 0x02,
-    I_CONST_0,
-    I_CONST_1,
-    I_CONST_2,
-    I_CONST_3,
-    I_CONST_4,
-    I_CONST_5,
 
     B_IPUSH = 0x10,
     S_IPUSH, // >255
@@ -39,35 +33,7 @@ enum class opcode : unsigned char
     LDC = 0x12,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
-    L_LOAD, // Loads a long variable from the local variable table at the specified index
-    F_LOAD, // Loads a float variable from the local variable table at the specified index
-    D_LOAD, // Loads a double variable from the local variable table at the specified index
-    A_LOAD, // Loads a reference variable from the local variable table at the specified index
-
-    I_LOAD_0 = 0x1A, // Loads an integer variable from the local variable table at index 0
-    I_LOAD_1, // Loads an integer variable from the local variable table at index 1
-    I_LOAD_2, // Loads an integer variable from the local variable table at index 2
-    I_LOAD_3, // Loads an integer variable from the local variable table at index 3
-
-    L_LOAD_0, // Loads a long variable from the local variable table at index 0
-    L_LOAD_1, // Loads a long variable from the local variable table at index 1
-    L_LOAD_2, // Loads a long variable from the local variable table at index 2
-    L_LOAD_3, // Loads a long variable from the local variable table at index 3
-
-    F_LOAD_0, // Loads a float variable from the local variable table at index 0
-    F_LOAD_1, // Loads a float variable from the local variable table at index 1
-    F_LOAD_2, // Loads a float variable from the local variable table at index 2
-    F_LOAD_3, // Loads a float variable from the local variable table at index 3
-
-    D_LOAD_0, // Loads a double variable from the local variable table at index 0
-    D_LOAD_1, // Loads a double variable from the local variable table at index 1
-    D_LOAD_2, // Loads a double variable from the local variable table at index 2
-    D_LOAD_3, // Loads a double variable from the local variable table at index 3
-
-    A_LOAD_0, // Loads a variable from the local variable table at index 0
-    A_LOAD_1, // Loads a variable from the local variable table at index 1
-    A_LOAD_2, // Loads a variable from the local variable table at index 2
-    A_LOAD_3, // Loads a variable from the local variable table at index 3
+    I_STORE = 0x36, // Stores an int value into variable #index
 
     RETURN = 0xB1,
 
@@ -146,12 +112,20 @@ public:
 
 class typed_instruction : public instruction
 {
+    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
+
     instruction_type type;
+    const unsigned char index;
+
+protected:
+    [[nodiscard]] virtual opcode first_generic() const = 0;
 
 public:
-    explicit typed_instruction(instruction_type type);
+    typed_instruction(instruction_type type, unsigned char index);
 
     [[nodiscard]] instruction_type get_instruction_type() const;
+
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 
@@ -165,17 +139,11 @@ public:
 
 class load_instruction final : public typed_instruction
 {
-    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
-
-    //TODO: Change to a Local Variable Table index pointer
-    const unsigned char lvt_index;
+protected:
+    [[nodiscard]] opcode first_generic() const override;
 
 public:
-    explicit load_instruction(instruction_type type, unsigned char lvt_index);
-
-    [[nodiscard]] unsigned char get_lvt_index() const;
-
-    void emit(std::list<instruction_container> &collector) const override;
+    explicit load_instruction(instruction_type type, unsigned char local_var_index);
 };
 
 
@@ -224,6 +192,15 @@ public:
     explicit load_constant_pool_instruction(int constant_pool_index);
 
     void emit(std::list<instruction_container> &collector) const override;
+};
+
+class store_in_local_var_instruction final : public typed_instruction
+{
+protected:
+    [[nodiscard]] opcode first_generic() const override;
+
+public:
+    store_in_local_var_instruction(instruction_type type, int local_var_index);
 };
 
 class get_static_instruction final : public instruction

@@ -14,21 +14,24 @@ namespace codesh::semantic_analyzer
 class local_variable_symbol;
 class method_scope_symbol;
 }
+
+
 namespace codesh::ast
 {
 
+//TODO: Move to method operations namespace & directory
 class local_variable_declaration_ast_node : public impl::i_constant_pool_emitter,
-    public impl::i_symbolically_linked<semantic_analyzer::local_variable_symbol>
+        public impl::i_symbolically_linked<semantic_analyzer::local_variable_symbol>
 {
     std::optional<std::reference_wrapper<semantic_analyzer::local_variable_symbol>> resolved_variable;
 
     std::string name;
     std::unique_ptr<type::type_ast_node> type;
-    std::unique_ptr<var_reference::value_ast_node> value;
     
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
-    int accessible_up_to;
+    size_t accessible_from;
+    size_t accessible_to;
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::local_variable_symbol>> &_get_resolved()
@@ -46,16 +49,14 @@ public:
     [[nodiscard]] type::type_ast_node *get_type() const;
     void set_type(std::unique_ptr<type::type_ast_node> type);
 
-    [[nodiscard]] var_reference::value_ast_node *get_value() const;
-    void set_value(std::unique_ptr<var_reference::value_ast_node> value);
-
     [[nodiscard]] type_decl::attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<type_decl::attributes_ast_node> value);
 
-    [[nodiscard]] int get_accessible_up_to() const;
-    void set_accessible_up_to(int available_to);
+    [[nodiscard]] size_t get_accessible_from() const;
+    void set_accessible_from(size_t accessible_from);
 
-    void add_to_scope(semantic_analyzer::method_scope_symbol &scope);
+    [[nodiscard]] size_t get_accessible_to() const;
+    void set_accessible_to(size_t accessible_to);
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

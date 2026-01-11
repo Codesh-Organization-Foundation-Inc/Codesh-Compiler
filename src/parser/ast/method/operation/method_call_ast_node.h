@@ -53,6 +53,8 @@ public:
     [[nodiscard]] const std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
     [[nodiscard]] std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
 
+    void set_statement_index(size_t statement_index) override;
+
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

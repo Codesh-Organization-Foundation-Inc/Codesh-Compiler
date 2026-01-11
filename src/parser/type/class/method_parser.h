@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../ast/type_declaration/attributes_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
+#include "../../ast/operator/assignment/assignment_operator_ast_node.h"
+#include "../../ast/type_declaration/attributes_ast_node.h"
 
 #include <memory>
 #include <queue>
@@ -24,7 +25,14 @@ void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method:
 [[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
     std::queue<std::unique_ptr<token>> &tokens);
 
-[[nodiscard]] std::unique_ptr<ast::local_variable_declaration_ast_node> parse_variable_declaration(
-    std::queue<std::unique_ptr<token>> &tokens);
+/**
+ * Parses a variable declaration.
+ * If the variable was also assigned during initialization, returns its assignment
+ * as the 2nd pair.
+ */
+[[nodiscard]] std::pair<
+    std::unique_ptr<ast::local_variable_declaration_ast_node>,
+    std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
+> parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens);
 
 }
