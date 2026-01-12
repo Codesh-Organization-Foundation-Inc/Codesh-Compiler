@@ -57,6 +57,16 @@ static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static bool consume_by(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
+/**
+ * @param tokens The queue of tokens
+ * @param sepd_by_by Whether the operands should be separated by the "by" operator
+ * @returns The lhs & rhs of the operator, or @link std::nullopt \endlink upon failure
+ */
+static std::optional<std::pair<
+    std::unique_ptr<variable_reference_ast_node>,
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node>
+>> parse_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, bool sepd_by_by);
+
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -435,126 +445,66 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_ADDITION_ASSIGNMENT: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
-        auto right_value_node = parse_value(tokens);
-
-        // Left side must be a variable
-        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+        auto result = parse_operator_sides(tokens, false);
+        if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
 
         eval_ast_node = std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
+            std::move(result->first),
+            std::move(result->second)
         );
-
         break;
     }
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
-        auto right_value_node = parse_value(tokens);
-
-        // Left side must be a variable
-        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
+        auto result = parse_operator_sides(tokens, false);
+        if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
 
         eval_ast_node = std::make_unique<ast::op::assignment::subtraction_assignment_operator_ast_node>(
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
+            std::move(result->first),
+            std::move(result->second)
         );
-
         break;
     }
     case token_group::OPERATOR_DIVISION_ASSIGNMENT: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
-        if (!consume_by(tokens))
-        {
+        auto result = parse_operator_sides(tokens, true);
+        if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
-
-        auto right_value_node = parse_value(tokens);
-
-        // Left side must be a variable
-        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
 
         eval_ast_node = std::make_unique<ast::op::assignment::division_assignment_operator_ast_node>(
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
+            std::move(result->first),
+            std::move(result->second)
         );
-
         break;
     }
     case token_group::OPERATOR_MODULO_ASSIGNMENT: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
-        if (!consume_by(tokens))
-        {
+        auto result = parse_operator_sides(tokens, true);
+        if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
-
-        auto right_value_node = parse_value(tokens);
-
-        // Left side must be a variable
-        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
 
         eval_ast_node = std::make_unique<ast::op::assignment::modulo_assignment_operator_ast_node>(
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
+            std::move(result->first),
+            std::move(result->second)
         );
-
         break;
     }
     case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
-        if (!consume_by(tokens))
-        {
+        auto result = parse_operator_sides(tokens, true);
+        if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
-
-        auto right_value_node = parse_value(tokens);
-
-        // Left side must be a variable
-        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE, blasphemy::blasphemy_type::SYNTAX);
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
-        }
 
         eval_ast_node = std::make_unique<ast::op::assignment::multiplication_assignment_operator_ast_node>(
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
+            std::move(result->first),
+            std::move(result->second)
         );
-
         break;
     }
     default: {
@@ -562,6 +512,36 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
     }
     return eval_ast_node;
+}
+
+static std::optional<std::pair<
+    std::unique_ptr<variable_reference_ast_node>,
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node>
+>> parse_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, const bool sepd_by_by)
+{
+    auto left_value_node  = codesh::parser::parse_value(tokens);
+    if (sepd_by_by && !consume_by(tokens))
+        return std::nullopt;
+
+    auto right_value_node = codesh::parser::parse_value(tokens);
+
+    // Left side must be a variable
+    if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::EXPECTED_VARIABLE,
+            codesh::blasphemy::blasphemy_type::SYNTAX
+        );
+
+        return std::nullopt;
+    }
+
+    return std::pair {
+        std::unique_ptr<variable_reference_ast_node>(
+            static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+        ),
+        std::move(right_value_node)
+    };
 }
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
