@@ -104,14 +104,14 @@ static void parse_if_statement(
     check_consume_scope_begin(tokens);
 
     auto if_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
-    auto &if_scope_ref = *if_scope;
+    auto &if_scope_reference = *if_scope;
 
-    codesh::parser::parse_method_scope(tokens, if_scope_ref);
+    codesh::parser::parse_method_scope(tokens, if_scope_reference);
     method_scope.add_method_scope(std::move(if_scope));
 
     auto root_if = std::make_unique<codesh::ast::block::if_ast_node>(
         std::move(condition),
-        if_scope_ref
+        if_scope_reference
     );
 
     auto *current_if = root_if.get();
@@ -123,24 +123,24 @@ static void parse_if_statement(
         check_consume_scope_begin(tokens);
 
         auto else_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
-        auto &else_scope_ref = *else_scope;
+        auto &else_scope_reference = *else_scope;
 
         method_scope.add_method_scope(std::move(else_scope));
-        current_if->set_else_scope(else_scope_ref);
+        current_if->set_else_scope(else_scope_reference);
 
         auto else_if_if_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
-        auto &else_if_if_scope_ref = *else_if_if_scope;
+        auto &else_if_if_scope_reference = *else_if_if_scope;
 
-        codesh::parser::parse_method_scope(tokens, else_if_if_scope_ref);
+        codesh::parser::parse_method_scope(tokens, else_if_if_scope_reference);
         method_scope.add_method_scope(std::move(else_if_if_scope));
 
         auto else_if_node = std::make_unique<codesh::ast::block::if_ast_node>(
             std::move(else_if_condition),
-            else_if_if_scope_ref
+            else_if_if_scope_reference
         );
 
         auto *next_if = else_if_node.get();
-        else_scope_ref.add_statement(std::move(else_if_node));
+        else_scope_reference.add_statement(std::move(else_if_node));
 
         current_if = next_if;
     }
@@ -152,12 +152,12 @@ static void parse_if_statement(
         if (check_consume_scope_begin(tokens))
         {
             auto else_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
-            auto &else_scope_ref = *else_scope;
+            auto &else_scope_reference = *else_scope;
 
-            codesh::parser::parse_method_scope(tokens, else_scope_ref);
+            codesh::parser::parse_method_scope(tokens, else_scope_reference);
             method_scope.add_method_scope(std::move(else_scope));
 
-            current_if->set_else_scope(else_scope_ref);
+            current_if->set_else_scope(else_scope_reference);
         }
     }
 
