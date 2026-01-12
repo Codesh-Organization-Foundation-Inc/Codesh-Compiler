@@ -30,6 +30,7 @@ extern const std::string NO_PUNCTUATION_END_OP;
 extern const std::string NO_TYPE;
 extern const std::string UNEXPECTED_DECLARATION;
 extern const std::string UNEXPECTED_TOKEN;
+extern const std::string EXPECTED_VARIABLE;
 
 // SEMANTIC
 extern const std::string UNRECOGNIZED_TYPE;

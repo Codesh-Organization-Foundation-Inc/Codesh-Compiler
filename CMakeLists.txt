@@ -203,6 +203,16 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
 )
