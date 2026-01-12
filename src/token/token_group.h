@@ -59,7 +59,7 @@ enum class token_group : int
     OPERATOR_MINUS, // ויחזק את־לב
     OPERATOR_BY, // פי־
 
-    OPERATOR_ADDITION_ASSIGNMENT, //ויסף ל־
+    OPERATOR_ADDITION_ASSIGNMENT, // ויסף ל־
     OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר מן
     OPERATOR_MULTIPLICATION_ASSIGNMENT, // ויכפל
     OPERATOR_DIVISION_ASSIGNMENT, // ויחלק
