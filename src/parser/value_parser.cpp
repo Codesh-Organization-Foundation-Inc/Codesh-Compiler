@@ -266,7 +266,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_GREATER_EQUALS:
     case token_group::OPERATOR_LESS:
     case token_group::OPERATOR_LESS_EQUALS:
-        parse_boolean_value(tokens);
+        eval_ast_node = parse_boolean_value(tokens);
         break;
 
     default: {
