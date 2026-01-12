@@ -37,6 +37,12 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
         }
 
+        case token_group::OPERATOR_ADDITION_ASSIGNMENT:
+        case token_group::OPERATOR_DIVISION_ASSIGNMENT:
+        case token_group::OPERATOR_MODULO_ASSIGNMENT:
+        case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT:
+        case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
+
         case token_group::OPERATOR_ADDITION:
         case token_group::OPERATOR_SUBTRACTION:
         case token_group::OPERATOR_MULTIPLICATION:
@@ -49,7 +55,6 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
                     blasphemy::blasphemy_type::SYNTAX);
             }
             break;
-
 
         case token_group::SCOPE_END:
             tokens.pop();
