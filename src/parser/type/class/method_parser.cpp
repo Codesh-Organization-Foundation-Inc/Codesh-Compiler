@@ -121,8 +121,7 @@ static void parse_if_statement(
     );
 
     auto *current_if = root_if.get();
-
-    while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_IF_ELSE))
+    while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ELSE_IF))
     {
         auto else_if_condition = codesh::parser::parse_value(tokens);
         check_consume_scope_begin(tokens);
