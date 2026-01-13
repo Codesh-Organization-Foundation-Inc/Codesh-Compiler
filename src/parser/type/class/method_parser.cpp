@@ -100,8 +100,8 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 }
 
 static void parse_if_statement(
-    std::queue<std::unique_ptr<codesh::token>> &tokens,
-    codesh::ast::method::method_scope_ast_node &method_scope)
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope)
 {
     tokens.pop();
 
@@ -125,7 +125,6 @@ static void parse_if_statement(
     while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_IF_ELSE))
     {
         auto else_if_condition = codesh::parser::parse_value(tokens);
-
         check_consume_scope_begin(tokens);
 
         auto else_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
@@ -154,7 +153,6 @@ static void parse_if_statement(
 
     if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ELSE))
     {
-
         if (check_consume_scope_begin(tokens))
         {
             auto else_scope = std::make_unique<codesh::ast::method::method_scope_ast_node>();
@@ -178,8 +176,10 @@ static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>>
             codesh::blasphemy::details::NO_SCOPE_BEGIN,
             codesh::blasphemy::blasphemy_type::SYNTAX
         );
+
         return false;
     }
+
     return true;
 }
 
