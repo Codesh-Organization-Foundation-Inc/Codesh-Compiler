@@ -108,37 +108,21 @@ std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statem
     auto &if_scope = method_scope.create_method_scope();
     parse_method_scope(tokens, if_scope);
 
-    auto root_if = std::make_unique<ast::block::if_ast_node>(
+    auto if_node = std::make_unique<ast::block::if_ast_node>(
         std::move(condition),
         if_scope
     );
 
     // Chain else-if blocks
-    auto *current_if = root_if.get();
     while (util::consuming_check(tokens, token_group::KEYWORD_ELSE_IF))
     {
         auto else_if_condition = parse_value(tokens);
 
         check_consume_scope_begin(tokens);
-        auto &current_if_scope = method_scope.create_method_scope();
-        parse_method_scope(tokens, current_if_scope);
+        auto &else_if_scope = method_scope.create_method_scope();
+        parse_method_scope(tokens, else_if_scope);
 
-        auto else_if_node = std::make_unique<ast::block::if_ast_node>(
-            std::move(else_if_condition),
-            current_if_scope
-        );
-
-
-        // The AST will be built as:
-        // if (A) { ... }
-        // else { if (B) { ... }
-        //     else { if (C) { ... }
-        auto &previous_else_scope = method_scope.create_method_scope();
-
-        current_if->set_else_scope(previous_else_scope);
-        current_if = else_if_node.get();
-
-        previous_else_scope.add_statement(std::move(else_if_node));
+        if_node->add_else_if_branch({std::move(else_if_condition), else_if_scope});
     }
 
 
@@ -148,10 +132,10 @@ std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statem
 
         auto &else_scope = method_scope.create_method_scope();
         parse_method_scope(tokens, else_scope);
-        current_if->set_else_scope(else_scope);
+        if_node->set_else_scope(else_scope);
     }
 
-    return root_if;
+    return if_node;
 }
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)

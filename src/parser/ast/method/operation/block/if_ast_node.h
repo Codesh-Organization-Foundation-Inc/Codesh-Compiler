@@ -1,8 +1,9 @@
 #pragma once
+
 #include "../method_operation_ast_node.h"
 #include "../../../var_reference/value_ast_node.h"
 
-
+#include <list>
 #include <memory>
 #include <optional>
 
@@ -13,11 +14,16 @@ class method_scope_ast_node;
 }
 namespace codesh::ast::block // TODO: do it like - block::logic
 {
+using else_if_branch = std::pair<
+    std::unique_ptr<var_reference::value_ast_node>, // Condition
+    std::reference_wrapper<method::method_scope_ast_node>
+>;
 
 class if_ast_node : public method::operation::method_operation_ast_node
 {
     std::unique_ptr<var_reference::value_ast_node> condition;
     method::method_scope_ast_node &if_scope;
+    std::list<else_if_branch> else_if_branches;
     std::optional<std::reference_wrapper<method::method_scope_ast_node>> else_scope;
 
 
@@ -36,7 +42,7 @@ public:
     [[nodiscard]] std::optional<std::reference_wrapper<method::method_scope_ast_node>> get_else_scope() const;
 
     void set_condition(std::unique_ptr<var_reference::value_ast_node> condition);
+    void add_else_if_branch(else_if_branch branch);
     void set_else_scope(method::method_scope_ast_node& scope);
-    void clear_else_scope();
 };
 }

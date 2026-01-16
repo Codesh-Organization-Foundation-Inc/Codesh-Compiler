@@ -9,8 +9,8 @@ codesh::ast::block::if_ast_node::if_ast_node(
 }
 
 void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
-    const semantic_analyzer::symbol_table &symbol_table,
-    const type_decl::type_declaration_ast_node &containing_type_decl) const
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
 }
 
@@ -32,20 +32,18 @@ std::optional<std::reference_wrapper<
 }
 
 void codesh::ast::block::if_ast_node::set_condition(
-    std::unique_ptr<var_reference::value_ast_node> new_condition
+        std::unique_ptr<var_reference::value_ast_node> condition
 )
 {
-    condition = std::move(new_condition);
+    this->condition = std::move(condition);
 }
 
-void codesh::ast::block::if_ast_node::set_else_scope(
-    method::method_scope_ast_node& scope
-)
+void codesh::ast::block::if_ast_node::add_else_if_branch(else_if_branch branch)
 {
-    else_scope = std::ref(scope);
+    this->else_if_branches.emplace_back(std::move(branch));
 }
 
-void codesh::ast::block::if_ast_node::clear_else_scope()
+void codesh::ast::block::if_ast_node::set_else_scope(method::method_scope_ast_node& scope)
 {
-    else_scope.reset();
+    else_scope = scope;
 }
