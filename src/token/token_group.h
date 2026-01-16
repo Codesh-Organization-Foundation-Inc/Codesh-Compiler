@@ -88,7 +88,7 @@ enum class token_group : int
 
     KEYWORD_IF, // אם־
     KEYWORD_ELSE, // אחרת
-    KEYWORD_IF_ELSE, // אם־אחרת
+    KEYWORD_ELSE_IF, // אם־אחרת
     KEYWORD_SWITCH, // ויחלוק על
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // באין צדיק
