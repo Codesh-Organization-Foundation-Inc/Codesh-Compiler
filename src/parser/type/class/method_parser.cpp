@@ -15,6 +15,10 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
+static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
+
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
 {
@@ -102,40 +106,37 @@ std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statem
 {
     tokens.pop();
 
-    auto condition = parse_value(tokens);
-
-    check_consume_scope_begin(tokens);
-    auto &if_scope = method_scope.create_method_scope();
-    parse_method_scope(tokens, if_scope);
-
     auto if_node = std::make_unique<ast::block::if_ast_node>(
-        std::move(condition),
-        if_scope
+        parse_conditioned_scope(tokens, method_scope)
     );
 
-    // Chain else-if blocks
     while (util::consuming_check(tokens, token_group::KEYWORD_ELSE_IF))
     {
-        auto else_if_condition = parse_value(tokens);
-
-        check_consume_scope_begin(tokens);
-        auto &else_if_scope = method_scope.create_method_scope();
-        parse_method_scope(tokens, else_if_scope);
-
-        if_node->add_else_if_branch({std::move(else_if_condition), else_if_scope});
+        if_node->add_else_if_branch(parse_conditioned_scope(tokens, method_scope));
     }
-
 
     if (util::consuming_check(tokens, token_group::KEYWORD_ELSE))
     {
         check_consume_scope_begin(tokens);
-
         auto &else_scope = method_scope.create_method_scope();
         parse_method_scope(tokens, else_scope);
-        if_node->set_else_scope(else_scope);
+
+        if_node->set_else_branch(else_scope);
     }
 
     return if_node;
+}
+
+static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope)
+{
+    auto else_if_condition = codesh::parser::parse_value(tokens);
+
+    check_consume_scope_begin(tokens);
+    auto &else_if_scope = method_scope.create_method_scope();
+    codesh::parser::parse_method_scope(tokens, else_if_scope);
+
+    return {std::move(else_if_condition), else_if_scope};
 }
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)

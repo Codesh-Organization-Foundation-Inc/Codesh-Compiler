@@ -1,49 +1,38 @@
 #include "if_ast_node.h"
 
-codesh::ast::block::if_ast_node::if_ast_node(
-    std::unique_ptr<var_reference::value_ast_node> condition,
-    method::method_scope_ast_node &if_scope,
-    std::optional<std::reference_wrapper<method::method_scope_ast_node>> else_scope
-) : condition(std::move(condition)), if_scope(if_scope), else_scope(else_scope)
+codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
 {
+}
+
+const codesh::ast::block::conditioned_scope_container &codesh::ast::block::if_ast_node::get_if_branch() const
+{
+    return if_branch;
+}
+
+void codesh::ast::block::if_ast_node::add_else_if_branch(conditioned_scope_container branch)
+{
+    this->else_if_branches.emplace_back(std::move(branch));
+}
+
+const std::list<codesh::ast::block::conditioned_scope_container> &codesh::ast::block::if_ast_node::
+    get_else_if_branches() const
+{
+    return this->else_if_branches;
+}
+
+std::optional<std::reference_wrapper<codesh::ast::method::method_scope_ast_node>> codesh::ast::block::if_ast_node::
+    get_else_branch() const
+{
+    return this->else_branch;
+}
+
+void codesh::ast::block::if_ast_node::set_else_branch(method::method_scope_ast_node &else_scope)
+{
+    this->else_branch = else_scope;
 }
 
 void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-}
-
-const codesh::ast::var_reference::value_ast_node &codesh::ast::block::if_ast_node::get_condition() const
-{
-    return *condition;
-}
-
-codesh::ast::method::method_scope_ast_node &codesh::ast::block::if_ast_node::get_if_scope() const
-{
-    return if_scope;
-}
-
-std::optional<std::reference_wrapper<
-    codesh::ast::method::method_scope_ast_node
->> codesh::ast::block::if_ast_node::get_else_scope() const
-{
-    return else_scope;
-}
-
-void codesh::ast::block::if_ast_node::set_condition(
-        std::unique_ptr<var_reference::value_ast_node> condition
-)
-{
-    this->condition = std::move(condition);
-}
-
-void codesh::ast::block::if_ast_node::add_else_if_branch(else_if_branch branch)
-{
-    this->else_if_branches.emplace_back(std::move(branch));
-}
-
-void codesh::ast::block::if_ast_node::set_else_scope(method::method_scope_ast_node& scope)
-{
-    else_scope = scope;
 }
