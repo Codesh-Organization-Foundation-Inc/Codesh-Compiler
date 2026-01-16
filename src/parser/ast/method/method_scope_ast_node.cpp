@@ -55,9 +55,10 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
     local_variables.emplace_back(std::move(statement));
 }
 
-void codesh::ast::method::method_scope_ast_node::add_method_scope(std::unique_ptr<method_scope_ast_node> method_scope)
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_ast_node::
+    create_method_scope()
 {
-    method_scopes.emplace_back(std::move(method_scope));
+    return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>());
 }
 
 void codesh::ast::method::method_scope_ast_node::mark_end() const
