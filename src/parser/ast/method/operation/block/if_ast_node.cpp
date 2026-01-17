@@ -1,6 +1,7 @@
 #include "if_ast_node.h"
 
 #include "../../../../../defenition/primitive_type.h"
+#include "../../../../../output/ir/code_block.h"
 #include "../../../type/primitive_type_ast_node.h"
 
 codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
@@ -45,6 +46,11 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
         {
             if_cond.emit_ir(containing_block, symbol_table, containing_type_decl);
+
+            // If false, jump 'till after the block.
+            containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
+                output::ir::if_type::IS_ZERO
+            ));
         }
     }
 

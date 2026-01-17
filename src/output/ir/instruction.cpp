@@ -226,3 +226,25 @@ void codesh::output::ir::get_static_instruction::emit(std::list<instruction_cont
 
     collector.emplace_back(std::move(opcodes), 1);
 }
+
+codesh::output::ir::if_instruction::if_instruction(const if_type type) : type(type)
+{
+}
+
+void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &collector) const
+{
+    std::vector<unsigned char> opcodes(3);
+
+    opcodes[0] = *opcode::IF_ZERO + *type;
+    //TODO: Implement correct jump
+    util::put_int_bytes(opcodes.data() + 1, 2, 3);
+
+
+    collector.emplace_back(
+        std::move(opcodes),
+
+        type >= if_type::ARE_INTS_EQUAL
+            ? -2
+            : -1
+    );
+}

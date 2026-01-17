@@ -25,7 +25,7 @@ enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
 
-    I_CONST_M1 = 0x02,
+    I_CONST_M1 = 0x02, // Loads -1 onto the stack
 
     B_IPUSH = 0x10,
     S_IPUSH, // >255
@@ -34,6 +34,9 @@ enum class opcode : unsigned char
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index
+
+    IF_ZERO = 0x99,
+    GOTO = 0xA7,
 
     RETURN = 0xB1,
 
@@ -64,12 +67,41 @@ enum class invokation_type
     VIRTUAL
 };
 
+enum class if_type
+{
+    IS_ZERO,
+    IS_NONZERO,
 
+    IS_NEGATIVE,
+    IS_POSITIVE_OR_ZERO,
+    IS_POSITIVE,
+    IS_NEGATIVE_OR_ZERO,
+
+    ARE_INTS_EQUAL,
+    ARE_INTS_NOT_EQUAL,
+
+    IS_INT_LESSER,
+    IS_INT_GREATER_OR_EQUAL,
+    IS_INT_GREATER,
+    IS_INT_LESSER_OR_EQUAL,
+
+    ARE_REFS_EQUAL,
+    ARE_REFS_NOT_EQUAL,
+};
+
+
+/**
+ * A shorthand for casting an opcode to a byte
+ */
 constexpr unsigned char operator*(const opcode op)
 {
     return static_cast<unsigned char>(op);
 }
 constexpr unsigned char operator*(const instruction_type instr_type)
+{
+    return static_cast<unsigned char>(instr_type);
+}
+constexpr unsigned char operator*(const if_type instr_type)
 {
     return static_cast<unsigned char>(instr_type);
 }
@@ -209,6 +241,16 @@ class get_static_instruction final : public instruction
 
 public:
     explicit get_static_instruction(int constant_pool_index);
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class if_instruction final : public instruction
+{
+    if_type type;
+
+public:
+    explicit if_instruction(if_type type);
 
     void emit(std::list<instruction_container> &collector) const override;
 };
