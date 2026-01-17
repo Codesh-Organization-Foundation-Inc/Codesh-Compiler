@@ -1,8 +1,8 @@
 #pragma once
 
-namespace codesh::ast::type_decl
+namespace codesh::ast::method
 {
-class type_declaration_ast_node;
+class method_declaration_ast_node;
 }
 namespace codesh::semantic_analyzer
 {
@@ -16,6 +16,6 @@ class type_symbol;
 
 namespace codesh::semantic_analyzer::method_declaration
 {
-void collect(const semantic_context &context, const ast::type_decl::type_declaration_ast_node &type_decl,
+void collect(const semantic_context &context, ast::method::method_declaration_ast_node &method_decl,
         type_symbol &containing_type);
 }

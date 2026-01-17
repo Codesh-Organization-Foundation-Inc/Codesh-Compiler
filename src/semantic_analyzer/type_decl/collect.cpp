@@ -31,5 +31,9 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
         ));
     }
 
-    method_declaration::collect(new_context, type_decl, it.get());
+
+    for (const auto &method_decl : type_decl.get_all_methods())
+    {
+        method_declaration::collect(new_context, *method_decl, it.get());
+    }
 }
