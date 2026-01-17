@@ -49,7 +49,7 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
 {
     const auto &if_cond = *if_branch.condition;
 
-    // Emit to a dummy block such that we can compute its size
+    // Pre-process the if block such that we can determine its size beforehand
     output::ir::code_block if_block;
     if_branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
 
