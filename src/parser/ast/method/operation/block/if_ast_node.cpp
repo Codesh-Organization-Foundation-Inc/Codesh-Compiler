@@ -68,4 +68,6 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         }
     }
 
+
+    containing_block.consume_code_block(std::move(if_block));
 }

@@ -31,6 +31,8 @@ public:
 
     [[nodiscard]] const std::list<std::unique_ptr<instruction>> &get_instructions() const;
     void add_instruction(std::unique_ptr<instruction> instruction);
+
+    void consume_code_block(code_block block);
 };
 
 }

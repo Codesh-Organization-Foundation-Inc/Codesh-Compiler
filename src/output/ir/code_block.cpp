@@ -24,3 +24,11 @@ void codesh::output::ir::code_block::add_instruction(std::unique_ptr<instruction
 {
     instructions.emplace_back(std::move(instruction));
 }
+
+void codesh::output::ir::code_block::consume_code_block(code_block block)
+{
+    for (auto &instruction : block.instructions)
+    {
+        add_instruction(std::move(instruction));
+    }
+}

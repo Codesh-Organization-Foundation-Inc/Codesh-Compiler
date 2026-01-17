@@ -286,7 +286,11 @@ void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &
     std::vector<unsigned char> opcodes(3);
 
     opcodes[0] = *opcode::IF_ZERO + *type;
-    util::put_int_bytes(opcodes.data() + 1, 2, jump_offset);
+    util::put_int_bytes(
+        opcodes.data() + 1,
+        2,
+        jump_offset + static_cast<int>(size())
+    );
 
 
     collector.emplace_back(
