@@ -34,7 +34,11 @@ public:
     [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
         const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
+
+
     method_scope_ast_node &create_method_scope();
+    [[nodiscard]] const std::vector<std::unique_ptr<method_scope_ast_node>> &get_method_scopes() const;
+
 
     /**
      * Marks the end of the scope.

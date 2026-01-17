@@ -61,6 +61,12 @@ codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_as
     return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>());
 }
 
+const std::vector<std::unique_ptr<codesh::ast::method::method_scope_ast_node>> &codesh::ast::method::
+    method_scope_ast_node::get_method_scopes() const
+{
+    return method_scopes;
+}
+
 void codesh::ast::method::method_scope_ast_node::mark_end() const
 {
     const size_t last_statement_index = body.size() - 1;

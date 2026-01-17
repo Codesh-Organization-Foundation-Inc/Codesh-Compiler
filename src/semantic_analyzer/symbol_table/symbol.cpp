@@ -241,9 +241,10 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::me
     return scope;
 }
 
-void codesh::semantic_analyzer::method_scope_symbol::add_inner_scope(std::unique_ptr<method_scope_symbol> method_scope)
+codesh::semantic_analyzer::method_scope_symbol &codesh::semantic_analyzer::method_scope_symbol::add_inner_scope(
+        std::unique_ptr<method_scope_symbol> method_scope)
 {
-    inner_scopes.emplace_back(std::move(method_scope));
+    return *inner_scopes.emplace_back(std::move(method_scope));
 }
 
 codesh::semantic_analyzer::symbols_collection &codesh::semantic_analyzer::method_symbol::get_scope()
@@ -282,9 +283,9 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
 }
 
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
-    create_method_scope(i_scope_containing_symbol &parent_scope, ast::method::method_scope_ast_node &scope_node)
+    create_method_scope(i_scope_containing_symbol &parent_scope, ast::method::method_scope_ast_node &producing_node)
 {
-    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &scope_node);
+    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &producing_node);
 }
 
 const codesh::definition::fully_qualified_class_name &codesh::semantic_analyzer::method_symbol::get_full_name() const

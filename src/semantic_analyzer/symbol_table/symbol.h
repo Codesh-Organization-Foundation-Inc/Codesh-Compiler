@@ -215,7 +215,7 @@ public:
 
     [[nodiscard]] const named_symbol_map &get_scope() const override;
 
-    void add_inner_scope(std::unique_ptr<method_scope_symbol> method_scope);
+    method_scope_symbol &add_inner_scope(std::unique_ptr<method_scope_symbol> method_scope);
 };
 
 class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>,
@@ -249,7 +249,7 @@ public:
             ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope,
-            ast::method::method_scope_ast_node &scope_node);
+            ast::method::method_scope_ast_node &producing_node);
 
     [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
     void set_full_name(definition::fully_qualified_class_name name);

@@ -4,6 +4,7 @@
 
 #include "../../parser/ast/impl/binary_ast_node.h"
 #include "../../parser/ast/impl/unary_ast_node.h"
+#include "../../parser/ast/method/operation/block/if_ast_node.h"
 #include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 #include "../../semantic_analyzer/symbol_table/symbol.h"
 
@@ -11,6 +12,10 @@ static bool resolve_value(const codesh::semantic_analyzer::semantic_context &con
                                codesh::ast::var_reference::value_ast_node &val_node,
                                const codesh::semantic_analyzer::method_symbol &containing_method,
                                const codesh::semantic_analyzer::method_scope_symbol &scope);
+
+static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::ast::method::method_scope_ast_node &scope_node);
 
 
 bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
@@ -26,6 +31,18 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&stmnt))
     {
         return variable_reference::resolve(context, *var_ref, scope);
+    }
+
+
+    if (const auto if_node = dynamic_cast<ast::block::if_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        all_succeed &= resolve_value(context, *if_node->get_if_branch().condition, containing_method, scope);
+        all_succeed &= resolve_scope(context, containing_method, if_node->get_if_branch().scope);
+        //TODO: Resolve else-if & else
+
+        return all_succeed;
     }
 
 
@@ -48,9 +65,9 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 
 
 static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
-                               codesh::ast::var_reference::value_ast_node &val_node,
-                               const codesh::semantic_analyzer::method_symbol &containing_method,
-                               const codesh::semantic_analyzer::method_scope_symbol &scope)
+                          codesh::ast::var_reference::value_ast_node &val_node,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
     {
@@ -58,4 +75,23 @@ static bool resolve_value(const codesh::semantic_analyzer::semantic_context &con
     }
 
     return codesh::semantic_analyzer::statement::resolve(context, val_node, containing_method, scope);
+}
+
+static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::ast::method::method_scope_ast_node &scope_node)
+{
+    bool all_succeed = true;
+
+    for (const auto &statement : scope_node.get_body())
+    {
+        all_succeed &= codesh::semantic_analyzer::statement::resolve(
+            context,
+            *statement,
+            containing_method,
+            scope_node.get_resolved()
+        );
+    }
+
+    return all_succeed;
 }
