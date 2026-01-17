@@ -270,34 +270,45 @@ void codesh::output::ir::get_static_instruction::emit(std::list<instruction_cont
     collector.emplace_back(std::move(opcodes), 1);
 }
 
-codesh::output::ir::if_instruction::if_instruction(const if_type type, const int jump_offset) :
-    type(type),
-    jump_offset(jump_offset)
+codesh::output::ir::goto_instruction::goto_instruction(const int jump_offset) : jump_offset(jump_offset)
 {
 }
 
-size_t codesh::output::ir::if_instruction::size() const
+size_t codesh::output::ir::goto_instruction::size() const
 {
     return 3;
 }
 
-void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::goto_instruction::emit(std::list<instruction_container> &collector) const
 {
     std::vector<unsigned char> opcodes(3);
 
-    opcodes[0] = *opcode::IF_ZERO + *type;
+    opcodes[0] = *opcode::GOTO;
+
     util::put_int_bytes(
         opcodes.data() + 1,
         2,
         jump_offset + static_cast<int>(size())
     );
 
-
     collector.emplace_back(
         std::move(opcodes),
-
-        type >= if_type::ARE_INTS_EQUAL
-            ? -2
-            : -1
+        0
     );
+}
+
+codesh::output::ir::if_instruction::if_instruction(const if_type type, const int jump_offset) :
+    goto_instruction(jump_offset),
+    type(type)
+{
+}
+
+void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &collector) const
+{
+    goto_instruction::emit(collector);
+
+    collector.back().opcodes[0] = *opcode::IF_ZERO + *type;
+    collector.back().size_delta = type >= if_type::ARE_INTS_EQUAL
+        ? -2
+        : -1;
 }
