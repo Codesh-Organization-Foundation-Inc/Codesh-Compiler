@@ -35,6 +35,13 @@ void codesh::ast::block::if_ast_node::set_else_branch(method::method_scope_ast_n
     this->else_branch = else_scope;
 }
 
+void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
+                                                     output::jvm_target::constant_pool &constant_pool)
+{
+    if_branch.scope.emit_constants(root_node, constant_pool);
+    //TODO: Add else-if and else
+}
+
 void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const

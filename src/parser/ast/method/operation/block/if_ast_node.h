@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../method_operation_ast_node.h"
+#include "../../../impl/i_constant_pool_emitter.h"
 #include "../../../var_reference/value_ast_node.h"
+#include "../method_operation_ast_node.h"
 
 #include <list>
 #include <memory>
@@ -25,7 +26,7 @@ struct conditioned_scope_container
     method::method_scope_ast_node &scope;
 };
 
-class if_ast_node : public method::operation::method_operation_ast_node
+class if_ast_node : public method::operation::method_operation_ast_node, public impl::i_constant_pool_emitter
 {
     const conditioned_scope_container if_branch;
     std::list<conditioned_scope_container> else_if_branches;
@@ -43,6 +44,9 @@ public:
     [[nodiscard]] std::optional<std::reference_wrapper<method::method_scope_ast_node>> get_else_branch() const;
     void set_else_branch(method::method_scope_ast_node& else_scope);
 
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+                        output::jvm_target::constant_pool &constant_pool) override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
                  const type_decl::type_declaration_ast_node &containing_type_decl) const override;
