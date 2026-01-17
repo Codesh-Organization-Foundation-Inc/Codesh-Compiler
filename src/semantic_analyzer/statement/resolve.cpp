@@ -40,7 +40,13 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 
         all_succeed &= resolve_value(context, *if_node->get_if_branch().condition, containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, if_node->get_if_branch().scope);
-        //TODO: Resolve else-if & else
+
+        //TODO: Resolve else-if
+
+        if (if_node->get_else_branch().has_value())
+        {
+            resolve_scope(context, containing_method, if_node->get_else_branch()->get());
+        }
 
         return all_succeed;
     }

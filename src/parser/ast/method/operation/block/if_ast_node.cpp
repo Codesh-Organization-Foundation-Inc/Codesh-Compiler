@@ -40,7 +40,13 @@ void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_
                                                      output::jvm_target::constant_pool &constant_pool)
 {
     if_branch.scope.emit_constants(root_node, constant_pool);
-    //TODO: Add else-if and else
+
+    //TODO: Add else-if
+
+    if (else_branch.has_value())
+    {
+        else_branch->get().emit_constants(root_node, constant_pool);
+    }
 }
 
 void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
