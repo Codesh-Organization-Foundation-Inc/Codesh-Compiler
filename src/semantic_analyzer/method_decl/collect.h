@@ -16,6 +16,6 @@ class type_symbol;
 
 namespace codesh::semantic_analyzer::method_declaration
 {
-void collect_methods(const semantic_context &context, const ast::type_decl::type_declaration_ast_node &type_decl,
+void collect(const semantic_context &context, const ast::type_decl::type_declaration_ast_node &type_decl,
         type_symbol &containing_type);
 }

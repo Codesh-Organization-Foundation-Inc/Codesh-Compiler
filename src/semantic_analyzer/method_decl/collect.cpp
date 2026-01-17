@@ -13,7 +13,7 @@ static void collect_local_variables(const codesh::ast::method::method_declaratio
                                     const codesh::semantic_analyzer::method_symbol &method_symbol);
 
 
-void codesh::semantic_analyzer::method_declaration::collect_methods(const semantic_context &context,
+void codesh::semantic_analyzer::method_declaration::collect(const semantic_context &context,
         const ast::type_decl::type_declaration_ast_node &type_decl, type_symbol &containing_type)
 {
     for (const auto &method_decl : type_decl.get_all_methods())

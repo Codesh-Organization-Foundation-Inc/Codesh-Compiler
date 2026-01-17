@@ -18,5 +18,6 @@ class compilation_unit_ast_node;
 
 namespace codesh::semantic_analyzer::type_declaration
 {
-void collect(const semantic_context &context, country_symbol &country);
+void collect(const semantic_context &context, ast::type_decl::type_declaration_ast_node &type_decl,
+        country_symbol &country);
 }
