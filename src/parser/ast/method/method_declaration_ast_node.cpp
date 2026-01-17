@@ -71,8 +71,8 @@ const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_de
     return method_scope;
 }
 
-const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_parameters() const
+const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_parameters() const
 {
     return parameters;
 }

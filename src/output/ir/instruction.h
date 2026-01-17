@@ -25,7 +25,7 @@ enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
 
-    I_CONST_M1 = 0x02,
+    I_CONST_M1 = 0x02, // Loads -1 onto the stack
 
     B_IPUSH = 0x10,
     S_IPUSH, // >255
@@ -34,6 +34,9 @@ enum class opcode : unsigned char
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index
+
+    IF_ZERO = 0x99,
+    GOTO = 0xA7,
 
     RETURN = 0xB1,
 
@@ -64,12 +67,41 @@ enum class invokation_type
     VIRTUAL
 };
 
+enum class if_type
+{
+    IS_ZERO,
+    IS_NONZERO,
 
+    IS_NEGATIVE,
+    IS_POSITIVE_OR_ZERO,
+    IS_POSITIVE,
+    IS_NEGATIVE_OR_ZERO,
+
+    ARE_INTS_EQUAL,
+    ARE_INTS_NOT_EQUAL,
+
+    IS_INT_LESSER,
+    IS_INT_GREATER_OR_EQUAL,
+    IS_INT_GREATER,
+    IS_INT_LESSER_OR_EQUAL,
+
+    ARE_REFS_EQUAL,
+    ARE_REFS_NOT_EQUAL,
+};
+
+
+/**
+ * A shorthand for casting an opcode to a byte
+ */
 constexpr unsigned char operator*(const opcode op)
 {
     return static_cast<unsigned char>(op);
 }
 constexpr unsigned char operator*(const instruction_type instr_type)
+{
+    return static_cast<unsigned char>(instr_type);
+}
+constexpr unsigned char operator*(const if_type instr_type)
 {
     return static_cast<unsigned char>(instr_type);
 }
@@ -93,6 +125,8 @@ class instruction
 public:
     virtual ~instruction();
 
+    [[nodiscard]] virtual size_t size() const = 0;
+
     virtual void emit(std::list<instruction_container> &collector) const = 0;
 };
 
@@ -100,14 +134,16 @@ class simple_instruction : public instruction
 {
     const opcode _opcode;
     const int stack_delta;
+    const size_t _size;
 
 public:
-    simple_instruction(opcode _opcode, int stack_delta);
+    simple_instruction(opcode _opcode, int stack_delta, size_t _size);
 
     [[nodiscard]] opcode get_opcode() const;
     [[nodiscard]] int get_stack_delta() const;
 
     void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 };
 
 class typed_instruction : public instruction
@@ -123,7 +159,7 @@ protected:
 public:
     typed_instruction(instruction_type type, unsigned char index);
 
-    [[nodiscard]] instruction_type get_instruction_type() const;
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
@@ -164,9 +200,9 @@ class invoke_instruction final : public instruction
 public:
     invoke_instruction(invokation_type type, int method_cp_index, int parameters_count);
 
-    void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 
-    [[nodiscard]] int get_method_cp_index() const;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 class load_int_constant_instruction final : public instruction
@@ -181,6 +217,8 @@ public:
      */
     load_int_constant_instruction(int constant, std::optional<int> constant_cpi);
 
+    [[nodiscard]] size_t size() const override;
+
     void emit(std::list<instruction_container> &collector) const override;
 };
 
@@ -190,6 +228,8 @@ class load_constant_pool_instruction final : public instruction
 
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
+
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
@@ -209,6 +249,21 @@ class get_static_instruction final : public instruction
 
 public:
     explicit get_static_instruction(int constant_pool_index);
+
+    [[nodiscard]] size_t size() const override;
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class if_instruction final : public instruction
+{
+    if_type type;
+    const int jump_offset;
+
+public:
+    if_instruction(if_type type, int jump_offset);
+
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
