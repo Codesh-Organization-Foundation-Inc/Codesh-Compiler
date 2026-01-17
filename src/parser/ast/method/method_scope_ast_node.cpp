@@ -81,9 +81,24 @@ void codesh::ast::method::method_scope_ast_node::emit_constants(const compilatio
 
     for (const auto &statement : get_body())
     {
-        if (auto *constant_emitter = dynamic_cast<i_constant_pool_emitter *>(statement.get()))
-        {
-            constant_emitter->emit_constants(root_node, constant_pool);
-        }
+        auto *constant_emitter = dynamic_cast<i_constant_pool_emitter *>(statement.get());
+        if (!constant_emitter)
+            continue;
+
+        constant_emitter->emit_constants(root_node, constant_pool);
+    }
+}
+
+void codesh::ast::method::method_scope_ast_node::emit_ir(
+    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+    const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    for (const auto &method_op : get_body())
+    {
+        const auto ir_emitter = dynamic_cast<i_ir_emitter *>(method_op.get());
+        if (!ir_emitter)
+            continue;
+
+        ir_emitter->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
 }
