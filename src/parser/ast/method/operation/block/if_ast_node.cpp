@@ -3,6 +3,7 @@
 #include "../../../../../defenition/primitive_type.h"
 #include "../../../../../output/ir/code_block.h"
 #include "../../../type/primitive_type_ast_node.h"
+#include "../../method_scope_ast_node.h"
 
 codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
 {
@@ -48,6 +49,11 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
 {
     const auto &if_cond = *if_branch.condition;
 
+    // Emit to a dummy block such that we can compute its size
+    output::ir::code_block if_block;
+    if_branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
+
+
     if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(if_cond.get_type()))
     {
         if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
@@ -56,7 +62,8 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
 
             // If false, jump 'till after the block.
             containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
-                output::ir::if_type::IS_ZERO
+                output::ir::if_type::IS_ZERO,
+                if_block.size()
             ));
         }
     }

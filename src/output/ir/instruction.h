@@ -125,6 +125,8 @@ class instruction
 public:
     virtual ~instruction();
 
+    [[nodiscard]] virtual size_t size() const = 0;
+
     virtual void emit(std::list<instruction_container> &collector) const = 0;
 };
 
@@ -132,14 +134,16 @@ class simple_instruction : public instruction
 {
     const opcode _opcode;
     const int stack_delta;
+    const size_t _size;
 
 public:
-    simple_instruction(opcode _opcode, int stack_delta);
+    simple_instruction(opcode _opcode, int stack_delta, size_t _size);
 
     [[nodiscard]] opcode get_opcode() const;
     [[nodiscard]] int get_stack_delta() const;
 
     void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 };
 
 class typed_instruction : public instruction
@@ -155,7 +159,7 @@ protected:
 public:
     typed_instruction(instruction_type type, unsigned char index);
 
-    [[nodiscard]] instruction_type get_instruction_type() const;
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
@@ -196,9 +200,9 @@ class invoke_instruction final : public instruction
 public:
     invoke_instruction(invokation_type type, int method_cp_index, int parameters_count);
 
-    void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 
-    [[nodiscard]] int get_method_cp_index() const;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 class load_int_constant_instruction final : public instruction
@@ -213,6 +217,8 @@ public:
      */
     load_int_constant_instruction(int constant, std::optional<int> constant_cpi);
 
+    [[nodiscard]] size_t size() const override;
+
     void emit(std::list<instruction_container> &collector) const override;
 };
 
@@ -222,6 +228,8 @@ class load_constant_pool_instruction final : public instruction
 
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
+
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
@@ -242,15 +250,20 @@ class get_static_instruction final : public instruction
 public:
     explicit get_static_instruction(int constant_pool_index);
 
+    [[nodiscard]] size_t size() const override;
+
     void emit(std::list<instruction_container> &collector) const override;
 };
 
 class if_instruction final : public instruction
 {
     if_type type;
+    const int jump_offset;
 
 public:
-    explicit if_instruction(if_type type);
+    if_instruction(if_type type, int jump_offset);
+
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
