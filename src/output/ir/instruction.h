@@ -255,15 +255,24 @@ public:
     void emit(std::list<instruction_container> &collector) const override;
 };
 
-class if_instruction final : public instruction
+class goto_instruction : public instruction
 {
-    if_type type;
     const int jump_offset;
 
 public:
-    if_instruction(if_type type, int jump_offset);
+    explicit goto_instruction(int jump_offset);
 
     [[nodiscard]] size_t size() const override;
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class if_instruction final : public goto_instruction
+{
+    if_type type;
+
+public:
+    if_instruction(if_type type, int jump_offset);
 
     void emit(std::list<instruction_container> &collector) const override;
 };

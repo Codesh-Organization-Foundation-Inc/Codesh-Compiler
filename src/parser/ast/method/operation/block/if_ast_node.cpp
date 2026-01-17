@@ -40,7 +40,13 @@ void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_
                                                      output::jvm_target::constant_pool &constant_pool)
 {
     if_branch.scope.emit_constants(root_node, constant_pool);
-    //TODO: Add else-if and else
+
+    //TODO: Add else-if
+
+    if (else_branch.has_value())
+    {
+        else_branch->get().emit_constants(root_node, constant_pool);
+    }
 }
 
 void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing_block,
@@ -54,20 +60,36 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
     if_branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
 
 
+    output::ir::if_type if_type;
     if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(if_cond.get_type()))
     {
         if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
         {
             if_cond.emit_ir(containing_block, symbol_table, containing_type_decl);
-
-            // If false, jump 'till after the block.
-            containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
-                output::ir::if_type::IS_ZERO,
-                if_block.size()
-            ));
+            if_type = output::ir::if_type::IS_ZERO;
         }
     }
 
+    // If false, jump 'till after the block.
+    containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
+        if_type,
+        if_block.size() + (
+            // Account for a potential goto instruction ahead
+            else_branch.has_value() ? 3 : 0
+        )
+    ));
 
     containing_block.consume_code_block(std::move(if_block));
+
+
+    if (else_branch.has_value())
+    {
+        output::ir::code_block else_block;
+        else_branch->get().emit_ir(else_block, symbol_table, containing_type_decl);
+
+        // Add an instruction to the end of the if block to skip to the very end of the else block
+        containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(else_block.size()));
+
+        containing_block.consume_code_block(std::move(else_block));
+    }
 }
