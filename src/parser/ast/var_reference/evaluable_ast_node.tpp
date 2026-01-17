@@ -54,7 +54,7 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &) const
 {
-    if constexpr (std::is_same_v<T, int>)
+    if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool>)
     {
         containing_block.add_instruction(std::make_unique<output::ir::load_int_constant_instruction>(value, value_cpi));
     }

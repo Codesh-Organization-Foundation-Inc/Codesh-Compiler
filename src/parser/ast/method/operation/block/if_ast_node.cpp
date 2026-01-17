@@ -1,5 +1,8 @@
 #include "if_ast_node.h"
 
+#include "../../../../../defenition/primitive_type.h"
+#include "../../../type/primitive_type_ast_node.h"
+
 codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
 {
 }
@@ -35,4 +38,14 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
+    const auto &if_cond = *if_branch.condition;
+
+    if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(if_cond.get_type()))
+    {
+        if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
+        {
+            if_cond.emit_ir(containing_block, symbol_table, containing_type_decl);
+        }
+    }
+
 }
