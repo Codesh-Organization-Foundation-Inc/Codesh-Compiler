@@ -57,6 +57,7 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
     size_t emitted_size = 0;
+    bool has_next_branch = false;
 
     std::vector<std::reference_wrapper<output::ir::instruction>> gotos;
     // 1 If + as many else-ifs
@@ -64,17 +65,22 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
 
 
     // If
+    has_next_branch = !else_if_branches.empty() || else_branch.has_value();
+
     emitted_size += emit_branch_ir(
         if_branch,
 
-        !else_if_branches.empty() || else_branch.has_value(),
+        has_next_branch,
         emitted_size,
         containing_block,
         symbol_table,
         containing_type_decl
     );
 
-    gotos.emplace_back(*containing_block.get_instructions().back());
+    if (has_next_branch)
+    {
+        gotos.emplace_back(*containing_block.get_instructions().back());
+    }
 
 
     // Else-if
@@ -82,17 +88,22 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
     {
         const auto &else_if_branch = else_if_branches.at(i);
 
+        has_next_branch = i < else_if_branches.size() - 1 || else_branch.has_value();
+
         emitted_size += emit_branch_ir(
             else_if_branch,
-            i < else_if_branches.size() - 1 || else_branch.has_value(),
 
+            has_next_branch,
             emitted_size,
             containing_block,
             symbol_table,
             containing_type_decl
         );
 
-        gotos.emplace_back(*containing_block.get_instructions().back());
+        if (has_next_branch)
+        {
+            gotos.emplace_back(*containing_block.get_instructions().back());
+        }
     }
 
     // Else
@@ -107,13 +118,10 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
     }
 
 
-    // Update all gotos
+    // Update all closure gotos
     for (const auto &instr : gotos)
     {
-        if (const auto goto_instr = dynamic_cast<output::ir::goto_instruction *>(&instr.get()))
-        {
-            goto_instr->set_target(static_cast<int>(emitted_size));
-        }
+        dynamic_cast<output::ir::goto_instruction &>(instr.get()).set_target(static_cast<int>(emitted_size));
     }
 }
 
