@@ -32,6 +32,10 @@ class if_ast_node : public method::operation::method_operation_ast_node, public 
     std::list<conditioned_scope_container> else_if_branches;
     std::optional<std::reference_wrapper<method::method_scope_ast_node>> else_branch;
 
+    void emit_branch_ir(const conditioned_scope_container &branch, output::ir::code_block &containing_block,
+            const semantic_analyzer::symbol_table &symbol_table,
+            const type_decl::type_declaration_ast_node &containing_type_decl) const;
+
 public:
     explicit if_ast_node(conditioned_scope_container if_branch);
 

@@ -56,34 +56,14 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    const auto &if_cond = *if_branch.condition;
+    // If
+    emit_branch_ir(if_branch, containing_block, symbol_table, containing_type_decl);
 
-    // Pre-process the if block such that we can determine its size beforehand
-    output::ir::code_block if_block;
-    if_branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
-
-
-    output::ir::if_type if_type;
-    if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(if_cond.get_type()))
+    // Else-if
+    for (const auto &else_if_branch : else_if_branches)
     {
-        if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
-        {
-            if_cond.emit_ir(containing_block, symbol_table, containing_type_decl);
-            if_type = output::ir::if_type::IS_ZERO;
-        }
+        emit_branch_ir(else_if_branch, containing_block, symbol_table, containing_type_decl);
     }
-
-    // If false, jump 'till after the block.
-    containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
-        if_type,
-        if_block.size() + (
-            // Account for a potential goto instruction ahead
-            else_branch.has_value() ? 3 : 0
-        )
-    ));
-
-    containing_block.consume_code_block(std::move(if_block));
-
 
     if (else_branch.has_value())
     {
@@ -95,4 +75,37 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
 
         containing_block.consume_code_block(std::move(else_block));
     }
+}
+
+void codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_container &branch,
+    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+    const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    const auto &cond = *branch.condition;
+
+    // Pre-process the if block such that we can determine its size beforehand
+    output::ir::code_block if_block;
+    branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
+
+
+    output::ir::if_type if_type;
+    if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
+    {
+        if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
+        {
+            cond.emit_ir(containing_block, symbol_table, containing_type_decl);
+            if_type = output::ir::if_type::IS_ZERO;
+        }
+    }
+
+    containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
+        if_type,
+        // If false, jump 'till after the block.
+        if_block.size() + (
+            // Account for a potential goto instruction ahead
+            else_branch.has_value() ? 3 : 0
+        )
+    ));
+
+    containing_block.consume_code_block(std::move(if_block));
 }
