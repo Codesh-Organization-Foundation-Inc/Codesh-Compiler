@@ -8,7 +8,10 @@
 #include <memory>
 #include <optional>
 
-
+namespace codesh::output::ir
+{
+class goto_instruction;
+}
 namespace codesh::ast::method
 {
 class method_scope_ast_node;
@@ -32,7 +35,14 @@ class if_ast_node : public method::operation::method_operation_ast_node, public 
     std::vector<conditioned_scope_container> else_if_branches;
     std::optional<std::reference_wrapper<method::method_scope_ast_node>> else_branch;
 
-    static size_t emit_branch_ir(const conditioned_scope_container &branch, bool has_next_branch,
+    /**
+     * Emits IR for the given branch.
+     *
+     * If it has a next branch, will append a @link goto_instruction \endlink to be filled later.
+     *
+     * @returns The size of the branch in bytes
+     */
+    static size_t emit_branch_ir(const conditioned_scope_container &branch, bool has_next_branch, size_t current_position,
             output::ir::code_block &containing_block,
             const semantic_analyzer::symbol_table &symbol_table,
             const type_decl::type_declaration_ast_node &containing_type_decl) ;

@@ -257,12 +257,18 @@ public:
 
 class goto_instruction : public instruction
 {
-    const int jump_offset;
+    int jump_offset;
 
 public:
     explicit goto_instruction(int jump_offset);
 
     [[nodiscard]] size_t size() const override;
+
+    /**
+     * Apply the JVM formula for the jump distance between the current @link jump_offset \endlink
+     * and the set target
+     */
+    void set_target(int target);
 
     void emit(std::list<instruction_container> &collector) const override;
 };
