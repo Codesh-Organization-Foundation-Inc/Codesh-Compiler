@@ -279,6 +279,11 @@ size_t codesh::output::ir::goto_instruction::size() const
     return 3;
 }
 
+void codesh::output::ir::goto_instruction::set_target(const int target)
+{
+    jump_offset = target - jump_offset;
+}
+
 void codesh::output::ir::goto_instruction::emit(std::list<instruction_container> &collector) const
 {
     std::vector<unsigned char> opcodes(3);
