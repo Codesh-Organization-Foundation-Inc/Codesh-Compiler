@@ -111,7 +111,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     default:
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_TYPE,
-            blasphemy::blasphemy_type::SYNTAX, std::nullopt);
+            blasphemy::blasphemy_type::SYNTAX, std::nullopt, true);
         return nullptr;
     }
 
