@@ -141,6 +141,7 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
             cond.emit_ir(temp_block, symbol_table, containing_type_decl);
             if_type = output::ir::if_type::IS_ZERO;
         }
+        //TODO: Add more types
     }
 
     temp_block.add_instruction(std::make_unique<output::ir::if_instruction>(
