@@ -41,7 +41,10 @@ void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_
 {
     if_branch.scope.emit_constants(root_node, constant_pool);
 
-    //TODO: Add else-if
+    for (const auto &else_if_branch : else_if_branches)
+    {
+        else_if_branch.scope.emit_constants(root_node, constant_pool);
+    }
 
     if (else_branch.has_value())
     {

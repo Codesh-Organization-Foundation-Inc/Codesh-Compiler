@@ -17,6 +17,11 @@ static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &con
                           const codesh::semantic_analyzer::method_symbol &containing_method,
                           const codesh::ast::method::method_scope_ast_node &scope_node);
 
+static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope,
+                          const codesh::ast::block::conditioned_scope_container &conditioned_scope);
+
 
 bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
                                                    ast::method::operation::method_operation_ast_node &stmnt,
@@ -38,14 +43,19 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     {
         bool all_succeed = true;
 
-        all_succeed &= resolve_value(context, *if_node->get_if_branch().condition, containing_method, scope);
-        all_succeed &= resolve_scope(context, containing_method, if_node->get_if_branch().scope);
+        // If
+        all_succeed &= resolve_conditioned_scope(context, containing_method, scope, if_node->get_if_branch());
 
-        //TODO: Resolve else-if
+        // Else-if
+        for (const auto &else_if_branch : if_node->get_else_if_branches())
+        {
+            all_succeed &= resolve_conditioned_scope(context, containing_method, scope, else_if_branch);
+        }
 
+        // Else
         if (if_node->get_else_branch().has_value())
         {
-            resolve_scope(context, containing_method, if_node->get_else_branch()->get());
+            all_succeed &= resolve_scope(context, containing_method, if_node->get_else_branch()->get());
         }
 
         return all_succeed;
@@ -99,5 +109,16 @@ static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &con
         );
     }
 
+    return all_succeed;
+}
+
+static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope,
+                          const codesh::ast::block::conditioned_scope_container &conditioned_scope)
+{
+    bool all_succeed = true;
+    all_succeed &= resolve_value(context, *conditioned_scope.condition, containing_method, scope);
+    all_succeed &= resolve_scope(context, containing_method, conditioned_scope.scope);
     return all_succeed;
 }
