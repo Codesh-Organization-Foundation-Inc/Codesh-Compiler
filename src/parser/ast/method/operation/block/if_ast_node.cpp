@@ -57,12 +57,31 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
     // If
-    emit_branch_ir(if_branch, containing_block, symbol_table, containing_type_decl);
+    emit_branch_ir(
+        if_branch,
+        !else_if_branches.empty() || else_branch.has_value(),
+
+        containing_block,
+        symbol_table,
+        containing_type_decl
+    );
 
     // Else-if
-    for (const auto &else_if_branch : else_if_branches)
+    for (size_t i = 0; i < else_if_branches.size(); ++i)
     {
-        emit_branch_ir(else_if_branch, containing_block, symbol_table, containing_type_decl);
+        const auto &else_if_branch = else_if_branches.at(i);
+
+        // Add a goto instruction to the end of the if block to skip to the very end of the if chain
+        containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(50));
+
+        emit_branch_ir(
+            else_if_branch,
+            i < else_if_branches.size() - 1 || else_branch.has_value(),
+
+            containing_block,
+            symbol_table,
+            containing_type_decl
+        );
     }
 
     if (else_branch.has_value())
@@ -70,16 +89,17 @@ void codesh::ast::block::if_ast_node::emit_ir(output::ir::code_block &containing
         output::ir::code_block else_block;
         else_branch->get().emit_ir(else_block, symbol_table, containing_type_decl);
 
-        // Add an instruction to the end of the if block to skip to the very end of the else block
+        // Add a goto instruction to the end of the if block to skip to the very end of the else block
         containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(else_block.size()));
 
         containing_block.consume_code_block(std::move(else_block));
     }
 }
 
-void codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_container &branch,
-    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-    const type_decl::type_declaration_ast_node &containing_type_decl) const
+size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_container &branch,
+        const bool has_next_branch, output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl)
 {
     const auto &cond = *branch.condition;
 
@@ -98,14 +118,17 @@ void codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_con
         }
     }
 
+    const size_t if_byte_size = if_block.size() + (
+        // Account for a potential goto instruction ahead
+        has_next_branch ? 3 : 0
+    );
+
     containing_block.add_instruction(std::make_unique<output::ir::if_instruction>(
         if_type,
         // If false, jump 'till after the block.
-        if_block.size() + (
-            // Account for a potential goto instruction ahead
-            else_branch.has_value() ? 3 : 0
-        )
+        if_byte_size
     ));
 
     containing_block.consume_code_block(std::move(if_block));
+    return if_byte_size;
 }
