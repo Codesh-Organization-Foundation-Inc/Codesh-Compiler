@@ -1,29 +1,35 @@
 #pragma once
 
-#include "../../../impl/ast_node.h"
-#include "../../../impl/i_ir_emitter.h"
+#include "../method_operation_ast_node.h"
+#include "../../../var_reference/value_ast_node.h"
 
 #include <memory>
 
-namespace codesh::ast
+namespace codesh::ast::method
 {
-class block_ast_node;
+class method_scope_ast_node;
 }
 
-
-namespace codesh::ast::method::operation
+namespace codesh::ast::block
 {
 
-class while_ast_node final : public impl::ast_node
+class while_ast_node : public method::operation::method_operation_ast_node
 {
-    std::unique_ptr<impl::i_ir_emitter> condition;
+    std::unique_ptr<var_reference::value_ast_node> condition;
+    method::method_scope_ast_node &body_scope;
 
 public:
-    explicit while_ast_node(std::unique_ptr<impl::i_ir_emitter> condition);
+    while_ast_node(
+        std::unique_ptr<var_reference::value_ast_node> condition,
+        method::method_scope_ast_node &body_scope
+    );
 
-    [[nodiscard]] impl::i_ir_emitter *get_condition() const;
+    [[nodiscard]] const var_reference::value_ast_node &get_condition() const;
+    [[nodiscard]] const method::method_scope_ast_node &get_body_scope() const;
 
-    void set_condition(std::unique_ptr<impl::i_ir_emitter> condition);
+    void emit_ir(output::ir::code_block &containing_block,
+                 const semantic_analyzer::symbol_table &symbol_table,
+                 const type_decl::type_declaration_ast_node &containing_type_decl) const override;
 };
 
 }

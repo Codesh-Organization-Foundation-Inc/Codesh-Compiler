@@ -215,6 +215,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
+        src/parser/ast/method/operation/block/for_ast_node.cpp
+        src/parser/ast/method/operation/block/for_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
