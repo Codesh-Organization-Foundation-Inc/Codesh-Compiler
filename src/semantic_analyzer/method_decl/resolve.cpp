@@ -88,16 +88,11 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
         if (!var_type)
             continue;
 
-        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(
+        codesh::semantic_analyzer::util::resolve_custom_type_node(
             context,
             *var_type,
             *var_symbol.get().get_producing_node()->get_type()
-        )) {
-            context.blasphemy_consumer(fmt::format(
-                "עֶצֶם בִּלְתִּי מְזֹהֶה: סוּג לֹא יָדוּעַ {}",
-                var_type->get_unresolved_name().join(" ל־")
-            ));
-        }
+        );
 
         //TODO: Do value checks
     }

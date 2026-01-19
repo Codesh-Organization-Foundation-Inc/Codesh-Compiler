@@ -2,6 +2,7 @@
 
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../blasphemy/blasphemy_consumer.h"
+#include "../../defenition/definitions.h"
 #include "../semantic_context.h"
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
@@ -40,6 +41,10 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
                          const std::optional<std::vector<std::string>::const_iterator> name_end,
                          const std::optional<std::vector<std::string>::const_iterator> name_start)
 {
+    if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
+        return std::nullopt;
+
+
     for (const auto &country : context.lookup_countries)
     {
         const auto result =
