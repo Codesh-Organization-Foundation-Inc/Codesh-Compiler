@@ -67,6 +67,10 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             method_scope.add_statement(parse_if_statement(tokens, method_scope));
             break;
 
+        case token_group::KEYWORD_WHILE:
+            method_scope.add_statement(parse_if_statement(tokens, method_scope));
+            break;
+
         case token_group::SCOPE_END:
             tokens.pop();
             method_scope.mark_end();
@@ -137,6 +141,19 @@ static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
     codesh::parser::parse_method_scope(tokens, else_if_scope);
 
     return {std::move(else_if_condition), else_if_scope};
+}
+
+std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_while_statement(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    tokens.pop();
+
+}
+
+std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_for_statement(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    tokens.pop();
 }
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)
