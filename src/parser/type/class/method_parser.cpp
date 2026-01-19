@@ -6,7 +6,9 @@
 #include "../../ast/method/operation/block/if_ast_node.h"
 #include "../../ast/method/operation/block/while_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
+#include "../../ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "../../ast/operator/assignment/assign_operator_ast_node.h"
+#include "../../ast/operator/boolean/less_operator_ast_node.h"
 #include "../../util.h"
 #include "../../value_parser.h"
 #include "../type_parser.h"
@@ -172,8 +174,90 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
     ast::method::method_scope_ast_node &method_scope)
 {
     tokens.pop();
-    return nullptr;
+
+    auto var_type = util::parse_type(tokens); // TODO: check if its always int or it can be somthing else
+
+    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_NAME,
+            blasphemy::blasphemy_type::SYNTAX
+        );
+    }
+
+    auto name_token = util::consume_identifier_token(tokens);
+    const std::string &var_name = name_token->get_content();
+
+    if (!util::consuming_check(tokens, token_group::KEYWORD_FROM))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_FROM,
+            blasphemy::blasphemy_type::SYNTAX
+        );
+    }
+
+    auto from_value = parse_value(tokens);
+
+    if (!util::consuming_check(tokens, token_group::KEYWORD_TO))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_TO,
+            blasphemy::blasphemy_type::SYNTAX
+        );
+    }
+
+    auto to_value = parse_value(tokens);
+
+    if (!util::consuming_check(tokens, token_group::KEYWORD_SKIP))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_SKIP,
+            blasphemy::blasphemy_type::SYNTAX
+        );
+    }
+
+    auto step_value = parse_value(tokens);
+
+    auto variable_decl = std::make_unique<ast::local_variable_declaration_ast_node>();
+    variable_decl->set_type(std::move(var_type));
+    variable_decl->set_name(var_name);
+
+
+    auto init = std::make_optional(
+        std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+            std::make_unique<variable_reference_ast_node>(*variable_decl),
+            std::move(from_value)
+        )
+    );
+
+    auto condition = std::make_optional(
+        std::make_unique<ast::op::less_operator_ast_node>(
+            std::make_unique<variable_reference_ast_node>(*variable_decl),
+            std::move(to_value)
+        )
+    );
+
+    auto iteration = std::make_optional(
+        std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
+            std::make_unique<variable_reference_ast_node>(*variable_decl),
+            std::move(step_value)
+        )
+    );
+
+    check_consume_scope_begin(tokens);
+
+    auto &for_scope = method_scope.create_method_scope();
+    for_scope.add_local_variable(std::move(variable_decl));
+    parse_method_scope(tokens, for_scope);
+
+    return std::make_unique<ast::block::for_ast_node>(
+        std::move(init),
+        std::move(condition),
+        std::move(iteration),
+        for_scope
+    );
 }
+
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
