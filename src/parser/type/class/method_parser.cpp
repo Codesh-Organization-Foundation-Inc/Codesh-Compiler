@@ -4,6 +4,7 @@
 #include "../../../blasphemy/details.h"
 #include "../../ast/method/method_declaration_ast_node.h"
 #include "../../ast/method/operation/block/if_ast_node.h"
+#include "../../ast/method/operation/block/while_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../ast/operator/assignment/assign_operator_ast_node.h"
 #include "../../util.h"
@@ -68,7 +69,11 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_WHILE:
-            method_scope.add_statement(parse_if_statement(tokens, method_scope));
+            method_scope.add_statement(parse_while_statement(tokens, method_scope));
+            break;
+
+        case token_group::KEYWORD_FOR:
+            method_scope.add_statement(parse_for_statement(tokens, method_scope));
             break;
 
         case token_group::SCOPE_END:
@@ -143,17 +148,31 @@ static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
     return {std::move(else_if_condition), else_if_scope};
 }
 
-std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_while_statement(
-        std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::ast::block::while_ast_node> codesh::parser::parse_while_statement(
+    std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_scope_ast_node &method_scope)
 {
     tokens.pop();
 
+    auto condition = parse_value(tokens);
+
+    check_consume_scope_begin(tokens);
+
+    auto &while_scope = method_scope.create_method_scope();
+    parse_method_scope(tokens, while_scope);
+
+    return std::make_unique<ast::block::while_ast_node>(
+        std::move(condition),
+        while_scope
+    );
 }
 
-std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_for_statement(
-        std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_statement(
+    std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_scope_ast_node &method_scope)
 {
     tokens.pop();
+    return nullptr;
 }
 
 static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)

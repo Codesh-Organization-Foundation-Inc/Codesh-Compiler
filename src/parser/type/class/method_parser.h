@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../ast/method/operation/block/for_ast_node.h"
+#include "../../ast/method/operation/block/while_ast_node.h"
 #include "../../ast/method/operation/method_call_ast_node.h"
 #include "../../ast/operator/assignment/assignment_operator_ast_node.h"
 #include "../../ast/type_declaration/attributes_ast_node.h"
@@ -43,10 +45,12 @@ std::unique_ptr<ast::block::if_ast_node> parse_if_statement(
     std::queue<std::unique_ptr<token>> &tokens,
     ast::method::method_scope_ast_node &method_scope);
 
-std::unique_ptr<ast::block::if_ast_node> parse_while_statement(
-    std::queue<std::unique_ptr<token>> &tokens);
+std::unique_ptr<ast::block::while_ast_node> parse_while_statement(
+    std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_scope_ast_node &method_scope);
 
-std::unique_ptr<ast::block::if_ast_node> parse_for_statement(
-    std::queue<std::unique_ptr<token>> &tokens);
+std::unique_ptr<ast::block::for_ast_node> parse_for_statement(
+    std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_scope_ast_node &method_scope);
 
 }
