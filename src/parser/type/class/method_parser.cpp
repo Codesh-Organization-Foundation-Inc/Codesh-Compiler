@@ -35,7 +35,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_LET: {
-            auto result = parse_variable_declaration(tokens, true);
+            auto result = parse_variable_declaration(tokens, var_decl_assignment_policy::REQUIRE);
             method_scope.add_local_variable(std::move(result.first));
 
             // Add the produced assignment statement to the method body if one was generated
@@ -173,20 +173,8 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
     std::queue<std::unique_ptr<token>> &tokens,
     ast::method::method_scope_ast_node &method_scope)
 {
-    tokens.pop();
-
-    auto var_type = util::parse_type(tokens);
-
-    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX
-        );
-    }
-
-    auto name_token = util::consume_identifier_token(tokens);
-    const std::string &var_name = name_token->get_content();
+    auto variable_decl =
+        parse_variable_declaration(tokens, var_decl_assignment_policy::FORBID).first;
 
     if (!util::consuming_check(tokens, token_group::KEYWORD_FROM))
     {
@@ -217,10 +205,6 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
     }
 
     auto step_value = parse_value(tokens);
-
-    auto variable_decl = std::make_unique<ast::local_variable_declaration_ast_node>();
-    variable_decl->set_type(std::move(var_type));
-    variable_decl->set_name(var_name);
 
 
     auto init = std::make_optional(
@@ -301,14 +285,27 @@ std::pair<
 
 
     // Value assignment
-    std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment = nullptr;
-
     const bool has_val_assignment = util::consuming_check(tokens, token_group::KEYWORD_LET);
-    if (require_value && !has_val_assignment)
+
+    if (assignment_policy == var_decl_assignment_policy::REQUIRE && !has_val_assignment)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
                                                            blasphemy::blasphemy_type::SYNTAX);
     }
+
+    if (assignment_policy == var_decl_assignment_policy::FORBID)
+    {
+        if (has_val_assignment)
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
+                                                               blasphemy::blasphemy_type::SYNTAX);
+        }
+
+        return {std::move(variable_decl_ast_node), nullptr};
+    }
+
+
+    std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment = nullptr;
 
     if (has_val_assignment)
     {
@@ -317,7 +314,6 @@ std::pair<
 
         util::ensure_end_op(tokens);
     }
-
 
     return {std::move(variable_decl_ast_node), std::move(val_assignment)};
 }
