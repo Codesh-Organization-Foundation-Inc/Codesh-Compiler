@@ -21,8 +21,8 @@ class while_ast_node : public method::operation::method_operation_ast_node
 public:
     while_ast_node(std::unique_ptr<var_reference::value_ast_node> condition, method::method_scope_ast_node &body_scope);
 
-    [[nodiscard]] const var_reference::value_ast_node &get_condition() const;
-    [[nodiscard]] const method::method_scope_ast_node &get_body_scope() const;
+    [[nodiscard]] var_reference::value_ast_node &get_condition() const;
+    [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;
 
     void emit_ir(output::ir::code_block &containing_block,
                  const semantic_analyzer::symbol_table &symbol_table,

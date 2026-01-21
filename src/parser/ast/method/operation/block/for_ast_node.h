@@ -5,7 +5,6 @@
 #include "../method_operation_ast_node.h"
 
 #include <memory>
-#include <optional>
 
 namespace codesh::ast::method
 {
@@ -17,22 +16,19 @@ namespace codesh::ast::block
 
 class for_ast_node : public method::operation::method_operation_ast_node
 {
-    std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init;
-    std::optional<std::unique_ptr<var_reference::value_ast_node>> condition;
-    std::optional<std::unique_ptr<impl::binary_ast_node>> iteration;
+    std::unique_ptr<local_variable_declaration_ast_node> iterator;
+    std::unique_ptr<var_reference::value_ast_node> collection;
 
     method::method_scope_ast_node &body_scope;
 
 public:
-    for_ast_node(std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
-            std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
-            std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
+    for_ast_node(std::unique_ptr<local_variable_declaration_ast_node> iterator,
+            std::unique_ptr<var_reference::value_ast_node> collection,
             method::method_scope_ast_node &body_scope);
 
-    [[nodiscard]] const std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> &get_init() const;
-    [[nodiscard]] const std::optional<std::unique_ptr<var_reference::value_ast_node>> &get_condition() const;
-    [[nodiscard]] const std::optional<std::unique_ptr<impl::binary_ast_node>> &get_iteration() const;
-    [[nodiscard]] const method::method_scope_ast_node &get_body_scope() const;
+    [[nodiscard]] local_variable_declaration_ast_node &get_iterator() const;
+    [[nodiscard]] var_reference::value_ast_node &get_collection() const;
+    [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;
 
     void emit_ir(output::ir::code_block &containing_block,
                  const semantic_analyzer::symbol_table &symbol_table,

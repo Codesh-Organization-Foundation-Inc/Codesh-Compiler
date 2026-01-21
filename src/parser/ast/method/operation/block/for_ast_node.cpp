@@ -2,34 +2,26 @@
 
 using namespace codesh::ast::block;
 
-for_ast_node::for_ast_node(
-        std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
-        std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
-        std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
-        method::method_scope_ast_node &body_scope) :
-    init(std::move(init)),
-    condition(std::move(condition)),
-    iteration(std::move(iteration)),
+for_ast_node::for_ast_node(std::unique_ptr<local_variable_declaration_ast_node> iterator,
+                           std::unique_ptr<var_reference::value_ast_node> collection,
+                           method::method_scope_ast_node &body_scope) :
+    iterator(std::move(iterator)),
+    collection(std::move(collection)),
     body_scope(body_scope)
 {
 }
 
-const std::optional<std::unique_ptr<codesh::ast::op::assignment::assign_operator_ast_node>> &for_ast_node::get_init() const
+codesh::ast::local_variable_declaration_ast_node &for_ast_node::get_iterator() const
 {
-    return init;
+    return *iterator;
 }
 
-const std::optional<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &for_ast_node::get_condition() const
+codesh::ast::var_reference::value_ast_node &for_ast_node::get_collection() const
 {
-    return condition;
+    return *collection;
 }
 
-const std::optional<std::unique_ptr<codesh::ast::impl::binary_ast_node>> &for_ast_node::get_iteration() const
-{
-    return iteration;
-}
-
-const codesh::ast::method::method_scope_ast_node &for_ast_node::get_body_scope() const
+codesh::ast::method::method_scope_ast_node &for_ast_node::get_body_scope() const
 {
     return body_scope;
 }

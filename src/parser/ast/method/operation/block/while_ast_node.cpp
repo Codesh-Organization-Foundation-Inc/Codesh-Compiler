@@ -9,12 +9,12 @@ while_ast_node::while_ast_node(std::unique_ptr<var_reference::value_ast_node> co
 {
 }
 
-const codesh::ast::var_reference::value_ast_node &while_ast_node::get_condition() const
+codesh::ast::var_reference::value_ast_node &while_ast_node::get_condition() const
 {
     return *condition;
 }
 
-const codesh::ast::method::method_scope_ast_node &while_ast_node::get_body_scope() const
+codesh::ast::method::method_scope_ast_node &while_ast_node::get_body_scope() const
 {
     return body_scope;
 }

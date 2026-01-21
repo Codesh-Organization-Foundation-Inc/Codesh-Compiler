@@ -173,7 +173,7 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
     std::queue<std::unique_ptr<token>> &tokens,
     ast::method::method_scope_ast_node &method_scope)
 {
-    auto variable_decl =
+    auto iterator_decl =
         parse_variable_declaration(tokens, var_decl_assignment_policy::FORBID).first;
 
     if (!util::consuming_check(tokens, token_group::KEYWORD_FROM))
@@ -184,60 +184,18 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
         );
     }
 
-    auto from_value = parse_value(tokens);
+    auto collection = parse_value(tokens);
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_TO))
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::NO_KEYWORD_TO,
-            blasphemy::blasphemy_type::SYNTAX
-        );
-    }
-
-    auto to_value = parse_value(tokens);
-
-    if (!util::consuming_check(tokens, token_group::KEYWORD_SKIP))
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::NO_KEYWORD_SKIP,
-            blasphemy::blasphemy_type::SYNTAX
-        );
-    }
-
-    auto step_value = parse_value(tokens);
-
-
-    auto init = std::make_optional(
-        std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-            std::make_unique<variable_reference_ast_node>(*variable_decl),
-            std::move(from_value)
-        )
-    );
-
-    auto condition = std::make_optional(
-        std::make_unique<ast::op::less_operator_ast_node>(
-            std::make_unique<variable_reference_ast_node>(*variable_decl),
-            std::move(to_value)
-        )
-    );
-
-    auto iteration = std::make_optional(
-        std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
-            std::make_unique<variable_reference_ast_node>(*variable_decl),
-            std::move(step_value)
-        )
-    );
 
     check_consume_scope_begin(tokens);
 
     auto &for_scope = method_scope.create_method_scope();
-    for_scope.add_local_variable(std::move(variable_decl));
+    for_scope.add_local_variable(std::move(iterator_decl));
     parse_method_scope(tokens, for_scope);
 
     return std::make_unique<ast::block::for_ast_node>(
-        std::move(init),
-        std::move(condition),
-        std::move(iteration),
+        std::move(iterator_decl),
+        std::move(collection),
         for_scope
     );
 }
