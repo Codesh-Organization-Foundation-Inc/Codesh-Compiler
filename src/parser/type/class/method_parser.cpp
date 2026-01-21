@@ -261,7 +261,8 @@ static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>>
 std::pair<
     std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>,
     std::unique_ptr<codesh::ast::op::assignment::assignment_operator_ast_node>
-> codesh::parser::parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens, const bool require_value)
+> codesh::parser::parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens,
+        const var_decl_assignment_policy assignment_policy)
 {
     tokens.pop();
 
