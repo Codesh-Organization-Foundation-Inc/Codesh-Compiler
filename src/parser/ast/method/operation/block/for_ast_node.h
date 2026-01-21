@@ -24,12 +24,10 @@ class for_ast_node : public method::operation::method_operation_ast_node
     method::method_scope_ast_node &body_scope;
 
 public:
-    for_ast_node(
-        std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
-        std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
-        std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
-        method::method_scope_ast_node &body_scope
-    );
+    for_ast_node(std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
+            std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
+            std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
+            method::method_scope_ast_node &body_scope);
 
     [[nodiscard]] const std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> &get_init() const;
     [[nodiscard]] const std::optional<std::unique_ptr<var_reference::value_ast_node>> &get_condition() const;

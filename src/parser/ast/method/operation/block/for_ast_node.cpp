@@ -3,15 +3,14 @@
 using namespace codesh::ast::block;
 
 for_ast_node::for_ast_node(
-    std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
-    std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
-    std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
-    method::method_scope_ast_node &body_scope
-)
-    : init(std::move(init)),
-      condition(std::move(condition)),
-      iteration(std::move(iteration)),
-      body_scope(body_scope)
+        std::optional<std::unique_ptr<op::assignment::assign_operator_ast_node>> init,
+        std::optional<std::unique_ptr<var_reference::value_ast_node>> condition,
+        std::optional<std::unique_ptr<impl::binary_ast_node>> iteration,
+        method::method_scope_ast_node &body_scope) :
+    init(std::move(init)),
+    condition(std::move(condition)),
+    iteration(std::move(iteration)),
+    body_scope(body_scope)
 {
 }
 

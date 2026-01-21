@@ -2,12 +2,10 @@
 
 using namespace codesh::ast::block;
 
-while_ast_node::while_ast_node(
-    std::unique_ptr<var_reference::value_ast_node> condition,
-    method::method_scope_ast_node &body_scope
-)
-    : condition(std::move(condition)),
-      body_scope(body_scope)
+while_ast_node::while_ast_node(std::unique_ptr<var_reference::value_ast_node> condition,
+        method::method_scope_ast_node &body_scope) :
+    condition(std::move(condition)),
+    body_scope(body_scope)
 {
 }
 
