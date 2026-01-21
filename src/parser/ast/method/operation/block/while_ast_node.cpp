@@ -1,16 +1,29 @@
 #include "while_ast_node.h"
 
-codesh::ast::method::operation::while_ast_node::while_ast_node(std::unique_ptr<impl::i_ir_emitter> condition)
-    : condition(std::move(condition))
+using namespace codesh::ast::block;
+
+while_ast_node::while_ast_node(std::unique_ptr<var_reference::value_ast_node> condition,
+        method::method_scope_ast_node &body_scope) :
+    condition(std::move(condition)),
+    body_scope(body_scope)
 {
 }
 
-codesh::ast::impl::i_ir_emitter *codesh::ast::method::operation::while_ast_node::get_condition() const
+codesh::ast::var_reference::value_ast_node &while_ast_node::get_condition() const
 {
-    return this->condition.get();
+    return *condition;
 }
 
-void codesh::ast::method::operation::while_ast_node::set_condition(std::unique_ptr<impl::i_ir_emitter> condition)
+codesh::ast::method::method_scope_ast_node &while_ast_node::get_body_scope() const
 {
-    this->condition = std::move(condition);
+    return body_scope;
+}
+
+void while_ast_node::emit_ir(
+    output::ir::code_block &containing_block,
+    const semantic_analyzer::symbol_table &symbol_table,
+    const type_decl::type_declaration_ast_node &containing_type_decl
+) const
+{
+
 }
