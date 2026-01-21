@@ -35,7 +35,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_LET: {
-            auto result = parse_variable_declaration(tokens);
+            auto result = parse_variable_declaration(tokens, true);
             method_scope.add_local_variable(std::move(result.first));
 
             // Add the produced assignment statement to the method body if one was generated
@@ -175,7 +175,7 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
 {
     tokens.pop();
 
-    auto var_type = util::parse_type(tokens); // TODO: check if its always int or it can be somthing else
+    auto var_type = util::parse_type(tokens);
 
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
@@ -277,8 +277,7 @@ static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>>
 std::pair<
     std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>,
     std::unique_ptr<codesh::ast::op::assignment::assignment_operator_ast_node>
-> codesh::parser::parse_variable_declaration(
-        std::queue<std::unique_ptr<token>> &tokens)
+> codesh::parser::parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens, const bool require_value)
 {
     tokens.pop();
 
@@ -300,18 +299,25 @@ std::pair<
 
     variable_decl_ast_node->set_attributes(parse_modifiers(tokens));
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_LET))
+
+    // Value assignment
+    std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment = nullptr;
+
+    const bool has_val_assignment = util::consuming_check(tokens, token_group::KEYWORD_LET);
+    if (require_value && !has_val_assignment)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
                                                            blasphemy::blasphemy_type::SYNTAX);
     }
 
-    auto val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-        std::make_unique<variable_reference_ast_node>(*variable_decl_ast_node),
-        parse_value(tokens)
-    );
+    if (has_val_assignment)
+    {
+        val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+                std::make_unique<variable_reference_ast_node>(*variable_decl_ast_node), parse_value(tokens));
 
-    util::ensure_end_op(tokens);
+        util::ensure_end_op(tokens);
+    }
+
 
     return {std::move(variable_decl_ast_node), std::move(val_assignment)};
 }

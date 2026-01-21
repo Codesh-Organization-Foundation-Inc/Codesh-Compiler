@@ -31,6 +31,8 @@ void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method:
 [[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
     std::queue<std::unique_ptr<token>> &tokens);
 
+//FIXME: require_value is a result of laziness around making default values.
+//TODO: Add it then remove the parameter
 /**
  * Parses a variable declaration.
  * If the variable was also assigned during initialization, returns its assignment
@@ -39,7 +41,7 @@ void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method:
 [[nodiscard]] std::pair<
     std::unique_ptr<ast::local_variable_declaration_ast_node>,
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
-> parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens);
+> parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens, bool require_value);
 
 std::unique_ptr<ast::block::if_ast_node> parse_if_statement(
     std::queue<std::unique_ptr<token>> &tokens,
