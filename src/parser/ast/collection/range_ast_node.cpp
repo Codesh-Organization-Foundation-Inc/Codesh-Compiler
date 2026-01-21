@@ -2,29 +2,32 @@
 
 #include "../../../semantic_analyzer/builtins.h"
 
-codesh::ast::collection::range_ast_node::range_ast_node(const int from, const int to, const int skip) :
-    from(from),
-    to(to),
-    skip(skip),
+codesh::ast::collection::range_ast_node::range_ast_node(std::unique_ptr<value_ast_node> from,
+                                                        std::unique_ptr<value_ast_node> to,
+                                                        std::unique_ptr<value_ast_node> skip) :
+    from(std::move(from)),
+    to(std::move(to)),
+    skip(std::move(skip)),
     type(std::make_unique<type::custom_type_ast_node>(
         definition::fully_qualified_class_name(semantic_analyzer::builtins::CLASS_RANGE)
     ))
 {
 }
 
-int codesh::ast::collection::range_ast_node::get_from() const
+
+codesh::ast::var_reference::value_ast_node &codesh::ast::collection::range_ast_node::get_from() const
 {
-    return from;
+    return *from;
 }
 
-int codesh::ast::collection::range_ast_node::get_to() const
+codesh::ast::var_reference::value_ast_node &codesh::ast::collection::range_ast_node::get_to() const
 {
-    return to;
+    return *to;
 }
 
-int codesh::ast::collection::range_ast_node::get_skip() const
+codesh::ast::var_reference::value_ast_node &codesh::ast::collection::range_ast_node::get_skip() const
 {
-    return skip;
+    return *skip;
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::collection::range_ast_node::get_type() const

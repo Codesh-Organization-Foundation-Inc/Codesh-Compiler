@@ -8,18 +8,19 @@ namespace codesh::ast::collection
 
 class range_ast_node : public collection_ast_node
 {
-    const int from;
-    const int to;
-    const int skip;
+    std::unique_ptr<value_ast_node> from;
+    std::unique_ptr<value_ast_node> to;
+    std::unique_ptr<value_ast_node> skip;
 
     const std::unique_ptr<type::custom_type_ast_node> type;
 
 public:
-    range_ast_node(int from, int to, int skip);
+    range_ast_node(std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
+            std::unique_ptr<value_ast_node> skip);
 
-    [[nodiscard]] int get_from() const;
-    [[nodiscard]] int get_to() const;
-    [[nodiscard]] int get_skip() const;
+    [[nodiscard]] value_ast_node &get_from() const;
+    [[nodiscard]] value_ast_node &get_to() const;
+    [[nodiscard]] value_ast_node &get_skip() const;
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
