@@ -1,0 +1,30 @@
+#pragma once
+
+#include "../type/custom_type_ast_node.h"
+#include "collection_ast_node.h"
+
+namespace codesh::ast::collection
+{
+
+class range_ast_node : public collection_ast_node
+{
+    const int from;
+    const int to;
+    const int skip;
+
+    const std::unique_ptr<type::custom_type_ast_node> type;
+
+public:
+    range_ast_node(int from, int to, int skip);
+
+    [[nodiscard]] int get_from() const;
+    [[nodiscard]] int get_to() const;
+    [[nodiscard]] int get_skip() const;
+
+    [[nodiscard]] type::type_ast_node *get_type() const override;
+
+    void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+                 const type_decl::type_declaration_ast_node &containing_type_decl) const override;
+};
+
+}
