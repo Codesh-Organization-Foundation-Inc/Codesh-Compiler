@@ -2,13 +2,15 @@
 
 #include "../../../../../output/ir/code_block.h"
 #include "../../../operator/boolean/and_operator_ast_node.h"
+#include "../../../operator/boolean/or_operator_ast_node.h"
 #include "../../method_scope_ast_node.h"
 
 static codesh::output::ir::code_block build_condition_block(
         const codesh::ast::var_reference::value_ast_node &condition,
         size_t if_block_size,
         const codesh::semantic_analyzer::symbol_table &symbol_table,
-        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl);
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        codesh::output::ir::if_type if_type);
 
 codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
 {
@@ -150,7 +152,8 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
         cond,
         if_block_size,
         symbol_table,
-        containing_type_decl
+        containing_type_decl,
+        output::ir::if_type::IS_ZERO // Jump on false to skip the if body
     ));
 
     temp_block.consume_code_block(std::move(if_block));
@@ -177,7 +180,8 @@ static codesh::output::ir::code_block build_condition_block(
         const codesh::ast::var_reference::value_ast_node &condition,
         const size_t if_block_size,
         const codesh::semantic_analyzer::symbol_table &symbol_table,
-        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl)
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        const codesh::output::ir::if_type if_type)
 {
     codesh::output::ir::code_block condition_block;
 
@@ -187,14 +191,63 @@ static codesh::output::ir::code_block build_condition_block(
             and_cond->get_right(),
             if_block_size,
             symbol_table,
-            containing_type_decl
+            containing_type_decl,
+            if_type
         );
+
+        size_t jump_size;
+        if (if_type == codesh::output::ir::if_type::IS_NONZERO)
+        {
+            // When jumping on true, short-circuit false by skipping the right block
+            jump_size = right_block.size();
+        }
+        else
+        {
+            // When jumping on false, short-circuit false by skipping the right block and body
+            jump_size = if_block_size + right_block.size();
+        }
 
         auto left_block = build_condition_block(
             and_cond->get_left(),
-            if_block_size + right_block.size(),
+            jump_size,
             symbol_table,
-            containing_type_decl
+            containing_type_decl,
+            codesh::output::ir::if_type::IS_ZERO
+        );
+
+        condition_block.consume_code_block(std::move(left_block));
+        condition_block.consume_code_block(std::move(right_block));
+        return condition_block;
+    }
+
+    if (const auto or_cond = dynamic_cast<const codesh::ast::op::or_operator_ast_node *>(&condition))
+    {
+        auto right_block = build_condition_block(
+            or_cond->get_right(),
+            if_block_size,
+            symbol_table,
+            containing_type_decl,
+            if_type
+        );
+
+        size_t jump_size;
+        if (if_type == codesh::output::ir::if_type::IS_ZERO)
+        {
+            // When jumping on false, short-circuit true by skipping the right block
+            jump_size = right_block.size();
+        }
+        else
+        {
+            // When jumping on true, short-circuit true by jumping immediately to the target
+            jump_size = if_block_size;
+        }
+
+        auto left_block = build_condition_block(
+            or_cond->get_left(),
+            jump_size,
+            symbol_table,
+            containing_type_decl,
+            codesh::output::ir::if_type::IS_NONZERO
         );
 
         condition_block.consume_code_block(std::move(left_block));
@@ -204,7 +257,7 @@ static codesh::output::ir::code_block build_condition_block(
 
     condition.emit_ir(condition_block, symbol_table, containing_type_decl);
     condition_block.add_instruction(std::make_unique<codesh::output::ir::if_instruction>(
-        codesh::output::ir::if_type::IS_ZERO,
+        if_type,
         static_cast<int>(if_block_size)
     ));
 
