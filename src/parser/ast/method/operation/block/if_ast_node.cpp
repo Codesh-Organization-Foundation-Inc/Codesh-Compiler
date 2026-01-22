@@ -185,6 +185,7 @@ static codesh::output::ir::code_block build_condition_block(
 {
     codesh::output::ir::code_block condition_block;
 
+    // Handle AND
     if (const auto and_cond = dynamic_cast<const codesh::ast::op::and_operator_ast_node *>(&condition))
     {
         auto right_block = build_condition_block(
@@ -219,7 +220,7 @@ static codesh::output::ir::code_block build_condition_block(
         condition_block.consume_code_block(std::move(right_block));
         return condition_block;
     }
-
+    // Handle OR
     if (const auto or_cond = dynamic_cast<const codesh::ast::op::or_operator_ast_node *>(&condition))
     {
         auto right_block = build_condition_block(
@@ -233,12 +234,12 @@ static codesh::output::ir::code_block build_condition_block(
         size_t jump_size;
         if (if_type == codesh::output::ir::if_type::IS_ZERO)
         {
-            // When jumping on false, short-circuit true by skipping the right block
+            // When jumping on false, short-circuit true by skipping over the right block
             jump_size = right_block.size();
         }
         else
         {
-            // When jumping on true, short-circuit true by jumping immediately to the target
+            // When jumping on true, short-circuit true by jumping immediately to the expression
             jump_size = if_block_size;
         }
 
@@ -255,11 +256,21 @@ static codesh::output::ir::code_block build_condition_block(
         return condition_block;
     }
 
+
+    //TODO: This should only be emitted if no other if options exists (see next TODO)
     condition.emit_ir(condition_block, symbol_table, containing_type_decl);
     condition_block.add_instruction(std::make_unique<codesh::output::ir::if_instruction>(
         if_type,
         static_cast<int>(if_block_size)
     ));
+
+    //TODO: Add more if types (bytecode optimizations)
+    // if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
+    // {
+    //     if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
+    //     {
+    //     }
+    // }
 
     return condition_block;
 }
