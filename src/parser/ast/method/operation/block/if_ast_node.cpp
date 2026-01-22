@@ -142,15 +142,18 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
 
     output::ir::if_type if_type;
     const auto &cond = *branch.condition;
-    if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
-    {
-        if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
-        {
-            cond.emit_ir(temp_block, symbol_table, containing_type_decl);
-            if_type = output::ir::if_type::IS_ZERO;
-        }
-        //TODO: Add more types
-    }
+
+    //TODO: This should only be emitted if no other if options exists
+    cond.emit_ir(temp_block, symbol_table, containing_type_decl);
+    if_type = output::ir::if_type::IS_ZERO;
+
+    //TODO: Add more if types (bytecode optimizations)
+    // if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
+    // {
+    //     if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
+    //     {
+    //     }
+    // }
 
     temp_block.add_instruction(std::make_unique<output::ir::if_instruction>(
         if_type,
