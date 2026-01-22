@@ -133,13 +133,6 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
 {
     output::ir::code_block temp_block;
 
-    // Pre-process the branch such that we can determine its size before we emit the condition
-    output::ir::code_block if_block;
-    branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
-
-    const size_t if_block_size = if_block.size() + (has_next_branch ? 3 : 0);
-
-
     output::ir::if_type if_type;
     const auto &cond = *branch.condition;
 
@@ -154,6 +147,13 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
     //     {
     //     }
     // }
+
+
+    // Pre-process the branch such that we can determine its size before we emit it
+    output::ir::code_block if_block;
+    branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
+
+    const size_t if_block_size = if_block.size() + (has_next_branch ? 3 : 0);
 
     temp_block.add_instruction(std::make_unique<output::ir::if_instruction>(
         if_type,
