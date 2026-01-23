@@ -10,6 +10,7 @@
 #include "parser/type/type_parser.h"
 
 #include "method_parser.h"
+#include "parser/ast/compilation_unit_ast_node.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -24,7 +25,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
-        std::queue<std::unique_ptr<token>> &tokens, const definition::basad_type basad_type)
+        std::queue<std::unique_ptr<token>> &tokens, const ast::compilation_unit_ast_node &root_node)
 {
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
@@ -41,7 +42,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
-        definition::fully_qualified_name(name_token->get_content()), basad_type
+        definition::fully_qualified_name(name_token->get_content()), root_node.get_basad_type()
     );
 
 
