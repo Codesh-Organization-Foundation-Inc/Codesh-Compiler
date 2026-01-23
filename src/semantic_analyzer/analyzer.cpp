@@ -53,10 +53,9 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
 }
 
-void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_node &ast_root,
+                                                const symbol_table &table)
 {
-    const symbol_table &table = ast_root.get_symbol_table();
-
     //TODO: Use actual countries
     const std::vector lookup_countries = {
         table.resolve_country("").value()
@@ -65,18 +64,25 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
+    type_declaration::collect_types(context, country);
+}
 
-    //FIXME: This should be entirely replaced with Talmud Codesh once interoperability is implemented
-    builtins::add_builtins(table);
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
+                                        const symbol_table &table)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        table.resolve_country("").value()
+    };
+    country_symbol &country = lookup_countries.back();
 
+    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    //TODO: Iterate over each and every country, then INSIDE do the following:
-    type_declaration::collect(context,country);
+    type_declaration::collect_methods(context, country);
     type_declaration::resolve(context, country);
 
     // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);
-
 
     type_declaration::resolve_aliases(context, country);
 }

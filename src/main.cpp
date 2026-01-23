@@ -6,12 +6,15 @@
 #include "output/jvm_target/class_file_writer.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
+#include "semantic_analyzer/builtins.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "defenition/definitions.h"
 
 #include <filesystem>
 #include <fstream>
 #include <queue>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 static std::string read_file(const std::string &file_name);
@@ -20,7 +23,11 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 static void collect_source_files(const std::filesystem::path &path, std::vector<std::filesystem::path> &source_files_out);
 
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
-        codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path);
+        codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
+        const codesh::semantic_analyzer::symbol_table &symbol_table);
+
+static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
 
 
 int main(const int argc, char **const argv)
@@ -51,11 +58,19 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
+    auto master_symbol_table = build_master_symbol_table(asts);
+
     for (const auto &root_node : asts)
     {
         codesh::semantic_analyzer::prepare(*root_node);
-        root_node->construct_symbol_table();
-        codesh::semantic_analyzer::analyze(*root_node);
+        codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
+    }
+
+    codesh::semantic_analyzer::builtins::add_builtins(master_symbol_table);
+
+    for (const auto &root_node : asts)
+    {
+        codesh::semantic_analyzer::analyze(*root_node, master_symbol_table);
     }
 
 
@@ -73,7 +88,7 @@ int main(const int argc, char **const argv)
     {
         for (auto &type_declaration : root_node->get_type_declarations())
         {
-            build_class_file(*root_node, *type_declaration, args.dest_path); //FIXME: Dest path is for one file
+            build_class_file(*root_node, *type_declaration, args.dest_path, master_symbol_table); //FIXME: Dest path is for one file
             // Use is_project
         }
     }
@@ -82,7 +97,8 @@ int main(const int argc, char **const argv)
 }
 
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
-        codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path)
+        codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
+        const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
     // CONSTRUCTING CONSTANT POOLS
     type_decl.set_constant_pool(codesh::output::jvm_target::constant_pool(root_node, type_decl));
@@ -92,6 +108,7 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
     codesh::output::jvm_target::class_file_builder(
         class_file,
         root_node,
+        symbol_table,
         type_decl
     ).build();
 
@@ -117,6 +134,15 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
     }
 
     return results;
+}
+
+static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts)
+{
+    if (asts.empty())
+        throw std::runtime_error("Cannot build a master symbol table without compilation units");
+
+    return codesh::semantic_analyzer::symbol_table(*asts.front());
 }
 
 static std::string read_file(const std::string &file_name)
