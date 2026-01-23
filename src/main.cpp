@@ -15,11 +15,16 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
+#include <vector>
 
 static std::string read_file(const std::string &file_name);
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const std::vector<std::filesystem::path> &source_files);
 static void collect_source_files(const std::filesystem::path &path, std::vector<std::filesystem::path> &source_files_out);
+static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
+static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
+        const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
         codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
@@ -81,14 +86,31 @@ int main(const int argc, char **const argv)
     }
 
 
+    if (!validate_output_path(args.dest_path, is_project))
+        return EXIT_FAILURE;
+
+
     // A class file represents a single file.
     // So for each type declaration, build one class file:
     for (const auto &root_node : asts)
     {
+        const auto &source_file_path = root_node->get_source_path();
+
         for (auto &type_declaration : root_node->get_type_declarations())
         {
-            build_class_file(*root_node, *type_declaration, args.dest_path, master_symbol_table); //FIXME: Dest path is for one file
-            // Use is_project
+            const auto output_dir = get_output_path(
+                args.dest_path,
+                args.src_path,
+                source_file_path,
+                is_project
+            );
+
+            if (!output_dir.has_value())
+            {
+                return EXIT_FAILURE;
+            }
+
+            build_class_file(*root_node, *type_declaration, output_dir.value(), master_symbol_table);
         }
     }
 
@@ -127,7 +149,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
         auto tokens = codesh::lexer::tokenize_code(source_file);
 
         // PARSING
-        auto ast = codesh::parser::parse(tokens, source_file_path.stem());
+        auto ast = codesh::parser::parse(tokens, source_file_path);
 
         results.push_back(std::move(ast));
     }
@@ -142,6 +164,55 @@ static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
         throw std::runtime_error("Cannot build a master symbol table without compilation units");
 
     return codesh::semantic_analyzer::symbol_table(*asts.front());
+}
+
+static bool validate_output_path(const std::filesystem::path &dest_path, const bool is_project)
+{
+    if (!is_project)
+        return true;
+
+    std::error_code error;
+    if (std::filesystem::is_directory(dest_path, error))
+        return true;
+
+    //FIXME: Make this more specific to dest path not being a directory in a project-aligned compilation
+    codesh::blasphemy::blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + dest_path.string(),
+        codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
+
+    return false;
+}
+
+static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
+        const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path,
+        const bool is_project)
+{
+    std::filesystem::path result = cli_dest_path;
+
+    // In a non-project, the CLI dest path IS the output path.
+    if (!is_project)
+        return result;
+
+
+    // In a project, the CLI dest path is the output directory.
+    std::error_code error;
+    const auto relative_path = std::filesystem::relative(source_file_path, sources_dir_path, error);
+
+    if (error)
+    {
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + source_file_path.string(),
+            codesh::blasphemy::blasphemy_type::INIT,
+            std::nullopt,
+            true
+        );
+
+        return std::nullopt;
+    }
+
+    result /= relative_path.parent_path();
+    std::filesystem::create_directories(result);
+    return result;
 }
 
 static std::string read_file(const std::string &file_name)

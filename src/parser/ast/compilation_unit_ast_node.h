@@ -7,6 +7,7 @@
 
 #include <list>
 #include <memory>
+#include <filesystem>
 #include <string>
 
 namespace codesh::ast
@@ -14,7 +15,7 @@ namespace codesh::ast
 
 class compilation_unit_ast_node final : public impl::ast_node
 {
-    const std::string source_stem;
+    const std::filesystem::path source_path;
 
     const definition::basad_type basad_type;
     definition::fully_qualified_name package_name;
@@ -22,8 +23,9 @@ class compilation_unit_ast_node final : public impl::ast_node
     std::list<std::unique_ptr<type_decl::type_declaration_ast_node>> type_declarations;
 
 public:
-    compilation_unit_ast_node(definition::basad_type basad_type, std::string source_stem);
+    compilation_unit_ast_node(definition::basad_type basad_type, std::filesystem::path source_path);
 
+    [[nodiscard]] const std::filesystem::path &get_source_path() const;
     /**
      * The source file name with no extension
      */

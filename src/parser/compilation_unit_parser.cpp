@@ -12,10 +12,10 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilation_unit(
-        std::queue<std::unique_ptr<token>> &tokens, const std::string &source_stem)
+        std::queue<std::unique_ptr<token>> &tokens, const std::filesystem::path &source_path)
 {
     std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        parse_basad_type(tokens), source_stem
+        parse_basad_type(tokens), source_path
     );
 
     if (!tokens.empty())

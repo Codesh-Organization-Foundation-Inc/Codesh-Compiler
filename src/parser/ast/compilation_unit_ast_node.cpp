@@ -3,15 +3,20 @@
 #include <utility>
 
 codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type,
-        std::string source_stem) :
-    source_stem(std::move(source_stem)),
+        std::filesystem::path source_path) :
+    source_path(std::move(source_path)),
     basad_type(basad_type)
 {
 }
 
+const std::filesystem::path &codesh::ast::compilation_unit_ast_node::get_source_path() const
+{
+    return this->source_path;
+}
+
 std::string codesh::ast::compilation_unit_ast_node::get_source_stem() const
 {
-    return this->source_stem;
+    return source_path.stem();
 }
 
 codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
