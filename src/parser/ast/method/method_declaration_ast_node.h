@@ -1,7 +1,6 @@
 #pragma once
 
 #include "defenition/fully_qualified_name.h"
-#include "output/jvm_target/class_file_builder.h"
 #include "parser/ast/impl/ast_node.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/impl/i_descriptor_emitter.h"
