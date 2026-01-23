@@ -1,6 +1,6 @@
 #include "resolve_aliases.h"
 
-#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
 

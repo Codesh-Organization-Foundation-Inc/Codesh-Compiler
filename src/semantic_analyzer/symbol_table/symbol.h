@@ -1,8 +1,8 @@
 #pragma once
 
-#include "parser/ast/method/method_declaration_ast_node.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/type/type_ast_node.h"
-#include "parser/ast/type_declaration/type_declaration_ast_node.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "scope.h"
 #include "symbol.h"
 #include "symbol_type.h"
@@ -14,6 +14,24 @@ namespace codesh::semantic_analyzer
 {
 class method_symbol;
 class i_scope_containing_symbol;
+}
+
+namespace codesh::ast
+{
+class local_variable_declaration_ast_node;
+}
+namespace codesh::ast::method
+{
+class method_scope_ast_node;
+class method_declaration_ast_node;
+}
+namespace codesh::ast::type_decl
+{
+class type_declaration_ast_node;
+}
+
+namespace codesh::semantic_analyzer
+{
 
 
 class symbol

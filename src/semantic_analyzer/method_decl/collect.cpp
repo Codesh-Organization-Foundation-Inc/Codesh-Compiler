@@ -1,8 +1,8 @@
 #include "collect.h"
 
 #include "blasphemy/blasphemy_collector.h"
-#include "parser/ast/compilation_unit_ast_node.h"
-#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
 
@@ -15,7 +15,6 @@ static void collect_local_variables(const codesh::ast::method::method_declaratio
 void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbol,
         const codesh::ast::method::method_scope_ast_node &current_scope_node,
         codesh::semantic_analyzer::method_scope_symbol &current_scope_symbol);
-
 
 void codesh::semantic_analyzer::method_declaration::collect(const semantic_context &context,
         ast::method::method_declaration_ast_node &method_decl, type_symbol &containing_type)

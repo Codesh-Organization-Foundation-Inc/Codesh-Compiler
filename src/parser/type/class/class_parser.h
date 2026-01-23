@@ -5,6 +5,10 @@
 
 namespace codesh
 {
+namespace ast
+{
+class compilation_unit_ast_node;
+}
 class token;
 }
 namespace codesh::ast::type_decl
@@ -17,6 +21,6 @@ namespace codesh::parser
 {
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> parse_class_declaration(
-        std::queue<std::unique_ptr<token>> &tokens);
+    std::queue<std::unique_ptr<token>> &tokens);
 
 }

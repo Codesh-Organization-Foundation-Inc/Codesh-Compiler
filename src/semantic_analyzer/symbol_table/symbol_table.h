@@ -2,6 +2,11 @@
 
 #include "symbol.h"
 
+namespace codesh::ast
+{
+class compilation_unit_ast_node;
+}
+
 namespace codesh::semantic_analyzer
 {
 struct semantic_context;

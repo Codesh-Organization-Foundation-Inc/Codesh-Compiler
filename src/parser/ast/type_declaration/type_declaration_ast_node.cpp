@@ -3,6 +3,8 @@
 #include "defenition/definitions.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 
 #include <utility>
@@ -14,9 +16,11 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
-        definition::fully_qualified_name name) : name(std::move(name))
+        definition::fully_qualified_name name) :
+    name(std::move(name))
 {
 }
+
 codesh::ast::type_decl::type_declaration_ast_node::~type_declaration_ast_node() = default;
 
 void codesh::ast::type_decl::type_declaration_ast_node::set_resolved(semantic_analyzer::type_symbol &symbol)

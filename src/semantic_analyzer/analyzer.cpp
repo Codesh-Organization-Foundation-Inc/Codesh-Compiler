@@ -2,19 +2,23 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/blasphemy_consumer.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/method/operation/super_call_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "builtins.h"
-#include "semantic_context.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
+#include "semantic_context.h"
+#include "symbol_table/symbol_table.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
@@ -53,10 +57,9 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
 }
 
-void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_node &ast_root,
+                                                const symbol_table &table)
 {
-    const symbol_table &table = ast_root.get_symbol_table();
-
     //TODO: Use actual countries
     const std::vector lookup_countries = {
         table.resolve_country("").value()
@@ -65,16 +68,38 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-
-    //FIXME: This should be entirely replaced with Talmud Codesh once interoperability is implemented
-    builtins::add_builtins(table);
-
-
-    //TODO: Iterate over each and every country, then INSIDE do the following:
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         type_declaration::collect(context, *type_decl, country);
     }
+}
+
+void codesh::semantic_analyzer::collect_methods(const ast::compilation_unit_ast_node &ast_root,
+                                                const symbol_table &table)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        table.resolve_country("").value()
+    };
+    country_symbol &country = lookup_countries.back();
+
+    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+
+    type_declaration::dispatch_collect_methods(context, country);
+}
+
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
+                                        const symbol_table &table)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        table.resolve_country("").value()
+    };
+    const country_symbol &country = lookup_countries.back();
+
+    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+
+    //TODO: Iterate over each and every country, then INSIDE do the following:
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         type_declaration::resolve(context, *type_decl, country);
@@ -82,7 +107,6 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);
-
 
     type_declaration::resolve_aliases(context, country);
 }

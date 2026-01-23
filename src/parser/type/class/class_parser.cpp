@@ -10,6 +10,7 @@
 #include "parser/type/type_parser.h"
 
 #include "method_parser.h"
+#include "parser/ast/compilation_unit_ast_node.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -24,7 +25,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
-        std::queue<std::unique_ptr<token>> &tokens)
+    std::queue<std::unique_ptr<token>> &tokens)
 {
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {

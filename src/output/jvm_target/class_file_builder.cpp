@@ -12,6 +12,7 @@
 #include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -21,9 +22,11 @@
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
+        const semantic_analyzer::symbol_table &symbol_table,
         const ast::type_decl::type_declaration_ast_node &type_decl) :
     class_file(class_file_out),
     root_node(root_node),
+    symbol_table(symbol_table),
     type_decl(type_decl),
     constant_pool_(type_decl.get_constant_pool()),
 
@@ -128,7 +131,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
     // Convert the method to IR
     ir::code_block code_block;
-    method_decl.get_method_scope().emit_ir(code_block, root_node.get_symbol_table(), type_decl);
+    method_decl.get_method_scope().emit_ir(code_block, symbol_table, type_decl);
 
     std::list<ir::instruction_container> bytecode_collector;
     for (const auto &instruction : code_block.get_instructions())

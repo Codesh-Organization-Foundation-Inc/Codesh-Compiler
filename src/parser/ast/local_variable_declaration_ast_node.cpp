@@ -1,5 +1,6 @@
 #include "local_variable_declaration_ast_node.h"
 
+#include "output/jvm_target/constant_pool.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::

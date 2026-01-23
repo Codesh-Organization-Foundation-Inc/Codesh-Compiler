@@ -5,6 +5,7 @@
 namespace codesh::semantic_analyzer
 {
 class method_scope_symbol;
+class symbol_table;
 }
 namespace codesh::ast::type_decl
 {
@@ -53,6 +54,7 @@ class class_file_builder
     defs::class_file &class_file;
 
     const ast::compilation_unit_ast_node &root_node;
+    const semantic_analyzer::symbol_table &symbol_table;
     const ast::type_decl::type_declaration_ast_node &type_decl;
 
     const constant_pool &constant_pool_;
@@ -77,6 +79,7 @@ class class_file_builder
 public:
     class_file_builder(defs::class_file &class_file_out,
             const ast::compilation_unit_ast_node &root_node,
+            const semantic_analyzer::symbol_table &symbol_table,
             const ast::type_decl::type_declaration_ast_node &type_decl);
 
     void build() const;
