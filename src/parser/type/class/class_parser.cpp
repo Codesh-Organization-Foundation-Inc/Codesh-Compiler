@@ -24,7 +24,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
-        std::queue<std::unique_ptr<token>> &tokens)
+        std::queue<std::unique_ptr<token>> &tokens, const definition::basad_type basad_type)
 {
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
@@ -41,7 +41,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
-        definition::fully_qualified_name(name_token->get_content())
+        definition::fully_qualified_name(name_token->get_content()), basad_type
     );
 
 

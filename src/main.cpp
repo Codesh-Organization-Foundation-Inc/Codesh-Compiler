@@ -82,6 +82,11 @@ int main(const int argc, char **const argv)
     return EXIT_SUCCESS;
 }
 
+static void collect_symbols()
+{
+
+}
+
 static std::string read_file(const std::string &file_name)
 {
     std::ifstream file;

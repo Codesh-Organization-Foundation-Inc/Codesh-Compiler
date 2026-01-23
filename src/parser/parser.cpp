@@ -9,6 +9,8 @@
 
 namespace ast = codesh::ast;
 
+static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
+
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
         const std::string &source_stem)
@@ -23,11 +25,15 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         );
     }
 
+
+    const auto basad_type = parse_basad_type(tokens);
+
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
 
-    if (root_node->get_basad_type() == definition::basad_type::IAW)
+    if (basad_type == definition::basad_type::IAW)
     {
         //TODO: Return the joke program
+        // (Do not even make the compilation unit yet)
         return root_node;
     }
 
@@ -45,7 +51,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_LET:
-            root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
+            root_node->get_type_declarations().push_back(parse_type_declaration(tokens, basad_type));
             break;
 
         default:
@@ -58,4 +64,26 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
 
     return root_node;
+}
+
+
+static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    switch (codesh::parser::util::consume_token(tokens, codesh::blasphemy::details::NO_BASAD)->get_group())
+    {
+    case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
+    case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
+    case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
+
+    default: {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_BASAD,
+            codesh::blasphemy::blasphemy_type::LEXICAL,
+            std::nullopt,
+            true
+        );
+
+        return codesh::definition::basad_type::MISSING;
+    }
+    }
 }

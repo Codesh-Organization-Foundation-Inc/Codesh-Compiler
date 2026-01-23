@@ -9,7 +9,6 @@
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
-static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
                                  ast::compilation_unit_ast_node *root_node);
 
@@ -18,7 +17,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilatio
         std::queue<std::unique_ptr<token>> &tokens, const std::string &source_stem)
 {
     std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        get_basad_type(tokens), source_stem
+        source_stem
     );
 
     if (!tokens.empty())
@@ -30,28 +29,6 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilatio
     }
 
     return node;
-}
-
-
-static codesh::definition::basad_type get_basad_type(std::queue<std::unique_ptr<codesh::token>> &tokens)
-{
-    switch (parser::util::consume_token(tokens, codesh::blasphemy::details::NO_BASAD)->get_group())
-    {
-    case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
-    case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
-    case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
-
-    default: {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_BASAD,
-            codesh::blasphemy::blasphemy_type::LEXICAL,
-            std::nullopt,
-            true
-        );
-
-        return codesh::definition::basad_type::MISSING;
-    }
-    }
 }
 
 static void parse_origin_country(std::queue<std::unique_ptr<codesh::token>> &tokens,
