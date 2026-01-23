@@ -9,7 +9,7 @@ class class_declaration_ast_node final : public type_declaration_ast_node
 {
 
 public:
-    explicit class_declaration_ast_node(definition::fully_qualified_name name, definition::basad_type basad_type);
+    explicit class_declaration_ast_node(definition::fully_qualified_name name);
 };
 
 }

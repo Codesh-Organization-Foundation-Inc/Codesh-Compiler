@@ -10,7 +10,6 @@
 namespace ast = codesh::ast;
 
 
-
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
         const std::string &source_stem)
 {
@@ -48,7 +47,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_LET:
-            root_node->get_type_declarations().push_back(parse_type_declaration(tokens, *root_node));
+            root_node->get_type_declarations().push_back(parse_type_declaration(tokens));
             break;
 
         default:

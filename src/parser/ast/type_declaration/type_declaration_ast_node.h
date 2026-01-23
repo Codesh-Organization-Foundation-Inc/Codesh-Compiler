@@ -28,7 +28,6 @@ namespace codesh::ast::type_decl
 class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
     public impl::i_resolvable<semantic_analyzer::type_symbol>, public impl::i_constant_pool_emitter
 {
-    const definition::basad_type basad_type;
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
     std::unique_ptr<type::custom_type_ast_node> super_class;
@@ -52,12 +51,10 @@ protected:
         const override;
 
 public:
-    type_declaration_ast_node(definition::fully_qualified_name name, definition::basad_type basad_type);
+    explicit type_declaration_ast_node(definition::fully_qualified_name name);
     ~type_declaration_ast_node() override;
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;
-
-    [[nodiscard]] definition::basad_type get_basad_type() const;
 
     [[nodiscard]] const output::jvm_target::constant_pool &get_constant_pool() const;
     void set_constant_pool(output::jvm_target::constant_pool constant_pool);

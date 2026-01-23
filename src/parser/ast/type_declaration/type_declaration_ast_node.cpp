@@ -14,21 +14,16 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
-        definition::fully_qualified_name name, const definition::basad_type basad_type) :
-    basad_type(basad_type),
+        definition::fully_qualified_name name) :
     name(std::move(name))
 {
 }
+
 codesh::ast::type_decl::type_declaration_ast_node::~type_declaration_ast_node() = default;
 
 void codesh::ast::type_decl::type_declaration_ast_node::set_resolved(semantic_analyzer::type_symbol &symbol)
 {
     resolved_symbol.emplace(symbol);
-}
-
-codesh::definition::basad_type codesh::ast::type_decl::type_declaration_ast_node::get_basad_type() const
-{
-    return basad_type;
 }
 
 std::string codesh::ast::type_decl::type_declaration_ast_node::generate_descriptor(const bool resolved) const

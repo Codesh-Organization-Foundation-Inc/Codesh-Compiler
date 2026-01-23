@@ -11,13 +11,13 @@ namespace ast = codesh::ast;
 
 
 std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse_type_declaration(
-        std::queue<std::unique_ptr<token>> &tokens, const ast::compilation_unit_ast_node &root_node)
+        std::queue<std::unique_ptr<token>> &tokens)
 {
     tokens.pop();
 
     switch (util::consume_token(tokens, blasphemy::details::UNEXPECTED_DECLARATION)->get_group())
     {
-    case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens, root_node);
+    case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
     case token_group::KEYWORD_INTERFACE:; //TODO
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
