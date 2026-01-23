@@ -99,7 +99,11 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    type_declaration::resolve(context, country);
+    //TODO: Iterate over each and every country, then INSIDE do the following:
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::resolve(context, *type_decl, country);
+    }
 
     // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);

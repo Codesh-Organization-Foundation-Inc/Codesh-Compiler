@@ -49,7 +49,6 @@ void codesh::semantic_analyzer::type_declaration::dispatch_collect_methods(const
             &type_symbol_raw->get()
         );
 
-
         for (const auto &method_decl : type_decl->get_all_methods())
         {
             method_declaration::collect(new_context, *method_decl, type_symbol);
