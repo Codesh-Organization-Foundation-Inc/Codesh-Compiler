@@ -68,11 +68,14 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    type_declaration::collect_types(context, country);
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::collect(context, *type_decl, country);
+    }
 }
 
-void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
-                                        const symbol_table &table)
+void codesh::semantic_analyzer::collect_methods(const ast::compilation_unit_ast_node &ast_root,
+                                                const symbol_table &table)
 {
     //TODO: Use actual countries
     const std::vector lookup_countries = {
@@ -82,7 +85,20 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    type_declaration::collect_methods(context, country);
+    type_declaration::dispatch_collect_methods(context, country);
+}
+
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
+                                        const symbol_table &table)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        table.resolve_country("").value()
+    };
+    const country_symbol &country = lookup_countries.back();
+
+    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+
     type_declaration::resolve(context, country);
 
     // Only after collecting all types should we resolve all the methods' bodies:

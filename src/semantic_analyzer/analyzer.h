@@ -20,5 +20,6 @@ void prepare(const ast::compilation_unit_ast_node &ast_root);
  * This runs after the symbol table is constructed.
  */
 void collect_symbols(const ast::compilation_unit_ast_node &ast_root, const symbol_table &table);
+void collect_methods(const ast::compilation_unit_ast_node &ast_root, const symbol_table &table);
 void analyze(const ast::compilation_unit_ast_node &ast_root, const symbol_table &table);
 }

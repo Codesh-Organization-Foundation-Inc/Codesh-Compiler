@@ -1,4 +1,5 @@
 #pragma once
+#include "parser/ast/method/method_declaration_ast_node.h"
 
 namespace codesh::ast::type_decl
 {
@@ -16,6 +17,6 @@ class type_symbol;
 
 namespace codesh::semantic_analyzer::method_declaration
 {
-void collect_methods(const semantic_context &context, const ast::type_decl::type_declaration_ast_node &type_decl,
-        type_symbol &containing_type);
+void collect(const semantic_context &context, ast::method::method_declaration_ast_node &method_decl,
+             type_symbol &containing_type);
 }
