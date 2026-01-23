@@ -1,9 +1,16 @@
 #include "if_ast_node.h"
 
-#include "../../../../../defenition/primitive_type.h"
 #include "../../../../../output/ir/code_block.h"
-#include "../../../type/primitive_type_ast_node.h"
+#include "../../../operator/boolean/and_operator_ast_node.h"
+#include "../../../operator/boolean/or_operator_ast_node.h"
 #include "../../method_scope_ast_node.h"
+
+static codesh::output::ir::code_block build_condition_block(
+        const codesh::ast::var_reference::value_ast_node &condition,
+        size_t if_block_size,
+        const codesh::semantic_analyzer::symbol_table &symbol_table,
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        codesh::output::ir::if_type if_type);
 
 codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
 {
@@ -133,32 +140,20 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
 {
     output::ir::code_block temp_block;
 
-    // Pre-process the branch such that we can determine its size before we emit the condition
+    const auto &cond = *branch.condition;
+
+    // Pre-process the branch such that we can determine its size before we emit it
     output::ir::code_block if_block;
     branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
 
     const size_t if_block_size = if_block.size() + (has_next_branch ? 3 : 0);
 
-
-    output::ir::if_type if_type;
-    const auto &cond = *branch.condition;
-
-    //TODO: This should only be emitted if no other if options exists
-    cond.emit_ir(temp_block, symbol_table, containing_type_decl);
-    if_type = output::ir::if_type::IS_ZERO;
-
-    //TODO: Add more if types (bytecode optimizations)
-    // if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
-    // {
-    //     if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
-    //     {
-    //     }
-    // }
-
-    temp_block.add_instruction(std::make_unique<output::ir::if_instruction>(
-        if_type,
-        // If false, jump 'till after the block.
-        if_block_size
+    temp_block.consume_code_block(build_condition_block(
+        cond,
+        if_block_size,
+        symbol_table,
+        containing_type_decl,
+        output::ir::if_type::IS_ZERO // Jump on false to skip the if body
     ));
 
     temp_block.consume_code_block(std::move(if_block));
@@ -179,4 +174,103 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
     const size_t emitted_size = temp_block.size();
     containing_block.consume_code_block(std::move(temp_block));
     return emitted_size;
+}
+
+static codesh::output::ir::code_block build_condition_block(
+        const codesh::ast::var_reference::value_ast_node &condition,
+        const size_t if_block_size,
+        const codesh::semantic_analyzer::symbol_table &symbol_table,
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        const codesh::output::ir::if_type if_type)
+{
+    codesh::output::ir::code_block condition_block;
+
+    // Handle AND
+    if (const auto and_cond = dynamic_cast<const codesh::ast::op::and_operator_ast_node *>(&condition))
+    {
+        auto right_block = build_condition_block(
+            and_cond->get_right(),
+            if_block_size,
+            symbol_table,
+            containing_type_decl,
+            if_type
+        );
+
+        size_t jump_size;
+        if (if_type == codesh::output::ir::if_type::IS_NONZERO)
+        {
+            // When jumping on true, short-circuit false by skipping the right block
+            jump_size = right_block.size();
+        }
+        else
+        {
+            // When jumping on false, short-circuit false by skipping the right block and body
+            jump_size = if_block_size + right_block.size();
+        }
+
+        auto left_block = build_condition_block(
+            and_cond->get_left(),
+            jump_size,
+            symbol_table,
+            containing_type_decl,
+            codesh::output::ir::if_type::IS_ZERO
+        );
+
+        condition_block.consume_code_block(std::move(left_block));
+        condition_block.consume_code_block(std::move(right_block));
+        return condition_block;
+    }
+    // Handle OR
+    if (const auto or_cond = dynamic_cast<const codesh::ast::op::or_operator_ast_node *>(&condition))
+    {
+        auto right_block = build_condition_block(
+            or_cond->get_right(),
+            if_block_size,
+            symbol_table,
+            containing_type_decl,
+            if_type
+        );
+
+        size_t jump_size;
+        if (if_type == codesh::output::ir::if_type::IS_ZERO)
+        {
+            // When jumping on false, short-circuit true by skipping over the right block
+            jump_size = right_block.size();
+        }
+        else
+        {
+            // When jumping on true, short-circuit true by jumping immediately to the expression
+            jump_size = if_block_size;
+        }
+
+        auto left_block = build_condition_block(
+            or_cond->get_left(),
+            jump_size,
+            symbol_table,
+            containing_type_decl,
+            codesh::output::ir::if_type::IS_NONZERO
+        );
+
+        condition_block.consume_code_block(std::move(left_block));
+        condition_block.consume_code_block(std::move(right_block));
+        return condition_block;
+    }
+
+
+    //TODO: This should only be emitted if no other if options exists (see next TODO)
+    condition.emit_ir(condition_block, symbol_table, containing_type_decl);
+    condition_block.add_instruction(std::make_unique<codesh::output::ir::if_instruction>(
+        if_type,
+        static_cast<int>(if_block_size)
+    ));
+
+    //TODO: Add more if types (bytecode optimizations)
+    // if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
+    // {
+    //     if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
+    //     {
+    //     }
+    // }
+
+    return condition_block;
 }
