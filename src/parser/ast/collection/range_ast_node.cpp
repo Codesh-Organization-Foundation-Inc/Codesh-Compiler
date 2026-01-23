@@ -9,7 +9,7 @@ codesh::ast::collection::range_ast_node::range_ast_node(std::unique_ptr<value_as
     to(std::move(to)),
     skip(std::move(skip)),
     type(std::make_unique<type::custom_type_ast_node>(
-        definition::fully_qualified_class_name(semantic_analyzer::builtins::CLASS_RANGE)
+        definition::fully_qualified_name(semantic_analyzer::builtins::CLASS_RANGE)
     ))
 {
 }

@@ -116,7 +116,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
         tokens.pop();
 
         return std::make_unique<ast::type::custom_type_ast_node>(
-            definition::fully_qualified_class_name(definition::ERROR_IDENTIFIER_CONTENT)
+            definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT)
         );
     }
 
