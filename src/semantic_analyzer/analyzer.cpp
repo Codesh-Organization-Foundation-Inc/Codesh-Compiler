@@ -71,8 +71,14 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
 
     //TODO: Iterate over each and every country, then INSIDE do the following:
-    type_declaration::collect(context,country);
-    type_declaration::resolve(context, country);
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::collect(context, *type_decl, country);
+    }
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::resolve(context, *type_decl, country);
+    }
 
     // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);

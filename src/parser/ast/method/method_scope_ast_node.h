@@ -12,8 +12,9 @@
 namespace codesh::ast::method
 {
 
-class method_scope_ast_node : public impl::ast_node, public impl::i_constant_pool_emitter,
-    public impl::i_symbolically_linked<semantic_analyzer::method_scope_symbol>
+class method_scope_ast_node : public impl::ast_node,
+    public impl::i_symbolically_linked<semantic_analyzer::method_scope_symbol>,
+    public impl::i_constant_pool_emitter, public impl::i_ir_emitter
 {
     std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> scope_symbol;
 
@@ -35,7 +36,11 @@ public:
     [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
         const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
+
+
     method_scope_ast_node &create_method_scope();
+    [[nodiscard]] const std::vector<std::unique_ptr<method_scope_ast_node>> &get_method_scopes() const;
+
 
     /**
      * Marks the end of the scope.
@@ -46,6 +51,9 @@ public:
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;
+
+    void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+                 const type_decl::type_declaration_ast_node &containing_type_decl) const override;
 };
 
 }
