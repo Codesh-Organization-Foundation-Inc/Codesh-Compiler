@@ -3,6 +3,7 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
+#include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/division_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h"
@@ -49,9 +50,12 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> mak
         bool value);
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
-    std::queue<std::unique_ptr<codesh::token>> &tokens,
-    std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node
-);
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+
+static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
 static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
@@ -312,7 +316,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_EQUALS: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -331,7 +335,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_NOT_EQUALS: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -350,7 +354,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_GREATER: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -369,7 +373,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_GREATER_EQUALS: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -388,7 +392,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_LESS: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -407,7 +411,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     case token_group::OPERATOR_LESS_EQUALS: {
         tokens.pop();
 
-        auto left_value_node  = parse_value(tokens);
+        auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
@@ -433,8 +437,37 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         );
     }
     }
+
     return eval_ast_node;
 }
+
+static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
+{
+    auto to_val = codesh::parser::parse_value(tokens);
+
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node> skip_val = nullptr;
+    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_SKIP))
+    {
+        skip_val = codesh::parser::parse_value(tokens);
+    }
+    else
+    {
+        skip_val = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
+            std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::INTEGER),
+            1
+        );
+    }
+
+    return std::make_unique<codesh::ast::collection::range_ast_node>(
+        std::move(eval_ast_node),
+        std::move(to_val),
+        std::move(skip_val)
+    );
+}
+
+
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_assignment_operator(
     std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -551,6 +584,11 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
 {
     switch (tokens.front()->get_group())
     {
+        case codesh::token_group::KEYWORD_TO: {
+            tokens.pop();
+            return parse_range(tokens, std::move(eval_ast_node));
+        }
+
         case codesh::token_group::OPERATOR_NOT: {
             tokens.pop();
             return std::make_unique<codesh::ast::op::not_operator_ast_node>(std::move(eval_ast_node));

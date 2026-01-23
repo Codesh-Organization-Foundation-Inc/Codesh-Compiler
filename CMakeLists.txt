@@ -216,6 +216,11 @@ add_executable(Codesh_Compiler
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
         src/parser/ast/impl/operator_ast_node.h
+        src/parser/ast/method/operation/block/for_ast_node.cpp
+        src/parser/ast/method/operation/block/for_ast_node.h
+        src/parser/ast/collection/collection_ast_node.h
+        src/parser/ast/collection/range_ast_node.cpp
+        src/parser/ast/collection/range_ast_node.h
   )
 
 # sudo dnf install boost-regex boost-devel

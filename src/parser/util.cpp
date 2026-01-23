@@ -112,7 +112,12 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     default:
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_TYPE,
             blasphemy::blasphemy_type::SYNTAX, std::nullopt);
-        return nullptr;
+
+        tokens.pop();
+
+        return std::make_unique<ast::type::custom_type_ast_node>(
+            definition::fully_qualified_class_name(definition::ERROR_IDENTIFIER_CONTENT)
+        );
     }
 
 
