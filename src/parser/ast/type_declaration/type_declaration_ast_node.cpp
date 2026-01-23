@@ -3,6 +3,8 @@
 #include "defenition/definitions.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 
 #include <utility>

@@ -1,21 +1,25 @@
 #pragma once
 
 #include "attributes_ast_node.h"
-#include "defenition/basad_type.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/impl/ast_node.h"
 #include "parser/ast/impl/i_descriptor_emitter.h"
 
 #include <memory>
 #include <string>
+#include <list>
 
 #include "output/jvm_target/constant_pool.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
-#include "parser/ast/method/constructor_declaration_ast_node.h"
-
 namespace codesh::semantic_analyzer
 {
 class type_symbol;
+}
+namespace codesh::ast::method
+{
+class method_declaration_ast_node;
+class constructor_declaration_ast_node;
 }
 namespace codesh::ast::type
 {

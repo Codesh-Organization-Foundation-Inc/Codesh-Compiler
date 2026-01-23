@@ -1,5 +1,8 @@
 #pragma once
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include "semantic_analyzer/symbol_table/symbol.h"
+
 #include <iostream>
 
 template <typename T>

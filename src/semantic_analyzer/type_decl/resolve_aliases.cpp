@@ -3,6 +3,7 @@
 
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 void codesh::semantic_analyzer::type_declaration::resolve_aliases(const semantic_context &context,
                                                                   const country_symbol &country)

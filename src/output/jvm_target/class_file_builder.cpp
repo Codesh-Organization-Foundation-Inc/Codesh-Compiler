@@ -12,6 +12,7 @@
 #include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <algorithm>
 #include <filesystem>

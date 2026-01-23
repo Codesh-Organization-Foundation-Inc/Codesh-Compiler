@@ -52,24 +52,3 @@ const std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_nod
 {
     return this->type_declarations;
 }
-
-const codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table() const
-{
-    if (!symbol_table)
-        throw std::runtime_error("Attempted to get a symbol table instance, yet none was set");
-
-    return symbol_table.value();
-}
-
-codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table()
-{
-    if (!symbol_table)
-        throw std::runtime_error("Attempted to get a symbol table instance, yet none was set");
-
-    return symbol_table.value();
-}
-
-void codesh::ast::compilation_unit_ast_node::construct_symbol_table()
-{
-    symbol_table.emplace(*this);
-}

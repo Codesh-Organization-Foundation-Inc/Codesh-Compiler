@@ -1,5 +1,10 @@
 #include "symbol.h"
 
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
+
 #include <utility>
 
 codesh::semantic_analyzer::symbol::symbol(i_scope_containing_symbol *const parent_symbol, const symbol_type symbol_type) :

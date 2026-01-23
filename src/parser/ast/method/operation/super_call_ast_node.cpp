@@ -1,5 +1,6 @@
 #include "super_call_ast_node.h"
 
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "output/ir/code_block.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "semantic_analyzer/symbol_table/symbol.h"

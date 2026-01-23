@@ -58,7 +58,7 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
-    auto master_symbol_table = build_master_symbol_table(asts);
+    const auto master_symbol_table = build_master_symbol_table(asts);
 
     for (const auto &root_node : asts)
     {

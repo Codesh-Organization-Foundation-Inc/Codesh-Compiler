@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
@@ -72,4 +73,3 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 
     return result;
 }
-

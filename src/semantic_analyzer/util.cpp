@@ -1,10 +1,10 @@
 #include "util.h"
 
+#include "fmt/compile.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
-#include "fmt/compile.h"
 #include "semantic_context.h"
-
+#include "symbol_table/symbol_table.h"
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
     ::resolve_custom_type(

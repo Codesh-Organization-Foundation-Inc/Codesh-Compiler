@@ -1,5 +1,6 @@
 #include "variable_reference_ast_node.h"
 
+#include "output/jvm_target/constant_pool.h"
 #include "output/ir/code_block.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
