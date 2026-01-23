@@ -57,8 +57,8 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::OPERATOR_MINUS, "ויחזק את־לב", word_boundary::BOTH},
     {token_group::OPERATOR_BY, "פי־", word_boundary::BEFORE},
 
-    {token_group::OPERATOR_ADDITION_ASSIGNMENT, "ויסף", word_boundary::BOTH},
-    {token_group::OPERATOR_SUBTRACTION_ASSIGNMENT, "ויחסר", word_boundary::BOTH},
+    {token_group::OPERATOR_ADDITION_ASSIGNMENT, "ויסף ל־", word_boundary::BOTH},
+    {token_group::OPERATOR_SUBTRACTION_ASSIGNMENT, "ויחסר מן", word_boundary::BOTH},
     {token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT, "ויכפל", word_boundary::BOTH},
     {token_group::OPERATOR_DIVISION_ASSIGNMENT, "ויחלק", word_boundary::BOTH},
     {token_group::OPERATOR_MODULO_ASSIGNMENT, "וישרה", word_boundary::BOTH},
@@ -86,7 +86,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
 
     {token_group::KEYWORD_IF, "אם־", word_boundary::BEFORE},
     {token_group::KEYWORD_ELSE, "אחרת", word_boundary::BOTH},
-    {token_group::KEYWORD_IF_ELSE, "אם־אחרת", word_boundary::BOTH},
+    {token_group::KEYWORD_ELSE_IF, "אם־אחרת", word_boundary::BOTH},
     {token_group::KEYWORD_SWITCH, "ויחלוק על", word_boundary::BOTH},
     {token_group::KEYWORD_CASE, "כאשר", word_boundary::BOTH},
     {token_group::KEYWORD_DEFAULT, "באין צדיק", word_boundary::BOTH},

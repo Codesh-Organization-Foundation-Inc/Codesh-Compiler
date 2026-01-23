@@ -59,8 +59,8 @@ enum class token_group : int
     OPERATOR_MINUS, // ויחזק את־לב
     OPERATOR_BY, // פי־
 
-    OPERATOR_ADDITION_ASSIGNMENT, //ויסף
-    OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר
+    OPERATOR_ADDITION_ASSIGNMENT, // ויסף ל־
+    OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר מן
     OPERATOR_MULTIPLICATION_ASSIGNMENT, // ויכפל
     OPERATOR_DIVISION_ASSIGNMENT, // ויחלק
     OPERATOR_MODULO_ASSIGNMENT, // וישרה
@@ -88,7 +88,7 @@ enum class token_group : int
 
     KEYWORD_IF, // אם־
     KEYWORD_ELSE, // אחרת
-    KEYWORD_IF_ELSE, // אם־אחרת
+    KEYWORD_ELSE_IF, // אם־אחרת
     KEYWORD_SWITCH, // ויחלוק על
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // באין צדיק

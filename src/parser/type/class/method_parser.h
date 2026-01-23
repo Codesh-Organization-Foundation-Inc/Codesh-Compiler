@@ -9,6 +9,10 @@
 
 namespace codesh::ast
 {
+namespace block
+{
+class if_ast_node;
+}
 class local_variable_declaration_ast_node;
 }
 
@@ -34,5 +38,9 @@ void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method:
     std::unique_ptr<ast::local_variable_declaration_ast_node>,
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
 > parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens);
+
+std::unique_ptr<ast::block::if_ast_node> parse_if_statement(
+    std::queue<std::unique_ptr<token>> &tokens,
+    ast::method::method_scope_ast_node &method_scope);
 
 }

@@ -20,7 +20,7 @@ class method_scope_ast_node : public impl::ast_node, public impl::i_constant_poo
     std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
     std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
-    // TODO: Add inner scopes
+   std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> &_get_resolved()
         const override;
@@ -35,6 +35,7 @@ public:
     [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
         const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
+    method_scope_ast_node &create_method_scope();
 
     /**
      * Marks the end of the scope.

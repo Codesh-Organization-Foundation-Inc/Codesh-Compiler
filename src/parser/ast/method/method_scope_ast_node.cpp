@@ -55,6 +55,12 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
     local_variables.emplace_back(std::move(statement));
 }
 
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_ast_node::
+    create_method_scope()
+{
+    return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>());
+}
+
 void codesh::ast::method::method_scope_ast_node::mark_end() const
 {
     const size_t last_statement_index = body.size() - 1;

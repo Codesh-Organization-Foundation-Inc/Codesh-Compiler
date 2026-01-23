@@ -13,7 +13,7 @@ class method_scope_symbol;
 namespace codesh::ast::method::operation
 {
 
-class method_operation_ast_node : impl::ast_node, public impl::i_ir_emitter
+class method_operation_ast_node : public impl::ast_node, public impl::i_ir_emitter
 {
     size_t statement_index;
 

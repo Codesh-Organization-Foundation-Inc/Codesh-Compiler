@@ -3,6 +3,8 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/operation/block/if_ast_node.h"
+#include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "parser/util.h"
 #include "parser/value_parser.h"
@@ -11,6 +13,11 @@
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens);
+
+static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
 
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
@@ -37,6 +44,12 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
         }
 
+        case token_group::OPERATOR_ADDITION_ASSIGNMENT:
+        case token_group::OPERATOR_DIVISION_ASSIGNMENT:
+        case token_group::OPERATOR_MODULO_ASSIGNMENT:
+        case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT:
+        case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
+
         case token_group::OPERATOR_ADDITION:
         case token_group::OPERATOR_SUBTRACTION:
         case token_group::OPERATOR_MULTIPLICATION:
@@ -50,6 +63,9 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             }
             break;
 
+        case token_group::KEYWORD_IF:
+            method_scope.add_statement(parse_if_statement(tokens, method_scope));
+            break;
 
         case token_group::SCOPE_END:
             tokens.pop();
@@ -82,6 +98,60 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     util::ensure_end_op(tokens);
     return method_call_node;
+}
+
+std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statement(
+        std::queue<std::unique_ptr<token>> &tokens,
+        ast::method::method_scope_ast_node &method_scope)
+{
+    tokens.pop();
+
+    auto if_node = std::make_unique<ast::block::if_ast_node>(
+        parse_conditioned_scope(tokens, method_scope)
+    );
+
+    while (util::consuming_check(tokens, token_group::KEYWORD_ELSE_IF))
+    {
+        if_node->add_else_if_branch(parse_conditioned_scope(tokens, method_scope));
+    }
+
+    if (util::consuming_check(tokens, token_group::KEYWORD_ELSE))
+    {
+        check_consume_scope_begin(tokens);
+        auto &else_scope = method_scope.create_method_scope();
+        parse_method_scope(tokens, else_scope);
+
+        if_node->set_else_branch(else_scope);
+    }
+
+    return if_node;
+}
+
+static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
+        std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope)
+{
+    auto else_if_condition = codesh::parser::parse_value(tokens);
+
+    check_consume_scope_begin(tokens);
+    auto &else_if_scope = method_scope.create_method_scope();
+    codesh::parser::parse_method_scope(tokens, else_if_scope);
+
+    return {std::move(else_if_condition), else_if_scope};
+}
+
+static bool check_consume_scope_begin(std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_SCOPE_BEGIN,
+            codesh::blasphemy::blasphemy_type::SYNTAX
+        );
+
+        return false;
+    }
+
+    return true;
 }
 
 std::pair<

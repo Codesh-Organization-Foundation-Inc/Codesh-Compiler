@@ -19,8 +19,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/method/operation/while_ast_node.cpp
-        src/parser/ast/method/operation/while_ast_node.h
+        src/parser/ast/method/operation/block/while_ast_node.cpp
+        src/parser/ast/method/operation/block/while_ast_node.h
         src/parser/ast/impl/i_ir_emitter.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
@@ -196,7 +196,6 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/symbol_table/symbol_type.h
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/resolve.h
-        src/semantic_analyzer/statement/resolve.h
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.h
@@ -204,8 +203,20 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
+        src/parser/ast/method/operation/block/if_ast_node.cpp
+        src/parser/ast/method/operation/block/if_ast_node.h
         src/parser/ast/impl/operator_ast_node.h
-)
+  )
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
