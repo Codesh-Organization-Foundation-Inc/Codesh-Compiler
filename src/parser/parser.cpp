@@ -61,6 +61,3 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
     return root_node;
 }
-
-
-
