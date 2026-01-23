@@ -130,7 +130,8 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
 
 
     // Convert the method to IR
-    const auto code_block = ir::code_block::build_from_method(method_decl, symbol_table, type_decl);
+    ir::code_block code_block;
+    method_decl.get_method_scope().emit_ir(code_block, symbol_table, type_decl);
 
     std::list<ir::instruction_container> bytecode_collector;
     for (const auto &instruction : code_block.get_instructions())
