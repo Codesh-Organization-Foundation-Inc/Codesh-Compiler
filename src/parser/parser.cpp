@@ -26,6 +26,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
     }
 
 
+    // The BASAD type will apply to all class types declared in this file
     const auto basad_type = parse_basad_type(tokens);
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
