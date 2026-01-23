@@ -1,6 +1,6 @@
 #include "range_ast_node.h"
 
-#include "../../../semantic_analyzer/builtins.h"
+#include "semantic_analyzer/builtins.h"
 
 codesh::ast::collection::range_ast_node::range_ast_node(std::unique_ptr<value_ast_node> from,
                                                         std::unique_ptr<value_ast_node> to,

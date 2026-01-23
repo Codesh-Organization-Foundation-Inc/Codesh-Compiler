@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../../operator/assignment/assign_operator_ast_node.h"
-#include "../../../var_reference/value_ast_node.h"
-#include "../method_operation_ast_node.h"
+#include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
+#include "parser/ast/method/operation/method_operation_ast_node.h"
 
 #include <memory>
 

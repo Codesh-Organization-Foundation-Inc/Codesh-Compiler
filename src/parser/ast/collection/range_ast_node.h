@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../type/custom_type_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "collection_ast_node.h"
 
 namespace codesh::ast::collection
