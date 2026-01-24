@@ -71,16 +71,27 @@ const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_de
     return method_scope;
 }
 
-void codesh::ast::method::method_declaration_ast_node::set_method_scope_position(method_scope_ast_node &scope_node,
+void codesh::ast::method::method_declaration_ast_node::set_inner_scope_position(method_scope_ast_node &scope_node,
                                                                                  const size_t bytecode_position)
 {
-    bytecode_position_to_method_scope.emplace(bytecode_position, scope_node);
+    bytecode_position_to_inner_scope.emplace(bytecode_position, scope_node);
 }
 
-codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope_at(
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_inner_scope_at(
         const size_t bytecode_position) const
 {
-    return bytecode_position_to_method_scope.at(bytecode_position);
+    return bytecode_position_to_inner_scope.at(bytecode_position);
+}
+
+bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
+{
+    return !bytecode_position_to_inner_scope.empty();
+}
+
+const std::unordered_map<size_t, std::reference_wrapper<codesh::ast::method::method_scope_ast_node>> &codesh::ast::
+    method::method_declaration_ast_node::get_bytecode_position_to_inner_scope_map() const
+{
+    return bytecode_position_to_inner_scope;
 }
 
 const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
@@ -118,7 +129,7 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
     constant_pool.goc_utf8_info("Code");
     constant_pool.goc_utf8_info("LocalVariableTable");
 
-    if (!get_method_scope().get_method_scopes().empty())
+    if (has_inner_scopes())
     {
         constant_pool.goc_utf8_info("StackMapTable");
     }

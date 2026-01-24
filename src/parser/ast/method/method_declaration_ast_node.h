@@ -41,7 +41,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
 
     method_scope_ast_node method_scope;
 
-    std::unordered_map<size_t, std::reference_wrapper<method_scope_ast_node>> bytecode_position_to_method_scope;
+    std::unordered_map<size_t, std::reference_wrapper<method_scope_ast_node>> bytecode_position_to_inner_scope;
 
 
 protected:
@@ -71,8 +71,13 @@ public:
     [[nodiscard]] method_scope_ast_node &get_method_scope();
     [[nodiscard]] const method_scope_ast_node &get_method_scope() const;
 
-    void set_method_scope_position(method_scope_ast_node &scope_node, size_t bytecode_position);
-    [[nodiscard]] method_scope_ast_node &get_method_scope_at(size_t bytecode_position) const;
+
+    const std::unordered_map<size_t, std::reference_wrapper<method_scope_ast_node>>
+        &get_bytecode_position_to_inner_scope_map() const;
+
+    void set_inner_scope_position(method_scope_ast_node &scope_node, size_t bytecode_position);
+    [[nodiscard]] method_scope_ast_node &get_inner_scope_at(size_t bytecode_position) const;
+    [[nodiscard]] bool has_inner_scopes() const;
 
 
     [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
