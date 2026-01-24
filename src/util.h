@@ -17,4 +17,9 @@ void put_bytes(unsigned char arr[], const std::vector<unsigned char> &contents);
  */
 void put_int_bytes(unsigned char arr[], size_t width, int num);
 
+/**
+ * Reads a big-endian integer from the array `arr` over `width` bytes.
+ */
+int read_int_bytes(const unsigned char arr[], size_t width);
+
 }

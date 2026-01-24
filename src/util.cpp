@@ -28,3 +28,15 @@ void codesh::util::put_int_bytes(unsigned char arr[], const size_t width, const 
         arr[width - 1 - i] = static_cast<unsigned char>(num >> (8 * i) & 0xFF);
     }
 }
+
+int codesh::util::read_int_bytes(const unsigned char arr[], const size_t width)
+{
+    int result = 0;
+
+    for (size_t i = 0; i < width; i++)
+    {
+        result = result << 8 | static_cast<int>(arr[i]);
+    }
+
+    return result;
+}

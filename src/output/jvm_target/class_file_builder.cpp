@@ -109,11 +109,6 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
 
-    if (method_decl.has_inner_scopes())
-    {
-        method_entry->attribute_info.push_back(create_stack_map_table_attribute(method_decl));
-    }
-
     class_file.methods_info.push_back(std::move(method_entry));
 }
 
@@ -146,19 +141,34 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
     emit_method_bytecode(*code_attr, method_decl);
 
-    const int lvt_size = set_max_locals(*code_attr, method_decl);
-    const int lvt_attr_length = add_local_variable_table(
-        *code_attr,
+    const auto locals = get_locals_count(method_decl);
+    util::put_int_bytes(code_attr->max_locals, 2, locals);
+
+    code_attr->attributes.push_back(create_local_variable_table(
         method_decl,
         static_cast<int>(code_attr->code.size()),
-        lvt_size
-    );
+        locals
+    ));
+
+    if (method_decl.has_inner_scopes())
+    {
+        code_attr->attributes.push_back(create_stack_map_table_attribute(method_decl));
+    }
+
+
+    size_t attributes_size = 0;
+    for (const auto &attribute : code_attr->attributes)
+    {
+        attributes_size += util::read_int_bytes(attribute->attribute_length, 4);
+    }
 
     util::put_int_bytes(
         code_attr->attribute_length, 4,
-        18 + lvt_attr_length + static_cast<int>(code_attr->code.size())
+        18
+            + static_cast<int>(attributes_size)
+            + static_cast<int>(code_attr->code.size())
     );
-    util::put_int_bytes(code_attr->attribute_count, 2, 1);
+    util::put_int_bytes(code_attr->attribute_count, 2, static_cast<int>(code_attr->attributes.size()));
 
     return code_attr;
 }
@@ -227,7 +237,7 @@ void codesh::output::jvm_target::class_file_builder::emit_method_bytecode(defs::
     // code_attr->attributes.push_back(std::move(line_number_table_attr));
 }
 
-int codesh::output::jvm_target::class_file_builder::set_max_locals(defs::code_attribute_entry &code_attr,
+int codesh::output::jvm_target::class_file_builder::get_locals_count(
         const ast::method::method_declaration_ast_node &method_decl)
 {
     // Local variables
@@ -238,15 +248,12 @@ int codesh::output::jvm_target::class_file_builder::set_max_locals(defs::code_at
         throw std::runtime_error("Too many local variables in method " + method_decl.get_unresolved_name().join() + "; Max amount is 65535");
     }
 
-    const int lvt_size = static_cast<int>(local_vars_count);
-    util::put_int_bytes(code_attr.max_locals, 2, lvt_size);
-
-    return lvt_size;
+    return static_cast<int>(local_vars_count);
 }
 
-int codesh::output::jvm_target::class_file_builder::add_local_variable_table(defs::code_attribute_entry &code_attr,
-        const ast::method::method_declaration_ast_node &method_decl, const int code_length_total, const int lvt_size)
-    const
+std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute_entry> codesh::output::jvm_target::
+    class_file_builder::create_local_variable_table(const ast::method::method_declaration_ast_node &method_decl,
+        const int code_length_total, const int lvt_size) const
 {
     auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
 
@@ -263,12 +270,12 @@ int codesh::output::jvm_target::class_file_builder::add_local_variable_table(def
 
     util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
 
-    const int lvt_attr_length = 2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size;
-    util::put_int_bytes(local_variable_table->attribute_length, 4, lvt_attr_length);
+    util::put_int_bytes(
+        local_variable_table->attribute_length, 4,
+        2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size
+    );
 
-    code_attr.attributes.push_back(std::move(local_variable_table));
-
-    return lvt_attr_length;
+    return local_variable_table;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entry> codesh::output::jvm_target::
@@ -278,15 +285,20 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
     auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
     util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
 
+    size_t smt_attr_size = 2;
+
     size_t prev_pos = 0;
     for (const auto &[byte_pos, scope_node] : method_decl.get_bytecode_position_to_inner_scope_map())
     {
         //TODO: Figure out when it's not same_frame
         auto frame = std::make_unique<defs::same_frame>(byte_pos - prev_pos);
+        // same_frame size is 1:
+        smt_attr_size += 1;
 
         prev_pos = byte_pos;
     }
 
+    util::put_int_bytes(smt_attr->attribute_length, 4, static_cast<int>(smt_attr_size));
     return smt_attr;
 }
 
