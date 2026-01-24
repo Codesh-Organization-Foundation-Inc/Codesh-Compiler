@@ -290,12 +290,31 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
     size_t prev_pos = 0;
     for (const auto &[byte_pos, scope_node] : method_decl.get_bytecode_position_to_inner_scope_map())
     {
+        const auto offset_delta = byte_pos - prev_pos;
+
+        std::unique_ptr<defs::stack_map_frame> frame;
         //TODO: Figure out when it's not same_frame
-        auto frame = std::make_unique<defs::same_frame>(byte_pos - prev_pos);
+        if (offset_delta <= 63)
+        {
+            frame = std::make_unique<defs::same_frame>(offset_delta);
+            smt_attr_size += 1;
+        }
+        else
+        {
+            if (offset_delta > 0xFFFF)
+            {
+                //TODO: Make Codesh error
+                throw std::runtime_error("Inner scope too big; Max is 65535");
+            }
+
+            auto temp_frame = std::make_unique<defs::same_frame_extended>();
+            util::put_int_bytes(temp_frame->offset_delta, 2, static_cast<int>(offset_delta));
+
+            frame = std::move(temp_frame);
+            smt_attr_size += 3;
+        }
 
         smt_attr->entries.push_back(std::move(frame));
-        // same_frame size is 1:
-        smt_attr_size += 1;
 
         prev_pos = byte_pos;
     }
