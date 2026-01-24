@@ -138,15 +138,17 @@ size_t codesh::ast::block::if_ast_node::emit_branch_ir(const conditioned_scope_c
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl)
 {
-    output::ir::code_block temp_block;
-
-    const auto &cond = *branch.condition;
+    branch.scope.set_bytecode_position(current_position);
 
     // Pre-process the branch such that we can determine its size before we emit it
     output::ir::code_block if_block;
     branch.scope.emit_ir(if_block, symbol_table, containing_type_decl);
 
     const size_t if_block_size = if_block.size() + (has_next_branch ? 3 : 0);
+
+
+    output::ir::code_block temp_block;
+    const auto &cond = *branch.condition;
 
     temp_block.consume_code_block(build_condition_block(
         cond,

@@ -19,12 +19,20 @@ class method_scope_ast_node : public impl::ast_node,
     std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
     std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
-   std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
+    std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
+
+    /**
+     * The starting position of this scope within the compiled bytecode
+     */
+    size_t bytecode_position;
+
+
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> &_get_resolved()
         const override;
 
 public:
+    method_scope_ast_node();
     void set_resolved(semantic_analyzer::method_scope_symbol &symbol) override;
 
     [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
@@ -45,6 +53,10 @@ public:
      * All local variables will end at the current position.
      */
     void mark_end() const;
+
+
+    void set_bytecode_position(size_t bytecode_position);
+    [[nodiscard]] size_t get_bytecode_position() const;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

@@ -6,6 +6,10 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sco
     return scope_symbol;
 }
 
+codesh::ast::method::method_scope_ast_node::method_scope_ast_node() : bytecode_position(-1)
+{
+}
+
 void codesh::ast::method::method_scope_ast_node::set_resolved(semantic_analyzer::method_scope_symbol &symbol)
 {
     scope_symbol.emplace(symbol);
@@ -75,6 +79,16 @@ void codesh::ast::method::method_scope_ast_node::mark_end() const
     {
         local_var->set_accessible_to(last_statement_index);
     }
+}
+
+void codesh::ast::method::method_scope_ast_node::set_bytecode_position(const size_t bytecode_position)
+{
+    this->bytecode_position = bytecode_position;
+}
+
+size_t codesh::ast::method::method_scope_ast_node::get_bytecode_position() const
+{
+    return bytecode_position;
 }
 
 void codesh::ast::method::method_scope_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
