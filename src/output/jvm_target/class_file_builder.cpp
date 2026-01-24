@@ -102,8 +102,18 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
-void codesh::output::jvm_target::class_file_builder::add_method(const ast::method::method_declaration_ast_node &method_decl)
-    const
+void codesh::output::jvm_target::class_file_builder::add_method(
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    auto method_entry = create_method_entry(method_decl);
+
+    method_entry->attribute_info.push_back(create_code_attribute(method_decl));
+
+    class_file.methods_info.push_back(std::move(method_entry));
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry> codesh::output::jvm_target::class_file_builder::
+    create_method_entry(const ast::method::method_declaration_ast_node &method_decl) const
 {
     auto method_entry = std::make_unique<defs::methods_info_entry>();
 
@@ -115,17 +125,42 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     );
     util::put_int_bytes(
         method_entry->descriptor_index, 2,
-    constant_pool_.get_utf8_index(method_decl.generate_descriptor())
+        constant_pool_.get_utf8_index(method_decl.generate_descriptor())
     );
 
     util::put_int_bytes(method_entry->attributes_count, 2, 1);
 
+    return method_entry;
+}
 
-    // Code
+std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::output::jvm_target::class_file_builder::
+    create_code_attribute(const ast::method::method_declaration_ast_node &method_decl) const
+{
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
+
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
+    emit_method_bytecode(*code_attr, method_decl);
 
+    const int lvt_size = set_max_locals(*code_attr, method_decl);
+    const int lvt_attr_length = add_local_variable_table(
+        *code_attr,
+        method_decl,
+        static_cast<int>(code_attr->code.size()),
+        lvt_size
+    );
 
+    util::put_int_bytes(
+        code_attr->attribute_length, 4,
+        18 + lvt_attr_length + static_cast<int>(code_attr->code.size())
+    );
+    util::put_int_bytes(code_attr->attribute_count, 2, 1);
+
+    return code_attr;
+}
+
+void codesh::output::jvm_target::class_file_builder::emit_method_bytecode(defs::code_attribute_entry &code_attr,
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
     // Convert the method to IR
     ir::code_block code_block;
     method_decl.get_method_scope().emit_ir(code_block, root_node.get_symbol_table(), type_decl);
@@ -136,7 +171,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         instruction->emit(bytecode_collector);
     }
 
-    code_attr->code.reserve(bytecode_collector.size());
+    code_attr.code.reserve(bytecode_collector.size());
     int max_stack = 0;
     int current_stack = 0;
 
@@ -144,7 +179,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     {
         for (const auto opcode : opcodes)
         {
-            code_attr->code.push_back(opcode);
+            code_attr.code.push_back(opcode);
         }
 
         // Each opcode may alter the method stack.
@@ -157,19 +192,19 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
         max_stack = std::max(max_stack, current_stack);
     }
 
-    util::put_int_bytes(code_attr->max_stack, 2, max_stack);
+    util::put_int_bytes(code_attr.max_stack, 2, max_stack);
 
 
-    if (code_attr->code.size() > 0xFFFFFF)
+    if (code_attr.code.size() > 0xFFFFFF)
     {
         blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::METHOD_TOO_BIG,
             blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
-    util::put_int_bytes(code_attr->code_length, 4, code_attr->code.size()); // NOLINT(*-narrowing-conversions)
+    util::put_int_bytes(code_attr.code_length, 4, code_attr.code.size()); // NOLINT(*-narrowing-conversions)
 
 
-    util::put_int_bytes(code_attr->exception_table_length, 2, 0);
+    util::put_int_bytes(code_attr.exception_table_length, 2, 0);
 
     //TODO: Re-add line number table
     //
@@ -185,8 +220,11 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     //
     // line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
     // code_attr->attributes.push_back(std::move(line_number_table_attr));
+}
 
-
+int codesh::output::jvm_target::class_file_builder::set_max_locals(defs::code_attribute_entry &code_attr,
+        const ast::method::method_declaration_ast_node &method_decl)
+{
     // Local variables
     const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().size();
     if (local_vars_count > 0xFFFF)
@@ -196,11 +234,17 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     }
 
     const int lvt_size = static_cast<int>(local_vars_count);
-    util::put_int_bytes(code_attr->max_locals, 2, lvt_size);
+    util::put_int_bytes(code_attr.max_locals, 2, lvt_size);
 
+    return lvt_size;
+}
 
-    // Local Variables Table
+int codesh::output::jvm_target::class_file_builder::add_local_variable_table(defs::code_attribute_entry &code_attr,
+        const ast::method::method_declaration_ast_node &method_decl, const int code_length_total, const int lvt_size)
+    const
+{
     auto local_variable_table = std::make_unique<defs::local_variable_table_attribute_entry>();
+
     util::put_int_bytes(
         local_variable_table->attribute_name_index, 2,
         constant_pool_.get_utf8_index("LocalVariableTable")
@@ -209,7 +253,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     collect_local_variables(
         local_variable_table->local_variable_table,
         method_decl,
-        static_cast<int>(code_attr->code.size())
+        code_length_total
     );
 
     util::put_int_bytes(local_variable_table->local_variable_table_length, 2, lvt_size);
@@ -217,18 +261,9 @@ void codesh::output::jvm_target::class_file_builder::add_method(const ast::metho
     const int lvt_attr_length = 2 + static_cast<int>(sizeof(defs::local_variable_table_entry)) * lvt_size;
     util::put_int_bytes(local_variable_table->attribute_length, 4, lvt_attr_length);
 
-    code_attr->attributes.push_back(std::move(local_variable_table));
+    code_attr.attributes.push_back(std::move(local_variable_table));
 
-
-
-    util::put_int_bytes(
-        code_attr->attribute_length, 4,
-        18 + lvt_attr_length + static_cast<int>(code_attr->code.size())
-    );
-    util::put_int_bytes(code_attr->attribute_count, 2, 1);
-
-    method_entry->attribute_info.push_back(std::move(code_attr));
-    class_file.methods_info.push_back(std::move(method_entry));
+    return lvt_attr_length;
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
