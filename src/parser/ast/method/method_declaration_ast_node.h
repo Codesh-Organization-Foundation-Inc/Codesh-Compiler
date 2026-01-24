@@ -11,9 +11,9 @@
 #include "method_scope_ast_node.h"
 
 #include <list>
+#include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 namespace codesh::semantic_analyzer
 {
@@ -41,7 +41,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
 
     method_scope_ast_node method_scope;
 
-    std::unordered_map<size_t, std::reference_wrapper<method_scope_ast_node>> bytecode_position_to_inner_scope;
+    std::map<size_t, std::reference_wrapper<method_scope_ast_node>> bytecode_position_to_inner_scope;
 
 
 protected:
@@ -72,7 +72,7 @@ public:
     [[nodiscard]] const method_scope_ast_node &get_method_scope() const;
 
 
-    const std::unordered_map<size_t, std::reference_wrapper<method_scope_ast_node>>
+    const std::map<size_t, std::reference_wrapper<method_scope_ast_node>>
         &get_bytecode_position_to_inner_scope_map() const;
 
     void set_inner_scope_position(method_scope_ast_node &scope_node, size_t bytecode_position);
