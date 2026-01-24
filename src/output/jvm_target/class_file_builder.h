@@ -25,6 +25,7 @@ namespace codesh::ast
 {
 namespace method
 {
+class method_scope_ast_node;
 class method_declaration_ast_node;
 }
 class compilation_unit_ast_node;

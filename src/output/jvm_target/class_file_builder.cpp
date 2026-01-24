@@ -109,8 +109,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
 
-    // Add the StackMapTable if we have inner scopes
-    if (!method_decl.get_method_scope().get_method_scopes().empty())
+    if (method_decl.has_inner_scopes())
     {
         method_entry->attribute_info.push_back(create_stack_map_table_attribute(method_decl));
     }
@@ -277,8 +276,16 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
     const
 {
     auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
-
     util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
+
+    size_t prev_pos = 0;
+    for (const auto &[byte_pos, scope_node] : method_decl.get_bytecode_position_to_inner_scope_map())
+    {
+        //TODO: Figure out when it's not same_frame
+        auto frame = std::make_unique<defs::same_frame>(byte_pos - prev_pos);
+
+        prev_pos = byte_pos;
+    }
 
     return smt_attr;
 }
@@ -305,7 +312,7 @@ void codesh::output::jvm_target::class_file_builder::set_access_flags(
     //TODO: Change default values
     uint16_t value = 0;
 
-    for (auto flag: flags)
+    for (const auto flag : flags)
     {
         value |= static_cast<uint16_t>(flag);
     }
