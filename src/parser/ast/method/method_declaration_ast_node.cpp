@@ -85,7 +85,7 @@ codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declarat
 
 bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
 {
-    return !bytecode_position_to_inner_scope.empty();
+    return !method_scope.get_method_scopes().empty();
 }
 
 const std::unordered_map<size_t, std::reference_wrapper<codesh::ast::method::method_scope_ast_node>> &codesh::ast::
