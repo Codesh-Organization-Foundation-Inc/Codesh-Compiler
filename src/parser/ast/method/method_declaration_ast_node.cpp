@@ -101,6 +101,11 @@ std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::metho
 void codesh::ast::method::method_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
         output::jvm_target::constant_pool &constant_pool)
 {
+    //FIXME: Emit only if there is code in this method
+    // (Might not exist for abstract/interface methods)
+    constant_pool.goc_utf8_info("Code");
+    constant_pool.goc_utf8_info("LocalVariableTable");
+
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),
         constant_pool.goc_utf8_info(generate_descriptor())

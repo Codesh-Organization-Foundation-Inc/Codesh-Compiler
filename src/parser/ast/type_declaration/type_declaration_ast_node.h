@@ -42,9 +42,8 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<method::method_declaration_ast_node *> methods;
     std::list<method::constructor_declaration_ast_node *> constructors;
 
-
-    void emit_metadata(const compilation_unit_ast_node &root_node,
-            output::jvm_target::constant_pool &constant_pool) const;
+    static void emit_metadata(const compilation_unit_ast_node &root_node,
+            output::jvm_target::constant_pool &constant_pool);
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
