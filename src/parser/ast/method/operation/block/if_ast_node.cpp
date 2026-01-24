@@ -3,6 +3,7 @@
 #include "../../../../../output/ir/code_block.h"
 #include "../../../operator/boolean/and_operator_ast_node.h"
 #include "../../../operator/boolean/or_operator_ast_node.h"
+#include "../../method_declaration_ast_node.h"
 #include "../../method_scope_ast_node.h"
 
 static codesh::output::ir::code_block build_condition_block(

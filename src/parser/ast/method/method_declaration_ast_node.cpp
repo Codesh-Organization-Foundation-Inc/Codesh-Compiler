@@ -13,7 +13,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-    definition::fully_qualified_class_name name) : name(std::move(name))
+    definition::fully_qualified_class_name name) : name(std::move(name)), method_scope(*this)
 {
 }
 
@@ -69,6 +69,18 @@ const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_de
     const
 {
     return method_scope;
+}
+
+void codesh::ast::method::method_declaration_ast_node::set_method_scope_position(method_scope_ast_node &scope_node,
+                                                                                 const size_t bytecode_position)
+{
+    bytecode_position_to_method_scope.emplace(bytecode_position, scope_node);
+}
+
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope_at(
+        const size_t bytecode_position) const
+{
+    return bytecode_position_to_method_scope.at(bytecode_position);
 }
 
 const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::

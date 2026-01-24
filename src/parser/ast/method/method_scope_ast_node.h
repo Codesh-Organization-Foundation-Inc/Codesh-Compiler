@@ -14,26 +14,29 @@ class method_scope_ast_node : public impl::ast_node,
     public impl::i_symbolically_linked<semantic_analyzer::method_scope_symbol>,
     public impl::i_constant_pool_emitter, public impl::i_ir_emitter
 {
-    std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> scope_symbol;
+    method_declaration_ast_node &parent_method;
 
     std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
     std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
     std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
 
-    /**
-     * The starting position of this scope within the compiled bytecode
-     */
-    size_t bytecode_position;
-
+    std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> scope_symbol;
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_scope_symbol>> &_get_resolved()
         const override;
 
 public:
-    method_scope_ast_node();
+    explicit method_scope_ast_node(method_declaration_ast_node &parent_method);
+
     void set_resolved(semantic_analyzer::method_scope_symbol &symbol) override;
+
+
+    [[nodiscard]] method_declaration_ast_node &get_parent_method() const;
+
+    void set_bytecode_position(size_t bytecode_position);
+
 
     [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
@@ -53,10 +56,6 @@ public:
      * All local variables will end at the current position.
      */
     void mark_end() const;
-
-
-    void set_bytecode_position(size_t bytecode_position);
-    [[nodiscard]] size_t get_bytecode_position() const;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,
