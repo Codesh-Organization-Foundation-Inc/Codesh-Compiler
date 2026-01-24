@@ -279,6 +279,11 @@ size_t codesh::output::ir::goto_instruction::size() const
     return 3;
 }
 
+int codesh::output::ir::goto_instruction::get_jump_offset() const
+{
+    return jump_offset;
+}
+
 void codesh::output::ir::goto_instruction::set_target(const int target)
 {
     jump_offset = target - jump_offset;

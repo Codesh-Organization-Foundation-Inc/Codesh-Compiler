@@ -18,6 +18,7 @@
 
 #include <list>
 #include <ranges>
+#include <set>
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
@@ -139,7 +140,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
-    emit_method_bytecode(*code_attr, method_decl);
+    const auto method_code = emit_method_bytecode(*code_attr, method_decl);
 
     const auto locals = get_locals_count(method_decl);
     util::put_int_bytes(code_attr->max_locals, 2, locals);
@@ -152,7 +153,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
 
     if (method_decl.has_inner_scopes())
     {
-        code_attr->attributes.push_back(create_stack_map_table_attribute(method_decl));
+        code_attr->attributes.push_back(create_stack_map_table_attribute(method_code));
     }
 
 
@@ -173,8 +174,8 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     return code_attr;
 }
 
-void codesh::output::jvm_target::class_file_builder::emit_method_bytecode(defs::code_attribute_entry &code_attr,
-        const ast::method::method_declaration_ast_node &method_decl) const
+codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::emit_method_bytecode(
+    defs::code_attribute_entry &code_attr, const ast::method::method_declaration_ast_node &method_decl) const
 {
     // Convert the method to IR
     ir::code_block code_block;
@@ -235,6 +236,8 @@ void codesh::output::jvm_target::class_file_builder::emit_method_bytecode(defs::
     //
     // line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
     // code_attr->attributes.push_back(std::move(line_number_table_attr));
+
+    return code_block;
 }
 
 int codesh::output::jvm_target::class_file_builder::get_locals_count(
@@ -279,24 +282,41 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entry> codesh::output::jvm_target::
-    class_file_builder::create_stack_map_table_attribute(const ast::method::method_declaration_ast_node &method_decl)
-    const
+        class_file_builder::create_stack_map_table_attribute(const ir::code_block &method_code) const
 {
     auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
     util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
 
     size_t smt_attr_size = 2;
 
-    size_t prev_pos = 0;
-    for (const auto &[byte_pos, scope_node] : method_decl.get_bytecode_position_to_inner_scope_map())
+    std::set<size_t> frame_targets;
+    frame_targets.insert(0);
+
+    size_t curr_byte_pos = 0;
+    for (const auto &method_instruction : method_code.get_instructions())
     {
-        const auto offset_delta = byte_pos - prev_pos;
+        if (const auto jump_instr = dynamic_cast<const ir::goto_instruction *>(method_instruction.get()))
+        {
+            const int offset = jump_instr->get_jump_offset() + static_cast<int>(method_instruction->size());
+            const int target = static_cast<int>(curr_byte_pos) + offset;
+
+            frame_targets.insert(static_cast<size_t>(target));
+        }
+
+        curr_byte_pos += method_instruction->size();
+    }
+
+    int prev_pos = -1;
+    for (const size_t target : frame_targets)
+    {
+        const int current_pos = static_cast<int>(target);
+        const int offset_delta = current_pos - prev_pos - 1;
 
         std::unique_ptr<defs::stack_map_frame> frame;
         //TODO: Figure out when it's not same_frame
         if (offset_delta <= 63)
         {
-            frame = std::make_unique<defs::same_frame>(offset_delta);
+            frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
             smt_attr_size += 1;
         }
         else
@@ -308,15 +328,14 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
             }
 
             auto temp_frame = std::make_unique<defs::same_frame_extended>();
-            util::put_int_bytes(temp_frame->offset_delta, 2, static_cast<int>(offset_delta));
+            util::put_int_bytes(temp_frame->offset_delta, 2, offset_delta);
 
             frame = std::move(temp_frame);
             smt_attr_size += 3;
         }
 
         smt_attr->entries.push_back(std::move(frame));
-
-        prev_pos = byte_pos;
+        prev_pos = current_pos;
     }
 
     util::put_int_bytes(smt_attr->number_of_entries, 2, static_cast<int>(smt_attr->entries.size()));

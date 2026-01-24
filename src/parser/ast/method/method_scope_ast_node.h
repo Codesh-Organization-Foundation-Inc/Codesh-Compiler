@@ -7,6 +7,8 @@
 #include "../local_variable_declaration_ast_node.h"
 #include "operation/method_operation_ast_node.h"
 
+#include <list>
+
 namespace codesh::ast::method
 {
 

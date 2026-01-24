@@ -270,6 +270,7 @@ public:
 
 
     [[nodiscard]] size_t size() const override;
+    [[nodiscard]] int get_jump_offset() const;
 
     void emit(std::list<instruction_container> &collector) const override;
 };

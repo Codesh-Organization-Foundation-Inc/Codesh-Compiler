@@ -23,11 +23,6 @@ codesh::ast::method::method_declaration_ast_node &codesh::ast::method::method_sc
     return parent_method;
 }
 
-void codesh::ast::method::method_scope_ast_node::set_bytecode_position(const size_t bytecode_position)
-{
-    parent_method.set_inner_scope_position(*this, bytecode_position);
-}
-
 const std::list<std::unique_ptr<codesh::ast::method::operation::method_operation_ast_node>> &codesh::ast::method::
     method_scope_ast_node::get_body() const
 {

@@ -11,7 +11,6 @@
 #include "method_scope_ast_node.h"
 
 #include <list>
-#include <map>
 #include <memory>
 #include <string>
 
@@ -38,11 +37,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     // "throws" declaration
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
-
     method_scope_ast_node method_scope;
-
-    std::map<size_t, std::reference_wrapper<method_scope_ast_node>> bytecode_position_to_inner_scope;
-
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved()
@@ -71,12 +66,6 @@ public:
     [[nodiscard]] method_scope_ast_node &get_method_scope();
     [[nodiscard]] const method_scope_ast_node &get_method_scope() const;
 
-
-    const std::map<size_t, std::reference_wrapper<method_scope_ast_node>>
-        &get_bytecode_position_to_inner_scope_map() const;
-
-    void set_inner_scope_position(method_scope_ast_node &scope_node, size_t bytecode_position);
-    [[nodiscard]] method_scope_ast_node &get_inner_scope_at(size_t bytecode_position) const;
     [[nodiscard]] bool has_inner_scopes() const;
 
 

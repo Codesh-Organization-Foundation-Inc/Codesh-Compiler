@@ -71,27 +71,9 @@ const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_de
     return method_scope;
 }
 
-void codesh::ast::method::method_declaration_ast_node::set_inner_scope_position(method_scope_ast_node &scope_node,
-                                                                                 const size_t bytecode_position)
-{
-    bytecode_position_to_inner_scope.emplace(bytecode_position, scope_node);
-}
-
-codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_inner_scope_at(
-        const size_t bytecode_position) const
-{
-    return bytecode_position_to_inner_scope.at(bytecode_position);
-}
-
 bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
 {
     return !method_scope.get_method_scopes().empty();
-}
-
-const std::map<size_t, std::reference_wrapper<codesh::ast::method::method_scope_ast_node>> &codesh::ast::
-    method::method_declaration_ast_node::get_bytecode_position_to_inner_scope_map() const
-{
-    return bytecode_position_to_inner_scope;
 }
 
 const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::

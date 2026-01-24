@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../ir/code_block.h"
 #include "defs/class_file.h"
 
 #include <filesystem>
-#include <list>
+#include <vector>
 
 namespace codesh::semantic_analyzer
 {
@@ -75,14 +76,14 @@ class class_file_builder
     [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
             const ast::method::method_declaration_ast_node &method_decl) const;
 
-    void emit_method_bytecode(defs::code_attribute_entry &code_attr,
-            const ast::method::method_declaration_ast_node &method_decl) const;
+    ir::code_block emit_method_bytecode(defs::code_attribute_entry &code_attr,
+                              const ast::method::method_declaration_ast_node &method_decl) const;
     [[nodiscard]] static int get_locals_count(const ast::method::method_declaration_ast_node &method_decl);
     [[nodiscard]] std::unique_ptr<defs::local_variable_table_attribute_entry> create_local_variable_table(
         const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
 
     [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
-            const ast::method::method_declaration_ast_node &method_decl) const;
+        const ir::code_block &method_code) const;
 
 
     void add_constant_pool_entries() const;
