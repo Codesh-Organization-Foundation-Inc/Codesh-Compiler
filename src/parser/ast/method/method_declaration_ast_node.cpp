@@ -106,6 +106,12 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
     constant_pool.goc_utf8_info("Code");
     constant_pool.goc_utf8_info("LocalVariableTable");
 
+    if (!get_method_scope().get_method_scopes().empty())
+    {
+        constant_pool.goc_utf8_info("StackMapTable");
+    }
+
+
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),
         constant_pool.goc_utf8_info(generate_descriptor())

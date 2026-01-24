@@ -109,6 +109,12 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
 
+    // Add the StackMapTable if we have inner scopes
+    if (!method_decl.get_method_scope().get_method_scopes().empty())
+    {
+        method_entry->attribute_info.push_back(create_stack_map_table_attribute(method_decl));
+    }
+
     class_file.methods_info.push_back(std::move(method_entry));
 }
 
@@ -134,7 +140,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry> codesh::ou
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::output::jvm_target::class_file_builder::
-    create_code_attribute(const ast::method::method_declaration_ast_node &method_decl) const
+        create_code_attribute(const ast::method::method_declaration_ast_node &method_decl) const
 {
     auto code_attr = std::make_unique<defs::code_attribute_entry>();
 
@@ -264,6 +270,17 @@ int codesh::output::jvm_target::class_file_builder::add_local_variable_table(def
     code_attr.attributes.push_back(std::move(local_variable_table));
 
     return lvt_attr_length;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entry> codesh::output::jvm_target::
+    class_file_builder::create_stack_map_table_attribute(const ast::method::method_declaration_ast_node &method_decl)
+    const
+{
+    auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
+
+    util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
+
+    return smt_attr;
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const

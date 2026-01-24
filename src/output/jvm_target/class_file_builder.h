@@ -67,17 +67,23 @@ class class_file_builder
 
     void handle_class_type(const ast::type_decl::class_declaration_ast_node &class_decl) const;
 
-    std::unique_ptr<defs::methods_info_entry> create_method_entry(
-        const ast::method::method_declaration_ast_node &method_decl) const;
-    std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
-        const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] std::unique_ptr<defs::methods_info_entry> create_method_entry(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
     void emit_method_bytecode(defs::code_attribute_entry &code_attr,
-        const ast::method::method_declaration_ast_node &method_decl) const;
+            const ast::method::method_declaration_ast_node &method_decl) const;
     static int set_max_locals(defs::code_attribute_entry &code_attr,
-        const ast::method::method_declaration_ast_node &method_decl) ;
+            const ast::method::method_declaration_ast_node &method_decl) ;
     int add_local_variable_table(defs::code_attribute_entry &code_attr,
-        const ast::method::method_declaration_ast_node &method_decl,
-        int code_length_total, int lvt_size) const;
+            const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
+
+    [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
 
     void add_constant_pool_entries() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
