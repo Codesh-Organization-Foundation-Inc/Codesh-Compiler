@@ -159,12 +159,12 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     size_t attributes_size = 0;
     for (const auto &attribute : code_attr->attributes)
     {
-        attributes_size += util::read_int_bytes(attribute->attribute_length, 4);
+        attributes_size += 6 + util::read_int_bytes(attribute->attribute_length, 4);
     }
 
     util::put_int_bytes(
         code_attr->attribute_length, 4,
-        18
+        12
             + static_cast<int>(attributes_size)
             + static_cast<int>(code_attr->code.size())
     );
@@ -292,12 +292,15 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
     {
         //TODO: Figure out when it's not same_frame
         auto frame = std::make_unique<defs::same_frame>(byte_pos - prev_pos);
+
+        smt_attr->entries.push_back(std::move(frame));
         // same_frame size is 1:
         smt_attr_size += 1;
 
         prev_pos = byte_pos;
     }
 
+    util::put_int_bytes(smt_attr->number_of_entries, 2, static_cast<int>(smt_attr->entries.size()));
     util::put_int_bytes(smt_attr->attribute_length, 4, static_cast<int>(smt_attr_size));
     return smt_attr;
 }
