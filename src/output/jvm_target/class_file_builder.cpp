@@ -285,12 +285,18 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
         class_file_builder::create_stack_map_table_attribute(const ir::code_block &method_code) const
 {
     auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
+
     util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
+    add_stack_map_frames(*smt_attr, method_code);
 
-    size_t smt_attr_size = 2;
+    return smt_attr;
+}
 
-    std::set<size_t> frame_targets;
-    frame_targets.insert(0);
+std::set<size_t> codesh::output::jvm_target::class_file_builder::collect_jump_targets(
+    const ir::code_block &method_code)
+{
+    std::set<size_t> jump_targets;
+    jump_targets.insert(0);
 
     size_t curr_byte_pos = 0;
     for (const auto &method_instruction : method_code.get_instructions())
@@ -300,11 +306,21 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
             const int offset = jump_instr->get_jump_offset() + static_cast<int>(method_instruction->size());
             const int target = static_cast<int>(curr_byte_pos) + offset;
 
-            frame_targets.insert(static_cast<size_t>(target));
+            jump_targets.insert(static_cast<size_t>(target));
         }
 
         curr_byte_pos += method_instruction->size();
     }
+
+    return jump_targets;
+}
+
+void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
+        defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code)
+{
+    const auto frame_targets = collect_jump_targets(method_code);
+
+    size_t smt_attr_size = 2;
 
     int prev_pos = -1;
     for (const size_t target : frame_targets)
@@ -334,13 +350,12 @@ std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entr
             smt_attr_size += 3;
         }
 
-        smt_attr->entries.push_back(std::move(frame));
+        smt_attr.entries.push_back(std::move(frame));
         prev_pos = current_pos;
     }
 
-    util::put_int_bytes(smt_attr->number_of_entries, 2, static_cast<int>(smt_attr->entries.size()));
-    util::put_int_bytes(smt_attr->attribute_length, 4, static_cast<int>(smt_attr_size));
-    return smt_attr;
+    util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
+    util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_size));
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const

@@ -4,6 +4,7 @@
 #include "defs/class_file.h"
 
 #include <filesystem>
+#include <set>
 #include <vector>
 
 namespace codesh::semantic_analyzer
@@ -84,6 +85,9 @@ class class_file_builder
 
     [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
         const ir::code_block &method_code) const;
+    [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
+    static void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
+        const ir::code_block &method_code);
 
 
     void add_constant_pool_entries() const;
