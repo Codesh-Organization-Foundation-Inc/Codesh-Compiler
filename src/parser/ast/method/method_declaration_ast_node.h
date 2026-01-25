@@ -66,6 +66,8 @@ public:
     [[nodiscard]] method_scope_ast_node &get_method_scope();
     [[nodiscard]] const method_scope_ast_node &get_method_scope() const;
 
+    [[nodiscard]] bool has_inner_scopes() const;
+
 
     [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);

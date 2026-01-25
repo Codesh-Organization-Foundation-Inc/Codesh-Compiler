@@ -1,5 +1,7 @@
 #pragma once
 
+#include "stack_map_table.h"
+
 #include <memory>
 #include <vector>
 
@@ -32,6 +34,12 @@ struct code_attribute_entry : attribute_info_entry
     std::vector<std::unique_ptr<exception_table_entry>> exception_table;
     unsigned char attribute_count[2];
     std::vector<std::unique_ptr<attribute_info_entry>> attributes;
+};
+
+struct stack_map_table_attribute_entry : attribute_info_entry
+{
+    unsigned char number_of_entries[2];
+    std::vector<std::unique_ptr<stack_map_frame>> entries;
 };
 
 struct line_number_table_entry
