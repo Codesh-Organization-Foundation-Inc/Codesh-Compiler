@@ -13,7 +13,7 @@ extern const std::unordered_map<token_group, std::string> TOKEN_TO_NAME_MAP;
 
 namespace keyword
 {
-constexpr std::string_view MULTILINE_COMMENT_END = "כי־טוב:";
+constexpr std::string_view MULTILINE_COMMENT_END = "ויחדל:";
 
 constexpr std::string_view STRING_OPEN = "ויקרא ";
 constexpr std::string_view STRING_END = " לאמר";
