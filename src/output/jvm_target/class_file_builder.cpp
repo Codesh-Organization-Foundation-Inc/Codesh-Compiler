@@ -459,11 +459,17 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
 {
     const auto scope_boundaries = create_scope_boundaries(method_code, method_decl, total_code_length);
 
-    set_root_scope_ranges(method_decl.get_method_scope(), total_code_length);
-    set_inner_scope_ranges(method_decl.get_method_scope(), scope_boundaries);
+    // Compute for root scope
+    set_root_scope_bytecode_boundaries(method_decl.get_method_scope(), total_code_length);
+
+    // Compute for inner scopes
+    for (const auto &inner_scope : method_decl.get_method_scope().get_method_scopes())
+    {
+        set_scope_bytecode_boundaries(*inner_scope, scope_boundaries);
+    }
 }
 
-void codesh::output::jvm_target::class_file_builder::set_root_scope_ranges(
+void codesh::output::jvm_target::class_file_builder::set_root_scope_bytecode_boundaries(
         const ast::method::method_scope_ast_node &root_scope,
         const size_t total_code_length)
 {
@@ -475,34 +481,25 @@ void codesh::output::jvm_target::class_file_builder::set_root_scope_ranges(
     }
 }
 
-void codesh::output::jvm_target::class_file_builder::set_inner_scope_ranges(
-        const ast::method::method_scope_ast_node &root_scope,
+void codesh::output::jvm_target::class_file_builder::set_scope_bytecode_boundaries(
+        const ast::method::method_scope_ast_node &scope,
         const scope_to_bytecode_boundaries &scope_boundaries)
 {
-    const std::function<void(const ast::method::method_scope_ast_node &)> process_scope =
-        [&](const ast::method::method_scope_ast_node &scope)
-        {
-            const auto it = scope_boundaries.find(&scope);
-            if (it == scope_boundaries.end())
-                return;
+    const auto it = scope_boundaries.find(&scope);
+    if (it == scope_boundaries.end())
+        return;
 
-            const auto [scope_start, scope_end] = it->second;
+    const auto [scope_start, scope_end] = it->second;
 
-            for (const auto &var : scope.get_local_variables())
-            {
-                var->set_bytecode_start_pc(scope_start);
-                var->set_bytecode_length(scope_end - scope_start);
-            }
-
-            for (const auto &inner_scope : scope.get_method_scopes())
-            {
-                process_scope(*inner_scope);
-            }
-        };
-
-    for (const auto &inner_scope : root_scope.get_method_scopes())
+    for (const auto &var : scope.get_local_variables())
     {
-        process_scope(*inner_scope);
+        var->set_bytecode_start_pc(scope_start);
+        var->set_bytecode_length(scope_end - scope_start);
+    }
+
+    for (const auto &inner_scope : scope.get_method_scopes())
+    {
+        set_scope_bytecode_boundaries(*inner_scope, scope_boundaries);
     }
 }
 
