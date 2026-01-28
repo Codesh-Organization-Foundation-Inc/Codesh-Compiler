@@ -5,6 +5,7 @@
 #include "../../parser/ast/impl/binary_ast_node.h"
 #include "../../parser/ast/impl/unary_ast_node.h"
 #include "../../parser/ast/method/operation/block/if_ast_node.h"
+#include "../../parser/ast/method/operation/block/while_ast_node.h"
 #include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 #include "../../semantic_analyzer/symbol_table/symbol.h"
 
@@ -57,6 +58,17 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         {
             all_succeed &= resolve_scope(context, containing_method, if_node->get_else_branch()->get());
         }
+
+        return all_succeed;
+    }
+
+
+    if (const auto while_node = dynamic_cast<ast::block::while_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        all_succeed &= resolve_value(context, while_node->get_condition(), containing_method, scope);
+        all_succeed &= resolve_scope(context, containing_method, while_node->get_body_scope());
 
         return all_succeed;
     }
