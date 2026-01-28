@@ -349,7 +349,7 @@ size_t codesh::output::ir::scope_marker::get_bytecode_position() const
     return bytecode_position;
 }
 
-void codesh::output::ir::scope_marker::set_bytecode_position(const size_t pos) const
+void codesh::output::ir::scope_marker::set_bytecode_position(const size_t pos)
 {
     bytecode_position = pos;
 }

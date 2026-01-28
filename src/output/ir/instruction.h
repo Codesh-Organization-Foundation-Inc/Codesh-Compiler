@@ -303,7 +303,7 @@ public:
 class scope_marker : public instruction
 {
     const ast::method::method_scope_ast_node &scope;
-    mutable size_t bytecode_position = 0;
+    size_t bytecode_position = 0;
 
 public:
     explicit scope_marker(const ast::method::method_scope_ast_node &scope);
@@ -313,7 +313,7 @@ public:
 
     [[nodiscard]] const ast::method::method_scope_ast_node &get_scope() const;
     [[nodiscard]] size_t get_bytecode_position() const;
-    void set_bytecode_position(size_t pos) const;
+    void set_bytecode_position(size_t pos);
 };
 
 /**

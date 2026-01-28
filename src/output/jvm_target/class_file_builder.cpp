@@ -468,12 +468,12 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
 
     for (const auto &instr : method_code.get_instructions())
     {
-        if (const auto *begin_marker = dynamic_cast<const ir::scope_begin_marker *>(instr.get()))
+        if (auto *begin_marker = dynamic_cast<ir::scope_begin_marker *>(instr.get()))
         {
             begin_marker->set_bytecode_position(current_bytecode_pos);
             scope_positions[&begin_marker->get_scope()].first = current_bytecode_pos;
         }
-        else if (const auto *end_marker = dynamic_cast<const ir::scope_end_marker *>(instr.get()))
+        else if (auto *end_marker = dynamic_cast<ir::scope_end_marker *>(instr.get()))
         {
             end_marker->set_bytecode_position(current_bytecode_pos);
             scope_positions[&end_marker->get_scope()].second = current_bytecode_pos;
