@@ -26,6 +26,12 @@ static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_
                           const codesh::semantic_analyzer::method_scope_symbol &scope,
                           const codesh::ast::block::conditioned_scope_container &conditioned_scope);
 
+static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
+                              codesh::definition::primitive_type type,
+                              const std::string &blasphemy_details);
+
+static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_node &val_node);
+
 
 bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
                                                    ast::method::operation::method_operation_ast_node &stmnt,
@@ -69,30 +75,9 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     if (const auto while_node = dynamic_cast<ast::block::while_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
-
         all_succeed &= resolve_value(context, while_node->get_condition(), containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, while_node->get_body_scope());
-
-        if (const auto cond_type = dynamic_cast<ast::type::primitive_type_ast_node *>(while_node->get_condition().get_type()))
-        {
-            if (cond_type->get_type() != definition::primitive_type::BOOLEAN)
-            {
-                blasphemy::get_blasphemy_collector().add_blasphemy(
-                    blasphemy::details::CONDITION_NOT_BOOLEAN,
-                    blasphemy::blasphemy_type::SEMANTIC
-                );
-                all_succeed = false;
-            }
-        }
-        else
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::CONDITION_NOT_BOOLEAN,
-                blasphemy::blasphemy_type::SEMANTIC
-            );
-            all_succeed = false;
-        }
-
+        all_succeed &= is_condition_boolean(while_node->get_condition());
         return all_succeed;
     }
 
@@ -105,10 +90,8 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     if (const auto binary_op = dynamic_cast<ast::impl::binary_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
-
         all_succeed &= resolve_value(context, binary_op->get_left(), containing_method, scope);
         all_succeed &= resolve_value(context, binary_op->get_right(), containing_method, scope);
-
         return all_succeed;
     }
 
@@ -157,5 +140,32 @@ static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_
     bool all_succeed = true;
     all_succeed &= resolve_value(context, *conditioned_scope.condition, containing_method, scope);
     all_succeed &= resolve_scope(context, containing_method, conditioned_scope.scope);
+    all_succeed &= is_condition_boolean(*conditioned_scope.condition);
     return all_succeed;
+}
+
+static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
+                              const codesh::definition::primitive_type type,
+                              const std::string &blasphemy_details)
+{
+    if (const auto prim_type = dynamic_cast<codesh::ast::type::primitive_type_ast_node *>(val_node.get_type()))
+    {
+        if (prim_type->get_type() == type)
+            return true;
+    }
+
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy_details,
+        codesh::blasphemy::blasphemy_type::SEMANTIC
+    );
+    return false;
+}
+
+static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_node &val_node)
+{
+    return is_primitive_type(
+        val_node,
+        codesh::definition::primitive_type::BOOLEAN,
+        codesh::blasphemy::details::CONDITION_NOT_BOOLEAN
+    );
 }
