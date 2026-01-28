@@ -315,6 +315,11 @@ public:
     void set_bytecode_position(size_t pos) const;
 };
 
+/**
+ * Marker instruction for tracking scope boundaries.
+ * Does not emit any bytecode, but helps track bytecode positions
+ * for LocalVariableTable and StackMapTable generation.
+ */
 class scope_end_marker final : public instruction
 {
     const ast::method::method_scope_ast_node &scope;
