@@ -2,9 +2,15 @@
 #include "method_call/resolve.h"
 #include "variable_reference/resolve.h"
 
+#include "../../blasphemy/blasphemy_collector.h"
+#include "../../blasphemy/details.h"
 #include "../../parser/ast/impl/binary_ast_node.h"
 #include "../../parser/ast/impl/unary_ast_node.h"
+#include "../../parser/ast/collection/collection_ast_node.h"
+#include "../../parser/ast/method/operation/block/for_ast_node.h"
 #include "../../parser/ast/method/operation/block/if_ast_node.h"
+#include "../../parser/ast/method/operation/block/while_ast_node.h"
+#include "../../parser/ast/type/primitive_type_ast_node.h"
 #include "../../parser/ast/var_reference/variable_reference_ast_node.h"
 #include "../../semantic_analyzer/symbol_table/symbol.h"
 
@@ -21,6 +27,14 @@ static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_
                           const codesh::semantic_analyzer::method_symbol &containing_method,
                           const codesh::semantic_analyzer::method_scope_symbol &scope,
                           const codesh::ast::block::conditioned_scope_container &conditioned_scope);
+
+static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
+                              codesh::definition::primitive_type type,
+                              const std::string &blasphemy_details);
+
+static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_node &val_node);
+
+static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node);
 
 
 bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
@@ -58,6 +72,25 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
             all_succeed &= resolve_scope(context, containing_method, if_node->get_else_branch()->get());
         }
 
+        return all_succeed;
+    }
+
+
+    if (const auto while_node = dynamic_cast<ast::block::while_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_value(context, while_node->get_condition(), containing_method, scope);
+        all_succeed &= resolve_scope(context, containing_method, while_node->get_body_scope());
+        all_succeed &= is_condition_boolean(while_node->get_condition());
+        return all_succeed;
+    }
+
+    if (const auto for_node = dynamic_cast<ast::block::for_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_value(context, for_node->get_collection(), containing_method, scope);
+        all_succeed &= resolve_scope(context, containing_method, for_node->get_body_scope());
+        all_succeed &= is_collection(for_node->get_collection());
         return all_succeed;
     }
 
@@ -120,5 +153,44 @@ static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_
     bool all_succeed = true;
     all_succeed &= resolve_value(context, *conditioned_scope.condition, containing_method, scope);
     all_succeed &= resolve_scope(context, containing_method, conditioned_scope.scope);
+    all_succeed &= is_condition_boolean(*conditioned_scope.condition);
     return all_succeed;
+}
+
+static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
+                              const codesh::definition::primitive_type type,
+                              const std::string &blasphemy_details)
+{
+    if (const auto prim_type = dynamic_cast<codesh::ast::type::primitive_type_ast_node *>(val_node.get_type()))
+    {
+        if (prim_type->get_type() == type)
+            return true;
+    }
+
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy_details,
+        codesh::blasphemy::blasphemy_type::SEMANTIC
+    );
+    return false;
+}
+
+static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_node &val_node)
+{
+    return is_primitive_type(
+        val_node,
+        codesh::definition::primitive_type::BOOLEAN,
+        codesh::blasphemy::details::CONDITION_NOT_BOOLEAN
+    );
+}
+
+static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node)
+{
+    if (dynamic_cast<const codesh::ast::collection::collection_ast_node *>(&val_node))
+        return true;
+
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::details::ITERATOR_NOT_COLLECTION,
+        codesh::blasphemy::blasphemy_type::SEMANTIC
+    );
+    return false;
 }
