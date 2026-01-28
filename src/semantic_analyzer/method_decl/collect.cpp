@@ -88,7 +88,7 @@ void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbo
             method_symbol.create_method_scope(current_scope_symbol, *inner_scope_node)
         );
 
-        // Collect local variables declared in this inner scope
+        // Collect all local variables declared in this scope
         collect_local_variables(*inner_scope_node, inner_scope_symbol);
 
         // Recursively collect even more inner scopes

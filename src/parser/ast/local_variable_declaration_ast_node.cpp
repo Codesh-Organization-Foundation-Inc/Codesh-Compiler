@@ -76,7 +76,7 @@ size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_start_pc()
     return bytecode_start_pc;
 }
 
-void codesh::ast::local_variable_declaration_ast_node::set_bytecode_start_pc(const size_t start_pc) const
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_start_pc(const size_t start_pc)
 {
     this->bytecode_start_pc = start_pc;
 }
@@ -86,7 +86,7 @@ size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_length() c
     return bytecode_length;
 }
 
-void codesh::ast::local_variable_declaration_ast_node::set_bytecode_length(const size_t length) const
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_length(const size_t length)
 {
     this->bytecode_length = length;
 }
