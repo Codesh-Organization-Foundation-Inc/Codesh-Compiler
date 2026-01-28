@@ -324,62 +324,42 @@ void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &
         : -1;
 }
 
-codesh::output::ir::scope_begin_marker::scope_begin_marker(const ast::method::method_scope_ast_node &scope) :
+codesh::output::ir::scope_marker::scope_marker(const ast::method::method_scope_ast_node &scope) :
     scope(scope)
 {
 }
 
-size_t codesh::output::ir::scope_begin_marker::size() const
+size_t codesh::output::ir::scope_marker::size() const
 {
-    return 0;  // Marker emits no bytecode
+    // Markers emit nothing
+    return 0;
 }
 
-void codesh::output::ir::scope_begin_marker::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::scope_marker::emit(std::list<instruction_container> &collector) const
 {
-    // Marker emits nothing
 }
 
-const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_begin_marker::get_scope() const
+const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_marker::get_scope() const
 {
     return scope;
 }
 
-size_t codesh::output::ir::scope_begin_marker::get_bytecode_position() const
+size_t codesh::output::ir::scope_marker::get_bytecode_position() const
 {
     return bytecode_position;
 }
 
-void codesh::output::ir::scope_begin_marker::set_bytecode_position(const size_t pos) const
+void codesh::output::ir::scope_marker::set_bytecode_position(const size_t pos) const
 {
     bytecode_position = pos;
+}
+
+codesh::output::ir::scope_begin_marker::scope_begin_marker(const ast::method::method_scope_ast_node &scope) :
+        scope_marker(scope)
+{
 }
 
 codesh::output::ir::scope_end_marker::scope_end_marker(const ast::method::method_scope_ast_node &scope) :
-    scope(scope)
+        scope_marker(scope)
 {
-}
-
-size_t codesh::output::ir::scope_end_marker::size() const
-{
-    return 0;  // Marker emits no bytecode
-}
-
-void codesh::output::ir::scope_end_marker::emit(std::list<instruction_container> &collector) const
-{
-    // Marker emits nothing
-}
-
-const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_end_marker::get_scope() const
-{
-    return scope;
-}
-
-size_t codesh::output::ir::scope_end_marker::get_bytecode_position() const
-{
-    return bytecode_position;
-}
-
-void codesh::output::ir::scope_end_marker::set_bytecode_position(const size_t pos) const
-{
-    bytecode_position = pos;
 }
