@@ -458,27 +458,7 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
         const size_t total_code_length)
 {
     const auto scope_boundaries = create_scope_boundaries(method_code, method_decl, total_code_length);
-
-    // Compute for root scope
-    set_root_scope_bytecode_boundaries(method_decl.get_method_scope(), total_code_length);
-
-    // Compute for inner scopes
-    for (const auto &inner_scope : method_decl.get_method_scope().get_method_scopes())
-    {
-        set_scope_bytecode_boundaries(*inner_scope, scope_boundaries);
-    }
-}
-
-void codesh::output::jvm_target::class_file_builder::set_root_scope_bytecode_boundaries(
-        const ast::method::method_scope_ast_node &root_scope,
-        const size_t total_code_length)
-{
-    // The root scope spans the entire method
-    for (const auto &var : root_scope.get_local_variables())
-    {
-        var->set_bytecode_start_pc(0);
-        var->set_bytecode_length(total_code_length);
-    }
+    set_scope_bytecode_boundaries(method_decl.get_method_scope(), scope_boundaries);
 }
 
 void codesh::output::jvm_target::class_file_builder::set_scope_bytecode_boundaries(
