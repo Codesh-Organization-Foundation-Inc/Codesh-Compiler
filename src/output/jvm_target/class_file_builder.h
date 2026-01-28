@@ -1,6 +1,9 @@
 #pragma once
 
+#include "output/ir/code_block.h"
 #include "output/jvm_target/defs/class_file.h"
+
+#include <set>
 
 namespace codesh::semantic_analyzer
 {
@@ -23,6 +26,7 @@ namespace codesh::ast
 {
 namespace method
 {
+class method_scope_ast_node;
 class method_declaration_ast_node;
 }
 class compilation_unit_ast_node;
@@ -65,6 +69,25 @@ class class_file_builder
 
 
     void handle_class_type(const ast::type_decl::class_declaration_ast_node &class_decl) const;
+
+
+    [[nodiscard]] std::unique_ptr<defs::methods_info_entry> create_method_entry(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
+    ir::code_block emit_method_bytecode(defs::code_attribute_entry &code_attr,
+                              const ast::method::method_declaration_ast_node &method_decl) const;
+    [[nodiscard]] static int get_locals_count(const ast::method::method_declaration_ast_node &method_decl);
+    [[nodiscard]] std::unique_ptr<defs::local_variable_table_attribute_entry> create_local_variable_table(
+        const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
+
+    [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
+        const ir::code_block &method_code) const;
+    [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
+    static void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
+        const ir::code_block &method_code);
 
 
     void add_constant_pool_entries() const;

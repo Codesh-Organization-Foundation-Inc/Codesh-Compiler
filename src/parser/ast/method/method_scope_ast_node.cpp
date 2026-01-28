@@ -1,14 +1,26 @@
 #include "method_scope_ast_node.h"
 
+#include "method_declaration_ast_node.h"
+
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_scope_symbol>> &codesh::ast::method::
     method_scope_ast_node::_get_resolved() const
 {
     return scope_symbol;
 }
 
+codesh::ast::method::method_scope_ast_node::method_scope_ast_node(method_declaration_ast_node &parent_method) :
+    parent_method(parent_method)
+{
+}
+
 void codesh::ast::method::method_scope_ast_node::set_resolved(semantic_analyzer::method_scope_symbol &symbol)
 {
     scope_symbol.emplace(symbol);
+}
+
+codesh::ast::method::method_declaration_ast_node &codesh::ast::method::method_scope_ast_node::get_parent_method() const
+{
+    return parent_method;
 }
 
 const std::list<std::unique_ptr<codesh::ast::method::operation::method_operation_ast_node>> &codesh::ast::method::
@@ -58,7 +70,7 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
 codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_ast_node::
     create_method_scope()
 {
-    return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>());
+    return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>(parent_method));
 }
 
 const std::vector<std::unique_ptr<codesh::ast::method::method_scope_ast_node>> &codesh::ast::method::

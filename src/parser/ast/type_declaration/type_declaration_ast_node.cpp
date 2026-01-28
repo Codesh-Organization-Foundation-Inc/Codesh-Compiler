@@ -152,6 +152,4 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_metadata(const comp
 
     // More bs
     constant_pool.goc_utf8_info("SourceFile");
-    constant_pool.goc_utf8_info("Code");
-    constant_pool.goc_utf8_info("LocalVariableTable");
 }
