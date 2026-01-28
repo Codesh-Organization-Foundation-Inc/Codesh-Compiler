@@ -459,39 +459,48 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
 {
     const auto scope_boundaries = create_scope_boundaries(method_code, method_decl, total_code_length);
 
-    // Second pass: set bytecode ranges for all local variables based on their containing scope
-    // Variables in root method scope
-    for (const auto &var : method_decl.get_method_scope().get_local_variables())
+    set_root_scope_ranges(method_decl.get_method_scope(), total_code_length);
+    set_inner_scope_ranges(method_decl.get_method_scope(), scope_boundaries);
+}
+
+void codesh::output::jvm_target::class_file_builder::set_root_scope_ranges(
+        const ast::method::method_scope_ast_node &root_scope,
+        const size_t total_code_length)
+{
+    // The root scope spans the entire method
+    for (const auto &var : root_scope.get_local_variables())
     {
         var->set_bytecode_start_pc(0);
         var->set_bytecode_length(total_code_length);
     }
+}
 
-    // Variables in inner scopes - need to recursively process
-    std::function<void(const ast::method::method_scope_ast_node &)> process_scope;
-    process_scope = [&](const ast::method::method_scope_ast_node &scope)
-    {
-        auto it = scope_boundaries.find(&scope);
-        if (it == scope_boundaries.end())
-            return;
-
-        const auto [scope_start, scope_end] = it->second;
-
-        for (const auto &var : scope.get_local_variables())
+void codesh::output::jvm_target::class_file_builder::set_inner_scope_ranges(
+        const ast::method::method_scope_ast_node &root_scope,
+        const scope_to_bytecode_boundaries &scope_boundaries)
+{
+    const std::function<void(const ast::method::method_scope_ast_node &)> process_scope =
+        [&](const ast::method::method_scope_ast_node &scope)
         {
-            var->set_bytecode_start_pc(scope_start);
-            var->set_bytecode_length(scope_end - scope_start);
-        }
+            const auto it = scope_boundaries.find(&scope);
+            if (it == scope_boundaries.end())
+                return;
 
-        // Process nested scopes
-        for (const auto &inner_scope : scope.get_method_scopes())
-        {
-            process_scope(*inner_scope);
-        }
-    };
+            const auto [scope_start, scope_end] = it->second;
 
-    // Process all inner scopes
-    for (const auto &inner_scope : method_decl.get_method_scope().get_method_scopes())
+            for (const auto &var : scope.get_local_variables())
+            {
+                var->set_bytecode_start_pc(scope_start);
+                var->set_bytecode_length(scope_end - scope_start);
+            }
+
+            for (const auto &inner_scope : scope.get_method_scopes())
+            {
+                process_scope(*inner_scope);
+            }
+        };
+
+    for (const auto &inner_scope : root_scope.get_method_scopes())
     {
         process_scope(*inner_scope);
     }
@@ -504,7 +513,7 @@ codesh::output::jvm_target::class_file_builder::scope_to_bytecode_boundaries cod
 {
     scope_to_bytecode_boundaries result;
 
-    // The root method scope spans the entire method
+    // The root scope spans the entire method
     result[&method_decl.get_method_scope()] = {0, total_code_length};
 
     size_t current_bytecode_pos = 0;

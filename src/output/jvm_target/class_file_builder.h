@@ -108,6 +108,12 @@ class class_file_builder
     [[nodiscard]] static scope_to_bytecode_boundaries create_scope_boundaries(const ir::code_block &method_code,
             const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
 
+    static void set_root_scope_ranges(const ast::method::method_scope_ast_node &root_scope,
+            size_t total_code_length);
+
+    static void set_inner_scope_ranges(const ast::method::method_scope_ast_node &root_scope,
+            const scope_to_bytecode_boundaries &scope_boundaries);
+
 
     void add_constant_pool_entries() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
