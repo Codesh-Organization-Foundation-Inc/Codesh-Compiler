@@ -4,6 +4,7 @@
 #include "output/jvm_target/defs/class_file.h"
 
 #include <set>
+#include <unordered_map>
 
 namespace codesh::semantic_analyzer
 {
@@ -95,6 +96,17 @@ class class_file_builder
      */
     static void compute_local_variable_bytecode_ranges(const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
+
+    /**
+     * Maps a scope node to a pair representing the start and end bytecodes
+     */
+    using scope_to_bytecode_boundaries = std::unordered_map<
+        const ast::method::method_scope_ast_node *,
+        std::pair<size_t, size_t>
+    >;
+
+    [[nodiscard]] static scope_to_bytecode_boundaries create_scope_boundaries(const ir::code_block &method_code,
+            const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
 
 
     void add_constant_pool_entries() const;

@@ -457,30 +457,7 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
         const ast::method::method_declaration_ast_node &method_decl,
         const size_t total_code_length)
 {
-    // First pass: compute bytecode positions for all scope markers
-    size_t current_bytecode_pos = 0;
-
-    // Map from scope to (start_position, end_position)
-    std::unordered_map<const ast::method::method_scope_ast_node *, std::pair<size_t, size_t>> scope_positions;
-
-    // The root method scope spans the entire method
-    scope_positions[&method_decl.get_method_scope()] = {0, total_code_length};
-
-    for (const auto &instr : method_code.get_instructions())
-    {
-        if (auto *begin_marker = dynamic_cast<ir::scope_begin_marker *>(instr.get()))
-        {
-            begin_marker->set_bytecode_position(current_bytecode_pos);
-            scope_positions[&begin_marker->get_scope()].first = current_bytecode_pos;
-        }
-        else if (auto *end_marker = dynamic_cast<ir::scope_end_marker *>(instr.get()))
-        {
-            end_marker->set_bytecode_position(current_bytecode_pos);
-            scope_positions[&end_marker->get_scope()].second = current_bytecode_pos;
-        }
-
-        current_bytecode_pos += instr->size();
-    }
+    const auto scope_boundaries = create_scope_boundaries(method_code, method_decl, total_code_length);
 
     // Second pass: set bytecode ranges for all local variables based on their containing scope
     // Variables in root method scope
@@ -494,8 +471,8 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
     std::function<void(const ast::method::method_scope_ast_node &)> process_scope;
     process_scope = [&](const ast::method::method_scope_ast_node &scope)
     {
-        auto it = scope_positions.find(&scope);
-        if (it == scope_positions.end())
+        auto it = scope_boundaries.find(&scope);
+        if (it == scope_boundaries.end())
             return;
 
         const auto [scope_start, scope_end] = it->second;
@@ -518,4 +495,34 @@ void codesh::output::jvm_target::class_file_builder::compute_local_variable_byte
     {
         process_scope(*inner_scope);
     }
+}
+
+codesh::output::jvm_target::class_file_builder::scope_to_bytecode_boundaries codesh::output::jvm_target::
+    class_file_builder::create_scope_boundaries(const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl,
+        const size_t total_code_length)
+{
+    scope_to_bytecode_boundaries result;
+
+    // The root method scope spans the entire method
+    result[&method_decl.get_method_scope()] = {0, total_code_length};
+
+    size_t current_bytecode_pos = 0;
+    for (const auto &instr : method_code.get_instructions())
+    {
+        if (auto *begin_marker = dynamic_cast<ir::scope_begin_marker *>(instr.get()))
+        {
+            begin_marker->set_bytecode_position(current_bytecode_pos);
+            result[&begin_marker->get_scope()].first = current_bytecode_pos;
+        }
+        else if (auto *end_marker = dynamic_cast<ir::scope_end_marker *>(instr.get()))
+        {
+            end_marker->set_bytecode_position(current_bytecode_pos);
+            result[&end_marker->get_scope()].second = current_bytecode_pos;
+        }
+
+        current_bytecode_pos += instr->size();
+    }
+
+    return result;
 }
