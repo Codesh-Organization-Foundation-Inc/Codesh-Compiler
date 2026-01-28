@@ -34,6 +34,7 @@ const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION = "נָבו
 //TODO: Throw when interoperability & type checks exist
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE = "עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה";
 const std::string codesh::blasphemy::details::CONDITION_NOT_BOOLEAN = "תְּנַאי חַיָּב לִהְיוֹת מִסּוּג דְּבַר־מָה";
+const std::string codesh::blasphemy::details::ITERATOR_NOT_COLLECTION = "מוֹנֶה חַיָּב לִהְיוֹת מִסּוּג אוסף";
 
 // OUTPUT
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG = "אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף";
