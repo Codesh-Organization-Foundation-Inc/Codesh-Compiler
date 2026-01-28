@@ -1,9 +1,11 @@
 #include "error_type_declaration_ast_node.h"
 
+#include "defenition/definitions.h"
+
 #include <stdexcept>
 
 codesh::ast::type_decl::error_type_declaration_ast_node::error_type_declaration_ast_node() :
-    type_declaration_ast_node(definition::fully_qualified_name{})
+    type_declaration_ast_node(definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT))
 {
 }
 
