@@ -4,11 +4,14 @@
 #include "blasphemy/details.h"
 #include "defenition/definitions.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "util.h"
 #include "output/ir/code_block.h"
+#include "output/ir/instruction.h"
 #include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
@@ -16,10 +19,12 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 
 #include <list>
 #include <ranges>
 #include <set>
+#include <unordered_map>
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
@@ -144,6 +149,9 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
 
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
     const auto method_code = emit_method_bytecode(*code_attr, method_decl);
+
+    // Compute bytecode positions for local variables before creating LocalVariableTable
+    compute_local_variable_bytecode_ranges(method_code, method_decl, code_attr->code.size());
 
     const auto locals = get_locals_count(method_decl);
     util::put_int_bytes(code_attr->max_locals, 2, locals);
@@ -400,9 +408,13 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
     {
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
-        //TODO: Fill per scope info:
-        util::put_int_bytes(entry->start_pc, 2, 0);
-        util::put_int_bytes(entry->length, 2, code_length_total);
+        // Use bytecode positions computed by compute_local_variable_bytecode_ranges
+        const auto *producing_node = var.get().get_producing_node();
+        const size_t start_pc = producing_node ? producing_node->get_bytecode_start_pc() : 0;
+        const size_t length = producing_node ? producing_node->get_bytecode_length() : static_cast<size_t>(code_length_total);
+
+        util::put_int_bytes(entry->start_pc, 2, static_cast<int>(start_pc));
+        util::put_int_bytes(entry->length, 2, static_cast<int>(length));
 
         util::put_int_bytes(
             entry->name_index,
@@ -437,5 +449,73 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         util::put_int_bytes(entry->index, 2, static_cast<int>(var_index));
 
         results_out.push_back(std::move(entry));
+    }
+}
+
+void codesh::output::jvm_target::class_file_builder::compute_local_variable_bytecode_ranges(
+        const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl,
+        const size_t total_code_length)
+{
+    // First pass: compute bytecode positions for all scope markers
+    size_t current_bytecode_pos = 0;
+
+    // Map from scope to (start_position, end_position)
+    std::unordered_map<const ast::method::method_scope_ast_node *, std::pair<size_t, size_t>> scope_positions;
+
+    // The root method scope spans the entire method
+    scope_positions[&method_decl.get_method_scope()] = {0, total_code_length};
+
+    for (const auto &instr : method_code.get_instructions())
+    {
+        if (const auto *begin_marker = dynamic_cast<const ir::scope_begin_marker *>(instr.get()))
+        {
+            begin_marker->set_bytecode_position(current_bytecode_pos);
+            scope_positions[&begin_marker->get_scope()].first = current_bytecode_pos;
+        }
+        else if (const auto *end_marker = dynamic_cast<const ir::scope_end_marker *>(instr.get()))
+        {
+            end_marker->set_bytecode_position(current_bytecode_pos);
+            scope_positions[&end_marker->get_scope()].second = current_bytecode_pos;
+        }
+
+        current_bytecode_pos += instr->size();
+    }
+
+    // Second pass: set bytecode ranges for all local variables based on their containing scope
+    // Variables in root method scope
+    for (const auto &var : method_decl.get_method_scope().get_local_variables())
+    {
+        var->set_bytecode_start_pc(0);
+        var->set_bytecode_length(total_code_length);
+    }
+
+    // Variables in inner scopes - need to recursively process
+    std::function<void(const ast::method::method_scope_ast_node &)> process_scope;
+    process_scope = [&](const ast::method::method_scope_ast_node &scope)
+    {
+        auto it = scope_positions.find(&scope);
+        if (it == scope_positions.end())
+            return;
+
+        const auto [scope_start, scope_end] = it->second;
+
+        for (const auto &var : scope.get_local_variables())
+        {
+            var->set_bytecode_start_pc(scope_start);
+            var->set_bytecode_length(scope_end - scope_start);
+        }
+
+        // Process nested scopes
+        for (const auto &inner_scope : scope.get_method_scopes())
+        {
+            process_scope(*inner_scope);
+        }
+    };
+
+    // Process all inner scopes
+    for (const auto &inner_scope : method_decl.get_method_scope().get_method_scopes())
+    {
+        process_scope(*inner_scope);
     }
 }

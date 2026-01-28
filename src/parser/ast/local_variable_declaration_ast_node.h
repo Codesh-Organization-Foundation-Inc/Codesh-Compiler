@@ -33,6 +33,10 @@ class local_variable_declaration_ast_node : public impl::i_constant_pool_emitter
     size_t accessible_from;
     size_t accessible_to;
 
+    // Bytecode positions - set during IR emission finalization
+    mutable size_t bytecode_start_pc = 0;
+    mutable size_t bytecode_length = 0;
+
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::local_variable_symbol>> &_get_resolved()
         const override;
@@ -57,6 +61,12 @@ public:
 
     [[nodiscard]] size_t get_accessible_to() const;
     void set_accessible_to(size_t accessible_to);
+
+    [[nodiscard]] size_t get_bytecode_start_pc() const;
+    void set_bytecode_start_pc(size_t start_pc) const;
+
+    [[nodiscard]] size_t get_bytecode_length() const;
+    void set_bytecode_length(size_t length) const;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

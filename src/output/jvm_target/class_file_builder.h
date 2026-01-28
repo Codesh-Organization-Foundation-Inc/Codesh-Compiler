@@ -89,6 +89,13 @@ class class_file_builder
     static void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
         const ir::code_block &method_code);
 
+    /**
+     * Processes scope markers in the IR to compute bytecode positions for local variables.
+     * Must be called before creating LocalVariableTable.
+     */
+    static void compute_local_variable_bytecode_ranges(const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
+
 
     void add_constant_pool_entries() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;

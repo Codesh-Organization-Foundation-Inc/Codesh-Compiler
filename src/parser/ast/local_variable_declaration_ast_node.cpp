@@ -71,6 +71,26 @@ void codesh::ast::local_variable_declaration_ast_node::set_accessible_from(const
     this->accessible_from = accessible_from;
 }
 
+size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_start_pc() const
+{
+    return bytecode_start_pc;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_start_pc(const size_t start_pc) const
+{
+    this->bytecode_start_pc = start_pc;
+}
+
+size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_length() const
+{
+    return bytecode_length;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_length(const size_t length) const
+{
+    this->bytecode_length = length;
+}
+
 void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                                       output::jvm_target::constant_pool &constant_pool)
 {

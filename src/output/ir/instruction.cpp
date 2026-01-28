@@ -1,5 +1,6 @@
 #include "instruction.h"
 
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "util.h"
 #include "output/jvm_target/constant_pool.h"
 
@@ -321,4 +322,64 @@ void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &
     collector.back().size_delta = type >= if_type::ARE_INTS_EQUAL
         ? -2
         : -1;
+}
+
+codesh::output::ir::scope_begin_marker::scope_begin_marker(const ast::method::method_scope_ast_node &scope) :
+    scope(scope)
+{
+}
+
+size_t codesh::output::ir::scope_begin_marker::size() const
+{
+    return 0;  // Marker emits no bytecode
+}
+
+void codesh::output::ir::scope_begin_marker::emit(std::list<instruction_container> &collector) const
+{
+    // Marker emits nothing
+}
+
+const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_begin_marker::get_scope() const
+{
+    return scope;
+}
+
+size_t codesh::output::ir::scope_begin_marker::get_bytecode_position() const
+{
+    return bytecode_position;
+}
+
+void codesh::output::ir::scope_begin_marker::set_bytecode_position(const size_t pos) const
+{
+    bytecode_position = pos;
+}
+
+codesh::output::ir::scope_end_marker::scope_end_marker(const ast::method::method_scope_ast_node &scope) :
+    scope(scope)
+{
+}
+
+size_t codesh::output::ir::scope_end_marker::size() const
+{
+    return 0;  // Marker emits no bytecode
+}
+
+void codesh::output::ir::scope_end_marker::emit(std::list<instruction_container> &collector) const
+{
+    // Marker emits nothing
+}
+
+const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_end_marker::get_scope() const
+{
+    return scope;
+}
+
+size_t codesh::output::ir::scope_end_marker::get_bytecode_position() const
+{
+    return bytecode_position;
+}
+
+void codesh::output::ir::scope_end_marker::set_bytecode_position(const size_t pos) const
+{
+    bytecode_position = pos;
 }

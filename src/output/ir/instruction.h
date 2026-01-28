@@ -16,6 +16,14 @@ namespace codesh::semantic_analyzer
 {
 class symbol;
 }
+namespace codesh::ast
+{
+class local_variable_declaration_ast_node;
+}
+namespace codesh::ast::method
+{
+class method_scope_ast_node;
+}
 
 
 namespace codesh::output::ir
@@ -283,6 +291,44 @@ public:
     if_instruction(if_type type, int jump_offset);
 
     void emit(std::list<instruction_container> &collector) const override;
+};
+
+
+/**
+ * Marker instruction for tracking scope boundaries.
+ * Does not emit any bytecode, but helps track bytecode positions
+ * for LocalVariableTable and StackMapTable generation.
+ */
+class scope_begin_marker final : public instruction
+{
+    const ast::method::method_scope_ast_node &scope;
+    mutable size_t bytecode_position = 0;
+
+public:
+    explicit scope_begin_marker(const ast::method::method_scope_ast_node &scope);
+
+    [[nodiscard]] size_t size() const override;
+    void emit(std::list<instruction_container> &collector) const override;
+
+    [[nodiscard]] const ast::method::method_scope_ast_node &get_scope() const;
+    [[nodiscard]] size_t get_bytecode_position() const;
+    void set_bytecode_position(size_t pos) const;
+};
+
+class scope_end_marker final : public instruction
+{
+    const ast::method::method_scope_ast_node &scope;
+    mutable size_t bytecode_position = 0;
+
+public:
+    explicit scope_end_marker(const ast::method::method_scope_ast_node &scope);
+
+    [[nodiscard]] size_t size() const override;
+    void emit(std::list<instruction_container> &collector) const override;
+
+    [[nodiscard]] const ast::method::method_scope_ast_node &get_scope() const;
+    [[nodiscard]] size_t get_bytecode_position() const;
+    void set_bytecode_position(size_t pos) const;
 };
 
 }
