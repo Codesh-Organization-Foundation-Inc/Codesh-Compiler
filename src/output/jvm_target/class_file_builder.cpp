@@ -408,10 +408,15 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
     {
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
-        // Use bytecode positions computed by compute_local_variable_bytecode_ranges
         const auto *producing_node = var.get().get_producing_node();
-        const size_t start_pc = producing_node ? producing_node->get_bytecode_start_pc() : 0;
-        const size_t length = producing_node ? producing_node->get_bytecode_length() : static_cast<size_t>(code_length_total);
+
+        // Use the positions as computed earlier by compute_local_variable_bytecode_ranges
+        const size_t start_pc = producing_node != nullptr
+            ? producing_node->get_bytecode_start_pc()
+            : 0;
+        const size_t length = producing_node != nullptr
+            ? producing_node->get_bytecode_length()
+            : static_cast<size_t>(code_length_total);
 
         util::put_int_bytes(entry->start_pc, 2, static_cast<int>(start_pc));
         util::put_int_bytes(entry->length, 2, static_cast<int>(length));
