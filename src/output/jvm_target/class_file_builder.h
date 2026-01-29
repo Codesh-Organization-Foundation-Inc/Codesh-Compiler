@@ -85,10 +85,19 @@ class class_file_builder
         const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
 
     [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
-        const ir::code_block &method_code) const;
+            const ir::code_block &method_code, const ast::method::method_declaration_ast_node &method_decl) const;
     [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
-    static void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
-        const ir::code_block &method_code);
+    void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
+        const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_at_offset(
+            size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] std::unique_ptr<defs::verification_type_info> descriptor_to_verification_type(
+            const std::string &descriptor) const;
+
+    [[nodiscard]] static size_t verification_type_byte_size(const defs::verification_type_info &info);
 
     /**
      * Processes scope markers in the IR to compute bytecode positions for local variables.

@@ -164,7 +164,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
 
     if (method_decl.has_inner_scopes())
     {
-        code_attr->attributes.push_back(create_stack_map_table_attribute(method_code));
+        code_attr->attributes.push_back(create_stack_map_table_attribute(method_code, method_decl));
     }
 
 
@@ -293,12 +293,13 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entry> codesh::output::jvm_target::
-        class_file_builder::create_stack_map_table_attribute(const ir::code_block &method_code) const
+    class_file_builder::create_stack_map_table_attribute(const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl) const
 {
     auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
 
     util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
-    add_stack_map_frames(*smt_attr, method_code);
+    add_stack_map_frames(*smt_attr, method_code, method_decl);
 
     return smt_attr;
 }
@@ -307,7 +308,6 @@ std::set<size_t> codesh::output::jvm_target::class_file_builder::collect_jump_ta
     const ir::code_block &method_code)
 {
     std::set<size_t> jump_targets;
-    jump_targets.insert(0);
 
     size_t curr_byte_pos = 0;
     for (const auto &method_instruction : method_code.get_instructions())
@@ -326,12 +326,130 @@ std::set<size_t> codesh::output::jvm_target::class_file_builder::collect_jump_ta
     return jump_targets;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>
+    codesh::output::jvm_target::class_file_builder::descriptor_to_verification_type(const std::string &descriptor) const
+{
+    if (descriptor.empty())
+        return std::make_unique<defs::top_variable_info>();
+
+    switch (descriptor[0])
+    {
+        case 'I': case 'Z': case 'B': case 'C': case 'S':
+            return std::make_unique<defs::integer_variable_info>();
+        case 'F':
+            return std::make_unique<defs::float_variable_info>();
+        case 'J':
+            return std::make_unique<defs::long_variable_info>();
+        case 'D':
+            return std::make_unique<defs::double_variable_info>();
+        case 'L': case '[':
+        {
+            auto obj = std::make_unique<defs::object_variable_info>();
+            // For object types, set the constant pool class index
+            // Arrays use the full descriptor as class name, objects use internal name
+            std::string class_name;
+            if (descriptor[0] == '[')
+            {
+                class_name = descriptor;
+            }
+            else
+            {
+                // Strip L and ; from "Lclassname;"
+                class_name = descriptor.substr(1, descriptor.size() - 2);
+            }
+            const int utf8_index = constant_pool_.get_utf8_index(class_name);
+            const int class_index = constant_pool_.get_class_index(utf8_index);
+            util::put_int_bytes(obj->cpool_index, 2, class_index);
+            return obj;
+        }
+        default:
+            return std::make_unique<defs::top_variable_info>();
+    }
+}
+
+size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_size(
+    const defs::verification_type_info &info)
+{
+    const unsigned char tag = info.get_tag();
+    // object_variable_info (tag 7) and uninitialized_variable_info (tag 8) have 2 extra bytes
+    if (tag == 7 || tag == 8)
+        return 3;
+    return 1;
+}
+
+std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
+    codesh::output::jvm_target::class_file_builder::build_locals_at_offset(
+        const size_t offset, const ast::method::method_declaration_ast_node &method_decl) const
+{
+    // Determine max slot index and which slots are active
+    const auto &all_locals = method_decl.get_resolved().get_all_local_variables();
+
+    // Find the highest slot index to size the result
+    size_t max_slot = 0;
+    for (const auto &var : all_locals | std::views::values)
+    {
+        const size_t idx = var.get().get_index();
+        if (idx >= max_slot)
+            max_slot = idx + 1;
+    }
+
+    // Build the locals array with top for inactive/gap slots
+    std::vector<std::unique_ptr<defs::verification_type_info>> locals;
+    locals.reserve(max_slot);
+    for (size_t i = 0; i < max_slot; ++i)
+        locals.push_back(std::make_unique<defs::top_variable_info>());
+
+    for (const auto &var : all_locals | std::views::values)
+    {
+        const auto *producing_node = var.get().get_producing_node();
+
+        bool is_active;
+        if (producing_node == nullptr)
+        {
+            // Parameters and 'this' have no producing node: always active.
+            is_active = true;
+        }
+        else
+        {
+            const size_t start_pc = producing_node->get_bytecode_start_pc();
+            const size_t length = producing_node->get_bytecode_length();
+            is_active = offset >= start_pc && offset < start_pc + length;
+        }
+
+        if (is_active)
+        {
+            const size_t idx = var.get().get_index();
+            const std::string descriptor = var.get().get_type()->generate_descriptor();
+            locals[idx] = descriptor_to_verification_type(descriptor);
+        }
+    }
+
+    // Trim trailing top entries
+    while (!locals.empty() && locals.back()->get_tag() == 0)
+    {
+        locals.pop_back();
+    }
+
+    return locals;
+}
+
 void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
-        defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code)
+        defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl) const
 {
     const auto frame_targets = collect_jump_targets(method_code);
 
-    size_t smt_attr_size = 2;
+    if (frame_targets.empty())
+    {
+        util::put_int_bytes(smt_attr.number_of_entries, 2, 0);
+        util::put_int_bytes(smt_attr.attribute_length, 4, 2);
+        return;
+    }
+
+    size_t smt_attr_size = 2; // 2 bytes for number_of_entries
+
+    // Build the initial locals (at offset 0, before any branch target)
+    auto prev_locals = build_locals_at_offset(0, method_decl);
 
     int prev_pos = -1;
     for (const size_t target : frame_targets)
@@ -339,29 +457,133 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         const int current_pos = static_cast<int>(target);
         const int offset_delta = current_pos - prev_pos - 1;
 
-        std::unique_ptr<defs::stack_map_frame> frame;
-        //TODO: Figure out when it's not same_frame
-        if (offset_delta <= 63)
+        if (offset_delta > 0xFFFF)
         {
-            frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
-            smt_attr_size += 1;
+            throw std::runtime_error("Inner scope too big; Max is 65535");
+        }
+
+        auto current_locals = build_locals_at_offset(target, method_decl);
+
+        // Compare current_locals with prev_locals to determine frame type
+        const size_t prev_size = prev_locals.size();
+        const size_t curr_size = current_locals.size();
+
+        // Check if locals are identical
+        bool locals_same = (prev_size == curr_size);
+        if (locals_same)
+        {
+            for (size_t i = 0; i < prev_size; ++i)
+            {
+                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
+                {
+                    locals_same = false;
+                    break;
+                }
+            }
+        }
+
+        std::unique_ptr<defs::stack_map_frame> frame;
+
+        if (locals_same)
+        {
+            // same_frame or same_frame_extended
+            if (offset_delta <= 63)
+            {
+                frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
+                smt_attr_size += 1;
+            }
+            else
+            {
+                auto temp_frame = std::make_unique<defs::same_frame_extended>();
+                util::put_int_bytes(temp_frame->offset_delta, 2, offset_delta);
+                frame = std::move(temp_frame);
+                smt_attr_size += 3;
+            }
+        }
+        else if (curr_size > prev_size && curr_size <= prev_size + 3)
+        {
+            // Check if the first prev_size entries match — if so, append_frame
+            bool prefix_matches = true;
+            for (size_t i = 0; i < prev_size; ++i)
+            {
+                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
+                {
+                    prefix_matches = false;
+                    break;
+                }
+            }
+
+            if (prefix_matches)
+            {
+                const auto k = static_cast<unsigned char>(curr_size - prev_size);
+                auto append = std::make_unique<defs::append_frame>(k);
+                util::put_int_bytes(append->offset_delta, 2, offset_delta);
+
+                size_t frame_size = 3; // 1 byte frame_type + 2 bytes offset_delta
+                for (size_t i = prev_size; i < curr_size; ++i)
+                {
+                    frame_size += verification_type_byte_size(*current_locals[i]);
+                    append->locals.push_back(std::move(current_locals[i]));
+                }
+
+                smt_attr_size += frame_size;
+                frame = std::move(append);
+            }
+            else
+            {
+                goto emit_full_frame;
+            }
+        }
+        else if (curr_size < prev_size && prev_size <= curr_size + 3)
+        {
+            // Check if the first curr_size entries match — if so, chop_frame
+            bool prefix_matches = true;
+            for (size_t i = 0; i < curr_size; ++i)
+            {
+                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
+                {
+                    prefix_matches = false;
+                    break;
+                }
+            }
+
+            if (prefix_matches)
+            {
+                const auto k = static_cast<unsigned char>(prev_size - curr_size);
+                auto chop = std::make_unique<defs::chop_frame>(k);
+                util::put_int_bytes(chop->offset_delta, 2, offset_delta);
+
+                smt_attr_size += 3; // 1 byte frame_type + 2 bytes offset_delta
+                frame = std::move(chop);
+            }
+            else
+            {
+                goto emit_full_frame;
+            }
         }
         else
         {
-            if (offset_delta > 0xFFFF)
+            emit_full_frame:
+            auto full = std::make_unique<defs::full_frame>();
+            util::put_int_bytes(full->offset_delta, 2, offset_delta);
+            util::put_int_bytes(full->number_of_locals, 2, static_cast<int>(curr_size));
+            util::put_int_bytes(full->number_of_stack_items, 2, 0);
+
+            size_t frame_size = 7; // 1 + 2 + 2 + 2 (frame_type + offset_delta + num_locals + num_stack)
+            for (size_t i = 0; i < curr_size; ++i)
             {
-                //TODO: Make Codesh error
-                throw std::runtime_error("Inner scope too big; Max is 65535");
+                frame_size += verification_type_byte_size(*current_locals[i]);
+                full->locals.push_back(std::move(current_locals[i]));
             }
 
-            auto temp_frame = std::make_unique<defs::same_frame_extended>();
-            util::put_int_bytes(temp_frame->offset_delta, 2, offset_delta);
-
-            frame = std::move(temp_frame);
-            smt_attr_size += 3;
+            smt_attr_size += frame_size;
+            frame = std::move(full);
         }
 
         smt_attr.entries.push_back(std::move(frame));
+
+        // Rebuild prev_locals for next iteration (current_locals may have been moved from)
+        prev_locals = build_locals_at_offset(target, method_decl);
         prev_pos = current_pos;
     }
 
