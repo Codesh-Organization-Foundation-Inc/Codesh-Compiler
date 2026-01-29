@@ -15,6 +15,7 @@
 #include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <algorithm>
@@ -326,45 +327,66 @@ std::set<size_t> codesh::output::jvm_target::class_file_builder::collect_jump_ta
     return jump_targets;
 }
 
-std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>
-    codesh::output::jvm_target::class_file_builder::descriptor_to_verification_type(const std::string &descriptor) const
+std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info> codesh::output::jvm_target::
+    class_file_builder::parse_verification_type(
+        const ast::type::type_ast_node &type_node) const
 {
-    if (descriptor.empty())
-        return std::make_unique<defs::top_variable_info>();
-
-    switch (descriptor[0])
+    if (const auto primitive_type = dynamic_cast<const ast::type::primitive_type_ast_node *>(&type_node))
     {
-        case 'I': case 'Z': case 'B': case 'C': case 'S':
-            return std::make_unique<defs::integer_variable_info>();
-        case 'F':
-            return std::make_unique<defs::float_variable_info>();
-        case 'J':
-            return std::make_unique<defs::long_variable_info>();
-        case 'D':
-            return std::make_unique<defs::double_variable_info>();
-        case 'L': case '[':
+        switch (primitive_type->get_type())
         {
-            auto obj = std::make_unique<defs::object_variable_info>();
-            // For object types, set the constant pool class index
-            // Arrays use the full descriptor as class name, objects use internal name
-            std::string class_name;
-            if (descriptor[0] == '[')
-            {
-                class_name = descriptor;
-            }
-            else
-            {
-                // Strip L and ; from "Lclassname;"
-                class_name = descriptor.substr(1, descriptor.size() - 2);
-            }
-            const int utf8_index = constant_pool_.get_utf8_index(class_name);
-            const int class_index = constant_pool_.get_class_index(utf8_index);
-            util::put_int_bytes(obj->cpool_index, 2, class_index);
-            return obj;
+        case definition::primitive_type::INTEGER:
+        case definition::primitive_type::BOOLEAN:
+        case definition::primitive_type::BYTE:
+        case definition::primitive_type::CHAR:
+        case definition::primitive_type::SHORT:
+            return std::make_unique<defs::integer_variable_info>();
+
+        case definition::primitive_type::FLOAT:
+            return std::make_unique<defs::float_variable_info>();
+
+        case definition::primitive_type::LONG:
+            return std::make_unique<defs::long_variable_info>();
+
+        case definition::primitive_type::DOUBLE:
+            return std::make_unique<defs::double_variable_info>();
+
+        case definition::primitive_type::REFERENCE:
+        {
+            auto obj_var_info = std::make_unique<defs::object_variable_info>();
+
+            const int class_cpi = constant_pool_.get_class_index(
+                constant_pool_.get_utf8_index(
+                    primitive_type->generate_descriptor()
+                )
+            );
+            util::put_int_bytes(obj_var_info->cpool_index, 2, class_cpi);
+
+            return obj_var_info;
         }
+
         default:
             return std::make_unique<defs::top_variable_info>();
+        }
     }
+
+    if (const auto custom_type = dynamic_cast<const ast::type::custom_type_ast_node *>(&type_node))
+    {
+        auto obj_var_info = std::make_unique<defs::object_variable_info>();
+
+        const int class_cpi = constant_pool_.get_class_index(
+            constant_pool_.get_utf8_index(
+                custom_type->get_array_dimensions() == 0
+                    ? custom_type->get_resolved_name().join()
+                    : custom_type->generate_descriptor()
+            )
+        );
+        util::put_int_bytes(obj_var_info->cpool_index, 2, class_cpi);
+
+        return obj_var_info;
+    }
+
+    throw std::invalid_argument("Invalid type provided");
 }
 
 size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_size(
@@ -419,8 +441,7 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
         if (is_active)
         {
             const size_t idx = var.get().get_index();
-            const std::string descriptor = var.get().get_type()->generate_descriptor();
-            locals[idx] = descriptor_to_verification_type(descriptor);
+            locals[idx] = parse_verification_type(*var.get().get_type());
         }
     }
 

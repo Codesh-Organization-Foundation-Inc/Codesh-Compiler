@@ -25,6 +25,10 @@ class constant_pool;
 }
 namespace codesh::ast
 {
+namespace type
+{
+class type_ast_node;
+}
 namespace method
 {
 class method_scope_ast_node;
@@ -86,7 +90,9 @@ class class_file_builder
 
     [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
             const ir::code_block &method_code, const ast::method::method_declaration_ast_node &method_decl) const;
+
     [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
+
     void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
         const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const;
@@ -94,8 +100,8 @@ class class_file_builder
     [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_at_offset(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
 
-    [[nodiscard]] std::unique_ptr<defs::verification_type_info> descriptor_to_verification_type(
-            const std::string &descriptor) const;
+    [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
+            const ast::type::type_ast_node &type_node) const;
 
     [[nodiscard]] static size_t verification_type_byte_size(const defs::verification_type_info &info);
 
