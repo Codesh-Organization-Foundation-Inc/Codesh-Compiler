@@ -502,22 +502,6 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
 static constexpr size_t MAX_STACK_FRAME_DELTA = 3;
 static constexpr size_t MAX_SAME_FRAME_OFFSET = 63;
 
-bool codesh::output::jvm_target::class_file_builder::are_locals_identical(
-        const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_1,
-        const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_2)
-{
-    if (locals_1.size() != locals_2.size())
-        return false;
-
-    for (size_t i = 0; i < locals_1.size(); ++i)
-    {
-        if (locals_1.at(i)->get_tag() != locals_2.at(i)->get_tag())
-            return false;
-    }
-
-    return true;
-}
-
 codesh::output::jvm_target::frame_result codesh::output::jvm_target::class_file_builder::
     build_stack_frame(const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
         std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
@@ -565,6 +549,22 @@ codesh::output::jvm_target::frame_result codesh::output::jvm_target::class_file_
     }
 
     return build_full_frame(offset_delta, current_locals);
+}
+
+bool codesh::output::jvm_target::class_file_builder::are_locals_identical(
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_1,
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_2)
+{
+    if (locals_1.size() != locals_2.size())
+        return false;
+
+    for (size_t i = 0; i < locals_1.size(); ++i)
+    {
+        if (locals_1.at(i)->get_tag() != locals_2.at(i)->get_tag())
+            return false;
+    }
+
+    return true;
 }
 
 std::optional<codesh::output::jvm_target::frame_result>
