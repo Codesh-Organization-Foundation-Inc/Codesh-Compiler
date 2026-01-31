@@ -63,6 +63,11 @@ struct frame_result
     std::unique_ptr<defs::stack_map_frame> frame;
     size_t byte_size;
 };
+struct stack_map_builder_result
+{
+    std::vector<std::unique_ptr<defs::stack_map_frame>> entries;
+    size_t total_byte_size;
+};
 
 class class_file_builder
 {
@@ -102,6 +107,10 @@ class class_file_builder
     void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
         const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] stack_map_builder_result build_stack_map_entries(
+            const std::set<size_t> &frame_targets,
+            const ast::method::method_declaration_ast_node &method_decl) const;
 
     [[nodiscard]] static std::optional<frame_result> try_build_append_frame(
             int offset_delta, size_t prev_size,

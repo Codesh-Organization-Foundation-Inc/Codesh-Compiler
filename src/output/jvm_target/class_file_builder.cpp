@@ -456,17 +456,29 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
 {
     const auto frame_targets = collect_jump_targets(method_code);
 
-    if (frame_targets.empty())
+    auto [entries, total_byte_size] = build_stack_map_entries(
+        frame_targets,
+        method_decl
+    );
+
+    for (auto &entry : entries)
     {
-        util::put_int_bytes(smt_attr.number_of_entries, 2, 0);
-        util::put_int_bytes(smt_attr.attribute_length, 4, 2);
-        return;
+        smt_attr.entries.push_back(std::move(entry));
     }
 
+    const size_t smt_attr_length = 2 + total_byte_size; // 2 bytes for number_of_entries
 
-    size_t smt_attr_size = 2; // 2 bytes for number_of_entries
+    util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
+    util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_length));
+}
 
-    // Build the initial locals (at offset 0, before any branch target)
+codesh::output::jvm_target::stack_map_builder_result codesh::output::jvm_target::class_file_builder::build_stack_map_entries(
+        const std::set<size_t> &frame_targets,
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    std::vector<std::unique_ptr<defs::stack_map_frame>> entries;
+    size_t total_byte_size = 0;
+
     auto prev_locals = build_local_verifications_at(0, method_decl);
 
     int prev_pos = -1;
@@ -487,16 +499,14 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
             current_locals,
             offset_delta
         );
-        smt_attr.entries.push_back(std::move(frame));
-        smt_attr_size += byte_size;
+        entries.push_back(std::move(frame));
+        total_byte_size += byte_size;
 
-        // Rebuild prev_locals for the next iteration (current_locals may have been moved from)
         prev_locals = build_local_verifications_at(target, method_decl);
         prev_pos = current_pos;
     }
 
-    util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
-    util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_size));
+    return {std::move(entries), total_byte_size};
 }
 
 static constexpr size_t MAX_STACK_FRAME_DELTA = 3;
