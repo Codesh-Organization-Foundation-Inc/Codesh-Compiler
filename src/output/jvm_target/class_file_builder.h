@@ -117,6 +117,10 @@ class class_file_builder
             int offset_delta,
             std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
 
+    [[nodiscard]] static bool are_locals_identical(
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_1,
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_2);
+
     [[nodiscard]] static frame_result build_stack_frame(
             const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
             std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
