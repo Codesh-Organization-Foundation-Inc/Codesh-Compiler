@@ -402,39 +402,35 @@ size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_si
 }
 
 std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
-    codesh::output::jvm_target::class_file_builder::build_locals_at_offset(
+    codesh::output::jvm_target::class_file_builder::build_local_verifications_at(
         const size_t offset, const ast::method::method_declaration_ast_node &method_decl) const
 {
-    // Determine max slot index and which slots are active
-    const auto &all_locals = method_decl.get_resolved().get_all_local_variables();
-
-    // Find the highest slot index to size the result
     size_t max_slot = 0;
-    for (const auto &var : all_locals | std::views::values)
+    for (const auto &var : method_decl.get_resolved().get_all_local_variables() | std::views::values)
     {
-        const size_t idx = var.get().get_index();
-        if (idx >= max_slot)
+        const size_t var_index = var.get().get_jvm_index();
+        if (var_index >= max_slot)
         {
-            max_slot = idx + 1;
+            max_slot = var_index + 1;
         }
     }
 
-    return build_locals_list(max_slot, offset, method_decl);
+    return build_local_verifications(max_slot, offset, method_decl);
 }
 
 std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
-    codesh::output::jvm_target::class_file_builder::build_locals_list(
+    codesh::output::jvm_target::class_file_builder::build_local_verifications(
         const size_t max_slot, const size_t offset,
         const ast::method::method_declaration_ast_node &method_decl) const
 {
-    const auto &all_locals = method_decl.get_resolved().get_all_local_variables();
-
     std::vector<std::unique_ptr<defs::verification_type_info>> locals;
     locals.reserve(max_slot);
     for (size_t i = 0; i < max_slot; ++i)
+    {
         locals.push_back(std::make_unique<defs::top_variable_info>());
+    }
 
-    for (const auto &var : all_locals | std::views::values)
+    for (const auto &var : method_decl.get_resolved().get_all_local_variables() | std::views::values)
     {
         const auto *producing_node = var.get().get_producing_node();
 
@@ -453,7 +449,7 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
 
         if (is_active)
         {
-            const size_t idx = var.get().get_index();
+            const size_t idx = var.get().get_jvm_index();
             locals[idx] = parse_verification_type(*var.get().get_type());
         }
     }
@@ -483,7 +479,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
     size_t smt_attr_size = 2; // 2 bytes for number_of_entries
 
     // Build the initial locals (at offset 0, before any branch target)
-    auto prev_locals = build_locals_at_offset(0, method_decl);
+    auto prev_locals = build_local_verifications_at(0, method_decl);
 
     int prev_pos = -1;
     for (const size_t target : frame_targets)
@@ -496,7 +492,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
             throw std::runtime_error("Inner scope too big; Max is 65535");
         }
 
-        auto current_locals = build_locals_at_offset(target, method_decl);
+        auto current_locals = build_local_verifications_at(target, method_decl);
 
         // Compare current_locals with prev_locals to determine frame type
         const size_t prev_size = prev_locals.size();
@@ -617,7 +613,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         smt_attr.entries.push_back(std::move(frame));
 
         // Rebuild prev_locals for next iteration (current_locals may have been moved from)
-        prev_locals = build_locals_at_offset(target, method_decl);
+        prev_locals = build_local_verifications_at(target, method_decl);
         prev_pos = current_pos;
     }
 
@@ -693,7 +689,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         );
 
 
-        const size_t var_index = var.get().get_index();
+        const size_t var_index = var.get().get_jvm_index();
         if (var_index > 0xFFFF)
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(

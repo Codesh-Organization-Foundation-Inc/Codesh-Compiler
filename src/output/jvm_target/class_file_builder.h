@@ -97,10 +97,10 @@ class class_file_builder
         const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const;
 
-    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_at_offset(
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
 
-    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_list(
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications(
             size_t max_slot, size_t offset,
             const ast::method::method_declaration_ast_node &method_decl) const;
 
