@@ -269,6 +269,7 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
     attributes(std::move(attributes)),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
+    local_variables(),
     scope(ALLOWED_SYMBOL_TYPES),
     method_scope(nullptr),
     producing_node(producing_node),
