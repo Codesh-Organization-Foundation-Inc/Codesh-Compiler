@@ -449,6 +449,9 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
     return locals;
 }
 
+
+static constexpr size_t MAX_STACK_FRAME_DELTA = 3;
+
 void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const
@@ -461,6 +464,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         util::put_int_bytes(smt_attr.attribute_length, 4, 2);
         return;
     }
+
 
     size_t smt_attr_size = 2; // 2 bytes for number_of_entries
 
@@ -516,7 +520,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
                 smt_attr_size += 3;
             }
         }
-        else if (curr_size > prev_size && curr_size <= prev_size + 3)
+        else if (curr_size > prev_size && curr_size <= prev_size + MAX_STACK_FRAME_DELTA)
         {
             // Check if the first prev_size entries match — if so, append_frame
             bool prefix_matches = true;
@@ -550,7 +554,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
                 goto emit_full_frame;
             }
         }
-        else if (curr_size < prev_size && prev_size <= curr_size + 3)
+        else if (curr_size < prev_size && prev_size <= curr_size + MAX_STACK_FRAME_DELTA)
         {
             // Check if the first curr_size entries match — if so, chop_frame
             bool prefix_matches = true;
