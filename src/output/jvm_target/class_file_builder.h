@@ -3,6 +3,7 @@
 #include "output/ir/code_block.h"
 #include "output/jvm_target/defs/class_file.h"
 
+#include <optional>
 #include <set>
 #include <unordered_map>
 
@@ -57,6 +58,11 @@ enum class access_flag : uint16_t
     ACC_MODULE      = 0x8000
 };
 
+struct frame_result
+{
+    std::unique_ptr<defs::stack_map_frame> frame;
+    size_t byte_size;
+};
 
 class class_file_builder
 {
@@ -96,6 +102,20 @@ class class_file_builder
     void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
         const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const;
+
+    [[nodiscard]] static std::optional<frame_result> try_build_append_frame(
+            int offset_delta, size_t prev_size,
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
+
+    [[nodiscard]] static std::optional<frame_result> try_build_chop_frame(
+            int offset_delta, size_t prev_size, size_t curr_size,
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
+
+    [[nodiscard]] static frame_result build_full_frame(
+            int offset_delta,
+            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
 
     [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;

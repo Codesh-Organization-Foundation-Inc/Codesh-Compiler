@@ -522,82 +522,37 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         }
         else if (curr_size > prev_size && curr_size <= prev_size + MAX_STACK_FRAME_DELTA)
         {
-            // Check if the first prev_size entries match — if so, append_frame
-            bool prefix_matches = true;
-            for (size_t i = 0; i < prev_size; ++i)
+            if (auto append_result = try_build_append_frame(offset_delta, prev_size, prev_locals, current_locals))
             {
-                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
-                {
-                    prefix_matches = false;
-                    break;
-                }
-            }
-
-            if (prefix_matches)
-            {
-                const auto k = static_cast<unsigned char>(curr_size - prev_size);
-                auto append = std::make_unique<defs::append_frame>(k);
-                util::put_int_bytes(append->offset_delta, 2, offset_delta);
-
-                size_t frame_size = 3; // 1 byte frame_type + 2 bytes offset_delta
-                for (size_t i = prev_size; i < curr_size; ++i)
-                {
-                    frame_size += verification_type_byte_size(*current_locals[i]);
-                    append->locals.push_back(std::move(current_locals[i]));
-                }
-
-                smt_attr_size += frame_size;
-                frame = std::move(append);
+                smt_attr_size += append_result->byte_size;
+                frame = std::move(append_result->frame);
             }
             else
             {
-                goto emit_full_frame;
+                auto full_result = build_full_frame(offset_delta, current_locals);
+                smt_attr_size += full_result.byte_size;
+                frame = std::move(full_result.frame);
             }
         }
         else if (curr_size < prev_size && prev_size <= curr_size + MAX_STACK_FRAME_DELTA)
         {
-            // Check if the first curr_size entries match — if so, chop_frame
-            bool prefix_matches = true;
-            for (size_t i = 0; i < curr_size; ++i)
+            if (auto chop_result = try_build_chop_frame(offset_delta, prev_size, curr_size, prev_locals, current_locals))
             {
-                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
-                {
-                    prefix_matches = false;
-                    break;
-                }
-            }
-
-            if (prefix_matches)
-            {
-                const auto k = static_cast<unsigned char>(prev_size - curr_size);
-                auto chop = std::make_unique<defs::chop_frame>(k);
-                util::put_int_bytes(chop->offset_delta, 2, offset_delta);
-
-                smt_attr_size += 3; // 1 byte frame_type + 2 bytes offset_delta
-                frame = std::move(chop);
+                smt_attr_size += chop_result->byte_size;
+                frame = std::move(chop_result->frame);
             }
             else
             {
-                goto emit_full_frame;
+                auto full_result = build_full_frame(offset_delta, current_locals);
+                smt_attr_size += full_result.byte_size;
+                frame = std::move(full_result.frame);
             }
         }
         else
         {
-            emit_full_frame:
-            auto full = std::make_unique<defs::full_frame>();
-            util::put_int_bytes(full->offset_delta, 2, offset_delta);
-            util::put_int_bytes(full->number_of_locals, 2, static_cast<int>(curr_size));
-            util::put_int_bytes(full->number_of_stack_items, 2, 0);
-
-            size_t frame_size = 7; // 1 + 2 + 2 + 2 (frame_type + offset_delta + num_locals + num_stack)
-            for (size_t i = 0; i < curr_size; ++i)
-            {
-                frame_size += verification_type_byte_size(*current_locals[i]);
-                full->locals.push_back(std::move(current_locals[i]));
-            }
-
-            smt_attr_size += frame_size;
-            frame = std::move(full);
+            auto result = build_full_frame(offset_delta, current_locals);
+            smt_attr_size += result.byte_size;
+            frame = std::move(result.frame);
         }
 
         smt_attr.entries.push_back(std::move(frame));
@@ -609,6 +564,72 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
 
     util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
     util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_size));
+}
+
+std::optional<codesh::output::jvm_target::frame_result>
+    codesh::output::jvm_target::class_file_builder::try_build_append_frame(
+        const int offset_delta, const size_t prev_size,
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+        std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals)
+{
+    const size_t curr_size = current_locals.size();
+
+    for (size_t i = 0; i < prev_size; ++i)
+    {
+        if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
+            return std::nullopt;
+    }
+
+    const auto k = static_cast<unsigned char>(curr_size - prev_size);
+    auto append = std::make_unique<defs::append_frame>(k);
+    util::put_int_bytes(append->offset_delta, 2, offset_delta);
+
+    size_t frame_size = 3; // 1 byte frame_type + 2 bytes offset_delta
+    for (size_t i = prev_size; i < curr_size; ++i)
+    {
+        frame_size += verification_type_byte_size(*current_locals[i]);
+        append->locals.push_back(std::move(current_locals[i]));
+    }
+
+    return frame_result{std::move(append), frame_size};
+}
+
+std::optional<codesh::output::jvm_target::frame_result>codesh::output::jvm_target::class_file_builder::
+    try_build_chop_frame(const int offset_delta, const size_t prev_size, const size_t curr_size,
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+        const std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals)
+{
+    for (size_t i = 0; i < curr_size; ++i)
+    {
+        if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
+            return std::nullopt;
+    }
+
+    const auto k = static_cast<unsigned char>(prev_size - curr_size);
+    auto chop = std::make_unique<defs::chop_frame>(k);
+    util::put_int_bytes(chop->offset_delta, 2, offset_delta);
+
+    return frame_result{std::move(chop), 3}; // 1 byte frame_type + 2 bytes offset_delta
+}
+
+codesh::output::jvm_target::frame_result codesh::output::jvm_target::class_file_builder::build_full_frame(
+        const int offset_delta, std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals)
+{
+    const size_t curr_size = current_locals.size();
+
+    auto full = std::make_unique<defs::full_frame>();
+    util::put_int_bytes(full->offset_delta, 2, offset_delta);
+    util::put_int_bytes(full->number_of_locals, 2, static_cast<int>(curr_size));
+    util::put_int_bytes(full->number_of_stack_items, 2, 0);
+
+    size_t frame_size = 7; // 1 + 2 + 2 + 2 (frame_type + offset_delta + num_locals + num_stack)
+    for (size_t i = 0; i < curr_size; ++i)
+    {
+        frame_size += verification_type_byte_size(*current_locals[i]);
+        full->locals.push_back(std::move(current_locals[i]));
+    }
+
+    return frame_result{std::move(full), frame_size};
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
