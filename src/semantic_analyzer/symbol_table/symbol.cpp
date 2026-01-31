@@ -233,7 +233,7 @@ size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::s
     const size_t index = variable->get_jvm_index();
 
     const auto result = scope.add_symbol(name, std::move(variable));
-    index_to_local_variable.locals.emplace(name, result.first);
+    index_to_local_variable.name_to_var.emplace(name, result.first);
 
     return index;
 }

@@ -207,7 +207,7 @@ public:
 
 struct indexed_locals_container
 {
-    std::map<std::string, std::reference_wrapper<local_variable_symbol>> locals;
+    std::map<std::string, std::reference_wrapper<local_variable_symbol>> name_to_var;
     size_t slots_used;
 };
 

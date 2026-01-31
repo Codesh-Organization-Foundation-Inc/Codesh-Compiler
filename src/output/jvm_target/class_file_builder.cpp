@@ -256,7 +256,7 @@ int codesh::output::jvm_target::class_file_builder::get_locals_count(
         const ast::method::method_declaration_ast_node &method_decl)
 {
     // Local variables
-    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().size();
+    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().name_to_var.size();
     if (local_vars_count > 0xFFFF)
     {
         //TODO: Convert to Codesh error
@@ -414,7 +414,7 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
         locals.push_back(std::make_unique<defs::top_variable_info>());
     }
 
-    for (const auto &var : method_decl.get_resolved().get_all_local_variables().locals | std::views::values)
+    for (const auto &var : method_decl.get_resolved().get_all_local_variables().name_to_var | std::views::values)
     {
         const auto *producing_node = var.get().get_producing_node();
 
@@ -640,7 +640,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables())
+    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables().name_to_var)
     {
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
