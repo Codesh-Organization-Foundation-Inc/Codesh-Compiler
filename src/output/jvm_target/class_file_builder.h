@@ -97,8 +97,8 @@ class class_file_builder
         const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const;
 
-    [[nodiscard]] static std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
-            size_t offset, const ast::method::method_declaration_ast_node &method_decl) ;
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
+            size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
 
     [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
             const ast::type::type_ast_node &type_node) const;

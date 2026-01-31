@@ -403,7 +403,7 @@ size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_si
 
 std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
     codesh::output::jvm_target::class_file_builder::build_local_verifications_at(
-        const size_t offset, const ast::method::method_declaration_ast_node &method_decl)
+        const size_t offset, const ast::method::method_declaration_ast_node &method_decl) const
 {
     const size_t slots_used = method_decl.get_resolved().get_all_local_variables().slots_used;
 
