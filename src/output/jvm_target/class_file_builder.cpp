@@ -403,34 +403,18 @@ size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_si
 
 std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
     codesh::output::jvm_target::class_file_builder::build_local_verifications_at(
-        const size_t offset, const ast::method::method_declaration_ast_node &method_decl) const
+        const size_t offset, const ast::method::method_declaration_ast_node &method_decl)
 {
-    size_t max_slot = 0;
-    for (const auto &var : method_decl.get_resolved().get_all_local_variables() | std::views::values)
-    {
-        const size_t var_index = var.get().get_jvm_index();
-        if (var_index >= max_slot)
-        {
-            max_slot = var_index + 1;
-        }
-    }
+    const size_t slots_used = method_decl.get_resolved().get_all_local_variables().slots_used;
 
-    return build_local_verifications(max_slot, offset, method_decl);
-}
-
-std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
-    codesh::output::jvm_target::class_file_builder::build_local_verifications(
-        const size_t max_slot, const size_t offset,
-        const ast::method::method_declaration_ast_node &method_decl) const
-{
     std::vector<std::unique_ptr<defs::verification_type_info>> locals;
-    locals.reserve(max_slot);
-    for (size_t i = 0; i < max_slot; ++i)
+    locals.reserve(slots_used);
+    for (size_t i = 0; i < slots_used; ++i)
     {
         locals.push_back(std::make_unique<defs::top_variable_info>());
     }
 
-    for (const auto &var : method_decl.get_resolved().get_all_local_variables() | std::views::values)
+    for (const auto &var : method_decl.get_resolved().get_all_local_variables().locals | std::views::values)
     {
         const auto *producing_node = var.get().get_producing_node();
 
