@@ -418,6 +418,8 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
     {
         const auto *producing_node = var.get().get_producing_node();
 
+        // Find all the active variables and add them to the results vector.
+        // An active variable is a variable that is within the current scope.
         bool is_active;
         if (producing_node == nullptr)
         {
