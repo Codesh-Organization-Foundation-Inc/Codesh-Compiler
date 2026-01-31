@@ -3,8 +3,6 @@
 #include "output/ir/code_block.h"
 #include "output/jvm_target/defs/class_file.h"
 
-#include <optional>
-#include <set>
 #include <unordered_map>
 
 namespace codesh::semantic_analyzer
@@ -58,17 +56,6 @@ enum class access_flag : uint16_t
     ACC_MODULE      = 0x8000
 };
 
-struct frame_result
-{
-    std::unique_ptr<defs::stack_map_frame> frame;
-    size_t byte_size;
-};
-struct stack_map_builder_result
-{
-    std::vector<std::unique_ptr<defs::stack_map_frame>> entries;
-    size_t total_byte_size;
-};
-
 class class_file_builder
 {
     defs::class_file &class_file;
@@ -98,50 +85,6 @@ class class_file_builder
     [[nodiscard]] static int get_locals_count(const ast::method::method_declaration_ast_node &method_decl);
     [[nodiscard]] std::unique_ptr<defs::local_variable_table_attribute_entry> create_local_variable_table(
         const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
-
-    [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
-            const ir::code_block &method_code, const ast::method::method_declaration_ast_node &method_decl) const;
-
-    [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
-
-    void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
-        const ir::code_block &method_code,
-        const ast::method::method_declaration_ast_node &method_decl) const;
-
-    [[nodiscard]] stack_map_builder_result build_stack_map_entries(
-            const std::set<size_t> &frame_targets,
-            const ast::method::method_declaration_ast_node &method_decl) const;
-
-    [[nodiscard]] static std::optional<frame_result> try_build_append_frame(
-            int offset_delta, size_t prev_size,
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
-            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
-
-    [[nodiscard]] static std::optional<frame_result> try_build_chop_frame(
-            int offset_delta, size_t prev_size, size_t curr_size,
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
-
-    [[nodiscard]] static frame_result build_full_frame(
-            int offset_delta,
-            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
-
-    [[nodiscard]] static bool are_locals_identical(
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_1,
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &locals_2);
-
-    [[nodiscard]] static frame_result build_stack_frame(
-            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
-            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
-            int offset_delta);
-
-    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
-            size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
-
-    [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
-            const ast::type::type_ast_node &type_node) const;
-
-    [[nodiscard]] static size_t verification_type_byte_size(const defs::verification_type_info &info);
 
     /**
      * Processes scope markers in the IR to compute bytecode positions for local variables.
