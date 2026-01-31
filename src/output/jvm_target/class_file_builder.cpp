@@ -450,8 +450,6 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
 }
 
 
-static constexpr size_t MAX_STACK_FRAME_DELTA = 3;
-
 void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code,
         const ast::method::method_declaration_ast_node &method_decl) const
@@ -484,88 +482,88 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
 
         auto current_locals = build_local_verifications_at(target, method_decl);
 
-        // Compare current_locals with prev_locals to determine frame type
-        const size_t prev_size = prev_locals.size();
-        const size_t curr_size = current_locals.size();
-
-        bool locals_identical = prev_size == curr_size;
-        if (locals_identical)
-        {
-            for (size_t i = 0; i < prev_size; ++i)
-            {
-                if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
-                {
-                    locals_identical = false;
-                    break;
-                }
-            }
-        }
-
-        std::unique_ptr<defs::stack_map_frame> frame;
-
-        // If the delta is too complex, resort to building a full frame
-        bool should_build_full_frame = false;
-
-        if (locals_identical)
-        {
-            if (offset_delta <= 63)
-            {
-                frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
-                smt_attr_size += 1;
-            }
-            else
-            {
-                auto temp_frame = std::make_unique<defs::same_frame_extended>();
-                util::put_int_bytes(temp_frame->offset_delta, 2, offset_delta);
-                frame = std::move(temp_frame);
-                smt_attr_size += 3;
-            }
-        }
-        else if (curr_size > prev_size && curr_size <= prev_size + MAX_STACK_FRAME_DELTA)
-        {
-            if (auto append_result = try_build_append_frame(offset_delta, prev_size, prev_locals, current_locals))
-            {
-                smt_attr_size += append_result->byte_size;
-                frame = std::move(append_result->frame);
-            }
-            else
-            {
-                should_build_full_frame = true;
-            }
-        }
-        else if (curr_size < prev_size && prev_size <= curr_size + MAX_STACK_FRAME_DELTA)
-        {
-            if (auto chop_result = try_build_chop_frame(offset_delta, prev_size, curr_size, prev_locals, current_locals))
-            {
-                smt_attr_size += chop_result->byte_size;
-                frame = std::move(chop_result->frame);
-            }
-            else
-            {
-                should_build_full_frame = true;
-            }
-        }
-        else
-        {
-            should_build_full_frame = true;
-        }
-
-        if (should_build_full_frame)
-        {
-            auto result = build_full_frame(offset_delta, current_locals);
-            smt_attr_size += result.byte_size;
-            frame = std::move(result.frame);
-        }
-
+        auto [frame, byte_size] = build_stack_frame(
+            prev_locals,
+            current_locals,
+            offset_delta
+        );
         smt_attr.entries.push_back(std::move(frame));
+        smt_attr_size += byte_size;
 
-        // Rebuild prev_locals for next iteration (current_locals may have been moved from)
+        // Rebuild prev_locals for the next iteration (current_locals may have been moved from)
         prev_locals = build_local_verifications_at(target, method_decl);
         prev_pos = current_pos;
     }
 
     util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
     util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_size));
+}
+
+static constexpr size_t MAX_STACK_FRAME_DELTA = 3;
+static constexpr size_t MAX_SAME_FRAME_OFFSET = 63;
+
+codesh::output::jvm_target::frame_result codesh::output::jvm_target::class_file_builder::
+    build_stack_frame(const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+        std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
+        const int offset_delta)
+{
+    // Compare current_locals with prev_locals to determine frame type
+    const size_t prev_size = prev_locals.size();
+    const size_t curr_size = current_locals.size();
+
+    bool locals_identical = prev_size == curr_size;
+    if (locals_identical)
+    {
+        for (size_t i = 0; i < prev_size; i++)
+        {
+            if (prev_locals.at(i)->get_tag() != current_locals.at(i)->get_tag())
+            {
+                locals_identical = false;
+                break;
+            }
+        }
+    }
+
+
+    if (locals_identical)
+    {
+        if (offset_delta <= MAX_SAME_FRAME_OFFSET)
+        {
+            return {
+                std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta)),
+                1
+            };
+        }
+
+        auto frame = std::make_unique<defs::same_frame_extended>();
+        util::put_int_bytes(frame->offset_delta, 2, offset_delta);
+
+        return {std::move(frame), 3};
+    }
+
+    //NOTE: If the delta is too complex, resorts to building a full frame.
+
+    if (curr_size > prev_size && curr_size <= prev_size + MAX_STACK_FRAME_DELTA)
+    {
+        if (auto append_result = try_build_append_frame(offset_delta, prev_size, prev_locals, current_locals))
+        {
+            return std::move(append_result.value());
+        }
+
+        return build_full_frame(offset_delta, current_locals);
+    }
+
+    if (curr_size < prev_size && prev_size <= curr_size + MAX_STACK_FRAME_DELTA)
+    {
+        if (auto chop_result = try_build_chop_frame(offset_delta, prev_size, curr_size, prev_locals, current_locals))
+        {
+            return std::move(chop_result.value());
+        }
+
+        return build_full_frame(offset_delta, current_locals);
+    }
+
+    return build_full_frame(offset_delta, current_locals);
 }
 
 std::optional<codesh::output::jvm_target::frame_result>

@@ -105,7 +105,7 @@ class class_file_builder
 
     [[nodiscard]] static std::optional<frame_result> try_build_append_frame(
             int offset_delta, size_t prev_size,
-        const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
             std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
 
     [[nodiscard]] static std::optional<frame_result> try_build_chop_frame(
@@ -116,6 +116,11 @@ class class_file_builder
     [[nodiscard]] static frame_result build_full_frame(
             int offset_delta,
             std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals);
+
+    [[nodiscard]] static frame_result build_stack_frame(
+            const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
+            std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
+            int offset_delta);
 
     [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
