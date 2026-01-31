@@ -100,6 +100,10 @@ class class_file_builder
     [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_at_offset(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
 
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_locals_list(
+            size_t max_slot, size_t offset,
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
     [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
             const ast::type::type_ast_node &type_node) const;
 

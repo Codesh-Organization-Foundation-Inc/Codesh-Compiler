@@ -153,6 +153,7 @@ public:
     full_frame();
 
     unsigned char offset_delta[2]{};
+
     unsigned char number_of_locals[2]{};
     std::vector<std::unique_ptr<verification_type_info>> locals;
     unsigned char number_of_stack_items[2]{};

@@ -393,9 +393,11 @@ size_t codesh::output::jvm_target::class_file_builder::verification_type_byte_si
     const defs::verification_type_info &info)
 {
     const unsigned char tag = info.get_tag();
+
     // object_variable_info (tag 7) and uninitialized_variable_info (tag 8) have 2 extra bytes
     if (tag == 7 || tag == 8)
         return 3;
+
     return 1;
 }
 
@@ -412,10 +414,21 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
     {
         const size_t idx = var.get().get_index();
         if (idx >= max_slot)
+        {
             max_slot = idx + 1;
+        }
     }
 
-    // Build the locals array with top for inactive/gap slots
+    return build_locals_list(max_slot, offset, method_decl);
+}
+
+std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
+    codesh::output::jvm_target::class_file_builder::build_locals_list(
+        const size_t max_slot, const size_t offset,
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    const auto &all_locals = method_decl.get_resolved().get_all_local_variables();
+
     std::vector<std::unique_ptr<defs::verification_type_info>> locals;
     locals.reserve(max_slot);
     for (size_t i = 0; i < max_slot; ++i)
@@ -490,7 +503,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         const size_t curr_size = current_locals.size();
 
         // Check if locals are identical
-        bool locals_same = (prev_size == curr_size);
+        bool locals_same = prev_size == curr_size;
         if (locals_same)
         {
             for (size_t i = 0; i < prev_size; ++i)
