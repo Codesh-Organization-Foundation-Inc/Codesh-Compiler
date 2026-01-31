@@ -488,15 +488,14 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
         const size_t prev_size = prev_locals.size();
         const size_t curr_size = current_locals.size();
 
-        // Check if locals are identical
-        bool locals_same = prev_size == curr_size;
-        if (locals_same)
+        bool locals_identical = prev_size == curr_size;
+        if (locals_identical)
         {
             for (size_t i = 0; i < prev_size; ++i)
             {
                 if (prev_locals[i]->get_tag() != current_locals[i]->get_tag())
                 {
-                    locals_same = false;
+                    locals_identical = false;
                     break;
                 }
             }
@@ -504,9 +503,11 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
 
         std::unique_ptr<defs::stack_map_frame> frame;
 
-        if (locals_same)
+        // If the delta is too complex, resort to building a full frame
+        bool should_build_full_frame = false;
+
+        if (locals_identical)
         {
-            // same_frame or same_frame_extended
             if (offset_delta <= 63)
             {
                 frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
@@ -529,9 +530,7 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
             }
             else
             {
-                auto full_result = build_full_frame(offset_delta, current_locals);
-                smt_attr_size += full_result.byte_size;
-                frame = std::move(full_result.frame);
+                should_build_full_frame = true;
             }
         }
         else if (curr_size < prev_size && prev_size <= curr_size + MAX_STACK_FRAME_DELTA)
@@ -543,12 +542,15 @@ void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
             }
             else
             {
-                auto full_result = build_full_frame(offset_delta, current_locals);
-                smt_attr_size += full_result.byte_size;
-                frame = std::move(full_result.frame);
+                should_build_full_frame = true;
             }
         }
         else
+        {
+            should_build_full_frame = true;
+        }
+
+        if (should_build_full_frame)
         {
             auto result = build_full_frame(offset_delta, current_locals);
             smt_attr_size += result.byte_size;
