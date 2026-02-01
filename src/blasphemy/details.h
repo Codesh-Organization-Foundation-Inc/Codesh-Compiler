@@ -37,6 +37,8 @@ extern const std::string EXPECTED_VARIABLE;
 
 // SEMANTIC
 extern const std::string UNRECOGNIZED_TYPE;
+extern const std::string CONDITION_NOT_BOOLEAN;
+extern const std::string ITERATOR_NOT_COLLECTION;
 
 // OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
