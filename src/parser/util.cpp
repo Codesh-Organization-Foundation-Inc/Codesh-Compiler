@@ -7,7 +7,8 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
-static std::unique_ptr<codesh::identifier_token> make_error_identifier_token();
+static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
+        codesh::blasphemy::code_position code_position);
 
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
@@ -30,7 +31,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
             blasphemy::blasphemy_type::SYNTAX, std::nullopt);
 
-        return make_error_identifier_token();
+        return make_error_identifier_token(token->get_code_position());
     }
 
     return std::unique_ptr<identifier_token>(
@@ -51,7 +52,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
             std::nullopt
         );
 
-        return make_error_identifier_token();
+        return make_error_identifier_token(token->get_code_position());
     }
 
     return std::unique_ptr<identifier_token>(
@@ -59,9 +60,14 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
     );
 }
 
-static std::unique_ptr<codesh::identifier_token> make_error_identifier_token()
+static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
+        codesh::blasphemy::code_position code_position)
 {
-    return std::make_unique<codesh::identifier_token>(codesh::token_group::IDENTIFIER, codesh::definition::ERROR_IDENTIFIER_CONTENT);
+    return std::make_unique<codesh::identifier_token>(
+        code_position,
+        codesh::token_group::IDENTIFIER,
+        codesh::definition::ERROR_IDENTIFIER_CONTENT
+    );
 }
 
 
