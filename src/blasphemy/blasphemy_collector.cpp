@@ -57,9 +57,10 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
         if (const auto &code_pos = blasphemy.code_pos)
         {
             fmt::println(stderr,
-                " בְּפָּסוּק {} עֲבוּר {}",
-                std::to_string(code_pos->line),
-                code_pos->filename
+                " בְּסֵפֶר {}:{} פָּסוּק {}",
+                code_pos->relative_source_path.string(),
+                std::to_string(code_pos->target_line.line),
+                std::to_string(code_pos->target_line.column)
             );
         }
 

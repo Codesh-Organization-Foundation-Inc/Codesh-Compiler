@@ -2,6 +2,7 @@
 
 #include "fmt/xchar.h"
 
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -22,11 +23,15 @@ enum class blasphemy_type
     UNKNOWN
 };
 
-struct code_position
+struct line_info
 {
-    std::string filename;
     size_t line;
     size_t column;
+};
+struct code_position
+{
+    std::filesystem::path relative_source_path;
+    line_info target_line;
 };
 
 struct blasphemy_info
