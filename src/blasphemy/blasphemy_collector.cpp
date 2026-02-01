@@ -64,11 +64,15 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 
         std::cerr << get_blasphemy_message(blasphemy.type);
 
-        if (const auto &code_pos = blasphemy.code_pos)
+        fmt::print(stderr,
+            " בְּסֵפֶר {}",
+            relative_source_path.string()
+        );
+
+        if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
         {
             fmt::print(stderr,
-                " בְּסֵפֶר {} פֶּרֶק {} פָּסוּק {}",
-                relative_source_path.string(),
+                " פֶּרֶק {} פָּסוּק {}",
                 std::to_string(code_pos->line),
                 std::to_string(code_pos->column)
             );
