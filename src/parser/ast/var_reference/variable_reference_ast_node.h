@@ -35,7 +35,8 @@ protected:
     _get_resolved() const override;
 
 public:
-    explicit variable_reference_ast_node(codesh::definition::fully_qualified_name name);
+    variable_reference_ast_node(codesh::blasphemy::code_position code_position,
+            codesh::definition::fully_qualified_name name);
     /**
     * When a local_variable_declaration_ast_node is created and assigned on the spot, it will create an
     * assignment operator to later give it a value during runtime.
@@ -48,7 +49,8 @@ public:
     * Hence, for better compilation times, we can just cache the declaration producing this node and then resolve
     * it immediately after.
     */
-    explicit variable_reference_ast_node(const codesh::ast::local_variable_declaration_ast_node &producing_declaration);
+    variable_reference_ast_node(codesh::blasphemy::code_position code_position,
+            const codesh::ast::local_variable_declaration_ast_node &producing_declaration);
 
     void set_resolved(codesh::semantic_analyzer::variable_symbol &symbol) override;
 

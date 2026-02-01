@@ -79,17 +79,22 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     switch (tokens.front()->get_group())
     {
     case token_group::IDENTIFIER: {
+        auto id_pos = tokens.front()->get_code_position();
+
         definition::fully_qualified_name value;
         util::parse_fqcn(tokens, value);
 
-        eval_ast_node = std::make_unique<variable_reference_ast_node>(value);
+        eval_ast_node = std::make_unique<variable_reference_ast_node>(id_pos, value);
 
         break;
     }
 
     case token_group::LITERAL_STRING: {
+        auto str_pos = tokens.front()->get_code_position();
+
         eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
-            std::make_unique<ast::type::custom_type_ast_node>("java/lang/String"),
+            str_pos,
+            std::make_unique<ast::type::custom_type_ast_node>(str_pos, "java/lang/String"),
 
             util::consume_alnum_identifier_token(
                 tokens, "לא אמור לקרות"
@@ -162,12 +167,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     // Math operations:
 
     case token_group::OPERATOR_ADDITION: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::addition_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -176,12 +183,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
 
     case token_group::OPERATOR_SUBTRACTION: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::subtraction_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -190,18 +199,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
 
     case token_group::OPERATOR_MULTIPLICATION: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_by(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::multiplication_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -210,18 +221,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
 
     case token_group::OPERATOR_DIVISION: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_by(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::division_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -230,18 +243,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
 
     case token_group::OPERATOR_MODULO: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node  = parse_value(tokens);
 
         if (!consume_by(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::modulu_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -266,9 +281,11 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
 
     case token_group::OPERATOR_MINUS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         eval_ast_node = std::make_unique<ast::op::minus_operator_ast_node>(
+            op_pos,
             parse_value(tokens)
         );
 
@@ -293,7 +310,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
 
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position());
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -314,18 +331,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     switch (tokens.front()->get_group())
     {
     case token_group::OPERATOR_EQUALS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::equals_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -333,18 +352,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_NOT_EQUALS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::not_equals_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -352,18 +373,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_GREATER: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::greater_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -371,18 +394,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_GREATER_EQUALS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::greater_equals_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -390,18 +415,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_LESS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::less_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -409,18 +436,20 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     case token_group::OPERATOR_LESS_EQUALS: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
 
         if (!consume_against(tokens))
         {
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::less_equals_operator_ast_node>(
+            op_pos,
             std::move(left_value_node),
             std::move(right_value_node)
         );
@@ -428,7 +457,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(); // FIXME: does problems
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position()); // FIXME: does problems
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -455,12 +484,14 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
     else
     {
         skip_val = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
-            std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::INTEGER),
+            codesh::blasphemy::NO_CODE_POS,
+            std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::blasphemy::NO_CODE_POS, codesh::definition::primitive_type::INTEGER),
             1
         );
     }
 
     return std::make_unique<codesh::ast::collection::range_ast_node>(
+        codesh::blasphemy::NO_CODE_POS,
         std::move(eval_ast_node),
         std::move(to_val),
         std::move(skip_val)
@@ -476,72 +507,82 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     switch (tokens.front()->get_group())
     {
     case token_group::OPERATOR_ADDITION_ASSIGNMENT: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto result = parse_operator_sides(tokens, false);
         if (!result.has_value())
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         eval_ast_node = std::make_unique<ast::op::assignment::addition_assignment_operator_ast_node>(
+            op_pos,
             std::move(result->first),
             std::move(result->second)
         );
         break;
     }
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto result = parse_operator_sides(tokens, false);
         if (!result.has_value())
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         eval_ast_node = std::make_unique<ast::op::assignment::subtraction_assignment_operator_ast_node>(
+            op_pos,
             std::move(result->first),
             std::move(result->second)
         );
         break;
     }
     case token_group::OPERATOR_DIVISION_ASSIGNMENT: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto result = parse_operator_sides(tokens, true);
         if (!result.has_value())
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         eval_ast_node = std::make_unique<ast::op::assignment::division_assignment_operator_ast_node>(
+            op_pos,
             std::move(result->first),
             std::move(result->second)
         );
         break;
     }
     case token_group::OPERATOR_MODULO_ASSIGNMENT: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto result = parse_operator_sides(tokens, true);
         if (!result.has_value())
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         eval_ast_node = std::make_unique<ast::op::assignment::modulo_assignment_operator_ast_node>(
+            op_pos,
             std::move(result->first),
             std::move(result->second)
         );
         break;
     }
     case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT: {
+        auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
         auto result = parse_operator_sides(tokens, true);
         if (!result.has_value())
-            return std::make_unique<ast::var_reference::error_value_ast_node>();
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         eval_ast_node = std::make_unique<ast::op::assignment::multiplication_assignment_operator_ast_node>(
+            op_pos,
             std::move(result->first),
             std::move(result->second)
         );
         break;
     }
     default: {
-        std::make_unique<ast::var_reference::error_value_ast_node>();
+        std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position());
     }
     }
     return eval_ast_node;
@@ -590,17 +631,23 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         }
 
         case codesh::token_group::OPERATOR_NOT: {
+            auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
-            return std::make_unique<codesh::ast::op::not_operator_ast_node>(std::move(eval_ast_node));
+
+            return std::make_unique<codesh::ast::op::not_operator_ast_node>(op_pos, std::move(eval_ast_node));
         }
         case codesh::token_group::OPERATOR_AND: {
+            auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
-            return std::make_unique<codesh::ast::op::and_operator_ast_node>(std::move(eval_ast_node),
+
+            return std::make_unique<codesh::ast::op::and_operator_ast_node>(op_pos, std::move(eval_ast_node),
                 codesh::parser::parse_value(tokens));
         }
         case codesh::token_group::OPERATOR_OR: {
+            auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
-            return std::make_unique<codesh::ast::op::or_operator_ast_node>(std::move(eval_ast_node),
+
+            return std::make_unique<codesh::ast::op::or_operator_ast_node>(op_pos, std::move(eval_ast_node),
                 codesh::parser::parse_value(tokens));
         }
         default: {
@@ -643,8 +690,11 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
         codesh::definition::primitive_type primitive_type,
         const std::function<T(const std::string &)> &mapper)
 {
+    auto pos = tokens.front()->get_code_position();
+
     return std::make_unique<codesh::ast::var_reference::evaluable_ast_node<T>>(
-        std::make_unique<codesh::ast::type::primitive_type_ast_node>(primitive_type),
+        pos,
+        std::make_unique<codesh::ast::type::primitive_type_ast_node>(pos, primitive_type),
         mapper(
             codesh::parser::util::consume_alnum_identifier_token(
                 tokens, "לא אמור לקרות"
@@ -659,10 +709,12 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
         codesh::definition::primitive_type primitive_type,
         T value)
 {
+    auto pos = tokens.front()->get_code_position();
     tokens.pop();
 
     return std::make_unique<codesh::ast::var_reference::evaluable_ast_node<T>>(
-        std::make_unique<codesh::ast::type::primitive_type_ast_node>(primitive_type),
+        pos,
+        std::make_unique<codesh::ast::type::primitive_type_ast_node>(pos, primitive_type),
         std::move(value)
     );
 }

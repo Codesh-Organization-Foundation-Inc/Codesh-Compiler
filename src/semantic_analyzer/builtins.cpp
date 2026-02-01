@@ -1,5 +1,6 @@
 #include "builtins.h"
 
+#include "blasphemy/blasphemy_collector.h"
 #include "lexer/trie/keywords.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
@@ -28,7 +29,7 @@ void codesh::semantic_analyzer::builtins::add_builtins(const symbol_table &table
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 {
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
@@ -47,7 +48,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
 {
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
@@ -65,7 +66,7 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
 
 
     // Add System.out
-    auto is_attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    auto is_attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
     is_attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     is_attributes->set_is_final(true);
     is_attributes->set_is_static(true);
@@ -77,7 +78,10 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
             "java/lang/System/out",
 
             std::move(is_attributes),
-            std::make_unique<codesh::ast::type::custom_type_ast_node>("java/io/PrintStream")
+            std::make_unique<codesh::ast::type::custom_type_ast_node>(
+                codesh::blasphemy::NO_CODE_POS,
+                "java/io/PrintStream"
+            )
         )
     );
 
@@ -96,15 +100,21 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
     ).first.get();
 
 
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_static(true);
 
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types;
     parameter_types.reserve(1);
-    parameter_types.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>("java/lang/String"));
+    parameter_types.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+        codesh::blasphemy::NO_CODE_POS,
+        "java/lang/String")
+    );
 
-    auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::definition::primitive_type::VOID);
+    auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+        codesh::blasphemy::NO_CODE_POS,
+        codesh::definition::primitive_type::VOID
+    );
 
     // Make the method symbol point to the original PrintStream's println
     emor_overloads.get_scope().add_symbol(

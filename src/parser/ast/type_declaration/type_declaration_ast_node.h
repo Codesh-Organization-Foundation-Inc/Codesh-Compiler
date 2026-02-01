@@ -12,6 +12,7 @@
 #include "output/jvm_target/constant_pool.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
+
 namespace codesh::semantic_analyzer
 {
 class type_symbol;
@@ -25,6 +26,7 @@ namespace codesh::ast::type
 {
 class custom_type_ast_node;
 }
+
 
 namespace codesh::ast::type_decl
 {
@@ -55,7 +57,7 @@ protected:
         const override;
 
 public:
-    explicit type_declaration_ast_node(definition::fully_qualified_name name);
+    type_declaration_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
     ~type_declaration_ast_node() override;
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;

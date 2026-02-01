@@ -16,6 +16,8 @@ namespace codesh::ast::method
 {
 class method_scope_ast_node;
 }
+
+
 namespace codesh::ast::block // TODO: Additionally nest inside logic namespace
 {
 /**
@@ -48,7 +50,7 @@ class if_ast_node : public method::operation::method_operation_ast_node, public 
             const type_decl::type_declaration_ast_node &containing_type_decl) ;
 
 public:
-    explicit if_ast_node(conditioned_scope_container if_branch);
+    if_ast_node(blasphemy::code_position code_position, conditioned_scope_container if_branch);
 
 
     [[nodiscard]] const conditioned_scope_container &get_if_branch() const;

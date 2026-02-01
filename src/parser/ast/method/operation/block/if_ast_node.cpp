@@ -13,7 +13,10 @@ static codesh::output::ir::code_block build_condition_block(
         const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
         codesh::output::ir::if_type if_type);
 
-codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
+codesh::ast::block::if_ast_node::if_ast_node(const blasphemy::code_position code_position,
+        conditioned_scope_container if_branch) :
+    method_operation_ast_node(code_position),
+    if_branch(std::move(if_branch))
 {
 }
 

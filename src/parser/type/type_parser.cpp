@@ -13,11 +13,12 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse_type_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
+    const auto declaration_pos = tokens.front()->get_code_position();
     tokens.pop();
 
     switch (util::consume_token(tokens, blasphemy::details::UNEXPECTED_DECLARATION)->get_group())
     {
-    case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
+    case token_group::KEYWORD_CLASS: return parse_class_declaration(declaration_pos, tokens);
     case token_group::KEYWORD_INTERFACE:; //TODO
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
@@ -28,9 +29,11 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
 
 
 std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modifiers(
-        std::queue<std::unique_ptr<token>> &tokens)
+        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::type_decl::attributes_ast_node> node = std::make_unique<ast::type_decl::attributes_ast_node>();
+    std::unique_ptr<ast::type_decl::attributes_ast_node> node = std::make_unique<ast::type_decl::attributes_ast_node>(
+        code_position
+    );
 
     // Attributes are optional, so check whether they exist at all.
     bool attributes_exist = false;

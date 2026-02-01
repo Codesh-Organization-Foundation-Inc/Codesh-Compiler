@@ -8,8 +8,9 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sco
     return scope_symbol;
 }
 
-codesh::ast::method::method_scope_ast_node::method_scope_ast_node(method_declaration_ast_node &parent_method) :
-    parent_method(parent_method)
+codesh::ast::method::method_scope_ast_node::method_scope_ast_node(const blasphemy::code_position code_position,
+        method_declaration_ast_node &parent_method) :
+    ast_node(code_position), parent_method(parent_method)
 {
 }
 
@@ -68,9 +69,11 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
 }
 
 codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_ast_node::
-    create_method_scope()
+    create_method_scope(const blasphemy::code_position code_position)
 {
-    return *method_scopes.emplace_back(std::make_unique<method_scope_ast_node>(parent_method));
+    return *method_scopes.emplace_back(
+        std::make_unique<method_scope_ast_node>(code_position, parent_method)
+    );
 }
 
 const std::vector<std::unique_ptr<codesh::ast::method::method_scope_ast_node>> &codesh::ast::method::

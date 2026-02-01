@@ -1,4 +1,6 @@
 #include "resolve.h"
+
+#include "blasphemy/blasphemy_collector.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
@@ -8,7 +10,6 @@
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
-#include "fmt/color.h"
 
 #include <ranges>
 
@@ -55,7 +56,7 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     // Manually pass System.out to every מסוף ל־אמר call
     if (method_call.get_unresolved_name().join() == "מסוף/אמר")
     {
-        auto system_in_reference = std::make_unique<variable_reference_ast_node>("מסוף/פלט");
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>(blasphemy::NO_CODE_POS, "מסוף/פלט");
         system_in_reference->set_resolved(
             *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "מסוף/פלט")->get()) // NOLINT(*-pro-type-static-cast-downcast)
         );

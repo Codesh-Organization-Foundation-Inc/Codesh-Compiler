@@ -17,7 +17,7 @@ class primitive_type_ast_node final : public type_ast_node
     const definition::primitive_type type;
 
 public:
-    explicit primitive_type_ast_node(definition::primitive_type type);
+    primitive_type_ast_node(blasphemy::code_position code_position, definition::primitive_type type);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

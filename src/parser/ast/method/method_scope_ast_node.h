@@ -9,8 +9,6 @@
 
 #include <list>
 
-#include <list>
-
 namespace codesh::ast::method
 {
 
@@ -32,26 +30,23 @@ protected:
         const override;
 
 public:
-    explicit method_scope_ast_node(method_declaration_ast_node &parent_method);
+    method_scope_ast_node(blasphemy::code_position code_position, method_declaration_ast_node &parent_method);
 
     void set_resolved(semantic_analyzer::method_scope_symbol &symbol) override;
 
 
     [[nodiscard]] method_declaration_ast_node &get_parent_method() const;
 
-    void set_bytecode_position(size_t bytecode_position);
-
 
     [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
     void push_front_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
 
-    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
-        const;
+    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables() const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
 
 
-    method_scope_ast_node &create_method_scope();
+    method_scope_ast_node &create_method_scope(blasphemy::code_position code_position);
     [[nodiscard]] const std::vector<std::unique_ptr<method_scope_ast_node>> &get_method_scopes() const;
 
 

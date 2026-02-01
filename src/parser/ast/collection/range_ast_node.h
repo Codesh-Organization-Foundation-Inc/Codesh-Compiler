@@ -15,7 +15,7 @@ class range_ast_node : public collection_ast_node
     const std::unique_ptr<type::custom_type_ast_node> type;
 
 public:
-    range_ast_node(std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
+    range_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
             std::unique_ptr<value_ast_node> skip);
 
     [[nodiscard]] value_ast_node &get_from() const;

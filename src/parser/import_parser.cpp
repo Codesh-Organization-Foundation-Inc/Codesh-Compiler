@@ -7,11 +7,15 @@
 
 namespace ast = codesh::ast;
 
-std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
+        std::queue<std::unique_ptr<token>> &tokens)
 {
+    auto import_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>();
+    std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>(
+        import_pos
+    );
 
     // Check if is a static import
     util::ensure_tokens_exist(tokens, blasphemy::details::NO_IMPORT_TYPE); // TODO: provide better reason

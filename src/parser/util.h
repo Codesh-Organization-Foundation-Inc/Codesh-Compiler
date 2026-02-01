@@ -28,7 +28,8 @@ namespace codesh::parser::util
  * If so, pops it from the queue.
  * @return Whether the token group matches the requested
  */
-bool consuming_check(std::queue<std::unique_ptr<token>> &tokens, token_group token_group);
+bool consuming_check(std::queue<std::unique_ptr<token>> &tokens, token_group token_group,
+        std::optional<std::reference_wrapper<std::unique_ptr<token>>> token_out = std::nullopt);
 /**
  * Checks whether the group of the first token matches the requested one.
  * @return Whether the token group matches the requested

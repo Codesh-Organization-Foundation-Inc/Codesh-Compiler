@@ -4,14 +4,15 @@
 #include "output/ir/code_block.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
-variable_reference_ast_node::variable_reference_ast_node(codesh::definition::fully_qualified_name name) :
-    name(std::move(name))
+variable_reference_ast_node::variable_reference_ast_node(const codesh::blasphemy::code_position code_position, codesh::definition::fully_qualified_name name) :
+    value_ast_node(code_position), name(std::move(name))
 {
 }
 
 variable_reference_ast_node::variable_reference_ast_node(
+        const codesh::blasphemy::code_position code_position,
         const codesh::ast::local_variable_declaration_ast_node &producing_declaration) :
-    name(codesh::definition::fully_qualified_name(producing_declaration.get_name())),
+    value_ast_node(code_position), name(codesh::definition::fully_qualified_name(producing_declaration.get_name())),
     producing_declaration(producing_declaration)
 {
 }

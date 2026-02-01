@@ -29,6 +29,8 @@ struct code_position
     size_t column;
 };
 
+constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
+
 struct blasphemy_info
 {
     std::string details;

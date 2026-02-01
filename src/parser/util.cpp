@@ -77,33 +77,34 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     std::unique_ptr<ast::type::type_ast_node> result;
 
     ensure_tokens_exist(tokens, blasphemy::details::NO_TYPE);
+    const auto type_pos = tokens.front()->get_code_position();
     const auto token_group = tokens.front()->get_group();
 
     switch (token_group)
     {
     case token_group::KEYWORD_INTEGER:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::INTEGER);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::INTEGER);
         break;
     case token_group::KEYWORD_FLOAT:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::FLOAT);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::FLOAT);
         break;
     case token_group::KEYWORD_DOUBLE:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::DOUBLE);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::DOUBLE);
         break;
     case token_group::KEYWORD_LONG:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::LONG);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::LONG);
         break;
     case token_group::KEYWORD_SHORT:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::SHORT);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::SHORT);
         break;
     case token_group::KEYWORD_BYTE:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BYTE);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::BYTE);
         break;
     case token_group::KEYWORD_CHAR:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::CHAR);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::CHAR);
         break;
     case token_group::KEYWORD_BOOLEAN:
-        result = std::make_unique<ast::type::primitive_type_ast_node>(definition::primitive_type::BOOLEAN);
+        result = std::make_unique<ast::type::primitive_type_ast_node>(type_pos, definition::primitive_type::BOOLEAN);
         break;
 
     case token_group::IDENTIFIER:
@@ -111,7 +112,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
         definition::fully_qualified_name name;
         parse_fqcn(tokens, name);
 
-        result = std::make_unique<ast::type::custom_type_ast_node>(name);
+        result = std::make_unique<ast::type::custom_type_ast_node>(type_pos, name);
         break;
     }
 
@@ -122,6 +123,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
         tokens.pop();
 
         return std::make_unique<ast::type::custom_type_ast_node>(
+            type_pos,
             definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT)
         );
     }
@@ -145,10 +147,16 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     return result;
 }
 
-bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group)
+bool codesh::parser::util::consuming_check(std::queue<std::unique_ptr<token>> &tokens, const token_group token_group,
+        const std::optional<std::reference_wrapper<std::unique_ptr<token>>> token_out)
 {
     if (peeking_check(tokens, token_group))
     {
+        if (token_out.has_value())
+        {
+            token_out.value().get() = std::move(tokens.front());
+        }
+
         tokens.pop();
         return true;
     }

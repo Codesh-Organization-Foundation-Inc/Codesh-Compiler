@@ -9,7 +9,9 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_vari
     return resolved_variable;
 }
 
-codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() :
+codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node(
+        const blasphemy::code_position code_position) :
+    ast_node(code_position),
     accessible_from(-1),
     accessible_to(-1)
 {
