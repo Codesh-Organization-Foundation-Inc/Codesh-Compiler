@@ -27,7 +27,7 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
         std::optional<code_position> code_pos, const bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
+    blasphemies.emplace_back(std::move(details), type, std::move(code_pos), is_fatal);
 
     if (is_fatal)
     {
@@ -54,19 +54,17 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 
         std::cerr << get_blasphemy_message(blasphemy.type);
 
-        if (blasphemy.code_pos.has_value())
+        if (const auto &code_pos = blasphemy.code_pos)
         {
             fmt::println(stderr,
-                " בְּפָּסוּק {}",
-                std::to_string(blasphemy.code_pos->line)
+                " בְּפָּסוּק {} עֲבוּר {}",
+                std::to_string(code_pos->line),
+                code_pos->filename
             );
         }
 
         fmt::println(stderr,
-            " עֲבוּר {}: {}",
-
-            // TODO: Add file name to blasphemy
-            "דוגמה.אמן",
+            "{} :",
             blasphemy.details
         );
 

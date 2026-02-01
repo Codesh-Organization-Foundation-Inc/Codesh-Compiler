@@ -24,6 +24,7 @@ enum class blasphemy_type
 
 struct code_position
 {
+    std::string filename;
     size_t line;
     size_t column;
 };
@@ -32,6 +33,7 @@ struct blasphemy_info
 {
     std::string details;
     blasphemy_type type;
+
     std::optional<code_position> code_pos;
 
     bool is_fatal;

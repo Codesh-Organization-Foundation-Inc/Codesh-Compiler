@@ -27,7 +27,7 @@ public:
 
     [[nodiscard]] const std::filesystem::path &get_source_path() const;
     /**
-     * The source file name with no extension
+     * @returns The source file name with no extension
      */
     [[nodiscard]] std::string get_source_stem() const;
 
