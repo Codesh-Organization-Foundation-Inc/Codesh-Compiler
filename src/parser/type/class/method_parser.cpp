@@ -11,6 +11,7 @@
 #include "parser/util.h"
 #include "parser/value_parser.h"
 #include "parser/type/type_parser.h"
+#include "fmt/format.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
@@ -83,9 +84,21 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             method_scope.mark_end();
             return;
 
-        default: blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
-            blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
-            tokens.pop(); // TODO: remove it in the future if not needed
+        default: {
+            const auto token_name = util::get_token_display_name(*tokens.front());
+
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    "{}: {}",
+                    blasphemy::details::UNEXPECTED_TOKEN,
+                    token_name
+                ),
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.front()->get_code_position()
+            );
+
+            tokens.pop();
+        }
         }
     }
 
@@ -278,7 +291,11 @@ std::pair<
         if (has_val_assignment)
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::UNEXPECTED_TOKEN,
+                fmt::format(
+                "{}: {}",
+                    blasphemy::details::UNEXPECTED_TOKEN,
+                    util::get_token_display_name(*assignment_token)
+                ),
                 blasphemy::blasphemy_type::SYNTAX,
                 assignment_token->get_code_position()
             );
@@ -322,7 +339,11 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
         if (!codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
         {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::UNEXPECTED_TOKEN,
+                tokens.empty() ? codesh::blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
+                    "{}: {}",
+                    codesh::blasphemy::details::UNEXPECTED_TOKEN,
+                    codesh::parser::util::get_token_display_name(*tokens.front())
+                ),
                 codesh::blasphemy::blasphemy_type::SYNTAX,
                 tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
             );

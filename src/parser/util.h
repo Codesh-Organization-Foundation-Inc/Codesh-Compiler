@@ -74,4 +74,9 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
 
 [[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
 
+/**
+ * Returns the display name of a token: its content if it's an identifier, or its keyword name otherwise.
+ */
+[[nodiscard]] std::string get_token_display_name(const token &token);
+
 }

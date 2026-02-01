@@ -4,6 +4,7 @@
 #include "blasphemy/details.h"
 #include "defenition/definitions.h"
 #include "defenition/fully_qualified_name.h"
+#include "lexer/trie/keywords.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
@@ -249,4 +250,16 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
 
         break;
     }
+}
+
+std::string codesh::parser::util::get_token_display_name(const token &token)
+{
+    if (const auto id = dynamic_cast<const identifier_token *>(&token))
+        return id->get_content();
+
+    const auto it = lexer::trie::TOKEN_TO_NAME_MAP.find(token.get_group());
+    if (it != lexer::trie::TOKEN_TO_NAME_MAP.end())
+        return it->second;
+
+    return definition::ERROR_IDENTIFIER_CONTENT;
 }

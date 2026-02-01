@@ -31,6 +31,8 @@
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "util.h"
 
+#include "fmt/format.h"
+
 #include <functional>
 
 template <typename T>
@@ -312,11 +314,16 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
 
     default: {
         const auto error_pos = tokens.front()->get_code_position();
+        const auto token_name = util::get_token_display_name(*tokens.front());
         eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos);
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::UNEXPECTED_TOKEN,
+            fmt::format(
+                "{}: {}",
+                blasphemy::details::UNEXPECTED_TOKEN,
+                token_name
+            ),
             blasphemy::blasphemy_type::SYNTAX,
             error_pos
         );
@@ -461,11 +468,16 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
     default: {
         const auto error_pos = tokens.front()->get_code_position();
+        const auto token_name = util::get_token_display_name(*tokens.front());
         eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos); // FIXME: does problems
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::UNEXPECTED_TOKEN,
+            fmt::format(
+                "{}: {}",
+                blasphemy::details::UNEXPECTED_TOKEN,
+                token_name
+            ),
             blasphemy::blasphemy_type::SYNTAX,
             error_pos
         );
