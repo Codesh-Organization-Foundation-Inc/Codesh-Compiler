@@ -286,9 +286,8 @@ bool codesh::output::jvm_target::stack_map_table_builder::are_locals_identical(
     return true;
 }
 
-std::optional<codesh::output::jvm_target::frame_result>
-    codesh::output::jvm_target::stack_map_table_builder::try_build_append_frame(
-        const int offset_delta, const size_t prev_size,
+std::optional<codesh::output::jvm_target::frame_result> codesh::output::jvm_target::stack_map_table_builder::
+    try_build_append_frame(const int offset_delta, const size_t prev_size,
         const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
         std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals)
 {
@@ -314,7 +313,7 @@ std::optional<codesh::output::jvm_target::frame_result>
     return frame_result{std::move(append), frame_size};
 }
 
-std::optional<codesh::output::jvm_target::frame_result>codesh::output::jvm_target::stack_map_table_builder::
+std::optional<codesh::output::jvm_target::frame_result> codesh::output::jvm_target::stack_map_table_builder::
     try_build_chop_frame(const int offset_delta, const size_t prev_size, const size_t curr_size,
         const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
         const std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals)
