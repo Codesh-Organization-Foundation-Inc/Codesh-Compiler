@@ -27,13 +27,23 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
         std::optional<code_position> code_pos, const bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(details), type, std::move(code_pos), is_fatal);
+    blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
 
     if (is_fatal)
     {
         print_all_blasphemies();
         std::exit(EXIT_FAILURE);
     }
+}
+
+void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesystem::path source_directory_path)
+{
+    this->source_directory_path = std::move(source_directory_path);
+}
+
+void codesh::blasphemy::blasphemy_collector::set_source_file(const std::filesystem::path &source_file_path)
+{
+    relative_source_path = std::filesystem::relative(source_file_path, source_directory_path);
 }
 
 bool codesh::blasphemy::blasphemy_collector::has_errors() const
@@ -58,9 +68,9 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
         {
             fmt::println(stderr,
                 " בְּסֵפֶר {}:{} פָּסוּק {}",
-                code_pos->relative_source_path.string(),
-                std::to_string(code_pos->target_line.line),
-                std::to_string(code_pos->target_line.column)
+                relative_source_path.string(),
+                std::to_string(code_pos->line),
+                std::to_string(code_pos->column)
             );
         }
 

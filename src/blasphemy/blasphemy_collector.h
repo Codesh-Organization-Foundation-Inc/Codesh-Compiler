@@ -23,15 +23,10 @@ enum class blasphemy_type
     UNKNOWN
 };
 
-struct line_info
+struct code_position
 {
     size_t line;
     size_t column;
-};
-struct code_position
-{
-    std::filesystem::path relative_source_path;
-    line_info target_line;
 };
 
 struct blasphemy_info
@@ -47,6 +42,15 @@ struct blasphemy_info
 
 class blasphemy_collector
 {
+    std::filesystem::path source_directory_path;
+    std::filesystem::path relative_source_path;
+
+    std::vector<blasphemy_info> blasphemies;
+
+    static std::string type_to_string(blasphemy_type type);
+    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
+    [[nodiscard]] static fmt::format_string<std::string> get_random_message();
+
 public:
     /**
      * Adds a new blasphemy
@@ -58,6 +62,13 @@ public:
     void add_blasphemy(std::string details, blasphemy_type type, std::optional<code_position> code_pos = std::nullopt,
         bool is_fatal = false);
 
+    void set_source_directory(std::filesystem::path source_directory_path);
+
+    /**
+     * Makes all blasphemies from this point on blame the provided `source_path`
+     */
+    void set_source_file(const std::filesystem::path &source_file_path);
+
     /**
      * Whether any error exists
      */
@@ -67,16 +78,6 @@ public:
      * Prints all errors
      */
     void print_all_blasphemies() const;
-
-private:
-    std::vector<blasphemy_info> blasphemies;
-
-    static std::string type_to_string(blasphemy_type type);
-
-    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
-
-    [[nodiscard]] static fmt::format_string<std::string> get_random_message();
-
 };
 
 

@@ -18,6 +18,9 @@
 #include <utility>
 #include <vector>
 
+static void update_source_file(const std::filesystem::path &source_file_path);
+static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
+
 static std::string read_file(const std::string &file_name);
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const std::vector<std::filesystem::path> &source_files);
@@ -45,11 +48,15 @@ int main(const int argc, char **const argv)
     std::error_code error;
     if (std::filesystem::is_directory(args.src_path, error))
     {
+        codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path);
+
         collect_source_files(args.src_path, source_files);
         is_project = true;
     }
     else
     {
+        codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path.parent_path());
+
         // We don't care about its file extension so long as the user forced this source file, I guess.
         source_files.push_back(args.src_path);
         is_project = false;
@@ -66,6 +73,7 @@ int main(const int argc, char **const argv)
 
     for (const auto &root_node : asts)
     {
+        update_source_file(*root_node);
         codesh::semantic_analyzer::prepare(*root_node);
         codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
     }
@@ -77,11 +85,13 @@ int main(const int argc, char **const argv)
     // occurs.
     for (const auto &root_node : asts)
     {
+        update_source_file(*root_node);
         codesh::semantic_analyzer::collect_methods(*root_node, master_symbol_table);
     }
 
     for (const auto &root_node : asts)
     {
+        update_source_file(*root_node);
         codesh::semantic_analyzer::analyze(*root_node, master_symbol_table);
     }
 
@@ -102,6 +112,7 @@ int main(const int argc, char **const argv)
     // So for each type declaration, build one class file:
     for (const auto &root_node : asts)
     {
+        update_source_file(*root_node);
         const auto &source_file_path = root_node->get_source_path();
 
         for (auto &type_declaration : root_node->get_type_declarations())
@@ -123,6 +134,15 @@ int main(const int argc, char **const argv)
     }
 
     return EXIT_SUCCESS;
+}
+
+static void update_source_file(const std::filesystem::path &source_file_path)
+{
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
+}
+static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node)
+{
+    update_source_file(root_node.get_source_path());
 }
 
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
@@ -152,6 +172,8 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
     for (const auto &source_file_path : source_files)
     {
+        update_source_file(source_file_path);
+
         // LEXING
         const std::string source_file = read_file(source_file_path);
         auto tokens = codesh::lexer::tokenize_code(source_file);
