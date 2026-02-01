@@ -62,7 +62,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-                    blasphemy::blasphemy_type::SYNTAX);
+                    blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position());
             }
             break;
 
@@ -84,13 +84,13 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             return;
 
         default: blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
             tokens.pop(); // TODO: remove it in the future if not needed
         }
     }
 
     blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_SCOPE_END,
-        blasphemy::blasphemy_type::SYNTAX);
+        blasphemy::blasphemy_type::SYNTAX, method_scope.get_code_position());
 }
 
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
@@ -197,7 +197,8 @@ std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_stat
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_FROM,
-            blasphemy::blasphemy_type::SYNTAX
+            blasphemy::blasphemy_type::SYNTAX,
+            for_pos
         );
     }
 
@@ -227,7 +228,8 @@ static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_SCOPE_BEGIN,
-            codesh::blasphemy::blasphemy_type::SYNTAX
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return std::nullopt;
@@ -252,7 +254,7 @@ std::pair<
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, declaration_pos);
     }
 
     const auto name_token = util::consume_identifier_token(tokens);
@@ -268,15 +270,18 @@ std::pair<
     if (assignment_policy == var_decl_assignment_policy::REQUIRE && !has_val_assignment)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
-                                                           blasphemy::blasphemy_type::SYNTAX);
+                                                           blasphemy::blasphemy_type::SYNTAX, declaration_pos);
     }
 
     if (assignment_policy == var_decl_assignment_policy::FORBID)
     {
         if (has_val_assignment)
         {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_TOKEN,
-                                                               blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::UNEXPECTED_TOKEN,
+                blasphemy::blasphemy_type::SYNTAX,
+                assignment_token->get_code_position()
+            );
         }
 
         return {std::move(variable_decl_ast_node), nullptr};
@@ -318,7 +323,8 @@ static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::tok
         {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
                 codesh::blasphemy::details::UNEXPECTED_TOKEN,
-                codesh::blasphemy::blasphemy_type::SYNTAX
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
             );
         }
     }

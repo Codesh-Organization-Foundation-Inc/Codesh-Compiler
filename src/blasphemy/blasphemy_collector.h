@@ -61,8 +61,7 @@ public:
      * @param code_pos The location in the source code where the error was initiated from
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
-    void add_blasphemy(std::string details, blasphemy_type type, std::optional<code_position> code_pos = std::nullopt,
-        bool is_fatal = false);
+    void add_blasphemy(std::string details, blasphemy_type type, code_position code_pos, bool is_fatal = false);
 
     void set_source_directory(std::filesystem::path source_directory_path);
 

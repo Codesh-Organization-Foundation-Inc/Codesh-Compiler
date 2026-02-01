@@ -272,7 +272,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         if (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS)) {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::NO_CLOSE_PARENTHESIS,
-                blasphemy::blasphemy_type::SYNTAX
+                blasphemy::blasphemy_type::SYNTAX,
+                inner->get_code_position()
             );
         }
 
@@ -310,12 +311,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
 
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position());
+        const auto error_pos = tokens.front()->get_code_position();
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos);
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::UNEXPECTED_TOKEN,
-            blasphemy::blasphemy_type::SYNTAX
+            blasphemy::blasphemy_type::SYNTAX,
+            error_pos
         );
     }
     }
@@ -457,12 +460,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         break;
     }
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position()); // FIXME: does problems
+        const auto error_pos = tokens.front()->get_code_position();
+        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos); // FIXME: does problems
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::UNEXPECTED_TOKEN,
-            blasphemy::blasphemy_type::SYNTAX
+            blasphemy::blasphemy_type::SYNTAX,
+            error_pos
         );
     }
     }
@@ -604,7 +609,8 @@ static std::optional<std::pair<
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::EXPECTED_VARIABLE,
-            codesh::blasphemy::blasphemy_type::SYNTAX
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            left_value_node->get_code_position()
         );
 
         return std::nullopt;
@@ -661,7 +667,8 @@ static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
     if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_AGAINST)) {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_KEYWORD_AGAINST,
-            codesh::blasphemy::blasphemy_type::SYNTAX
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;
@@ -675,7 +682,8 @@ static bool consume_by(std::queue<std::unique_ptr<codesh::token>> &tokens)
     if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::OPERATOR_BY)) {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_KEYWORD_BY,
-            codesh::blasphemy::blasphemy_type::SYNTAX
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;

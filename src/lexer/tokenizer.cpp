@@ -145,8 +145,11 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::TOKEN_DOESNT_EXIST,
-                blasphemy::blasphemy_type::LEXICAL);
+            blasphemy::blasphemy_collector().add_blasphemy(
+                blasphemy::details::TOKEN_DOESNT_EXIST,
+                blasphemy::blasphemy_type::LEXICAL,
+                current_code_position
+            );
         }
     }
 
@@ -177,9 +180,11 @@ static size_t handle_keyword_match(const std::string &code, codesh::blasphemy::c
             if (end != std::string::npos)
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
-            //TODO: Convert word error token or alike
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT , codesh::blasphemy::blasphemy_type::SYNTAX);
+                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT,
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                current_code_position
+            );
         }
 
         default: {

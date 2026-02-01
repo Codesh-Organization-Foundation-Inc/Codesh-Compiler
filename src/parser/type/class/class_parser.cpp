@@ -30,7 +30,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, code_position);
     }
 
     // Get name
@@ -38,7 +38,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     if (!name_token)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, code_position);
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
@@ -55,7 +55,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
     if (!util::consuming_check(tokens, token_group::SCOPE_BEGIN))
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_SCOPE_BEGIN,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, code_position);
     }
 
     parse_class_scope(tokens, node.get());
@@ -108,7 +108,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
         default: {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
-                                                                   codesh::blasphemy::blasphemy_type::SYNTAX);
+                                                                   codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
             return;
         }
 
@@ -116,7 +116,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     }
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_SCOPE_END,
-        codesh::blasphemy::blasphemy_type::SYNTAX);
+        codesh::blasphemy::blasphemy_type::SYNTAX, class_node->get_code_position());
 }
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
@@ -133,7 +133,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
         {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_IDENTIFIER,
-                codesh::blasphemy::blasphemy_type::SYNTAX);
+                codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
         }
     }
 
@@ -150,7 +150,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_KEYWORD_NAME,
-            codesh::blasphemy::blasphemy_type::SYNTAX);
+            codesh::blasphemy::blasphemy_type::SYNTAX, code_position);
     }
 
     // * (the name)
@@ -176,7 +176,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
                 codesh::blasphemy::details::NO_KEYWORD_NAME,
-                codesh::blasphemy::blasphemy_type::SYNTAX
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                arg_declaration_token->get_code_position()
             );
         }
 
@@ -220,7 +221,8 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_SCOPE_BEGIN,
-            codesh::blasphemy::blasphemy_type::SYNTAX
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            code_position
         );
     }
 

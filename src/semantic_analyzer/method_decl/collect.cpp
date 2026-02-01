@@ -44,7 +44,7 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
         new_context.blasphemy_consumer(fmt::format(
             "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
             method_name
-        ));
+        ), method_decl.get_code_position());
     }
 
     collect_local_variables(method_decl, it);

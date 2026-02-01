@@ -93,7 +93,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     if (constant_pool_size > 0xFFFF)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::CONSTANT_POOL_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+            blasphemy::blasphemy_type::OUTPUT, blasphemy::NO_CODE_POS, true);
     }
 
     util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
@@ -217,7 +217,7 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
     if (code_attr.code.size() > 0xFFFFFF)
     {
         blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::METHOD_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+            blasphemy::blasphemy_type::OUTPUT, blasphemy::NO_CODE_POS, true);
     }
 
     util::put_int_bytes(code_attr.code_length, 4, code_attr.code.size()); // NOLINT(*-narrowing-conversions)
@@ -429,7 +429,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
                     method_decl.get_resolved_name().holy_join()
                 ),
                 blasphemy::blasphemy_type::OUTPUT,
-                std::nullopt,
+                blasphemy::NO_CODE_POS,
                 true
             );
         }

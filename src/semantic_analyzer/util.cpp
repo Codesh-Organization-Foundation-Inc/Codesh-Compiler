@@ -11,7 +11,11 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
         const semantic_context &context,
         const definition::fully_qualified_name &full_name)
 {
-    const auto result_raw = symbol_table::resolve_from_imports(context, full_name);
+    const auto result_raw = symbol_table::resolve_from_imports(
+        context,
+        full_name,
+        blasphemy::NO_CODE_POS
+    );
 
     if (!result_raw.has_value())
         return std::nullopt;
@@ -22,7 +26,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
         context.blasphemy_consumer(fmt::format(
             "{} אינו עצם",
             full_name.holy_join()
-        ));
+        ), blasphemy::NO_CODE_POS);
         return std::nullopt;
     }
 

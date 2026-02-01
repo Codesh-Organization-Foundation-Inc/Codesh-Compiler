@@ -18,7 +18,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_BASAD,
             blasphemy::blasphemy_type::LEXICAL,
-            std::nullopt,
+            blasphemy::NO_CODE_POS,
             true
         );
     }
@@ -51,8 +51,11 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             break;
 
         default:
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
-                blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_KEYWORD_SHALL_BE,
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.front()->get_code_position()
+            );
             tokens.pop();
             break;
         }

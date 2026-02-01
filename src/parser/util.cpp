@@ -29,7 +29,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
     if (token->get_group() != token_group::IDENTIFIER)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX, std::nullopt);
+            blasphemy::blasphemy_type::SYNTAX, token->get_code_position());
 
         return make_error_identifier_token(token->get_code_position());
     }
@@ -49,7 +49,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
         blasphemy::get_blasphemy_collector().add_blasphemy(
             no_tokens_blasphemy_details,
             blasphemy::blasphemy_type::SYNTAX,
-            std::nullopt
+            token->get_code_position()
         );
 
         return make_error_identifier_token(token->get_code_position());
@@ -117,8 +117,11 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     }
 
     default:
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_TYPE,
-            blasphemy::blasphemy_type::SYNTAX, std::nullopt);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_TYPE,
+            blasphemy::blasphemy_type::SYNTAX,
+            type_pos
+        );
 
         tokens.pop();
 
@@ -176,8 +179,12 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
     if (tokens.empty())
     {
         // TODO: Switch error message to take from parameter
-        blasphemy::get_blasphemy_collector().add_blasphemy(no_tokens_blasphemy_details,
-            blasphemy::blasphemy_type::SYNTAX, std::nullopt, true);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            no_tokens_blasphemy_details,
+            blasphemy::blasphemy_type::SYNTAX,
+            blasphemy::NO_CODE_POS,
+            true
+        );
     }
 }
 
@@ -186,7 +193,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
     if (!consuming_check(tokens, token_group::PUNCTUATION_END_OP))
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position());
     }
 }
 
@@ -205,8 +212,11 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             }
             else
             {
-                blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-                    blasphemy::blasphemy_type::SYNTAX);
+                blasphemy::get_blasphemy_collector().add_blasphemy(
+                    blasphemy::details::NO_IDENTIFIER,
+                    blasphemy::blasphemy_type::SYNTAX,
+                    id->get_code_position()
+                );
             }
         }
         else
@@ -229,9 +239,11 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             // If the user has put a wildcard yet still attempts to add more shit
             if (!is_last_item && fqcn_out.is_wildcard())
             {
-                // throw std::runtime_error("Unexpected token: A wildcard statement must be the last item in an FQN");
-                blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-                    blasphemy::blasphemy_type::SYNTAX);
+                blasphemy::get_blasphemy_collector().add_blasphemy(
+                    blasphemy::details::NO_IDENTIFIER,
+                    blasphemy::blasphemy_type::SYNTAX,
+                    tokens.front()->get_code_position()
+                );
             }
         }
 

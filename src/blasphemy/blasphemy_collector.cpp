@@ -25,7 +25,7 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
-        std::optional<code_position> code_pos, const bool is_fatal)
+        code_position code_pos, const bool is_fatal)
 {
     blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
 
@@ -66,7 +66,7 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 
         if (const auto &code_pos = blasphemy.code_pos)
         {
-            fmt::println(stderr,
+            fmt::print(stderr,
                 " בְּסֵפֶר {}:{} פָּסוּק {}",
                 relative_source_path.string(),
                 std::to_string(code_pos->line),
@@ -75,7 +75,7 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
         }
 
         fmt::println(stderr,
-            "{} :",
+            ": {}",
             blasphemy.details
         );
 

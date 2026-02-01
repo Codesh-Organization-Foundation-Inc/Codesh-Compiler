@@ -28,8 +28,8 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
     {
         new_context.blasphemy_consumer(fmt::format(
             "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-            type_decl.get_unresolved_name().join()
-        ));
+            type_decl.get_unresolved_name().holy_join()
+        ), type_decl.get_code_position());
     }
 }
 

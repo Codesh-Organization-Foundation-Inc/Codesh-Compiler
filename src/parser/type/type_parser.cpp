@@ -76,8 +76,11 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     // or did not close the attribute statement with Shall Be.
     if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
-            blasphemy::blasphemy_type::SYNTAX);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_SHALL_BE,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     return node;

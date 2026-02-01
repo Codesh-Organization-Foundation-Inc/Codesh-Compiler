@@ -208,7 +208,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
     //FIXME: Make this more specific to dest path not being a directory in a project-aligned compilation
     codesh::blasphemy::blasphemy_collector().add_blasphemy(
         codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + dest_path.string(),
-        codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
+        codesh::blasphemy::blasphemy_type::INIT, codesh::blasphemy::NO_CODE_POS, true);
 
     return false;
 }
@@ -233,7 +233,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + source_file_path.string(),
             codesh::blasphemy::blasphemy_type::INIT,
-            std::nullopt,
+            codesh::blasphemy::NO_CODE_POS,
             true
         );
 
@@ -252,9 +252,12 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR
-            + file_name,
-            codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + file_name,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
     }
 
     std::ostringstream buffer;

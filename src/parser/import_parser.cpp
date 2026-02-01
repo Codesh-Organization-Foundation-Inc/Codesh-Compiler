@@ -31,7 +31,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
 
     default:
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IMPORT_TYPE,
-            blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
 
     }
 
