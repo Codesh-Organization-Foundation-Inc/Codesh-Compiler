@@ -70,7 +70,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 {
     std::queue<std::unique_ptr<token>> tokens;
 
-    blasphemy::code_position current_code_position{};
+    blasphemy::code_position current_code_position{1, 0};
 
     size_t i = 0;
     while (i < code.size())
