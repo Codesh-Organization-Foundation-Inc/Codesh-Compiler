@@ -1,7 +1,6 @@
 #include "collect.h"
 
 #include "blasphemy/blasphemy_collector.h"
-#include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -41,9 +40,9 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
 
     if (!inserted)
     {
-        //TODO: Print full method signature
+        //TODO: Print full method declaration
         new_context.blasphemy_consumer(fmt::format(
-            blasphemy::details::DUPLICATE_METHOD_DECLARATION,
+            "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
             method_name
         ));
     }

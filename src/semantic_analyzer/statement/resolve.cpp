@@ -6,7 +6,6 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
-#include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/collection/collection_ast_node.h"
 #include "parser/ast/impl/binary_ast_node.h"
@@ -111,8 +110,9 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 
         if (!unary_op->is_value_valid())
         {
+            //TODO: Improve message
             context.blasphemy_consumer(fmt::format(
-                blasphemy::details::UNARY_TYPE_MISMATCH,
+                "הסוג {} אינו תואם לפעולת {}",
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
             ));
@@ -133,8 +133,9 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         {
             if (!binary_op->is_value_valid())
             {
+                //TODO: Improve message
                 context.blasphemy_consumer(fmt::format(
-                    blasphemy::details::BINARY_TYPE_MISMATCH,
+                    "הסוגים {} ו־{} אינם תואמים לפעולת {}",
                     binary_op->get_left().get_type()->to_pretty_string(),
                     binary_op->get_right().get_type()->to_pretty_string(),
                     binary_op->to_pretty_string()

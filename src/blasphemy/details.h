@@ -1,16 +1,13 @@
 #pragma once
 
-#include "fmt/base.h"
-
 #include <string>
 
 namespace codesh::blasphemy::details
 {
 
 // INIT
-extern const fmt::runtime_format_string<> SOURCE_FILE_OPEN_ERROR;
-extern const fmt::runtime_format_string<> OUTPUT_FILE_OPEN_ERROR;
-extern const fmt::runtime_format_string<> DEST_PATH_NOT_DIRECTORY;
+extern const std::string SOURCE_FILE_OPEN_ERROR;
+extern const std::string OUTPUT_FILE_OPEN_ERROR;
 extern const std::string NO_MAIN_ARGS;
 
 // LEXICAL
@@ -42,24 +39,11 @@ extern const std::string EXPECTED_VARIABLE;
 extern const std::string UNRECOGNIZED_TYPE;
 extern const std::string CONDITION_NOT_BOOLEAN;
 extern const std::string ITERATOR_NOT_COLLECTION;
-extern const fmt::runtime_format_string<> NOT_AN_OBJECT;
-extern const fmt::runtime_format_string<> UNARY_TYPE_MISMATCH;
-extern const fmt::runtime_format_string<> BINARY_TYPE_MISMATCH;
-extern const fmt::runtime_format_string<> VARIABLE_REFERENCED_BEFORE_CREATION;
-extern const fmt::runtime_format_string<> NOT_A_VARIABLE;
-extern const fmt::runtime_format_string<> SYMBOL_NOT_FOUND;
-extern const fmt::runtime_format_string<> TYPE_DOES_NOT_EXIST;
-extern const fmt::runtime_format_string<> METHOD_NOT_FOUND;
-extern const fmt::runtime_format_string<> NOT_A_METHOD;
-extern const std::string ARGUMENT_TYPE_MISMATCH;
-extern const fmt::runtime_format_string<> DUPLICATE_TYPE_DECLARATION;
-extern const fmt::runtime_format_string<> DUPLICATE_METHOD_DECLARATION;
 
 // OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
 extern const std::string METHOD_TOO_BIG;
 extern const std::string STRING_TOO_BIG;
 extern const std::string NUMBER_TOO_BIG;
-extern const fmt::runtime_format_string<> TOO_MANY_LOCAL_VARIABLES;
 
 }

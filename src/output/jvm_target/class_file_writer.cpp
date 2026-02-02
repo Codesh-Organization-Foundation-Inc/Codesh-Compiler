@@ -1,7 +1,6 @@
 #include "class_file_writer.h"
 
 #include <filesystem>
-#include <fmt/xchar.h>
 #include <fstream>
 
 #include <ranges>
@@ -29,22 +28,15 @@ static void write_stack_map_frame(std::ofstream &out,
 
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file,
-                                               const ast::type_decl::type_declaration_ast_node &type_decl,
-                                               const std::filesystem::path &destination)
+    const ast::compilation_unit_ast_node &root_node,
+    const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
 {
     std::ofstream destination_file(destination / (type_decl.get_last_name(false) + ".class"), std::ios::binary);
 
     if (!destination_file)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(
-            fmt::format(
-                blasphemy::details::SOURCE_FILE_OPEN_ERROR,
-                (destination / (type_decl.get_last_name(false) + ".class")).string()
-            ),
-            blasphemy::blasphemy_type::OUTPUT,
-            std::nullopt,
-            true
-        );
+        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::SOURCE_FILE_OPEN_ERROR,
+            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
     }
 
 
