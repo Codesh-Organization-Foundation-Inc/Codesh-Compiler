@@ -9,7 +9,7 @@ class class_declaration_ast_node final : public type_declaration_ast_node
 {
 
 public:
-    explicit class_declaration_ast_node(definition::fully_qualified_name name);
+    class_declaration_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
 };
 
 }

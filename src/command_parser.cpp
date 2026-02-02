@@ -12,7 +12,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_MAIN_ARGS,
             blasphemy::blasphemy_type::INIT,
-            std::nullopt,
+            blasphemy::NO_CODE_POS,
             true
         );
     }

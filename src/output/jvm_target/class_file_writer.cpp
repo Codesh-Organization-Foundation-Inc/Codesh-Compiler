@@ -42,7 +42,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
                 (destination / (type_decl.get_last_name(false) + ".class")).string()
             ),
             blasphemy::blasphemy_type::OUTPUT,
-            std::nullopt,
+            blasphemy::NO_CODE_POS,
             true
         );
     }

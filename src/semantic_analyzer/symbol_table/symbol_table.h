@@ -1,5 +1,6 @@
 #pragma once
 
+#include "blasphemy/blasphemy_collector.h"
 #include "symbol.h"
 
 namespace codesh::ast
@@ -34,6 +35,7 @@ public:
 
     [[nodiscard]] static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(
             const semantic_context &context, const definition::fully_qualified_name &full_name,
+            blasphemy::code_position code_pos,
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt);
 

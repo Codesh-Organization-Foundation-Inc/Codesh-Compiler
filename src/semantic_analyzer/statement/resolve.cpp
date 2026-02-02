@@ -115,7 +115,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
                 blasphemy::details::UNARY_TYPE_MISMATCH,
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
-            ));
+            ), unary_op->get_code_position());
             return false;
         }
 
@@ -138,7 +138,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
                     binary_op->get_left().get_type()->to_pretty_string(),
                     binary_op->get_right().get_type()->to_pretty_string(),
                     binary_op->to_pretty_string()
-                ));
+                ), binary_op->get_code_position());
                 all_succeed = false;
             }
         }
@@ -206,7 +206,8 @@ static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         blasphemy_details,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }
@@ -227,7 +228,8 @@ static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         codesh::blasphemy::details::ITERATOR_NOT_COLLECTION,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }

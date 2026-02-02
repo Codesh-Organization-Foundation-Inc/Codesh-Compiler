@@ -4,6 +4,7 @@
 
 codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type,
         std::filesystem::path source_path) :
+    ast_node(blasphemy::NO_CODE_POS),
     source_path(std::move(source_path)),
     basad_type(basad_type)
 {

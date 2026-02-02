@@ -14,8 +14,10 @@ namespace trie = codesh::lexer::trie;
 /**
  * @returns How many characters should be consumed by this match
  */
-static size_t handle_keyword_match(const std::string &code, codesh::token_group token_group,
-                                   std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
+static size_t handle_keyword_match(const std::string &code, codesh::blasphemy::code_position current_code_position,
+                                   codesh::token_group token_group,
+                                   std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end);
+
 static void on_regex_token(codesh::token *token);
 static void escape_characters(std::string &str, std::string_view word);
 
@@ -68,13 +70,24 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 {
     std::queue<std::unique_ptr<token>> tokens;
 
+    blasphemy::code_position current_code_position{1, 0};
+
     size_t i = 0;
     while (i < code.size())
     {
+        current_code_position.column++;
+
         if (isspace(code[i]))
         {
             //TODO: If this space is a newline, add newline++
             //TODO: Add char counter, If newline++, then char_count = 0;
+
+            if (code[i] == '\n')
+            {
+                current_code_position.line++;
+                current_code_position.column = 0;
+            }
+
             i++;
             continue;
         }
@@ -106,7 +119,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 
         if (last_match && check_boundary(code, last_match, i, last_match_end))
         {
-            i = handle_keyword_match(code, last_match->token, tokens, last_match_end);
+            i = handle_keyword_match(code, current_code_position, last_match->token, tokens, last_match_end);
             continue;
         }
 
@@ -119,7 +132,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         {
             if (const auto &match_info = match[j]; match_info.matched)
             {
-                std::unique_ptr<token> token = token::from_regex_group_id(j, match_info);
+                std::unique_ptr<token> token = token::from_regex_group_id(current_code_position, j, match_info);
 
                 on_regex_token(token.get());
                 tokens.push(std::move(token));
@@ -133,8 +146,11 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         if (!matched)
         {
             //FIXME: This is mostly caused by an unenclosed string.
-            blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::TOKEN_DOESNT_EXIST,
-                blasphemy::blasphemy_type::LEXICAL);
+            blasphemy::blasphemy_collector().add_blasphemy(
+                blasphemy::details::TOKEN_DOESNT_EXIST,
+                blasphemy::blasphemy_type::LEXICAL,
+                current_code_position
+            );
         }
     }
 
@@ -142,7 +158,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
 }
 
 
-static size_t handle_keyword_match(const std::string &code, const codesh::token_group token_group,
+static size_t handle_keyword_match(const std::string &code, codesh::blasphemy::code_position current_code_position,
+                                   const codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end)
 {
     switch (token_group)
@@ -164,13 +181,18 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
             if (end != std::string::npos)
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
-            //TODO: Convert word error token or alike
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT , codesh::blasphemy::blasphemy_type::SYNTAX);
+                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT,
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                current_code_position
+            );
         }
 
         default: {
-            tokens.push(std::make_unique<codesh::token>(codesh::token_type::KEYWORD, token_group));
+            tokens.push(
+                std::make_unique<codesh::token>(current_code_position, codesh::token_type::KEYWORD, token_group)
+            );
+
             return keyword_end;
         }
     }

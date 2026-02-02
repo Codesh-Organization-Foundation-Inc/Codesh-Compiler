@@ -1,7 +1,8 @@
 #include "method_operation_ast_node.h"
 
-codesh::ast::method::operation::method_operation_ast_node::method_operation_ast_node() :
-    statement_index(-1)
+codesh::ast::method::operation::method_operation_ast_node::method_operation_ast_node(
+        const blasphemy::code_position code_position) :
+    ast_node(code_position), statement_index(-1)
 {
 }
 

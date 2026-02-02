@@ -19,7 +19,7 @@ namespace codesh::ast
 {
 
 //TODO: Move to method operations namespace & directory
-class local_variable_declaration_ast_node final : public impl::i_constant_pool_emitter,
+class local_variable_declaration_ast_node final : public impl::ast_node, public impl::i_constant_pool_emitter,
     public impl::i_symbolically_linked<semantic_analyzer::local_variable_symbol>
 {
     std::optional<std::reference_wrapper<semantic_analyzer::local_variable_symbol>> resolved_variable;
@@ -41,7 +41,7 @@ protected:
         const override;
 
 public:
-    local_variable_declaration_ast_node();
+    explicit local_variable_declaration_ast_node(blasphemy::code_position code_position);
 
     void set_resolved(semantic_analyzer::local_variable_symbol &symbol) override;
 

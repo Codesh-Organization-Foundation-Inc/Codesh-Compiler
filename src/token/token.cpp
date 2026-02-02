@@ -22,7 +22,8 @@ codesh::token_type codesh::token::get_token_type(const token_group name)
     }
 }
 
-codesh::token::token(const token_type type, const token_group group) :
+codesh::token::token(const blasphemy::code_position code_position, const token_type type, const token_group group) :
+    code_position(code_position),
     type(type),
     group(group)
 {}
@@ -30,18 +31,24 @@ codesh::token::token(const token_type type, const token_group group) :
 codesh::token::~token() = default;
 
 
-std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(const int group_id, const std::string &content)
+std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(blasphemy::code_position code_position,
+        const int group_id, const std::string &content)
 {
     const token_group group = lexer::token_group_from_regex_id(group_id);
 
     switch (const token_type type = get_token_type(group))
     {
     case token_type::IDENTIFIER:
-        return std::make_unique<identifier_token>(group, content);
+        return std::make_unique<identifier_token>(code_position, group, content);
 
     default:
-        return std::make_unique<token>(type, group);
+        return std::make_unique<token>(code_position, type, group);
     }
+}
+
+codesh::blasphemy::code_position codesh::token::get_code_position() const
+{
+    return code_position;
 }
 
 codesh::token_type codesh::token::get_type() const
@@ -54,8 +61,10 @@ token_group codesh::token::get_group() const
     return this->group;
 }
 
-codesh::identifier_token::identifier_token(const token_group group, std::string content)
-    : token(token_type::IDENTIFIER, group), content(std::move(content))
+codesh::identifier_token::identifier_token(const blasphemy::code_position code_position, const token_group group,
+        std::string content) :
+    token(code_position, token_type::IDENTIFIER, group),
+    content(std::move(content))
 {
 }
 

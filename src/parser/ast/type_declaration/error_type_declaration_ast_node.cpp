@@ -4,8 +4,12 @@
 
 #include <stdexcept>
 
-codesh::ast::type_decl::error_type_declaration_ast_node::error_type_declaration_ast_node() :
-    type_declaration_ast_node(definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT))
+codesh::ast::type_decl::error_type_declaration_ast_node::error_type_declaration_ast_node(
+        const blasphemy::code_position code_position) :
+    type_declaration_ast_node(
+        code_position,
+        definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT)
+    )
 {
 }
 

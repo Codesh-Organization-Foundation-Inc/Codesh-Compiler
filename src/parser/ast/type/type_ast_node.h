@@ -23,7 +23,7 @@ class type_ast_node : public impl::ast_node, public impl::i_descriptor_emitter
     int array_dimensions;
 
 public:
-    type_ast_node();
+    explicit type_ast_node(blasphemy::code_position code_position);
 
     [[nodiscard]] int get_array_dimensions() const;
     void set_array_dimensions(int array_dimensions);

@@ -43,7 +43,7 @@ protected:
         const override;
 
 public:
-    explicit method_declaration_ast_node(definition::fully_qualified_name name);
+    method_declaration_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

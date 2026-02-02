@@ -1,6 +1,6 @@
 #include "type_ast_node.h"
 
-codesh::ast::type::type_ast_node::type_ast_node() : array_dimensions(0)
+codesh::ast::type::type_ast_node::type_ast_node(const blasphemy::code_position code_position) : ast_node(code_position), array_dimensions(0)
 {
 }
 

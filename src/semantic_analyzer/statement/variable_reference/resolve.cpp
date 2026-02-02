@@ -43,7 +43,7 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
             context.blasphemy_consumer(fmt::format(
                 blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION,
                 local_var_node->get_name()
-            ));
+            ), var_ref_node.get_code_position());
         }
     }
 
@@ -72,7 +72,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::NOT_A_VARIABLE,
             var_ref_node.get_unresolved_name().holy_join()
-        ));
+        ), var_ref_node.get_code_position());
 
         return false;
     }
@@ -88,7 +88,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
     if (!full_var_name.is_single_part())
-        return codesh::semantic_analyzer::symbol_table::resolve_from_imports(context, full_var_name);
+    {
+        return codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+            context,
+            full_var_name,
+            var_ref_node.get_code_position()
+        );
+    }
 
 
     // If the variable name is made only with a single part, it MUST be either a local variable, class member,
@@ -102,7 +108,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::SYMBOL_NOT_FOUND,
             var_name
-        ));
+        ), var_ref_node.get_code_position());
 
         return std::nullopt;
     }

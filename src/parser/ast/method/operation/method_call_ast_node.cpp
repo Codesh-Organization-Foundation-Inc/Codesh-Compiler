@@ -65,7 +65,7 @@ std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh:
     return arguments;
 }
 
-void codesh::ast::method::operation::method_call_ast_node::set_statement_index(size_t statement_index)
+void codesh::ast::method::operation::method_call_ast_node::set_statement_index(const size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
 

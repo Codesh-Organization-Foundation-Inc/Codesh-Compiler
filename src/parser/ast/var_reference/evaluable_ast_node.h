@@ -15,7 +15,7 @@ class evaluable_ast_node : public value_ast_node, public impl::i_constant_pool_e
     std::optional<int> value_cpi;
 
 public:
-    evaluable_ast_node(std::unique_ptr<type::type_ast_node> type, T value);
+    evaluable_ast_node(blasphemy::code_position code_position, std::unique_ptr<type::type_ast_node> type, T value);
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 

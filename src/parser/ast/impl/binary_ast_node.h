@@ -18,7 +18,8 @@ class binary_ast_node : public operator_ast_node, public i_constant_pool_emitter
     const std::unique_ptr<type::type_ast_node> type;
 
 protected:
-    binary_ast_node(std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right);
+    binary_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+            std::unique_ptr<value_ast_node> right);
 
 public:
     [[nodiscard]] virtual value_ast_node &get_left() const;

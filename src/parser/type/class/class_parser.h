@@ -1,5 +1,7 @@
 #pragma once
 
+#include "blasphemy/blasphemy_collector.h"
+
 #include <memory>
 #include <queue>
 
@@ -21,6 +23,6 @@ namespace codesh::parser
 {
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> parse_class_declaration(
-    std::queue<std::unique_ptr<token>> &tokens);
+        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens);
 
 }

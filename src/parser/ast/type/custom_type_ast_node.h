@@ -29,7 +29,7 @@ protected:
         const override;
 
 public:
-    explicit custom_type_ast_node(definition::fully_qualified_name name);
+    custom_type_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;
 

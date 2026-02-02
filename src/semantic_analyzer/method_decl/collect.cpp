@@ -45,7 +45,7 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
         new_context.blasphemy_consumer(fmt::format(
             blasphemy::details::DUPLICATE_METHOD_DECLARATION,
             method_name
-        ));
+        ), method_decl.get_code_position());
     }
 
     collect_local_variables(method_decl.get_method_scope(), it.get().get_method_scope());

@@ -8,8 +8,8 @@ namespace codesh::ast::op
 class multiplication_operator_ast_node final : public impl::binary_ast_node
 {
 public:
-    multiplication_operator_ast_node(std::unique_ptr<value_ast_node> left,
-        std::unique_ptr<value_ast_node> right);
+    multiplication_operator_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+            std::unique_ptr<value_ast_node> right);
 
     [[nodiscard]] std::string to_pretty_string() const override;
 
