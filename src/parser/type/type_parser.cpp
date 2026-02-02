@@ -25,9 +25,12 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
     default:
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_DECLARATION,
-            blasphemy::blasphemy_type::SYNTAX);
-        return std::make_unique<ast::type_decl::error_type_declaration_ast_node>();
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::UNEXPECTED_DECLARATION,
+            blasphemy::blasphemy_type::SYNTAX,
+            declaration_pos
+        );
+        return std::make_unique<ast::type_decl::error_type_declaration_ast_node>(declaration_pos);
     }
 }
 
@@ -35,7 +38,7 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
 std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modifiers(
         blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::type_decl::attributes_ast_node> node = std::make_unique<ast::type_decl::attributes_ast_node>(
+    auto node = std::make_unique<ast::type_decl::attributes_ast_node>(
         code_position
     );
 

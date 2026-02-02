@@ -30,13 +30,13 @@ codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_ast_node
     return this->package_name;
 }
 
-std::list<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+std::vector<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_import_declarations()
 {
     return this->import_declarations;
 }
 
-std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+std::vector<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_type_declarations()
 {
     return this->type_declarations;
@@ -47,13 +47,13 @@ const codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_as
     return this->package_name;
 }
 
-const std::list<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_import_declarations() const
 {
     return this->import_declarations;
 }
 
-const std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_type_declarations() const
 {
     return this->type_declarations;

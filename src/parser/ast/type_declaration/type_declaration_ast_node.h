@@ -5,9 +5,10 @@
 #include "parser/ast/impl/ast_node.h"
 #include "parser/ast/impl/i_descriptor_emitter.h"
 
+#include <deque>
 #include <memory>
 #include <string>
-#include <list>
+#include <vector>
 
 #include "output/jvm_target/constant_pool.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
@@ -45,9 +46,9 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<attributes_ast_node> attributes;
 
 
-    std::list<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
-    std::list<method::method_declaration_ast_node *> methods;
-    std::list<method::constructor_declaration_ast_node *> constructors;
+    std::deque<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
+    std::vector<method::method_declaration_ast_node *> methods;
+    std::vector<method::constructor_declaration_ast_node *> constructors;
 
     static void emit_metadata(const compilation_unit_ast_node &root_node,
             output::jvm_target::constant_pool &constant_pool);
@@ -83,12 +84,12 @@ public:
      * @return All methods, including constructors.
      * Constructors are placed first, then methods.
      */
-    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
+    [[nodiscard]] const std::deque<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
     void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
     void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
 
-    [[nodiscard]] const std::list<method::constructor_declaration_ast_node *> &get_constructors() const;
-    [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
+    [[nodiscard]] const std::vector<method::constructor_declaration_ast_node *> &get_constructors() const;
+    [[nodiscard]] const std::vector<method::method_declaration_ast_node *> &get_methods() const;
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

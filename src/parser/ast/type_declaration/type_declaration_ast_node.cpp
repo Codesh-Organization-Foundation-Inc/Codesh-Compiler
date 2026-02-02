@@ -76,7 +76,7 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(
     this->constant_pool = std::make_unique<output::jvm_target::constant_pool>(std::move(constant_pool));
 }
 
-const std::list<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
+const std::deque<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
     type_declaration_ast_node::get_all_methods() const
 {
     return all_methods;
@@ -96,13 +96,13 @@ void codesh::ast::type_decl::type_declaration_ast_node::add_method(
     constructors.push_back(static_cast<method::constructor_declaration_ast_node *>(all_methods.front().get())); // NOLINT(*-pro-type-static-cast-downcast)
 }
 
-const std::list<codesh::ast::method::constructor_declaration_ast_node *> &codesh::ast::type_decl::
+const std::vector<codesh::ast::method::constructor_declaration_ast_node *> &codesh::ast::type_decl::
     type_declaration_ast_node::get_constructors() const
 {
     return constructors;
 }
 
-const std::list<codesh::ast::method::method_declaration_ast_node *> &codesh::ast::type_decl::type_declaration_ast_node::
+const std::vector<codesh::ast::method::method_declaration_ast_node *> &codesh::ast::type_decl::type_declaration_ast_node::
     get_methods() const
 {
     return methods;

@@ -22,8 +22,8 @@
 #include <filesystem>
 #include <functional>
 
-#include <list>
-#include <unordered_map>
+#include <ranges>
+#include <set>
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
@@ -193,7 +193,7 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
     ir::code_block code_block;
     method_decl.get_method_scope().emit_ir(code_block, symbol_table, type_decl);
 
-    std::list<ir::instruction_container> bytecode_collector;
+    std::vector<ir::instruction_container> bytecode_collector;
     for (const auto &instruction : code_block.get_instructions())
     {
         instruction->emit(bytecode_collector);

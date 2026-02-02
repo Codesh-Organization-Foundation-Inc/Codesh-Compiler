@@ -10,7 +10,6 @@
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "method_scope_ast_node.h"
 
-#include <list>
 #include <memory>
 #include <string>
 
@@ -35,7 +34,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::vector<std::reference_wrapper<type::type_ast_node>> parameter_types;
 
     // "throws" declaration
-    std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
+    std::vector<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
     method_scope_ast_node method_scope;
 
@@ -72,8 +71,8 @@ public:
     [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);
 
-    [[nodiscard]] const std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
-    [[nodiscard]] std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
+    [[nodiscard]] const std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
+    [[nodiscard]] std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

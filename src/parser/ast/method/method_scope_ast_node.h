@@ -7,7 +7,8 @@
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/operation/method_operation_ast_node.h"
 
-#include <list>
+#include <deque>
+#include <vector>
 
 namespace codesh::ast::method
 {
@@ -18,8 +19,8 @@ class method_scope_ast_node : public impl::ast_node,
 {
     method_declaration_ast_node &parent_method;
 
-    std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
-    std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
+    std::deque<std::unique_ptr<operation::method_operation_ast_node>> body;
+    std::vector<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
     std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
 
@@ -38,11 +39,12 @@ public:
     [[nodiscard]] method_declaration_ast_node &get_parent_method() const;
 
 
-    [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
+    [[nodiscard]] const std::deque<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
     void push_front_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
 
-    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables() const;
+    [[nodiscard]] const std::vector<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
+        const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
 
 
