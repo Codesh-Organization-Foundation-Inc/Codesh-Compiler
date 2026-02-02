@@ -1,6 +1,5 @@
 #pragma once
 
-#include <list>
 #include <optional>
 #include <vector>
 
@@ -135,7 +134,7 @@ public:
 
     [[nodiscard]] virtual size_t size() const = 0;
 
-    virtual void emit(std::list<instruction_container> &collector) const = 0;
+    virtual void emit(std::vector<instruction_container> &collector) const = 0;
 };
 
 class simple_instruction : public instruction
@@ -150,7 +149,7 @@ public:
     [[nodiscard]] opcode get_opcode() const;
     [[nodiscard]] int get_stack_delta() const;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
     [[nodiscard]] size_t size() const override;
 };
 
@@ -169,7 +168,7 @@ public:
 
     [[nodiscard]] size_t size() const override;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 
@@ -210,7 +209,7 @@ public:
 
     [[nodiscard]] size_t size() const override;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class load_int_constant_instruction final : public instruction
@@ -227,7 +226,7 @@ public:
 
     [[nodiscard]] size_t size() const override;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class load_constant_pool_instruction final : public instruction
@@ -239,7 +238,7 @@ public:
 
     [[nodiscard]] size_t size() const override;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class store_in_local_var_instruction final : public typed_instruction
@@ -260,7 +259,7 @@ public:
 
     [[nodiscard]] size_t size() const override;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class goto_instruction : public instruction
@@ -280,7 +279,7 @@ public:
     [[nodiscard]] size_t size() const override;
     [[nodiscard]] int get_jump_offset() const;
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class if_instruction final : public goto_instruction
@@ -290,7 +289,7 @@ class if_instruction final : public goto_instruction
 public:
     if_instruction(if_type type, int jump_offset);
 
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 
@@ -309,7 +308,7 @@ public:
     explicit scope_marker(const ast::method::method_scope_ast_node &scope);
 
     [[nodiscard]] size_t size() const override;
-    void emit(std::list<instruction_container> &collector) const override;
+    void emit(std::vector<instruction_container> &collector) const override;
 
     [[nodiscard]] const ast::method::method_scope_ast_node &get_scope() const;
     [[nodiscard]] size_t get_bytecode_position() const;
