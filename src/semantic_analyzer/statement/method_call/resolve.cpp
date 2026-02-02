@@ -102,7 +102,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (parent_type == nullptr)
         {
             context.blasphemy_consumer(fmt::format(
-                fmt::runtime(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST),
+                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
                 name.holy_join()
             ));
 
@@ -162,7 +162,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "name doesn't exist"
         context.blasphemy_consumer(fmt::format(
-            fmt::runtime(codesh::blasphemy::details::METHOD_NOT_FOUND),
+            codesh::blasphemy::details::METHOD_NOT_FOUND,
             method_call.get_last_name(false)
         ));
         return std::nullopt;
@@ -173,7 +173,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "is not a method"
         context.blasphemy_consumer(fmt::format(
-            fmt::runtime(codesh::blasphemy::details::NOT_A_METHOD),
+            codesh::blasphemy::details::NOT_A_METHOD,
             method_call.get_last_name(false)
         ));
         return std::nullopt;

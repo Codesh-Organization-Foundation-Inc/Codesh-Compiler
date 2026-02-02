@@ -43,7 +43,7 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
     {
         //TODO: Print full method signature
         new_context.blasphemy_consumer(fmt::format(
-            fmt::runtime(blasphemy::details::DUPLICATE_METHOD_DECLARATION),
+            blasphemy::details::DUPLICATE_METHOD_DECLARATION,
             method_name
         ));
     }
