@@ -3,6 +3,12 @@
 #include "output/ir/code_block.h"
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
+#include "parser/ast/operator/boolean/greater_operator_ast_node.h"
+#include "parser/ast/operator/boolean/greater_equals_operator_ast_node.h"
+#include "parser/ast/operator/boolean/less_operator_ast_node.h"
+#include "parser/ast/operator/boolean/less_equals_operator_ast_node.h"
+#include "parser/ast/operator/boolean/equals_operator_ast_node.h"
+#include "parser/ast/operator/boolean/not_equals_operator_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
@@ -19,6 +25,9 @@ codesh::ast::block::if_ast_node::if_ast_node(const blasphemy::code_position code
     if_branch(std::move(if_branch))
 {
 }
+
+static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_reference::value_ast_node &condition,
+        codesh::output::ir::if_type parent_if_type);
 
 const codesh::ast::block::conditioned_scope_container &codesh::ast::block::if_ast_node::get_if_branch() const
 {
@@ -271,21 +280,56 @@ static codesh::output::ir::code_block build_condition_block(
         return condition_block;
     }
 
-
-    //TODO: This should only be emitted if no other if options exists (see next TODO)
     condition.emit_ir(condition_block, symbol_table, containing_type_decl);
     condition_block.add_instruction(std::make_unique<codesh::output::ir::if_instruction>(
-        if_type,
+        get_if_type_for(condition, if_type),
         static_cast<int>(if_block_size)
     ));
 
-    //TODO: Add more if types (bytecode optimizations)
-    // if (const auto &primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(cond.get_type()))
-    // {
-    //     if (primitive_type->get_type() == definition::primitive_type::BOOLEAN)
-    //     {
-    //     }
-    // }
-
     return condition_block;
+}
+
+static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_reference::value_ast_node &condition,
+        const codesh::output::ir::if_type parent_if_type)
+{
+    const bool jump_on_false = parent_if_type == codesh::output::ir::if_type::IS_ZERO;
+
+    if (dynamic_cast<const codesh::ast::op::greater_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::IS_INT_LESSER_OR_EQUAL
+            : codesh::output::ir::if_type::IS_INT_GREATER;
+    }
+    if (dynamic_cast<const codesh::ast::op::greater_equals_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::IS_INT_LESSER
+            : codesh::output::ir::if_type::IS_INT_GREATER_OR_EQUAL;
+    }
+    if (dynamic_cast<const codesh::ast::op::less_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::IS_INT_GREATER_OR_EQUAL
+            : codesh::output::ir::if_type::IS_INT_LESSER;
+    }
+    if (dynamic_cast<const codesh::ast::op::less_equals_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::IS_INT_GREATER
+            : codesh::output::ir::if_type::IS_INT_LESSER_OR_EQUAL;
+    }
+    if (dynamic_cast<const codesh::ast::op::equals_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::ARE_INTS_NOT_EQUAL
+            : codesh::output::ir::if_type::ARE_INTS_EQUAL;
+    }
+    if (dynamic_cast<const codesh::ast::op::not_equals_operator_ast_node *>(&condition))
+    {
+        return jump_on_false
+            ? codesh::output::ir::if_type::ARE_INTS_EQUAL
+            : codesh::output::ir::if_type::ARE_INTS_NOT_EQUAL;
+    }
+
+    return parent_if_type;
 }
