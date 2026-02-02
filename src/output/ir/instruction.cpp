@@ -1,5 +1,6 @@
 #include "instruction.h"
 
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "util.h"
 #include "output/jvm_target/constant_pool.h"
 
@@ -37,7 +38,7 @@ int codesh::output::ir::simple_instruction::get_stack_delta() const
     return stack_delta;
 }
 
-void codesh::output::ir::simple_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::simple_instruction::emit(std::vector<instruction_container> &collector) const
 {
     collector.emplace_back(*_opcode, stack_delta);
 }
@@ -58,7 +59,7 @@ size_t codesh::output::ir::typed_instruction::size() const
     return index <= 3 ? 1 : 2;
 }
 
-void codesh::output::ir::typed_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::typed_instruction::emit(std::vector<instruction_container> &collector) const
 {
     if (index <= 3)
     {
@@ -115,7 +116,7 @@ size_t codesh::output::ir::invoke_instruction::size() const
     return 3;
 }
 
-void codesh::output::ir::invoke_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::invoke_instruction::emit(std::vector<instruction_container> &collector) const
 {
     opcode instruction;
 
@@ -172,7 +173,7 @@ size_t codesh::output::ir::load_int_constant_instruction::size() const
     throw std::runtime_error("Attempted to load a number greater than int16 without a constant pool entry");
 }
 
-void codesh::output::ir::load_int_constant_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::load_int_constant_instruction::emit(std::vector<instruction_container> &collector) const
 {
     if (constant_cpi.has_value())
     {
@@ -228,7 +229,7 @@ size_t codesh::output::ir::load_constant_pool_instruction::size() const
     return 2;
 }
 
-void codesh::output::ir::load_constant_pool_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::load_constant_pool_instruction::emit(std::vector<instruction_container> &collector) const
 {
     collector.emplace_back(
         std::vector {
@@ -260,7 +261,7 @@ size_t codesh::output::ir::get_static_instruction::size() const
     return 3;
 }
 
-void codesh::output::ir::get_static_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::get_static_instruction::emit(std::vector<instruction_container> &collector) const
 {
     std::vector<unsigned char> opcodes(3);
 
@@ -289,7 +290,7 @@ void codesh::output::ir::goto_instruction::set_target(const int target)
     jump_offset = target - jump_offset;
 }
 
-void codesh::output::ir::goto_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::goto_instruction::emit(std::vector<instruction_container> &collector) const
 {
     std::vector<unsigned char> opcodes(3);
 
@@ -313,7 +314,7 @@ codesh::output::ir::if_instruction::if_instruction(const if_type type, const int
 {
 }
 
-void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &collector) const
+void codesh::output::ir::if_instruction::emit(std::vector<instruction_container> &collector) const
 {
     goto_instruction::emit(collector);
 
@@ -321,4 +322,44 @@ void codesh::output::ir::if_instruction::emit(std::list<instruction_container> &
     collector.back().size_delta = type >= if_type::ARE_INTS_EQUAL
         ? -2
         : -1;
+}
+
+codesh::output::ir::scope_marker::scope_marker(const ast::method::method_scope_ast_node &scope) :
+    scope(scope)
+{
+}
+
+size_t codesh::output::ir::scope_marker::size() const
+{
+    // Markers emit nothing
+    return 0;
+}
+
+void codesh::output::ir::scope_marker::emit(std::vector<instruction_container> &collector) const
+{
+}
+
+const codesh::ast::method::method_scope_ast_node &codesh::output::ir::scope_marker::get_scope() const
+{
+    return scope;
+}
+
+size_t codesh::output::ir::scope_marker::get_bytecode_position() const
+{
+    return bytecode_position;
+}
+
+void codesh::output::ir::scope_marker::set_bytecode_position(const size_t pos)
+{
+    bytecode_position = pos;
+}
+
+codesh::output::ir::scope_begin_marker::scope_begin_marker(const ast::method::method_scope_ast_node &scope) :
+        scope_marker(scope)
+{
+}
+
+codesh::output::ir::scope_end_marker::scope_end_marker(const ast::method::method_scope_ast_node &scope) :
+        scope_marker(scope)
+{
 }

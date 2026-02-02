@@ -1,6 +1,5 @@
 #include "custom_type_ast_node.h"
 
-#include "fmt/chrono.h"
 #include "lexer/trie/keywords.h"
 #include "output/ir/instruction.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
@@ -11,8 +10,9 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
     return resolved_symbol;
 }
 
-codesh::ast::type::custom_type_ast_node::custom_type_ast_node(definition::fully_qualified_name name) :
-    name(std::move(name))
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const blasphemy::code_position code_position,
+        definition::fully_qualified_name name) :
+    type_ast_node(code_position), name(std::move(name))
 {
 }
 

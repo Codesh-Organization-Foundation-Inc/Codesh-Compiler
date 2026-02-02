@@ -16,6 +16,8 @@ namespace codesh::ast::method
 {
 class method_scope_ast_node;
 }
+
+
 namespace codesh::ast::block // TODO: Additionally nest inside logic namespace
 {
 /**
@@ -29,7 +31,7 @@ struct conditioned_scope_container
     method::method_scope_ast_node &scope;
 };
 
-class if_ast_node : public method::operation::method_operation_ast_node, public impl::i_constant_pool_emitter
+class if_ast_node final : public method::operation::method_operation_ast_node, public impl::i_constant_pool_emitter
 {
     const conditioned_scope_container if_branch;
     std::vector<conditioned_scope_container> else_if_branches;
@@ -48,7 +50,7 @@ class if_ast_node : public method::operation::method_operation_ast_node, public 
             const type_decl::type_declaration_ast_node &containing_type_decl) ;
 
 public:
-    explicit if_ast_node(conditioned_scope_container if_branch);
+    if_ast_node(blasphemy::code_position code_position, conditioned_scope_container if_branch);
 
 
     [[nodiscard]] const conditioned_scope_container &get_if_branch() const;
@@ -58,6 +60,8 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<method::method_scope_ast_node>> get_else_branch() const;
     void set_else_branch(method::method_scope_ast_node& else_scope);
+
+    void set_statement_index(size_t statement_index) override;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

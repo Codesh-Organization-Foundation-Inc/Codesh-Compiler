@@ -7,7 +7,6 @@
 #include "util.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/compilation_unit_ast_node.h"
-#include "parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
         ast::type_decl::type_declaration_ast_node &type_decl) :
@@ -22,7 +21,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>
     if (utf8.size() > 0xFFFF)
     {
         blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::STRING_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+            blasphemy::blasphemy_type::OUTPUT, blasphemy::NO_CODE_POS, true);
     }
 
     auto utf8_info = std::make_unique<defs::CONSTANT_Utf8_info>();
@@ -145,7 +144,7 @@ int codesh::output::jvm_target::constant_pool::get_index(const defs::cp_info &li
 {
     const auto result = literals_lookup_map.find(&literal);
     if (result == literals_lookup_map.end())
-        throw std::runtime_error("Could not find literal in constant pool"); // shouldn't be printed to user
+        throw std::invalid_argument("Could not find literal in constant pool");
 
     return result->second;
 }

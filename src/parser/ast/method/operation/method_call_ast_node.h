@@ -36,6 +36,8 @@ protected:
         override;
 
 public:
+    using method_operation_ast_node::method_operation_ast_node;
+
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
 
     [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;

@@ -1,7 +1,8 @@
 #include "method_declaration_ast_node.h"
 
-#include "semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 #include "util.h"
 
 #include <ranges>
@@ -13,7 +14,8 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-    definition::fully_qualified_name name) : name(std::move(name)), method_scope(*this)
+        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+    ast_node(code_position), name(std::move(name)), method_scope(code_position, *this)
 {
 }
 
@@ -91,13 +93,13 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter(
     method_scope.add_local_variable(std::move(parameter));
 }
 
-const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown() const
 {
     return exceptions_thrown;
 }
 
-std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown()
 {
     return exceptions_thrown;
@@ -116,6 +118,10 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
         constant_pool.goc_utf8_info("StackMapTable");
     }
 
+    for (const auto &param : parameters)
+    {
+        param.get().emit_constants(root_node, constant_pool);
+    }
 
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),

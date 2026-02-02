@@ -28,7 +28,8 @@ namespace codesh::parser::util
  * If so, pops it from the queue.
  * @return Whether the token group matches the requested
  */
-bool consuming_check(std::queue<std::unique_ptr<token>> &tokens, token_group token_group);
+bool consuming_check(std::queue<std::unique_ptr<token>> &tokens, token_group token_group,
+        std::optional<std::reference_wrapper<std::unique_ptr<token>>> token_out = std::nullopt);
 /**
  * Checks whether the group of the first token matches the requested one.
  * @return Whether the token group matches the requested
@@ -72,5 +73,10 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
         std::queue<std::unique_ptr<token>> &tokens, const std::string &no_tokens_blasphemy_details);
 
 [[nodiscard]] std::unique_ptr<ast::type::type_ast_node> parse_type(std::queue<std::unique_ptr<token>> &tokens);
+
+/**
+ * Returns the display name of a token: its content if it's an identifier, or its keyword name otherwise.
+ */
+[[nodiscard]] std::string get_token_display_name(const token &token);
 
 }

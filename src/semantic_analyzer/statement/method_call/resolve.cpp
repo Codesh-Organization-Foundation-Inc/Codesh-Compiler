@@ -1,4 +1,6 @@
 #include "resolve.h"
+
+#include "blasphemy/blasphemy_collector.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
@@ -8,6 +10,7 @@
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
+#include "blasphemy/details.h"
 #include "fmt/color.h"
 
 #include <ranges>
@@ -55,9 +58,14 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     // Manually pass System.out to every מסוף ל־אמר call
     if (method_call.get_unresolved_name().join() == "מסוף/אמר")
     {
-        auto system_in_reference = std::make_unique<variable_reference_ast_node>("מסוף/פלט");
+        auto system_in_reference = std::make_unique<variable_reference_ast_node>(blasphemy::NO_CODE_POS, "מסוף/פלט");
         system_in_reference->set_resolved(
-            *static_cast<field_symbol *>(&symbol_table::resolve_from_imports(context, "מסוף/פלט")->get()) // NOLINT(*-pro-type-static-cast-downcast)
+            *static_cast<field_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+                &symbol_table::resolve_from_imports(
+                    context, "מסוף/פלט",
+                    method_call.get_code_position()
+                )->get()
+            )
         );
 
         method_call.get_arguments().push_front(std::move(system_in_reference));
@@ -85,7 +93,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     else
     {
         const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
-            context, name,
+            context,
+            name,
+            method_call.get_code_position(),
             // Ignore the last part of the name, which points to the method overloads.
             // get_called_method_as_symbol already handles it.
             name.get_parts().end() - 1
@@ -101,9 +111,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (parent_type == nullptr)
         {
             context.blasphemy_consumer(fmt::format(
-                "{} אינו קיים",
+                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
                 name.holy_join()
-            ));
+            ), method_call.get_code_position());
 
             return std::nullopt;
         }
@@ -161,8 +171,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "name doesn't exist"
         context.blasphemy_consumer(fmt::format(
-            "היי אלירןןןןןן תעשה את השם בבקשה השגיאה היא שהדבר לא נמצא"
-        ));
+            codesh::blasphemy::details::METHOD_NOT_FOUND,
+            method_call.get_last_name(false)
+        ), method_call.get_code_position());
         return std::nullopt;
     }
 
@@ -171,8 +182,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "is not a method"
         context.blasphemy_consumer(fmt::format(
-            "אליצ'אאאןןן >w< איייי!! נאני גה־סוקי? זוהי לא מתודה, יורימו אנאטה?"
-        ));
+            codesh::blasphemy::details::NOT_A_METHOD,
+            method_call.get_last_name(false)
+        ), method_call.get_code_position());
         return std::nullopt;
     }
 
@@ -215,9 +227,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         }
     }
 
-    //TODO: Throw "mismatched argument types"
-    context.blasphemy_consumer(fmt::format(
-        "סוג המנחות אינו תואם לחותם המעשה"
-    ));
+    context.blasphemy_consumer(codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH, method_call.get_code_position());
     return std::nullopt;
 }

@@ -1,8 +1,8 @@
 #include "import_declaration_ast_node.h"
 
 
-codesh::ast::import_declaration_ast_node::import_declaration_ast_node() :
-    is_on_demand(false), is_static(false)
+codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const blasphemy::code_position code_position) :
+    ast_node(code_position), is_on_demand(false), is_static(false)
 {}
 
 codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_package_name()

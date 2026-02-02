@@ -2,14 +2,15 @@
 
 #include "semantic_analyzer/builtins.h"
 
-codesh::ast::collection::range_ast_node::range_ast_node(std::unique_ptr<value_ast_node> from,
-                                                        std::unique_ptr<value_ast_node> to,
-                                                        std::unique_ptr<value_ast_node> skip) :
+codesh::ast::collection::range_ast_node::range_ast_node(blasphemy::code_position code_position,
+        std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
+        std::unique_ptr<value_ast_node> skip) :
+    collection_ast_node(code_position),
     from(std::move(from)),
     to(std::move(to)),
     skip(std::move(skip)),
     type(std::make_unique<type::custom_type_ast_node>(
-        definition::fully_qualified_name(semantic_analyzer::builtins::CLASS_RANGE)
+        code_position, definition::fully_qualified_name(semantic_analyzer::builtins::CLASS_RANGE)
     ))
 {
 }

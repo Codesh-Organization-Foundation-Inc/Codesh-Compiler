@@ -15,7 +15,7 @@ class unary_ast_node : public operator_ast_node, i_constant_pool_emitter
     std::unique_ptr<value_ast_node> child;
 
 protected:
-    explicit unary_ast_node(std::unique_ptr<value_ast_node> child);
+    unary_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> child);
 
 public:
     [[nodiscard]] value_ast_node &get_child() const;

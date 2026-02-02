@@ -8,7 +8,7 @@ namespace codesh::ast::op
 class not_operator_ast_node final : public impl::unary_ast_node
 {
 public:
-    explicit not_operator_ast_node(std::unique_ptr<value_ast_node> child);
+    not_operator_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> child);
 
     [[nodiscard]] std::string to_pretty_string() const override;
 

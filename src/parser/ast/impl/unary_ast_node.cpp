@@ -1,7 +1,8 @@
 #include "unary_ast_node.h"
 
-codesh::ast::impl::unary_ast_node::unary_ast_node(std::unique_ptr<value_ast_node> child) :
-    child(std::move(child))
+codesh::ast::impl::unary_ast_node::unary_ast_node(const blasphemy::code_position code_position,
+        std::unique_ptr<value_ast_node> child) :
+    operator_ast_node(code_position), child(std::move(child))
 {
 }
 

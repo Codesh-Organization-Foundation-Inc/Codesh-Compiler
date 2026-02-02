@@ -4,12 +4,17 @@
 #include "semantic_analyzer/method_decl/collect.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
-#include "semantic_analyzer/semantic_context.h"
 #include "blasphemy/blasphemy_collector.h"
+#include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
 
 void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
         ast::type_decl::type_declaration_ast_node &type_decl, country_symbol &country)
 {
+    // No reason to collect error nodes
+    if (dynamic_cast<const ast::type_decl::error_type_declaration_ast_node *>(&type_decl))
+        return;
+
     const std::string name = type_decl.get_last_name(false);
     const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
@@ -28,8 +33,8 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
     {
         new_context.blasphemy_consumer(fmt::format(
             "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-            type_decl.get_unresolved_name().join()
-        ));
+            type_decl.get_unresolved_name().holy_join()
+        ), type_decl.get_code_position());
     }
 }
 

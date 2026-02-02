@@ -4,7 +4,10 @@
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
-codesh::ast::block::if_ast_node::if_ast_node(conditioned_scope_container if_branch) : if_branch(std::move(if_branch))
+codesh::ast::block::if_ast_node::if_ast_node(const blasphemy::code_position code_position,
+        conditioned_scope_container if_branch) :
+    method_operation_ast_node(code_position),
+    if_branch(std::move(if_branch))
 {
 }
 
@@ -33,6 +36,17 @@ std::optional<std::reference_wrapper<codesh::ast::method::method_scope_ast_node>
 void codesh::ast::block::if_ast_node::set_else_branch(method::method_scope_ast_node &else_scope)
 {
     this->else_branch = else_scope;
+}
+
+void codesh::ast::block::if_ast_node::set_statement_index(const size_t statement_index)
+{
+    method_operation_ast_node::set_statement_index(statement_index);
+
+    if_branch.condition->set_statement_index(statement_index);
+    for (const auto &else_if_branch : else_if_branches)
+    {
+        else_if_branch.condition->set_statement_index(statement_index);
+    }
 }
 
 void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_node &root_node,

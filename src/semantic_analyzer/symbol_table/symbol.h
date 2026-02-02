@@ -178,7 +178,14 @@ public:
             size_t index, ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
-    [[nodiscard]] size_t get_index() const;
+    /**
+     * Returns the index of the variable as per the JVM specifications.
+     *
+     * That means that long and double types occupy 2 slots. This affects later slots as well.
+     *
+     * @return The index of the variable as per the JVM specifications.
+     */
+    [[nodiscard]] size_t get_jvm_index() const;
 };
 
 
@@ -198,7 +205,11 @@ public:
 };
 
 
-using indexed_locals_container = std::map<std::string, std::reference_wrapper<local_variable_symbol>>;
+struct indexed_locals_container
+{
+    std::map<std::string, std::reference_wrapper<local_variable_symbol>> name_to_var;
+    size_t slots_used;
+};
 
 class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>,
     public i_scope_containing_symbol

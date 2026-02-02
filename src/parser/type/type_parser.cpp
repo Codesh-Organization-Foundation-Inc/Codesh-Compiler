@@ -4,6 +4,7 @@
 #include "blasphemy/details.h"
 #include "defenition/visibility.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "parser/util.h"
 #include "parser/type/class/class_parser.h"
 
@@ -13,24 +14,33 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse_type_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
+    const auto declaration_pos = tokens.front()->get_code_position();
     tokens.pop();
 
     switch (util::consume_token(tokens, blasphemy::details::UNEXPECTED_DECLARATION)->get_group())
     {
-    case token_group::KEYWORD_CLASS: return parse_class_declaration(tokens);
+    case token_group::KEYWORD_CLASS: return parse_class_declaration(declaration_pos, tokens);
     case token_group::KEYWORD_INTERFACE:; //TODO
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
-    default: throw std::runtime_error(blasphemy::details::UNEXPECTED_DECLARATION);
+    default:
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::UNEXPECTED_DECLARATION,
+            blasphemy::blasphemy_type::SYNTAX,
+            declaration_pos
+        );
+        return std::make_unique<ast::type_decl::error_type_declaration_ast_node>(declaration_pos);
     }
 }
 
 
 std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modifiers(
-        std::queue<std::unique_ptr<token>> &tokens)
+        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::type_decl::attributes_ast_node> node = std::make_unique<ast::type_decl::attributes_ast_node>();
+    auto node = std::make_unique<ast::type_decl::attributes_ast_node>(
+        code_position
+    );
 
     // Attributes are optional, so check whether they exist at all.
     bool attributes_exist = false;
@@ -73,8 +83,11 @@ std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modif
     // or did not close the attribute statement with Shall Be.
     if (!util::consuming_check(tokens, token_group::KEYWORD_SHALL_BE))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
-            blasphemy::blasphemy_type::SYNTAX);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_SHALL_BE,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     return node;

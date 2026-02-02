@@ -2,6 +2,7 @@
 #include "semantic_analyzer/method_decl/resolve_aliases.h"
 
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
@@ -10,6 +11,10 @@ void codesh::semantic_analyzer::type_declaration::resolve_aliases(const semantic
 {
     for (const auto &type_decl : context.root.get_type_declarations())
     {
+        // No reason to check an error node
+        if (dynamic_cast<const ast::type_decl::error_type_declaration_ast_node *>(type_decl.get()))
+            continue;
+
         const std::string name = type_decl->get_last_name(false);
         const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 

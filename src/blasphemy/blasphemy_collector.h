@@ -2,6 +2,7 @@
 
 #include "fmt/xchar.h"
 
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -28,10 +29,13 @@ struct code_position
     size_t column;
 };
 
+constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
+
 struct blasphemy_info
 {
     std::string details;
     blasphemy_type type;
+
     std::optional<code_position> code_pos;
 
     bool is_fatal;
@@ -40,6 +44,15 @@ struct blasphemy_info
 
 class blasphemy_collector
 {
+    std::filesystem::path source_directory_path;
+    std::filesystem::path relative_source_path;
+
+    std::vector<blasphemy_info> blasphemies;
+
+    static std::string type_to_string(blasphemy_type type);
+    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
+    [[nodiscard]] static fmt::format_string<std::string> get_random_message();
+
 public:
     /**
      * Adds a new blasphemy
@@ -48,8 +61,14 @@ public:
      * @param code_pos The location in the source code where the error was initiated from
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
-    void add_blasphemy(std::string details, blasphemy_type type, std::optional<code_position> code_pos = std::nullopt,
-        bool is_fatal = false);
+    void add_blasphemy(std::string details, blasphemy_type type, code_position code_pos, bool is_fatal = false);
+
+    void set_source_directory(std::filesystem::path source_directory_path);
+
+    /**
+     * Makes all blasphemies from this point on blame the provided `source_path`
+     */
+    void set_source_file(const std::filesystem::path &source_file_path);
 
     /**
      * Whether any error exists
@@ -60,16 +79,6 @@ public:
      * Prints all errors
      */
     void print_all_blasphemies() const;
-
-private:
-    std::vector<blasphemy_info> blasphemies;
-
-    static std::string type_to_string(blasphemy_type type);
-
-    [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
-
-    [[nodiscard]] static fmt::format_string<std::string> get_random_message();
-
 };
 
 

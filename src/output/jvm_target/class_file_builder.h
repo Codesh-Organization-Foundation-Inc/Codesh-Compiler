@@ -3,7 +3,7 @@
 #include "output/ir/code_block.h"
 #include "output/jvm_target/defs/class_file.h"
 
-#include <set>
+#include <unordered_map>
 
 namespace codesh::semantic_analyzer
 {
@@ -24,6 +24,10 @@ class constant_pool;
 }
 namespace codesh::ast
 {
+namespace type
+{
+class type_ast_node;
+}
 namespace method
 {
 class method_scope_ast_node;
@@ -51,7 +55,6 @@ enum class access_flag : uint16_t
     ACC_ENUM        = 0x4000,
     ACC_MODULE      = 0x8000
 };
-
 
 class class_file_builder
 {
@@ -83,11 +86,26 @@ class class_file_builder
     [[nodiscard]] std::unique_ptr<defs::local_variable_table_attribute_entry> create_local_variable_table(
         const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
 
-    [[nodiscard]] std::unique_ptr<defs::stack_map_table_attribute_entry> create_stack_map_table_attribute(
-        const ir::code_block &method_code) const;
-    [[nodiscard]] static std::set<size_t> collect_jump_targets(const ir::code_block &method_code);
-    static void add_stack_map_frames(defs::stack_map_table_attribute_entry &smt_attr,
-        const ir::code_block &method_code);
+    /**
+     * Processes scope markers in the IR to compute bytecode positions for local variables.
+     * Must be called before creating LocalVariableTable.
+     */
+    static void compute_local_variable_bytecode_ranges(const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
+
+    /**
+     * Maps a scope node to a pair representing the start and end bytecodes
+     */
+    using scope_to_bytecode_boundaries = std::unordered_map<
+        const ast::method::method_scope_ast_node *,
+        std::pair<size_t, size_t>
+    >;
+
+    [[nodiscard]] static scope_to_bytecode_boundaries create_scope_boundaries(const ir::code_block &method_code,
+            const ast::method::method_declaration_ast_node &method_decl, size_t total_code_length);
+
+    static void set_scope_bytecode_boundaries(const ast::method::method_scope_ast_node &scope,
+            const scope_to_bytecode_boundaries &scope_boundaries);
 
 
     void add_constant_pool_entries() const;

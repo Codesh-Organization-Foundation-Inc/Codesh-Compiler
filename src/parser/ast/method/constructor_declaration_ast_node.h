@@ -8,7 +8,7 @@ namespace codesh::ast::method
 class constructor_declaration_ast_node : public method_declaration_ast_node
 {
 public:
-    constructor_declaration_ast_node();
+    explicit constructor_declaration_ast_node(blasphemy::code_position code_position);
 };
 
 }

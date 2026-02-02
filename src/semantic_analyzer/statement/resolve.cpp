@@ -6,6 +6,7 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
+#include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/collection/collection_ast_node.h"
 #include "parser/ast/impl/binary_ast_node.h"
@@ -110,12 +111,11 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 
         if (!unary_op->is_value_valid())
         {
-            //TODO: Improve message
             context.blasphemy_consumer(fmt::format(
-                "הסוג {} אינו תואם לפעולת {}",
+                blasphemy::details::UNARY_TYPE_MISMATCH,
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
-            ));
+            ), unary_op->get_code_position());
             return false;
         }
 
@@ -133,13 +133,12 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         {
             if (!binary_op->is_value_valid())
             {
-                //TODO: Improve message
                 context.blasphemy_consumer(fmt::format(
-                    "הסוגים {} ו־{} אינם תואמים לפעולת {}",
+                    blasphemy::details::BINARY_TYPE_MISMATCH,
                     binary_op->get_left().get_type()->to_pretty_string(),
                     binary_op->get_right().get_type()->to_pretty_string(),
                     binary_op->to_pretty_string()
-                ));
+                ), binary_op->get_code_position());
                 all_succeed = false;
             }
         }
@@ -207,7 +206,8 @@ static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         blasphemy_details,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }
@@ -228,7 +228,8 @@ static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         codesh::blasphemy::details::ITERATOR_NOT_COLLECTION,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }

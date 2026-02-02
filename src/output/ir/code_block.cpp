@@ -14,7 +14,7 @@ size_t codesh::output::ir::code_block::size() const
     return result;
 }
 
-const std::list<std::unique_ptr<codesh::output::ir::instruction>> &codesh::output::ir::code_block::get_instructions()
+const std::vector<std::unique_ptr<codesh::output::ir::instruction>> &codesh::output::ir::code_block::get_instructions()
     const
 {
     return instructions;
