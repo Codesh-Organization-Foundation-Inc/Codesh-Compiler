@@ -91,13 +91,13 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter(
     method_scope.add_local_variable(std::move(parameter));
 }
 
-const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown() const
 {
     return exceptions_thrown;
 }
 
-std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown()
 {
     return exceptions_thrown;

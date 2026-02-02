@@ -23,7 +23,7 @@ codesh::ast::method::method_declaration_ast_node &codesh::ast::method::method_sc
     return parent_method;
 }
 
-const std::list<std::unique_ptr<codesh::ast::method::operation::method_operation_ast_node>> &codesh::ast::method::
+const std::deque<std::unique_ptr<codesh::ast::method::operation::method_operation_ast_node>> &codesh::ast::method::
     method_scope_ast_node::get_body() const
 {
     return body;
@@ -54,7 +54,7 @@ void codesh::ast::method::method_scope_ast_node::push_front_statement(
     body.emplace_front(std::move(statement));
 }
 
-const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
     method_scope_ast_node::get_local_variables() const
 {
     return local_variables;
