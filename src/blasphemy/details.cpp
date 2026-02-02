@@ -1,8 +1,9 @@
 #include "details.h"
 
 // INIT
-const std::string codesh::blasphemy::details::SOURCE_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת קּוֹבֶץ הַמּוֹצָא";
-const std::string codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת הַקּוֹבֶץ: ";
+const std::string codesh::blasphemy::details::SOURCE_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת סֵפֶר הַמּוֹצָא {}";
+const std::string codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR = "לֹא נִתַּן לִפְתֹּחַ אֶת סֵפֶר הַיַּעַד {}";
+const std::string codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY = "נְתִיב הַיַּעַד {} אֵינוֹ אֶרֶץ";
 const std::string codesh::blasphemy::details::NO_MAIN_ARGS = "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
 
 // LEXICAL
@@ -31,13 +32,25 @@ const std::string codesh::blasphemy::details::NO_TYPE = "נָבוֹא שְׁקָ
 const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION = "נָבוֹא שְׁקָרַי: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
 
 // SEMANTIC
-//TODO: Throw when interoperability & type checks exist
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE = "עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה";
 const std::string codesh::blasphemy::details::CONDITION_NOT_BOOLEAN = "תְּנַאי חַיָּב לִהְיוֹת מִסּוּג דְּבַר־מָה";
 const std::string codesh::blasphemy::details::ITERATOR_NOT_COLLECTION = "מוֹנֶה חַיָּב לִהְיוֹת מִסּוּג אוסף";
+const std::string codesh::blasphemy::details::NOT_AN_OBJECT = "{} אֵינוֹ עֶצֶם";
+const std::string codesh::blasphemy::details::UNARY_TYPE_MISMATCH = "הַסּוּג {} אֵינוֹ תּוֹאֵם לִפְעֻלַּת {}";
+const std::string codesh::blasphemy::details::BINARY_TYPE_MISMATCH = "הַסּוּגִים {} וְ{} אֵינָם תּוֹאֲמִים לִפְעֻלַּת {}";
+const std::string codesh::blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION = "אוּזְכַּר הַמִּשְׁתַּנֶּה {} אֲשֶׁר טֶּרֶם נוֹצַר";
+const std::string codesh::blasphemy::details::NOT_A_VARIABLE = "דְּבַר־{} אֵינוֹ מִשְׁתַּנֶּה";
+const std::string codesh::blasphemy::details::SYMBOL_NOT_FOUND = "דְּבַר־{} אֵינוֹ נִמְצָא";
+const std::string codesh::blasphemy::details::TYPE_DOES_NOT_EXIST = "דְּבַר־{} אֵינוֹ קַיָּם";
+const std::string codesh::blasphemy::details::METHOD_NOT_FOUND = "דְּבַר־{} אֵינוֹ נִמְצָא";
+const std::string codesh::blasphemy::details::NOT_A_METHOD = "דְּבַר־{} אֵינוֹ מַעֲשֶׂה";
+const std::string codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH = "סוּג הַמִּנְחוֹת אֵינוֹ תּוֹאֵם לְחוֹתַם הַמַּעֲשֶׂה";
+const std::string codesh::blasphemy::details::DUPLICATE_TYPE_DECLARATION = "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד";
+const std::string codesh::blasphemy::details::DUPLICATE_METHOD_DECLARATION = "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}";
 
 // OUTPUT
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG = "אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף";
 const std::string codesh::blasphemy::details::METHOD_TOO_BIG = "נוּ, מַה זֶּה? מַעֲשֶׂה אוֹ הַתָּנ״ךְ עַצְמוֹ? קַצֵּר!";
 const std::string codesh::blasphemy::details::STRING_TOO_BIG = "אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים תָּוִים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה תָּוִים וְשִׁשִּׁים אָלֶף תָּוִים בִּכְתֻבִים";
 const std::string codesh::blasphemy::details::NUMBER_TOO_BIG = "אֵין־זֶה ִכְתֻבִים—זוֹהִי מְגִלָּה! לְכָל הַיּוֹתֵר חָמֵשׁ תָּוִים וּשְׁלֹשִׁים ספרות וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה ספרות וְשִׁשִּׁים אָלֶף ספרות בִּכְתֻבִים"; //TODO: לדוד לא היה כל כך הרבה נשים
+const std::string codesh::blasphemy::details::TOO_MANY_LOCAL_VARIABLES = "יוֹתֵר מִדַּי מִשְׁתַּנִּים בְּמַעֲשֶׂה {}";
