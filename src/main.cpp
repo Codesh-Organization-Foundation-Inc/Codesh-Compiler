@@ -186,7 +186,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
 
     codesh::blasphemy::blasphemy_collector().add_blasphemy(
         fmt::format(
-            fmt::runtime(codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY),
+            codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY,
             dest_path.string()
         ),
         codesh::blasphemy::blasphemy_type::INIT,
@@ -216,7 +216,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
     {
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
-                fmt::runtime(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR),
+                codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
                 source_file_path.string()
             ),
             codesh::blasphemy::blasphemy_type::INIT,
@@ -241,7 +241,7 @@ static std::string read_file(const std::string &file_name)
     {
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
-                fmt::runtime(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR),
+                codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
                 file_name
             ),
             codesh::blasphemy::blasphemy_type::INIT,

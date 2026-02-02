@@ -21,7 +21,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     if (!result)
     {
         context.blasphemy_consumer(fmt::format(
-            fmt::runtime(blasphemy::details::NOT_AN_OBJECT),
+            blasphemy::details::NOT_AN_OBJECT,
             full_name.holy_join()
         ));
         return std::nullopt;

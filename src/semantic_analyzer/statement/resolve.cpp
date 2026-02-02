@@ -112,7 +112,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         if (!unary_op->is_value_valid())
         {
             context.blasphemy_consumer(fmt::format(
-                fmt::runtime(blasphemy::details::UNARY_TYPE_MISMATCH),
+                blasphemy::details::UNARY_TYPE_MISMATCH,
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
             ));
@@ -134,7 +134,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
             if (!binary_op->is_value_valid())
             {
                 context.blasphemy_consumer(fmt::format(
-                    fmt::runtime(blasphemy::details::BINARY_TYPE_MISMATCH),
+                    blasphemy::details::BINARY_TYPE_MISMATCH,
                     binary_op->get_left().get_type()->to_pretty_string(),
                     binary_op->get_right().get_type()->to_pretty_string(),
                     binary_op->to_pretty_string()

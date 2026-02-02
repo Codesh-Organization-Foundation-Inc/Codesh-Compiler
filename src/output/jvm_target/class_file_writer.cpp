@@ -38,7 +38,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     {
         blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
-                fmt::runtime(blasphemy::details::SOURCE_FILE_OPEN_ERROR),
+                blasphemy::details::SOURCE_FILE_OPEN_ERROR,
                 (destination / (type_decl.get_last_name(false) + ".class")).string()
             ),
             blasphemy::blasphemy_type::OUTPUT,

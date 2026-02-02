@@ -41,7 +41,7 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
         {
             //TODO: Proper message
             context.blasphemy_consumer(fmt::format(
-                fmt::runtime(blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION),
+                blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION,
                 local_var_node->get_name()
             ));
         }
@@ -70,7 +70,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     if (var_symbol == nullptr)
     {
         context.blasphemy_consumer(fmt::format(
-            fmt::runtime(codesh::blasphemy::details::NOT_A_VARIABLE),
+            codesh::blasphemy::details::NOT_A_VARIABLE,
             var_ref_node.get_unresolved_name().holy_join()
         ));
 
@@ -100,7 +100,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (!result.has_value())
     {
         context.blasphemy_consumer(fmt::format(
-            fmt::runtime(codesh::blasphemy::details::SYMBOL_NOT_FOUND),
+            codesh::blasphemy::details::SYMBOL_NOT_FOUND,
             var_name
         ));
 

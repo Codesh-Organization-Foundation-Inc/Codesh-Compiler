@@ -425,7 +425,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 fmt::format(
-                    fmt::runtime(blasphemy::details::TOO_MANY_LOCAL_VARIABLES),
+                    blasphemy::details::TOO_MANY_LOCAL_VARIABLES,
                     method_decl.get_resolved_name().holy_join()
                 ),
                 blasphemy::blasphemy_type::OUTPUT,
