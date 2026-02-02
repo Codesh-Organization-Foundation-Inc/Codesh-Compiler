@@ -17,7 +17,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::LITERAL_STRING, R"(ויקרא(?: | [^\n]+? )(?<! ליטרלי )לאמר)"},
     {token_group::LITERAL_CHAR, R"('(?:[^'\\]|\\.)')"},
 
-    {token_group::IDENTIFIER, R"([\w־]+)"},
+    {token_group::IDENTIFIER, R"([^\s.;[\]/<>:]+)"},
     {token_group::INVALID, R"(\S+)"},
 };
 

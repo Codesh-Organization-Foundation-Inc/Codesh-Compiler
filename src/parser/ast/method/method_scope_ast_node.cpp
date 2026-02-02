@@ -1,6 +1,8 @@
 #include "method_scope_ast_node.h"
 
 #include "method_declaration_ast_node.h"
+#include "output/ir/code_block.h"
+#include "output/ir/instruction.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_scope_symbol>> &codesh::ast::method::
     method_scope_ast_node::_get_resolved() const
@@ -30,7 +32,7 @@ const std::deque<std::unique_ptr<codesh::ast::method::operation::method_operatio
 }
 
 void codesh::ast::method::method_scope_ast_node::add_statement(
-    std::unique_ptr<operation::method_operation_ast_node> statement)
+        std::unique_ptr<operation::method_operation_ast_node> statement)
 {
     statement->set_statement_index(body.size());
     body.emplace_back(std::move(statement));
@@ -111,6 +113,13 @@ void codesh::ast::method::method_scope_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
+    const bool is_inner_scope = &parent_method.get_method_scope() != this;
+
+    if (is_inner_scope)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::scope_begin_marker>(*this));
+    }
+
     for (const auto &method_op : get_body())
     {
         const auto ir_emitter = dynamic_cast<i_ir_emitter *>(method_op.get());
@@ -118,5 +127,10 @@ void codesh::ast::method::method_scope_ast_node::emit_ir(
             continue;
 
         ir_emitter->emit_ir(containing_block, symbol_table, containing_type_decl);
+    }
+
+    if (is_inner_scope)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::scope_end_marker>(*this));
     }
 }

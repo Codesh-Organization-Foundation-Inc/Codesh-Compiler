@@ -10,6 +10,7 @@
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "defenition/definitions.h"
 
+#include <fmt/xchar.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -142,7 +143,7 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
     ).build();
 
     // WRITING
-    codesh::output::jvm_target::write_to_file(class_file, root_node, type_decl, dest_path);
+    codesh::output::jvm_target::write_to_file(class_file, type_decl, dest_path);
 }
 
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
@@ -183,10 +184,15 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
     if (std::filesystem::is_directory(dest_path, error))
         return true;
 
-    //FIXME: Make this more specific to dest path not being a directory in a project-aligned compilation
     codesh::blasphemy::blasphemy_collector().add_blasphemy(
-        codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + dest_path.string(),
-        codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
+        fmt::format(
+            codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY,
+            dest_path.string()
+        ),
+        codesh::blasphemy::blasphemy_type::INIT,
+        std::nullopt,
+        true
+    );
 
     return false;
 }
@@ -209,7 +215,10 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
     if (error)
     {
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR + source_file_path.string(),
+            fmt::format(
+                codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
+                source_file_path.string()
+            ),
             codesh::blasphemy::blasphemy_type::INIT,
             std::nullopt,
             true
@@ -230,9 +239,15 @@ static std::string read_file(const std::string &file_name)
 
     if (!file.is_open())
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR
-            + file_name,
-            codesh::blasphemy::blasphemy_type::INIT, std::nullopt, true);
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
+                file_name
+            ),
+            codesh::blasphemy::blasphemy_type::INIT,
+            std::nullopt,
+            true
+        );
     }
 
     std::ostringstream buffer;
