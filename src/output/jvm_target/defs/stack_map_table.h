@@ -26,43 +26,43 @@ public:
     top_variable_info();
 };
 
-class integer_variable_info final : verification_type_info
+class integer_variable_info final : public verification_type_info
 {
 public:
     integer_variable_info();
 };
 
-class float_variable_info final : verification_type_info
+class float_variable_info final : public verification_type_info
 {
 public:
     float_variable_info();
 };
 
-class long_variable_info final : verification_type_info
+class long_variable_info final : public verification_type_info
 {
 public:
     long_variable_info();
 };
 
-class double_variable_info final : verification_type_info
+class double_variable_info final : public verification_type_info
 {
 public:
     double_variable_info();
 };
 
-class null_variable_info final : verification_type_info
+class null_variable_info final : public verification_type_info
 {
 public:
     null_variable_info();
 };
 
-class uninitialized_this_variable_info final : verification_type_info
+class uninitialized_this_variable_info final : public verification_type_info
 {
 public:
     uninitialized_this_variable_info();
 };
 
-class object_variable_info final : verification_type_info
+class object_variable_info final : public verification_type_info
 {
 public:
     object_variable_info();
@@ -70,7 +70,7 @@ public:
     unsigned char cpool_index[2]{};
 };
 
-class uninitialized_variable_info final : verification_type_info
+class uninitialized_variable_info final : public verification_type_info
 {
 public:
     uninitialized_variable_info();
@@ -153,6 +153,7 @@ public:
     full_frame();
 
     unsigned char offset_delta[2]{};
+
     unsigned char number_of_locals[2]{};
     std::vector<std::unique_ptr<verification_type_info>> locals;
     unsigned char number_of_stack_items[2]{};

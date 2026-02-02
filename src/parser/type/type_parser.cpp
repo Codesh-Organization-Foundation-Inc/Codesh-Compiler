@@ -4,6 +4,7 @@
 #include "blasphemy/details.h"
 #include "defenition/visibility.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "parser/util.h"
 #include "parser/type/class/class_parser.h"
 
@@ -22,7 +23,10 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
     case token_group::KEYWORD_ENUM:; //TODO
     case token_group::KEYWORD_ANNOTATION: return nullptr; //TODO
 
-    default: throw std::runtime_error(blasphemy::details::UNEXPECTED_DECLARATION);
+    default:
+        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::UNEXPECTED_DECLARATION,
+            blasphemy::blasphemy_type::SYNTAX);
+        return std::make_unique<ast::type_decl::error_type_declaration_ast_node>();
     }
 }
 

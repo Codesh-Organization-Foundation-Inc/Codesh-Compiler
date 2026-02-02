@@ -13,7 +13,7 @@ class method_scope_ast_node;
 namespace codesh::ast::block
 {
 
-class while_ast_node : public method::operation::method_operation_ast_node
+class while_ast_node final : public method::operation::method_operation_ast_node
 {
     std::unique_ptr<var_reference::value_ast_node> condition;
     method::method_scope_ast_node &body_scope;
@@ -23,6 +23,8 @@ public:
 
     [[nodiscard]] var_reference::value_ast_node &get_condition() const;
     [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;
+
+    void set_statement_index(size_t statement_index) override;
 
     void emit_ir(output::ir::code_block &containing_block,
                  const semantic_analyzer::symbol_table &symbol_table,

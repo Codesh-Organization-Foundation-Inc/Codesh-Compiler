@@ -1,8 +1,10 @@
 #include "symbol.h"
 
+#include "defenition/primitive_type.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
 #include <utility>
@@ -173,7 +175,7 @@ codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::loc
     return producing_node;
 }
 
-size_t codesh::semantic_analyzer::local_variable_symbol::get_index() const
+size_t codesh::semantic_analyzer::local_variable_symbol::get_jvm_index() const
 {
     return index;
 }
@@ -228,10 +230,10 @@ codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_sc
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
                                                                     std::unique_ptr<local_variable_symbol> variable)
 {
-    const size_t index = variable->get_index();
+    const size_t index = variable->get_jvm_index();
 
     const auto result = scope.add_symbol(name, std::move(variable));
-    index_to_local_variable.emplace(name, result.first);
+    index_to_local_variable.name_to_var.emplace(name, result.first);
 
     return index;
 }
@@ -267,6 +269,7 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
     attributes(std::move(attributes)),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
+    local_variables(),
     scope(ALLOWED_SYMBOL_TYPES),
     method_scope(nullptr),
     producing_node(producing_node),
@@ -337,10 +340,30 @@ const codesh::semantic_analyzer::symbol_list &codesh::semantic_analyzer::method_
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(ast::local_variable_declaration_ast_node &variable)
 {
+    size_t jvm_index = index_to_local_variable.slots_used;
+    // A variable gets 2 slots if is either a long or a double
+    bool gets_extra_slot = false;
+
+    if (const auto primitive_type = dynamic_cast<const ast::type::primitive_type_ast_node *>(variable.get_type()))
+    {
+        switch (primitive_type->get_type())
+        {
+        case definition::primitive_type::LONG:
+        case definition::primitive_type::DOUBLE:
+            gets_extra_slot = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    index_to_local_variable.slots_used += 1 + gets_extra_slot;
+
     return add_variable(variable.get_name(), std::make_unique<local_variable_symbol>(
         this,
         variable.get_type()->clone(),
-        index_to_local_variable.size(),
+        jvm_index,
         &variable
     ));
 }
