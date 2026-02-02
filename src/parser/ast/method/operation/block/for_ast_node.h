@@ -14,7 +14,7 @@ class method_scope_ast_node;
 namespace codesh::ast::block
 {
 
-class for_ast_node : public method::operation::method_operation_ast_node
+class for_ast_node final : public method::operation::method_operation_ast_node
 {
     std::unique_ptr<local_variable_declaration_ast_node> iterator;
     std::unique_ptr<var_reference::value_ast_node> collection;
@@ -29,6 +29,8 @@ public:
     [[nodiscard]] local_variable_declaration_ast_node &get_iterator() const;
     [[nodiscard]] var_reference::value_ast_node &get_collection() const;
     [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;
+
+    void set_statement_index(size_t statement_index) override;
 
     void emit_ir(output::ir::code_block &containing_block,
                  const semantic_analyzer::symbol_table &symbol_table,

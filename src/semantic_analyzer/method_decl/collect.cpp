@@ -1,6 +1,7 @@
 #include "collect.h"
 
 #include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -9,8 +10,8 @@
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
 
-static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    const codesh::semantic_analyzer::method_symbol &method_symbol);
+static void collect_local_variables(const codesh::ast::method::method_scope_ast_node &scope_node,
+                                    codesh::semantic_analyzer::method_scope_symbol &scope_symbol);
 
 void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbol,
         const codesh::ast::method::method_scope_ast_node &current_scope_node,
@@ -40,14 +41,14 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
 
     if (!inserted)
     {
-        //TODO: Print full method declaration
+        //TODO: Print full method signature
         new_context.blasphemy_consumer(fmt::format(
-            "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
+            blasphemy::details::DUPLICATE_METHOD_DECLARATION,
             method_name
         ), method_decl.get_code_position());
     }
 
-    collect_local_variables(method_decl, it);
+    collect_local_variables(method_decl.get_method_scope(), it.get().get_method_scope());
 
     collect_inner_scopes(
         it,
@@ -56,13 +57,12 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
     );
 }
 
-static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    const codesh::semantic_analyzer::method_symbol &method_symbol)
+static void collect_local_variables(const codesh::ast::method::method_scope_ast_node &scope_node,
+                                    codesh::semantic_analyzer::method_scope_symbol &scope_symbol)
 {
-    //TODO: Handle inner scopes
-    for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
+    for (auto &var_decl : scope_node.get_local_variables())
     {
-        method_symbol.get_method_scope().add_variable(*var_decl);
+        scope_symbol.add_variable(*var_decl);
     }
 }
 
@@ -89,10 +89,10 @@ void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbo
             method_symbol.create_method_scope(current_scope_symbol, *inner_scope_node)
         );
 
+        // Collect all local variables declared in this scope
+        collect_local_variables(*inner_scope_node, inner_scope_symbol);
+
         // Recursively collect even more inner scopes
-        for (const auto &inner_inner_scope : inner_scope_node->get_method_scopes())
-        {
-            collect_inner_scopes(method_symbol, *inner_inner_scope, inner_scope_symbol);
-        }
+        collect_inner_scopes(method_symbol, *inner_scope_node, inner_scope_symbol);
     }
 }

@@ -4,6 +4,7 @@
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "blasphemy/details.h"
 #include "fmt/args.h"
 
 /**
@@ -40,7 +41,7 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
         {
             //TODO: Proper message
             context.blasphemy_consumer(fmt::format(
-                "אוזכר המשתנה {} שטרם נוצר",
+                blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION,
                 local_var_node->get_name()
             ), var_ref_node.get_code_position());
         }
@@ -68,9 +69,8 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     const auto var_symbol = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&result.value().get());
     if (var_symbol == nullptr)
     {
-        //TODO: Add proper message
         context.blasphemy_consumer(fmt::format(
-            "{} אינו משתנה",
+            codesh::blasphemy::details::NOT_A_VARIABLE,
             var_ref_node.get_unresolved_name().holy_join()
         ), var_ref_node.get_code_position());
 
@@ -105,8 +105,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     const auto result = scope.resolve_up(var_name);
     if (!result.has_value())
     {
-        // TODO: Add proper message
-        context.blasphemy_consumer(fmt::format("{} אינו נמצא", var_name), var_ref_node.get_code_position());
+        context.blasphemy_consumer(fmt::format(
+            codesh::blasphemy::details::SYMBOL_NOT_FOUND,
+            var_name
+        ), var_ref_node.get_code_position());
 
         return std::nullopt;
     }

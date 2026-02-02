@@ -10,6 +10,8 @@
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
+#include "blasphemy/details.h"
+#include "fmt/color.h"
 
 #include <ranges>
 
@@ -109,7 +111,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (parent_type == nullptr)
         {
             context.blasphemy_consumer(fmt::format(
-                "{} אינו קיים",
+                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
                 name.holy_join()
             ), method_call.get_code_position());
 
@@ -169,7 +171,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "name doesn't exist"
         context.blasphemy_consumer(fmt::format(
-            "היי אלירןןןןןן תעשה את השם בבקשה השגיאה היא שהדבר לא נמצא"
+            codesh::blasphemy::details::METHOD_NOT_FOUND,
+            method_call.get_last_name(false)
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -179,7 +182,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         //TODO: Throw "is not a method"
         context.blasphemy_consumer(fmt::format(
-            "אליצ'אאאןןן >w< איייי!! נאני גה־סוקי? זוהי לא מתודה, יורימו אנאטה?"
+            codesh::blasphemy::details::NOT_A_METHOD,
+            method_call.get_last_name(false)
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -223,9 +227,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         }
     }
 
-    //TODO: Throw "mismatched argument types"
-    context.blasphemy_consumer(fmt::format(
-        "סוג המנחות אינו תואם לחותם המעשה"
-    ), method_call.get_code_position());
+    context.blasphemy_consumer(codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH, method_call.get_code_position());
     return std::nullopt;
 }

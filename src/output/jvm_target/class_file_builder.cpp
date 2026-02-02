@@ -1,14 +1,18 @@
 #include "class_file_builder.h"
+#include "stack_map_table_builder.h"
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/definitions.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "util.h"
 #include "output/ir/code_block.h"
+#include "output/ir/instruction.h"
 #include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
@@ -16,10 +20,10 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 
 #include <list>
-#include <ranges>
-#include <set>
+#include <unordered_map>
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
@@ -145,6 +149,9 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
     const auto method_code = emit_method_bytecode(*code_attr, method_decl);
 
+    // Compute bytecode positions for local variables before creating LocalVariableTable
+    compute_local_variable_bytecode_ranges(method_code, method_decl, code_attr->code.size());
+
     const auto locals = get_locals_count(method_decl);
     util::put_int_bytes(code_attr->max_locals, 2, locals);
 
@@ -156,7 +163,9 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
 
     if (method_decl.has_inner_scopes())
     {
-        code_attr->attributes.push_back(create_stack_map_table_attribute(method_code));
+        code_attr->attributes.push_back(
+            stack_map_table_builder(constant_pool_).build(method_code, method_decl)
+        );
     }
 
 
@@ -247,7 +256,7 @@ int codesh::output::jvm_target::class_file_builder::get_locals_count(
         const ast::method::method_declaration_ast_node &method_decl)
 {
     // Local variables
-    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().size();
+    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().name_to_var.size();
     if (local_vars_count > 0xFFFF)
     {
         //TODO: Convert to Codesh error
@@ -282,83 +291,6 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
     );
 
     return local_variable_table;
-}
-
-std::unique_ptr<codesh::output::jvm_target::defs::stack_map_table_attribute_entry> codesh::output::jvm_target::
-        class_file_builder::create_stack_map_table_attribute(const ir::code_block &method_code) const
-{
-    auto smt_attr = std::make_unique<defs::stack_map_table_attribute_entry>();
-
-    util::put_int_bytes(smt_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("StackMapTable"));
-    add_stack_map_frames(*smt_attr, method_code);
-
-    return smt_attr;
-}
-
-std::set<size_t> codesh::output::jvm_target::class_file_builder::collect_jump_targets(
-    const ir::code_block &method_code)
-{
-    std::set<size_t> jump_targets;
-    jump_targets.insert(0);
-
-    size_t curr_byte_pos = 0;
-    for (const auto &method_instruction : method_code.get_instructions())
-    {
-        if (const auto jump_instr = dynamic_cast<const ir::goto_instruction *>(method_instruction.get()))
-        {
-            const int offset = jump_instr->get_jump_offset() + static_cast<int>(method_instruction->size());
-            const int target = static_cast<int>(curr_byte_pos) + offset;
-
-            jump_targets.insert(static_cast<size_t>(target));
-        }
-
-        curr_byte_pos += method_instruction->size();
-    }
-
-    return jump_targets;
-}
-
-void codesh::output::jvm_target::class_file_builder::add_stack_map_frames(
-        defs::stack_map_table_attribute_entry &smt_attr, const ir::code_block &method_code)
-{
-    const auto frame_targets = collect_jump_targets(method_code);
-
-    size_t smt_attr_size = 2;
-
-    int prev_pos = -1;
-    for (const size_t target : frame_targets)
-    {
-        const int current_pos = static_cast<int>(target);
-        const int offset_delta = current_pos - prev_pos - 1;
-
-        std::unique_ptr<defs::stack_map_frame> frame;
-        //TODO: Figure out when it's not same_frame
-        if (offset_delta <= 63)
-        {
-            frame = std::make_unique<defs::same_frame>(static_cast<unsigned char>(offset_delta));
-            smt_attr_size += 1;
-        }
-        else
-        {
-            if (offset_delta > 0xFFFF)
-            {
-                //TODO: Make Codesh error
-                throw std::runtime_error("Inner scope too big; Max is 65535");
-            }
-
-            auto temp_frame = std::make_unique<defs::same_frame_extended>();
-            util::put_int_bytes(temp_frame->offset_delta, 2, offset_delta);
-
-            frame = std::move(temp_frame);
-            smt_attr_size += 3;
-        }
-
-        smt_attr.entries.push_back(std::move(frame));
-        prev_pos = current_pos;
-    }
-
-    util::put_int_bytes(smt_attr.number_of_entries, 2, static_cast<int>(smt_attr.entries.size()));
-    util::put_int_bytes(smt_attr.attribute_length, 4, static_cast<int>(smt_attr_size));
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
@@ -396,13 +328,22 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables())
+    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables().name_to_var)
     {
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
-        //TODO: Fill per scope info:
-        util::put_int_bytes(entry->start_pc, 2, 0);
-        util::put_int_bytes(entry->length, 2, code_length_total);
+        const auto *producing_node = var.get().get_producing_node();
+
+        // Use the positions as computed earlier by compute_local_variable_bytecode_ranges
+        const size_t start_pc = producing_node != nullptr
+            ? producing_node->get_bytecode_start_pc()
+            : 0;
+        const size_t length = producing_node != nullptr
+            ? producing_node->get_bytecode_length()
+            : static_cast<size_t>(code_length_total);
+
+        util::put_int_bytes(entry->start_pc, 2, static_cast<int>(start_pc));
+        util::put_int_bytes(entry->length, 2, static_cast<int>(length));
 
         util::put_int_bytes(
             entry->name_index,
@@ -420,12 +361,12 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         );
 
 
-        const size_t var_index = var.get().get_index();
+        const size_t var_index = var.get().get_jvm_index();
         if (var_index > 0xFFFF)
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 fmt::format(
-                    "יותר מידיי משתנים מקומיים במעשה {}",
+                    blasphemy::details::TOO_MANY_LOCAL_VARIABLES,
                     method_decl.get_resolved_name().holy_join()
                 ),
                 blasphemy::blasphemy_type::OUTPUT,
@@ -438,4 +379,65 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
 
         results_out.push_back(std::move(entry));
     }
+}
+
+void codesh::output::jvm_target::class_file_builder::compute_local_variable_bytecode_ranges(
+        const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl,
+        const size_t total_code_length)
+{
+    const auto scope_boundaries = create_scope_boundaries(method_code, method_decl, total_code_length);
+    set_scope_bytecode_boundaries(method_decl.get_method_scope(), scope_boundaries);
+}
+
+void codesh::output::jvm_target::class_file_builder::set_scope_bytecode_boundaries(
+        const ast::method::method_scope_ast_node &scope,
+        const scope_to_bytecode_boundaries &scope_boundaries)
+{
+    const auto it = scope_boundaries.find(&scope);
+    if (it == scope_boundaries.end())
+        return;
+
+    const auto [scope_start, scope_end] = it->second;
+
+    for (const auto &var : scope.get_local_variables())
+    {
+        var->set_bytecode_start_pc(scope_start);
+        var->set_bytecode_length(scope_end - scope_start);
+    }
+
+    for (const auto &inner_scope : scope.get_method_scopes())
+    {
+        set_scope_bytecode_boundaries(*inner_scope, scope_boundaries);
+    }
+}
+
+codesh::output::jvm_target::class_file_builder::scope_to_bytecode_boundaries codesh::output::jvm_target::
+    class_file_builder::create_scope_boundaries(const ir::code_block &method_code,
+        const ast::method::method_declaration_ast_node &method_decl,
+        const size_t total_code_length)
+{
+    scope_to_bytecode_boundaries result;
+
+    // The root scope spans the entire method
+    result[&method_decl.get_method_scope()] = {0, total_code_length};
+
+    size_t current_bytecode_pos = 0;
+    for (const auto &instr : method_code.get_instructions())
+    {
+        if (auto *begin_marker = dynamic_cast<ir::scope_begin_marker *>(instr.get()))
+        {
+            begin_marker->set_bytecode_position(current_bytecode_pos);
+            result[&begin_marker->get_scope()].first = current_bytecode_pos;
+        }
+        else if (auto *end_marker = dynamic_cast<ir::scope_end_marker *>(instr.get()))
+        {
+            end_marker->set_bytecode_position(current_bytecode_pos);
+            result[&end_marker->get_scope()].second = current_bytecode_pos;
+        }
+
+        current_bytecode_pos += instr->size();
+    }
+
+    return result;
 }

@@ -71,6 +71,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/type_declaration/attributes_ast_node.h
         src/parser/ast/type_declaration/type_declaration_ast_node.cpp
         src/parser/ast/type_declaration/type_declaration_ast_node.h
+        src/parser/ast/type_declaration/error_type_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/error_type_declaration_ast_node.h
         src/defenition/visibility.h
         src/defenition/visibility.cpp
         src/output/jvm_target/defs/class_file.h
@@ -106,6 +108,8 @@ add_executable(Codesh_Compiler
         src/test.h
         src/output/jvm_target/class_file_builder.cpp
         src/output/jvm_target/class_file_builder.h
+        src/output/jvm_target/stack_map_table_builder.cpp
+        src/output/jvm_target/stack_map_table_builder.h
         src/output/jvm_target/defs/attribute_info_entry.cpp
         src/output/jvm_target/defs/cp_info.cpp
         src/output/jvm_target/defs/cp_info.cpp

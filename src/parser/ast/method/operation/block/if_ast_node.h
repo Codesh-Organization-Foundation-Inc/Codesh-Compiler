@@ -31,7 +31,7 @@ struct conditioned_scope_container
     method::method_scope_ast_node &scope;
 };
 
-class if_ast_node : public method::operation::method_operation_ast_node, public impl::i_constant_pool_emitter
+class if_ast_node final : public method::operation::method_operation_ast_node, public impl::i_constant_pool_emitter
 {
     const conditioned_scope_container if_branch;
     std::vector<conditioned_scope_container> else_if_branches;
@@ -60,6 +60,8 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<method::method_scope_ast_node>> get_else_branch() const;
     void set_else_branch(method::method_scope_ast_node& else_scope);
+
+    void set_statement_index(size_t statement_index) override;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

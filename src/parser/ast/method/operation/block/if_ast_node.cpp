@@ -47,6 +47,17 @@ void codesh::ast::block::if_ast_node::set_else_branch(method::method_scope_ast_n
     this->else_branch = else_scope;
 }
 
+void codesh::ast::block::if_ast_node::set_statement_index(size_t statement_index)
+{
+    method_operation_ast_node::set_statement_index(statement_index);
+
+    if_branch.condition->set_statement_index(statement_index);
+    for (const auto &else_if_branch : else_if_branches)
+    {
+        else_if_branch.condition->set_statement_index(statement_index);
+    }
+}
+
 void codesh::ast::block::if_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                      output::jvm_target::constant_pool &constant_pool)
 {

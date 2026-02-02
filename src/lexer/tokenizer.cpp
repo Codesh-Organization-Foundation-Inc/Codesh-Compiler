@@ -102,7 +102,8 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         {
             current = &current->get_child(code[j])->get();
 
-            if (const auto keyword = current->get_keyword()) {
+            if (const auto keyword = current->get_keyword())
+            {
                 last_match = &keyword->get();
                 last_match_end = j + 1;
             }
@@ -127,7 +128,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         const auto match = *boost::u32regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
         bool matched = false;
 
-        for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
+        for (int j = 1; j <= TOKEN_GROUP_RGX_COUNT; ++j)
         {
             if (const auto &match_info = match[j]; match_info.matched)
             {
@@ -202,7 +203,7 @@ static void on_regex_token(codesh::token *token)
     switch (token->get_group())
     {
     case codesh::token_group::LITERAL_STRING: {
-        codesh::identifier_token *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
+        auto *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
         std::string content = iden_token->get_content();
 
         // Handle newline

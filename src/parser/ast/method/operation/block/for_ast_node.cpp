@@ -28,6 +28,12 @@ codesh::ast::method::method_scope_ast_node &for_ast_node::get_body_scope() const
     return body_scope;
 }
 
+void for_ast_node::set_statement_index(size_t statement_index)
+{
+    method_operation_ast_node::set_statement_index(statement_index);
+    collection->set_statement_index(statement_index);
+}
+
 void for_ast_node::emit_ir(
     output::ir::code_block &containing_block,
     const semantic_analyzer::symbol_table &symbol_table,

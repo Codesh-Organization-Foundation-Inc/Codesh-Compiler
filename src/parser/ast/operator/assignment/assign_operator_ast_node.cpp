@@ -27,7 +27,7 @@ void codesh::ast::op::assignment::assign_operator_ast_node::emit_ir(
     {
         containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
             local_var->get_type()->to_instruction_type(),
-            local_var->get_index()
+            local_var->get_jvm_index()
         ));
     }
     else

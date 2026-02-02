@@ -2,6 +2,7 @@
 
 #include "output/jvm_target/constant_pool.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "type/custom_type_ast_node.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
     local_variable_declaration_ast_node::_get_resolved() const
@@ -73,9 +74,44 @@ void codesh::ast::local_variable_declaration_ast_node::set_accessible_from(const
     this->accessible_from = accessible_from;
 }
 
+size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_start_pc() const
+{
+    return bytecode_start_pc;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_start_pc(const size_t start_pc)
+{
+    this->bytecode_start_pc = start_pc;
+}
+
+size_t codesh::ast::local_variable_declaration_ast_node::get_bytecode_length() const
+{
+    return bytecode_length;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_bytecode_length(const size_t length)
+{
+    this->bytecode_length = length;
+}
+
 void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                                       output::jvm_target::constant_pool &constant_pool)
 {
     constant_pool.goc_utf8_info(get_name());
-    constant_pool.goc_utf8_info(get_type()->generate_descriptor());
+    const int descriptor_cpi = constant_pool.goc_utf8_info(get_type()->generate_descriptor());
+
+    // For object and array types, also add a Class entry so it can be referenced
+    // in the StackMapTable entries (verification):
+    if (get_type()->get_array_dimensions() != 0)
+    {
+        constant_pool.goc_class_info(descriptor_cpi);
+    }
+    else if (const auto custom_type = dynamic_cast<const type::custom_type_ast_node *>(get_type()))
+    {
+        constant_pool.goc_class_info(
+            constant_pool.goc_utf8_info(
+                custom_type->get_resolved_name().join()
+            )
+        );
+    }
 }

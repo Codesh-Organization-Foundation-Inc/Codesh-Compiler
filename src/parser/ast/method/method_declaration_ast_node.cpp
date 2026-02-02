@@ -1,5 +1,7 @@
 #include "method_declaration_ast_node.h"
 
+#include "fmt/xchar.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "util.h"
 
@@ -116,6 +118,10 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
         constant_pool.goc_utf8_info("StackMapTable");
     }
 
+    for (const auto &param : parameters)
+    {
+        param.get().emit_constants(root_node, constant_pool);
+    }
 
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),
