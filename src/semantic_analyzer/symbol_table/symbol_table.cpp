@@ -2,6 +2,7 @@
 
 #include "../../blasphemy/blasphemy_collector.h"
 #include "../../blasphemy/blasphemy_consumer.h"
+#include "../../defenition/definitions.h"
 #include "../semantic_context.h"
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
@@ -10,34 +11,22 @@
         std::vector<std::string>::const_iterator fqcn_start,
         std::vector<std::string>::const_iterator fqcn_end);
 
-
-const std::vector<codesh::semantic_analyzer::symbol_type> &codesh::semantic_analyzer::symbol_table::
-    allowed_symbol_types() const
-{
-    return ALLOWED_SYMBOL_TYPES;
-}
-
-codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_unit_ast_node &root_node)
+codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_unit_ast_node &root_node) :
+    scope(ALLOWED_SYMBOL_TYPES)
 {
     // Add the global scope
-    add_symbol("", std::make_unique<country_symbol>(""));
+    scope.add_symbol("", std::make_unique<country_symbol>(""));
 }
 
-const codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map() const
+const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
 {
-    return global_scope;
+    return scope;
 }
-
-codesh::semantic_analyzer::named_scope_map &codesh::semantic_analyzer::symbol_table::get_symbol_map()
-{
-    return global_scope;
-}
-
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> codesh::semantic_analyzer::
     symbol_table::resolve_country(const std::string &name) const
 {
-    const auto result = resolve(name);
+    const auto result = scope.resolve_local(name);
 
     if (!result)
         return std::nullopt;
@@ -52,24 +41,28 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
                          const std::optional<std::vector<std::string>::const_iterator> name_end,
                          const std::optional<std::vector<std::string>::const_iterator> name_start)
 {
+    if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
+        return std::nullopt;
+
+
     for (const auto &country : context.lookup_countries)
     {
-         const auto result = resolve_method_from_scope_container(
-             country,
-             name_start.value_or(full_name.get_parts().begin()),
-             name_end.value_or(full_name.get_parts().end())
-         );
+        const auto result =
+            resolve_method_from_scope_container(country, name_start.value_or(full_name.get_parts().begin()),
+                                                name_end.value_or(full_name.get_parts().end()));
 
         if (result.has_value())
             return result.value();
     }
 
-    context.blasphemy_consumer(fmt::format(
-        "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
-        full_name.join(" ל־")
-    ));
+    context.blasphemy_consumer(fmt::format("עֶצֶם בִּלְתִּי־מְזֹהֶה: {}", full_name.join(" ל־")));
 
     return std::nullopt;
+}
+
+codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope()
+{
+    return scope;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_from_scope_container(
@@ -83,8 +76,16 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (it == end)
         return std::nullopt;
 
+    // We can only resolve for named symbol maps.
+    // If the container is not a named symbol map - it means that we've hit a local scope (i.e a method),
+    // in which case it is unnamed and thus unaccessible anyway.
+    const auto &named_scope_container = dynamic_cast<const codesh::semantic_analyzer::named_symbol_map *>(
+        &scope_container.get_scope()
+    );
+    if (named_scope_container == nullptr)
+        return std::nullopt;
 
-    const auto symbol_raw = scope_container.resolve(*it);
+    const auto symbol_raw = named_scope_container->resolve_local(*it);
     if (!symbol_raw.has_value())
         return std::nullopt;
 

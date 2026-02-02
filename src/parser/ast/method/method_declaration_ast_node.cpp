@@ -1,6 +1,5 @@
 #include "method_declaration_ast_node.h"
 
-#include "../local_variable_declaration_ast_node.h"
 #include "../../../semantic_analyzer/symbol_table/symbol.h"
 #include "fmt/xchar.h"
 #include "util.h"
@@ -14,7 +13,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-    definition::fully_qualified_class_name name) : name(std::move(name))
+    definition::fully_qualified_class_name name) : name(std::move(name)), method_scope(*this)
 {
 }
 
@@ -61,31 +60,24 @@ void codesh::ast::method::method_declaration_ast_node::set_return_type(std::uniq
     this->return_type = std::move(return_type);
 }
 
-std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_body()
+codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope()
 {
-    return body;
+    return method_scope;
 }
 
-const std::list<std::unique_ptr<codesh::ast::impl::ir_emitting_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_body() const
+const codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_declaration_ast_node::get_method_scope()
+    const
 {
-    return body;
-}
-std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
-    method_declaration_ast_node::get_local_variables()
-{
-    return local_variables;
+    return method_scope;
 }
 
-const std::list<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
-    method_declaration_ast_node::get_local_variables() const
+bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
 {
-    return local_variables;
+    return !method_scope.get_method_scopes().empty();
 }
 
-const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_parameters() const
+const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_parameters() const
 {
     return parameters;
 }
@@ -93,8 +85,10 @@ const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_no
 void codesh::ast::method::method_declaration_ast_node::add_parameter(
     std::unique_ptr<local_variable_declaration_ast_node> parameter)
 {
-    parameter_types.push_back(*parameter->get_type());
-    parameters.push_back(std::move(parameter));
+    parameter_types.emplace_back(*parameter->get_type());
+    parameters.emplace_back(*parameter);
+
+    method_scope.add_local_variable(std::move(parameter));
 }
 
 const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
@@ -107,4 +101,26 @@ std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::metho
     get_exceptions_thrown()
 {
     return exceptions_thrown;
+}
+
+void codesh::ast::method::method_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
+        output::jvm_target::constant_pool &constant_pool)
+{
+    //FIXME: Emit only if there is code in this method
+    // (Might not exist for abstract/interface methods)
+    constant_pool.goc_utf8_info("Code");
+    constant_pool.goc_utf8_info("LocalVariableTable");
+
+    if (has_inner_scopes())
+    {
+        constant_pool.goc_utf8_info("StackMapTable");
+    }
+
+
+    constant_pool.goc_name_and_type_info(
+        constant_pool.goc_utf8_info(get_last_name(true)),
+        constant_pool.goc_utf8_info(generate_descriptor())
+    );
+
+    method_scope.emit_constants(root_node, constant_pool);
 }

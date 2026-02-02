@@ -1,15 +1,21 @@
 #pragma once
 
 #include "method_call_ast_node.h"
+#include "method_operation_ast_node.h"
 
 #include "../../../../defenition/fully_qualified_class_name.h"
+#include "../../impl/i_constant_pool_emitter.h"
+#include "../../impl/i_ir_emitter.h"
 #include "../../impl/i_resolvable.h"
-#include "../../impl/ir_emitting_ast_node.h"
 #include "../../var_reference/value_ast_node.h"
 
 #include <memory>
 #include <deque>
 
+namespace codesh::ast
+{
+class compilation_unit_ast_node;
+}
 namespace codesh::semantic_analyzer
 {
 class method_symbol;
@@ -18,7 +24,8 @@ class method_symbol;
 namespace codesh::ast::method::operation
 {
 
-class method_call_ast_node : public impl::ir_emitting_ast_node,
+class method_call_ast_node : public method_operation_ast_node,
+    public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
     public impl::i_descriptor_emitter
 {
@@ -46,6 +53,11 @@ public:
     [[nodiscard]] const std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
     [[nodiscard]] std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
 
+    void set_statement_index(size_t statement_index) override;
+
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+                        output::jvm_target::constant_pool &constant_pool) override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
                  const type_decl::type_declaration_ast_node &containing_type_decl) const override;

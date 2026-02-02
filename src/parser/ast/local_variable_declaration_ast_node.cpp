@@ -1,5 +1,24 @@
 #include "local_variable_declaration_ast_node.h"
 
+#include "../../semantic_analyzer/symbol_table/symbol.h"
+
+const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
+    local_variable_declaration_ast_node::_get_resolved() const
+{
+    return resolved_variable;
+}
+
+codesh::ast::local_variable_declaration_ast_node::local_variable_declaration_ast_node() :
+    accessible_from(-1),
+    accessible_to(-1)
+{
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_resolved(semantic_analyzer::local_variable_symbol &symbol)
+{
+    resolved_variable.emplace(symbol);
+}
+
 std::string codesh::ast::local_variable_declaration_ast_node::get_name() const
 {
     return name;
@@ -20,16 +39,6 @@ void codesh::ast::local_variable_declaration_ast_node::set_type(std::unique_ptr<
     this->type = std::move(type);
 }
 
-codesh::ast::var_reference::value_ast_node *codesh::ast::local_variable_declaration_ast_node::get_value() const
-{
-    return value.get();
-}
-
-void codesh::ast::local_variable_declaration_ast_node::set_value(std::unique_ptr<var_reference::value_ast_node> value)
-{
-    this->value = std::move(value);
-}
-
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::local_variable_declaration_ast_node::get_attributes() const
 {
     return attributes.get();
@@ -41,3 +50,29 @@ void codesh::ast::local_variable_declaration_ast_node::set_attributes(
     this->attributes = std::move(attributes);
 }
 
+size_t codesh::ast::local_variable_declaration_ast_node::get_accessible_to() const
+{
+    return accessible_to;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_accessible_to(const size_t accessible_to)
+{
+    this->accessible_to = accessible_to;
+}
+
+size_t codesh::ast::local_variable_declaration_ast_node::get_accessible_from() const
+{
+    return accessible_from;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::set_accessible_from(const size_t accessible_from)
+{
+    this->accessible_from = accessible_from;
+}
+
+void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
+                                                                      output::jvm_target::constant_pool &constant_pool)
+{
+    constant_pool.goc_utf8_info(get_name());
+    constant_pool.goc_utf8_info(get_type()->generate_descriptor());
+}

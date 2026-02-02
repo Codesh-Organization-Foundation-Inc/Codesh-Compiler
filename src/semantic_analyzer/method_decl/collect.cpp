@@ -9,65 +9,61 @@
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
 
-static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    codesh::semantic_analyzer::method_symbol &method_symbol);
+static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol);
+
+void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbol,
+        const codesh::ast::method::method_scope_ast_node &current_scope_node,
+        codesh::semantic_analyzer::method_scope_symbol &current_scope_symbol);
 
 
-void codesh::semantic_analyzer::method_declaration::collect_methods(const semantic_context &context,
-        const ast::type_decl::type_declaration_ast_node &type_decl, type_symbol &containing_type)
+void codesh::semantic_analyzer::method_declaration::collect(const semantic_context &context,
+        ast::method::method_declaration_ast_node &method_decl, type_symbol &containing_type)
 {
-    for (const auto &method_decl : type_decl.get_all_methods())
+    const std::string method_name = method_decl.get_last_name(false);
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+
+    method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
+
+    const auto [it, inserted] = methods_container.get_scope().add_symbol(
+        method_decl.generate_parameters_descriptor(false), std::make_unique<method_symbol>(
+            &methods_container,
+            containing_type,
+            containing_type.get_full_name().with(method_name),
+
+            method_decl.get_attributes()->clone(),
+            clone_parameter_types(method_decl),
+            method_decl.get_return_type()->clone(),
+
+            &method_decl
+        )
+    );
+
+    if (!inserted)
     {
-        const std::string method_name = method_decl->get_last_name(false);
-        const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
-
-        method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
-
-        const auto [it, inserted] = methods_container.add_symbol(
-            method_decl->generate_parameters_descriptor(false), std::make_unique<method_symbol>(
-                &methods_container,
-                containing_type,
-                containing_type.get_full_name().with(method_name),
-
-                method_decl->get_attributes()->clone(),
-                clone_parameter_types(*method_decl),
-                method_decl->get_return_type()->clone(),
-
-                method_decl.get()
-            )
-        );
-
-        if (!inserted)
-        {
-            //TODO: Print full method declaration
-            new_context.blasphemy_consumer(fmt::format(
-                "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
-                method_name
-            ));
-        }
-
-        method_decl->set_resolved(it);
-
-
-        collect_local_variables(*method_decl, it);
+        //TODO: Print full method declaration
+        new_context.blasphemy_consumer(fmt::format(
+            "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}",
+            method_name
+        ));
     }
+
+    collect_local_variables(method_decl, it);
+
+    collect_inner_scopes(
+        it,
+        method_decl.get_method_scope(),
+        it.get().get_method_scope()
+    );
 }
 
-static void collect_local_variables(codesh::ast::method::method_declaration_ast_node &method_decl,
-                                    codesh::semantic_analyzer::method_symbol &method_symbol)
+static void collect_local_variables(const codesh::ast::method::method_declaration_ast_node &method_decl,
+                                    const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    // Parameters
-    for (const auto &param : method_decl.get_parameters())
+    //TODO: Handle inner scopes
+    for (auto &var_decl : method_decl.get_method_scope().get_local_variables())
     {
-        auto &method_scope = method_symbol.get_scope();
-
-        method_scope.add_variable(
-            param->get_name(),
-            std::make_unique<codesh::semantic_analyzer::local_variable_symbol>(
-                &method_scope,
-                param->get_type()->clone()
-            )
-        );
+        method_symbol.get_method_scope().add_variable(*var_decl);
     }
 }
 
@@ -78,9 +74,26 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
 
     for (const auto &param_node : method_decl.get_parameters())
     {
-        result.push_back(param_node->get_type()->clone());
+        result.push_back(param_node.get().get_type()->clone());
     }
 
     return result;
 }
 
+void collect_inner_scopes(codesh::semantic_analyzer::method_symbol &method_symbol,
+        const codesh::ast::method::method_scope_ast_node &current_scope_node,
+        codesh::semantic_analyzer::method_scope_symbol &current_scope_symbol)
+{
+    for (const auto &inner_scope_node : current_scope_node.get_method_scopes())
+    {
+        auto &inner_scope_symbol = current_scope_symbol.add_inner_scope(
+            method_symbol.create_method_scope(current_scope_symbol, *inner_scope_node)
+        );
+
+        // Recursively collect even more inner scopes
+        for (const auto &inner_inner_scope : inner_scope_node->get_method_scopes())
+        {
+            collect_inner_scopes(method_symbol, *inner_inner_scope, inner_scope_symbol);
+        }
+    }
+}

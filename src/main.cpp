@@ -6,7 +6,6 @@
 #include "output/jvm_target/class_file_writer.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
-#include "semantic_analyzer/symbol_table/symbol_table.h"
 
 #include <filesystem>
 #include <fstream>

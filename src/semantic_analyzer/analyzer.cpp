@@ -4,13 +4,13 @@
 #include "../blasphemy/blasphemy_consumer.h"
 #include "../parser/ast/method/operation/return_ast_node.h"
 #include "../parser/ast/method/operation/super_call_ast_node.h"
+#include "../parser/ast/type/custom_type_ast_node.h"
 #include "../parser/ast/type/primitive_type_ast_node.h"
 #include "../parser/ast/type_declaration/attributes_ast_node.h"
 #include "../parser/ast/type_declaration/class_declaration_ast_node.h"
-#include "../parser/ast/type/custom_type_ast_node.h"
 #include "builtins.h"
-#include "method_call/resolve.h"
 #include "semantic_context.h"
+#include "statement/resolve.h"
 #include "symbol_table/symbol.h"
 #include "type_decl/collect.h"
 #include "type_decl/resolve.h"
@@ -71,10 +71,16 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
 
     //TODO: Iterate over each and every country, then INSIDE do the following:
-    type_declaration::collect(context,country);
-    type_declaration::resolve(context, country);
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::collect(context, *type_decl, country);
+    }
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        type_declaration::resolve(context, *type_decl, country);
+    }
 
-    // Only after resolving all methods should we resolve all methods' bodies:
+    // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);
 
 
@@ -93,12 +99,17 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
         {
             const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
 
-            for (const auto &statement : method_decl->get_body())
+            //TODO: Handle multiple scopes
+            const codesh::ast::method::method_scope_ast_node &method_scope = method_decl->get_method_scope();
+
+            for (const auto &stmnt : method_scope.get_body())
             {
-                if (const auto method_call = dynamic_cast<codesh::ast::method::operation::method_call_ast_node *>(statement.get()))
-                {
-                    codesh::semantic_analyzer::method_call::resolve(method_context, *method_call, method_decl->get_resolved());
-                }
+                codesh::semantic_analyzer::statement::resolve(
+                    method_context,
+                    *stmnt,
+                    method_decl->get_resolved(),
+                    method_scope.get_resolved()
+                );
             }
         }
     }
@@ -153,14 +164,15 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
 
         for (const auto constructor : class_decl->get_constructors())
         {
-            const auto &body = constructor->get_body();
+            auto &scope = constructor->get_method_scope();
+            const auto &body = scope.get_body();
 
             // Only add super calls to those who lack it
             //TODO: Also filter "this" calls
             if (!body.empty() && dynamic_cast<const codesh::ast::method::operation::super_call_ast_node *>(body.front().get()))
                 continue;
 
-            constructor->get_body().emplace_back(
+            scope.push_front_statement(
                 std::make_unique<codesh::ast::method::operation::super_call_ast_node>()
             );
         }
@@ -184,13 +196,14 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
                 continue;
 
 
-            const auto &body = method->get_body();
+            auto &scope = method->get_method_scope();
+            const auto &body = scope.get_body();
 
             //TODO: This SHOULD check all PATHS, not the last line alone.
             if (!body.empty() && dynamic_cast<const codesh::ast::method::operation::return_ast_node *>(body.front().get()))
                 continue;
 
-            method->get_body().emplace_back(
+            scope.add_statement(
                 std::make_unique<codesh::ast::method::operation::return_ast_node>()
             );
         }

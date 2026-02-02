@@ -56,10 +56,11 @@ enum class token_group : int
     OPERATOR_MULTIPLICATION, // ויוכפל
     OPERATOR_DIVISION, // ויחולק
     OPERATOR_MODULO, // ויושרה
+    OPERATOR_MINUS, // ויחזק את־לב
     OPERATOR_BY, // פי־
 
-    OPERATOR_ADDITION_ASSIGNMENT, //ויסף
-    OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר
+    OPERATOR_ADDITION_ASSIGNMENT, // ויסף ל־
+    OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר מן
     OPERATOR_MULTIPLICATION_ASSIGNMENT, // ויכפל
     OPERATOR_DIVISION_ASSIGNMENT, // ויחלק
     OPERATOR_MODULO_ASSIGNMENT, // וישרה
@@ -87,7 +88,7 @@ enum class token_group : int
 
     KEYWORD_IF, // אם־
     KEYWORD_ELSE, // אחרת
-    KEYWORD_IF_ELSE, // אם־אחרת
+    KEYWORD_ELSE_IF, // אם־אחרת
     KEYWORD_SWITCH, // ויחלוק על
     KEYWORD_CASE, // כאשר
     KEYWORD_DEFAULT, // באין צדיק
@@ -99,9 +100,9 @@ enum class token_group : int
     OPERATOR_EQUALS, // שווה
     OPERATOR_NOT_EQUALS, // אינו־שווה
     OPERATOR_GREATER, // גדול
-    OPERATOR_GREATER_EQUAL, // גדול־ושווה
+    OPERATOR_GREATER_EQUALS, // גדול־ושווה
     OPERATOR_LESS, // קטן
-    OPERATOR_LESS_EQUAL, // קטן־ושווה
+    OPERATOR_LESS_EQUALS, // קטן־ושווה
     OPERATOR_AGAINST, // לנגד
     OPERATOR_AND, // וגם
     OPERATOR_OR, // או

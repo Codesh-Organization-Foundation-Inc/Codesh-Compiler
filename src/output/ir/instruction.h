@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <optional>
 #include <vector>
 
 namespace codesh::output::jvm_target
@@ -24,13 +25,7 @@ enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
 
-    I_CONST_M1 = 0x02,
-    I_CONST_0,
-    I_CONST_1,
-    I_CONST_2,
-    I_CONST_3,
-    I_CONST_4,
-    I_CONST_5,
+    I_CONST_M1 = 0x02, // Loads -1 onto the stack
 
     B_IPUSH = 0x10,
     S_IPUSH, // >255
@@ -38,35 +33,10 @@ enum class opcode : unsigned char
     LDC = 0x12,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
-    L_LOAD, // Loads a long variable from the local variable table at the specified index
-    F_LOAD, // Loads a float variable from the local variable table at the specified index
-    D_LOAD, // Loads a double variable from the local variable table at the specified index
-    A_LOAD, // Loads a reference variable from the local variable table at the specified index
+    I_STORE = 0x36, // Stores an int value into variable #index
 
-    I_LOAD_0 = 0x1A, // Loads an integer variable from the local variable table at index 0
-    I_LOAD_1, // Loads an integer variable from the local variable table at index 1
-    I_LOAD_2, // Loads an integer variable from the local variable table at index 2
-    I_LOAD_3, // Loads an integer variable from the local variable table at index 3
-
-    L_LOAD_0, // Loads a long variable from the local variable table at index 0
-    L_LOAD_1, // Loads a long variable from the local variable table at index 1
-    L_LOAD_2, // Loads a long variable from the local variable table at index 2
-    L_LOAD_3, // Loads a long variable from the local variable table at index 3
-
-    F_LOAD_0, // Loads a float variable from the local variable table at index 0
-    F_LOAD_1, // Loads a float variable from the local variable table at index 1
-    F_LOAD_2, // Loads a float variable from the local variable table at index 2
-    F_LOAD_3, // Loads a float variable from the local variable table at index 3
-
-    D_LOAD_0, // Loads a double variable from the local variable table at index 0
-    D_LOAD_1, // Loads a double variable from the local variable table at index 1
-    D_LOAD_2, // Loads a double variable from the local variable table at index 2
-    D_LOAD_3, // Loads a double variable from the local variable table at index 3
-
-    A_LOAD_0, // Loads a variable from the local variable table at index 0
-    A_LOAD_1, // Loads a variable from the local variable table at index 1
-    A_LOAD_2, // Loads a variable from the local variable table at index 2
-    A_LOAD_3, // Loads a variable from the local variable table at index 3
+    IF_ZERO = 0x99,
+    GOTO = 0xA7,
 
     RETURN = 0xB1,
 
@@ -97,12 +67,41 @@ enum class invokation_type
     VIRTUAL
 };
 
+enum class if_type
+{
+    IS_ZERO,
+    IS_NONZERO,
 
+    IS_NEGATIVE,
+    IS_POSITIVE_OR_ZERO,
+    IS_POSITIVE,
+    IS_NEGATIVE_OR_ZERO,
+
+    ARE_INTS_EQUAL,
+    ARE_INTS_NOT_EQUAL,
+
+    IS_INT_LESSER,
+    IS_INT_GREATER_OR_EQUAL,
+    IS_INT_GREATER,
+    IS_INT_LESSER_OR_EQUAL,
+
+    ARE_REFS_EQUAL,
+    ARE_REFS_NOT_EQUAL,
+};
+
+
+/**
+ * A shorthand for casting an opcode to a byte
+ */
 constexpr unsigned char operator*(const opcode op)
 {
     return static_cast<unsigned char>(op);
 }
 constexpr unsigned char operator*(const instruction_type instr_type)
+{
+    return static_cast<unsigned char>(instr_type);
+}
+constexpr unsigned char operator*(const if_type instr_type)
 {
     return static_cast<unsigned char>(instr_type);
 }
@@ -126,6 +125,8 @@ class instruction
 public:
     virtual ~instruction();
 
+    [[nodiscard]] virtual size_t size() const = 0;
+
     virtual void emit(std::list<instruction_container> &collector) const = 0;
 };
 
@@ -133,24 +134,34 @@ class simple_instruction : public instruction
 {
     const opcode _opcode;
     const int stack_delta;
+    const size_t _size;
 
 public:
-    simple_instruction(opcode _opcode, int stack_delta);
+    simple_instruction(opcode _opcode, int stack_delta, size_t _size);
 
     [[nodiscard]] opcode get_opcode() const;
     [[nodiscard]] int get_stack_delta() const;
 
     void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 };
 
 class typed_instruction : public instruction
 {
+    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
+
     instruction_type type;
+    const unsigned char index;
+
+protected:
+    [[nodiscard]] virtual opcode first_generic() const = 0;
 
 public:
-    explicit typed_instruction(instruction_type type);
+    typed_instruction(instruction_type type, unsigned char index);
 
-    [[nodiscard]] instruction_type get_instruction_type() const;
+    [[nodiscard]] size_t size() const override;
+
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 
@@ -164,17 +175,11 @@ public:
 
 class load_instruction final : public typed_instruction
 {
-    static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
-
-    //TODO: Change to a Local Variable Table index pointer
-    const unsigned char lvt_index;
+protected:
+    [[nodiscard]] opcode first_generic() const override;
 
 public:
-    explicit load_instruction(instruction_type type, unsigned char lvt_index);
-
-    [[nodiscard]] unsigned char get_lvt_index() const;
-
-    void emit(std::list<instruction_container> &collector) const override;
+    explicit load_instruction(instruction_type type, unsigned char local_var_index);
 };
 
 
@@ -195,18 +200,24 @@ class invoke_instruction final : public instruction
 public:
     invoke_instruction(invokation_type type, int method_cp_index, int parameters_count);
 
-    void emit(std::list<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
 
-    [[nodiscard]] int get_method_cp_index() const;
+    void emit(std::list<instruction_container> &collector) const override;
 };
 
 class load_int_constant_instruction final : public instruction
 {
     const int constant;
-    const jvm_target::constant_pool &fallback_constant_pool;
+    const std::optional<int> constant_cpi;
 
 public:
-    load_int_constant_instruction(int constant, const jvm_target::constant_pool &fallback_constant_pool);
+    /**
+     * @param constant
+     * @param constant_cpi The constant pool index of a big integer. If passed, uses this and disregards the constant.
+     */
+    load_int_constant_instruction(int constant, std::optional<int> constant_cpi);
+
+    [[nodiscard]] size_t size() const override;
 
     void emit(std::list<instruction_container> &collector) const override;
 };
@@ -218,7 +229,18 @@ class load_constant_pool_instruction final : public instruction
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
 
+    [[nodiscard]] size_t size() const override;
+
     void emit(std::list<instruction_container> &collector) const override;
+};
+
+class store_in_local_var_instruction final : public typed_instruction
+{
+protected:
+    [[nodiscard]] opcode first_generic() const override;
+
+public:
+    store_in_local_var_instruction(instruction_type type, int local_var_index);
 };
 
 class get_static_instruction final : public instruction
@@ -227,6 +249,38 @@ class get_static_instruction final : public instruction
 
 public:
     explicit get_static_instruction(int constant_pool_index);
+
+    [[nodiscard]] size_t size() const override;
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class goto_instruction : public instruction
+{
+    int jump_offset;
+
+public:
+    explicit goto_instruction(int jump_offset);
+
+    /**
+     * Apply the JVM formula for the jump distance between the current @link jump_offset \endlink
+     * and the set target
+     */
+    void set_target(int target);
+
+
+    [[nodiscard]] size_t size() const override;
+    [[nodiscard]] int get_jump_offset() const;
+
+    void emit(std::list<instruction_container> &collector) const override;
+};
+
+class if_instruction final : public goto_instruction
+{
+    if_type type;
+
+public:
+    if_instruction(if_type type, int jump_offset);
 
     void emit(std::list<instruction_container> &collector) const override;
 };

@@ -17,7 +17,7 @@ namespace trie = codesh::lexer::trie;
 static size_t handle_keyword_match(const std::string &code, codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
 static void on_regex_token(codesh::token *token);
-static void escape_characters(std::string &str, const std::string &word);
+static void escape_characters(std::string &str, std::string_view word);
 
 
 static const boost::regex NEWLINE_REPLACE_RGX(
@@ -192,12 +192,12 @@ static void on_regex_token(codesh::token *token)
         content = content
             .substr(
                 trie::keyword::STRING_OPEN.length(),
-                content.length() - trie::keyword::STRING_END.length()*2
+                content.length() - trie::keyword::STRING_OPEN.length() - trie::keyword::STRING_END.length()
             );
 
         // Replace escaped characters
-        escape_characters(content, std::string(trie::keyword::STRING_END).substr(1));
-        escape_characters(content, std::string(trie::keyword::STRING_NEWLINE).substr(1));
+        escape_characters(content, trie::keyword::STRING_END.substr(1));
+        escape_characters(content, trie::keyword::STRING_NEWLINE.substr(1));
 
         iden_token->set_content(content);
     }
@@ -207,11 +207,13 @@ static void on_regex_token(codesh::token *token)
     }
 }
 
-static void escape_characters(std::string &str, const std::string &word)
+static void escape_characters(std::string &str, const std::string_view word)
 {
+    const std::string _word(word);
+
     codesh::util::replace_all(
         str,
-        std::string(trie::keyword::STRING_ESCAPE) + word,
-        word
+        std::string(trie::keyword::STRING_ESCAPE) + _word,
+        _word
     );
 }

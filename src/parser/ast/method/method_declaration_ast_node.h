@@ -2,12 +2,13 @@
 
 #include "../../../output/jvm_target/class_file_builder.h"
 #include "../impl/ast_node.h"
+#include "../impl/i_constant_pool_emitter.h"
 #include "../impl/i_descriptor_emitter.h"
 #include "../impl/i_resolvable.h"
-#include "../impl/ir_emitting_ast_node.h"
 #include "../local_variable_declaration_ast_node.h"
 #include "../type/type_ast_node.h"
 #include "../type_declaration/attributes_ast_node.h"
+#include "method_scope_ast_node.h"
 
 #include <list>
 #include <memory>
@@ -22,7 +23,7 @@ namespace codesh::ast::method
 {
 
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
-        public impl::i_resolvable<semantic_analyzer::method_symbol>
+        public impl::i_resolvable<semantic_analyzer::method_symbol>, public impl::i_constant_pool_emitter
 {
     const definition::fully_qualified_class_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
@@ -30,14 +31,13 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
     std::unique_ptr<type::type_ast_node> return_type;
-    std::vector<std::unique_ptr<local_variable_declaration_ast_node>> parameters;
+    std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> parameters;
     std::vector<std::reference_wrapper<type::type_ast_node>> parameter_types;
 
     // "throws" declaration
     std::list<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
 
-    std::list<std::unique_ptr<impl::ir_emitting_ast_node>> body;
-    std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
+    method_scope_ast_node method_scope;
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved()
@@ -63,17 +63,20 @@ public:
     void set_return_type(std::unique_ptr<type::type_ast_node> return_type);
 
 
-    [[nodiscard]] std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body();
-    [[nodiscard]] const std::list<std::unique_ptr<impl::ir_emitting_ast_node>> &get_body() const;
+    [[nodiscard]] method_scope_ast_node &get_method_scope();
+    [[nodiscard]] const method_scope_ast_node &get_method_scope() const;
 
-    [[nodiscard]] std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables();
-    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables() const;
+    [[nodiscard]] bool has_inner_scopes() const;
 
-    [[nodiscard]] const std::vector<std::unique_ptr<local_variable_declaration_ast_node>> &get_parameters() const;
+
+    [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);
 
     [[nodiscard]] const std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
     [[nodiscard]] std::list<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+                        output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

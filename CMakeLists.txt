@@ -19,9 +19,9 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
         src/parser/ast/impl/binary_ast_node.h
-        src/parser/ast/method/operation/while_ast_node.cpp
-        src/parser/ast/method/operation/while_ast_node.h
-        src/parser/ast/impl/ir_emitting_ast_node.h
+        src/parser/ast/method/operation/block/while_ast_node.cpp
+        src/parser/ast/method/operation/block/while_ast_node.h
+        src/parser/ast/impl/i_ir_emitter.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/compilation_unit_ast_node.cpp
@@ -162,8 +162,8 @@ add_executable(Codesh_Compiler
         src/defenition/fully_qualified_class_name.h
         src/blasphemy/details.h
         src/blasphemy/details.cpp
-        src/semantic_analyzer/method_call/resolve.cpp
-        src/semantic_analyzer/method_call/resolve.h
+        src/semantic_analyzer/statement/method_call/resolve.cpp
+        src/semantic_analyzer/statement/method_call/resolve.h
         src/blasphemy/blasphemy_consumer.h
         src/blasphemy/blasphemy_consumer.cpp
         src/semantic_analyzer/type_decl/resolve.cpp
@@ -180,6 +180,48 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
+        src/parser/value_parser.cpp
+        src/parser/value_parser.h
+        src/parser/ast/impl/i_constant_pool_emitter.h
+        src/parser/ast/operator/math/minus_operator_ast_node.cpp
+        src/parser/ast/operator/math/minus_operator_ast_node.h
+        src/parser/ast/method/operation/method_operation_ast_node.cpp
+        src/parser/ast/method/operation/method_operation_ast_node.h
+        src/parser/ast/method/method_scope_ast_node.cpp
+        src/parser/ast/method/method_scope_ast_node.h
+        src/parser/ast/impl/i_symbolically_linked.h
+        src/parser/ast/impl/i_symbolically_linked.tpp
+        src/semantic_analyzer/symbol_table/scope.cpp
+        src/semantic_analyzer/symbol_table/scope.tpp
+        src/semantic_analyzer/symbol_table/symbol_type.h
+        src/semantic_analyzer/statement/resolve.cpp
+        src/semantic_analyzer/statement/resolve.h
+        src/semantic_analyzer/statement/resolve.cpp
+        src/semantic_analyzer/statement/variable_reference/resolve.cpp
+        src/semantic_analyzer/statement/variable_reference/resolve.h
+        src/parser/ast/operator/assignment/assign_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/assign_operator_ast_node.h
+        src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/addition_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
+        src/parser/ast/method/operation/block/if_ast_node.cpp
+        src/parser/ast/method/operation/block/if_ast_node.h
+        src/parser/ast/method/operation/block/for_ast_node.cpp
+        src/parser/ast/method/operation/block/for_ast_node.h
+        src/parser/ast/collection/collection_ast_node.h
+        src/parser/ast/collection/range_ast_node.cpp
+        src/parser/ast/collection/range_ast_node.h
+        src/output/jvm_target/defs/stack_map_table.h
+        src/output/jvm_target/defs/stack_map_table.cpp
 )
 
 # sudo dnf install boost-regex boost-devel

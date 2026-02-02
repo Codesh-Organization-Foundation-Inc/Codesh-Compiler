@@ -8,6 +8,7 @@
 #include <string>
 
 #include "../../../output/jvm_target/constant_pool.h"
+#include "../impl/i_constant_pool_emitter.h"
 #include "../impl/i_resolvable.h"
 #include "../method/constructor_declaration_ast_node.h"
 
@@ -24,7 +25,7 @@ namespace codesh::ast::type_decl
 {
 
 class type_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
-    public impl::i_resolvable<semantic_analyzer::type_symbol>
+    public impl::i_resolvable<semantic_analyzer::type_symbol>, public impl::i_constant_pool_emitter
 {
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
@@ -40,6 +41,9 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::list<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
     std::list<method::method_declaration_ast_node *> methods;
     std::list<method::constructor_declaration_ast_node *> constructors;
+
+    static void emit_metadata(const compilation_unit_ast_node &root_node,
+            output::jvm_target::constant_pool &constant_pool);
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
@@ -78,6 +82,9 @@ public:
 
     [[nodiscard]] const std::list<method::constructor_declaration_ast_node *> &get_constructors() const;
     [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+                        output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }
