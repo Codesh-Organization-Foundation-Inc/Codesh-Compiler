@@ -1,4 +1,5 @@
 #pragma once
+
 #include "assignment_operator_ast_node.h"
 
 namespace codesh::ast::op::assignment

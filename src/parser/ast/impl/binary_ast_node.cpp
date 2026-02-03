@@ -1,10 +1,12 @@
 #include "binary_ast_node.h"
 
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/util.h"
 
 codesh::ast::impl::binary_ast_node::binary_ast_node(const blasphemy::code_position code_position,
         std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right) :
-    operator_ast_node(code_position), left(std::move(left)), right(std::move(right))
+    operator_ast_node(code_position), left(std::move(left)), right(std::move(right)),
+    type(std::make_unique<type::primitive_type_ast_node>(code_position, definition::primitive_type::INTEGER))
 {
 }
 

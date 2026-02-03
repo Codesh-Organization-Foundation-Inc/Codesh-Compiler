@@ -78,7 +78,7 @@ codesh::output::jvm_target::stack_map_builder_result codesh::output::jvm_target:
     std::vector<std::unique_ptr<defs::stack_map_frame>> entries;
     size_t total_byte_size = 0;
 
-    auto prev_locals = build_local_verifications_at(0, method_decl);
+    auto prev_locals = build_initial_frame(method_decl);
 
     int prev_pos = -1;
     for (const size_t target : frame_targets)
@@ -137,7 +137,7 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
         {
             const size_t start_pc = producing_node->get_bytecode_start_pc();
             const size_t length = producing_node->get_bytecode_length();
-            is_active = offset >= start_pc && offset < start_pc + length;
+            is_active = offset > start_pc && offset < start_pc + length;
         }
 
         if (is_active)
@@ -216,6 +216,22 @@ std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info> codesh
     }
 
     throw std::invalid_argument("Invalid type provided");
+}
+
+std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info>>
+    codesh::output::jvm_target::stack_map_table_builder::build_initial_frame(
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    // The JVM initial frame is derived from the method descriptor:
+    // It contains only the parameter types.
+    std::vector<std::unique_ptr<defs::verification_type_info>> locals;
+
+    for (const auto &param : method_decl.get_parameters())
+    {
+        locals.push_back(parse_verification_type(*param.get().get_type()));
+    }
+
+    return locals;
 }
 
 static constexpr size_t MAX_STACK_FRAME_DELTA = 3;

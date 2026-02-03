@@ -49,6 +49,9 @@ class stack_map_table_builder
     [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_local_verifications_at(
             size_t offset, const ast::method::method_declaration_ast_node &method_decl) const;
 
+    [[nodiscard]] std::vector<std::unique_ptr<defs::verification_type_info>> build_initial_frame(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
     [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
             const ast::type::type_ast_node &type_node) const;
 
