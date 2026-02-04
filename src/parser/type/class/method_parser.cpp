@@ -49,6 +49,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         {
         case token_group::KEYWORD_FUNCTION_CALL:
             method_scope.add_statement(parse_method_call(tokens));
+            util::ensure_end_op(tokens);
             break;
 
         case token_group::KEYWORD_LET: {
@@ -144,7 +145,6 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
         parse_methods_call_parameters(tokens, *method_call_node);
     }
 
-    util::ensure_end_op(tokens);
     return method_call_node;
 }
 
