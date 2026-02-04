@@ -20,6 +20,7 @@
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
                                codesh::ast::var_reference::value_ast_node &val_node,
@@ -60,7 +61,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     }
 
 
-    //TODO: Move operators to separate resolvers
+    //TODO: Move to separate resolvers
     if (const auto if_node = dynamic_cast<ast::block::if_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
@@ -107,7 +108,28 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         if (return_node->get_return_value() == nullptr)
             return true;
 
-        return resolve_value(context, *return_node->get_return_value(), containing_method, scope);
+        // Perform compatibility check only if we could resolve the return value
+        // Otherwise it's a useless, guaranteed error.
+        if (!resolve_value(context, *return_node->get_return_value(), containing_method, scope))
+            return false;
+
+
+        const auto &return_type = *return_node->get_return_value()->get_type();
+        const auto &expected_return_type = containing_method.get_return_type();
+
+        if (!util::are_types_compatible(return_type, expected_return_type)) {
+            context.blasphemy_consumer(
+                fmt::format(
+                    blasphemy::details::RETURN_TYPE_MISMATCH,
+                    return_type.to_pretty_string(),
+                    expected_return_type.to_pretty_string()
+                ),
+                return_node->get_code_position()
+            );
+            return false;
+        }
+
+        return true;
     }
 
 

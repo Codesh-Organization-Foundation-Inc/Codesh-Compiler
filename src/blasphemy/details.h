@@ -51,7 +51,9 @@ extern const fmt::runtime_format_string<> SYMBOL_NOT_FOUND;
 extern const fmt::runtime_format_string<> TYPE_DOES_NOT_EXIST;
 extern const fmt::runtime_format_string<> METHOD_NOT_FOUND;
 extern const fmt::runtime_format_string<> NOT_A_METHOD;
+//FIXME: Make formatted string
 extern const std::string ARGUMENT_TYPE_MISMATCH;
+extern const fmt::runtime_format_string<> RETURN_TYPE_MISMATCH;
 extern const fmt::runtime_format_string<> DUPLICATE_TYPE_DECLARATION;
 extern const fmt::runtime_format_string<> DUPLICATE_METHOD_DECLARATION;
 

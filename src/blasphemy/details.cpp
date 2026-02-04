@@ -102,6 +102,9 @@ const rfs_t codesh::blasphemy::details::NOT_A_METHOD = rfs(
 );
 const std::string codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH =
     "סוּג הַמִּנְחוֹת אֵינוֹ תּוֹאֵם לְחוֹתַם הַמַּעֲשֶׂה";
+const rfs_t codesh::blasphemy::details::RETURN_TYPE_MISMATCH = rfs(
+    "סוּג הַהַשָּׁבָה {} אֵינוֹ תּוֹאֵם לְחוֹתַם הַמַּעֲשֶׂה {}"
+);
 const rfs_t codesh::blasphemy::details::DUPLICATE_TYPE_DECLARATION = rfs(
     "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד"
 );
