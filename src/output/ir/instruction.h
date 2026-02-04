@@ -42,6 +42,8 @@ enum class opcode : unsigned char
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index
 
+    I_RETURN = 0xAC, // Returns an int from a method
+
     IF_ZERO = 0x99,
     GOTO = 0xA7,
 
@@ -190,11 +192,18 @@ public:
 };
 
 
-//TODO: Make typed version
 class return_instruction final : public simple_instruction
 {
 public:
+    /**
+     * Void return
+     */
     return_instruction();
+
+    /**
+     * Typed return (ireturn, lreturn, freturn, dreturn, areturn)
+     */
+    explicit return_instruction(instruction_type type);
 };
 
 
