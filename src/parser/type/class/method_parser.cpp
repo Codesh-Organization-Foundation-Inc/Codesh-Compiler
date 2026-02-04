@@ -2,16 +2,17 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "fmt/format.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/operation/block/if_ast_node.h"
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/type/type_parser.h"
 #include "parser/util.h"
 #include "parser/value_parser.h"
-#include "parser/type/type_parser.h"
-#include "fmt/format.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
@@ -78,6 +79,24 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         case token_group::KEYWORD_FOR:
             method_scope.add_statement(parse_for_statement(tokens, method_scope));
             break;
+
+        case token_group::KEYWORD_RETURN:
+            const auto return_pos = tokens.front()->get_code_position();
+            tokens.pop();
+
+            auto return_value = parse_value(tokens);
+
+            util::ensure_end_op(tokens);
+
+            method_scope.add_statement(
+                std::make_unique<ast::method::operation::return_ast_node>(
+                    return_pos,
+                    std::move(return_value)
+                )
+            );
+
+            method_scope.mark_end();
+            return;
 
         case token_group::SCOPE_END:
             tokens.pop();
