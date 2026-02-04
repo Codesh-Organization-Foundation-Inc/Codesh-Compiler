@@ -25,7 +25,7 @@ public:
     virtual ~token();
 
     [[nodiscard]] static std::unique_ptr<token> from_regex_group_id(blasphemy::code_position code_position,
-            int group_id, const std::string &content);
+            int group_id, const std::u16string &content);
 
 
     [[nodiscard]] blasphemy::code_position get_code_position() const;
