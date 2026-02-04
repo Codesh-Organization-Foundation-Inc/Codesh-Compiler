@@ -50,16 +50,5 @@ enum class var_decl_assignment_policy
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
 > parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens, var_decl_assignment_policy assignment_policy);
 
-std::unique_ptr<ast::block::if_ast_node> parse_if_statement(
-    std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_scope_ast_node &method_scope);
-
-std::unique_ptr<ast::block::while_ast_node> parse_while_statement(
-    std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_scope_ast_node &method_scope);
-
-std::unique_ptr<ast::block::for_ast_node> parse_for_statement(
-    std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_scope_ast_node &method_scope);
 
 }
