@@ -229,6 +229,8 @@ add_executable(Codesh_Compiler
         src/output/jvm_target/defs/stack_map_table.cpp
         src/output/ir/condition_block_builder.h
         src/output/ir/condition_block_builder.cpp
+        src/parser/ast/operator/boolean/boolean_binary_ast_node.cpp
+        src/parser/ast/operator/boolean/boolean_binary_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
