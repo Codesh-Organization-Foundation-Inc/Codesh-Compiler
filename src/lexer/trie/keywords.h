@@ -15,6 +15,9 @@ namespace keyword
 {
 constexpr std::u16string MULTILINE_COMMENT_END = u"ויחדל:";
 
+// This is only used in blasphemy messages
+constexpr std::string TYPE_VOID = "תֹּהוּ";
+
 // These are not UTF-16 as this is used for post-processing the returned string.
 // The returned string is in UTF-8.
 constexpr std::string_view STRING_OPEN = "ויקרא ";

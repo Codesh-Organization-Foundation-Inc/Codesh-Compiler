@@ -96,6 +96,9 @@ std::string codesh::ast::type::primitive_type_ast_node::to_pretty_string() const
     case definition::primitive_type::BOOLEAN:
         return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_BOOLEAN);
 
+    case definition::primitive_type::VOID:
+        return lexer::trie::keyword::TYPE_VOID;
+
     default:
         throw std::runtime_error("Cannot pretty print the current type");
     }
