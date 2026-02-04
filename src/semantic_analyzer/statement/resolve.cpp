@@ -16,6 +16,7 @@
 #include "parser/ast/method/operation/block/if_ast_node.h"
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -99,6 +100,14 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         all_succeed &= resolve_scope(context, containing_method, for_node->get_body_scope());
         all_succeed &= is_collection(for_node->get_collection());
         return all_succeed;
+    }
+
+    if (const auto return_node = dynamic_cast<ast::method::operation::return_ast_node *>(&stmnt))
+    {
+        if (return_node->get_return_value() == nullptr)
+            return true;
+
+        return resolve_value(context, *return_node->get_return_value(), containing_method, scope);
     }
 
 
