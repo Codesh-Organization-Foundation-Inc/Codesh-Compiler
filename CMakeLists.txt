@@ -246,9 +246,26 @@ target_link_libraries(Codesh_Compiler
         icudata
 )
 
-# fmt
+
 include(FetchContent)
 
+
+# utfcpp
+# Declare utfcpp content
+FetchContent_Declare(
+        utfcpp
+        GIT_REPOSITORY https://github.com/nemtrif/utfcpp.git
+        GIT_TAG        origin/master
+        GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(utfcpp)
+
+target_include_directories(Codesh_Compiler PRIVATE
+        ${utfcpp_SOURCE_DIR}/source
+)
+
+# fmt
 FetchContent_Declare(
         fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git
