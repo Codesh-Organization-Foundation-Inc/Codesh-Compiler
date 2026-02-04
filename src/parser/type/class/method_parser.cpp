@@ -97,7 +97,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             );
 
             method_scope.mark_end(); // Todo: does this count as scope end?
-            return;
+            break;
         }
 
         case token_group::SCOPE_END:
