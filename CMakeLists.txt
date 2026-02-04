@@ -227,6 +227,8 @@ add_executable(Codesh_Compiler
         src/parser/ast/collection/range_ast_node.h
         src/output/jvm_target/defs/stack_map_table.h
         src/output/jvm_target/defs/stack_map_table.cpp
+        src/output/ir/condition_block_builder.h
+        src/output/ir/condition_block_builder.cpp
         src/parser/ast/operator/boolean/boolean_binary_ast_node.cpp
         src/parser/ast/operator/boolean/boolean_binary_ast_node.h
 )
@@ -246,9 +248,26 @@ target_link_libraries(Codesh_Compiler
         icudata
 )
 
-# fmt
+
 include(FetchContent)
 
+
+# utfcpp
+# Declare utfcpp content
+FetchContent_Declare(
+        utfcpp
+        GIT_REPOSITORY https://github.com/nemtrif/utfcpp.git
+        GIT_TAG        origin/master
+        GIT_SHALLOW    TRUE
+)
+
+FetchContent_MakeAvailable(utfcpp)
+
+target_include_directories(Codesh_Compiler PRIVATE
+        ${utfcpp_SOURCE_DIR}/source
+)
+
+# fmt
 FetchContent_Declare(
         fmt
         GIT_REPOSITORY https://github.com/fmtlib/fmt.git

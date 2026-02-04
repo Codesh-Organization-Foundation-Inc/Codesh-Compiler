@@ -11,7 +11,7 @@ static std::unique_ptr<const codesh::lexer::trie::trie_node> create_language_tri
     {
         codesh::lexer::trie::trie_node *current = root;
 
-        for (const char keyword_char : keyword.keyword)
+        for (const auto keyword_char : keyword.keyword)
         {
             current = &current->get_or_create_child(keyword_char);
         }

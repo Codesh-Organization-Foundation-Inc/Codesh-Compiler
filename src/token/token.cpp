@@ -2,6 +2,7 @@
 
 #include "lexer/regex.h"
 
+#include <utf8/checked.h>
 #include <utility>
 
 using codesh::token_group;
@@ -32,14 +33,15 @@ codesh::token::~token() = default;
 
 
 std::unique_ptr<codesh::token> codesh::token::from_regex_group_id(blasphemy::code_position code_position,
-        const int group_id, const std::string &content)
+        const int group_id, const std::u16string &content)
 {
     const token_group group = lexer::token_group_from_regex_id(group_id);
 
     switch (const token_type type = get_token_type(group))
     {
     case token_type::IDENTIFIER:
-        return std::make_unique<identifier_token>(code_position, group, content);
+        // Convert the contents back to UTF-8 as we don't really need it except for lexing.
+        return std::make_unique<identifier_token>(code_position, group, utf8::utf16to8(content));
 
     default:
         return std::make_unique<token>(code_position, type, group);
