@@ -28,8 +28,8 @@ namespace codesh::parser
 
 void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method::method_scope_ast_node &method_scope);
 
-[[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_methods_call(
-    std::queue<std::unique_ptr<token>> &tokens);
+[[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_method_call(
+        std::queue<std::unique_ptr<token>> &tokens);
 
 enum class var_decl_assignment_policy
 {

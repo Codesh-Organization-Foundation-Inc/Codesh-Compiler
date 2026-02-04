@@ -48,7 +48,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
-            method_scope.add_statement(parse_methods_call(tokens));
+            method_scope.add_statement(parse_method_call(tokens));
             break;
 
         case token_group::KEYWORD_LET: {
@@ -129,7 +129,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         blasphemy::blasphemy_type::SYNTAX, method_scope.get_code_position());
 }
 
-std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
+std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_method_call(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     auto call_pos = tokens.front()->get_code_position();

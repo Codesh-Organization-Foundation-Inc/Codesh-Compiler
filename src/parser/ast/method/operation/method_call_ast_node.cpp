@@ -12,6 +12,12 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
     return resolved_symbol;
 }
 
+codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
+        const blasphemy::code_position code_position) :
+    value_ast_node(code_position)
+{
+}
+
 void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
 {
     resolved_symbol.emplace(symbol);
@@ -32,6 +38,11 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     const
 {
     return name;
+}
+
+codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
+{
+    return &get_resolved().get_return_type();
 }
 
 std::string codesh::ast::method::operation::method_call_ast_node::generate_descriptor(const bool resolved) const
