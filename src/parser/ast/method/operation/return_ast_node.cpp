@@ -26,6 +26,15 @@ void codesh::ast::method::operation::return_ast_node::set_statement_index(size_t
     }
 }
 
+void codesh::ast::method::operation::return_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
+                                                                     output::jvm_target::constant_pool &constant_pool)
+{
+    if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(return_value.get()))
+    {
+        cp_emitter->emit_constants(root_node, constant_pool);
+    }
+}
+
 void codesh::ast::method::operation::return_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
@@ -36,6 +45,8 @@ void codesh::ast::method::operation::return_ast_node::emit_ir(
     }
     else
     {
+        return_value->emit_ir(containing_block, symbol_table, containing_type_decl);
+
         containing_block.add_instruction(std::make_unique<output::ir::return_instruction>(
             get_opcode_return_type(*return_value->get_type())
         ));
