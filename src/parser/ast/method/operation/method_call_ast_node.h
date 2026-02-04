@@ -31,6 +31,8 @@ class method_call_ast_node final : public var_reference::value_ast_node,
 
     std::deque<std::unique_ptr<value_ast_node>> arguments;
 
+    static size_t determine_stack_delta(const type::type_ast_node &type);
+
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
         override;
