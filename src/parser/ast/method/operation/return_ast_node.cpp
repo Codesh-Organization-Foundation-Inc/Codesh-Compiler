@@ -2,23 +2,19 @@
 
 #include "output/ir/code_block.h"
 
-using namespace codesh::ast::method::operation;
-
-return_ast_node::return_ast_node(
-    blasphemy::code_position code_position,
-    std::unique_ptr<var_reference::value_ast_node> return_value
-)
-    : method_operation_ast_node(code_position),
-      return_value(std::move(return_value))
+codesh::ast::method::operation::return_ast_node::return_ast_node(blasphemy::code_position code_position,
+        std::unique_ptr<var_reference::value_ast_node> return_value) :
+    method_operation_ast_node(code_position),
+    return_value(std::move(return_value))
 {
 }
 
-codesh::ast::var_reference::value_ast_node *return_ast_node::get_return_value() const
+codesh::ast::var_reference::value_ast_node *codesh::ast::method::operation::return_ast_node::get_return_value() const
 {
     return return_value.get();
 }
 
-void return_ast_node::set_statement_index(size_t statement_index)
+void codesh::ast::method::operation::return_ast_node::set_statement_index(size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
 
