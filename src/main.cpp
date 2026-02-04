@@ -19,6 +19,8 @@
 #include <utility>
 #include <vector>
 
+#include <utf8.h>
+
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -177,7 +179,10 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
         // LEXING
         const std::string source_file = read_file(source_file_path);
-        auto tokens = codesh::lexer::tokenize_code(source_file);
+        // Convert the string to UTF-8.
+        // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
+        const std::u16string utf16_code = utf8::utf8to16(source_file);
+        auto tokens = codesh::lexer::tokenize_code(utf16_code);
 
         // PARSING
         auto ast = codesh::parser::parse(tokens, source_file_path);

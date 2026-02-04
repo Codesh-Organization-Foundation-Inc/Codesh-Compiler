@@ -13,8 +13,10 @@ extern const std::unordered_map<token_group, std::string> TOKEN_TO_NAME_MAP;
 
 namespace keyword
 {
-constexpr std::string_view MULTILINE_COMMENT_END = "ויחדל:";
+constexpr std::u16string MULTILINE_COMMENT_END = u"ויחדל:";
 
+// These are not UTF-16 as this is used for post-processing the returned string.
+// The returned string is in UTF-8.
 constexpr std::string_view STRING_OPEN = "ויקרא ";
 constexpr std::string_view STRING_END = " לאמר";
 
