@@ -11,13 +11,13 @@ class return_ast_node : public method_operation_ast_node
 {
     std::unique_ptr<var_reference::value_ast_node> return_value;
 
+    static output::ir::instruction_type get_opcode_return_type(const type::type_ast_node &return_type);
+
 public:
     using method_operation_ast_node::method_operation_ast_node;
 
-    return_ast_node(
-        blasphemy::code_position code_position,
-        std::unique_ptr<var_reference::value_ast_node> return_value
-    );
+    return_ast_node(blasphemy::code_position code_position,
+            std::unique_ptr<var_reference::value_ast_node> return_value);
 
     [[nodiscard]] var_reference::value_ast_node *get_return_value() const;
 

@@ -199,10 +199,6 @@ public:
      * Void return
      */
     return_instruction();
-
-    /**
-     * Typed return (ireturn, lreturn, freturn, dreturn, areturn)
-     */
     explicit return_instruction(instruction_type type);
 };
 
