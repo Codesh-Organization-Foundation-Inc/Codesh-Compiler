@@ -81,6 +81,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_RETURN:
+        {
             const auto return_pos = tokens.front()->get_code_position();
             tokens.pop();
 
@@ -95,13 +96,15 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
                 )
             );
 
-            method_scope.mark_end();
+            method_scope.mark_end(); // Todo: does this count as scope end?
             return;
+        }
 
         case token_group::SCOPE_END:
             tokens.pop();
             method_scope.mark_end();
             return;
+
 
         default: {
             const auto token_name = util::get_token_display_name(*tokens.front());
