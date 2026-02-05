@@ -147,11 +147,11 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
 
     for (const auto &arg : method_call_node.get_arguments())
     {
-        if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
+        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg.get()))
         {
             all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
-                *var_ref,
+                *stmnt,
                 containing_method,
                 scope
             );
