@@ -15,11 +15,3 @@ codesh::ast::type::type_ast_node *codesh::ast::op::boolean_binary_ast_node::get_
 {
     return type.get();
 }
-
-void codesh::ast::op::boolean_binary_ast_node::emit_ir(
-        output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-        const type_decl::type_declaration_ast_node &containing_type_decl) const
-{
-    get_left().emit_ir(containing_block, symbol_table, containing_type_decl);
-    get_right().emit_ir(containing_block, symbol_table, containing_type_decl);
-}

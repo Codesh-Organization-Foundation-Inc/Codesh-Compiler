@@ -11,8 +11,6 @@ namespace codesh::ast::impl
 
 class unary_ast_node : public operator_ast_node, i_constant_pool_emitter
 {
-    std::unique_ptr<type::type_ast_node> type;
-    //FIXME: Remove
     std::unique_ptr<value_ast_node> child;
 
 protected:
@@ -21,8 +19,6 @@ protected:
 public:
     [[nodiscard]] value_ast_node &get_child() const;
 
-    //FIXME: THIS SHOULD NOT EXIST!!!
-    // Each child should implement its own.
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
     void set_statement_index(size_t statement_index) override;
@@ -30,6 +26,9 @@ public:
     //TODO: Each node should specify this for THEMSELVES!!! This default should NOT exist
     [[nodiscard]] bool is_value_valid() const override;
 
+
+    void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+             const type_decl::type_declaration_ast_node &containing_type_decl) const override;
 
     void emit_constants(const compilation_unit_ast_node &root_node,
             output::jvm_target::constant_pool &constant_pool) override;

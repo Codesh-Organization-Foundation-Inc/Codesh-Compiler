@@ -5,7 +5,6 @@
 codesh::ast::impl::unary_ast_node::unary_ast_node(const blasphemy::code_position code_position,
         std::unique_ptr<value_ast_node> child) :
     operator_ast_node(code_position),
-    type(std::make_unique<type::primitive_type_ast_node>(code_position, definition::primitive_type::INTEGER)),
     child(std::move(child))
 {
 }
@@ -17,7 +16,7 @@ codesh::ast::var_reference::value_ast_node &codesh::ast::impl::unary_ast_node::g
 
 codesh::ast::type::type_ast_node *codesh::ast::impl::unary_ast_node::get_type() const
 {
-    return this->type.get();
+    return child->get_type();
 }
 
 void codesh::ast::impl::unary_ast_node::set_statement_index(const size_t statement_index)
@@ -29,6 +28,13 @@ void codesh::ast::impl::unary_ast_node::set_statement_index(const size_t stateme
 bool codesh::ast::impl::unary_ast_node::is_value_valid() const
 {
     return true;
+}
+
+void codesh::ast::impl::unary_ast_node::emit_ir(output::ir::code_block &containing_block,
+                                                const semantic_analyzer::symbol_table &symbol_table,
+                                                const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    child->emit_ir(containing_block, symbol_table, containing_type_decl);
 }
 
 void codesh::ast::impl::unary_ast_node::emit_constants(const compilation_unit_ast_node &root_node,

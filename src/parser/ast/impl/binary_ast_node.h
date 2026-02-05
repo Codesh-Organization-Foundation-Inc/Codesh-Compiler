@@ -14,9 +14,6 @@ class binary_ast_node : public operator_ast_node, public i_constant_pool_emitter
     const std::unique_ptr<value_ast_node> left;
     const std::unique_ptr<value_ast_node> right;
 
-    //FIXME: REMOVE THIS!!
-    const std::unique_ptr<type::type_ast_node> type;
-
 protected:
     binary_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
             std::unique_ptr<value_ast_node> right);
@@ -31,10 +28,11 @@ public:
     [[nodiscard]] bool is_value_valid() const override;
 
 
-    // FIXME: REMOVE THIS!!
-    // Each node should set the type for itself.
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
+
+    void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+             const type_decl::type_declaration_ast_node &containing_type_decl) const override;
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

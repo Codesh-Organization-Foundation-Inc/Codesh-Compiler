@@ -5,8 +5,7 @@
 
 codesh::ast::impl::binary_ast_node::binary_ast_node(const blasphemy::code_position code_position,
         std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right) :
-    operator_ast_node(code_position), left(std::move(left)), right(std::move(right)),
-    type(std::make_unique<type::primitive_type_ast_node>(code_position, definition::primitive_type::INTEGER))
+    operator_ast_node(code_position), left(std::move(left)), right(std::move(right))
 {
 }
 
@@ -34,8 +33,19 @@ bool codesh::ast::impl::binary_ast_node::is_value_valid() const
 
 codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const
 {
-    return this->type.get();
+    //TODO: Add auto casting logic
+    // For now assume the same type
+    return left->get_type();
 }
+
+void codesh::ast::impl::binary_ast_node::emit_ir(output::ir::code_block &containing_block,
+                                                 const semantic_analyzer::symbol_table &symbol_table,
+                                                 const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    get_left().emit_ir(containing_block, symbol_table, containing_type_decl);
+    get_right().emit_ir(containing_block, symbol_table, containing_type_decl);
+}
+
 void codesh::ast::impl::binary_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                                         output::jvm_target::constant_pool &constant_pool)
 {
