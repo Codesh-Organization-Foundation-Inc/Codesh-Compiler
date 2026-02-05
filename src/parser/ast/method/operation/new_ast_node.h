@@ -20,10 +20,9 @@ public:
     [[nodiscard]] type::custom_type_ast_node &get_constructed_type();
     [[nodiscard]] const type::custom_type_ast_node &get_constructed_type() const;
 
-    void emit_ir(
-            output::ir::code_block &containing_block,
-            const semantic_analyzer::symbol_table &symbol_table,
-            const type_decl::type_declaration_ast_node &containing_type_decl
+    void emit_ir(output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl
     ) const override;
 };
 
