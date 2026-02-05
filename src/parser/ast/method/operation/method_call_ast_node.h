@@ -21,7 +21,7 @@ class method_symbol;
 namespace codesh::ast::method::operation
 {
 
-class method_call_ast_node final : public var_reference::value_ast_node,
+class method_call_ast_node : public var_reference::value_ast_node,
     public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
     public impl::i_descriptor_emitter
