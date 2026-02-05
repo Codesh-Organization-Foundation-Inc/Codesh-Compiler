@@ -27,6 +27,7 @@ enum class token_group : int
     KEYWORD_RETURN, // וישב
 
     KEYWORD_METHOD, // מעשה
+    KEYWORD_CONSTRUCTOR, // בריאה
     KEYWORD_FUNCTION_CALL, // ויעש
     KEYWORD_TAKES, // ויקח
 

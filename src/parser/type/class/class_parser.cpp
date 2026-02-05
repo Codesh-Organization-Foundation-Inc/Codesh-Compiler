@@ -11,6 +11,7 @@
 
 #include "method_parser.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -21,6 +22,9 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         ast::type_decl::class_declaration_ast_node *class_node);
 
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
+        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+
+static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
@@ -80,10 +84,18 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             {
             case codesh::token_group::KEYWORD_METHOD:
             {
-                class_node->add_method(
-                    parse_method_signature(let_pos, tokens)
-                );
-
+                if (tokens.size() > 1 && parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CONSTRUCTOR))
+                {
+                    class_node->add_method(
+                        parse_constructor_signature(let_pos, tokens)
+                    );
+                }
+                else
+                {
+                    class_node->add_method(
+                        parse_method_signature(let_pos, tokens)
+                    );
+                }
                 break;
             }
             case codesh::token_group::KEYWORD_CLASS:
@@ -229,4 +241,58 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     parser::parse_method_scope(tokens, method_node->get_method_scope());
 
     return method_node;
+}
+
+static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
+        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+
+    auto constructor_node = std::make_unique<ast::method::constructor_declaration_ast_node>(
+        code_position
+    );
+
+    // Get attributes
+    constructor_node->set_attributes(parser::parse_modifiers(code_position, tokens));
+
+    std::unique_ptr<codesh::token> arg_declaration_token;
+
+    while (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_TAKES, arg_declaration_token))
+    {
+        // Parse parameter type
+        std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
+
+        // ושמו
+        if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::NO_KEYWORD_NAME,
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                arg_declaration_token->get_code_position()
+            );
+        }
+
+        // * (the name)
+        const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
+
+        auto param = std::make_unique<ast::local_variable_declaration_ast_node>(
+            arg_declaration_token->get_code_position()
+        );
+        param->set_type(std::move(param_type));
+        param->set_name(token_name->get_content());
+
+        constructor_node->add_parameter(std::move(param));
+    }
+
+    if (!parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_SCOPE_BEGIN,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
+    }
+
+    parser::parse_method_scope(tokens, constructor_node->get_method_scope());
+
+    return constructor_node;
 }
