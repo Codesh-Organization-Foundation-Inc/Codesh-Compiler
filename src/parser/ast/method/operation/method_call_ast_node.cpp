@@ -1,15 +1,23 @@
 #include "method_call_ast_node.h"
 
-#include "output/ir/code_block.h"
-#include "semantic_analyzer/symbol_table/symbol.h"
-#include "parser/ast/var_reference/evaluable_ast_node.h"
-#include "parser/ast/method/util.h"
 #include "fmt/xchar.h"
+#include "output/ir/code_block.h"
+#include "parser/ast/method/util.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
 {
     return resolved_symbol;
+}
+
+codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
+        const blasphemy::code_position code_position) :
+    value_ast_node(code_position)
+{
 }
 
 void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
@@ -32,6 +40,11 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     const
 {
     return name;
+}
+
+codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
+{
+    return &get_resolved().get_return_type();
 }
 
 std::string codesh::ast::method::operation::method_call_ast_node::generate_descriptor(const bool resolved) const
@@ -139,4 +152,40 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
         method_cpi,
         arguments.size()
     ));
+
+
+    // If the method call has returned something, we should update the stack delta accordingly.
+    const auto &return_type = method.get_return_type();
+    const auto stack_delta = determine_stack_delta(return_type);
+
+    if (stack_delta != 0)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::stack_size_delta_marker>(stack_delta));
+    }
+}
+
+size_t codesh::ast::method::operation::method_call_ast_node::determine_stack_delta(const type::type_ast_node &type)
+{
+    if (const auto primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(&type))
+    {
+        switch (primitive_type->get_type())
+        {
+        case definition::primitive_type::VOID:
+            return 0;
+
+        case definition::primitive_type::LONG:
+        case definition::primitive_type::DOUBLE:
+            return 2;
+
+        default:
+            return 1;
+        }
+    }
+
+    if (dynamic_cast<const type::custom_type_ast_node *>(&type))
+    {
+        return 1;
+    }
+
+    throw std::invalid_argument("Unknown type");
 }

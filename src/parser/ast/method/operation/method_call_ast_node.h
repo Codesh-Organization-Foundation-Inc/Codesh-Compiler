@@ -21,7 +21,7 @@ class method_symbol;
 namespace codesh::ast::method::operation
 {
 
-class method_call_ast_node : public method_operation_ast_node,
+class method_call_ast_node final : public var_reference::value_ast_node,
     public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
     public impl::i_descriptor_emitter
@@ -29,14 +29,16 @@ class method_call_ast_node : public method_operation_ast_node,
     definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
-    std::deque<std::unique_ptr<var_reference::value_ast_node>> arguments;
+    std::deque<std::unique_ptr<value_ast_node>> arguments;
+
+    static size_t determine_stack_delta(const type::type_ast_node &type);
 
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
         override;
 
 public:
-    using method_operation_ast_node::method_operation_ast_node;
+    explicit method_call_ast_node(blasphemy::code_position code_position);
 
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
 
@@ -45,12 +47,15 @@ public:
     [[nodiscard]] definition::fully_qualified_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_name &get_fqcn() const;
 
+
+    [[nodiscard]] type::type_ast_node *get_type() const override;
+
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
 
-    [[nodiscard]] const std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments() const;
-    [[nodiscard]] std::deque<std::unique_ptr<var_reference::value_ast_node>> &get_arguments();
+    [[nodiscard]] const std::deque<std::unique_ptr<value_ast_node>> &get_arguments() const;
+    [[nodiscard]] std::deque<std::unique_ptr<value_ast_node>> &get_arguments();
 
     void set_statement_index(size_t statement_index) override;
 

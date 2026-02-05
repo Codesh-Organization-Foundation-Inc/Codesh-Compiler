@@ -147,11 +147,11 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
 
     for (const auto &arg : method_call_node.get_arguments())
     {
-        if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(arg.get()))
+        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg.get()))
         {
             all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
-                *var_ref,
+                *stmnt,
                 containing_method,
                 scope
             );
@@ -193,9 +193,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
     {
-        auto &method = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
+        auto &method_symbol = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        const auto &method_params = method.get_parameter_types();
+        const auto &method_params = method_symbol.get_parameter_types();
         const auto &arguments = method_call.get_arguments();
 
         if (method_params.size() != arguments.size())
@@ -205,7 +205,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         // If they're both 0-args long, then they're a perfect match.
         if (method_params.empty())
         {
-            return method;
+            return method_symbol;
         }
 
 
@@ -222,11 +222,19 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             if (codesh::semantic_analyzer::util::are_types_compatible(*argument_value->get_type(), *method_param_type))
             {
                 //TODO: Consider "best match", don't just return (casting etc.)
-                return method;
+                return method_symbol;
             }
         }
     }
 
-    context.blasphemy_consumer(codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH, method_call.get_code_position());
+    context.blasphemy_consumer(
+        fmt::format(
+            codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH,
+            //TODO: Pretty print argument types
+            "טודו",
+            method_call.get_last_name(false)
+        ),
+        method_call.get_code_position()
+    );
     return std::nullopt;
 }

@@ -193,8 +193,11 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 {
     if (!consuming_check(tokens, token_group::PUNCTUATION_END_OP))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-            blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position());
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_PUNCTUATION_END_OP,
+            blasphemy::blasphemy_type::SYNTAX,
+            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+        );
     }
 }
 
