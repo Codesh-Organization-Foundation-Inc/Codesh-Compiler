@@ -19,3 +19,8 @@ void codesh::ast::op::subtraction_operator_ast_node::emit_ir(
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
 }
+
+codesh::output::ir::operator_type codesh::ast::op::subtraction_operator_ast_node::get_ir_operator_type() const
+{
+    return output::ir::operator_type::SUB;
+}
