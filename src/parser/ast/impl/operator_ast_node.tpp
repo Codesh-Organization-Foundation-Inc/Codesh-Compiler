@@ -1,5 +1,8 @@
 #pragma once
 
+#include "output/ir/code_block.h"
+#include "parser/ast/operator/math/i_math_operator_holder.h"
+
 template <int operands>
 void codesh::ast::impl::operator_ast_node<operands>::set_statement_index(
         const size_t statement_index)
@@ -19,6 +22,14 @@ void codesh::ast::impl::operator_ast_node<operands>::emit_ir(output::ir::code_bl
     for (size_t i = 0; i < operands; ++i)
     {
         children[i]->emit_ir(containing_block, symbol_table, containing_type_decl);
+    }
+
+    if (const auto math_op_holder = dynamic_cast<const op::i_math_operator_holder *>(this))
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::operator_instruction>(
+            get_type()->to_instruction_type(),
+            math_op_holder->get_ir_operator_type()
+        ));
     }
 }
 

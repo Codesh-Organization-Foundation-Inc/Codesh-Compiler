@@ -232,6 +232,7 @@ add_executable(Codesh_Compiler
         src/parser/ast/operator/boolean/boolean_binary_ast_node.cpp
         src/parser/ast/operator/boolean/boolean_binary_ast_node.h
         src/parser/ast/impl/operator_ast_node.tpp
+        src/parser/ast/operator/math/i_math_operator_holder.h
 )
 
 # sudo dnf install boost-regex boost-devel
