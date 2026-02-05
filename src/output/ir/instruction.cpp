@@ -103,6 +103,11 @@ codesh::output::ir::return_instruction::return_instruction() :
 {
 }
 
+codesh::output::ir::return_instruction::return_instruction(const instruction_type type) :
+    simple_instruction(static_cast<opcode>(*opcode::I_RETURN + *type), -1, 1)
+{
+}
+
 codesh::output::ir::invoke_instruction::invoke_instruction(const invokation_type type, const int method_cp_index,
         const int parameters_count) :
     type(type),
