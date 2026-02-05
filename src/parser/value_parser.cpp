@@ -1,5 +1,6 @@
 #include "value_parser.h"
 
+#include "ast/method/operation/new_ast_node.h"
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
@@ -317,6 +318,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         eval_ast_node = parse_method_call(tokens);
         break;
 
+    case token_group::KEYWORD_NEW:
+        return parse_new_operator(tokens);
+
     default: {
         const auto error_pos = tokens.front()->get_code_position();
         const auto token_name = util::get_token_display_name(*tokens.front());
@@ -609,6 +613,60 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     }
     return eval_ast_node;
 }
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse_new_operator(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    const auto new_pos = tokens.front()->get_code_position();
+    tokens.pop();
+
+    auto parsed_type = util::parse_type(tokens);
+
+    auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.get());
+
+    if (!custom_type)
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::INVALID_TYPE_FOR_NEW,
+            blasphemy::blasphemy_type::SEMANTIC,
+            new_pos
+        );
+
+        return nullptr;
+    }
+
+    auto constructed_type = std::unique_ptr<ast::type::custom_type_ast_node>(
+        dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.release()));
+
+    auto new_node = std::make_unique<ast::op::new_ast_node>(
+        new_pos,
+        std::move(constructed_type)
+    );
+
+    if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
+    { //TODO: Can be optimized with the parse_methods_call_parameters func
+        while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
+        {
+            new_node->get_arguments().push_back(parse_value(tokens));
+
+            if (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR))
+                continue;
+
+            if (!util::peeking_check(tokens, token_group::CLOSE_PARENTHESIS))
+            {
+                blasphemy::get_blasphemy_collector().add_blasphemy(
+                    blasphemy::details::UNEXPECTED_TOKEN,
+                    blasphemy::blasphemy_type::SYNTAX,
+                    tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+                );
+            }
+        }
+    }
+
+
+    return new_node;
+}
+
 
 static std::optional<std::pair<
     std::unique_ptr<variable_reference_ast_node>,

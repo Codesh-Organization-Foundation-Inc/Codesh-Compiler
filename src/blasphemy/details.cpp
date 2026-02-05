@@ -65,6 +65,8 @@ const std::string codesh::blasphemy::details::NO_TYPE =
     "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה";
 const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION =
     "נָבוֹא שְׁקָרַי: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
+const std::string codesh::blasphemy::details::INVALID_TYPE_FOR_NEW =
+    "ָבוֹא שְׁקָרַי: צֻּפָּה עצם";
 
 // SEMANTIC
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE =
