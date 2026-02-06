@@ -170,20 +170,29 @@ codesh::output::ir::code_block codesh::output::ir::build_boolean_value_block(
         const semantic_analyzer::symbol_table &symbol_table,
         const ast::type_decl::type_declaration_ast_node &containing_type_decl)
 {
+    code_block temp_block;
+
+    // Before these instructions will come a condition block that, if met, jumps to here - loading 1 to the stack.
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(1, std::nullopt));
+    // Skip the next else case
+    temp_block.add_instruction(std::make_unique<goto_instruction>(1));
+
+    // The if block size must be computed BEFORE adding iconst_0, because the false branch of the
+    // condition should jump TO the iconst_0, not past it.
+    const auto if_block_size = temp_block.size();
+
+    // The else case jumps here:
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(0, std::nullopt));
+
+
     auto condition_block = build_condition_block(
         condition,
-        4, // iconst_1 (1) + goto (3) = 4 bytes to skip on false
+        if_block_size,
         symbol_table,
         containing_type_decl,
         if_type::IS_ZERO
     );
-
-    // True case: fell through the condition check
-    condition_block.add_instruction(std::make_unique<load_int_constant_instruction>(1, std::nullopt));
-    // Skip over the false case (next line)
-    condition_block.add_instruction(std::make_unique<goto_instruction>(1));
-    // False case: jumped here from the condition check
-    condition_block.add_instruction(std::make_unique<load_int_constant_instruction>(0, std::nullopt));
+    condition_block.consume_code_block(std::move(temp_block));
 
     return condition_block;
 }
