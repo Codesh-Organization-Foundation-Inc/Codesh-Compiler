@@ -173,7 +173,7 @@ codesh::output::ir::code_block codesh::output::ir::build_boolean_value_block(
     code_block temp_block;
 
     // Before these instructions will come a condition block that, if met, jumps to here - loading 1 to the stack.
-    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(1, std::nullopt));
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(true, std::nullopt));
     // Skip the next else case
     temp_block.add_instruction(std::make_unique<goto_instruction>(1));
 
@@ -182,7 +182,7 @@ codesh::output::ir::code_block codesh::output::ir::build_boolean_value_block(
     const auto if_block_size = temp_block.size();
 
     // The else case jumps here:
-    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(0, std::nullopt));
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(false, std::nullopt));
 
 
     auto condition_block = build_condition_block(
