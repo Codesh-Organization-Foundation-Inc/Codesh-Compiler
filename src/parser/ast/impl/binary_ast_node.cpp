@@ -5,46 +5,30 @@
 
 codesh::ast::impl::binary_ast_node::binary_ast_node(const blasphemy::code_position code_position,
         std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right) :
-    operator_ast_node(code_position), left(std::move(left)), right(std::move(right)),
-    type(std::make_unique<type::primitive_type_ast_node>(code_position, definition::primitive_type::INTEGER))
+    operator_ast_node(code_position)
 {
+    children[0] = std::move(left);
+    children[1] = std::move(right);
 }
 
 codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::get_left() const
 {
-    return *this->left;
+    return *children[0];
 }
 
 codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::get_right() const
 {
-    return *this->right;
-}
-
-void codesh::ast::impl::binary_ast_node::set_statement_index(const size_t statement_index)
-{
-    value_ast_node::set_statement_index(statement_index);
-    left->set_statement_index(statement_index);
-    right->set_statement_index(statement_index);
+    return *children[1];
 }
 
 bool codesh::ast::impl::binary_ast_node::is_value_valid() const
 {
-    return semantic_analyzer::util::are_types_compatible(*left->get_type(), *right->get_type());
+    return semantic_analyzer::util::are_types_compatible(*get_left().get_type(), *get_right().get_type());
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::impl::binary_ast_node::get_type() const
 {
-    return this->type.get();
-}
-void codesh::ast::impl::binary_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
-                                                        output::jvm_target::constant_pool &constant_pool)
-{
-    if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(left.get()))
-    {
-        constant_emitter->emit_constants(root_node, constant_pool);
-    }
-    if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(right.get()))
-    {
-        constant_emitter->emit_constants(root_node, constant_pool);
-    }
+    //TODO: Add auto casting logic
+    // For now assume the same type
+    return get_left().get_type();
 }

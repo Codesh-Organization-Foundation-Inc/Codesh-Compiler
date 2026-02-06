@@ -13,8 +13,7 @@ std::string codesh::ast::op::division_operator_ast_node::to_pretty_string() cons
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_DIVISION);
 }
 
-void codesh::ast::op::division_operator_ast_node::emit_ir(
-    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-    const type_decl::type_declaration_ast_node &containing_type_decl) const
+codesh::output::ir::operator_type codesh::ast::op::division_operator_ast_node::get_ir_operator_type() const
 {
+    return output::ir::operator_type::DIV;
 }
