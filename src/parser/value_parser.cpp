@@ -622,7 +622,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse
 
     auto parsed_type = util::parse_type(tokens);
 
-    auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.get());
+    const auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.get());
 
     if (!custom_type)
     {
@@ -636,7 +636,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse
     }
 
     auto constructed_type = std::unique_ptr<ast::type::custom_type_ast_node>(
-        dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.release()));
+        dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.release())
+    );
 
     auto new_node = std::make_unique<ast::op::new_ast_node>(
         new_pos,

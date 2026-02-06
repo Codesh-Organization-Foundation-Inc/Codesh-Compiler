@@ -85,7 +85,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             case codesh::token_group::KEYWORD_METHOD:
             {
                 tokens.pop();
-                if (tokens.size() > 1 && parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CONSTRUCTOR))
+                if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CONSTRUCTOR))
                 {
                     class_node->add_method(
                         parse_constructor_signature(let_pos, tokens)
@@ -157,7 +157,6 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-
     // ושמו
     if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
