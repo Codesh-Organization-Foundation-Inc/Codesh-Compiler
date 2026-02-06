@@ -158,7 +158,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     code_attr->attributes.push_back(create_local_variable_table(
         method_decl,
         static_cast<int>(code_attr->code.size()),
-        locals
+        static_cast<int>(method_decl.get_resolved().get_all_local_variables().name_to_var.size())
     ));
 
     if (method_decl.has_inner_scopes())
