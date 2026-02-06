@@ -4,7 +4,6 @@
 #include "output/ir/code_block.h"
 #include "output/jvm_target/constant_pool.h"
 #include "evaluable_ast_node.h"
-#include "variable_reference_ast_node.h"
 
 #include <limits>
 
@@ -47,6 +46,14 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::emit_constants(
             value_cpi = constant_pool.goc_integer_info(value);
         }
     }
+    else if constexpr (std::is_same_v<T, float>)
+    {
+        value_cpi = constant_pool.goc_float_info(value);
+    }
+    else if constexpr (std::is_same_v<T, double>)
+    {
+        value_cpi = constant_pool.goc_double_info(value);
+    }
     else if constexpr (std::is_same_v<T, std::string>)
     {
         value_cpi = constant_pool.goc_string_info(constant_pool.goc_utf8_info(value));
@@ -58,11 +65,15 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &) const
 {
-    if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool>)
+    if constexpr (std::is_same_v<T, int> || std::is_same_v<T, bool> || std::is_same_v<T, char>)
     {
         containing_block.add_instruction(std::make_unique<output::ir::load_int_constant_instruction>(value, value_cpi));
     }
-    else if constexpr (std::is_same_v<T, std::string>)
+    else if constexpr (std::is_same_v<T, double>)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::load_wide_constant_pool_instruction>(*value_cpi));
+    }
+    else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, float>)
     {
         containing_block.add_instruction(std::make_unique<output::ir::load_constant_pool_instruction>(*value_cpi));
     }
