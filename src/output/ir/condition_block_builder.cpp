@@ -7,6 +7,7 @@
 #include "parser/ast/operator/boolean/less_equals_operator_ast_node.h"
 #include "parser/ast/operator/boolean/less_operator_ast_node.h"
 #include "parser/ast/operator/boolean/not_equals_operator_ast_node.h"
+#include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
 
 static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_reference::value_ast_node &condition,
@@ -21,6 +22,22 @@ codesh::output::ir::code_block codesh::output::ir::build_condition_block(
         const if_type if_type)
 {
     code_block condition_block;
+
+    // Handle NOT
+    if (const auto not_cond = dynamic_cast<const ast::op::not_operator_ast_node *>(&condition))
+    {
+        return build_condition_block(
+            not_cond->get_child(),
+            if_block_size,
+            symbol_table,
+            containing_type_decl,
+
+            // Simply revert the if type
+            if_type == if_type::IS_ZERO
+                ? if_type::IS_NONZERO
+                : if_type::IS_ZERO
+        );
+    }
 
     // Handle AND
     if (const auto and_cond = dynamic_cast<const ast::op::and_operator_ast_node *>(&condition))
