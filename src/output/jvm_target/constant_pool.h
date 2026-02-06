@@ -59,6 +59,9 @@ class constant_pool
     static std::unique_ptr<defs::CONSTANT_Utf8_info> utf8_info(const std::string &utf8);
     static std::unique_ptr<defs::CONSTANT_String_info> string_info(int utf8_index);
     static std::unique_ptr<defs::CONSTANT_Integer_info> integer_info(int num);
+    static std::unique_ptr<defs::CONSTANT_Float_info> float_info(float num);
+    static std::unique_ptr<defs::CONSTANT_Long_info> long_info(long long num);
+    static std::unique_ptr<defs::CONSTANT_Double_info> double_info(double num);
 
     static std::unique_ptr<defs::CONSTANT_Methodref_info> methodref_info(int class_index, int name_and_type_index);
     static std::unique_ptr<defs::CONSTANT_NameAndType_info> name_and_type_info(int name_index, int descriptor_index);
@@ -75,6 +78,9 @@ public:
     int goc_utf8_info(const std::string &utf8);
     int goc_string_info(int utf8_index);
     int goc_integer_info(int num);
+    int goc_float_info(float num);
+    int goc_long_info(long long num);
+    int goc_double_info(double num);
 
     int goc_methodref_info(int class_index, int name_and_type_index);
     int goc_name_and_type_info(int name_index, int descriptor_index);
@@ -86,6 +92,9 @@ public:
     [[nodiscard]] int get_utf8_index(const std::string &utf8) const;
     [[nodiscard]] int get_string_index(int utf8_index) const;
     [[nodiscard]] int get_integer_index(int num) const;
+    [[nodiscard]] int get_float_index(float num) const;
+    [[nodiscard]] int get_long_index(long long num) const;
+    [[nodiscard]] int get_double_index(double num) const;
 
     [[nodiscard]] int get_methodref_index(int class_index, int name_and_type_index) const;
     [[nodiscard]] int get_name_and_type_index(int name_index, int descriptor_index) const;
