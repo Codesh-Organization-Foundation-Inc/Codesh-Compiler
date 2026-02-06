@@ -164,3 +164,26 @@ static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_refere
 
     return parent_if_type;
 }
+
+codesh::output::ir::code_block codesh::output::ir::build_boolean_value_block(
+        const ast::var_reference::value_ast_node &condition,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const ast::type_decl::type_declaration_ast_node &containing_type_decl)
+{
+    auto condition_block = build_condition_block(
+        condition,
+        4, // iconst_1 (1) + goto (3) = 4 bytes to skip on false
+        symbol_table,
+        containing_type_decl,
+        if_type::IS_ZERO
+    );
+
+    // True case: fell through the condition check
+    condition_block.add_instruction(std::make_unique<load_int_constant_instruction>(1, std::nullopt));
+    // Skip over the false case (next line)
+    condition_block.add_instruction(std::make_unique<goto_instruction>(1));
+    // False case: jumped here from the condition check
+    condition_block.add_instruction(std::make_unique<load_int_constant_instruction>(0, std::nullopt));
+
+    return condition_block;
+}
