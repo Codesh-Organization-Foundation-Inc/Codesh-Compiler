@@ -2,6 +2,9 @@
 
 #include "lexer/trie/keywords.h"
 #include "output/ir/code_block.h"
+#include "output/ir/condition_block_builder.h"
+#include "parser/ast/operator/boolean/boolean_binary_ast_node.h"
+#include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 codesh::ast::op::assignment::assign_operator_ast_node::assign_operator_ast_node(
@@ -20,7 +23,17 @@ void codesh::ast::op::assignment::assign_operator_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    get_right().emit_ir(containing_block, symbol_table, containing_type_decl);
+    if (dynamic_cast<const boolean_binary_ast_node *>(&get_right())
+        || dynamic_cast<const not_operator_ast_node *>(&get_right()))
+    {
+        containing_block.consume_code_block(output::ir::build_boolean_value_block(
+            get_right(), symbol_table, containing_type_decl
+        ));
+    }
+    else
+    {
+        get_right().emit_ir(containing_block, symbol_table, containing_type_decl);
+    }
 
     const auto &variable_symbol = get_left().get_resolved();
     if (const auto &local_var = dynamic_cast<const semantic_analyzer::local_variable_symbol *>(&variable_symbol))
