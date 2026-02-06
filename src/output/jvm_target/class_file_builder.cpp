@@ -255,8 +255,8 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
 int codesh::output::jvm_target::class_file_builder::get_locals_count(
         const ast::method::method_declaration_ast_node &method_decl)
 {
-    // Local variables
-    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().name_to_var.size();
+    // Local variable slots
+    const size_t local_vars_count = method_decl.get_resolved().get_all_local_variables().slots_used;
     if (local_vars_count > 0xFFFF)
     {
         //TODO: Convert to Codesh error
