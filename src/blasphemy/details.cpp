@@ -35,6 +35,8 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_LET =
     "נָבוֹא שְׁקָרַי: צֻּפָּה ויהי";
 const std::string codesh::blasphemy::details::NO_KEYWORD_NAME =
     "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו";
+const std::string codesh::blasphemy::details::NO_KEYWORD_NAME_OR_CONSTRUCTOR =
+    "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו אוֹ בריאה";
 const std::string codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT =
     "נָבוֹא שְׁקָרַי: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים";
 const std::string codesh::blasphemy::details::NO_CLOSE_PARENTHESIS =
@@ -65,6 +67,8 @@ const std::string codesh::blasphemy::details::NO_TYPE =
     "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה";
 const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION =
     "נָבוֹא שְׁקָרַי: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
+const std::string codesh::blasphemy::details::INVALID_TYPE_FOR_NEW =
+    "ָבוֹא שְׁקָרַי: צֻּפָּה עצם";
 
 // SEMANTIC
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE =

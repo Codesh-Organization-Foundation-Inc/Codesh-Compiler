@@ -22,6 +22,7 @@ extern const std::string NO_IDENTIFIER;
 extern const std::string NO_IMPORT_TYPE;
 extern const std::string NO_KEYWORD_LET;
 extern const std::string NO_KEYWORD_NAME;
+extern const std::string NO_KEYWORD_NAME_OR_CONSTRUCTOR;
 extern const std::string NO_CLOSE_MULTI_COMMENT;
 extern const std::string NO_CLOSE_PARENTHESIS;
 extern const std::string NO_SCOPE_BEGIN;
@@ -37,6 +38,7 @@ extern const std::string NO_TYPE;
 extern const std::string UNEXPECTED_DECLARATION;
 extern const std::string UNEXPECTED_TOKEN;
 extern const std::string EXPECTED_VARIABLE;
+extern const std::string INVALID_TYPE_FOR_NEW;
 
 // SEMANTIC
 extern const std::string UNRECOGNIZED_TYPE;

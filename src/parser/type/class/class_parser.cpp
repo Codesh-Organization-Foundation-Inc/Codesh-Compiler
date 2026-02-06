@@ -11,6 +11,7 @@
 
 #include "method_parser.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -80,10 +81,8 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             {
             case codesh::token_group::KEYWORD_METHOD:
             {
-                class_node->add_method(
-                    parse_method_signature(let_pos, tokens)
-                );
-
+                tokens.pop();
+                class_node->add_method(parse_method_signature(let_pos, tokens));
                 break;
             }
             case codesh::token_group::KEYWORD_CLASS:
@@ -144,52 +143,48 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    tokens.pop();
+    bool is_constructor = false;
 
     // ושמו
     if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_KEYWORD_NAME,
-            codesh::blasphemy::blasphemy_type::SYNTAX, code_position);
-    }
+        is_constructor = parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CONSTRUCTOR);
 
-    // * (the name)
-    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
-
-    auto method_node = std::make_unique<ast::method::method_declaration_ast_node>(
-        code_position,
-        codesh::definition::fully_qualified_name(name_token->get_content())
-    );
-
-    // Get attributes
-    method_node->set_attributes(parser::parse_modifiers(code_position, tokens));
-
-
-    std::unique_ptr<codesh::token> arg_declaration_token;
-    while (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_TAKES, arg_declaration_token))
-    {
-        // Parse parameter type
-        std::unique_ptr<ast::type::type_ast_node> param_type = parser::util::parse_type(tokens);
-
-        // ושמו
-        if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+        if (!is_constructor)
         {
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::NO_KEYWORD_NAME,
+                codesh::blasphemy::details::NO_KEYWORD_NAME_OR_CONSTRUCTOR,
                 codesh::blasphemy::blasphemy_type::SYNTAX,
-                arg_declaration_token->get_code_position()
+                code_position
             );
         }
+    }
 
+
+    std::unique_ptr<ast::method::method_declaration_ast_node> method_node;
+    if (!is_constructor)
+    {
         // * (the name)
-        const std::unique_ptr<codesh::identifier_token> token_name = parser::util::consume_identifier_token(tokens);
+        const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
-        auto param = std::make_unique<ast::local_variable_declaration_ast_node>(
-            arg_declaration_token->get_code_position()
+        method_node = std::make_unique<ast::method::method_declaration_ast_node>(
+            code_position,
+            codesh::definition::fully_qualified_name(name_token->get_content())
         );
-        param->set_type(std::move(param_type));
-        param->set_name(token_name->get_content());
+    }
+    else
+    {
+        method_node = std::make_unique<ast::method::constructor_declaration_ast_node>(code_position);
+    }
 
+
+    // Attributes
+    method_node->set_attributes(parser::parse_modifiers(code_position, tokens));
+
+    // Parameters
+    auto params = parser::parse_parameter_list(tokens);
+    for (auto &param : params)
+    {
         method_node->add_parameter(std::move(param));
     }
 
@@ -200,6 +195,16 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_RETURN))
     {
         method_node->set_return_type(parser::util::parse_type(tokens));
+    }
+    else if (is_constructor)
+    {
+        // Constructors always return void
+        method_node->set_return_type(
+            std::make_unique<ast::type::primitive_type_ast_node>(
+                code_position,
+                codesh::definition::primitive_type::VOID
+            )
+        );
     }
     else
     {
@@ -229,4 +234,40 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     parser::parse_method_scope(tokens, method_node->get_method_scope());
 
     return method_node;
+}
+
+std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> codesh::parser::parse_parameter_list(
+        std::queue<std::unique_ptr<token>> &tokens)
+{
+    std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> results;
+
+    std::unique_ptr<token> arg_declaration_token;
+    while (util::consuming_check(tokens, token_group::KEYWORD_TAKES, arg_declaration_token))
+    {
+        // Parse parameter type
+        std::unique_ptr<ast::type::type_ast_node> param_type = util::parse_type(tokens);
+
+        // ושמו
+        if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_KEYWORD_NAME,
+                blasphemy::blasphemy_type::SYNTAX,
+                arg_declaration_token->get_code_position()
+            );
+        }
+
+        // * (the name)
+        const std::unique_ptr<identifier_token> token_name = util::consume_identifier_token(tokens);
+
+        auto param = std::make_unique<ast::local_variable_declaration_ast_node>(
+            arg_declaration_token->get_code_position()
+        );
+        param->set_type(std::move(param_type));
+        param->set_name(token_name->get_content());
+
+        results.emplace_back(std::move(param));
+    }
+
+    return results;
 }

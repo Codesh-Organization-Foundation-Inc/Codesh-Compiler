@@ -27,6 +27,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_RETURN, u"וישב", word_boundary::BOTH},
 
     {token_group::KEYWORD_METHOD, u"מעשה", word_boundary::BOTH},
+    {token_group::KEYWORD_CONSTRUCTOR, u"בריאה", word_boundary::BOTH},
     {token_group::KEYWORD_FUNCTION_CALL, u"ויעש", word_boundary::BOTH},
     {token_group::KEYWORD_TAKES, u"ויקח", word_boundary::BOTH},
 
