@@ -14,9 +14,6 @@
 #include "parser/util.h"
 #include "parser/value_parser.h"
 
-static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::ast::method::operation::method_call_ast_node &method_call);
-
 static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
@@ -364,27 +361,27 @@ std::pair<
     return {std::move(variable_decl_ast_node), std::move(val_assignment)};
 }
 
-static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::ast::method::operation::method_call_ast_node &method_call)
+void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<token>> &tokens,
+                                                   ast::method::operation::method_call_ast_node &method_call)
 {
-    while (!codesh::parser::util::consuming_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
+    while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
     {
-        method_call.get_arguments().push_back(codesh::parser::parse_value(tokens));
+        method_call.get_arguments().push_back(parse_value(tokens));
 
-        if (codesh::parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR))
+        if (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR))
             continue;
 
         // If there are no more arguments, there shouldn't be anything else besides a closing parenthesis.
-        if (!codesh::parser::util::peeking_check(tokens, codesh::token_group::CLOSE_PARENTHESIS))
+        if (!util::peeking_check(tokens, token_group::CLOSE_PARENTHESIS))
         {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                tokens.empty() ? codesh::blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                tokens.empty() ? blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
                     "{}: {}",
-                    codesh::blasphemy::details::UNEXPECTED_TOKEN,
-                    codesh::parser::util::get_token_display_name(*tokens.front())
+                    blasphemy::details::UNEXPECTED_TOKEN,
+                    util::get_token_display_name(*tokens.front())
                 ),
-                codesh::blasphemy::blasphemy_type::SYNTAX,
-                tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
             );
         }
     }

@@ -4,7 +4,6 @@
 #include "parser/ast/operator/assignment/assignment_operator_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/method/operation/block/for_ast_node.h"
-#include "parser/ast/method/operation/block/while_ast_node.h"
 
 #include <memory>
 #include <queue>
@@ -50,5 +49,7 @@ enum class var_decl_assignment_policy
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
 > parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens, var_decl_assignment_policy assignment_policy);
 
+void parse_methods_call_parameters(std::queue<std::unique_ptr<token>> &tokens,
+        ast::method::operation::method_call_ast_node &method_call);
 
 }

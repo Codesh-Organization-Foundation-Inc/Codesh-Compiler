@@ -614,14 +614,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
     return eval_ast_node;
 }
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse_new_operator(
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::parse_new_operator(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     const auto new_pos = tokens.front()->get_code_position();
     tokens.pop();
 
     auto parsed_type = util::parse_type(tokens);
-
     const auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.get());
 
     if (!custom_type)
@@ -636,7 +635,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse
     }
 
     auto constructed_type = std::unique_ptr<ast::type::custom_type_ast_node>(
-        dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.release())
+        static_cast<ast::type::custom_type_ast_node *>(parsed_type.release()) // NOLINT(*-pro-type-static-cast-downcast)
     );
 
     auto new_node = std::make_unique<ast::op::new_ast_node>(
@@ -645,25 +644,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node>codesh::parser::parse
     );
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
-    { //TODO: Can be optimized with the parse_methods_call_parameters func
-        while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
-        {
-            new_node->get_arguments().push_back(parse_value(tokens));
-
-            if (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR))
-                continue;
-
-            if (!util::peeking_check(tokens, token_group::CLOSE_PARENTHESIS))
-            {
-                blasphemy::get_blasphemy_collector().add_blasphemy(
-                    blasphemy::details::UNEXPECTED_TOKEN,
-                    blasphemy::blasphemy_type::SYNTAX,
-                    tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
-                );
-            }
-        }
+    {
+        parse_methods_call_parameters(tokens, *new_node);
     }
-
 
     return new_node;
 }
