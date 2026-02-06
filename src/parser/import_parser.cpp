@@ -36,7 +36,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
     }
 
 
-    util::parse_fqcn(tokens, import_node->get_package_name());
+    util::parse_fqn(tokens, import_node->get_package_name());
 
     if (import_node->get_package_name().is_wildcard())
     {

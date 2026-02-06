@@ -23,7 +23,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilatio
         if (tokens.front()->get_group() == token_group::KEYWORD_ORIGIN_COUNTRY)
         {
             tokens.pop();
-            util::parse_fqcn(tokens, node->get_package_name());
+            util::parse_fqn(tokens, node->get_package_name());
             util::ensure_end_op(tokens);
         }
     }

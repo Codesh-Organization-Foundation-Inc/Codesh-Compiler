@@ -8,8 +8,8 @@
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
         const codesh::semantic_analyzer::i_scope_containing_symbol &scope_container,
-        std::vector<std::string>::const_iterator fqcn_start,
-        std::vector<std::string>::const_iterator fqcn_end);
+        std::vector<std::string>::const_iterator fqn_start,
+        std::vector<std::string>::const_iterator fqn_end);
 
 codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_unit_ast_node &root_node) :
     scope(ALLOWED_SYMBOL_TYPES)
@@ -71,11 +71,11 @@ codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_t
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_from_scope_container(
         const codesh::semantic_analyzer::i_scope_containing_symbol &scope_container,
-        const std::vector<std::string>::const_iterator fqcn_start,
-        const std::vector<std::string>::const_iterator fqcn_end)
+        const std::vector<std::string>::const_iterator fqn_start,
+        const std::vector<std::string>::const_iterator fqn_end)
 {
-    auto it = fqcn_start;
-    const auto end = fqcn_end;
+    auto it = fqn_start;
+    const auto end = fqn_end;
 
     if (it == end)
         return std::nullopt;
