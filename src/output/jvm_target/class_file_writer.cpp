@@ -105,6 +105,20 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
         {
             write_bytes(out, integer_info->bytes, 4);
         }
+        else if (const auto float_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Float_info *>(&info.get()))
+        {
+            write_bytes(out, float_info->bytes, 4);
+        }
+        else if (const auto long_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Long_info *>(&info.get()))
+        {
+            write_bytes(out, long_info->high_bytes, 4);
+            write_bytes(out, long_info->low_bytes, 4);
+        }
+        else if (const auto double_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Double_info *>(&info.get()))
+        {
+            write_bytes(out, double_info->high_bytes, 4);
+            write_bytes(out, double_info->low_bytes, 4);
+        }
         else if (const auto string_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_String_info *>(&info.get()))
         {
             write_bytes(out, string_info->string_index, 2);
