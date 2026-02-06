@@ -138,7 +138,7 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    util::parse_fqcn(tokens, method_call_node->get_fqcn());
+    util::parse_fqn(tokens, method_call_node->get_fqn());
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {

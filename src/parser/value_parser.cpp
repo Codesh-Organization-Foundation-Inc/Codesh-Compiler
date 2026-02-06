@@ -85,7 +85,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::pars
         auto id_pos = tokens.front()->get_code_position();
 
         definition::fully_qualified_name value;
-        util::parse_fqcn(tokens, value);
+        util::parse_fqn(tokens, value);
 
         eval_ast_node = std::make_unique<variable_reference_ast_node>(id_pos, value);
 

@@ -9,14 +9,14 @@ codesh::definition::fully_qualified_name::fully_qualified_name() :
 {
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const char *binary_fqcn) :
+codesh::definition::fully_qualified_name::fully_qualified_name(const char *binary_fqn) :
     fully_qualified_name()
 {
-    std::istringstream fqcn_stream(binary_fqcn);
+    std::istringstream fqn_stream(binary_fqn);
 
     // Split by '/'
     std::string item;
-    while (std::getline(fqcn_stream, item, '/'))
+    while (std::getline(fqn_stream, item, '/'))
     {
         if (!item.empty())
         {
