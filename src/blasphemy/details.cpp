@@ -35,6 +35,8 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_LET =
     "נָבוֹא שְׁקָרַי: צֻּפָּה ויהי";
 const std::string codesh::blasphemy::details::NO_KEYWORD_NAME =
     "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו";
+const std::string codesh::blasphemy::details::NO_KEYWORD_NAME_OR_CONSTRUCTOR =
+    "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו אוֹ בריאה";
 const std::string codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT =
     "נָבוֹא שְׁקָרַי: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים";
 const std::string codesh::blasphemy::details::NO_CLOSE_PARENTHESIS =
