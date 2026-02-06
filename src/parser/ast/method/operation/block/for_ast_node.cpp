@@ -3,19 +3,18 @@
 #include "parser/ast/method/method_scope_ast_node.h"
 
 codesh::ast::block::for_ast_node::for_ast_node(const blasphemy::code_position code_position,
-                           std::unique_ptr<local_variable_declaration_ast_node> iterator,
                            std::unique_ptr<var_reference::value_ast_node> collection,
                            method::method_scope_ast_node &body_scope) :
     method_operation_ast_node(code_position),
-    iterator(std::move(iterator)),
-    collection(std::move(collection)),
-    body_scope(body_scope)
+    body_scope(body_scope),
+    iterator(*body_scope.get_local_variables().at(0)),
+    collection(std::move(collection))
 {
 }
 
 codesh::ast::local_variable_declaration_ast_node &codesh::ast::block::for_ast_node::get_iterator() const
 {
-    return *iterator;
+    return iterator;
 }
 
 codesh::ast::var_reference::value_ast_node &codesh::ast::block::for_ast_node::get_collection() const
@@ -37,8 +36,7 @@ void codesh::ast::block::for_ast_node::set_statement_index(size_t statement_inde
 void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
         output::jvm_target::constant_pool &constant_pool)
 {
-
-    iterator->emit_constants(root_node, constant_pool);
+    iterator.emit_constants(root_node, constant_pool);
     if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(collection.get()))
     {
         cp_emitter->emit_constants(root_node, constant_pool);
