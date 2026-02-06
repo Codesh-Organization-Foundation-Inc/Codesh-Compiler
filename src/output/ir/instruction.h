@@ -55,7 +55,20 @@ enum class opcode : unsigned char
     INVOKE_INTERFACE = 0xB9,
     INVOKE_SPECIAL = 0xB7,
     INVOKE_STATIC = 0xB8,
-    INVOKE_VIRTUAL = 0xB6
+    INVOKE_VIRTUAL = 0xB6,
+
+    I_ADD = 0x60,
+    I_SUB = 0x64,
+    I_MUL = 0x68,
+    I_DIV = 0x6C,
+    I_REM = 0x70,
+    I_NEG = 0x74,
+    I_SHL = 0x78,
+    I_SHR = 0x7A,
+    I_USHR = 0x7C,
+    I_AND = 0x7E,
+    I_OR = 0x80,
+    I_XOR = 0x82
 };
 
 enum class instruction_type
@@ -96,6 +109,22 @@ enum class if_type
 
     ARE_REFS_EQUAL,
     ARE_REFS_NOT_EQUAL,
+};
+
+enum class operator_type
+{
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    REM,
+    NEG,
+    SHL,
+    SHR,
+    USHR,
+    AND,
+    OR,
+    XOR
 };
 
 
@@ -159,10 +188,10 @@ class typed_instruction : public instruction
 {
     static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
 
-    instruction_type type;
     const unsigned char index;
 
 protected:
+    instruction_type type;
     [[nodiscard]] virtual opcode first_generic() const = 0;
 
 public:
@@ -253,6 +282,21 @@ protected:
 
 public:
     store_in_local_var_instruction(instruction_type type, int local_var_index);
+};
+
+class operator_instruction final : public typed_instruction
+{
+    operator_type op;
+
+protected:
+    [[nodiscard]] opcode first_generic() const override;
+
+public:
+    operator_instruction(instruction_type type, operator_type op);
+
+    [[nodiscard]] size_t size() const override;
+
+    void emit(std::vector<instruction_container> &collector) const override;
 };
 
 class get_static_instruction final : public instruction
