@@ -133,12 +133,19 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh
 
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
+    // Long and Double entries occupy two constant pool slots
+    const bool is_wide = dynamic_cast<const defs::CONSTANT_Long_info *>(constant_info.get())
+                      || dynamic_cast<const defs::CONSTANT_Double_info *>(constant_info.get());
+
     const auto [it, inserted] = literals.emplace(std::move(constant_info));
 
     if (inserted)
     {
         literals_lookup_map.emplace(it->get(), index);
-        return index++;
+
+        const int assigned_index = index;
+        index += is_wide ? 2 : 1;
+        return assigned_index;
     }
 
     return literals_lookup_map.at(it->get());
@@ -272,9 +279,15 @@ std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_in
     std::vector<std::reference_wrapper<const defs::cp_info>> results;
     results.reserve(inverted_literals.size());
 
-    for (int i = 0; i < inverted_literals.size(); i++)
+    for (int i = 1; i < index; i++)
     {
-        results.emplace_back(*inverted_literals.at(i + 1));
+        const auto it = inverted_literals.find(i);
+        if (it == inverted_literals.end())
+        {
+            // Phantom slot after a Long/Double entry; skip it.
+            continue;
+        }
+        results.emplace_back(*it->second);
     }
 
     return results;
@@ -282,5 +295,8 @@ std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_in
 
 size_t codesh::output::jvm_target::constant_pool::size() const
 {
-    return literals.size();
+    // index starts at 1 and points one past the last used slot,
+    // so (index - 1) is the total number of slots including phantom
+    // slots consumed by Long/Double entries.
+    return index - 1;
 }
