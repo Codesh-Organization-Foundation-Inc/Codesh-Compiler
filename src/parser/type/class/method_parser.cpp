@@ -2,16 +2,17 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "fmt/format.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/operation/block/if_ast_node.h"
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/type/type_parser.h"
 #include "parser/util.h"
 #include "parser/value_parser.h"
-#include "parser/type/type_parser.h"
-#include "fmt/format.h"
 
 static void parse_methods_call_parameters(std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::operation::method_call_ast_node &method_call);
@@ -23,6 +24,21 @@ static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
         codesh::blasphemy::code_position fallback_position);
 
+static std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
+
+static std::unique_ptr<codesh::ast::block::while_ast_node> parse_while_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
+
+static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope);
+
+static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_return_operator(
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
+
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
 {
@@ -32,7 +48,8 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
-            method_scope.add_statement(parse_methods_call(tokens));
+            method_scope.add_statement(parse_method_call(tokens));
+            util::ensure_end_op(tokens);
             break;
 
         case token_group::KEYWORD_LET: {
@@ -79,10 +96,17 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             method_scope.add_statement(parse_for_statement(tokens, method_scope));
             break;
 
+        case token_group::KEYWORD_RETURN:
+        {
+            method_scope.add_statement(parse_return_operator(tokens));
+            break;
+        }
+
         case token_group::SCOPE_END:
             tokens.pop();
             method_scope.mark_end();
             return;
+
 
         default: {
             const auto token_name = util::get_token_display_name(*tokens.front());
@@ -106,7 +130,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         blasphemy::blasphemy_type::SYNTAX, method_scope.get_code_position());
 }
 
-std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_methods_call(
+std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_method_call(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     auto call_pos = tokens.front()->get_code_position();
@@ -121,24 +145,23 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
         parse_methods_call_parameters(tokens, *method_call_node);
     }
 
-    util::ensure_end_op(tokens);
     return method_call_node;
 }
 
-std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statement(
-        std::queue<std::unique_ptr<token>> &tokens,
-        ast::method::method_scope_ast_node &method_scope)
+std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope)
 {
     auto if_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto if_node = std::make_unique<ast::block::if_ast_node>(
+    auto if_node = std::make_unique<codesh::ast::block::if_ast_node>(
         if_pos,
         parse_conditioned_scope(tokens, method_scope, if_pos)
     );
 
-    std::unique_ptr<token> else_token;
-    while (util::consuming_check(tokens, token_group::KEYWORD_ELSE_IF, else_token))
+    std::unique_ptr<codesh::token> else_token;
+    while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ELSE_IF, else_token))
     {
         if_node->add_else_if_branch(parse_conditioned_scope(
             tokens,
@@ -147,14 +170,14 @@ std::unique_ptr<codesh::ast::block::if_ast_node> codesh::parser::parse_if_statem
         ));
     }
 
-    if (util::consuming_check(tokens, token_group::KEYWORD_ELSE, else_token))
+    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ELSE, else_token))
     {
         const auto scope_pos = check_consume_scope_begin(tokens);
         auto &else_scope = method_scope.create_method_scope(
             scope_pos.value_or(else_token->get_code_position())
         );
 
-        parse_method_scope(tokens, else_scope);
+        codesh::parser::parse_method_scope(tokens, else_scope);
 
         if_node->set_else_branch(else_scope);
     }
@@ -178,53 +201,69 @@ static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
     return {std::move(condition), scope};
 }
 
-std::unique_ptr<codesh::ast::block::while_ast_node> codesh::parser::parse_while_statement(
-        std::queue<std::unique_ptr<token>> &tokens, ast::method::method_scope_ast_node &method_scope)
+static std::unique_ptr<codesh::ast::block::while_ast_node> parse_while_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope)
 {
     auto while_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto condition = parse_value(tokens);
+    auto condition = codesh::parser::parse_value(tokens);
 
     const auto scope_pos = check_consume_scope_begin(tokens);
 
     auto &while_scope = method_scope.create_method_scope(scope_pos.value_or(while_pos));
-    parse_method_scope(tokens, while_scope);
+    codesh::parser::parse_method_scope(tokens, while_scope);
 
-    return std::make_unique<ast::block::while_ast_node>(
+    return std::make_unique<codesh::ast::block::while_ast_node>(
         while_pos,
         std::move(condition),
         while_scope
     );
 }
 
-std::unique_ptr<codesh::ast::block::for_ast_node> codesh::parser::parse_for_statement(
-    std::queue<std::unique_ptr<token>> &tokens,
-    ast::method::method_scope_ast_node &method_scope)
+static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_return_operator(
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    const auto return_pos = tokens.front()->get_code_position();
+    tokens.pop();
+
+    auto return_value = codesh::parser::parse_value(tokens);
+
+    codesh::parser::util::ensure_end_op(tokens);
+
+    return std::make_unique<codesh::ast::method::operation::return_ast_node>(
+        return_pos,
+        std::move(return_value)
+    );
+}
+
+static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::ast::method::method_scope_ast_node &method_scope)
 {
     auto for_pos = tokens.front()->get_code_position();
     auto iterator_decl =
-        parse_variable_declaration(tokens, var_decl_assignment_policy::FORBID).first;
+        codesh::parser::parse_variable_declaration(tokens, codesh::parser::var_decl_assignment_policy::FORBID).first;
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_FROM))
+    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_FROM))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::NO_KEYWORD_FROM,
-            blasphemy::blasphemy_type::SYNTAX,
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_FROM,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
             for_pos
         );
     }
 
-    auto collection = parse_value(tokens);
-
+    auto collection = codesh::parser::parse_value(tokens);
 
     const auto scope_pos = check_consume_scope_begin(tokens);
 
     auto &for_scope = method_scope.create_method_scope(scope_pos.value_or(for_pos));
     for_scope.add_local_variable(std::move(iterator_decl));
-    parse_method_scope(tokens, for_scope);
+    codesh::parser::parse_method_scope(tokens, for_scope);
 
-    return std::make_unique<ast::block::for_ast_node>(
+    return std::make_unique<codesh::ast::block::for_ast_node>(
         for_pos,
         std::move(iterator_decl),
         std::move(collection),

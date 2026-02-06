@@ -31,12 +31,14 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     std::deque<std::unique_ptr<value_ast_node>> arguments;
 
+    static size_t determine_stack_delta(const type::type_ast_node &type);
+
 protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> &_get_resolved() const
         override;
 
 public:
-    using method_operation_ast_node::method_operation_ast_node;
+    explicit method_call_ast_node(blasphemy::code_position code_position);
 
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
 
@@ -44,6 +46,9 @@ public:
 
     [[nodiscard]] definition::fully_qualified_name &get_fqcn();
     [[nodiscard]] const definition::fully_qualified_name &get_fqcn() const;
+
+
+    [[nodiscard]] type::type_ast_node *get_type() const override;
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

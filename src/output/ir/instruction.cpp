@@ -103,6 +103,11 @@ codesh::output::ir::return_instruction::return_instruction() :
 {
 }
 
+codesh::output::ir::return_instruction::return_instruction(const instruction_type type) :
+    simple_instruction(static_cast<opcode>(*opcode::I_RETURN + *type), -1, 1)
+{
+}
+
 codesh::output::ir::invoke_instruction::invoke_instruction(const invokation_type type, const int method_cp_index,
         const int parameters_count) :
     type(type),
@@ -324,18 +329,26 @@ void codesh::output::ir::if_instruction::emit(std::vector<instruction_container>
         : -1;
 }
 
-codesh::output::ir::scope_marker::scope_marker(const ast::method::method_scope_ast_node &scope) :
-    scope(scope)
+void codesh::output::ir::marker_instruction::emit(std::vector<instruction_container> &collector) const
 {
 }
 
-size_t codesh::output::ir::scope_marker::size() const
+size_t codesh::output::ir::marker_instruction::size() const
 {
-    // Markers emit nothing
     return 0;
 }
 
-void codesh::output::ir::scope_marker::emit(std::vector<instruction_container> &collector) const
+codesh::output::ir::stack_size_delta_marker::stack_size_delta_marker(const size_t size_delta) : size_delta(size_delta)
+{
+}
+
+void codesh::output::ir::stack_size_delta_marker::emit(std::vector<instruction_container> &collector) const
+{
+    collector.emplace_back(std::vector<unsigned char>{}, static_cast<int>(size_delta));
+}
+
+codesh::output::ir::scope_marker::scope_marker(const ast::method::method_scope_ast_node &scope) :
+    scope(scope)
 {
 }
 

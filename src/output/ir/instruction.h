@@ -42,6 +42,8 @@ enum class opcode : unsigned char
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index
 
+    I_RETURN = 0xAC, // Returns an int from a method
+
     IF_ZERO = 0x99,
     GOTO = 0xA7,
 
@@ -190,11 +192,14 @@ public:
 };
 
 
-//TODO: Make typed version
 class return_instruction final : public simple_instruction
 {
 public:
+    /**
+     * Void return
+     */
     return_instruction();
+    explicit return_instruction(instruction_type type);
 };
 
 
@@ -292,6 +297,29 @@ public:
     void emit(std::vector<instruction_container> &collector) const override;
 };
 
+/**
+ * An instruction that emits absolutely nothing.
+ *
+ * Used by the compiler to compute and determine stuff after IR emission.
+ */
+class marker_instruction : public instruction
+{
+public:
+    void emit(std::vector<instruction_container> &collector) const override;
+    [[nodiscard]] size_t size() const override;
+};
+
+/**
+ * A marker used to indicate that the stack was additionally changed by the previous opcode
+ */
+class stack_size_delta_marker : public marker_instruction
+{
+    size_t size_delta;
+
+public:
+    explicit stack_size_delta_marker(size_t size_delta);
+    void emit(std::vector<instruction_container> &collector) const override;
+};
 
 /**
  * Marker instruction for tracking scope boundaries.
@@ -299,16 +327,13 @@ public:
  *
  * @note Used for LocalVariableTable and StackMapTable generation
  */
-class scope_marker : public instruction
+class scope_marker : public marker_instruction
 {
     const ast::method::method_scope_ast_node &scope;
     size_t bytecode_position = 0;
 
 public:
     explicit scope_marker(const ast::method::method_scope_ast_node &scope);
-
-    [[nodiscard]] size_t size() const override;
-    void emit(std::vector<instruction_container> &collector) const override;
 
     [[nodiscard]] const ast::method::method_scope_ast_node &get_scope() const;
     [[nodiscard]] size_t get_bytecode_position() const;
