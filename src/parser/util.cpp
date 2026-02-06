@@ -111,7 +111,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
     case token_group::IDENTIFIER:
     {
         definition::fully_qualified_name name;
-        parse_fqcn(tokens, name);
+        parse_fqn(tokens, name);
 
         result = std::make_unique<ast::type::custom_type_ast_node>(type_pos, name);
         break;
@@ -202,7 +202,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
 }
 
 
-void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqcn_out)
+void codesh::parser::util::parse_fqn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out)
 {
     while (!tokens.empty())
     {
@@ -212,7 +212,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
         {
             if (id->get_group() == token_group::PUNCTUATION_WILDCARD)
             {
-                fqcn_out.set_is_wildcard(true);
+                fqn_out.set_is_wildcard(true);
             }
             else
             {
@@ -225,7 +225,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
         }
         else
         {
-            fqcn_out.add(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
+            fqn_out.add(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
         }
 
 
@@ -241,7 +241,7 @@ void codesh::parser::util::parse_fqcn(std::queue<std::unique_ptr<token>> &tokens
             const bool is_last_item = tokens.front()->get_group() == token_group::PUNCTUATION_END_OP;
 
             // If the user has put a wildcard yet still attempts to add more shit
-            if (!is_last_item && fqcn_out.is_wildcard())
+            if (!is_last_item && fqn_out.is_wildcard())
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(
                     blasphemy::details::NO_IDENTIFIER,

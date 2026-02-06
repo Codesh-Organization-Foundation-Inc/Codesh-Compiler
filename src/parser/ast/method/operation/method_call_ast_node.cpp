@@ -31,12 +31,12 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
-codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqn()
 {
     return name;
 }
 
-const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqn()
     const
 {
     return name;

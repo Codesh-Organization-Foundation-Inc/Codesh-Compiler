@@ -20,7 +20,7 @@ public:
     fully_qualified_name();
 
     // ReSharper disable once CppNonExplicitConvertingConstructor
-    fully_qualified_name(const char *binary_fqcn); // NOLINT(*-explicit-constructor)
+    fully_qualified_name(const char *binary_fqn); // NOLINT(*-explicit-constructor)
     explicit fully_qualified_name(std::string part);
 
     /**

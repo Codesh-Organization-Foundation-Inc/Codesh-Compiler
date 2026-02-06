@@ -44,7 +44,7 @@ void ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
 /**
  * Parses a Fully Qualified Class Name
  */
-void parse_fqcn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqcn_out);
+void parse_fqn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out);
 /**
  * Ensures a colon exists at the current token, and consumes it.
  */

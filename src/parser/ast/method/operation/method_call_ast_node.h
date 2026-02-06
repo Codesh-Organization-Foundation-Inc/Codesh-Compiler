@@ -44,8 +44,8 @@ public:
 
     [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
-    [[nodiscard]] definition::fully_qualified_name &get_fqcn();
-    [[nodiscard]] const definition::fully_qualified_name &get_fqcn() const;
+    [[nodiscard]] definition::fully_qualified_name &get_fqn();
+    [[nodiscard]] const definition::fully_qualified_name &get_fqn() const;
 
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
