@@ -11,12 +11,7 @@ codesh::ast::op::new_ast_node::new_ast_node(const blasphemy::code_position code_
     get_fqn().add("<init>");
 }
 
-codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_constructed_type()
-{
-    return *constructed_type;
-}
-
-const codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_constructed_type() const
+codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_constructed_type() const
 {
     return *constructed_type;
 }
