@@ -28,51 +28,51 @@ const std::string codesh::blasphemy::details::TOKEN_DOESNT_EXIST =
 
 // SYNTAX
 const std::string codesh::blasphemy::details::NO_IDENTIFIER =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה מִלָּה חָפְשִׁית";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה מִלָּה חָפְשִׁית";
 const std::string codesh::blasphemy::details::NO_IMPORT_TYPE =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג יְבוּא";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה סוּג יְבוּא";
 const std::string codesh::blasphemy::details::NO_KEYWORD_LET =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה ויהי";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ויהי";
 const std::string codesh::blasphemy::details::NO_KEYWORD_NAME =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ושמו";
 const std::string codesh::blasphemy::details::NO_KEYWORD_NAME_OR_CONSTRUCTOR =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה ושמו אוֹ בריאה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ושמו אוֹ בריאה";
 const std::string codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה סְגִירַת הָעֵרָה מְרוּבַּת־פְּסוּקִים";
 const std::string codesh::blasphemy::details::NO_CLOSE_PARENTHESIS =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה כי־טוב";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה כי־טוב";
 const std::string codesh::blasphemy::details::NO_SCOPE_BEGIN =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה ויאמר";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ויאמר";
 const std::string codesh::blasphemy::details::NO_SCOPE_END =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה ויתם";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ויתם";
 const std::string codesh::blasphemy::details::NO_KEYWORD_SHALL_BE =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה היה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה היה";
 const std::string codesh::blasphemy::details::NO_KEYWORD_BY =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה פי";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה פי";
 const std::string codesh::blasphemy::details::NO_KEYWORD_TO =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה עד";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עד";
 const std::string codesh::blasphemy::details::NO_KEYWORD_FROM =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה מן";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה מן";
 const std::string codesh::blasphemy::details::NO_KEYWORD_SKIP =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה וידלג";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה וידלג";
 const std::string codesh::blasphemy::details::NO_KEYWORD_AGAINST =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה לנגד";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה לנגד";
 const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP =
-    "נָבוֹא שְׁקָרַי: צֻפָּה סִיֹּמֶת שׁוּרָה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה סִיֹּמֶת שׁוּרָה";
 const std::string codesh::blasphemy::details::UNEXPECTED_TOKEN =
-    "נָבוֹא שְׁקָרַי: מִלָּה לֹא צְפוּיָה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: מִלָּה לֹא צְפוּיָה";
 const std::string codesh::blasphemy::details::EXPECTED_VARIABLE =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה משתנה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה משתנה";
 const std::string codesh::blasphemy::details::NO_TYPE =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה סוּג מִשְׁתַּנֶּה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה סוּג מִשְׁתַּנֶּה";
 const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION =
-    "נָבוֹא שְׁקָרַי: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
 const std::string codesh::blasphemy::details::INVALID_TYPE_FOR_NEW =
-    "ָבוֹא שְׁקָרַי: צֻּפָּה עצם";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עצם";
 
 // SEMANTIC
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE =
-    "עֶצֶם בִּלְתִּי־מְזֹהֶה: מִלָּה אֵינָהּ יְדוּעָה";
+    "עֶצֶם בִּלְתִּי־מְזֹהֶה הֱיֵה: מִלָּה אֵינָהּ יְדוּעָה";
 const std::string codesh::blasphemy::details::CONDITION_NOT_BOOLEAN =
     "תְּנַאי חַיָּב לִהְיוֹת מִסּוּג דְּבַר־מָה";
 const std::string codesh::blasphemy::details::ITERATOR_NOT_COLLECTION =
@@ -114,7 +114,7 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_TYPE_DECLARATION = rfs(
     "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד"
 );
 const rfs_t codesh::blasphemy::details::DUPLICATE_METHOD_DECLARATION = rfs(
-    "נֵאִיפַה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}"
+    "נֵאִיפַה תִּהְיֶה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}"
 );
 
 // OUTPUT
