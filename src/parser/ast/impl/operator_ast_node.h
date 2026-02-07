@@ -1,5 +1,6 @@
 #pragma once
 
+#include "defenition/i_pretty_string_convertable.h"
 #include "i_constant_pool_emitter.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 
@@ -7,7 +8,8 @@ namespace codesh::ast::impl
 {
 
 template <int operands>
-class operator_ast_node : public var_reference::value_ast_node, public i_constant_pool_emitter
+class operator_ast_node : public var_reference::value_ast_node, public i_constant_pool_emitter,
+    public definition::i_pretty_string_convertable
 {
 protected:
     std::unique_ptr<value_ast_node> children[operands]{};
@@ -16,7 +18,6 @@ public:
     using value_ast_node::value_ast_node;
 
     [[nodiscard]] virtual bool is_value_valid() const = 0;
-    [[nodiscard]] virtual std::string to_pretty_string() const = 0;
 
     void set_statement_index(size_t statement_index) override;
 
