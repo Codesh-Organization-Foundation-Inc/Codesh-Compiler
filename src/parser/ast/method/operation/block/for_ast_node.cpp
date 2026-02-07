@@ -1,5 +1,6 @@
 #include "for_ast_node.h"
 
+#include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
 codesh::ast::block::for_ast_node::for_ast_node(const blasphemy::code_position code_position,
@@ -50,62 +51,60 @@ void codesh::ast::block::for_ast_node::emit_ir(
     const type_decl::type_declaration_ast_node &containing_type_decl
 ) const
 {
-//     // 1. Initialize iterator: iterator = range.from
-//     iterator->emit_ir(containing_block, symbol_table, containing_type_decl);
-//
-//     // 2. Prepare loop body + increment in a temp block
-//     output::ir::code_block body_block;
-//
-//     // Emit loop body
-//     body_scope.emit_ir(body_block, symbol_table, containing_type_decl);
-//
-//     // iterator = iterator + range.skip
-//     {
-//         auto increment = std::make_unique<ast::op::addition_operator_ast_node>(
-//             iterator->get_code_position(),
-//             std::make_unique<ast::var_reference::variable_reference_ast_node>(
-//                 iterator->get_code_position(),
-//                 iterator->get_name()
-//             ),
-//             static_cast<const ast::collection::range_ast_node &>(*collection).get_skip().clone()
-//         );
-//
-//         increment->emit_ir(body_block, symbol_table, containing_type_decl);
-//     }
-//
-//     const size_t body_size = body_block.size();
-//     const size_t body_jump_size = body_size + 3; // body + goto
-//
-//     // 3. Build condition: iterator < range.to
-//     const auto &range = static_cast<const ast::collection::range_ast_node &>(*collection);
-//
-//     auto condition = std::make_unique<ast::op::less_operator_ast_node>(
-//         iterator->get_code_position(),
-//         std::make_unique<ast::var_reference::variable_reference_ast_node>(
-//             iterator->get_code_position(),
-//             iterator->get_name()
-//         ),
-//         range.get_to().clone()
-//     );
-//
-//     auto condition_block = output::ir::build_condition_block(
-//         *condition,
-//         body_jump_size,
-//         symbol_table,
-//         containing_type_decl,
-//         output::ir::if_type::IS_ZERO
-//     );
-//
-//     const size_t condition_size = condition_block.size();
-//
-//     // 4. Stitch blocks together
-//     containing_block.consume_code_block(std::move(condition_block));
-//     containing_block.consume_code_block(std::move(body_block));
-//
-//     // 5. Jump back to condition
-//     containing_block.add_instruction(
-//         std::make_unique<output::ir::goto_instruction>(
-//             -static_cast<int>(condition_size + body_size + 3)
-//         )
-//     );
+    const auto range_ptr = dynamic_cast<collection::range_ast_node *>(collection.get());
+    if (!range_ptr)
+    {
+        throw std::runtime_error("Collection is not a range_ast_node!");
+    }
+
+    output::ir::code_block body_block;
+
+    // initialize iterator to range start
+    range_ptr->get_from().emit_ir(containing_block, symbol_table, containing_type_decl);
+
+    containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
+        iterator.get_type()->to_instruction_type(),iterator.get_resolved().get_jvm_index()));
+
+    // emit body scope
+    body_scope.emit_ir(body_block, symbol_table, containing_type_decl);
+
+    // iterator = iterator + skip
+    // load iterator
+    body_block.add_instruction(std::make_unique<output::ir::load_instruction>(
+        iterator.get_type()->to_instruction_type(), iterator.get_resolved().get_jvm_index()));
+
+    // load skip
+    range_ptr->get_skip().emit_ir(body_block, symbol_table, containing_type_decl);
+
+    // add
+    body_block.add_instruction(std::make_unique<output::ir::operator_instruction>(
+        iterator.get_type()->to_instruction_type(), output::ir::operator_type::ADD));
+
+    // store in iterator
+    body_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
+        iterator.get_type()->to_instruction_type(),iterator.get_resolved().get_jvm_index()));
+
+    const size_t body_jump_size = body_block.size() + 3; // body + goto
+
+    output::ir::code_block condition_block;
+
+    // load iterator
+    condition_block.add_instruction(std::make_unique<output::ir::load_instruction>(
+        iterator.get_type()->to_instruction_type(), iterator.get_resolved().get_jvm_index()));
+
+    // load to
+    range_ptr->get_to().emit_ir(condition_block, symbol_table, containing_type_decl);
+
+    // compare (iterator >= to)
+    condition_block.add_instruction(std::make_unique<output::ir::if_instruction>(
+        output::ir::if_type::IS_INT_GREATER_OR_EQUAL, static_cast<int>(body_jump_size)));
+
+    const size_t condition_size = condition_block.size();
+
+    containing_block.consume_code_block(std::move(condition_block));
+    containing_block.consume_code_block(std::move(body_block));
+
+    // Jump back to condition
+    containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(
+            -static_cast<int>(condition_size + body_jump_size)));
 }
