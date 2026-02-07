@@ -6,7 +6,6 @@
 #include "constant_pool.h"
 #include "defenition/definitions.h"
 #include "output/ir/code_block.h"
-#include "output/ir/instruction/impl/instruction_container.h"
 #include "output/ir/instruction/scope_marker.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"

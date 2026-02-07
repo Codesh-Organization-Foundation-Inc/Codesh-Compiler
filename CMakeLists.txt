@@ -145,11 +145,11 @@ add_executable(codeshc
         src/semantic_analyzer/method_decl/resolve_aliases.h
         src/blasphemy/blasphemy_collector.h
         src/blasphemy/blasphemy_collector.cpp
-        src/output/ir/instruction/impl/instruction.cpp
-        src/output/ir/instruction/impl/instruction.h
+        src/output/ir/instruction/impl/opcode.h
         src/output/ir/instruction/impl/instruction_container.cpp
         src/output/ir/instruction/impl/instruction_container.h
-        src/output/ir/instruction/impl/opcode.h
+        src/output/ir/instruction/impl/instruction.cpp
+        src/output/ir/instruction/impl/instruction.h
         src/output/ir/instruction/impl/simple_instruction.cpp
         src/output/ir/instruction/impl/simple_instruction.h
         src/output/ir/instruction/impl/typed_instruction.cpp
@@ -178,6 +178,14 @@ add_executable(codeshc
         src/output/ir/instruction/goto_instruction.h
         src/output/ir/instruction/if_instruction.cpp
         src/output/ir/instruction/if_instruction.h
+        src/output/ir/instruction/assignment_instruction.cpp
+        src/output/ir/instruction/assignment_instruction.h
+        src/output/ir/instruction/assignment_from_code_block_instruction.cpp
+        src/output/ir/instruction/assignment_from_code_block_instruction.h
+        src/output/ir/instruction/assignment_from_constant_instruction.cpp
+        src/output/ir/instruction/assignment_from_constant_instruction.h
+        src/output/ir/instruction/increment_by_constant_instruction.cpp
+        src/output/ir/instruction/increment_by_constant_instruction.h
         src/output/ir/instruction/marker_instruction.cpp
         src/output/ir/instruction/marker_instruction.h
         src/output/ir/instruction/scope_marker.cpp

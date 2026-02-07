@@ -1,11 +1,11 @@
 #pragma once
 
+#include "instruction_container.h"
+
 #include <vector>
 
 namespace codesh::output::ir
 {
-
-struct instruction_container;
 
 class instruction
 {

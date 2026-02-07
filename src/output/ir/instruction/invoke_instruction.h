@@ -1,10 +1,11 @@
 #pragma once
 
 #include "impl/instruction.h"
-#include "impl/opcode.h"
 
 namespace codesh::output::ir
 {
+enum class invokation_type;
+
 
 class invoke_instruction final : public instruction
 {
@@ -18,6 +19,16 @@ public:
     [[nodiscard]] size_t size() const override;
 
     void emit(std::vector<instruction_container> &collector) const override;
+};
+
+
+enum class invokation_type
+{
+    DYNAMIC,
+    INTERFACE,
+    SPECIAL, // Calls a private method_cp_index, constructor or this/super constructor
+    STATIC,
+    VIRTUAL
 };
 
 }

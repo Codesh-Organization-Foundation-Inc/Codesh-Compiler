@@ -1,5 +1,5 @@
 #include "load_constant_pool_instruction.h"
-#include "impl/instruction_container.h"
+
 #include "impl/opcode.h"
 
 codesh::output::ir::load_constant_pool_instruction::load_constant_pool_instruction(const int constant_pool_index) :

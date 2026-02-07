@@ -1,7 +1,6 @@
 #include "simple_instruction.h"
-#include "instruction_container.h"
 
-codesh::output::ir::simple_instruction::simple_instruction(opcode _opcode, int stack_delta, const size_t _size) :
+codesh::output::ir::simple_instruction::simple_instruction(const opcode _opcode, const int stack_delta, const size_t _size) :
     _opcode(_opcode),
     stack_delta(stack_delta),
     _size(_size)

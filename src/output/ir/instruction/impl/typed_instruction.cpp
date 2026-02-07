@@ -1,5 +1,4 @@
 #include "typed_instruction.h"
-#include "instruction_container.h"
 
 codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type, const unsigned char index) :
     type(type),

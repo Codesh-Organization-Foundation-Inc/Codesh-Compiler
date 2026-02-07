@@ -1,6 +1,5 @@
 #pragma once
 
-#include "output/ir/instruction/impl/opcode.h"
 #include "parser/ast/impl/binary_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 

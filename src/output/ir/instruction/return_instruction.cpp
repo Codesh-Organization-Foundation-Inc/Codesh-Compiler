@@ -1,5 +1,7 @@
 #include "return_instruction.h"
 
+#include "impl/typed_instruction.h"
+
 codesh::output::ir::return_instruction::return_instruction() :
     simple_instruction(opcode::RETURN, 0, 1)
 {

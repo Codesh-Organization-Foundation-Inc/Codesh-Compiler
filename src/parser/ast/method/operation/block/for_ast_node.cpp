@@ -1,7 +1,12 @@
 #include "for_ast_node.h"
 
+#include "output/ir/instruction/if_instruction.h"
+#include "output/ir/instruction/increment_by_constant_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
+#include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::ast::block::for_ast_node::for_ast_node(const blasphemy::code_position code_position,
@@ -44,51 +49,73 @@ void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast
         cp_emitter->emit_constants(root_node, constant_pool);
     }
     body_scope.emit_constants(root_node, constant_pool);
+
+
+    if (const auto range = dynamic_cast<const collection::range_ast_node *>(collection.get()))
+    {
+        if (const auto evaluable = dynamic_cast<const var_reference::evaluable_ast_node<int> *>(&range->get_skip()))
+        {
+            const auto skip_constant = evaluable->get_value();
+
+            if (skip_constant < std::numeric_limits<int16_t>::min()
+                || skip_constant > std::numeric_limits<int16_t>::max())
+            {
+                skip_constant_cpi = constant_pool.goc_integer_info(skip_constant);
+            }
+        }
+    }
 }
 
 void codesh::ast::block::for_ast_node::emit_ir(
         output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    const auto range_ptr = dynamic_cast<collection::range_ast_node *>(collection.get());
-    if (!range_ptr)
+    const auto range = dynamic_cast<collection::range_ast_node *>(collection.get());
+    if (!range)
     {
-        throw std::runtime_error("Collection is not a range_ast_node!");
+        throw std::runtime_error("Non-range collections not currently supported");
     }
 
-    output::ir::code_block body_block;
-
-    // initialize iterator to range start
-    range_ptr->get_from().emit_ir(containing_block, symbol_table, containing_type_decl);
+    // Initialize iterator to range start
+    range->get_from().emit_ir(containing_block, symbol_table, containing_type_decl);
 
     containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
-        iterator.get_type()->to_instruction_type(),iterator.get_resolved().get_jvm_index()
+        iterator.get_type()->to_instruction_type(),
+        iterator.get_resolved().get_jvm_index()
     ));
 
-    // emit body scope
+
+    // Emit body scope
+    output::ir::code_block body_block;
     body_scope.emit_ir(body_block, symbol_table, containing_type_decl);
 
 
     // Handle skip
-    const auto &skip = range_ptr->get_skip();
-    // iterator = iterator + skip
-    // load iterator
-    body_block.add_instruction(std::make_unique<output::ir::load_instruction>(
-        iterator.get_type()->to_instruction_type(),
-        iterator.get_resolved().get_jvm_index()
-    ));
-    // load skip
-    skip.emit_ir(body_block, symbol_table, containing_type_decl);
-    // add
-    body_block.add_instruction(std::make_unique<output::ir::operator_instruction>(
-        iterator.get_type()->to_instruction_type(),
-        output::ir::operator_type::ADD
-    ));
-    // store in iterator
-    body_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
-        iterator.get_type()->to_instruction_type(),
-        iterator.get_resolved().get_jvm_index()
-    ));
+    const auto &skip = range->get_skip();
+    const auto it_lvt_index = iterator.get_resolved().get_jvm_index();
+
+    //TODO: Handle non-int
+    if (const auto evaluable = dynamic_cast<const var_reference::evaluable_ast_node<int> *>(&skip))
+    {
+        const auto value = evaluable->get_value();
+
+        body_block.add_instruction(std::make_unique<output::ir::increment_by_constant_instruction>(
+            iterator.get_type()->to_instruction_type(), // Always int rn
+            it_lvt_index,
+            value,
+            skip_constant_cpi
+        ));
+    }
+    else
+    {
+        // body_block.add_instruction(std::make_unique<assignment_from_value_instruction>(
+        //     iterator.get_type()->to_instruction_type(),
+        //     output::ir::operator_type::ADD,
+        //     it_lvt_index,
+        //     var_reference->get_resolved().
+        // ));
+    }
+
 
     const size_t body_jump_size = body_block.size() + 3; // body + goto
 
@@ -96,10 +123,11 @@ void codesh::ast::block::for_ast_node::emit_ir(
 
     // load iterator
     condition_block.add_instruction(std::make_unique<output::ir::load_instruction>(
-        iterator.get_type()->to_instruction_type(), iterator.get_resolved().get_jvm_index()));
+        iterator.get_type()->to_instruction_type(), iterator.get_resolved().get_jvm_index()
+    ));
 
     // load to
-    range_ptr->get_to().emit_ir(condition_block, symbol_table, containing_type_decl);
+    range->get_to().emit_ir(condition_block, symbol_table, containing_type_decl);
 
     // compare (iterator >= to)
     condition_block.add_instruction(std::make_unique<output::ir::if_instruction>(
@@ -114,6 +142,6 @@ void codesh::ast::block::for_ast_node::emit_ir(
 
     // Jump back to condition
     containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(
-        -static_cast<int>(condition_size + body_jump_size))
-    );
+        -static_cast<int>(condition_size + body_jump_size)
+    ));
 }

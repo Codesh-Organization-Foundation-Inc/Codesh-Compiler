@@ -1,5 +1,6 @@
 #include "if_instruction.h"
-#include "impl/instruction_container.h"
+
+#include "impl/opcode.h"
 
 codesh::output::ir::if_instruction::if_instruction(const if_type type, const int jump_offset) :
     goto_instruction(jump_offset),

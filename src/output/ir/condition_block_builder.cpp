@@ -3,6 +3,8 @@
 #include "output/ir/instruction/load_int_constant_instruction.h"
 #include "output/ir/instruction/goto_instruction.h"
 
+#include "instruction/if_instruction.h"
+#include "instruction/load_int_constant_instruction.h"
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/equals_operator_ast_node.h"
 #include "parser/ast/operator/boolean/greater_equals_operator_ast_node.h"

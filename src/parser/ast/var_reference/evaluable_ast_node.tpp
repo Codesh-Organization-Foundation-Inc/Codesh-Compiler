@@ -1,11 +1,11 @@
 #pragma once
 
+#include "evaluable_ast_node.h"
+#include "output/ir/code_block.h"
+#include "output/ir/instruction/load_constant_pool_instruction.h"
 #include "output/ir/instruction/load_int_constant_instruction.h"
 #include "output/ir/instruction/load_wide_constant_pool_instruction.h"
-#include "output/ir/instruction/load_constant_pool_instruction.h"
-#include "output/ir/code_block.h"
 #include "output/jvm_target/constant_pool.h"
-#include "evaluable_ast_node.h"
 
 #include <limits>
 

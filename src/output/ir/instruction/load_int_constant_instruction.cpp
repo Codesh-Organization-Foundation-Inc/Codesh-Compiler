@@ -1,6 +1,6 @@
 #include "load_int_constant_instruction.h"
 #include "load_constant_pool_instruction.h"
-#include "impl/instruction_container.h"
+
 #include "impl/opcode.h"
 #include "util.h"
 

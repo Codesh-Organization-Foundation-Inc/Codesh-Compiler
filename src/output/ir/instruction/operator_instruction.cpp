@@ -1,5 +1,4 @@
 #include "operator_instruction.h"
-#include "impl/instruction_container.h"
 
 #include <stdexcept>
 
