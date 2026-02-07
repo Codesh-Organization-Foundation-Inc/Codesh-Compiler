@@ -16,6 +16,14 @@ codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_cons
     return *constructed_type;
 }
 
+std::string codesh::ast::op::new_ast_node::to_pretty_string() const
+{
+    return fmt::format(
+        definition::CONSTRUCTOR_PRETTY_STRING,
+        get_last_name(false)
+    );
+}
+
 void codesh::ast::op::new_ast_node::emit_ir(output::ir::code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const

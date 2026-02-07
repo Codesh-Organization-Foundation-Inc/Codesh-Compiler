@@ -9,6 +9,8 @@ class constructor_declaration_ast_node : public method_declaration_ast_node
 {
 public:
     explicit constructor_declaration_ast_node(blasphemy::code_position code_position);
+
+    [[nodiscard]] std::string to_pretty_string() const override;
 };
 
 }

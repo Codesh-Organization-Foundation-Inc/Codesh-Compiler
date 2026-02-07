@@ -1,5 +1,6 @@
 #include "method_call_ast_node.h"
 
+#include "defenition/definitions.h"
 #include "fmt/xchar.h"
 #include "output/ir/code_block.h"
 #include "parser/ast/method/util.h"
@@ -86,6 +87,14 @@ void codesh::ast::method::operation::method_call_ast_node::set_statement_index(c
     {
         argument->set_statement_index(statement_index);
     }
+}
+
+std::string codesh::ast::method::operation::method_call_ast_node::to_pretty_string() const
+{
+    return fmt::format(
+        definition::METHOD_PRETTY_STRING,
+        get_last_name(false)
+    );
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_constants(
