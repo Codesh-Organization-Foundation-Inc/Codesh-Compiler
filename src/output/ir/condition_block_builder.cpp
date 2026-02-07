@@ -7,6 +7,7 @@
 #include "parser/ast/operator/boolean/less_equals_operator_ast_node.h"
 #include "parser/ast/operator/boolean/less_operator_ast_node.h"
 #include "parser/ast/operator/boolean/not_equals_operator_ast_node.h"
+#include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
 
 static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_reference::value_ast_node &condition,
@@ -21,6 +22,22 @@ codesh::output::ir::code_block codesh::output::ir::build_condition_block(
         const if_type if_type)
 {
     code_block condition_block;
+
+    // Handle NOT
+    if (const auto not_cond = dynamic_cast<const ast::op::not_operator_ast_node *>(&condition))
+    {
+        return build_condition_block(
+            not_cond->get_child(),
+            if_block_size,
+            symbol_table,
+            containing_type_decl,
+
+            // Simply revert the if type
+            if_type == if_type::IS_ZERO
+                ? if_type::IS_NONZERO
+                : if_type::IS_ZERO
+        );
+    }
 
     // Handle AND
     if (const auto and_cond = dynamic_cast<const ast::op::and_operator_ast_node *>(&condition))
@@ -146,4 +163,36 @@ static codesh::output::ir::if_type get_if_type_for(const codesh::ast::var_refere
     }
 
     return parent_if_type;
+}
+
+codesh::output::ir::code_block codesh::output::ir::build_boolean_value_block(
+        const ast::var_reference::value_ast_node &condition,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const ast::type_decl::type_declaration_ast_node &containing_type_decl)
+{
+    code_block temp_block;
+
+    // Before these instructions will come a condition block that, if met, jumps to here - loading 1 to the stack.
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(true, std::nullopt));
+    // Skip the next else case
+    temp_block.add_instruction(std::make_unique<goto_instruction>(1));
+
+    // The if block size must be computed BEFORE adding iconst_0, because the false branch of the
+    // condition should jump TO the iconst_0, not past it.
+    const auto if_block_size = temp_block.size();
+
+    // The else case jumps here:
+    temp_block.add_instruction(std::make_unique<load_int_constant_instruction>(false, std::nullopt));
+
+
+    auto condition_block = build_condition_block(
+        condition,
+        if_block_size,
+        symbol_table,
+        containing_type_decl,
+        if_type::IS_ZERO
+    );
+    condition_block.consume_code_block(std::move(temp_block));
+
+    return condition_block;
 }
