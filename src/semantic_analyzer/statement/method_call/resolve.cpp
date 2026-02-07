@@ -169,10 +169,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto method_overloads_raw = type.get_scope().resolve_local(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
-        //TODO: Throw "name doesn't exist"
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::METHOD_NOT_FOUND,
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -180,10 +179,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto *method_overloads = dynamic_cast<const codesh::semantic_analyzer::method_overloads_symbol *>(&method_overloads_raw->get());
     if (!method_overloads)
     {
-        //TODO: Throw "is not a method"
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::NOT_A_METHOD,
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -232,7 +230,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH,
             //TODO: Pretty print argument types
             "טודו",
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ),
         method_call.get_code_position()
     );

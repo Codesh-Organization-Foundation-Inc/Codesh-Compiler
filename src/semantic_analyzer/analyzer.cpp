@@ -121,7 +121,7 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
 
         for (const auto &method_decl : type_decl->get_all_methods())
         {
-            const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
+            const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->to_pretty_string());
 
             //TODO: Handle multiple scopes
             const codesh::ast::method::method_scope_ast_node &method_scope = method_decl->get_method_scope();

@@ -26,7 +26,7 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const semantic_context &context, const type_symbol &type,
     const ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.to_pretty_string());
     resolve_method_signature(new_context, method_decl, type);
 }
 
