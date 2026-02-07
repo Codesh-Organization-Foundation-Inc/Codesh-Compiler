@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.31.6)
-project(Codesh_Compiler CXX)
+project(codeshc CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Codesh_Compiler
+add_executable(codeshc
         src/main.cpp
         src/lexer/regex.h
         src/command_parser.cpp
@@ -241,13 +241,13 @@ add_executable(Codesh_Compiler
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
-target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
+target_link_libraries(codeshc Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
 
-target_link_libraries(Codesh_Compiler
+target_link_libraries(codeshc
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
@@ -268,7 +268,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(utfcpp)
 
-target_include_directories(Codesh_Compiler PRIVATE
+target_include_directories(codeshc PRIVATE
         ${utfcpp_SOURCE_DIR}/source
 )
 
@@ -280,8 +280,8 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(fmt)
-target_link_libraries(Codesh_Compiler fmt::fmt)
+target_link_libraries(codeshc fmt::fmt)
 
 
 # Support includes starting from relative paths
-target_include_directories(Codesh_Compiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(codeshc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
