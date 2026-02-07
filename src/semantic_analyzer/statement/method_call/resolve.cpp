@@ -11,7 +11,6 @@
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
 #include "blasphemy/details.h"
-#include "fmt/color.h"
 
 #include <ranges>
 
