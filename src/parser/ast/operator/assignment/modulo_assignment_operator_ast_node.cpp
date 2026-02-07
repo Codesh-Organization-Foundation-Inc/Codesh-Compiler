@@ -14,8 +14,8 @@ std::string codesh::ast::op::assignment::modulo_assignment_operator_ast_node::to
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_MODULO_ASSIGNMENT);
 }
 
-void codesh::ast::op::assignment::modulo_assignment_operator_ast_node::emit_ir(
-    output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
-    const type_decl::type_declaration_ast_node &containing_type_decl) const
+std::optional<codesh::output::ir::operator_type> codesh::ast::op::assignment::modulo_assignment_operator_ast_node::
+    get_operator_type() const
 {
+    return output::ir::operator_type::REM;
 }

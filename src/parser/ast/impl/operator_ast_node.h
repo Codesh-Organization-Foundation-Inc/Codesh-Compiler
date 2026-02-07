@@ -1,12 +1,13 @@
 #pragma once
 
+#include "i_constant_pool_emitter.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 
 namespace codesh::ast::impl
 {
 
 template <int operands>
-class operator_ast_node : public var_reference::value_ast_node, i_constant_pool_emitter
+class operator_ast_node : public var_reference::value_ast_node, public i_constant_pool_emitter
 {
 protected:
     std::unique_ptr<value_ast_node> children[operands]{};

@@ -19,6 +19,12 @@ std::string codesh::ast::op::assignment::assign_operator_ast_node::to_pretty_str
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_REPLACE);
 }
 
+std::optional<codesh::output::ir::operator_type> codesh::ast::op::assignment::assign_operator_ast_node::
+    get_operator_type() const
+{
+    return std::nullopt;
+}
+
 void codesh::ast::op::assignment::assign_operator_ast_node::emit_ir(
     output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
     const type_decl::type_declaration_ast_node &containing_type_decl) const
