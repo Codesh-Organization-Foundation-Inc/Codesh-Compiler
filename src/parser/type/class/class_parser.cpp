@@ -226,22 +226,14 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
 
     bool did_capture_scope_begin = false;
 
-    // If no וישב, return type = void:
+    // If there is a return type, use it.
     if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_RETURN))
     {
         method_decl.set_return_type(parser::util::parse_type(tokens));
     }
-    else if (dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
-    {
-        // Constructors always return void
-        method_decl.set_return_type(
-            std::make_unique<ast::type::primitive_type_ast_node>(
-                code_position,
-                codesh::definition::primitive_type::VOID
-            )
-        );
-    }
-    else
+    // If there isn't, default to using void.
+    // Skip this process for constructors as they already define it
+    else if (!dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
     {
         // Blame the void return type on the next scope begin:
         std::unique_ptr<codesh::token> scope_begin_token;
