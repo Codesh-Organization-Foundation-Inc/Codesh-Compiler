@@ -83,16 +83,16 @@ const std::deque<std::unique_ptr<codesh::ast::method::method_declaration_ast_nod
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::add_method(
-    std::unique_ptr<method::method_declaration_ast_node> method)
+    std::unique_ptr<method::method_declaration_ast_node> method_decl)
 {
-    all_methods.push_back(std::move(method));
+    all_methods.push_back(std::move(method_decl));
     methods.push_back(all_methods.back().get());
 }
 
-void codesh::ast::type_decl::type_declaration_ast_node::add_method(
-    std::unique_ptr<method::constructor_declaration_ast_node> method)
+void codesh::ast::type_decl::type_declaration_ast_node::add_constructor(
+    std::unique_ptr<method::constructor_declaration_ast_node> constructor_decl)
 {
-    all_methods.push_front(std::move(method));
+    all_methods.push_front(std::move(constructor_decl));
     constructors.push_back(static_cast<method::constructor_declaration_ast_node *>(all_methods.front().get())); // NOLINT(*-pro-type-static-cast-downcast)
 }
 

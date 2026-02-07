@@ -21,7 +21,14 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
 
+static void parse_method_signature_to(
+        ast::type_decl::type_declaration_ast_node &type_decl, codesh::blasphemy::code_position code_position,
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
+        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
+        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 
@@ -82,7 +89,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             case codesh::token_group::KEYWORD_METHOD:
             {
                 tokens.pop();
-                class_node->add_method(parse_method_signature(let_pos, tokens));
+                parse_method_signature_to(*class_node, let_pos, tokens);
                 break;
             }
             case codesh::token_group::KEYWORD_CLASS:
@@ -140,8 +147,9 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     throw std::runtime_error("Fields not yet supported");
 }
 
-static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
-        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+static void parse_method_signature_to(
+        ast::type_decl::type_declaration_ast_node &type_decl, const codesh::blasphemy::code_position code_position,
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     bool is_constructor = false;
 
@@ -160,32 +168,50 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         }
     }
 
-
-    std::unique_ptr<ast::method::method_declaration_ast_node> method_node;
-    if (!is_constructor)
+    if (is_constructor)
     {
-        // * (the name)
-        const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
-
-        method_node = std::make_unique<ast::method::method_declaration_ast_node>(
-            code_position,
-            codesh::definition::fully_qualified_name(name_token->get_content())
-        );
+        type_decl.add_constructor(parse_constructor_signature(code_position, tokens));
     }
     else
     {
-        method_node = std::make_unique<ast::method::constructor_declaration_ast_node>(code_position);
+        type_decl.add_method(parse_method_signature(code_position, tokens));
     }
+}
 
+static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
+        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    // * (the name)
+    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
+    auto method_decl = std::make_unique<ast::method::method_declaration_ast_node>(
+        code_position,
+        codesh::definition::fully_qualified_name(name_token->get_content())
+    );
+
+    parse_method_signature_continuation(*method_decl, code_position, tokens);
+    return method_decl;
+}
+
+static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
+        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    auto method_decl = std::make_unique<ast::method::constructor_declaration_ast_node>(code_position);
+    parse_method_signature_continuation(*method_decl, code_position, tokens);
+    return method_decl;
+}
+
+static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
+        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
     // Attributes
-    method_node->set_attributes(parser::parse_modifiers(code_position, tokens));
+    method_decl.set_attributes(parser::parse_modifiers(code_position, tokens));
 
     // Parameters
     auto params = parser::parse_parameter_list(tokens);
     for (auto &param : params)
     {
-        method_node->add_parameter(std::move(param));
+        method_decl.add_parameter(std::move(param));
     }
 
 
@@ -194,12 +220,12 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
     // If no וישב, return type = void:
     if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_RETURN))
     {
-        method_node->set_return_type(parser::util::parse_type(tokens));
+        method_decl.set_return_type(parser::util::parse_type(tokens));
     }
-    else if (is_constructor)
+    else if (dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
     {
         // Constructors always return void
-        method_node->set_return_type(
+        method_decl.set_return_type(
             std::make_unique<ast::type::primitive_type_ast_node>(
                 code_position,
                 codesh::definition::primitive_type::VOID
@@ -213,7 +239,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         did_capture_scope_begin = parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN,
             scope_begin_token);
 
-        method_node->set_return_type(
+        method_decl.set_return_type(
             std::make_unique<ast::type::primitive_type_ast_node>(
                 scope_begin_token ? scope_begin_token->get_code_position() : code_position,
                 codesh::definition::primitive_type::VOID
@@ -231,9 +257,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
         );
     }
 
-    parser::parse_method_scope(tokens, method_node->get_method_scope());
-
-    return method_node;
+    parser::parse_method_scope(tokens, method_decl.get_method_scope());
 }
 
 std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> codesh::parser::parse_parameter_list(

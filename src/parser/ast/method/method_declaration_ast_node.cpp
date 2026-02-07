@@ -1,6 +1,5 @@
 #include "method_declaration_ast_node.h"
 
-#include "fmt/xchar.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "util.h"

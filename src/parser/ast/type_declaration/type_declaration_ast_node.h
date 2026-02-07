@@ -85,8 +85,8 @@ public:
      * Constructors are placed first, then methods.
      */
     [[nodiscard]] const std::deque<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
-    void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
-    void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
+    void add_method(std::unique_ptr<method::method_declaration_ast_node> method_decl);
+    void add_constructor(std::unique_ptr<method::constructor_declaration_ast_node> constructor_decl);
 
     [[nodiscard]] const std::vector<method::constructor_declaration_ast_node *> &get_constructors() const;
     [[nodiscard]] const std::vector<method::method_declaration_ast_node *> &get_methods() const;

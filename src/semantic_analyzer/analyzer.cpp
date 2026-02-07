@@ -177,7 +177,7 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
         constructor_decl->set_attributes(std::move(attributes_node));
 
-        class_decl->add_method(std::move(constructor_decl));
+        class_decl->add_constructor(std::move(constructor_decl));
     }
 }
 
