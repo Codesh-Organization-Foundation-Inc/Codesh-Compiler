@@ -1,6 +1,5 @@
 #include "method_parser.h"
 
-#include "../../value/value_parser.h"
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "fmt/format.h"
@@ -13,6 +12,7 @@
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "parser/type/type_parser.h"
 #include "parser/util.h"
+#include "parser/value/value_parser.h"
 
 static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
