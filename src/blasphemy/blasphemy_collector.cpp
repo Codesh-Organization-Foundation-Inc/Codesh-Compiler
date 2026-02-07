@@ -17,7 +17,7 @@ static const std::vector<fmt::format_string<std::string>> RANDOM_MESSAGE_POOL = 
     "וְקֶצֶף ה' בְּיּוֹצֵר תָמְלִיל הַקֹּדֶשׁ וְיֹאמַר לוֹ אָחִי, תַקֵּן אֶת הַתּוֹעֵבָה הַ{}",
     "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {}",
     "וְיִתְפַּלֵּא ה' בְּיּוֹצֵר כִּי־אֵיךְ לֹא הִבְחִין בַּתּוֹעֵבָה הַ{}",
-    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד ה{}" //FIXME: Type is feminine while it shouldn't be here
+    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד הַ{}" //FIXME: Type is feminine while it shouldn't be here
 };
 
 static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
