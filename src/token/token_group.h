@@ -132,6 +132,32 @@ enum class token_group : int
     COMMENT_ONE_LINER, // כה הגה ה'
 
 
+    // Biblical Numbers
+    KEYWORD_NUMBER_ZERO, // חמס
+    KEYWORD_NUMBER_ONE, // אחד
+    KEYWORD_NUMBER_TWO, // שתיים
+    KEYWORD_NUMBER_THREE, // שלוש
+    KEYWORD_NUMBER_FOUR, // ארבע
+    KEYWORD_NUMBER_FIVE, // חמש
+    KEYWORD_NUMBER_SIX, // שש
+    KEYWORD_NUMBER_SEVEN, // שבע
+    KEYWORD_NUMBER_EIGHT, // שמונה
+    KEYWORD_NUMBER_NINE, // תשע
+    KEYWORD_NUMBER_TEN, // עשר
+    KEYWORD_NUMBER_TWELVE, // תריסר
+    KEYWORD_NUMBER_TWENTY, // עשרים
+    KEYWORD_NUMBER_THIRTY, // שלושים
+    KEYWORD_NUMBER_FORTY, // ארבעים
+    KEYWORD_NUMBER_FIFTY, // חמישים
+    KEYWORD_NUMBER_SIXTY, // שישים
+    KEYWORD_NUMBER_SEVENTY, // שבעים
+    KEYWORD_NUMBER_EIGHTY, // שמונים
+    KEYWORD_NUMBER_NINETY, // תשעים
+    KEYWORD_NUMBER_HUNDRED, // מאה
+    KEYWORD_NUMBER_THOUSAND, // אלף
+    KEYWORD_NUMBER_TEN_THOUSAND, // רבבה
+
+
     // REGEX Matches
 
     //TODO: Match with definition::primitive_type
