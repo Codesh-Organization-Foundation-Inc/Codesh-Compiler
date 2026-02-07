@@ -4,10 +4,10 @@
 
 namespace codesh::definition
 {
-const std::string SOURCE_FILE_EXTENSION = ".אמן";
+inline const std::string SOURCE_FILE_EXTENSION = ".אמן";
 
 /**
  * The identifier used when there was an error parsing an identifier
  */
-const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
+inline const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
 }
