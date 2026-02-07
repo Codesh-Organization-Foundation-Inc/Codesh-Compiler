@@ -6,7 +6,7 @@
 namespace codesh::ast::op::assignment
 {
 
-class assign_operator_ast_node final : public assignment_operator_ast_node, public impl::i_ir_emitter
+class assign_operator_ast_node final : public assignment_operator_ast_node
 {
 public:
     assign_operator_ast_node(blasphemy::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
