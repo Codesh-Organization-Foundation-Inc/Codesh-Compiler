@@ -1,7 +1,6 @@
 #pragma once
 
 #include "parser/ast/impl/i_constant_pool_emitter.h"
-#include "parser/ast/type/type_ast_node.h"
 #include "value_ast_node.h"
 
 namespace codesh::ast::var_reference

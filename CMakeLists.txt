@@ -285,8 +285,8 @@ add_executable(codeshc
         src/parser/ast/impl/operator_ast_node.tpp
         src/parser/ast/operator/math/i_math_operator_holder.h
         src/defenition/i_pretty_string_convertable.h
-        src/parser/value/primitive_value_parser.h
-        src/parser/value/primitive_value_parser.cpp
+        src/output/ir/util.cpp
+        src/output/ir/util.h
 )
 
 # sudo dnf install boost-regex boost-devel

@@ -53,6 +53,7 @@ enum class opcode : unsigned char
 
 enum class operator_type
 {
+    ASSIGN,
     ADD,
     SUB,
     MUL,

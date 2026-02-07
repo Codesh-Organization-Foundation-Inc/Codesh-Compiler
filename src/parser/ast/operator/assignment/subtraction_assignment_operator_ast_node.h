@@ -12,6 +12,6 @@ public:
 
     [[nodiscard]] std::string to_pretty_string() const override;
 
-    [[nodiscard]] std::optional<output::ir::operator_type> get_operator_type() const override;
+    [[nodiscard]] output::ir::operator_type get_operator_type() const override;
 };
 }

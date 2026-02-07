@@ -14,7 +14,7 @@ std::string codesh::ast::op::assignment::addition_assignment_operator_ast_node::
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_ADDITION_ASSIGNMENT);
 }
 
-std::optional<codesh::output::ir::operator_type> codesh::ast::op::assignment::addition_assignment_operator_ast_node::
+codesh::output::ir::operator_type codesh::ast::op::assignment::addition_assignment_operator_ast_node::
     get_operator_type() const
 {
     return output::ir::operator_type::ADD;

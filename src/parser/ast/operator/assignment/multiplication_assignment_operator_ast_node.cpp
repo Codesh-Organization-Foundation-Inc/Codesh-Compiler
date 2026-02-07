@@ -14,7 +14,7 @@ std::string codesh::ast::op::assignment::multiplication_assignment_operator_ast_
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT);
 }
 
-std::optional<codesh::output::ir::operator_type> codesh::ast::op::assignment::
+codesh::output::ir::operator_type codesh::ast::op::assignment::
     multiplication_assignment_operator_ast_node::get_operator_type() const
 {
     return output::ir::operator_type::MUL;

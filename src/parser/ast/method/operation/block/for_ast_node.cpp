@@ -5,6 +5,7 @@
 #include "output/ir/instruction/increment_by_constant_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/ir/instruction/store_in_local_var_instruction.h"
+#include "output/ir/util.h"
 #include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
@@ -77,12 +78,15 @@ void codesh::ast::block::for_ast_node::emit_ir(
         throw std::runtime_error("Non-range collections not currently supported");
     }
 
+    const auto it_type = iterator.get_type()->to_instruction_type();
+    const auto it_lvt = iterator.get_resolved().get_jvm_index();
+
     // Initialize iterator to range start
     range->get_from().emit_ir(containing_block, symbol_table, containing_type_decl);
 
     containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
-        iterator.get_type()->to_instruction_type(),
-        iterator.get_resolved().get_jvm_index()
+        it_type,
+        it_lvt
     ));
 
 
@@ -91,34 +95,15 @@ void codesh::ast::block::for_ast_node::emit_ir(
     body_scope.emit_ir(body_block, symbol_table, containing_type_decl);
 
 
-    // Handle skip
-    const auto &skip = range->get_skip();
-    const auto it_lvt_index = iterator.get_resolved().get_jvm_index();
-
-    //TODO: Handle non-int
-    if (const auto evaluable = dynamic_cast<const var_reference::evaluable_ast_node<int> *>(&skip))
-    {
-        const auto value = evaluable->get_value();
-
-        body_block.add_instruction(std::make_unique<output::ir::increment_by_constant_instruction>(
-            iterator.get_type()->to_instruction_type(), // Always int rn
-            it_lvt_index,
-            value,
-            skip_constant_cpi
-        ));
-    }
-    else
-    {
-        output::ir::code_block skip_block;
-        skip.emit_ir(skip_block, symbol_table, containing_type_decl);
-
-        body_block.add_instruction(std::make_unique<output::ir::assignment_from_code_block_instruction>(
-            iterator.get_type()->to_instruction_type(),
-            output::ir::operator_type::ADD,
-            it_lvt_index,
-            std::move(skip_block)
-        ));
-    }
+    // Emit skip
+    output::ir::util::emit_assignment_by_value_optimized(
+        containing_block, symbol_table, containing_type_decl,
+        range->get_skip(),
+        it_type,
+        output::ir::operator_type::ADD,
+        it_lvt,
+        skip_constant_cpi
+    );
 
 
     const size_t body_jump_size = body_block.size() + 3; // body + goto
@@ -127,7 +112,8 @@ void codesh::ast::block::for_ast_node::emit_ir(
 
     // load iterator
     condition_block.add_instruction(std::make_unique<output::ir::load_instruction>(
-        iterator.get_type()->to_instruction_type(), iterator.get_resolved().get_jvm_index()
+        it_type,
+        it_lvt
     ));
 
     // load to
