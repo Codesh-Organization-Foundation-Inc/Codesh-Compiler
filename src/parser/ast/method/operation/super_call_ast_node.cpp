@@ -3,7 +3,7 @@
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "output/ir/code_block.h"
 // ReSharper disable once CppUnusedIncludeDirective
-#include "semantic_analyzer/symbol_table/symbol.h"
+#include "defenition/definitions.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 
 void codesh::ast::method::operation::super_call_ast_node::emit_ir(
@@ -27,7 +27,7 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         ),
 
         cp.get_name_and_type_index(
-            cp.get_utf8_index("<init>"),
+            cp.get_utf8_index(definition::JVM_CONSTRUCTOR_NAME),
             //TODO: Match parameters list
             cp.get_utf8_index("()V")
         )

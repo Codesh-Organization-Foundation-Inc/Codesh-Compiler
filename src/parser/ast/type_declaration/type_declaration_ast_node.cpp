@@ -131,7 +131,7 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
         super_class_constant,
 
         constant_pool.goc_name_and_type_info(
-            constant_pool.goc_utf8_info("<init>"),
+            constant_pool.goc_utf8_info(definition::JVM_CONSTRUCTOR_NAME),
             //TODO: Actually check super call params
             constant_pool.goc_utf8_info("()V")
         )

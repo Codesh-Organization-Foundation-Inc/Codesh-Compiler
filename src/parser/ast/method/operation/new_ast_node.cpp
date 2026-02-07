@@ -1,6 +1,6 @@
 #include "new_ast_node.h"
 
-
+#include "defenition/definitions.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 codesh::ast::op::new_ast_node::new_ast_node(const blasphemy::code_position code_position,
@@ -8,7 +8,7 @@ codesh::ast::op::new_ast_node::new_ast_node(const blasphemy::code_position code_
     method_call_ast_node(code_position), constructed_type(std::move(constructed_type))
 {
     // Constructor name of new is always <init>
-    get_fqn().add("<init>");
+    get_fqn().add(definition::JVM_CONSTRUCTOR_NAME);
 }
 
 codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_constructed_type() const

@@ -4,6 +4,8 @@
 
 namespace codesh::definition
 {
+const std::string JVM_CONSTRUCTOR_NAME = "<init>";
+
 const std::string SOURCE_FILE_EXTENSION = ".אמן";
 
 /**
