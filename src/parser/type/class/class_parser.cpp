@@ -27,7 +27,8 @@ static void parse_method_signature_to(
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
-        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+        codesh::blasphemy::code_position code_position, const ast::type_decl::type_declaration_ast_node &type_decl,
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
         codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
 
@@ -170,7 +171,7 @@ static void parse_method_signature_to(
 
     if (is_constructor)
     {
-        type_decl.add_constructor(parse_constructor_signature(code_position, tokens));
+        type_decl.add_constructor(parse_constructor_signature(code_position, type_decl, tokens));
     }
     else
     {
@@ -194,9 +195,18 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 }
 
 static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
-        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+        const codesh::blasphemy::code_position code_position,
+        const ast::type_decl::type_declaration_ast_node &type_decl,
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    auto method_decl = std::make_unique<ast::method::constructor_declaration_ast_node>(code_position);
+    //TODO: Optimize for semantic analyzer
+    auto custom_type = std::make_unique<ast::type::custom_type_ast_node>(code_position, type_decl.get_unresolved_name());
+
+    auto method_decl = std::make_unique<ast::method::constructor_declaration_ast_node>(
+        code_position,
+        std::move(custom_type)
+    );
+
     parse_method_signature_continuation(*method_decl, code_position, tokens);
     return method_decl;
 }

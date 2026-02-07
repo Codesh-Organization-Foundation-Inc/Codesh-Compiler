@@ -20,7 +20,7 @@ std::string codesh::ast::op::new_ast_node::to_pretty_string() const
 {
     return fmt::format(
         definition::CONSTRUCTOR_PRETTY_STRING,
-        get_last_name(false)
+        constructed_type->to_pretty_string()
     );
 }
 

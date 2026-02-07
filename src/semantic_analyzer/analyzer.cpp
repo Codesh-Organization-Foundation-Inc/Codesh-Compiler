@@ -169,11 +169,17 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
         if (!class_decl->get_constructors().empty())
             continue;
 
+        const auto code_pos = class_decl->get_code_position();
+
+        //TODO: Optimize for semantic analyzer
+        auto custom_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(code_pos, type_decl->get_unresolved_name());
+
         auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>(
-            type_decl->get_code_position()
+            code_pos,
+            std::move(custom_type)
         );
 
-        auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+        auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(code_pos);
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
         constructor_decl->set_attributes(std::move(attributes_node));
 
