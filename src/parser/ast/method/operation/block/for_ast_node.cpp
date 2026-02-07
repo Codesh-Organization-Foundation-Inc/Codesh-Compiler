@@ -1,5 +1,6 @@
 #include "for_ast_node.h"
 
+#include "output/ir/instruction/assignment_from_code_block_instruction.h"
 #include "output/ir/instruction/if_instruction.h"
 #include "output/ir/instruction/increment_by_constant_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
@@ -108,12 +109,15 @@ void codesh::ast::block::for_ast_node::emit_ir(
     }
     else
     {
-        // body_block.add_instruction(std::make_unique<assignment_from_value_instruction>(
-        //     iterator.get_type()->to_instruction_type(),
-        //     output::ir::operator_type::ADD,
-        //     it_lvt_index,
-        //     var_reference->get_resolved().
-        // ));
+        output::ir::code_block skip_block;
+        skip.emit_ir(skip_block, symbol_table, containing_type_decl);
+
+        body_block.add_instruction(std::make_unique<output::ir::assignment_from_code_block_instruction>(
+            iterator.get_type()->to_instruction_type(),
+            output::ir::operator_type::ADD,
+            it_lvt_index,
+            std::move(skip_block)
+        ));
     }
 
 
