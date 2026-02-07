@@ -1,7 +1,6 @@
 #pragma once
 
 #include "parser/ast/var_reference/value_ast_node.h"
-#include "i_constant_pool_emitter.h"
 #include "operator_ast_node.h"
 
 #include <memory>
@@ -25,6 +24,5 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 };
-
 
 }

@@ -245,6 +245,28 @@ void codesh::output::ir::load_constant_pool_instruction::emit(std::vector<instru
     );
 }
 
+codesh::output::ir::load_wide_constant_pool_instruction::load_wide_constant_pool_instruction(
+        const int constant_pool_index) :
+    constant_pool_index(constant_pool_index)
+{
+}
+
+size_t codesh::output::ir::load_wide_constant_pool_instruction::size() const
+{
+    return 3;
+}
+
+void codesh::output::ir::load_wide_constant_pool_instruction::emit(
+        std::vector<instruction_container> &collector) const
+{
+    std::vector<unsigned char> opcodes(3);
+
+    opcodes[0] = *opcode::LDC2_W;
+    util::put_int_bytes(opcodes.data() + 1, 2, constant_pool_index);
+
+    collector.emplace_back(std::move(opcodes), 2);
+}
+
 codesh::output::ir::opcode codesh::output::ir::store_in_local_var_instruction::first_generic() const
 {
     return opcode::I_STORE;

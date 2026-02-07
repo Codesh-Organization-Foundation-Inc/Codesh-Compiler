@@ -38,6 +38,7 @@ enum class opcode : unsigned char
     S_IPUSH, // >255
 
     LDC = 0x12,
+    LDC2_W = 0x14,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index
@@ -269,6 +270,18 @@ class load_constant_pool_instruction final : public instruction
 
 public:
     explicit load_constant_pool_instruction(int constant_pool_index);
+
+    [[nodiscard]] size_t size() const override;
+
+    void emit(std::vector<instruction_container> &collector) const override;
+};
+
+class load_wide_constant_pool_instruction final : public instruction
+{
+    const int constant_pool_index;
+
+public:
+    explicit load_wide_constant_pool_instruction(int constant_pool_index);
 
     [[nodiscard]] size_t size() const override;
 

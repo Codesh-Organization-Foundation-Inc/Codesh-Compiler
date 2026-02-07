@@ -1,11 +1,11 @@
 #include "constant_pool.h"
 
+#include <cstring>
 #include <unordered_set>
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "util.h"
-#include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 
 codesh::output::jvm_target::constant_pool::constant_pool(const ast::compilation_unit_ast_node &root_node,
@@ -50,6 +50,42 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Integer_info> codesh:
     util::put_int_bytes(const_integer->bytes, 4, num);
 
     return const_integer;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Float_info> codesh::output::jvm_target::constant_pool::
+    float_info(const float num)
+{
+    auto const_float = std::make_unique<defs::CONSTANT_Float_info>();
+
+    uint32_t bits;
+    std::memcpy(&bits, &num, sizeof(bits));
+    util::put_int_bytes(const_float->bytes, 4, static_cast<int>(bits));
+
+    return const_float;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Long_info> codesh::output::jvm_target::constant_pool::
+    long_info(const long long num)
+{
+    auto const_long = std::make_unique<defs::CONSTANT_Long_info>();
+
+    util::put_int_bytes(const_long->high_bytes, 4, static_cast<int>(num >> 32));
+    util::put_int_bytes(const_long->low_bytes, 4, static_cast<int>(num & 0xFFFFFFFF));
+
+    return const_long;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Double_info> codesh::output::jvm_target::constant_pool::
+    double_info(const double num)
+{
+    auto const_double = std::make_unique<defs::CONSTANT_Double_info>();
+
+    uint64_t bits;
+    std::memcpy(&bits, &num, sizeof(bits));
+    util::put_int_bytes(const_double->high_bytes, 4, static_cast<int>(bits >> 32));
+    util::put_int_bytes(const_double->low_bytes, 4, static_cast<int>(bits & 0xFFFFFFFF));
+
+    return const_double;
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>
@@ -97,12 +133,19 @@ std::unique_ptr<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info> codesh
 
 int codesh::output::jvm_target::constant_pool::goc_constant(std::unique_ptr<defs::cp_info> constant_info)
 {
+    // Long and Double entries occupy two constant pool slots
+    const bool is_wide = dynamic_cast<const defs::CONSTANT_Long_info *>(constant_info.get())
+                      || dynamic_cast<const defs::CONSTANT_Double_info *>(constant_info.get());
+
     const auto [it, inserted] = literals.emplace(std::move(constant_info));
 
     if (inserted)
     {
         literals_lookup_map.emplace(it->get(), index);
-        return index++;
+
+        const int assigned_index = index;
+        index += is_wide ? 2 : 1;
+        return assigned_index;
     }
 
     return literals_lookup_map.at(it->get());
@@ -121,6 +164,21 @@ int codesh::output::jvm_target::constant_pool::goc_string_info(const int utf8_in
 int codesh::output::jvm_target::constant_pool::goc_integer_info(const int num)
 {
     return goc_constant(integer_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_float_info(const float num)
+{
+    return goc_constant(float_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_long_info(const long long num)
+{
+    return goc_constant(long_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::goc_double_info(const double num)
+{
+    return goc_constant(double_info(num));
 }
 
 int codesh::output::jvm_target::constant_pool::goc_methodref_info(const int class_index, const int name_and_type_index)
@@ -162,6 +220,21 @@ int codesh::output::jvm_target::constant_pool::get_string_index(const int utf8_i
 int codesh::output::jvm_target::constant_pool::get_integer_index(const int num) const
 {
     return get_index(*integer_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::get_float_index(const float num) const
+{
+    return get_index(*float_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::get_long_index(const long long num) const
+{
+    return get_index(*long_info(num));
+}
+
+int codesh::output::jvm_target::constant_pool::get_double_index(const double num) const
+{
+    return get_index(*double_info(num));
 }
 
 int codesh::output::jvm_target::constant_pool::get_methodref_index(const int class_index,
@@ -206,9 +279,15 @@ std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_in
     std::vector<std::reference_wrapper<const defs::cp_info>> results;
     results.reserve(inverted_literals.size());
 
-    for (int i = 0; i < inverted_literals.size(); i++)
+    for (int i = 1; i < index; i++)
     {
-        results.emplace_back(*inverted_literals.at(i + 1));
+        const auto it = inverted_literals.find(i);
+        if (it == inverted_literals.end())
+        {
+            // Phantom slot after a Long/Double entry; skip it.
+            continue;
+        }
+        results.emplace_back(*it->second);
     }
 
     return results;
@@ -216,5 +295,8 @@ std::vector<std::reference_wrapper<const codesh::output::jvm_target::defs::cp_in
 
 size_t codesh::output::jvm_target::constant_pool::size() const
 {
-    return literals.size();
+    // index starts at 1 and points one past the last used slot,
+    // so (index - 1) is the total number of slots including phantom
+    // slots consumed by Long/Double entries.
+    return index - 1;
 }
