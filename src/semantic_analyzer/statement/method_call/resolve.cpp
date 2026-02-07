@@ -4,14 +4,14 @@
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
+#include "blasphemy/details.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
-#include "blasphemy/details.h"
-#include "fmt/color.h"
 
 #include <ranges>
 
@@ -52,6 +52,16 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 
     if (!result.has_value())
         return false;
+
+
+    // For new calls, also resolve the constructed type:
+    if (const auto new_call = dynamic_cast<const ast::op::new_ast_node *>(&method_call))
+    {
+        util::resolve_type_node(
+            context,
+            new_call->get_constructed_type()
+        );
+    }
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -169,10 +179,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto method_overloads_raw = type.get_scope().resolve_local(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
-        //TODO: Throw "name doesn't exist"
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::METHOD_NOT_FOUND,
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -180,10 +189,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto *method_overloads = dynamic_cast<const codesh::semantic_analyzer::method_overloads_symbol *>(&method_overloads_raw->get());
     if (!method_overloads)
     {
-        //TODO: Throw "is not a method"
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::NOT_A_METHOD,
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ), method_call.get_code_position());
         return std::nullopt;
     }
@@ -232,7 +240,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH,
             //TODO: Pretty print argument types
             "טודו",
-            method_call.get_last_name(false)
+            method_call.to_pretty_string()
         ),
         method_call.get_code_position()
     );

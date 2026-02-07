@@ -7,11 +7,18 @@
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
 
-std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util
-    ::resolve_custom_type(
-        const semantic_context &context,
-        const definition::fully_qualified_name &full_name)
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
+    resolve_custom_type(const semantic_context &context, const ast::type::custom_type_ast_node &custom_type_node)
 {
+    // If we already know the type declaration, no need to find it.
+    if (const auto known_decl = custom_type_node.get_known_type_declaration())
+    {
+        return known_decl->get().get_resolved();
+    }
+
+
+    const auto &full_name = custom_type_node.get_unresolved_name();
+
     const auto result_raw = symbol_table::resolve_from_imports(
         context,
         full_name,
@@ -38,8 +45,10 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
         ast::type::custom_type_ast_node &custom_type_node,
         const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
 {
-    const auto result = resolve_custom_type(context,
-        custom_type_node.get_unresolved_name());
+    const auto result = resolve_custom_type(
+        context,
+        custom_type_node
+    );
 
     if (!result.has_value())
         return false;

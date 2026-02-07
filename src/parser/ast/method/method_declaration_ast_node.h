@@ -22,7 +22,8 @@ namespace codesh::ast::method
 {
 
 class method_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
-        public impl::i_resolvable<semantic_analyzer::method_symbol>, public impl::i_constant_pool_emitter
+    public impl::i_resolvable<semantic_analyzer::method_symbol>, public impl::i_constant_pool_emitter,
+    public definition::i_pretty_string_convertable
 {
     const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
@@ -73,6 +74,10 @@ public:
 
     [[nodiscard]] const std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
     [[nodiscard]] std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
+
+
+    [[nodiscard]] std::string to_pretty_string() const override;
+
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
@@ -26,8 +27,17 @@ void codesh::semantic_analyzer::method_declaration::resolve(
     const semantic_context &context, const type_symbol &type,
     const ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.to_pretty_string());
     resolve_method_signature(new_context, method_decl, type);
+
+    // For constructors, also resolve the constructed type:
+    if (const auto constructor_decl = dynamic_cast<const ast::method::constructor_declaration_ast_node *>(&method_decl))
+    {
+        util::resolve_type_node(
+            context,
+            constructor_decl->get_constructed_type()
+        );
+    }
 }
 
 static codesh::semantic_analyzer::method_symbol &resolve_method_signature(

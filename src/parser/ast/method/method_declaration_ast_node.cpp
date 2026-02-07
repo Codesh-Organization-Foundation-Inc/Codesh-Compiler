@@ -1,6 +1,6 @@
 #include "method_declaration_ast_node.h"
 
-#include "fmt/xchar.h"
+#include "defenition/definitions.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "util.h"
@@ -103,6 +103,14 @@ std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::met
     get_exceptions_thrown()
 {
     return exceptions_thrown;
+}
+
+std::string codesh::ast::method::method_declaration_ast_node::to_pretty_string() const
+{
+    return fmt::format(
+        definition::METHOD_PRETTY_STRING,
+        get_last_name(false)
+    );
 }
 
 void codesh::ast::method::method_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,

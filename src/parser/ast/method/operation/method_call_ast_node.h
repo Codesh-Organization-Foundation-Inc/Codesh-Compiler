@@ -24,7 +24,8 @@ namespace codesh::ast::method::operation
 class method_call_ast_node : public var_reference::value_ast_node,
     public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
-    public impl::i_descriptor_emitter
+    public impl::i_descriptor_emitter,
+    public definition::i_pretty_string_convertable
 {
     definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
@@ -58,6 +59,9 @@ public:
     [[nodiscard]] std::deque<std::unique_ptr<value_ast_node>> &get_arguments();
 
     void set_statement_index(size_t statement_index) override;
+
+
+    [[nodiscard]] std::string to_pretty_string() const override;
 
 
     void emit_constants(const compilation_unit_ast_node &root_node,

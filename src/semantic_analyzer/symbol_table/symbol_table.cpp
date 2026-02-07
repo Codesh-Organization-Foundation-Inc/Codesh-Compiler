@@ -48,9 +48,11 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     for (const auto &country : context.lookup_countries)
     {
-        const auto result =
-            resolve_method_from_scope_container(country, name_start.value_or(full_name.get_parts().begin()),
-                                                name_end.value_or(full_name.get_parts().end()));
+        const auto result = resolve_method_from_scope_container(
+            country,
+            name_start.value_or(full_name.get_parts().begin()),
+            name_end.value_or(full_name.get_parts().end())
+        );
 
         if (result.has_value())
             return result.value();

@@ -105,7 +105,7 @@ const rfs_t codesh::blasphemy::details::NOT_A_METHOD = rfs(
     "דְּבַר־{} אֵינוֹ מַעֲשֶׂה"
 );
 const rfs_t codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH = rfs(
-    "סוּגֵי הַמִּנְחוֹת {} אֵינָם תּוֹאֲמִים לְאַף מַעֲשֶׂה וּשְׁמוֹ {}"
+    "סוּגֵי הַמִּנְחוֹת {} אֵינָם תּוֹאֲמִים לְאַף מַעֲשֶׂה {}"
 );
 const rfs_t codesh::blasphemy::details::RETURN_TYPE_MISMATCH = rfs(
     "סוּג הַהַשָּׁבָה {} אֵינוֹ תּוֹאֵם לְחוֹתַם הַמַּעֲשֶׂה {}"

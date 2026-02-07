@@ -21,7 +21,7 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
         ast::method::method_declaration_ast_node &method_decl, type_symbol &containing_type)
 {
     const std::string method_name = method_decl.get_last_name(false);
-    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.get_last_name(false));
+    const auto new_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl.to_pretty_string());
 
     method_overloads_symbol &methods_container = util::get_method_overloads_symbol(method_name, containing_type);
 
