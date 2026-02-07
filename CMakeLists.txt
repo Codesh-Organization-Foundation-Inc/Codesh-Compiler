@@ -184,8 +184,16 @@ add_executable(codeshc
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
-        src/parser/value_parser.cpp
-        src/parser/value_parser.h
+        src/parser/value/value_parser.cpp
+        src/parser/value/value_parser.h
+        src/parser/value/arithmetic_value_parser.cpp
+        src/parser/value/arithmetic_value_parser.h
+        src/parser/value/boolean_value_parser.cpp
+        src/parser/value/boolean_value_parser.h
+        src/parser/value/assignment_value_parser.cpp
+        src/parser/value/assignment_value_parser.h
+        src/parser/value/new_value_parser.cpp
+        src/parser/value/new_value_parser.h
         src/parser/ast/impl/i_constant_pool_emitter.h
         src/parser/ast/operator/math/minus_operator_ast_node.cpp
         src/parser/ast/operator/math/minus_operator_ast_node.h
@@ -236,6 +244,8 @@ add_executable(codeshc
         src/parser/ast/impl/operator_ast_node.tpp
         src/parser/ast/operator/math/i_math_operator_holder.h
         src/defenition/i_pretty_string_convertable.h
+        src/parser/value/primitive_value_parser.h
+        src/parser/value/primitive_value_parser.cpp
 )
 
 # sudo dnf install boost-regex boost-devel

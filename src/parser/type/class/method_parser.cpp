@@ -12,7 +12,7 @@
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "parser/type/type_parser.h"
 #include "parser/util.h"
-#include "parser/value_parser.h"
+#include "parser/value/value_parser.h"
 
 static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
@@ -73,7 +73,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         case token_group::OPERATOR_MULTIPLICATION:
         case token_group::OPERATOR_DIVISION:
         case token_group::OPERATOR_MODULO:
-            method_scope.add_statement(parse_value(tokens));
+            method_scope.add_statement(value::parse_value(tokens));
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
@@ -186,7 +186,7 @@ static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
         codesh::blasphemy::code_position fallback_position)
 {
-    auto condition = codesh::parser::parse_value(tokens);
+    auto condition = codesh::parser::value::parse_value(tokens);
 
     const auto scope_pos = check_consume_scope_begin(tokens);
     auto &scope = method_scope.create_method_scope(
@@ -205,7 +205,7 @@ static std::unique_ptr<codesh::ast::block::while_ast_node> parse_while_statement
     auto while_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto condition = codesh::parser::parse_value(tokens);
+    auto condition = codesh::parser::value::parse_value(tokens);
 
     const auto scope_pos = check_consume_scope_begin(tokens);
 
@@ -225,7 +225,7 @@ static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_re
     const auto return_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto return_value = codesh::parser::parse_value(tokens);
+    auto return_value = codesh::parser::value::parse_value(tokens);
 
     codesh::parser::util::ensure_end_op(tokens);
 
@@ -252,7 +252,7 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
         );
     }
 
-    auto collection = codesh::parser::parse_value(tokens);
+    auto collection = codesh::parser::value::parse_value(tokens);
 
     const auto scope_pos = check_consume_scope_begin(tokens);
 
@@ -352,7 +352,7 @@ std::pair<
                 declaration_pos,
                 *variable_decl_ast_node
             ),
-            parse_value(tokens)
+            value::parse_value(tokens)
         );
 
         util::ensure_end_op(tokens);
@@ -366,7 +366,7 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
 {
     while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
     {
-        method_call.get_arguments().push_back(parse_value(tokens));
+        method_call.get_arguments().push_back(value::parse_value(tokens));
 
         if (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR))
             continue;
