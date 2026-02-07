@@ -29,7 +29,7 @@ namespace codesh::semantic_analyzer::util
  * Otherwise, returns `true` and the resolved name.
  */
 [[nodiscard]] std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type(const semantic_context &context,
-        const definition::fully_qualified_name &full_name);
+        const ast::type::custom_type_ast_node &custom_type_node);
 
 /**
  * @return Whether the type was successfully resolved

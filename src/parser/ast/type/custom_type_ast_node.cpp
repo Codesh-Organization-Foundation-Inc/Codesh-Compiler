@@ -2,6 +2,7 @@
 
 #include "lexer/trie/keywords.h"
 #include "output/ir/instruction.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type::
@@ -12,7 +13,16 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 
 codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const blasphemy::code_position code_position,
         definition::fully_qualified_name name) :
-    type_ast_node(code_position), name(std::move(name))
+    type_ast_node(code_position),
+    name(std::move(name))
+{
+}
+
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const blasphemy::code_position code_position,
+                                                              ast::type_decl::type_declaration_ast_node &type_decl) :
+    type_ast_node(code_position),
+    name(type_decl.get_unresolved_name()),
+    known_type_declaration(type_decl)
 {
 }
 
@@ -50,6 +60,12 @@ std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const
         return lexer::trie::keyword::ALIAS_STRING;
 
     return fqn.holy_join();
+}
+
+std::optional<std::reference_wrapper<codesh::ast::type_decl::type_declaration_ast_node>> codesh::ast::type::
+    custom_type_ast_node::get_known_type_declaration() const
+{
+    return known_type_declaration;
 }
 
 codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::to_instruction_type() const
