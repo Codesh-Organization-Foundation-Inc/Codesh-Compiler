@@ -1,6 +1,7 @@
 #include "assignment_operator_ast_node.h"
 
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
+#include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "output/ir/util.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
@@ -43,7 +44,16 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
     const auto op_type = get_operator_type();
     const auto &rhs = get_right();
 
-    if (op_type == output::ir::operator_type::ADD)
+    if (op_type == output::ir::operator_type::ASSIGN)
+    {
+        // Emit the RHS directly
+        rhs.emit_ir(containing_block, symbol_table, containing_type_decl);
+        // Then immediately load it to the variable in question
+        containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
+            type, lvt_index
+        ));
+    }
+    else if (op_type == output::ir::operator_type::ADD)
     {
         output::ir::util::emit_assignment_by_value_optimized(
             containing_block, symbol_table, containing_type_decl,
