@@ -8,8 +8,6 @@
 #include "output/ir/util.h"
 #include "output/jvm_target/constant_pool.h"
 
-#include <limits>
-
 template <typename T>
 codesh::ast::var_reference::evaluable_ast_node<T>::evaluable_ast_node(const blasphemy::code_position code_position,
         std::unique_ptr<type::type_ast_node> type, T value) :

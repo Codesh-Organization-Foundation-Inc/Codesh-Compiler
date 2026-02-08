@@ -4,6 +4,7 @@
 #include "output/ir/instruction/if_instruction.h"
 #include "output/ir/instruction/increment_int_by_constant_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
+#include "output/ir/instruction/scope_marker.h"
 #include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "output/ir/util.h"
 #include "parser/ast/collection/range_ast_node.h"
@@ -72,7 +73,12 @@ void codesh::ast::block::for_ast_node::emit_ir(
     const auto it_type = iterator.get_type()->to_instruction_type();
     const auto it_lvt = iterator.get_resolved().get_jvm_index();
 
-    // Initialize iterator to range start
+    // Begin the iterator's scope BEFORE init so it's visible in the condition and body.
+    // Thus, we emit markers manually INSTEAD of using body_scope.emit_ir() which would only
+    // wrap the body statements.
+    containing_block.add_instruction(std::make_unique<output::ir::scope_begin_marker>(body_scope));
+
+    // Initialize the iterator to the range's start
     range->get_from().emit_ir(containing_block, symbol_table, containing_type_decl);
 
     containing_block.add_instruction(std::make_unique<output::ir::store_in_local_var_instruction>(
@@ -80,15 +86,20 @@ void codesh::ast::block::for_ast_node::emit_ir(
         it_lvt
     ));
 
-
-    // Emit body scope
+    // Manually emit body scope
     output::ir::code_block body_block;
-    body_scope.emit_ir(body_block, symbol_table, containing_type_decl);
+    for (const auto &method_op : body_scope.get_body())
+    {
+        const auto ir_emitter = dynamic_cast<i_ir_emitter *>(method_op.get());
+        if (!ir_emitter)
+            continue;
 
+        ir_emitter->emit_ir(body_block, symbol_table, containing_type_decl);
+    }
 
-    // Emit skip
+    // Emit the skip
     output::ir::util::emit_increment_by_value_optimized(
-        containing_block, symbol_table, containing_type_decl,
+        body_block, symbol_table, containing_type_decl,
         range->get_skip(),
         it_type,
         output::ir::operator_type::ADD,
@@ -96,8 +107,7 @@ void codesh::ast::block::for_ast_node::emit_ir(
         skip_constant_cpi
     );
 
-
-    const size_t body_jump_size = body_block.size() + 3; // body + goto
+    const size_t body_jump_size = body_block.size() + 3; // body + advance + goto
 
     output::ir::code_block condition_block;
 
@@ -125,4 +135,7 @@ void codesh::ast::block::for_ast_node::emit_ir(
     containing_block.add_instruction(std::make_unique<output::ir::goto_instruction>(
         -static_cast<int>(condition_size + body_jump_size)
     ));
+
+    // End the loop scope
+    containing_block.add_instruction(std::make_unique<output::ir::scope_end_marker>(body_scope));
 }
