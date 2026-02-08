@@ -27,7 +27,7 @@ namespace codesh::output::ir::util
  * 2. An integer
  * 3. No longer than 2 bytes in size
  *
- * ... uses a single opcode (iinc).
+ * ...uses a single opcode (iinc).
  *
  * Otherwise, uses 4 opcodes.
  */

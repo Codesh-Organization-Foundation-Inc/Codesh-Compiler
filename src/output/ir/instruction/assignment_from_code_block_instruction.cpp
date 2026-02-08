@@ -2,8 +2,8 @@
 
 #include "parser/ast/var_reference/value_ast_node.h"
 
-codesh::output::ir::assignment_from_code_block_instruction::assignment_from_code_block_instruction(const instruction_type type,
-        const operator_type op_type, const int target_lvt_index, code_block _code_block) :
+codesh::output::ir::assignment_from_code_block_instruction::assignment_from_code_block_instruction(
+        const instruction_type type, const operator_type op_type, const int target_lvt_index, code_block _code_block) :
     assignment_instruction(type, op_type, target_lvt_index),
     _code_block(std::move(_code_block))
 {

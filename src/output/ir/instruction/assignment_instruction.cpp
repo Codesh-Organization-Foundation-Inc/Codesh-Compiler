@@ -24,13 +24,12 @@ void codesh::output::ir::assignment_instruction::emit(std::vector<instruction_co
 {
     // Load target
     load_instruction(type, target_lvt_index).emit(collector);
-
     // Load RHS
     emit_rhs(collector);
 
-    // Add
+    // Apply operator
     operator_instruction(type, op_type).emit(collector);
 
-    // Store in target
+    // Store result in target
     store_in_local_var_instruction(type, target_lvt_index).emit(collector);
 }
