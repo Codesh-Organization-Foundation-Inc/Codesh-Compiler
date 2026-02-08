@@ -101,9 +101,7 @@ void codesh::ast::block::for_ast_node::emit_ir(
     output::ir::util::emit_increment_by_value_optimized(
         body_block, symbol_table, containing_type_decl,
         range->get_skip(),
-        it_type,
-        output::ir::operator_type::ADD,
-        it_lvt,
+        {it_type, output::ir::operator_type::ADD, it_lvt},
         skip_constant_cpi
     );
 
