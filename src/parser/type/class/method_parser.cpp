@@ -262,7 +262,6 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 
     return std::make_unique<codesh::ast::block::for_ast_node>(
         for_pos,
-        std::move(iterator_decl),
         std::move(collection),
         for_scope
     );

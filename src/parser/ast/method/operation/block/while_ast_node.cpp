@@ -33,6 +33,10 @@ void codesh::ast::block::while_ast_node::set_statement_index(const size_t statem
 void codesh::ast::block::while_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
                                     output::jvm_target::constant_pool &constant_pool)
 {
+    if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(condition.get()))
+    {
+        cp_emitter->emit_constants(root_node, constant_pool);
+    }
     body_scope.emit_constants(root_node, constant_pool);
 }
 

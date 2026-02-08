@@ -33,6 +33,10 @@ enum class opcode : unsigned char
     INVOKE_STATIC = 0xB8,
     INVOKE_VIRTUAL = 0xB6,
 
+    WIDE = 0xC4,
+
+    I_INC = 0x84,
+
     I_ADD = 0x60,
     I_SUB = 0x64,
     I_MUL = 0x68,

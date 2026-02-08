@@ -14,7 +14,7 @@ std::string codesh::ast::op::assignment::subtraction_assignment_operator_ast_nod
     return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_SUBTRACTION_ASSIGNMENT);
 }
 
-std::optional<codesh::output::ir::operator_type> codesh::ast::op::assignment::subtraction_assignment_operator_ast_node::
+codesh::output::ir::operator_type codesh::ast::op::assignment::subtraction_assignment_operator_ast_node::
     get_operator_type() const
 {
     return output::ir::operator_type::SUB;
