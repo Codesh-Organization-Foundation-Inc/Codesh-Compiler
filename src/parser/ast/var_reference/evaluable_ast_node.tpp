@@ -5,6 +5,7 @@
 #include "output/ir/instruction/load_constant_pool_instruction.h"
 #include "output/ir/instruction/load_int_constant_instruction.h"
 #include "output/ir/instruction/load_wide_constant_pool_instruction.h"
+#include "output/ir/util.h"
 #include "output/jvm_target/constant_pool.h"
 
 #include <limits>
@@ -42,11 +43,9 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::emit_constants(
 {
     if constexpr (std::is_same_v<T, int>)
     {
-        // Only save numbers greater than 16 bits
-        if (std::numeric_limits<int16_t>::min() > value || value > std::numeric_limits<int16_t>::max())
-        {
-            value_cpi = constant_pool.goc_integer_info(value);
-        }
+        //FIXME: Currently, if there exists a big integer made for subtraction, it will also save a constant for the
+        // unnecessary positive value of it.
+        value_cpi = output::ir::util::goc_big_value(*this, constant_pool, output::ir::operator_type::ASSIGN);
     }
     else if constexpr (std::is_same_v<T, float>)
     {
