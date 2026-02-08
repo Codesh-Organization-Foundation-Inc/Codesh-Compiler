@@ -235,6 +235,8 @@ add_executable(codeshc
         src/parser/value/assignment_value_parser.h
         src/parser/value/new_value_parser.cpp
         src/parser/value/new_value_parser.h
+        src/parser/value/primitive_value_parser.cpp
+        src/parser/value/primitive_value_parser.h
         src/parser/ast/impl/i_constant_pool_emitter.h
         src/parser/ast/operator/math/minus_operator_ast_node.cpp
         src/parser/ast/operator/math/minus_operator_ast_node.h
