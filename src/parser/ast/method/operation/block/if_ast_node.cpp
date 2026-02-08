@@ -1,6 +1,7 @@
 #include "if_ast_node.h"
 
 #include "output/ir/condition_block_builder.h"
+#include "output/ir/instruction/goto_instruction.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 

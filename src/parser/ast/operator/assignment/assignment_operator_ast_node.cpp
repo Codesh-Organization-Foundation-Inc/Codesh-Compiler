@@ -1,6 +1,7 @@
 #include "assignment_operator_ast_node.h"
 
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 codesh::ast::op::assignment::assignment_operator_ast_node::assignment_operator_ast_node(

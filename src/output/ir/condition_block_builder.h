@@ -1,6 +1,7 @@
 #pragma once
 
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/impl/opcode.h"
 
 namespace codesh::ast::var_reference
 {

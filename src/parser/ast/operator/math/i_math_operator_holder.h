@@ -1,6 +1,6 @@
 #pragma once
 
-#include "output/ir/instruction.h"
+#include "output/ir/instruction/impl/opcode.h"
 
 namespace codesh::ast::op
 {

@@ -145,12 +145,45 @@ add_executable(codeshc
         src/semantic_analyzer/method_decl/resolve_aliases.h
         src/blasphemy/blasphemy_collector.h
         src/blasphemy/blasphemy_collector.cpp
-        src/output/ir/instruction.cpp
-        src/output/ir/instruction.h
+        src/output/ir/instruction/impl/instruction.cpp
+        src/output/ir/instruction/impl/instruction.h
+        src/output/ir/instruction/impl/instruction_container.cpp
+        src/output/ir/instruction/impl/instruction_container.h
+        src/output/ir/instruction/impl/opcode.h
+        src/output/ir/instruction/impl/simple_instruction.cpp
+        src/output/ir/instruction/impl/simple_instruction.h
+        src/output/ir/instruction/impl/typed_instruction.cpp
+        src/output/ir/instruction/impl/typed_instruction.h
+        src/output/ir/instruction/nop_instruction.cpp
+        src/output/ir/instruction/nop_instruction.h
+        src/output/ir/instruction/load_instruction.cpp
+        src/output/ir/instruction/load_instruction.h
+        src/output/ir/instruction/return_instruction.cpp
+        src/output/ir/instruction/return_instruction.h
+        src/output/ir/instruction/invoke_instruction.cpp
+        src/output/ir/instruction/invoke_instruction.h
+        src/output/ir/instruction/load_int_constant_instruction.cpp
+        src/output/ir/instruction/load_int_constant_instruction.h
+        src/output/ir/instruction/load_constant_pool_instruction.cpp
+        src/output/ir/instruction/load_constant_pool_instruction.h
+        src/output/ir/instruction/load_wide_constant_pool_instruction.cpp
+        src/output/ir/instruction/load_wide_constant_pool_instruction.h
+        src/output/ir/instruction/store_in_local_var_instruction.cpp
+        src/output/ir/instruction/store_in_local_var_instruction.h
+        src/output/ir/instruction/operator_instruction.cpp
+        src/output/ir/instruction/operator_instruction.h
+        src/output/ir/instruction/get_static_instruction.cpp
+        src/output/ir/instruction/get_static_instruction.h
+        src/output/ir/instruction/goto_instruction.cpp
+        src/output/ir/instruction/goto_instruction.h
+        src/output/ir/instruction/if_instruction.cpp
+        src/output/ir/instruction/if_instruction.h
+        src/output/ir/instruction/marker_instruction.cpp
+        src/output/ir/instruction/marker_instruction.h
+        src/output/ir/instruction/scope_marker.cpp
+        src/output/ir/instruction/scope_marker.h
         src/output/ir/code_block.cpp
         src/output/ir/code_block.h
-        src/output/ir/instruction.cpp
-        src/output/ir/instruction.h
         src/parser/ast/method/operation/return_ast_node.cpp
         src/parser/ast/method/operation/return_ast_node.h
         src/parser/ast/operator/boolean/not_operator_ast_node.h

@@ -1,7 +1,7 @@
 #include "primitive_type_ast_node.h"
 
 #include "lexer/trie/keywords.h"
-#include "output/ir/instruction.h"
+#include "output/ir/instruction/impl/opcode.h"
 #include "fmt/format.h"
 
 #include <stdexcept>

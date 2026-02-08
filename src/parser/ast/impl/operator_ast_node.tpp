@@ -1,6 +1,7 @@
 #pragma once
 
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/operator_instruction.h"
 #include "parser/ast/operator/math/i_math_operator_holder.h"
 
 template <int operands>
