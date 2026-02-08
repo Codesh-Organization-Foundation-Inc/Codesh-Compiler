@@ -2,7 +2,7 @@
 
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
 #include "output/ir/instruction/if_instruction.h"
-#include "output/ir/instruction/increment_by_constant_instruction.h"
+#include "output/ir/instruction/increment_int_by_constant_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "output/ir/util.h"

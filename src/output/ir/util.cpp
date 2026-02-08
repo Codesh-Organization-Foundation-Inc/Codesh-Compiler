@@ -1,7 +1,7 @@
 #include "util.h"
 
 #include "instruction/assignment_from_code_block_instruction.h"
-#include "instruction/increment_by_constant_instruction.h"
+#include "instruction/increment_int_by_constant_instruction.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 
 static constexpr short MIN_INT_CONSTANT = std::numeric_limits<int16_t>::min();
@@ -33,15 +33,13 @@ void codesh::output::ir::util::emit_increment_by_value_optimized(code_block &con
         const ast::var_reference::value_ast_node &value_node, instruction_type type, operator_type op_type,
         int target_lvt_index, std::optional<int> constant_rhs_cpi)
 {
-    //TODO: Handle non-int
     if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&value_node))
     {
         const auto value = op_type == operator_type::SUB
             ? -evaluable->get_value()
             : evaluable->get_value();
 
-        containing_block.add_instruction(std::make_unique<increment_by_constant_instruction>(
-            type, // Always int rn
+        containing_block.add_instruction(std::make_unique<increment_int_by_constant_instruction>(
             target_lvt_index,
             value,
             constant_rhs_cpi

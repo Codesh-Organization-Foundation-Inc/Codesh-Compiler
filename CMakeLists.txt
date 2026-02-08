@@ -184,8 +184,8 @@ add_executable(codeshc
         src/output/ir/instruction/assignment_from_code_block_instruction.h
         src/output/ir/instruction/assignment_from_constant_instruction.cpp
         src/output/ir/instruction/assignment_from_constant_instruction.h
-        src/output/ir/instruction/increment_by_constant_instruction.cpp
-        src/output/ir/instruction/increment_by_constant_instruction.h
+        src/output/ir/instruction/increment_int_by_constant_instruction.cpp
+        src/output/ir/instruction/increment_int_by_constant_instruction.h
         src/output/ir/instruction/marker_instruction.cpp
         src/output/ir/instruction/marker_instruction.h
         src/output/ir/instruction/scope_marker.cpp
