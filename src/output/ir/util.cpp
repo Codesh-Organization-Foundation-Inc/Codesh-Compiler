@@ -25,10 +25,10 @@ std::optional<int> codesh::output::ir::util::goc_big_value(const ast::var_refere
     return std::nullopt;
 }
 
-void codesh::output::ir::util::emit_assignment_by_value_optimized(code_block &containing_block,
+void codesh::output::ir::util::emit_increment_by_value_optimized(code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const ast::type_decl::type_declaration_ast_node &containing_type_decl,
-        const ast::var_reference::value_ast_node &value_node, instruction_type type, operator_type op_type,
+        const ast::var_reference::value_ast_node &value_node, instruction_type type,
         int target_lvt_index, std::optional<int> constant_rhs_cpi)
 {
     //TODO: Handle non-int
@@ -50,7 +50,7 @@ void codesh::output::ir::util::emit_assignment_by_value_optimized(code_block &co
 
         containing_block.add_instruction(std::make_unique<assignment_from_code_block_instruction>(
             type,
-            op_type,
+            operator_type::ADD,
             target_lvt_index,
             std::move(skip_block)
         ));

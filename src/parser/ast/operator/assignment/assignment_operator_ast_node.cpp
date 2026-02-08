@@ -55,9 +55,9 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
     }
     else if (op_type == output::ir::operator_type::ADD)
     {
-        output::ir::util::emit_assignment_by_value_optimized(
+        output::ir::util::emit_increment_by_value_optimized(
             containing_block, symbol_table, containing_type_decl,
-            rhs, type, op_type, lvt_index, rhs_cpi
+            rhs, type, lvt_index, rhs_cpi
         );
     }
     else
