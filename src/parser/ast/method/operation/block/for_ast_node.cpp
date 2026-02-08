@@ -55,7 +55,7 @@ void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast
 
     if (const auto range = dynamic_cast<const collection::range_ast_node *>(collection.get()))
     {
-        skip_constant_cpi = output::ir::util::goc_big_value(*range, constant_pool);
+        skip_constant_cpi = output::ir::util::goc_big_value(*range, constant_pool, output::ir::operator_type::ADD);
     }
 }
 
@@ -87,7 +87,7 @@ void codesh::ast::block::for_ast_node::emit_ir(
 
 
     // Emit skip
-    output::ir::util::emit_assignment_by_value_optimized(
+    output::ir::util::emit_increment_by_value_optimized(
         containing_block, symbol_table, containing_type_decl,
         range->get_skip(),
         it_type,

@@ -9,23 +9,25 @@ static constexpr short MAX_INT_CONSTANT = std::numeric_limits<int16_t>::max();
 
 
 std::optional<int> codesh::output::ir::util::goc_big_value(const ast::var_reference::value_ast_node &value_node,
-        jvm_target::constant_pool &constant_pool)
+        jvm_target::constant_pool &constant_pool, const operator_type applied_operator)
 {
     //TODO: Handle non-int
     if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&value_node))
     {
-        const auto skip_constant = evaluable->get_value();
+        const auto value = applied_operator == operator_type::SUB
+            ? -evaluable->get_value()
+            : evaluable->get_value();
 
-        if (skip_constant < MIN_INT_CONSTANT || skip_constant > MAX_INT_CONSTANT)
+        if (value < MIN_INT_CONSTANT || value > MAX_INT_CONSTANT)
         {
-            return constant_pool.goc_integer_info(skip_constant);
+            return constant_pool.goc_integer_info(value);
         }
     }
 
     return std::nullopt;
 }
 
-void codesh::output::ir::util::emit_assignment_by_value_optimized(code_block &containing_block,
+void codesh::output::ir::util::emit_increment_by_value_optimized(code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const ast::type_decl::type_declaration_ast_node &containing_type_decl,
         const ast::var_reference::value_ast_node &value_node, instruction_type type, operator_type op_type,
@@ -34,7 +36,9 @@ void codesh::output::ir::util::emit_assignment_by_value_optimized(code_block &co
     //TODO: Handle non-int
     if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&value_node))
     {
-        const auto value = evaluable->get_value();
+        const auto value = op_type == operator_type::SUB
+            ? -evaluable->get_value()
+            : evaluable->get_value();
 
         containing_block.add_instruction(std::make_unique<increment_by_constant_instruction>(
             type, // Always int rn

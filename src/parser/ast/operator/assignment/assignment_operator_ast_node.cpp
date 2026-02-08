@@ -27,7 +27,7 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_constants(
     const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
 {
     binary_ast_node::emit_constants(root_node, constant_pool);
-    rhs_cpi = output::ir::util::goc_big_value(get_right(), constant_pool);
+    rhs_cpi = output::ir::util::goc_big_value(get_right(), constant_pool, get_operator_type());
 }
 
 void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
@@ -53,9 +53,9 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
             type, lvt_index
         ));
     }
-    else if (op_type == output::ir::operator_type::ADD)
+    else if (op_type == output::ir::operator_type::ADD || op_type == output::ir::operator_type::SUB)
     {
-        output::ir::util::emit_assignment_by_value_optimized(
+        output::ir::util::emit_increment_by_value_optimized(
             containing_block, symbol_table, containing_type_decl,
             rhs, type, op_type, lvt_index, rhs_cpi
         );
