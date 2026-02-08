@@ -8,6 +8,8 @@ namespace codesh::ast::op::assignment
 
 class assignment_operator_ast_node : public impl::binary_ast_node
 {
+    std::optional<int> rhs_cpi;
+
 public:
     assignment_operator_ast_node(blasphemy::code_position code_position,
             std::unique_ptr<variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right);
@@ -17,6 +19,10 @@ public:
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
     [[nodiscard]] virtual output::ir::operator_type get_operator_type() const = 0;
+
+
+    void emit_constants(const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
+        override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
                  const type_decl::type_declaration_ast_node &containing_type_decl) const override;

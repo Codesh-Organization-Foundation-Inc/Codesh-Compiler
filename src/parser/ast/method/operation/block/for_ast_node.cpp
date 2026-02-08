@@ -55,16 +55,7 @@ void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast
 
     if (const auto range = dynamic_cast<const collection::range_ast_node *>(collection.get()))
     {
-        if (const auto evaluable = dynamic_cast<const var_reference::evaluable_ast_node<int> *>(&range->get_skip()))
-        {
-            const auto skip_constant = evaluable->get_value();
-
-            if (skip_constant < std::numeric_limits<int16_t>::min()
-                || skip_constant > std::numeric_limits<int16_t>::max())
-            {
-                skip_constant_cpi = constant_pool.goc_integer_info(skip_constant);
-            }
-        }
+        skip_constant_cpi = output::ir::util::goc_big_value(*range, constant_pool);
     }
 }
 
