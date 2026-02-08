@@ -2,7 +2,7 @@
 
 #include "method_declaration_ast_node.h"
 #include "output/ir/code_block.h"
-#include "output/ir/instruction.h"
+#include "output/ir/instruction/scope_marker.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_scope_symbol>> &codesh::ast::method::
     method_scope_ast_node::_get_resolved() const

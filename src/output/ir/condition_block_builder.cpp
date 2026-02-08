@@ -1,4 +1,7 @@
 #include "output/ir/condition_block_builder.h"
+#include "output/ir/instruction/if_instruction.h"
+#include "output/ir/instruction/load_int_constant_instruction.h"
+#include "output/ir/instruction/goto_instruction.h"
 
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/equals_operator_ast_node.h"

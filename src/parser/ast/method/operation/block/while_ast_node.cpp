@@ -2,6 +2,7 @@
 #include "while_ast_node.h"
 
 #include "output/ir/condition_block_builder.h"
+#include "output/ir/instruction/goto_instruction.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
 codesh::ast::block::while_ast_node::while_ast_node(const blasphemy::code_position code_position,

@@ -1,6 +1,7 @@
 #include "return_ast_node.h"
 
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/return_instruction.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 

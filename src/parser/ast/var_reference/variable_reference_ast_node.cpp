@@ -1,7 +1,9 @@
 #include "variable_reference_ast_node.h"
 
-#include "output/jvm_target/constant_pool.h"
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/get_static_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
+#include "output/jvm_target/constant_pool.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 variable_reference_ast_node::variable_reference_ast_node(const codesh::blasphemy::code_position code_position, codesh::definition::fully_qualified_name name) :

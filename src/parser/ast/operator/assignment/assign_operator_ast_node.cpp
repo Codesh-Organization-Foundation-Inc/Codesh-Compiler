@@ -3,6 +3,7 @@
 #include "lexer/trie/keywords.h"
 #include "output/ir/code_block.h"
 #include "output/ir/condition_block_builder.h"
+#include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "parser/ast/operator/boolean/boolean_binary_ast_node.h"
 #include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"

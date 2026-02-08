@@ -3,6 +3,8 @@
 #include "defenition/definitions.h"
 #include "fmt/xchar.h"
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/invoke_instruction.h"
+#include "output/ir/instruction/marker_instruction.h"
 #include "parser/ast/method/util.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
