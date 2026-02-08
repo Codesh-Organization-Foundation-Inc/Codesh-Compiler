@@ -47,48 +47,9 @@ enum class opcode : unsigned char
     I_XOR = 0x82
 };
 
-enum class instruction_type
-{
-    INT,
-    LONG,
-    FLOAT,
-    DOUBLE,
-    REFERENCE
-};
-
-enum class invokation_type
-{
-    DYNAMIC,
-    INTERFACE,
-    SPECIAL, // Calls a private method_cp_index, constructor or this/super constructor
-    STATIC,
-    VIRTUAL
-};
-
-enum class if_type
-{
-    IS_ZERO,
-    IS_NONZERO,
-
-    IS_NEGATIVE,
-    IS_POSITIVE_OR_ZERO,
-    IS_POSITIVE,
-    IS_NEGATIVE_OR_ZERO,
-
-    ARE_INTS_EQUAL,
-    ARE_INTS_NOT_EQUAL,
-
-    IS_INT_LESSER,
-    IS_INT_GREATER_OR_EQUAL,
-    IS_INT_GREATER,
-    IS_INT_LESSER_OR_EQUAL,
-
-    ARE_REFS_EQUAL,
-    ARE_REFS_NOT_EQUAL,
-};
-
 enum class operator_type
 {
+    ASSIGN,
     ADD,
     SUB,
     MUL,
@@ -110,14 +71,6 @@ enum class operator_type
 constexpr unsigned char operator*(const opcode op)
 {
     return static_cast<unsigned char>(op);
-}
-constexpr unsigned char operator*(const instruction_type instr_type)
-{
-    return static_cast<unsigned char>(instr_type);
-}
-constexpr unsigned char operator*(const if_type instr_type)
-{
-    return static_cast<unsigned char>(instr_type);
 }
 
 }

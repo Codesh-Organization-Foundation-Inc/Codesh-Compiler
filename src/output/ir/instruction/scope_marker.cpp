@@ -1,5 +1,4 @@
 #include "scope_marker.h"
-#include "parser/ast/method/method_scope_ast_node.h"
 
 codesh::output::ir::scope_marker::scope_marker(const ast::method::method_scope_ast_node &scope) :
     scope(scope)

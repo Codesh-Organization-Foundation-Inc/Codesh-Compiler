@@ -6,6 +6,9 @@
 namespace codesh::output::ir
 {
 
+enum class instruction_type;
+
+
 class typed_instruction : public instruction
 {
     static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
@@ -23,5 +26,20 @@ public:
 
     void emit(std::vector<instruction_container> &collector) const override;
 };
+
+
+enum class instruction_type
+{
+    INT,
+    LONG,
+    FLOAT,
+    DOUBLE,
+    REFERENCE
+};
+
+constexpr unsigned char operator*(const instruction_type instr_type)
+{
+    return static_cast<unsigned char>(instr_type);
+}
 
 }

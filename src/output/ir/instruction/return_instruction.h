@@ -1,6 +1,7 @@
 #pragma once
 
 #include "impl/simple_instruction.h"
+#include "impl/typed_instruction.h"
 
 namespace codesh::output::ir
 {

@@ -1,5 +1,4 @@
 #include "marker_instruction.h"
-#include "impl/instruction_container.h"
 
 void codesh::output::ir::marker_instruction::emit(std::vector<instruction_container> &collector) const
 {
