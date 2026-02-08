@@ -73,8 +73,11 @@ static bool emit_increment_by_evaluable(codesh::output::ir::code_block &containi
         const codesh::ast::var_reference::evaluable_ast_node<int> &evaluable,
         const codesh::output::ir::lvt_operand &operand, std::optional<int> constant_int_rhs_cpi)
 {
-    if (operand.op_type != codesh::output::ir::operator_type::ADD && operand.op_type != codesh::output::ir::operator_type::SUB)
+    if (operand.op_type != codesh::output::ir::operator_type::ADD
+        && operand.op_type != codesh::output::ir::operator_type::SUB)
+    {
         return false;
+    }
 
     const auto value = operand.op_type == codesh::output::ir::operator_type::SUB
         ? -evaluable.get_value()
