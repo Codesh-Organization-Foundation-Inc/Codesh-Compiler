@@ -43,7 +43,7 @@ void codesh::ast::var_reference::evaluable_ast_node<T>::emit_constants(
     {
         //FIXME: Currently, if there exists a big integer made for subtraction, it will also save a constant for the
         // unnecessary positive value of it.
-        value_cpi = output::ir::util::goc_big_value(*this, constant_pool, output::ir::operator_type::ASSIGN);
+        value_cpi = output::ir::util::goc_big_int_value(*this, constant_pool, output::ir::operator_type::ASSIGN);
     }
     else if constexpr (std::is_same_v<T, float>)
     {

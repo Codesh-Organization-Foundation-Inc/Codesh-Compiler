@@ -7,12 +7,24 @@
 static constexpr short MIN_INT_CONSTANT = std::numeric_limits<int16_t>::min();
 static constexpr short MAX_INT_CONSTANT = std::numeric_limits<int16_t>::max();
 
+/**
+ * @returns Whether the block was successfully emitted
+ */
+static bool emit_increment_by_evaluable(codesh::output::ir::code_block &containing_block,
+        const codesh::ast::var_reference::evaluable_ast_node<int> &evaluable, codesh::output::ir::operator_type op_type,
+        int target_lvt_index, std::optional<int> constant_int_rhs_cpi);
 
-std::optional<int> codesh::output::ir::util::goc_big_value(const ast::var_reference::value_ast_node &value_node,
+static void emit_increment_by_value(codesh::output::ir::code_block &containing_block,
+        const codesh::semantic_analyzer::symbol_table &symbol_table,
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        const codesh::ast::var_reference::value_ast_node &rhs_value, codesh::output::ir::instruction_type type,
+        codesh::output::ir::operator_type op_type, int target_lvt_index);
+
+
+std::optional<int> codesh::output::ir::util::goc_big_int_value(const ast::var_reference::value_ast_node &rhs_value,
         jvm_target::constant_pool &constant_pool, const operator_type applied_operator)
 {
-    //TODO: Handle non-int
-    if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&value_node))
+    if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&rhs_value))
     {
         const auto value = applied_operator == operator_type::SUB
             ? -evaluable->get_value()
@@ -30,31 +42,70 @@ std::optional<int> codesh::output::ir::util::goc_big_value(const ast::var_refere
 void codesh::output::ir::util::emit_increment_by_value_optimized(code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const ast::type_decl::type_declaration_ast_node &containing_type_decl,
-        const ast::var_reference::value_ast_node &value_node, instruction_type type, operator_type op_type,
-        int target_lvt_index, std::optional<int> constant_rhs_cpi)
+        const ast::var_reference::value_ast_node &rhs_value, const instruction_type type, const operator_type op_type,
+        const int target_lvt_index, const std::optional<int> constant_int_rhs_cpi)
 {
-    if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&value_node))
+    // Prefer optimized version
+    if (const auto evaluable = dynamic_cast<const ast::var_reference::evaluable_ast_node<int> *>(&rhs_value))
     {
-        const auto value = op_type == operator_type::SUB
-            ? -evaluable->get_value()
-            : evaluable->get_value();
-
-        containing_block.add_instruction(std::make_unique<increment_int_by_constant_instruction>(
-            target_lvt_index,
-            value,
-            constant_rhs_cpi
-        ));
-    }
-    else
-    {
-        code_block skip_block;
-        value_node.emit_ir(skip_block, symbol_table, containing_type_decl);
-
-        containing_block.add_instruction(std::make_unique<assignment_from_code_block_instruction>(
-            type,
+        const auto did_emit = emit_increment_by_evaluable(
+            containing_block,
+            *evaluable,
             op_type,
             target_lvt_index,
-            std::move(skip_block)
-        ));
+            constant_int_rhs_cpi
+        );
+
+        if (did_emit)
+            return;
     }
+
+    emit_increment_by_value(
+        containing_block,
+        symbol_table,
+        containing_type_decl,
+        rhs_value,
+        type,
+        op_type,
+        target_lvt_index
+    );
+}
+
+
+static bool emit_increment_by_evaluable(codesh::output::ir::code_block &containing_block,
+        const codesh::ast::var_reference::evaluable_ast_node<int> &evaluable,
+        const codesh::output::ir::operator_type op_type, const int target_lvt_index,
+        std::optional<int> constant_int_rhs_cpi)
+{
+    if (op_type != codesh::output::ir::operator_type::ADD && op_type != codesh::output::ir::operator_type::SUB)
+        return false;
+
+    const auto value = op_type == codesh::output::ir::operator_type::SUB
+        ? -evaluable.get_value()
+        : evaluable.get_value();
+
+    containing_block.add_instruction(std::make_unique<codesh::output::ir::increment_int_by_constant_instruction>(
+        target_lvt_index,
+        value,
+        constant_int_rhs_cpi
+    ));
+
+    return true;
+}
+
+static void emit_increment_by_value(codesh::output::ir::code_block &containing_block,
+        const codesh::semantic_analyzer::symbol_table &symbol_table,
+        const codesh::ast::type_decl::type_declaration_ast_node &containing_type_decl,
+        const codesh::ast::var_reference::value_ast_node &rhs_value, codesh::output::ir::instruction_type type,
+        const codesh::output::ir::operator_type op_type, int target_lvt_index)
+{
+    codesh::output::ir::code_block skip_block;
+    rhs_value.emit_ir(skip_block, symbol_table, containing_type_decl);
+
+    containing_block.add_instruction(std::make_unique<codesh::output::ir::assignment_from_code_block_instruction>(
+        type,
+        op_type,
+        target_lvt_index,
+        std::move(skip_block)
+    ));
 }

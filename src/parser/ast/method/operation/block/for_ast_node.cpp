@@ -56,7 +56,7 @@ void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast
 
     if (const auto range = dynamic_cast<const collection::range_ast_node *>(collection.get()))
     {
-        skip_constant_cpi = output::ir::util::goc_big_value(*range, constant_pool, output::ir::operator_type::ADD);
+        skip_constant_cpi = output::ir::util::goc_big_int_value(*range, constant_pool, output::ir::operator_type::ADD);
     }
 }
 

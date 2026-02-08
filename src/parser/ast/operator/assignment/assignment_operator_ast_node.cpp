@@ -27,7 +27,7 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_constants(
     const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
 {
     binary_ast_node::emit_constants(root_node, constant_pool);
-    rhs_cpi = output::ir::util::goc_big_value(get_right(), constant_pool, get_operator_type());
+    rhs_cpi = output::ir::util::goc_big_int_value(get_right(), constant_pool, get_operator_type());
 }
 
 void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
@@ -40,7 +40,7 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
         throw std::runtime_error("Unsupported assignment target");
 
     const auto type = local_var->get_type()->to_instruction_type();
-    const auto lvt_index = static_cast<int>(local_var->get_jvm_index());
+    const auto lvt_index = local_var->get_jvm_index();
     const auto op_type = get_operator_type();
     const auto &rhs = get_right();
 
@@ -53,20 +53,11 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
             type, lvt_index
         ));
     }
-    else if (op_type == output::ir::operator_type::ADD || op_type == output::ir::operator_type::SUB)
+    else
     {
         output::ir::util::emit_increment_by_value_optimized(
             containing_block, symbol_table, containing_type_decl,
             rhs, type, op_type, lvt_index, rhs_cpi
         );
-    }
-    else
-    {
-        output::ir::code_block rhs_block;
-        rhs.emit_ir(rhs_block, symbol_table, containing_type_decl);
-
-        containing_block.add_instruction(std::make_unique<output::ir::assignment_from_code_block_instruction>(
-            type, op_type, lvt_index, std::move(rhs_block)
-        ));
     }
 }
