@@ -181,8 +181,9 @@ int codesh::semantic_analyzer::local_variable_symbol::get_jvm_index() const
 }
 
 codesh::semantic_analyzer::method_overloads_symbol::method_overloads_symbol(
-    i_scope_containing_symbol *const parent_symbol)
-    : symbol(parent_symbol, symbol_type::METHOD_OVERLOADS), scope(ALLOWED_SYMBOL_TYPES)
+        i_scope_containing_symbol *const parent_symbol) :
+    symbol(parent_symbol, symbol_type::METHOD_OVERLOADS),
+    scope(ALLOWED_SYMBOL_TYPES)
 {
 }
 
