@@ -185,7 +185,7 @@ public:
      *
      * @return The index of the variable as per the JVM specifications.
      */
-    [[nodiscard]] size_t get_jvm_index() const;
+    [[nodiscard]] int get_jvm_index() const;
 };
 
 
