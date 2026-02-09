@@ -69,6 +69,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         default:
             throw std::runtime_error("Invalid state");
         }
+
+        accumulated_numbers.push_back(*number);
     }
 
     if (!ACCEPTING_STATES.contains(parse_state))
