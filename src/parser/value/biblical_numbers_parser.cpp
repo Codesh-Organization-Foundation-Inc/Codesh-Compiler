@@ -1,18 +1,9 @@
 #include "biblical_numbers_parser.h"
 
+#include "parser/util.h"
+
+#include <set>
 #include <unordered_map>
-
-struct biblical_number;
-
-static std::optional<biblical_number> parse_biblical_number_token(codesh::token_group token_group);
-
-
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_biblical_value(
-    std::queue<std::unique_ptr<token>> &tokens)
-{
-    return nullptr;
-}
-
 
 struct biblical_number
 {
@@ -26,6 +17,98 @@ constexpr int operator*(const biblical_number num)
 {
     return num.value.value();
 }
+
+// To save up on calculations, these are the only relevant powers of 10 (as defined by the available keywords)
+static const std::set POWERS_OF_10 = {
+    10, 100, 1000, 10000
+};
+
+static std::optional<biblical_number> parse_biblical_number(codesh::token_group token_group);
+
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_biblical_value(
+    std::queue<std::unique_ptr<token>> &tokens)
+{
+    // The first number must not be an addition
+    bool allow_addition = false;
+
+    bool encountered_period = false;
+    bool previous_was_period = false;
+
+    int result = 0;
+    // יעני פילוג לא יודע איך לרשום
+    int current_number_distro = 0;
+
+    while (!tokens.empty())
+    {
+        const std::unique_ptr<token> token = std::move(tokens.front());
+        tokens.pop();
+
+        const auto number = parse_biblical_number(token->get_group());
+        if (!number.has_value())
+        {
+            if (previous_was_period)
+            {
+                //TODO: Incomplete number blasphemy
+            }
+
+            result += current_number_distro;
+            break;
+        }
+
+        if (number->is_period)
+        {
+            encountered_period = true;
+            previous_was_period = true;
+
+            continue;
+        }
+
+
+        // Handle value insertion
+        const int num_value = **number;
+        if (number->is_addition)
+        {
+            // Add the previous distro to the result
+            result += current_number_distro;
+
+            // Start a new distro
+            current_number_distro = num_value;
+        }
+        else
+        {
+            // Only powers of 10 should be used as multiplications
+            if (!POWERS_OF_10.contains(num_value))
+            {
+                //TODO: Throw blasphemy
+            }
+
+            current_number_distro *= num_value;
+        }
+
+
+        //TODO: Check whether the previous value is greater than the current value
+
+
+        // The first number must not be an addition
+        if (!allow_addition)
+        {
+            if (number->is_addition)
+            {
+                //TODO: Throw invalid addition blasphemy
+            }
+
+            allow_addition = true;
+        }
+
+        previous_was_period = false;
+    }
+
+    return nullptr;
+}
+
+
+
 
 static const std::unordered_map<codesh::token_group, int> BIBLICAL_NUMBER_TOKEN_TO_VALUE = {
     {codesh::token_group::KEYWORD_BIBLICAL_ZERO, 0},
@@ -76,7 +159,7 @@ static const std::unordered_map<codesh::token_group, int> BIBLICAL_NUMBER_TOKEN_
     {codesh::token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED, 10000},
 };
 
-static std::optional<biblical_number> parse_biblical_number_token(const codesh::token_group token_group)
+static std::optional<biblical_number> parse_biblical_number(const codesh::token_group token_group)
 {
     // The enums are contiguous from KEYWORD_BIBLICAL_DECIMAL_SEPARATOR to KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED;
     // Anything else is invalid.
