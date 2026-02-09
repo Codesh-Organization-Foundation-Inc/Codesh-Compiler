@@ -9,12 +9,21 @@
 
 namespace codesh::parser::value
 {
-struct biblical_number;
+struct biblical_number
+{
+    std::optional<int> value;
+
+    bool is_addition;
+    bool is_period;
+};
+
 
 class biblical_numbers_parser
 {
     std::queue<std::unique_ptr<token>> &tokens;
-    std::vector<biblical_number> accumulated_numbers;
+
+    std::optional<biblical_number> current_number;
+    std::optional<biblical_number> next_number;
 
     bool contains_period;
 
@@ -28,28 +37,28 @@ class biblical_numbers_parser
 
         HANDLE_ADDITION,
         HANDLE_MULTIPLICATION,
-        HANDLE_PERIOD,
-
-        HANDLE_INVALID_ADDITION,
-        HANDLE_INVALID_PERIOD,
-        HANDLE_INVALID_MID_PERIOD,
-
-        END
+        HANDLE_PERIOD
     };
 
     static const std::set<parsing_state> ACCEPTING_STATES;
-    static const std::set<parsing_state> ERROR_STATES;
 
     // Each method returns the new parsing state
-    parsing_state start(const biblical_number &number);
+    [[nodiscard]] parsing_state start() const;
 
-    parsing_state handle_addition(const biblical_number &number);
-    parsing_state handle_multiplication(const biblical_number &number);
-    parsing_state handle_period(const biblical_number &number);
+    [[nodiscard]] parsing_state handle_addition() const;
+    [[nodiscard]] parsing_state handle_multiplication() const;
+    [[nodiscard]] parsing_state handle_period();
 
-    parsing_state handle_invalid_addition(const biblical_number &number);
-    parsing_state handle_invalid_period(const biblical_number &number);
-    parsing_state handle_invalid_mid_period(const biblical_number &number);
+    [[nodiscard]] static parsing_state handle_invalid_addition();
+    [[nodiscard]] static parsing_state handle_invalid_period();
+    [[nodiscard]] static parsing_state handle_invalid_mid_period();
+
+    /**
+     * Collects all biblical number tokens, parses them, and puts them in order at accumulated_numbers.
+     *
+     * Throws parsing errors when necessary along the way.
+     */
+    void collect_numbers();
 
 public:
     explicit biblical_numbers_parser(std::queue<std::unique_ptr<token>> &tokens);
@@ -57,14 +66,6 @@ public:
     [[nodiscard]] std::unique_ptr<ast::var_reference::value_ast_node> parse();
 };
 
-
-struct biblical_number
-{
-    std::optional<int> value;
-
-    bool is_addition;
-    bool is_period;
-};
 
 constexpr int operator*(const biblical_number num)
 {
