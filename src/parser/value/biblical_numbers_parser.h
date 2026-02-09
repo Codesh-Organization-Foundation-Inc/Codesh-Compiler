@@ -27,7 +27,12 @@ class biblical_numbers_parser
 
     bool contains_period;
 
-    [[nodiscard]] std::optional<biblical_number> parse_biblical_number() const;
+    // יעני פילוג
+    int previous_distro;
+    int current_distro;
+
+    int result;
+
 
     // Simulate an automaton.
     // See: https://excalidraw.com/#json=bSaEqnTKpd8ElGsLu32lH,G9BrmusT0Oe0phj-kjjIRw
@@ -45,8 +50,10 @@ class biblical_numbers_parser
     // Each method returns the new parsing state
     [[nodiscard]] parsing_state start() const;
 
-    [[nodiscard]] parsing_state handle_addition() const;
-    [[nodiscard]] parsing_state handle_multiplication() const;
+    [[nodiscard]] parsing_state handle_addition();
+    [[nodiscard]] parsing_state handle_multiplication();
+    [[nodiscard]] parsing_state handle_next_number() const;
+
     [[nodiscard]] parsing_state handle_period();
 
     [[nodiscard]] static parsing_state handle_invalid_addition();
@@ -59,6 +66,8 @@ class biblical_numbers_parser
      * Throws parsing errors when necessary along the way.
      */
     void collect_numbers();
+
+    [[nodiscard]] std::optional<biblical_number> parse_biblical_number() const;
 
 public:
     explicit biblical_numbers_parser(std::queue<std::unique_ptr<token>> &tokens);

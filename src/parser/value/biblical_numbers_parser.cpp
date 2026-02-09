@@ -19,7 +19,10 @@ const std::set<codesh::parser::value::biblical_numbers_parser::parsing_state> co
 
 codesh::parser::value::biblical_numbers_parser::biblical_numbers_parser(std::queue<std::unique_ptr<token>> &tokens) :
     tokens(tokens),
-    contains_period(false)
+    contains_period(false),
+    previous_distro(0),
+    current_distro(0),
+    result(0)
 {
 }
 
@@ -66,6 +69,8 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
     {
         //TODO: Throw unexpected end of number blasphemy
     }
+
+    result += current_distro;
 }
 
 
@@ -81,24 +86,26 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_addition() const
+    handle_addition()
 {
-    if (next_number->is_addition)
-        return parsing_state::HANDLE_ADDITION;
+    result += current_distro;
 
-    if (next_number->is_period)
-    {
-        if (contains_period)
-            return handle_invalid_mid_period();
+    previous_distro = current_distro;
+    current_distro = **current_number;
 
-        return parsing_state::HANDLE_PERIOD;
-    }
-
-    return parsing_state::HANDLE_MULTIPLICATION;
+    return handle_next_number();
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_multiplication() const
+    handle_multiplication()
+{
+    current_distro *= **current_number;
+
+    return handle_next_number();
+}
+
+codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
+    handle_next_number() const
 {
     if (next_number->is_addition)
         return parsing_state::HANDLE_ADDITION;
