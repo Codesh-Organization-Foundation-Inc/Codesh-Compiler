@@ -2,6 +2,7 @@
 
 #include "arithmetic_value_parser.h"
 #include "assignment_value_parser.h"
+#include "biblical_numbers_parser.h"
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "boolean_value_parser.h"
@@ -11,20 +12,15 @@
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
-#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
-#include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "primitive_value_parser.h"
-#include "util.h"
 
 #include "fmt/format.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
 #include "token/token_group.h"
-
-#include <functional>
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -51,6 +47,33 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::KEYWORD_TRUE:
     case token_group::KEYWORD_FALSE:
         eval_ast_node = parse_primitive_value(tokens);
+        break;
+
+    // Biblical numbers
+    case token_group::KEYWORD_BIBLICAL_ZERO:
+    case token_group::KEYWORD_BIBLICAL_ONE:
+    case token_group::KEYWORD_BIBLICAL_TWO:
+    case token_group::KEYWORD_BIBLICAL_THREE:
+    case token_group::KEYWORD_BIBLICAL_FOUR:
+    case token_group::KEYWORD_BIBLICAL_FIVE:
+    case token_group::KEYWORD_BIBLICAL_SIX:
+    case token_group::KEYWORD_BIBLICAL_SEVEN:
+    case token_group::KEYWORD_BIBLICAL_EIGHT:
+    case token_group::KEYWORD_BIBLICAL_NINE:
+    case token_group::KEYWORD_BIBLICAL_TEN:
+    case token_group::KEYWORD_BIBLICAL_TWELVE:
+    case token_group::KEYWORD_BIBLICAL_TWENTY:
+    case token_group::KEYWORD_BIBLICAL_THIRTY:
+    case token_group::KEYWORD_BIBLICAL_FORTY:
+    case token_group::KEYWORD_BIBLICAL_FIFTY:
+    case token_group::KEYWORD_BIBLICAL_SIXTY:
+    case token_group::KEYWORD_BIBLICAL_SEVENTY:
+    case token_group::KEYWORD_BIBLICAL_EIGHTY:
+    case token_group::KEYWORD_BIBLICAL_NINETY:
+    case token_group::KEYWORD_BIBLICAL_HUNDRED:
+    case token_group::KEYWORD_BIBLICAL_THOUSAND:
+    case token_group::KEYWORD_BIBLICAL_TEN_THOUSAND:
+        eval_ast_node = parse_biblical_value(tokens);
         break;
 
     // Arithmetic operations

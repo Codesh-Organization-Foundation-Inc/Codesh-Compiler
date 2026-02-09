@@ -289,6 +289,8 @@ add_executable(codeshc
         src/defenition/i_pretty_string_convertable.h
         src/output/ir/util.cpp
         src/output/ir/util.h
+        src/parser/value/biblical_numbers_parser.cpp
+        src/parser/value/biblical_numbers_parser.h
 )
 
 # sudo dnf install boost-regex boost-devel
