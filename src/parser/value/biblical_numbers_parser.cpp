@@ -1,5 +1,7 @@
 #include "biblical_numbers_parser.h"
 
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/util.h"
 
 #include <unordered_map>
@@ -28,11 +30,15 @@ codesh::parser::value::biblical_numbers_parser::biblical_numbers_parser(std::que
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::biblical_numbers_parser::parse()
 {
+    const auto pos = tokens.front()->get_code_position();
     collect_numbers();
 
-    //TODO: Parse final next_number
-    //TODO: Check ascending order
-    return nullptr;
+    //TODO: Handle decimal point (double default, float matzaf suffix)
+    return std::make_unique<ast::var_reference::evaluable_ast_node<int>>(
+        pos,
+        std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::INTEGER),
+        result
+    );
 }
 
 void codesh::parser::value::biblical_numbers_parser::collect_numbers()
