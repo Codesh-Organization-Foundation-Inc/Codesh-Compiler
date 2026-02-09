@@ -20,7 +20,7 @@ const std::set<codesh::parser::value::biblical_numbers_parser::parsing_state> co
 codesh::parser::value::biblical_numbers_parser::biblical_numbers_parser(std::queue<std::unique_ptr<token>> &tokens) :
     tokens(tokens),
     contains_period(false),
-    previous_distro(0),
+    previous_distro(std::numeric_limits<int>::min()),
     current_distro(0),
     result(0)
 {
@@ -90,6 +90,12 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 {
     result += current_distro;
 
+    // Distro order should be ascending
+    if (previous_distro >= current_distro)
+    {
+        //TODO: Throw invalid number format blasphemy
+    }
+
     previous_distro = current_distro;
     current_distro = **current_number;
 
@@ -100,6 +106,15 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
     handle_multiplication()
 {
     current_distro *= **current_number;
+
+    // Number order should be ascending
+    if (next_number.has_value())
+    {
+        if (**current_number >= **next_number)
+        {
+            //TODO: Throw invalid number format blasphemy
+        }
+    }
 
     return handle_next_number();
 }
