@@ -113,6 +113,12 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 {
     current_distro *= **current_number;
 
+    // Can only multiply by powers of 10
+    if (!POWERS_OF_10.contains(**current_number))
+    {
+        //TODO: Throw invalid multiplication blasphemy
+    }
+
     // Number order should be ascending
     if (next_number.has_value())
     {
