@@ -132,7 +132,7 @@ enum class token_group : int
     COMMENT_ONE_LINER, // כה הגה ה'
 
 
-    // Biblical Numbers
+    // Biblical numbers
     KEYWORD_BIBLICAL_ZERO, // חמס
     KEYWORD_BIBLICAL_ONE, // אחד
     KEYWORD_BIBLICAL_TWO, // שתיים
@@ -156,6 +156,31 @@ enum class token_group : int
     KEYWORD_BIBLICAL_HUNDRED, // מאה
     KEYWORD_BIBLICAL_THOUSAND, // אלף
     KEYWORD_BIBLICAL_TEN_THOUSAND, // רבבה
+
+    // Biblical numbers prefixed by vav (plus)
+    KEYWORD_BIBLICAL_ZERO_ADDED,  // וחמס
+    KEYWORD_BIBLICAL_ONE_ADDED,  // ואחד
+    KEYWORD_BIBLICAL_TWO_ADDED,  // ושתיים
+    KEYWORD_BIBLICAL_THREE_ADDED,  // ושלוש
+    KEYWORD_BIBLICAL_FOUR_ADDED,  // וארבע
+    KEYWORD_BIBLICAL_FIVE_ADDED,  // וחמש
+    KEYWORD_BIBLICAL_SIX_ADDED,  // ושש
+    KEYWORD_BIBLICAL_SEVEN_ADDED,  // ושבע
+    KEYWORD_BIBLICAL_EIGHT_ADDED,  // ושמונה
+    KEYWORD_BIBLICAL_NINE_ADDED,  // ותשע
+    KEYWORD_BIBLICAL_TEN_ADDED,  // ועשר
+    KEYWORD_BIBLICAL_TWELVE_ADDED,  // ותריסר
+    KEYWORD_BIBLICAL_TWENTY_ADDED,  // ועשרים
+    KEYWORD_BIBLICAL_THIRTY_ADDED,  // ושלושים
+    KEYWORD_BIBLICAL_FORTY_ADDED,  // וארבעים
+    KEYWORD_BIBLICAL_FIFTY_ADDED,  // וחמישים
+    KEYWORD_BIBLICAL_SIXTY_ADDED,  // ושישים
+    KEYWORD_BIBLICAL_SEVENTY_ADDED,  // ושבעים
+    KEYWORD_BIBLICAL_EIGHTY_ADDED,  // ושמונים
+    KEYWORD_BIBLICAL_NINETY_ADDED,  // ותשעים
+    KEYWORD_BIBLICAL_HUNDRED_ADDED,  // ומאה
+    KEYWORD_BIBLICAL_THOUSAND_ADDED,  // ואלף
+    KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED,  // ורבבה
 
 
     // REGEX Matches

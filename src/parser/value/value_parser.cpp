@@ -73,6 +73,29 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::KEYWORD_BIBLICAL_HUNDRED:
     case token_group::KEYWORD_BIBLICAL_THOUSAND:
     case token_group::KEYWORD_BIBLICAL_TEN_THOUSAND:
+    case token_group::KEYWORD_BIBLICAL_ZERO_ADDED:
+    case token_group::KEYWORD_BIBLICAL_ONE_ADDED:
+    case token_group::KEYWORD_BIBLICAL_TWO_ADDED:
+    case token_group::KEYWORD_BIBLICAL_THREE_ADDED:
+    case token_group::KEYWORD_BIBLICAL_FOUR_ADDED:
+    case token_group::KEYWORD_BIBLICAL_FIVE_ADDED:
+    case token_group::KEYWORD_BIBLICAL_SIX_ADDED:
+    case token_group::KEYWORD_BIBLICAL_SEVEN_ADDED:
+    case token_group::KEYWORD_BIBLICAL_EIGHT_ADDED:
+    case token_group::KEYWORD_BIBLICAL_NINE_ADDED:
+    case token_group::KEYWORD_BIBLICAL_TEN_ADDED:
+    case token_group::KEYWORD_BIBLICAL_TWELVE_ADDED:
+    case token_group::KEYWORD_BIBLICAL_TWENTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_THIRTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_FORTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_FIFTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_SIXTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_SEVENTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_EIGHTY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_NINETY_ADDED:
+    case token_group::KEYWORD_BIBLICAL_HUNDRED_ADDED:
+    case token_group::KEYWORD_BIBLICAL_THOUSAND_ADDED:
+    case token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED:
         eval_ast_node = parse_biblical_value(tokens);
         break;
 
