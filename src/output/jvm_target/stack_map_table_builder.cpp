@@ -1,12 +1,12 @@
 #include "stack_map_table_builder.h"
 
 #include "constant_pool.h"
-#include "util.h"
-#include "output/ir/instruction.h"
+#include "output/ir/instruction/goto_instruction.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "util.h"
 
 #include <ranges>
 

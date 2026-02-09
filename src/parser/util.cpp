@@ -266,3 +266,18 @@ std::string codesh::parser::util::get_token_display_name(const token &token)
 
     return definition::ERROR_IDENTIFIER_CONTENT;
 }
+
+bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens)
+{
+    if (!consuming_check(tokens, token_group::OPERATOR_BY)) {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_BY,
+            blasphemy::blasphemy_type::SYNTAX,
+            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+        );
+
+        return false;
+    }
+
+    return true;
+}

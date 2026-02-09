@@ -1,7 +1,7 @@
 #include "custom_type_ast_node.h"
 
 #include "lexer/trie/keywords.h"
-#include "output/ir/instruction.h"
+#include "output/ir/instruction/impl/typed_instruction.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 

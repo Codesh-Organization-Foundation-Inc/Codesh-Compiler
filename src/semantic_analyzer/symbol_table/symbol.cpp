@@ -175,14 +175,15 @@ codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::loc
     return producing_node;
 }
 
-size_t codesh::semantic_analyzer::local_variable_symbol::get_jvm_index() const
+int codesh::semantic_analyzer::local_variable_symbol::get_jvm_index() const
 {
-    return index;
+    return static_cast<int>(index);
 }
 
 codesh::semantic_analyzer::method_overloads_symbol::method_overloads_symbol(
-    i_scope_containing_symbol *const parent_symbol)
-    : symbol(parent_symbol, symbol_type::METHOD_OVERLOADS), scope(ALLOWED_SYMBOL_TYPES)
+        i_scope_containing_symbol *const parent_symbol) :
+    symbol(parent_symbol, symbol_type::METHOD_OVERLOADS),
+    scope(ALLOWED_SYMBOL_TYPES)
 {
 }
 

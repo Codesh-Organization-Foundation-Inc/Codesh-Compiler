@@ -1,6 +1,6 @@
 #pragma once
 
-#include "instruction.h"
+#include "instruction/impl/instruction.h"
 
 #include <memory>
 #include <vector>

@@ -4,6 +4,8 @@
 #include "output/ir/code_block.h"
 // ReSharper disable once CppUnusedIncludeDirective
 #include "defenition/definitions.h"
+#include "output/ir/instruction/invoke_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 
 void codesh::ast::method::operation::super_call_ast_node::emit_ir(

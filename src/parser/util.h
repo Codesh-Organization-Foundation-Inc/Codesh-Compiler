@@ -79,4 +79,10 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  */
 [[nodiscard]] std::string get_token_display_name(const token &token);
 
+/**
+ * Consumes the "by" operator token if present, or reports an error.
+ * @return Whether the "by" token was consumed
+ */
+bool consume_by(std::queue<std::unique_ptr<token>> &tokens);
+
 }

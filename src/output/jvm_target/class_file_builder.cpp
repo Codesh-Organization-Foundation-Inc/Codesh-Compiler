@@ -3,7 +3,10 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "constant_pool.h"
 #include "defenition/definitions.h"
+#include "output/ir/code_block.h"
+#include "output/ir/instruction/scope_marker.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
@@ -11,9 +14,6 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "util.h"
-#include "output/ir/code_block.h"
-#include "output/ir/instruction.h"
-#include "constant_pool.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
 #include "semantic_analyzer/symbol_table/symbol.h"

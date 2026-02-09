@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.31.6)
-project(Codesh_Compiler CXX)
+project(codeshc CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Codesh_Compiler
+add_executable(codeshc
         src/main.cpp
         src/lexer/regex.h
         src/command_parser.cpp
@@ -145,12 +145,53 @@ add_executable(Codesh_Compiler
         src/semantic_analyzer/method_decl/resolve_aliases.h
         src/blasphemy/blasphemy_collector.h
         src/blasphemy/blasphemy_collector.cpp
-        src/output/ir/instruction.cpp
-        src/output/ir/instruction.h
+        src/output/ir/instruction/impl/opcode.h
+        src/output/ir/instruction/impl/instruction_container.cpp
+        src/output/ir/instruction/impl/instruction_container.h
+        src/output/ir/instruction/impl/instruction.cpp
+        src/output/ir/instruction/impl/instruction.h
+        src/output/ir/instruction/impl/simple_instruction.cpp
+        src/output/ir/instruction/impl/simple_instruction.h
+        src/output/ir/instruction/impl/typed_instruction.cpp
+        src/output/ir/instruction/impl/typed_instruction.h
+        src/output/ir/instruction/nop_instruction.cpp
+        src/output/ir/instruction/nop_instruction.h
+        src/output/ir/instruction/load_instruction.cpp
+        src/output/ir/instruction/load_instruction.h
+        src/output/ir/instruction/return_instruction.cpp
+        src/output/ir/instruction/return_instruction.h
+        src/output/ir/instruction/invoke_instruction.cpp
+        src/output/ir/instruction/invoke_instruction.h
+        src/output/ir/instruction/load_int_constant_instruction.cpp
+        src/output/ir/instruction/load_int_constant_instruction.h
+        src/output/ir/instruction/load_constant_pool_instruction.cpp
+        src/output/ir/instruction/load_constant_pool_instruction.h
+        src/output/ir/instruction/load_wide_constant_pool_instruction.cpp
+        src/output/ir/instruction/load_wide_constant_pool_instruction.h
+        src/output/ir/instruction/store_in_local_var_instruction.cpp
+        src/output/ir/instruction/store_in_local_var_instruction.h
+        src/output/ir/instruction/operator_instruction.cpp
+        src/output/ir/instruction/operator_instruction.h
+        src/output/ir/instruction/get_static_instruction.cpp
+        src/output/ir/instruction/get_static_instruction.h
+        src/output/ir/instruction/goto_instruction.cpp
+        src/output/ir/instruction/goto_instruction.h
+        src/output/ir/instruction/if_instruction.cpp
+        src/output/ir/instruction/if_instruction.h
+        src/output/ir/instruction/assignment_instruction.cpp
+        src/output/ir/instruction/assignment_instruction.h
+        src/output/ir/instruction/assignment_from_code_block_instruction.cpp
+        src/output/ir/instruction/assignment_from_code_block_instruction.h
+        src/output/ir/instruction/assignment_from_constant_instruction.cpp
+        src/output/ir/instruction/assignment_from_constant_instruction.h
+        src/output/ir/instruction/increment_int_by_constant_instruction.cpp
+        src/output/ir/instruction/increment_int_by_constant_instruction.h
+        src/output/ir/instruction/marker_instruction.cpp
+        src/output/ir/instruction/marker_instruction.h
+        src/output/ir/instruction/scope_marker.cpp
+        src/output/ir/instruction/scope_marker.h
         src/output/ir/code_block.cpp
         src/output/ir/code_block.h
-        src/output/ir/instruction.cpp
-        src/output/ir/instruction.h
         src/parser/ast/method/operation/return_ast_node.cpp
         src/parser/ast/method/operation/return_ast_node.h
         src/parser/ast/operator/boolean/not_operator_ast_node.h
@@ -184,8 +225,18 @@ add_executable(Codesh_Compiler
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
-        src/parser/value_parser.cpp
-        src/parser/value_parser.h
+        src/parser/value/value_parser.cpp
+        src/parser/value/value_parser.h
+        src/parser/value/arithmetic_value_parser.cpp
+        src/parser/value/arithmetic_value_parser.h
+        src/parser/value/boolean_value_parser.cpp
+        src/parser/value/boolean_value_parser.h
+        src/parser/value/assignment_value_parser.cpp
+        src/parser/value/assignment_value_parser.h
+        src/parser/value/new_value_parser.cpp
+        src/parser/value/new_value_parser.h
+        src/parser/value/primitive_value_parser.cpp
+        src/parser/value/primitive_value_parser.h
         src/parser/ast/impl/i_constant_pool_emitter.h
         src/parser/ast/operator/math/minus_operator_ast_node.cpp
         src/parser/ast/operator/math/minus_operator_ast_node.h
@@ -236,18 +287,20 @@ add_executable(Codesh_Compiler
         src/parser/ast/impl/operator_ast_node.tpp
         src/parser/ast/operator/math/i_math_operator_holder.h
         src/defenition/i_pretty_string_convertable.h
+        src/output/ir/util.cpp
+        src/output/ir/util.h
 )
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
-target_link_libraries(Codesh_Compiler Boost::boost Boost::regex)
+target_link_libraries(codeshc Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
 
-target_link_libraries(Codesh_Compiler
+target_link_libraries(codeshc
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
@@ -268,7 +321,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(utfcpp)
 
-target_include_directories(Codesh_Compiler PRIVATE
+target_include_directories(codeshc PRIVATE
         ${utfcpp_SOURCE_DIR}/source
 )
 
@@ -280,8 +333,8 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(fmt)
-target_link_libraries(Codesh_Compiler fmt::fmt)
+target_link_libraries(codeshc fmt::fmt)
 
 
 # Support includes starting from relative paths
-target_include_directories(Codesh_Compiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(codeshc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
