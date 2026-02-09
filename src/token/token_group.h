@@ -133,6 +133,8 @@ enum class token_group : int
 
 
     // Biblical numbers
+    KEYWORD_BIBLICAL_DECIMAL_SEPARATOR, // נקודה
+
     KEYWORD_BIBLICAL_ZERO, // חמס
     KEYWORD_BIBLICAL_ONE, // אחד
     KEYWORD_BIBLICAL_TWO, // שתיים

@@ -50,6 +50,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         break;
 
     // Biblical numbers
+    case token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR:
     case token_group::KEYWORD_BIBLICAL_ZERO:
     case token_group::KEYWORD_BIBLICAL_ONE:
     case token_group::KEYWORD_BIBLICAL_TWO:

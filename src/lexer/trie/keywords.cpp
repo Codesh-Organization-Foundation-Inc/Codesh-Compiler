@@ -128,6 +128,8 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_THROW, u"גזר", word_boundary::BOTH},
     {token_group::KEYWORD_THROWS, u"פן־יחטא", word_boundary::BOTH},
 
+    {token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR, u"נקודה", word_boundary::BOTH},
+
     {token_group::KEYWORD_BIBLICAL_ZERO, u"חמס", word_boundary::BOTH},
     {token_group::KEYWORD_BIBLICAL_ONE, u"אחד", word_boundary::BOTH},
     {token_group::KEYWORD_BIBLICAL_TWO, u"שתיים", word_boundary::BOTH},
