@@ -97,7 +97,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::KEYWORD_BIBLICAL_HUNDRED_ADDED:
     case token_group::KEYWORD_BIBLICAL_THOUSAND_ADDED:
     case token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED:
-        eval_ast_node = parse_biblical_value(tokens);
+        eval_ast_node = biblical_numbers_parser(tokens).parse();
         break;
 
     // Arithmetic operations

@@ -5,29 +5,19 @@
 #include <set>
 #include <unordered_map>
 
-struct biblical_number
-{
-    std::optional<int> value;
-
-    bool is_addition;
-    bool is_period;
-};
-
-constexpr int operator*(const biblical_number num)
-{
-    return num.value.value();
-}
-
 // To save up on calculations, these are the only relevant powers of 10 (as defined by the available keywords)
 static const std::set POWERS_OF_10 = {
     10, 100, 1000, 10000
 };
 
-static std::optional<biblical_number> parse_biblical_number(codesh::token_group token_group);
 
+codesh::parser::value::biblical_numbers_parser::biblical_numbers_parser(std::queue<std::unique_ptr<token>> &tokens) :
+    tokens(tokens)
+{
+}
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_biblical_value(
-    std::queue<std::unique_ptr<token>> &tokens)
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::biblical_numbers_parser::parse()
+    const
 {
     // The first number must not be an addition
     bool allow_addition = false;
@@ -181,17 +171,18 @@ static const std::unordered_map<codesh::token_group, int> BIBLICAL_NUMBER_TOKEN_
     {codesh::token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED, 10000},
 };
 
-static std::optional<biblical_number> parse_biblical_number(const codesh::token_group token_group)
+std::optional<codesh::parser::value::biblical_number> codesh::parser::value::biblical_numbers_parser::
+    parse_biblical_number(const token_group token_group)
 {
     // The enums are contiguous from KEYWORD_BIBLICAL_DECIMAL_SEPARATOR to KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED;
     // Anything else is invalid.
-    if (token_group < codesh::token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR
-        || token_group > codesh::token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED)
+    if (token_group < token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR
+        || token_group > token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED)
     {
         return std::nullopt;
     }
 
-    if (token_group == codesh::token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
+    if (token_group == token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
     {
         return biblical_number{std::nullopt, false, true};
     }
@@ -199,7 +190,7 @@ static std::optional<biblical_number> parse_biblical_number(const codesh::token_
     return biblical_number {
         BIBLICAL_NUMBER_TOKEN_TO_VALUE.at(token_group),
         // All addition tokens are contiguous from KEYWORD_BIBLICAL_ZERO_ADDED to KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED
-        codesh::token_group::KEYWORD_BIBLICAL_ZERO_ADDED <= token_group
-            && token_group <= codesh::token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED
+        token_group::KEYWORD_BIBLICAL_ZERO_ADDED <= token_group
+            && token_group <= token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED
     };
 }
