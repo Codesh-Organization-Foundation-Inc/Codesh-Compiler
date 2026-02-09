@@ -35,8 +35,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     bool encountered_period = false;
     bool previous_was_period = false;
 
-    int result = 0;
+    // Value refers to the literal current number
+    int previous_value = std::numeric_limits<int>::min();
+    // Distro refers to a group of numbers forming one number distribution
+    // These are separated by addition and united via multiplication
     // יעני פילוג לא יודע איך לרשום
+    int previous_distro = std::numeric_limits<int>::min();
+
+    int result = 0;
     int current_number_distro = 0;
 
     while (!tokens.empty())
@@ -58,37 +64,16 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         if (number->is_period)
         {
+            if (encountered_period)
+            {
+                //TODO: Can't have 2 periods blasphemy
+            }
+
             encountered_period = true;
             previous_was_period = true;
 
             continue;
         }
-
-
-        // Handle value insertion
-        const int num_value = **number;
-        if (number->is_addition)
-        {
-            // Add the previous distro to the result
-            result += current_number_distro;
-
-            // Start a new distro
-            current_number_distro = num_value;
-        }
-        else
-        {
-            // Only powers of 10 should be used as multiplications
-            if (!POWERS_OF_10.contains(num_value))
-            {
-                //TODO: Throw blasphemy
-            }
-
-            current_number_distro *= num_value;
-        }
-
-
-        //TODO: Check whether the previous value is greater than the current value
-
 
         // The first number must not be an addition
         if (!allow_addition)
@@ -101,13 +86,50 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             allow_addition = true;
         }
 
+
+        // Handle value insertion
+        const int num_value = **number;
+        if (number->is_addition)
+        {
+            // The order of the distros must be in ascending order
+            if (current_number_distro <= previous_distro)
+            {
+                //TODO: Throw invalid order blasphemy (type distro (mikbatz))
+            }
+
+            // Add the distro to the result
+            result += current_number_distro;
+
+            // Start a new distro
+            previous_distro = current_number_distro;
+            current_number_distro = num_value;
+
+            // Reset the ascending numbers requirement
+            previous_value = std::numeric_limits<int>::min();
+        }
+        else
+        {
+            // The order of the numbers must be in ascending order
+            if (num_value <= previous_value)
+            {
+                //TODO: Throw invalid order blasphemy (type number)
+            }
+
+            // Only powers of 10 should be used as multiplications
+            if (!POWERS_OF_10.contains(num_value))
+            {
+                //TODO: Throw blasphemy
+            }
+
+            current_number_distro *= num_value;
+        }
+
         previous_was_period = false;
+        previous_value = num_value;
     }
 
     return nullptr;
 }
-
-
 
 
 static const std::unordered_map<codesh::token_group, int> BIBLICAL_NUMBER_TOKEN_TO_VALUE = {
