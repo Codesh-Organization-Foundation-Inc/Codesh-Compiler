@@ -137,10 +137,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     }
 
     // Load arguments
+    containing_block.set_is_consuming(true);
     for (const auto &argument : arguments)
     {
         argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
+    containing_block.set_is_consuming(false);
 
     // Call method
     const int method_cpi = cp.get_methodref_index(
