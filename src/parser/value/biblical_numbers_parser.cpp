@@ -54,19 +54,38 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
         if (!current_number.has_value() && !next_number.has_value())
             break;
 
+        // Perform state actions
+        switch (parse_state)
+        {
+        case parsing_state::HANDLE_ADDITION:
+            handle_addition();
+            break;
+        case parsing_state::HANDLE_MULTIPLICATION:
+            handle_multiplication();
+            break;
+        case parsing_state::HANDLE_PERIOD:
+            handle_period();
+            break;
+
+        default: break;
+        }
+
+        // Transition
+        // Just end execution if the next one is empty
+        if (next_number.has_value())
+            break;
+
         switch (parse_state)
         {
         case parsing_state::START:
-            parse_state = start();
+            parse_state = start_transition();
             break;
         case parsing_state::HANDLE_ADDITION:
-            parse_state = handle_addition();
-            break;
         case parsing_state::HANDLE_MULTIPLICATION:
-            parse_state = handle_multiplication();
+            parse_state = next_number_transition();
             break;
         case parsing_state::HANDLE_PERIOD:
-            parse_state = handle_period();
+            parse_state = handle_period_transition();
             break;
         }
     }
@@ -80,19 +99,7 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
 }
 
 
-codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::start()
-    const
-{
-    if (next_number->is_addition)
-        return handle_invalid_addition();
-    if (next_number->is_period)
-        return handle_invalid_period();
-
-    return parsing_state::HANDLE_ADDITION;
-}
-
-codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_addition()
+void codesh::parser::value::biblical_numbers_parser::handle_addition()
 {
     result += current_distro;
 
@@ -104,12 +111,9 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 
     previous_distro = current_distro;
     current_distro = **current_number;
-
-    return handle_next_number();
 }
 
-codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_multiplication()
+void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
 {
     current_distro *= **current_number;
 
@@ -127,12 +131,26 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
             //TODO: Throw invalid number format blasphemy
         }
     }
+}
 
-    return handle_next_number();
+void codesh::parser::value::biblical_numbers_parser::handle_period()
+{
+    contains_period = true;
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_next_number() const
+    start_transition() const
+{
+    if (next_number->is_addition)
+        return handle_invalid_addition();
+    if (next_number->is_period)
+        return handle_invalid_period();
+
+    return parsing_state::HANDLE_ADDITION;
+}
+
+codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
+    next_number_transition() const
 {
     if (next_number->is_addition)
         return parsing_state::HANDLE_ADDITION;
@@ -149,10 +167,8 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_period()
+    handle_period_transition() const
 {
-    contains_period = true;
-
     if (next_number->is_addition)
         return handle_invalid_addition();
     if (next_number->is_period)
@@ -235,7 +251,6 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
     parse_biblical_number() const
 {
     const auto token_group = tokens.front()->get_group();
-    tokens.pop();
 
     // The enums are contiguous from KEYWORD_BIBLICAL_DECIMAL_SEPARATOR to KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED;
     // Anything else is invalid.
@@ -244,6 +259,8 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
     {
         return std::nullopt;
     }
+
+    tokens.pop();
 
     if (token_group == token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
     {

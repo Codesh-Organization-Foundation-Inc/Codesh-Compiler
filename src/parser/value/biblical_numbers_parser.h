@@ -47,14 +47,16 @@ class biblical_numbers_parser
 
     static const std::set<parsing_state> ACCEPTING_STATES;
 
+    void handle_addition();
+    void handle_multiplication();
+    void handle_period();
+
     // Each method returns the new parsing state
-    [[nodiscard]] parsing_state start() const;
+    [[nodiscard]] parsing_state start_transition() const;
 
-    [[nodiscard]] parsing_state handle_addition();
-    [[nodiscard]] parsing_state handle_multiplication();
-    [[nodiscard]] parsing_state handle_next_number() const;
+    [[nodiscard]] parsing_state next_number_transition() const;
 
-    [[nodiscard]] parsing_state handle_period();
+    [[nodiscard]] parsing_state handle_period_transition() const;
 
     [[nodiscard]] static parsing_state handle_invalid_addition();
     [[nodiscard]] static parsing_state handle_invalid_period();
