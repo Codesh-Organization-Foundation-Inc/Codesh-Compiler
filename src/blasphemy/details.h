@@ -72,4 +72,7 @@ extern const std::string STRING_TOO_BIG;
 extern const std::string NUMBER_TOO_BIG;
 extern const fmt::runtime_format_string<> TOO_MANY_LOCAL_VARIABLES;
 
+// WARNINGS
+extern const std::string NON_BIBLICAL_NUMBER;
+
 }

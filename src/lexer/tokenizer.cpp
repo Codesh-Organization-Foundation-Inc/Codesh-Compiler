@@ -202,6 +202,18 @@ static void on_regex_token(codesh::token *token)
 {
     switch (token->get_group())
     {
+    case codesh::token_group::LITERAL_NUMBER_INT:
+    case codesh::token_group::LITERAL_NUMBER_FLOAT:
+    case codesh::token_group::LITERAL_NUMBER_DOUBLE: {
+        // Prefer using biblical numbers as a language convention
+        codesh::blasphemy::get_blasphemy_collector().add_warning(
+            codesh::blasphemy::details::NON_BIBLICAL_NUMBER,
+            codesh::blasphemy::blasphemy_type::LEXICAL,
+            token->get_code_position()
+        );
+        break;
+    }
+
     case codesh::token_group::LITERAL_STRING: {
         auto *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
         std::string content = iden_token->get_content();
