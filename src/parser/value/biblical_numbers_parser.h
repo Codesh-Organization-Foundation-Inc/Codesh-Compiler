@@ -15,6 +15,8 @@ struct biblical_number
 
     bool is_addition;
     bool is_period;
+
+    blasphemy::code_position code_pos;
 };
 
 
@@ -79,7 +81,7 @@ public:
 };
 
 
-constexpr int operator*(const biblical_number num)
+constexpr int operator*(const biblical_number &num)
 {
     return num.value.value();
 }

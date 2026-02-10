@@ -295,17 +295,25 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
         return std::nullopt;
     }
 
+    const auto code_pos = tokens.front()->get_code_position();
     tokens.pop();
 
     if (token_group == token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
     {
-        return biblical_number{std::nullopt, false, true};
+        return biblical_number{
+            std::nullopt,
+            false,
+            true,
+            code_pos
+        };
     }
 
     return biblical_number {
         BIBLICAL_NUMBER_TOKEN_TO_VALUE.at(token_group),
         // All addition tokens are contiguous from KEYWORD_BIBLICAL_ZERO_ADDED to KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED
         token_group::KEYWORD_BIBLICAL_ZERO_ADDED <= token_group
-            && token_group <= token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED
+            && token_group <= token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED,
+        false,
+        code_pos
     };
 }
