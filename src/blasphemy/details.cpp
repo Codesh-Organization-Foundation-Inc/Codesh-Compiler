@@ -104,6 +104,25 @@ const rfs_t codesh::blasphemy::details::METHOD_NOT_FOUND = rfs(
 const rfs_t codesh::blasphemy::details::NOT_A_METHOD = rfs(
     "הַפְנָיָה פְּסוּלָה הֱיֵה: דְּבַר־{} אֵינוֹ מַעֲשֶׂה"
 );
+const rfs_t codesh::blasphemy::details::UNEXPECTED_END_OF_NUMBER = rfs(
+    "סוֹף לֹא צָפוּי הֱיֵה: מִּסְפָּר נִגְמַר בְּלֹא עֵרֶךְ עֲבוּר {}"
+);
+const rfs_t codesh::blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING = rfs(
+    "מִסְפָּר שִׁקְרִי הֱיֵה: סֵדֶר הַגְּדָלָה לֹא נִשְׁמַר בְּעֵת {}"
+);
+const rfs_t codesh::blasphemy::details::INVALID_MULTIPLICATION_FACTOR = rfs(
+    "מִסְפָּר שִׁקְרִי הֱיֵה: הַכֶּפֶל אֵינוֹ בְּעָשׂוֹר עֲבוּר {}"
+);
+const rfs_t codesh::blasphemy::details::INVALID_NUMBER_FORMAT_DESCENDING = rfs(
+    "מִסְפָּר שִׁקְרִי הֱיֵה: הַמִּסְפָּר הַבָּא ({}) גָּדוֹל (מְ־{}) בְּקֶרֶב אוֹתוֹ הַמַּחֲנֶה"
+);
+const rfs_t codesh::blasphemy::details::UNEXPECTED_ADDITION_OPERATOR = rfs(
+    "מִסְפָּר שִׁקְרִי הֱיֵה: צֻפָּה פְּעֻלַּת חִבּוּר עֲבוּר {}"
+);
+const std::string codesh::blasphemy::details::UNEXPECTED_PERIOD_OPERATOR =
+    "מִסְפָּר שִׁקְרִי הֱיֵה: צֻפָּה מִסְפָּר";
+const std::string codesh::blasphemy::details::MULTIPLE_PERIOD_OPERATORS =
+    "נַאִיפַת נְקֻדּוֹת: מִסְפַּר נְקֻדּוֹת בְּאוֹתוֹ הַמִּסְפָּר שֶׁלֹּא לְצֹרֵךְ";
 const rfs_t codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: סוּגֵי הַמִּנְחוֹת {} אֵינָם תּוֹאֲמִים לְאַף מַעֲשֶׂה {}"
 );
