@@ -293,6 +293,8 @@ add_executable(codeshc
         src/output/ir/instruction/dup_instruction.h
         src/output/ir/instruction/new_instruction.cpp
         src/output/ir/instruction/new_instruction.h
+        src/output/ir/instruction/pop_instruction.cpp
+        src/output/ir/instruction/pop_instruction.h
 )
 
 # sudo dnf install boost-regex boost-devel
