@@ -44,7 +44,15 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         const double value = integer_result + result / divisor;
 
-        //TODO: Handle float matzaf suffix
+        if (util::consuming_check(tokens, token_group::KEYWORD_FLOAT))
+        {
+            return std::make_unique<ast::var_reference::evaluable_ast_node<float>>(
+                pos,
+                std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::FLOAT),
+                static_cast<float>(value)
+            );
+        }
+
         return std::make_unique<ast::var_reference::evaluable_ast_node<double>>(
             pos,
             std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::DOUBLE),
