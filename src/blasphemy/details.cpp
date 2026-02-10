@@ -129,3 +129,8 @@ const std::string codesh::blasphemy::details::NUMBER_TOO_BIG =
 const rfs_t codesh::blasphemy::details::TOO_MANY_LOCAL_VARIABLES = rfs(
     "גְּבוּל נֶעֱבַר: יוֹתֵר מִדַּי מִשְׁתַּנִּים בְּמַעֲשֶׂה {}"
 );
+
+// WARNINGS
+const rfs_t codesh::blasphemy::details::ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES = rfs(
+    "אוֹר לַגּוֹיִים: אֵין בִּיכֹלֶת מַרְבִּית הַלָּשׁוֹן הַזָּרָה לְהִשְׁתַּמֵּשׁ בְּשֵׁם הַמֵּכִיל {}"
+);

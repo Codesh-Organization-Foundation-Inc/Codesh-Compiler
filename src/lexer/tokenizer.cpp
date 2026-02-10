@@ -198,10 +198,42 @@ static size_t handle_keyword_match(const std::u16string &code, codesh::blasphemy
     }
 }
 
+/**
+ * Whether the string contains any character that foreign languages (like Java) will not like,
+ * aka risking interoperability.
+ */
+static std::optional<char> contains_non_compliant_char(const std::string &content)
+{
+    const auto it = std::ranges::find_if(content, [](const char c) {
+        return c == '"' || c == '\'';
+    });
+
+    return it != content.end()
+        ? std::optional(*it)
+        : std::nullopt;
+}
+
 static void on_regex_token(codesh::token *token)
 {
     switch (token->get_group())
     {
+    case codesh::token_group::IDENTIFIER: {
+        const auto *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
+
+        if (const auto non_kosher_char = contains_non_compliant_char(iden_token->get_content()))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_warning(
+                fmt::format(
+                    codesh::blasphemy::details::ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES,
+                    *non_kosher_char
+                ),
+                codesh::blasphemy::blasphemy_type::LEXICAL,
+                iden_token->get_code_position()
+            );
+        }
+        break;
+    }
+
     case codesh::token_group::LITERAL_STRING: {
         auto *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
         std::string content = iden_token->get_content();
@@ -223,6 +255,7 @@ static void on_regex_token(codesh::token *token)
         escape_characters(content, trie::keyword::STRING_NEWLINE.substr(1));
 
         iden_token->set_content(content);
+        break;
     }
 
     default:
