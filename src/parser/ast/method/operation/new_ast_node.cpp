@@ -5,6 +5,7 @@
 #include "output/ir/instruction/dup_instruction.h"
 #include "output/ir/instruction/invoke_instruction.h"
 #include "output/ir/instruction/new_instruction.h"
+#include "output/ir/instruction/pop_instruction.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
@@ -71,4 +72,8 @@ void codesh::ast::op::new_ast_node::emit_ir(output::ir::code_block &containing_b
         get_arguments().size()
     ));
 
+    if (!containing_block.get_is_consuming())
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::pop_instruction>());
+    }
 }
