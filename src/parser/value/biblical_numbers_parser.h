@@ -16,7 +16,7 @@ struct biblical_number
     bool is_addition;
     bool is_period;
 
-    blasphemy::code_position code_pos;
+    std::unique_ptr<token> producing_token;
 };
 
 
@@ -61,9 +61,9 @@ class biblical_numbers_parser
 
     [[nodiscard]] parsing_state handle_period_transition() const;
 
-    [[nodiscard]] static parsing_state handle_invalid_addition();
-    [[nodiscard]] static parsing_state handle_invalid_period();
-    [[nodiscard]] static parsing_state handle_invalid_mid_period();
+    [[nodiscard]] parsing_state handle_invalid_addition() const;
+    [[nodiscard]] parsing_state handle_invalid_period() const;
+    [[nodiscard]] parsing_state handle_invalid_mid_period() const;
 
     /**
      * Collects all biblical number tokens, parses them, and puts them in order at accumulated_numbers.

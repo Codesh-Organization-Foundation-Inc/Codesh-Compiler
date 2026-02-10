@@ -4,6 +4,10 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/util.h"
 
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "lexer/trie/keywords.h"
+
 #include <unordered_map>
 
 // To save up on calculations, these are the only relevant powers of 10 (as defined by the available keywords)
@@ -72,7 +76,7 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
     auto parse_state = parsing_state::START;
     while (!tokens.empty())
     {
-        current_number = next_number;
+        current_number = std::move(next_number);
         next_number = parse_biblical_number();
 
         // Null is valid to be had only for the start (current) and end (next) states.
@@ -118,7 +122,14 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
 
     if (!ACCEPTING_STATES.contains(parse_state))
     {
-        //TODO: Throw unexpected end of number blasphemy
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                blasphemy::details::UNEXPECTED_END_OF_NUMBER,
+                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+            ),
+            blasphemy::blasphemy_type::SYNTAX,
+            current_number->producing_token->get_code_position()
+        );
     }
 
     result += current_distro;
@@ -132,7 +143,14 @@ void codesh::parser::value::biblical_numbers_parser::handle_addition()
     // Distro order should be ascending
     if (previous_distro >= current_distro)
     {
-        //TODO: Throw invalid number format blasphemy
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING,
+                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+            ),
+            blasphemy::blasphemy_type::SYNTAX,
+            current_number->producing_token->get_code_position()
+        );
     }
 
     previous_distro = current_distro;
@@ -146,7 +164,14 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
     // Can only multiply by powers of 10
     if (!POWERS_OF_10.contains(**current_number))
     {
-        //TODO: Throw invalid multiplication blasphemy
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                blasphemy::details::INVALID_MULTIPLICATION_FACTOR,
+                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+            ),
+            blasphemy::blasphemy_type::SYNTAX,
+            current_number->producing_token->get_code_position()
+        );
     }
 
     // Number order should be ascending within the same distro
@@ -154,7 +179,15 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
     {
         if (**current_number >= **next_number)
         {
-            //TODO: Throw invalid number format blasphemy
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    blasphemy::details::INVALID_NUMBER_FORMAT_DESCENDING,
+                    lexer::trie::TOKEN_TO_NAME_MAP.at(next_number->producing_token->get_group()),
+                    lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+                ),
+                blasphemy::blasphemy_type::SYNTAX,
+                next_number->producing_token->get_code_position()
+            );
         }
     }
 }
@@ -213,23 +246,38 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_invalid_addition()
+    handle_invalid_addition() const
 {
-    //TODO: Throw blasphemy
+    blasphemy::get_blasphemy_collector().add_blasphemy(
+        fmt::format(
+            blasphemy::details::UNEXPECTED_ADDITION_OPERATOR,
+            lexer::trie::TOKEN_TO_NAME_MAP.at(next_number->producing_token->get_group())
+        ),
+        blasphemy::blasphemy_type::SYNTAX,
+        next_number->producing_token->get_code_position()
+    );
     return parsing_state::HANDLE_ADDITION;
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_invalid_period()
+    handle_invalid_period() const
 {
-    //TODO: Throw blasphemy
+    blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy::details::UNEXPECTED_PERIOD_OPERATOR,
+        blasphemy::blasphemy_type::SYNTAX,
+        next_number->producing_token->get_code_position()
+    );
     return parsing_state::START;
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
-    handle_invalid_mid_period()
+    handle_invalid_mid_period() const
 {
-    //TODO: Throw blasphemy
+    blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy::details::MULTIPLE_PERIOD_OPERATORS,
+        blasphemy::blasphemy_type::SYNTAX,
+        next_number->producing_token->get_code_position()
+    );
     return parsing_state::HANDLE_ADDITION;
 }
 
@@ -295,16 +343,15 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
         return std::nullopt;
     }
 
-    const auto code_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto token = util::consume_token(tokens, "לא יקרה");
 
     if (token_group == token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
     {
-        return biblical_number{
+        return biblical_number {
             std::nullopt,
             false,
             true,
-            code_pos
+            std::move(token)
         };
     }
 
@@ -314,6 +361,6 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
         token_group::KEYWORD_BIBLICAL_ZERO_ADDED <= token_group
             && token_group <= token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED,
         false,
-        code_pos
+        std::move(token)
     };
 }
