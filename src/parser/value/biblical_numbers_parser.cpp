@@ -98,7 +98,7 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
 
         // Transition
         // Just end execution if the next one is empty
-        if (next_number.has_value())
+        if (!next_number.has_value())
             break;
 
         switch (parse_state)
