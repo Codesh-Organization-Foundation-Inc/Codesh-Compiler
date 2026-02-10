@@ -7,20 +7,21 @@
 #include <utility>
 
 static const std::vector<fmt::format_string<std::string>> RANDOM_MESSAGE_POOL = {
-    "וְיִגְעַר ה' בַּיּוֹצֵר כִּי־תּוֹעֵבָה {} נוֹצְרָה",
-    "וְיֶחֱרַד ה' כִּי־רָאָה תּוֹעֵבָה {} כְּאֵימַת קֹדֶשׁ",
-    "וְיִכְעַס ה' כִּי הַיּוֹצֵר שָׂם מִלָּה וְשָׁכַח אֵחָרֵת כְּתוֹעֵבָה {}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
-    "וַיַּרְא ה' הַיּוֹצֵר לֵאמֹר מֵי זֶה עֲשֵׂה תּוֹעֵבָה {}",
-    "וְיִשְׁאַל ה' אֶת־יּוֹצֵר לֵאמֹר מַדּוּעַ בִּצַּעְתָּ תּוֹעֵבָה {}",
-    "וְיַזְהִיר ה' אֶת יּוֹצֵר כִּי־יְתַקֵּן בִּמְהֵרָה אֶת הַתּוֹעֵבָה הַ{}",
-    "וְיַחֲזֶה ה' בַּסֵפֶר לֵאמֹר וְיִתְאַכְזֵב וּמְאַכְזֵב יִהְיֶה פֶּן־רָאָה כִּי הַיּוֹצֵר לֹא תֶּקֶן אֶת הַתּוֹעֵבָה ה{} הַשּׁוֹכֶנֶת",
-    "וְקֶצֶף ה' בְּיּוֹצֵר סֵפֶר הַקֹּדֶשׁ וְיֹאמַר לוֹ אָחִי, תַקֵּן אֶת הַתּוֹעֵבָה הַ{}",
-    "וְיֵאָנַח ה' וְיֹאמַר הֲלֹא אָמַרְתִּי וְהִנֵּה תּוֹעֵבָה {}",
-    "וְיִתְפַּלֵּא ה' בְּיּוֹצֵר כִּי־אֵיךְ לֹא הִבְחִין בַּתּוֹעֵבָה הַ{}",
-    "וְיִפְתַּח ה' אֶת־לוּחוֹת הַבְּרִית וַיְהִי וְיִמְצָא הֲפָרָה בְּהַגֵּד הַ{}" //FIXME: Type is feminine while it shouldn't be here
+    "PLACEHOLDER_1 {}",
+    "PLACEHOLDER_2 {}",
+    "PLACEHOLDER_3 {}", // NOT FOR ALL ERRORS BUT FINE FOR NOW
+    "PLACEHOLDER_4 {}",
+    "PLACEHOLDER_5 {}",
+    "PLACEHOLDER_6 {}",
+    "PLACEHOLDER_7 {}",
+    "PLACEHOLDER_8 {}",
+    "PLACEHOLDER_9 {}",
+    "PLACEHOLDER_10 {}",
+    "PLACEHOLDER_11 {}" //FIXME: Type is feminine while it shouldn't be here
 };
 
 static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
+static constexpr std::string PRETTY_PRINT_YELLOW = "\033[33m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
@@ -34,6 +35,12 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
         print_all_blasphemies();
         std::exit(EXIT_FAILURE);
     }
+}
+
+void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
+        code_position code_pos)
+{
+    warnings.emplace_back(std::move(details), type, code_pos, false);
 }
 
 void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesystem::path source_directory_path)
@@ -51,41 +58,49 @@ bool codesh::blasphemy::blasphemy_collector::has_errors() const
     return !blasphemies.empty();
 }
 
+void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_info &blasphemy,
+        const std::string &color) const
+{
+    std::cerr << color;
+
+    if (blasphemy.is_fatal)
+    {
+        std::cerr << "חֵטְא נוֹרָא: ";
+    }
+
+    std::cerr << get_blasphemy_message(blasphemy.type);
+
+    fmt::print(stderr,
+        " בְּסֵפֶר {}",
+        relative_source_path.string()
+    );
+
+    if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
+    {
+        fmt::print(stderr,
+            " פֶּרֶק {} פָּסוּק {}",
+            std::to_string(code_pos->line),
+            std::to_string(code_pos->column)
+        );
+    }
+
+    fmt::println(stderr,
+        ": {}",
+        blasphemy.details
+    );
+
+    std::cerr << PRETTY_PRINT_END;
+}
+
 void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
-    {
-        std::cerr << PRETTY_PRINT_RED;
+        print_blasphemy(blasphemy, PRETTY_PRINT_RED);
 
-        if (blasphemy.is_fatal)
-        {
-            std::cerr << "חֵטְא נוֹרָא: ";
-        }
-
-        std::cerr << get_blasphemy_message(blasphemy.type);
-
-        fmt::print(stderr,
-            " בְּסֵפֶר {}",
-            relative_source_path.string()
-        );
-
-        if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
-        {
-            fmt::print(stderr,
-                " פֶּרֶק {} פָּסוּק {}",
-                std::to_string(code_pos->line),
-                std::to_string(code_pos->column)
-            );
-        }
-
-        fmt::println(stderr,
-            ": {}",
-            blasphemy.details
-        );
-
-        std::cerr << PRETTY_PRINT_END;
-    }
+    for (const auto &warning : warnings)
+        print_blasphemy(warning, PRETTY_PRINT_YELLOW);
 }
+
 std::string codesh::blasphemy::blasphemy_collector::type_to_string(const blasphemy_type type)
 {
     switch (type)
