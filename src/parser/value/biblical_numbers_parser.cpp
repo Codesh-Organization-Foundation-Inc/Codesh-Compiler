@@ -123,8 +123,8 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
         //TODO: Throw invalid multiplication blasphemy
     }
 
-    // Number order should be ascending
-    if (next_number.has_value())
+    // Number order should be ascending within the same distro
+    if (next_number.has_value() && !next_number->is_addition)
     {
         if (**current_number >= **next_number)
         {
