@@ -74,5 +74,6 @@ extern const fmt::runtime_format_string<> TOO_MANY_LOCAL_VARIABLES;
 
 // WARNINGS
 extern const std::string NON_BIBLICAL_NUMBER;
+extern const fmt::runtime_format_string<> ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES;
 
 }

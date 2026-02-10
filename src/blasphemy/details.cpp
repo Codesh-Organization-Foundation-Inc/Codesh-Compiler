@@ -152,3 +152,6 @@ const rfs_t codesh::blasphemy::details::TOO_MANY_LOCAL_VARIABLES = rfs(
 // WARNINGS
 const std::string codesh::blasphemy::details::NON_BIBLICAL_NUMBER =
     "וָלֹא תֹּאכַל גְּדִי בַּחֲלֵב אִמּוֹ: הַמְּסַפֵּר {} אֵינוֹ כָּשֵׁר לִמְהַדְּרִין";
+const rfs_t codesh::blasphemy::details::ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES = rfs(
+    "אוֹר לַגּוֹיִים: אֵין בִּיכֹלֶת מַרְבִּית הַלָּשׁוֹן הַזָּרָה לְהִשְׁתַּמֵּשׁ בְּשֵׁם הַמֵּכִיל {}"
+);
