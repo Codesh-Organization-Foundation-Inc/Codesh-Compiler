@@ -44,6 +44,7 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
     const auto op_type = get_operator_type();
     const auto &rhs = get_right();
 
+    containing_block.set_is_consuming(true);
     if (op_type == output::ir::operator_type::ASSIGN)
     {
         // Emit the RHS directly
@@ -60,4 +61,5 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
             rhs, {type, op_type, lvt_index}, rhs_cpi
         );
     }
+    containing_block.set_is_consuming(false);
 }
