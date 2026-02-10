@@ -137,9 +137,9 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     }
 
     // Load arguments
-    containing_block.set_is_consuming(true);
     for (const auto &argument : arguments)
     {
+        containing_block.set_is_consuming(true);
         argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
     containing_block.set_is_consuming(false);
