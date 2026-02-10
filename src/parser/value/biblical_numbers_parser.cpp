@@ -24,7 +24,8 @@ codesh::parser::value::biblical_numbers_parser::biblical_numbers_parser(std::que
     contains_period(false),
     previous_distro(std::numeric_limits<int>::min()),
     current_distro(0),
-    result(0)
+    result(0),
+    integer_result(0)
 {
 }
 
@@ -33,7 +34,24 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     const auto pos = tokens.front()->get_code_position();
     collect_numbers();
 
-    //TODO: Handle decimal point (double default, float matzaf suffix)
+    if (contains_period)
+    {
+        // Convert the fractional integer to a decimal fraction (e.g. 23 -> 0.23),
+        // then add it to the result.
+        double divisor = 1.0;
+        while (divisor <= result)
+            divisor *= 10;
+
+        const double value = integer_result + result / divisor;
+
+        //TODO: Handle float matzaf suffix
+        return std::make_unique<ast::var_reference::evaluable_ast_node<double>>(
+            pos,
+            std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::DOUBLE),
+            value
+        );
+    }
+
     return std::make_unique<ast::var_reference::evaluable_ast_node<int>>(
         pos,
         std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::INTEGER),
@@ -136,6 +154,15 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
 void codesh::parser::value::biblical_numbers_parser::handle_period()
 {
     contains_period = true;
+
+    // Move the results to integer_result
+    integer_result = result + current_distro;
+    // Now results will hold the decimal part
+    result = 0;
+
+    // Reset distro
+    current_distro = 0;
+    previous_distro = std::numeric_limits<int>::min();
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::

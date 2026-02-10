@@ -32,6 +32,7 @@ class biblical_numbers_parser
     int current_distro;
 
     int result;
+    int integer_result;
 
 
     // Simulate an automaton.
