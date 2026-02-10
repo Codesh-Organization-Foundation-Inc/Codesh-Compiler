@@ -25,6 +25,9 @@ enum class opcode : unsigned char
 
     RETURN = 0xB1,
 
+    NEW = 0xBB,
+    DUP = 0x59,
+
     GET_STATIC = 0xB2,
 
     INVOKE_DYNAMIC = 0xBA,

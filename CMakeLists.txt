@@ -289,6 +289,10 @@ add_executable(codeshc
         src/defenition/i_pretty_string_convertable.h
         src/output/ir/util.cpp
         src/output/ir/util.h
+        src/output/ir/instruction/dup_instruction.cpp
+        src/output/ir/instruction/dup_instruction.h
+        src/output/ir/instruction/new_instruction.cpp
+        src/output/ir/instruction/new_instruction.h
 )
 
 # sudo dnf install boost-regex boost-devel
