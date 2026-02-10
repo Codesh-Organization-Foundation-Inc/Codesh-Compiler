@@ -21,6 +21,7 @@ static const std::vector<fmt::format_string<std::string>> RANDOM_MESSAGE_POOL = 
 };
 
 static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
+static constexpr std::string PRETTY_PRINT_YELLOW = "\033[33m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
@@ -34,6 +35,12 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
         print_all_blasphemies();
         std::exit(EXIT_FAILURE);
     }
+}
+
+void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
+        code_position code_pos)
+{
+    warnings.emplace_back(std::move(details), type, code_pos, false);
 }
 
 void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesystem::path source_directory_path)
@@ -51,41 +58,49 @@ bool codesh::blasphemy::blasphemy_collector::has_errors() const
     return !blasphemies.empty();
 }
 
+void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_info &blasphemy,
+        const std::string &color) const
+{
+    std::cerr << color;
+
+    if (blasphemy.is_fatal)
+    {
+        std::cerr << "חֵטְא נוֹרָא: ";
+    }
+
+    std::cerr << get_blasphemy_message(blasphemy.type);
+
+    fmt::print(stderr,
+        " בְּסֵפֶר {}",
+        relative_source_path.string()
+    );
+
+    if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
+    {
+        fmt::print(stderr,
+            " פֶּרֶק {} פָּסוּק {}",
+            std::to_string(code_pos->line),
+            std::to_string(code_pos->column)
+        );
+    }
+
+    fmt::println(stderr,
+        ": {}",
+        blasphemy.details
+    );
+
+    std::cerr << PRETTY_PRINT_END;
+}
+
 void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
-    {
-        std::cerr << PRETTY_PRINT_RED;
+        print_blasphemy(blasphemy, PRETTY_PRINT_RED);
 
-        if (blasphemy.is_fatal)
-        {
-            std::cerr << "חֵטְא נוֹרָא: ";
-        }
-
-        std::cerr << get_blasphemy_message(blasphemy.type);
-
-        fmt::print(stderr,
-            " בְּסֵפֶר {}",
-            relative_source_path.string()
-        );
-
-        if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
-        {
-            fmt::print(stderr,
-                " פֶּרֶק {} פָּסוּק {}",
-                std::to_string(code_pos->line),
-                std::to_string(code_pos->column)
-            );
-        }
-
-        fmt::println(stderr,
-            ": {}",
-            blasphemy.details
-        );
-
-        std::cerr << PRETTY_PRINT_END;
-    }
+    for (const auto &warning : warnings)
+        print_blasphemy(warning, PRETTY_PRINT_YELLOW);
 }
+
 std::string codesh::blasphemy::blasphemy_collector::type_to_string(const blasphemy_type type)
 {
     switch (type)

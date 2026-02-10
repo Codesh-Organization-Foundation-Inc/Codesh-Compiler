@@ -48,10 +48,13 @@ class blasphemy_collector
     std::filesystem::path relative_source_path;
 
     std::vector<blasphemy_info> blasphemies;
+    std::vector<blasphemy_info> warnings;
 
     static std::string type_to_string(blasphemy_type type);
     [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
     [[nodiscard]] static fmt::format_string<std::string> get_random_message();
+
+    void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color) const;
 
 public:
     /**
@@ -62,6 +65,8 @@ public:
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
     void add_blasphemy(std::string details, blasphemy_type type, code_position code_pos, bool is_fatal = false);
+
+    void add_warning(std::string details, blasphemy_type type, code_position code_pos);
 
     void set_source_directory(std::filesystem::path source_directory_path);
 
