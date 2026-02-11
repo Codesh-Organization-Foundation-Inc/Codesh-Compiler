@@ -41,8 +41,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         // parse lhs
         auto left_value_node = parse_value(tokens);
 
-        // if (!util::consume_for(tokens))
-        //     return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        if (!util::consume_punc_equal(tokens))
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
         // parse rhs
         auto right_value_node = parse_value(tokens);
