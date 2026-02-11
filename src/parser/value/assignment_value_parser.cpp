@@ -12,6 +12,7 @@
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
+#include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -32,6 +33,42 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
     switch (tokens.front()->get_group())
     {
+    case token_group::KEYWORD_REPLACE:
+    {
+        auto op_pos = tokens.front()->get_code_position();
+        tokens.pop();
+
+        // parse lhs
+        auto left_value_node = parse_value(tokens);
+
+        if (!util::consume_punc_equal(tokens))
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+
+        // parse rhs
+        auto right_value_node = parse_value(tokens);
+
+        // lhs must be a variable
+        if (!dynamic_cast<variable_reference_ast_node *>(left_value_node.get()))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::EXPECTED_VARIABLE,
+                blasphemy::blasphemy_type::SYNTAX,
+                left_value_node->get_code_position()
+            );
+
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        }
+
+        eval_ast_node = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+            op_pos,
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(right_value_node)
+        );
+
+        break;
+    }
     case token_group::OPERATOR_ADDITION_ASSIGNMENT: {
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
