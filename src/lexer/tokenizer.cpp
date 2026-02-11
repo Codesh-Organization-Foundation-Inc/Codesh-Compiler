@@ -222,7 +222,10 @@ static void on_regex_token(codesh::token *token)
     case codesh::token_group::LITERAL_NUMBER_DOUBLE: {
         // Prefer using biblical numbers as a language convention
         codesh::blasphemy::get_blasphemy_collector().add_warning(
-            codesh::blasphemy::details::NON_BIBLICAL_NUMBER,
+            fmt::format(
+                codesh::blasphemy::details::NON_BIBLICAL_NUMBER,
+                static_cast<const codesh::identifier_token &>(*token).get_content() // NOLINT(*-pro-type-static-cast-downcast)
+            ),
             codesh::blasphemy::blasphemy_type::LEXICAL,
             token->get_code_position()
         );
