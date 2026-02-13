@@ -123,6 +123,7 @@ enum class token_group : int
 
     KEYWORD_TRY, // וינסה
     KEYWORD_CATCH, // ויתפוס
+    KEYWORD_FINALLY, // לאחר ארבעים שנה במדבר
     KEYWORD_THROW, // גזר
     KEYWORD_THROWS, // פן־יחטא
 

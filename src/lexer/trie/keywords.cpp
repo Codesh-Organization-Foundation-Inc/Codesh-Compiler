@@ -123,6 +123,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
 
     {token_group::KEYWORD_TRY, u"וינסה", word_boundary::BOTH},
     {token_group::KEYWORD_CATCH, u"ויתפוס", word_boundary::BOTH},
+    {token_group::KEYWORD_FINALLY, u"לאחר ארבעים שנה במדבר", word_boundary::BOTH},
     {token_group::KEYWORD_THROW, u"גזר", word_boundary::BOTH},
     {token_group::KEYWORD_THROWS, u"פן־יחטא", word_boundary::BOTH},
 
