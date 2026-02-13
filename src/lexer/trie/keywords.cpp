@@ -81,8 +81,6 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_BOOLEAN, u"דבר־מה", word_boundary::BOTH},
     {token_group::KEYWORD_NULL, u"תהו", word_boundary::BOTH},
 
-    {token_group::KEYWORD_STRING, u"פסוק", word_boundary::BOTH},
-
     {token_group::KEYWORD_ARRAY, u"כמסדר", word_boundary::BOTH},
     {token_group::KEYWORD_INDEX, u"במקום", word_boundary::BOTH},
     {token_group::KEYWORD_REPLACE, u"ויחלף", word_boundary::BOTH},

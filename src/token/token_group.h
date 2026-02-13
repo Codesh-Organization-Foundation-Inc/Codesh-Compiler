@@ -81,8 +81,6 @@ enum class token_group : int
     KEYWORD_BOOLEAN, // דבר־מה
     KEYWORD_NULL, // תהו
 
-    KEYWORD_STRING, // פסוק
-
     KEYWORD_ARRAY, // כמסדר
     KEYWORD_INDEX, // במקום i
     KEYWORD_REPLACE, // ויחלף
