@@ -60,7 +60,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
 
     const auto &method = get_resolved();
 
-    std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
+    std::deque<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
         param_types.emplace_back(*param);
@@ -139,8 +139,10 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     // Load arguments
     for (const auto &argument : arguments)
     {
+        containing_block.set_is_consuming(true);
         argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
+    containing_block.set_is_consuming(false);
 
     // Call method
     const int method_cpi = cp.get_methodref_index(
