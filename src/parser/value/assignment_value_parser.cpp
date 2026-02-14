@@ -153,9 +153,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         auto left_variable_node = parse_value(tokens);
 
-        if (!dynamic_cast<variable_reference_ast_node *>(left_variable_node.get())) {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE,
-                blasphemy::blasphemy_type::SYNTAX, left_variable_node->get_code_position());
+        if (!dynamic_cast<const variable_reference_ast_node *>(left_variable_node.get())) {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::EXPECTED_VARIABLE,
+                blasphemy::blasphemy_type::SYNTAX,
+                left_variable_node->get_code_position()
+            );
 
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
@@ -187,9 +190,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         auto left_variable_node = parse_value(tokens);
 
-        if (!dynamic_cast<variable_reference_ast_node *>(left_variable_node.get())) {
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE,
-                blasphemy::blasphemy_type::SYNTAX, left_variable_node->get_code_position());
+        if (!dynamic_cast<const variable_reference_ast_node *>(left_variable_node.get())) {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::EXPECTED_VARIABLE,
+                blasphemy::blasphemy_type::SYNTAX,
+                left_variable_node->get_code_position()
+            );
 
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
