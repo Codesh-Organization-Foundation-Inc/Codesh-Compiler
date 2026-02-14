@@ -81,6 +81,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::OPERATOR_MODULO_ASSIGNMENT:
     case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT:
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
+    case token_group::OPERATOR_INCREMENT:
+    case token_group::OPERATOR_DECREMENT:
         eval_ast_node = parse_assignment_operator(tokens);
         break;
 

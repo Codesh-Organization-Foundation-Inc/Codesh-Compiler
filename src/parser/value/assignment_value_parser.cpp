@@ -13,6 +13,8 @@
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -141,6 +143,74 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             op_pos,
             std::move(result->first),
             std::move(result->second)
+        );
+        break;
+    }
+    case token_group::OPERATOR_INCREMENT:
+    {
+        auto op_pos = tokens.front()->get_code_position();
+        tokens.pop();
+
+        auto left_variable_node = parse_value(tokens);
+
+        if (!dynamic_cast<variable_reference_ast_node *>(left_variable_node.get())) {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE,
+                blasphemy::blasphemy_type::SYNTAX, left_variable_node->get_code_position());
+
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        }
+
+        auto one = std::make_unique<
+            ast::var_reference::evaluable_ast_node<int>>(
+            op_pos,
+            std::make_unique<ast::type::primitive_type_ast_node>(
+                op_pos,
+                definition::primitive_type::INTEGER
+            ),
+            1
+        );
+
+        eval_ast_node = std::make_unique<
+            ast::op::assignment::addition_assignment_operator_ast_node>(
+            op_pos,
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_variable_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(one)
+        );
+        break;
+    }
+    case token_group::OPERATOR_DECREMENT:
+    {
+        auto op_pos = tokens.front()->get_code_position();
+        tokens.pop();
+
+        auto left_variable_node = parse_value(tokens);
+
+        if (!dynamic_cast<variable_reference_ast_node *>(left_variable_node.get())) {
+            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::EXPECTED_VARIABLE,
+                blasphemy::blasphemy_type::SYNTAX, left_variable_node->get_code_position());
+
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        }
+
+        auto one = std::make_unique<
+            ast::var_reference::evaluable_ast_node<int>>(
+            op_pos,
+            std::make_unique<ast::type::primitive_type_ast_node>(
+                op_pos,
+                definition::primitive_type::INTEGER
+            ),
+            1
+        );
+
+        eval_ast_node = std::make_unique<
+            ast::op::assignment::subtraction_assignment_operator_ast_node>(
+            op_pos,
+            std::unique_ptr<variable_reference_ast_node>(
+                static_cast<variable_reference_ast_node *>(left_variable_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            ),
+            std::move(one)
         );
         break;
     }
