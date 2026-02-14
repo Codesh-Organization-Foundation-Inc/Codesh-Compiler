@@ -210,6 +210,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
 
+    // For new calls, the 'this' parameter is implicit (created by the new instruction),
+    // so we skip it when matching arguments against constructor parameters.
+    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
+    const size_t param_offset = is_new_call;
+
     // Verify parameter types
 
     for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
@@ -219,21 +224,21 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const auto &method_params = method_symbol.get_parameter_types();
         const auto &arguments = method_call.get_arguments();
 
-        if (method_params.size() != arguments.size())
+        if (method_params.size() - param_offset != arguments.size())
             continue;
 
 
         // If they're both 0-args long, then they're a perfect match.
-        if (method_params.empty())
+        if (arguments.empty())
         {
             return method_symbol;
         }
 
 
-        for (size_t i = 0; i < method_params.size(); i++)
+        for (size_t i = 0; i < arguments.size(); i++)
         {
-            const auto method_param_type = method_params.at(i).get();
-            const auto argument_value = method_call.get_arguments().at(i).get();
+            const auto method_param_type = method_params.at(i + param_offset).get();
+            const auto argument_value = arguments.at(i).get();
 
             // Make sure this isn't an error argument
             if (argument_value->get_type() == nullptr)

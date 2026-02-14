@@ -22,6 +22,11 @@ codesh::ast::type::custom_type_ast_node &codesh::ast::op::new_ast_node::get_cons
     return *constructed_type;
 }
 
+codesh::ast::type::type_ast_node *codesh::ast::op::new_ast_node::get_type() const
+{
+    return constructed_type.get();
+}
+
 std::string codesh::ast::op::new_ast_node::to_pretty_string() const
 {
     return fmt::format(
