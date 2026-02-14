@@ -31,8 +31,8 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::unique_ptr<type_decl::attributes_ast_node> attributes;
 
     std::unique_ptr<type::type_ast_node> return_type;
-    std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> parameters;
-    std::vector<std::reference_wrapper<type::type_ast_node>> parameter_types;
+    std::deque<std::reference_wrapper<local_variable_declaration_ast_node>> parameters;
+    std::deque<std::reference_wrapper<type::type_ast_node>> parameter_types;
 
     // "throws" declaration
     std::vector<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
@@ -69,8 +69,9 @@ public:
     [[nodiscard]] bool has_inner_scopes() const;
 
 
-    [[nodiscard]] const std::vector<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
+    [[nodiscard]] const std::deque<std::reference_wrapper<local_variable_declaration_ast_node>> &get_parameters() const;
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);
+    void add_parameter_front(std::unique_ptr<local_variable_declaration_ast_node> parameter);
 
     [[nodiscard]] const std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
     [[nodiscard]] std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();

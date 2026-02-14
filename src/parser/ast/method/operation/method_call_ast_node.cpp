@@ -60,7 +60,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
 
     const auto &method = get_resolved();
 
-    std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
+    std::deque<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
         param_types.emplace_back(*param);
