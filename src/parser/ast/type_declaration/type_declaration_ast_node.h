@@ -44,6 +44,7 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
     std::unique_ptr<attributes_ast_node> attributes;
+    
 
     std::deque<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
     std::vector<method::method_declaration_ast_node *> methods;
