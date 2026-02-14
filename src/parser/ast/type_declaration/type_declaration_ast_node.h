@@ -38,7 +38,7 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
     std::unique_ptr<type::custom_type_ast_node> super_class;
-    //TODO: Add implements
+    std::vector<std::unique_ptr<type::custom_type_ast_node>> interfaces;
 
     const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
