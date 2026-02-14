@@ -93,7 +93,20 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto &name = method_call.get_unresolved_name();
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
-    if (name.is_single_part())
+    // For new calls, the parent type is the constructed type, not the containing class.
+    if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
+    {
+        const auto resolved_type = codesh::semantic_analyzer::util::resolve_custom_type(
+            context,
+            new_call->get_constructed_type()
+        );
+
+        if (!resolved_type.has_value())
+            return std::nullopt;
+
+        parent_type = &resolved_type->get();
+    }
+    else if (name.is_single_part())
     {
         // Since this is a single-part FQN (name only), the method must either be the classes' or a static import.
         //TODO: Handle static imports
