@@ -9,6 +9,17 @@
 #include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 
+static void collect_super_type(codesh::semantic_analyzer::type_symbol &type_sym,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
+        codesh::semantic_analyzer::country_symbol &country);
+static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
+        codesh::semantic_analyzer::country_symbol &country);
+static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
+        codesh::semantic_analyzer::country_symbol &country,
+        const codesh::ast::type::custom_type_ast_node &node);
+
+
 void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
         ast::type_decl::type_declaration_ast_node &type_decl, country_symbol &country)
 {
@@ -39,6 +50,7 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
     }
 }
 
+
 void codesh::semantic_analyzer::type_declaration::collect_inheritance(const semantic_context &context,
         country_symbol &country)
 {
@@ -52,33 +64,47 @@ void codesh::semantic_analyzer::type_declaration::collect_inheritance(const sema
             &country.get_scope().resolve_local(name).value().get()
         );
 
-        if (const ast::type::custom_type_ast_node *super_node = type_decl->get_super_class())
-        {
-            const std::string super_name = super_node->get_unresolved_name().get_parts().back();
-
-            if (const auto result = country.get_scope().resolve_local(super_name))
-            {
-                if (auto *super_sym = dynamic_cast<type_symbol *>(&result->get()))
-                {
-                    type_sym.set_super_type(super_sym);
-                }
-            }
-        }
-
-        for (const auto &interface_node : type_decl->get_interfaces())
-        {
-            const std::string iface_name = interface_node->get_unresolved_name().get_parts().back();
-
-            if (const auto result = country.get_scope().resolve_local(iface_name))
-            {
-                if (auto *iface_sym = dynamic_cast<type_symbol *>(&result->get()))
-                {
-                    type_sym.add_interface(iface_sym);
-                }
-            }
-        }
+        collect_super_type(type_sym, *type_decl, country);
+        collect_interfaces(type_sym, *type_decl, country);
     }
 }
+
+static void collect_super_type(codesh::semantic_analyzer::type_symbol &type_sym,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
+        codesh::semantic_analyzer::country_symbol &country)
+{
+    const codesh::ast::type::custom_type_ast_node *super_node = type_decl.get_super_class();
+    if (super_node == nullptr)
+        return;
+
+    if (auto *super_symbol = resolve_type_by_name(country, *super_node))
+        type_sym.set_super_type(super_symbol);
+}
+
+static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
+        codesh::semantic_analyzer::country_symbol &country)
+{
+    for (const auto &interface_node : type_decl.get_interfaces())
+    {
+        if (auto *interface_symbol = resolve_type_by_name(country, *interface_node))
+            type_sym.add_interface(interface_symbol);
+    }
+}
+
+static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
+        codesh::semantic_analyzer::country_symbol &country,
+        const codesh::ast::type::custom_type_ast_node &node)
+{
+    const std::string name = node.get_unresolved_name().get_parts().back();
+    const auto result = country.get_scope().resolve_local(name);
+
+    if (!result.has_value())
+        return nullptr;
+
+    return static_cast<codesh::semantic_analyzer::type_symbol *>(&result->get()); // NOLINT(*-pro-type-static-cast-downcast)
+}
+
 
 void codesh::semantic_analyzer::type_declaration::dispatch_collect_methods(const semantic_context &context,
         country_symbol &country)
