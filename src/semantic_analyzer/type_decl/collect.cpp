@@ -17,7 +17,7 @@ static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
         codesh::semantic_analyzer::country_symbol &country);
 static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
         const codesh::semantic_analyzer::country_symbol &country,
-        const codesh::ast::type::custom_type_ast_node &node);
+        codesh::ast::type::custom_type_ast_node &node);
 
 
 void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
@@ -94,7 +94,7 @@ static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
 
 static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
         const codesh::semantic_analyzer::country_symbol &country,
-        const codesh::ast::type::custom_type_ast_node &node)
+        codesh::ast::type::custom_type_ast_node &node)
 {
     const std::string name = node.get_last_name(false);
     const auto result = country.resolve_up(name);
@@ -102,7 +102,9 @@ static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
     if (!result.has_value())
         return nullptr;
 
-    return static_cast<codesh::semantic_analyzer::type_symbol *>(&result->get()); // NOLINT(*-pro-type-static-cast-downcast)
+    const auto resolved = static_cast<codesh::semantic_analyzer::type_symbol *>(&result->get()); // NOLINT(*-pro-type-static-cast-downcast)
+    node.set_resolved(*resolved);
+    return resolved;
 }
 
 
