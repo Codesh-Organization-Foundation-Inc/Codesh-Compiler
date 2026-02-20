@@ -42,6 +42,11 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     if (const auto *type_sym = dynamic_cast<const type_symbol *>(this))
     {
+        const auto &iface_result = resolve_in_interfaces(*type_sym, name);
+        if (iface_result.has_value())
+            return iface_result;
+
+
         // The symbol might be at the parent type
         const type_symbol *super = type_sym->get_super_type();
 
@@ -63,6 +68,24 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     return std::nullopt;
 }
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
+    i_scope_containing_symbol::resolve_in_interfaces(const type_symbol &type_sym, const std::string &name)
+{
+    for (const type_symbol *interface : type_sym.get_interfaces())
+    {
+        const auto &result = interface->get_scope().resolve_local(name);
+        if (result.has_value())
+            return result;
+
+        const auto &inherited = resolve_in_interfaces(*interface, name);
+        if (inherited.has_value())
+            return inherited;
+    }
+
+    return std::nullopt;
+}
+
 
 const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::country_symbol::get_full_name() const
 {
