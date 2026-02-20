@@ -34,8 +34,8 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
                               const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
- * If the resolved method is non-static and called with a single-part name (same-class call),
- * prepends `this` as the first argument. Emits a semantic error if the containing method is static.
+ * If the resolved method is non-static and the call targets the same class, prepends `this` as the first argument.
+ * Emits a semantic error if the containing method is static.
  * @returns False if a semantic error was emitted, true otherwise.
  */
 static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
@@ -129,9 +129,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
         parent_type = &resolved_type->get();
     }
-    else if (name.is_single_part())
+    else if (name.is_single_part() || name.get_parts().front() == "this")
     {
-        // Since this is a single-part FQN (name only), the method must either be the classes' or a static import.
+        // Since this is name-only situation, the method must either be the classes' or a static import.
         //TODO: Handle static imports
 
         parent_type = &containing_method.get_parent_type();
@@ -188,9 +188,12 @@ static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_cont
                                   const codesh::semantic_analyzer::method_symbol &containing_method,
                                   const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
-    const bool is_same_class_call = method_call.get_unresolved_name().is_single_part();
 
+    const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
+    const bool is_explicit_this_call = !fqn_parts.empty() && fqn_parts.front() == "this";
+    const bool is_same_class_call = method_call.get_unresolved_name().is_single_part() || is_explicit_this_call;
+
+    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
     if (resolved_method.get_attributes().get_is_static() || is_new_call || !is_same_class_call)
         return true;
 
