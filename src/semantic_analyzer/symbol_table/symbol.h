@@ -32,6 +32,7 @@ class type_declaration_ast_node;
 
 namespace codesh::semantic_analyzer
 {
+class type_symbol;
 
 
 class symbol
@@ -117,8 +118,9 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
-    //TODO: Add super type
-    // const std::unique_ptr<ast::type::type_ast_node> super_type;
+    type_symbol *super_type = nullptr;
+    std::vector<type_symbol *> interfaces;
+
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
@@ -129,6 +131,12 @@ public:
     [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
+
+    [[nodiscard]] type_symbol *get_super_type() const;
+    void set_super_type(type_symbol *super_type);
+
+    [[nodiscard]] const std::vector<type_symbol *> &get_interfaces() const;
+    void add_interface(type_symbol *interface_symbol);
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;

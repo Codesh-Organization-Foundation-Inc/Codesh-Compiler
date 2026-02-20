@@ -50,6 +50,18 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_super_class(
     this->super_class = std::move(super_class);
 }
 
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::type_decl::
+    type_declaration_ast_node::get_interfaces() const
+{
+    return interfaces;
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::add_interface(
+    std::unique_ptr<type::custom_type_ast_node> interface)
+{
+    interfaces.push_back(std::move(interface));
+}
+
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::type_declaration_ast_node::get_attributes()
     const
 {

@@ -129,6 +129,26 @@ const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::ty
     return *attributes;
 }
 
+codesh::semantic_analyzer::type_symbol *codesh::semantic_analyzer::type_symbol::get_super_type() const
+{
+    return super_type;
+}
+
+void codesh::semantic_analyzer::type_symbol::set_super_type(type_symbol *const super_type)
+{
+    this->super_type = super_type;
+}
+
+const std::vector<codesh::semantic_analyzer::type_symbol *> &codesh::semantic_analyzer::type_symbol::get_interfaces() const
+{
+    return interfaces;
+}
+
+void codesh::semantic_analyzer::type_symbol::add_interface(type_symbol *const interface_symbol)
+{
+    interfaces.push_back(interface_symbol);
+}
+
 codesh::semantic_analyzer::field_symbol::field_symbol(i_scope_containing_symbol *const parent_symbol,
                                                       definition::fully_qualified_name full_name,
                                                       std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
