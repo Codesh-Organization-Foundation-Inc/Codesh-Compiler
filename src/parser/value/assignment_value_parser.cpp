@@ -21,7 +21,7 @@
 /**
  * @param tokens The queue of tokens
  * @param sepd_by_by Whether the operands should be separated by the "by" operator
- * @returns The lhs & rhs of the operator, or @link std::nullopt \endlink upon failure
+ * @returns The lhs & rhs of the operator, or @c std::nullopt upon failure
  */
 static std::optional<std::pair<
     std::unique_ptr<variable_reference_ast_node>,
