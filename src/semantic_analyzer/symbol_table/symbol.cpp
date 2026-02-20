@@ -40,6 +40,22 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
             return result;
     }
 
+    if (const auto *type_sym = dynamic_cast<const type_symbol *>(this))
+    {
+        // The symbol might be at the parent type
+        const type_symbol *super = type_sym->get_super_type();
+
+        // Check all the super types of the super type etc. before moving up the country (next if chain)
+        while (super != nullptr)
+        {
+            const auto &result = super->get_scope().resolve_local(name);
+            if (result.has_value())
+                return result;
+
+            super = super->get_super_type();
+        }
+    }
+
     if (const auto &parent = dynamic_cast<const symbol &>(*this).get_parent_symbol())
     {
         return parent->resolve_up(name);
