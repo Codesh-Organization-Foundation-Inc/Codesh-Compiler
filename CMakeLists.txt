@@ -268,6 +268,12 @@ add_executable(codeshc
         src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_operator_ast_node.h
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.h
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
         src/parser/ast/impl/operator_ast_node.h
