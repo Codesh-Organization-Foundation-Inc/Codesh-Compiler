@@ -1,6 +1,7 @@
 #include "collect.h"
 
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/method_decl/collect.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
@@ -35,6 +36,33 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
             "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
             type_decl.get_unresolved_name().holy_join()
         ), type_decl.get_code_position());
+    }
+}
+
+void codesh::semantic_analyzer::type_declaration::collect_inheritance(const semantic_context &context,
+        country_symbol &country)
+{
+    for (const auto &type_decl : context.root.get_type_declarations())
+    {
+        if (dynamic_cast<const ast::type_decl::error_type_declaration_ast_node *>(type_decl.get()))
+            continue;
+
+        const std::string name = type_decl->get_last_name(false);
+        type_symbol &type_sym = *static_cast<type_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+            &country.get_scope().resolve_local(name).value().get()
+        );
+
+        if (const ast::type::custom_type_ast_node *super_node = type_decl->get_super_class())
+        {
+            const std::string super_name = super_node->get_unresolved_name().get_parts().back();
+            const auto result = country.get_scope().resolve_local(super_name);
+
+            if (result.has_value())
+            {
+                if (auto *super_sym = dynamic_cast<type_symbol *>(&result->get()))
+                    type_sym.set_super_type(super_sym);
+            }
+        }
     }
 }
 
