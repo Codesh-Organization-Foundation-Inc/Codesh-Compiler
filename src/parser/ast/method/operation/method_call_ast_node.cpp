@@ -130,12 +130,6 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
-    if (!method.get_attributes().get_is_static())
-    {
-        //TODO: Handle passing 'this' instances
-        throw std::runtime_error("Calling non-static methods not yet supported");
-    }
-
     // Load arguments
     for (const auto &argument : arguments)
     {
@@ -157,11 +151,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    //FIXME: Specifically make sout calls virtual because no non-static support yet exists
-    const bool is_sout = get_unresolved_name().join() == "מסוף/אמר";
+    const auto invokation_type = method.get_attributes().get_is_static()
+        ? output::ir::invokation_type::STATIC
+        : output::ir::invokation_type::VIRTUAL;
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
-        is_sout ? output::ir::invokation_type::VIRTUAL : output::ir::invokation_type::STATIC,
+        invokation_type,
         method_cpi,
         arguments.size()
     ));
