@@ -5,7 +5,9 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
+#include "parser/ast/operator/assignment/decrement_operator_ast_node.h"
 #include "parser/ast/operator/assignment/division_assignment_operator_ast_node.h"
+#include "parser/ast/operator/assignment/increment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h"
@@ -13,8 +15,6 @@
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
-#include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -163,23 +163,11 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
-        auto one = std::make_unique<
-            ast::var_reference::evaluable_ast_node<int>>(
-            op_pos,
-            std::make_unique<ast::type::primitive_type_ast_node>(
-                op_pos,
-                definition::primitive_type::INTEGER
-            ),
-            1
-        );
-
-        eval_ast_node = std::make_unique<
-            ast::op::assignment::addition_assignment_operator_ast_node>(
+        eval_ast_node = std::make_unique<ast::op::assignment::increment_operator_ast_node>(
             op_pos,
             std::unique_ptr<variable_reference_ast_node>(
                 static_cast<variable_reference_ast_node *>(left_variable_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(one)
+            )
         );
         break;
     }
@@ -200,23 +188,11 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
 
-        auto one = std::make_unique<
-            ast::var_reference::evaluable_ast_node<int>>(
-            op_pos,
-            std::make_unique<ast::type::primitive_type_ast_node>(
-                op_pos,
-                definition::primitive_type::INTEGER
-            ),
-            1
-        );
-
-        eval_ast_node = std::make_unique<
-            ast::op::assignment::subtraction_assignment_operator_ast_node>(
+        eval_ast_node = std::make_unique<ast::op::assignment::decrement_operator_ast_node>(
             op_pos,
             std::unique_ptr<variable_reference_ast_node>(
                 static_cast<variable_reference_ast_node *>(left_variable_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(one)
+            )
         );
         break;
     }
