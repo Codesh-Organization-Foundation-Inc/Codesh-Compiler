@@ -42,23 +42,13 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     if (const auto *type_sym = dynamic_cast<const type_symbol *>(this))
     {
-        const auto &iface_result = resolve_in_interfaces(*type_sym, name);
-        if (iface_result.has_value())
-            return iface_result;
+        auto result = resolve_in_super_types(*type_sym, name);
+        if (result.has_value())
+            return result;
 
-
-        // The symbol might be at the parent type
-        const type_symbol *super = type_sym->get_super_type();
-
-        // Check all the super types of the super type etc. before moving up the country (next if chain)
-        while (super != nullptr)
-        {
-            const auto &result = super->get_scope().resolve_local(name);
-            if (result.has_value())
-                return result;
-
-            super = super->get_super_type();
-        }
+        result = resolve_in_interfaces(*type_sym, name);
+        if (result.has_value())
+            return result;
     }
 
     if (const auto &parent = dynamic_cast<const symbol &>(*this).get_parent_symbol())
@@ -84,6 +74,20 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     }
 
     return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
+    i_scope_containing_symbol::resolve_in_super_types(const type_symbol &type_sym, const std::string &name)
+{
+    const type_symbol *super = type_sym.get_super_type();
+    if (super == nullptr)
+        return std::nullopt;
+
+    const auto &result = super->get_scope().resolve_local(name);
+    if (result.has_value())
+        return result;
+
+    return resolve_in_super_types(*super, name);
 }
 
 

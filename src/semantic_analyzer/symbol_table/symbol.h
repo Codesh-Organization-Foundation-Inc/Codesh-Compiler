@@ -51,8 +51,10 @@ public:
 
 class i_scope_containing_symbol
 {
-    static std::optional<std::reference_wrapper<symbol>> resolve_in_interfaces(
-        const type_symbol &type_sym, const std::string &name);
+    static std::optional<std::reference_wrapper<symbol>> resolve_in_interfaces(const type_symbol &type_sym,
+            const std::string &name);
+    static std::optional<std::reference_wrapper<symbol>> resolve_in_super_types(const type_symbol &type_sym,
+            const std::string &name);
 
 protected:
     [[nodiscard]] virtual symbols_collection &get_scope() = 0;
