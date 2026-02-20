@@ -118,6 +118,9 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_TYPE_DECLARATION = rfs(
 const rfs_t codesh::blasphemy::details::DUPLICATE_METHOD_DECLARATION = rfs(
     "נֵאִיפַה תִּהְיֶה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}"
 );
+const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rfs(
+    "קְרִיאָה אֵינָהּ כְּשֵׁרָה: וָלֹא־תְּבַשֵּׁל מַעֲשֶׂה כְּלָלִי {} בָּאֵנוּ כְּלָלֵי"
+);
 
 // OUTPUT
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG =

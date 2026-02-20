@@ -58,6 +58,7 @@ extern const fmt::runtime_format_string<> ARGUMENT_TYPE_MISMATCH;
 extern const fmt::runtime_format_string<> RETURN_TYPE_MISMATCH;
 extern const fmt::runtime_format_string<> DUPLICATE_TYPE_DECLARATION;
 extern const fmt::runtime_format_string<> DUPLICATE_METHOD_DECLARATION;
+extern const fmt::runtime_format_string<> NON_STATIC_CALL_FROM_STATIC_CONTEXT;
 
 // OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
