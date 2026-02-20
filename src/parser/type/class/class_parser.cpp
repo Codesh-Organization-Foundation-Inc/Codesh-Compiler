@@ -55,27 +55,26 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
         definition::fully_qualified_name(name_token->get_content())
     );
 
+
     if (util::consuming_check(tokens, token_group::KEYWORD_EXTENDS))
     {
-        const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens);
-
-        if (!super_name)
+        if (const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens))
         {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_IDENTIFIER,
-                blasphemy::blasphemy_type::SYNTAX,
-                code_position
+            auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
+                super_name->get_code_position(),
+                definition::fully_qualified_name(super_name->get_content())
             );
-        }
-        else
-        {
-            auto super_type = std::make_unique<ast::type::custom_type_ast_node>(super_name->get_code_position(),
-                definition::fully_qualified_name(super_name->get_content()));
 
             node->set_super_class(std::move(super_type));
         }
+        else
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_IDENTIFIER,
+                blasphemy::blasphemy_type::SYNTAX, code_position
+            );
+        }
     }
-
 
 
     // Get attributes
