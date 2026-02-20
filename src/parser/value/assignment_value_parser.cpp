@@ -41,8 +41,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
     switch (tokens.front()->get_group())
     {
-    case token_group::KEYWORD_REPLACE:
-    {
+    case token_group::KEYWORD_REPLACE: {
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
@@ -152,8 +151,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         );
         break;
     }
-    case token_group::OPERATOR_INCREMENT:
-    {
+    case token_group::OPERATOR_INCREMENT: {
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
@@ -166,8 +164,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         );
         break;
     }
-    case token_group::OPERATOR_DECREMENT:
-    {
+    case token_group::OPERATOR_DECREMENT: {
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
