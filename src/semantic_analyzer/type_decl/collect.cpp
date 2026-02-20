@@ -55,12 +55,26 @@ void codesh::semantic_analyzer::type_declaration::collect_inheritance(const sema
         if (const ast::type::custom_type_ast_node *super_node = type_decl->get_super_class())
         {
             const std::string super_name = super_node->get_unresolved_name().get_parts().back();
-            const auto result = country.get_scope().resolve_local(super_name);
 
-            if (result.has_value())
+            if (const auto result = country.get_scope().resolve_local(super_name))
             {
                 if (auto *super_sym = dynamic_cast<type_symbol *>(&result->get()))
+                {
                     type_sym.set_super_type(super_sym);
+                }
+            }
+        }
+
+        for (const auto &interface_node : type_decl->get_interfaces())
+        {
+            const std::string iface_name = interface_node->get_unresolved_name().get_parts().back();
+
+            if (const auto result = country.get_scope().resolve_local(iface_name))
+            {
+                if (auto *iface_sym = dynamic_cast<type_symbol *>(&result->get()))
+                {
+                    type_sym.add_interface(iface_sym);
+                }
             }
         }
     }

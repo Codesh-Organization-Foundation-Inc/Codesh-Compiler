@@ -76,6 +76,9 @@ public:
     [[nodiscard]] type::custom_type_ast_node *get_super_class() const;
     void set_super_class(std::unique_ptr<type::custom_type_ast_node> super_class);
 
+    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_interfaces() const;
+    void add_interface(std::unique_ptr<type::custom_type_ast_node> interface);
+
 
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
