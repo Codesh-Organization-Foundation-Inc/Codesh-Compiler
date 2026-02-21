@@ -6,7 +6,6 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
-#include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/collection/collection_ast_node.h"
 #include "parser/ast/collection/range_ast_node.h"
