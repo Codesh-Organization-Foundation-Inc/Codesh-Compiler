@@ -268,7 +268,13 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 
     auto &for_scope = method_scope.create_method_scope(scope_pos.value_or(for_pos));
     for_scope.add_local_variable(std::move(iterator_decl));
-    codesh::parser::parse_method_scope(tokens, for_scope);
+
+    // The iterator variable will go into a nested scope so that its scope_begin_marker (IR generation stage)
+    // can be placed INSIDE the loop body (after the condition check).
+    //
+    // This gives them a bytecode_start_pc that correctly EXCLUDES the loop's edge.
+    auto &iterator_decl_scope = for_scope.create_method_scope(scope_pos.value_or(for_pos));
+    codesh::parser::parse_method_scope(tokens, iterator_decl_scope);
 
     return std::make_unique<codesh::ast::block::for_ast_node>(
         for_pos,

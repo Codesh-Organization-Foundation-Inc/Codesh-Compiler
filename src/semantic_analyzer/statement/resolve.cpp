@@ -108,6 +108,7 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         bool all_succeed = true;
         all_succeed &= resolve_value(context, for_node->get_collection(), containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, for_node->get_body_scope());
+        all_succeed &= resolve_scope(context, containing_method, for_node->get_iterator_declaration_scope());
         all_succeed &= is_collection(for_node->get_collection());
         return all_succeed;
     }
