@@ -26,7 +26,5 @@ namespace codesh::ast::type_decl
         [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
         void emit_constants(const compilation_unit_ast_node& root,output::jvm_target::constant_pool& pool) override;
-
-        void set_resolved(semantic_analyzer::field_symbol& symbol) override;
     };
 }

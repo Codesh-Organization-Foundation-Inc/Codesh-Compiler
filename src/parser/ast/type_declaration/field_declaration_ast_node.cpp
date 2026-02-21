@@ -30,10 +30,4 @@ namespace codesh::ast::type_decl
         output::jvm_target::constant_pool& constant_pool)
     {
     }
-
-    void field_declaration_ast_node::set_resolved(semantic_analyzer::field_symbol& symbol)
-    {
-        resolved_symbol.emplace(symbol);
-    }
-
 }
