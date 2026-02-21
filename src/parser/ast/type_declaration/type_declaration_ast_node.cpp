@@ -50,6 +50,17 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_super_class(
     this->super_class = std::move(super_class);
 }
 
+const std::vector<std::unique_ptr<codesh::ast::type_decl::field_declaration_ast_node>>& codesh::ast::type_decl::
+type_declaration_ast_node::get_fields() const
+{
+    return fields;
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::add_field(std::unique_ptr<field_declaration_ast_node> field)
+{
+    fields.push_back(std::move(field));
+}
+
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::type_declaration_ast_node::get_attributes()
     const
 {
