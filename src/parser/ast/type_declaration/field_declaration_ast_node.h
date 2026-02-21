@@ -3,6 +3,7 @@
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/impl/i_descriptor_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
+#include "parser/ast/var_reference/value_ast_node.h"
 
 
 namespace codesh::ast::type_decl
@@ -13,6 +14,7 @@ namespace codesh::ast::type_decl
         definition::fully_qualified_name name;
         std::unique_ptr<type::type_ast_node> field_type;
         std::unique_ptr<attributes_ast_node> attributes;
+        std::unique_ptr<var_reference::value_ast_node> value;
 
         std::optional<std::reference_wrapper<semantic_analyzer::field_symbol>> resolved_symbol;
 
@@ -25,6 +27,9 @@ namespace codesh::ast::type_decl
 
         [[nodiscard]] attributes_ast_node *get_attributes() const;
         void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
+
+        [[nodiscard]] var_reference::value_ast_node* get_value() const;
+        void set_value(std::unique_ptr<var_reference::value_ast_node> val);
 
         [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 

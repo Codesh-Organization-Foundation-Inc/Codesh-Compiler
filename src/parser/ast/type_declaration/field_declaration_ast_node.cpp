@@ -31,6 +31,16 @@ namespace codesh::ast::type_decl
         this->attributes = std::move(attributes);
     }
 
+    var_reference::value_ast_node* field_declaration_ast_node::get_value() const
+    {
+        return value.get();
+    }
+
+    void field_declaration_ast_node::set_value(std::unique_ptr<var_reference::value_ast_node> val)
+    {
+        value = std::move(val);
+    }
+
     std::string field_declaration_ast_node::generate_descriptor(bool resolved) const
     {
         return field_type->generate_descriptor(resolved);
