@@ -4,10 +4,10 @@ namespace codesh::ast::type_decl
 {
 
     field_declaration_ast_node::field_declaration_ast_node(blasphemy::code_position pos,
-            definition::fully_qualified_name name, std::unique_ptr<type::type_ast_node> field_type) :
+            definition::fully_qualified_name name, std::unique_ptr<type::type_ast_node> type) :
         ast_node(pos),
         name(std::move(name)),
-        field_type(std::move(field_type))
+        type(std::move(type))
     {
     }
 
@@ -18,7 +18,7 @@ namespace codesh::ast::type_decl
 
     type::type_ast_node* field_declaration_ast_node::get_type() const
     {
-        return field_type.get();
+        return type.get();
     }
 
     attributes_ast_node* field_declaration_ast_node::get_attributes() const
@@ -43,7 +43,7 @@ namespace codesh::ast::type_decl
 
     std::string field_declaration_ast_node::generate_descriptor(bool resolved) const
     {
-        return field_type->generate_descriptor(resolved);
+        return type->generate_descriptor(resolved);
     }
 
     void field_declaration_ast_node::emit_constants(const compilation_unit_ast_node&,

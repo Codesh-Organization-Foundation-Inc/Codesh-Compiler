@@ -12,7 +12,7 @@ namespace codesh::ast::type_decl
             public impl::i_constant_pool_emitter
     {
         definition::fully_qualified_name name;
-        std::unique_ptr<type::type_ast_node> field_type;
+        std::unique_ptr<type::type_ast_node> type;
         std::unique_ptr<attributes_ast_node> attributes;
         std::unique_ptr<var_reference::value_ast_node> value;
 
@@ -20,7 +20,7 @@ namespace codesh::ast::type_decl
 
     public:
         field_declaration_ast_node(blasphemy::code_position pos, definition::fully_qualified_name name,
-            std::unique_ptr<type::type_ast_node> field_type);
+            std::unique_ptr<type::type_ast_node> type);
 
         [[nodiscard]] const definition::fully_qualified_name& get_name() const;
         [[nodiscard]] type::type_ast_node* get_type() const;
