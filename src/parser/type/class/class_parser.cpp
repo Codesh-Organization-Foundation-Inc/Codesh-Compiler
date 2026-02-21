@@ -12,6 +12,7 @@
 #include "method_parser.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/method/constructor_declaration_ast_node.h"
+#include "parser/value/value_parser.h"
 
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
@@ -158,7 +159,7 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_TYPE,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.front()->get_code_position()
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
         return;
     }
@@ -169,21 +170,20 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_KEYWORD_NAME,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.front()->get_code_position()
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
         return;
     }
 
     // Get field name
-    const std::unique_ptr<codesh::identifier_token> name_token =
-        parser::util::consume_identifier_token(tokens);
+    const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
     if (!name_token)
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_IDENTIFIER,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.front()->get_code_position()
+            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
         return;
     }
@@ -196,7 +196,11 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 
     field_decl->set_attributes(parser::parse_modifiers(name_token->get_code_position(), tokens));
 
-    // Add parsing for field initializer
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_LET))
+    {
+        auto value = parser::value::parse_value(tokens);
+        field_decl->set_value(std::move(value));
+    }
 
     parser::util::ensure_end_op(tokens);
 
