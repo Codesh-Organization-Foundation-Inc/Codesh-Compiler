@@ -36,6 +36,33 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_return_operator(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
+/**
+ * Parses the core of the variable declaration (type, name, modifiers) from the token queue
+ */
+static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> parse_variable_decl_core(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::blasphemy::code_position declaration_pos);
+
+/**
+ * If an assignment is present and permitted, builds and returns its new assignment node. @c nullptr otherwise.
+ */
+static std::unique_ptr<codesh::ast::op::assignment::assign_operator_ast_node> handle_var_decl_assignment(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        const codesh::ast::local_variable_declaration_ast_node &decl_node,
+        codesh::blasphemy::code_position declaration_pos,
+        codesh::parser::var_decl_assignment_policy assignment_policy);
+
+/*
+ * Builds an assignment operator node that assigns a parsed RHS value to the given declaration,
+ * then consumes the end-of-statement token.
+ */
+static std::unique_ptr<codesh::ast::op::assignment::assign_operator_ast_node> build_variable_assignment(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        const codesh::ast::local_variable_declaration_ast_node &decl_node,
+        codesh::blasphemy::code_position declaration_pos,
+        codesh::blasphemy::code_position assignment_pos);
+
+
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
 {
@@ -305,69 +332,103 @@ std::pair<
     const auto declaration_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto variable_decl_ast_node_type = util::parse_type(tokens);
-    auto variable_decl_ast_node = std::make_unique<ast::local_variable_declaration_ast_node>(declaration_pos);
-    variable_decl_ast_node->set_type(std::move(variable_decl_ast_node_type));
+    auto variable_decl_ast_node = parse_variable_decl_core(tokens, declaration_pos);
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
+    return {
+        std::move(variable_decl_ast_node),
+        handle_var_decl_assignment(tokens, *variable_decl_ast_node, declaration_pos, assignment_policy)
+    };
+}
+
+static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> parse_variable_decl_core(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::blasphemy::code_position declaration_pos)
+{
+    auto decl_node = std::make_unique<codesh::ast::local_variable_declaration_ast_node>(declaration_pos);
+    decl_node->set_type(codesh::parser::util::parse_type(tokens));
+
+    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX, declaration_pos);
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_NAME,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            declaration_pos
+        );
     }
 
-    const auto name_token = util::consume_identifier_token(tokens);
+    const auto name_token = codesh::parser::util::consume_identifier_token(tokens);
+    decl_node->set_name(name_token->get_content());
+    decl_node->set_attributes(codesh::parser::parse_modifiers(declaration_pos, tokens));
 
-    variable_decl_ast_node->set_name(name_token->get_content());
-    variable_decl_ast_node->set_attributes(parse_modifiers(declaration_pos, tokens));
+    return decl_node;
+}
 
+static std::unique_ptr<codesh::ast::op::assignment::assign_operator_ast_node> handle_var_decl_assignment(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        const codesh::ast::local_variable_declaration_ast_node &decl_node,
+        const codesh::blasphemy::code_position declaration_pos,
+        const codesh::parser::var_decl_assignment_policy assignment_policy)
+{
+    std::unique_ptr<codesh::token> assignment_token;
+    const bool has_val_assignment = codesh::parser::util::consuming_check(
+        tokens,
+        codesh::token_group::KEYWORD_LET,
+        assignment_token
+    );
 
-    // Value assignment
-    std::unique_ptr<token> assignment_token;
-    const bool has_val_assignment = util::consuming_check(tokens, token_group::KEYWORD_LET, assignment_token);
-
-    if (assignment_policy == var_decl_assignment_policy::REQUIRE && !has_val_assignment)
+    if (assignment_policy == codesh::parser::var_decl_assignment_policy::REQUIRE && !has_val_assignment)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
-                                                           blasphemy::blasphemy_type::SYNTAX, declaration_pos);
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_LET,
+            codesh::blasphemy::blasphemy_type::SYNTAX, declaration_pos
+        );
     }
 
-    if (assignment_policy == var_decl_assignment_policy::FORBID)
+    if (assignment_policy == codesh::parser::var_decl_assignment_policy::FORBID)
     {
         if (has_val_assignment)
         {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
                 fmt::format(
-                "{}: {}",
-                    blasphemy::details::UNEXPECTED_TOKEN,
-                    util::get_token_display_name(*assignment_token)
+                    "{}: {}",
+                    codesh::blasphemy::details::UNEXPECTED_TOKEN,
+                    codesh::parser::util::get_token_display_name(*assignment_token)
                 ),
-                blasphemy::blasphemy_type::SYNTAX,
+                codesh::blasphemy::blasphemy_type::SYNTAX,
                 assignment_token->get_code_position()
             );
         }
 
-        return {std::move(variable_decl_ast_node), nullptr};
+        return nullptr;
     }
-
-
-    std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment = nullptr;
 
     if (has_val_assignment)
     {
-        val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-            assignment_token->get_code_position(),
-
-            std::make_unique<variable_reference_ast_node>(
-                declaration_pos,
-                *variable_decl_ast_node
-            ),
-            value::parse_value(tokens)
+        return build_variable_assignment(
+            tokens,
+            decl_node,
+            declaration_pos,
+            assignment_token->get_code_position()
         );
-
-        util::ensure_end_op(tokens);
     }
 
-    return {std::move(variable_decl_ast_node), std::move(val_assignment)};
+    return nullptr;
+}
+
+static std::unique_ptr<codesh::ast::op::assignment::assign_operator_ast_node> build_variable_assignment(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        const codesh::ast::local_variable_declaration_ast_node &decl_node,
+        codesh::blasphemy::code_position declaration_pos,
+        codesh::blasphemy::code_position assignment_pos)
+{
+    auto assignment = std::make_unique<codesh::ast::op::assignment::assign_operator_ast_node>(
+        assignment_pos,
+        std::make_unique<variable_reference_ast_node>(declaration_pos, decl_node),
+        codesh::parser::value::parse_value(tokens)
+    );
+
+    codesh::parser::util::ensure_end_op(tokens);
+    return assignment;
 }
 
 void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<token>> &tokens,
