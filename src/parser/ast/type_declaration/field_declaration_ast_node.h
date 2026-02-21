@@ -8,7 +8,7 @@
 namespace codesh::ast::type_decl
 {
     class field_declaration_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
-          public impl::i_resolvable<semantic_analyzer::field_symbol>, public impl::i_constant_pool_emitter
+            public impl::i_constant_pool_emitter
     {
         definition::fully_qualified_name name;
         std::unique_ptr<type::type_ast_node> field_type;
