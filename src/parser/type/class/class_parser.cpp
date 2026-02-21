@@ -199,6 +199,15 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_LET))
     {
         auto value = parser::value::parse_value(tokens);
+        if (!value)
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::NO_IDENTIFIER, // FIXME: is it identifier?
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            );
+            return;
+        }
         field_decl->set_value(std::move(value));
     }
 
