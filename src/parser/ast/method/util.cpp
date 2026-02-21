@@ -5,12 +5,12 @@
 #include <ranges>
 
 [[nodiscard]] static std::string generate_unresolved_parameter_descriptors(
-        const std::vector<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types);
+        const std::deque<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types);
 
 
 std::string codesh::ast::method::util::generate_method_descriptor(
         const bool resolved, const type::type_ast_node &return_type,
-        const std::vector<std::reference_wrapper<type::type_ast_node>> &parameter_types,
+        const std::deque<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes)
 {
     // In JVM, a method descriptor is defined as such:
@@ -25,7 +25,7 @@ std::string codesh::ast::method::util::generate_method_descriptor(
 
 std::string codesh::ast::method::util::generate_parameters_descriptor(
         const bool resolved,
-        const std::vector<std::reference_wrapper<type::type_ast_node>> &parameter_types,
+        const std::deque<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes)
 {
     if (!resolved)
@@ -58,7 +58,7 @@ std::string codesh::ast::method::util::generate_parameters_descriptor(
 }
 
 static std::string generate_unresolved_parameter_descriptors(
-        const std::vector<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types)
+        const std::deque<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types)
 {
     auto descriptors = parameter_types
         | std::views::transform([](const codesh::ast::type::type_ast_node &var_type) {

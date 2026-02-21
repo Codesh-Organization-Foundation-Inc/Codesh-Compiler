@@ -78,7 +78,7 @@ bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
     return !method_scope.get_method_scopes().empty();
 }
 
-const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+const std::deque<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
     method_declaration_ast_node::get_parameters() const
 {
     return parameters;
@@ -91,6 +91,15 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter(
     parameters.emplace_back(*parameter);
 
     method_scope.add_local_variable(std::move(parameter));
+}
+
+void codesh::ast::method::method_declaration_ast_node::add_parameter_front(
+    std::unique_ptr<local_variable_declaration_ast_node> parameter)
+{
+    parameter_types.emplace_front(*parameter->get_type());
+    parameters.emplace_front(*parameter);
+
+    method_scope.add_local_variable_front(std::move(parameter));
 }
 
 const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::

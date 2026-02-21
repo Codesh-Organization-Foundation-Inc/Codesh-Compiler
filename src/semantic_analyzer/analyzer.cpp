@@ -257,7 +257,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
             if (method_decl->get_attributes()->get_is_static())
                 continue;
 
-            method_decl->add_parameter(
+            method_decl->add_parameter_front(
                 create_this_param(*class_decl)
             );
         }

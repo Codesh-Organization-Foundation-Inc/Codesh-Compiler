@@ -268,6 +268,12 @@ add_executable(codeshc
         src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_operator_ast_node.h
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.h
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
         src/parser/ast/impl/operator_ast_node.h
@@ -289,6 +295,12 @@ add_executable(codeshc
         src/defenition/i_pretty_string_convertable.h
         src/output/ir/util.cpp
         src/output/ir/util.h
+        src/output/ir/instruction/dup_instruction.cpp
+        src/output/ir/instruction/dup_instruction.h
+        src/output/ir/instruction/new_instruction.cpp
+        src/output/ir/instruction/new_instruction.h
+        src/output/ir/instruction/pop_instruction.cpp
+        src/output/ir/instruction/pop_instruction.h
 )
 
 # sudo dnf install boost-regex boost-devel
