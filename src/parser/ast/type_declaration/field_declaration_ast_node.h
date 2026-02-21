@@ -23,6 +23,9 @@ namespace codesh::ast::type_decl
         [[nodiscard]] const definition::fully_qualified_name& get_name() const;
         [[nodiscard]] type::type_ast_node* get_type() const;
 
+        [[nodiscard]] attributes_ast_node *get_attributes() const;
+        void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
+
         [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
         void emit_constants(const compilation_unit_ast_node& root,output::jvm_target::constant_pool& pool) override;

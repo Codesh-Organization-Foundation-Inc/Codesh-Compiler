@@ -21,6 +21,16 @@ namespace codesh::ast::type_decl
         return field_type.get();
     }
 
+    attributes_ast_node* field_declaration_ast_node::get_attributes() const
+    {
+        return attributes.get();
+    }
+
+    void field_declaration_ast_node::set_attributes(std::unique_ptr<attributes_ast_node> attributes)
+    {
+        this->attributes = std::move(attributes);
+    }
+
     std::string field_declaration_ast_node::generate_descriptor(bool resolved) const
     {
         return field_type->generate_descriptor(resolved);
@@ -30,4 +40,5 @@ namespace codesh::ast::type_decl
         output::jvm_target::constant_pool& constant_pool)
     {
     }
+
 }
