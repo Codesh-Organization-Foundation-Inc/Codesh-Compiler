@@ -22,6 +22,8 @@ public:
     [[nodiscard]] value_ast_node &get_to() const;
     [[nodiscard]] value_ast_node &get_skip() const;
 
+    void set_statement_index(size_t statement_index) override;
+
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

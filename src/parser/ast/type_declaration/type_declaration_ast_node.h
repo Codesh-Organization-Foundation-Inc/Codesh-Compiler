@@ -82,6 +82,10 @@ public:
     [[nodiscard]] const std::vector<std::unique_ptr<field_declaration_ast_node>>& get_fields() const;
     void add_field(std::unique_ptr<field_declaration_ast_node> field);
 
+    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_interfaces() const;
+    void add_interface(std::unique_ptr<type::custom_type_ast_node> interface);
+
+
     [[nodiscard]] attributes_ast_node *get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
 

@@ -6,9 +6,9 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
-#include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/collection/collection_ast_node.h"
+#include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/impl/binary_ast_node.h"
 #include "parser/ast/impl/unary_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
@@ -91,6 +91,15 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         all_succeed &= resolve_value(context, while_node->get_condition(), containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, while_node->get_body_scope());
         all_succeed &= is_condition_boolean(while_node->get_condition());
+        return all_succeed;
+    }
+
+    if (const auto range = dynamic_cast<ast::collection::range_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_value(context, range->get_from(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_to(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_skip(), containing_method, scope);
         return all_succeed;
     }
 

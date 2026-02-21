@@ -33,6 +33,18 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
                               const codesh::semantic_analyzer::method_symbol &containing_method,
                               const codesh::semantic_analyzer::method_scope_symbol &scope);
 
+/**
+ * If the resolved method is non-static and the call targets the same class, prepends `this` as the first argument.
+ * Emits a semantic error if the containing method is static.
+ * @returns False if a semantic error was emitted, true otherwise.
+ */
+static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+                                  codesh::ast::method::operation::method_call_ast_node &method_call,
+                                  const codesh::semantic_analyzer::method_symbol &resolved_method,
+                                  const codesh::semantic_analyzer::method_symbol &containing_method,
+                                  const codesh::semantic_analyzer::method_scope_symbol &scope);
+
+
 
 bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
                                                      ast::method::operation::method_call_ast_node &method_call,
@@ -62,6 +74,17 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
             new_call->get_constructed_type()
         );
     }
+
+
+    //NOTE: This call is here and not in analyzer.cpp because it requires the resolved method symbol,
+    // which is only available after resolve_method_call() completes.
+    // analyzer.cpp only sees a bool result from statement::resolve() and has no access to the intermediate
+    // resolution state.
+    //
+    // A post-resolution pass in analyzer.cpp would require a lot of nested calls and such to get all the necessary
+    // parameters below:
+    if (!prepend_this_argument(context, method_call, result.value().get(), containing_method, scope))
+        return false;
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -106,9 +129,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
         parent_type = &resolved_type->get();
     }
-    else if (name.is_single_part())
+    else if (name.is_single_part() || name.get_parts().front() == "this")
     {
-        // Since this is a single-part FQN (name only), the method must either be the classes' or a static import.
+        // Since this is name-only situation, the method must either be the classes' or a static import.
         //TODO: Handle static imports
 
         parent_type = &containing_method.get_parent_type();
@@ -157,6 +180,45 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     method_call.set_resolved(resolved_method.value());
 
     return resolved_method;
+}
+
+static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+                                  codesh::ast::method::operation::method_call_ast_node &method_call,
+                                  const codesh::semantic_analyzer::method_symbol &resolved_method,
+                                  const codesh::semantic_analyzer::method_symbol &containing_method,
+                                  const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+
+    const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
+    const bool is_explicit_this_call = !fqn_parts.empty() && fqn_parts.front() == "this";
+    const bool is_same_class_call = method_call.get_unresolved_name().is_single_part() || is_explicit_this_call;
+
+    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
+    if (resolved_method.get_attributes().get_is_static() || is_new_call || !is_same_class_call)
+        return true;
+
+    if (containing_method.get_attributes().get_is_static())
+    {
+        context.blasphemy_consumer(
+            fmt::format(codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT,
+                        method_call.get_last_name(false)),
+            method_call.get_code_position()
+        );
+        return false;
+    }
+
+    // 'this' is always in scope as a local_variable_symbol at slot 0 (added by prepare())
+    const auto this_symbol = scope.resolve_up("this");
+    auto &this_var_symbol = static_cast<codesh::semantic_analyzer::variable_symbol &>(this_symbol->get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+    auto this_var = std::make_unique<variable_reference_ast_node>(
+        method_call.get_code_position(),
+        "this"
+    );
+    this_var->set_resolved(this_var_symbol);
+    method_call.get_arguments().push_front(std::move(this_var));
+
+    return true;
 }
 
 static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context &context,
@@ -209,17 +271,18 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
-
-    // For new calls, the 'this' parameter is implicit (created by the new instruction),
-    // so we skip it when matching arguments against constructor parameters.
-    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
-    const size_t param_offset = is_new_call;
-
     // Verify parameter types
-
     for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
     {
         auto &method_symbol = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+        // Skip 'this' when matching
+        //
+        // Constructors and non-static methods both have it implicitly as param[0];
+        // callers don't pass it explicitly.
+        //
+        // It is injected later in resolve().
+        const size_t param_offset = method_symbol.get_attributes().get_is_static() ? 0 : 1;
 
         const auto &method_params = method_symbol.get_parameter_types();
         const auto &arguments = method_call.get_arguments();

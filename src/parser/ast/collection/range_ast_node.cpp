@@ -15,6 +15,13 @@ codesh::ast::collection::range_ast_node::range_ast_node(blasphemy::code_position
 {
 }
 
+void codesh::ast::collection::range_ast_node::set_statement_index(const size_t statement_index)
+{
+    collection_ast_node::set_statement_index(statement_index);
+    from->set_statement_index(statement_index);
+    to->set_statement_index(statement_index);
+    skip->set_statement_index(statement_index);
+}
 
 codesh::ast::var_reference::value_ast_node &codesh::ast::collection::range_ast_node::get_from() const
 {
