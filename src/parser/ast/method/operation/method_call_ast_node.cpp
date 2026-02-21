@@ -151,7 +151,9 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    const auto invokation_type = method.get_attributes().get_is_static()
+    //TODO: Remove after Talmud Codesh
+    const bool forcefeed_static = method.get_full_name().join() == "java/io/PrintStream/println";
+    const auto invokation_type = method.get_attributes().get_is_static() && !forcefeed_static
         ? output::ir::invokation_type::STATIC
         : output::ir::invokation_type::VIRTUAL;
 
