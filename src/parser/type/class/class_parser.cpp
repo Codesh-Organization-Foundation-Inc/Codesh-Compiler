@@ -150,7 +150,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 }
 
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
-    ast::type_decl::class_declaration_ast_node &class_node)
+        ast::type_decl::class_declaration_ast_node &class_node)
 {
     // Get field type
     std::unique_ptr<ast::type::type_ast_node> field_type = parser::util::parse_type(tokens);
