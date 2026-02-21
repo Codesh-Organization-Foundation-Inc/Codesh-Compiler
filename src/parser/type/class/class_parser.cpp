@@ -16,7 +16,8 @@
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
-static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        ast::type_decl::class_declaration_ast_node &class_node);
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
@@ -123,7 +124,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             default:
                 // Assume fields by default as they can either be custom types (identifiers)
                 // or primitives (other tokens).
-                parse_field_scope(tokens);
+                parse_field_scope(tokens, *class_node);
                 break;
             }
             break;
@@ -147,26 +148,20 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         codesh::blasphemy::blasphemy_type::SYNTAX, class_node->get_code_position());
 }
 
-static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
+static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
+    ast::type_decl::class_declaration_ast_node &class_node)
 {
-    const codesh::token_group type_token = parser::util::consume_token(tokens,
-            codesh::blasphemy::details::NO_TYPE)->get_group();
-
-
-    if (type_token != codesh::token_group::IDENTIFIER)
+    std::unique_ptr<ast::type::type_ast_node> field_type = parser::util::parse_type(tokens);
+    if (!field_type)
     {
-        // TODO: Parse token group as type and see if it is a primitive
-        constexpr bool isPrimitive = false;
-
-        if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
-        {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_IDENTIFIER,
-                codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
-        }
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_TYPE,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.front()->get_code_position()
+        );
+        return;
     }
 
-    //TODO: Support fields
-    throw std::runtime_error("Fields not yet supported");
 }
 
 static void parse_method_signature_to(
