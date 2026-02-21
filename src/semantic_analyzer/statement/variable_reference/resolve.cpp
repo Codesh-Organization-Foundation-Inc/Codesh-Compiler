@@ -18,6 +18,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
         variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope);
 
+/**
+ * @returns Whether that the local variable referenced is accessed when it's supposed to
+ */
+static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol &local_var,
+                          const variable_reference_ast_node &var_ref_node,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope);
+
 
 bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
                                                                        variable_reference_ast_node &var_ref_node,
@@ -30,24 +37,41 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
 
     if (const auto &local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved()))
     {
-        // Validate that the local variable referenced is accessed when it's supposed to
-        const auto &local_var_node = local_var->get_producing_node();
-
-        const size_t min = local_var_node->get_accessible_from();
-        const size_t max = local_var_node->get_accessible_to();
-        const size_t curr = var_ref_node.get_statement_index();
-
-        if (curr > max || curr < min)
+        if (!is_accessible(*local_var, var_ref_node, scope))
         {
-            //TODO: Proper message
+            const auto &local_var_node = local_var->get_producing_node();
+
+            // TODO: Proper message
             context.blasphemy_consumer(fmt::format(
-                blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION,
-                local_var_node->get_name()
-            ), var_ref_node.get_code_position());
+                blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION, local_var_node->get_name()),
+                var_ref_node.get_code_position()
+            );
         }
     }
 
     return true;
+}
+
+static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol &local_var,
+                          const variable_reference_ast_node &var_ref_node,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    // Only validate variable range if the reference is within the SAME scope as the declaration.
+    // References from nested scopes to outer-scope variables are always valid.
+    //
+    // To get the local_var parameter we use resolve_up anyway,
+    // so we literally can't get a variable from a scope lower than the current.
+    if (local_var.get_parent_symbol() != static_cast<const codesh::semantic_analyzer::i_scope_containing_symbol *>(&scope))
+        return true;
+
+
+    const auto &local_var_node = local_var.get_producing_node();
+
+    const size_t min = local_var_node->get_accessible_from();
+    const size_t max = local_var_node->get_accessible_to();
+    const size_t curr = var_ref_node.get_statement_index();
+
+    return min <= curr && curr <= max;
 }
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
