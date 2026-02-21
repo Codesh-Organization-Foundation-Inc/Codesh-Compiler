@@ -151,6 +151,7 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
 static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
     ast::type_decl::class_declaration_ast_node &class_node)
 {
+    // Get field type
     std::unique_ptr<ast::type::type_ast_node> field_type = parser::util::parse_type(tokens);
     if (!field_type)
     {
@@ -161,6 +162,45 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         );
         return;
     }
+
+    // ושמו
+    if (!parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_NAME))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_KEYWORD_NAME,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.front()->get_code_position()
+        );
+        return;
+    }
+
+    // Get field name
+    const std::unique_ptr<codesh::identifier_token> name_token =
+        parser::util::consume_identifier_token(tokens);
+
+    if (!name_token)
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_IDENTIFIER,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            tokens.front()->get_code_position()
+        );
+        return;
+    }
+
+    auto field_decl = std::make_unique<ast::type_decl::field_declaration_ast_node>(
+        name_token->get_code_position(),
+        codesh::definition::fully_qualified_name(name_token->get_content()),
+        std::move(field_type)
+    );
+
+    field_decl->set_attributes(parser::parse_modifiers(name_token->get_code_position(), tokens));
+
+    // Add parsing for field initializer
+
+    parser::util::ensure_end_op(tokens);
+
+    class_node.add_field(std::move(field_decl));
 
 }
 
