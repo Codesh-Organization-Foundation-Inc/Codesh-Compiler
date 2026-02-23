@@ -17,8 +17,6 @@ class variable_declaration_ast_node : public impl::ast_node, public impl::i_cons
 protected:
     explicit variable_declaration_ast_node(blasphemy::code_position pos);
 
-    void emit_constants(const compilation_unit_ast_node &root_node,
-            output::jvm_target::constant_pool &constant_pool) override;
 
 public:
     [[nodiscard]] const std::string& get_name() const;
@@ -29,6 +27,9 @@ public:
 
     [[nodiscard]] attributes_ast_node* get_attributes() const;
     void set_attributes(std::unique_ptr<attributes_ast_node> attributes);
+
+    void emit_constants(const compilation_unit_ast_node &root_node,
+            output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }
