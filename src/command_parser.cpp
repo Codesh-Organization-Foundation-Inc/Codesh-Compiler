@@ -108,6 +108,9 @@ static bool is_zip(const std::string &file_name)
 
 static std::string consume_argument(std::queue<std::string> &args)
 {
+    if (args.empty())
+        return "";
+
     const auto arg_content = args.front();
     args.pop();
 
@@ -117,6 +120,9 @@ static std::string consume_argument(std::queue<std::string> &args)
 static std::queue<std::string> create_args_queue(const int argc, char **argv)
 {
     std::queue<std::string> result;
-    //TODO
+    for (int i = 1; i < argc; ++i)
+    {
+        result.push(argv[i]);
+    }
     return result;
 }
