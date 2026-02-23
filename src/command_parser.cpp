@@ -3,7 +3,13 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 
+#include <queue>
+
+static std::queue<std::string> create_args_queue(int argc, char **argv);
+static std::string consume_argument(std::queue<std::string> &args);
+
 static bool is_zip(const std::string &file_name);
+
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -19,13 +25,16 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         );
     }
 
-    result.src_path = argv[1];
-    result.dest_path = argv[2];
+    //TODO: Implement
+    auto args = create_args_queue(argc, argv);
+
+
+    result.src_path = consume_argument(args);
+    result.dest_path = consume_argument(args);
 
     if (argc == 3)
-    {
         return result;
-    }
+
 
     for (int i = 3; i < argc; ++i)
     {
@@ -34,17 +43,19 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         if (arg == "--classpath")
         {
             if (i + 1 >= argc)
+            {
                 blasphemy::get_blasphemy_collector().add_blasphemy(
                     blasphemy::details::NO_CLASSPATH_ARG,
                     blasphemy::blasphemy_type::INIT,
                     blasphemy::NO_CODE_POS,
                     true
                 );
+            }
 
             std::stringstream stream(argv[++i]);
             std::string entry;
 
-            while (std::getline(stream, entry, ':'))
+            while (std::getline(stream, entry, ';'))
             {
                 std::filesystem::path file_path(entry);
 
@@ -69,11 +80,11 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
-                    blasphemy::details::UNKNOWN_FLAG,
-                    blasphemy::blasphemy_type::INIT,
-                    blasphemy::NO_CODE_POS,
-                    true
-                );
+                blasphemy::details::UNKNOWN_FLAG,
+                blasphemy::blasphemy_type::INIT,
+                blasphemy::NO_CODE_POS,
+                true
+            );
         }
     }
 
@@ -93,4 +104,19 @@ static bool is_zip(const std::string &file_name)
 
     return magic[0] == 0x50 && magic[1] == 0x4B &&
            magic[2] == 0x03 && magic[3] == 0x04;
+}
+
+static std::string consume_argument(std::queue<std::string> &args)
+{
+    const auto arg_content = args.front();
+    args.pop();
+
+    return arg_content;
+}
+
+static std::queue<std::string> create_args_queue(const int argc, char **argv)
+{
+    std::queue<std::string> result;
+    //TODO
+    return result;
 }
