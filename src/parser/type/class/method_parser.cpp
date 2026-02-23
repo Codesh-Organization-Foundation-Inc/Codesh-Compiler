@@ -9,7 +9,6 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
-#include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "parser/type/type_parser.h"
 #include "parser/util.h"
 #include "parser/value/value_parser.h"
@@ -36,6 +35,8 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_return_operator(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
+
+
 void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &tokens,
         ast::method::method_scope_ast_node &method_scope)
 {
@@ -50,13 +51,15 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_LET: {
-            auto result = parse_variable_declaration(tokens, var_decl_assignment_policy::REQUIRE);
-            method_scope.add_local_variable(std::move(result.first));
+            auto [var_decl, var_assignment] =
+                parse_variable_declaration(tokens, var_decl_assignment_policy::REQUIRE);
+
+            method_scope.add_local_variable(std::move(var_decl));
 
             // Add the produced assignment statement to the method body if one was generated
-            if (result.second != nullptr)
+            if (var_assignment != nullptr)
             {
-                method_scope.add_statement(std::move(result.second));
+                method_scope.add_statement(std::move(var_assignment));
             }
 
             break;
@@ -311,69 +314,15 @@ std::pair<
     const auto declaration_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    auto variable_decl_ast_node_type = util::parse_type(tokens);
-    auto variable_decl_ast_node = std::make_unique<ast::local_variable_declaration_ast_node>(declaration_pos);
-    variable_decl_ast_node->set_type(std::move(variable_decl_ast_node_type));
+    auto decl_node = std::make_unique<ast::local_variable_declaration_ast_node>(declaration_pos);
+    auto assignment = parse_variable_declaration(
+        *decl_node,
+        declaration_pos,
+        tokens,
+        assignment_policy
+    );
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX, declaration_pos);
-    }
-
-    const auto name_token = util::consume_identifier_token(tokens);
-
-    variable_decl_ast_node->set_name(name_token->get_content());
-    variable_decl_ast_node->set_attributes(parse_modifiers(declaration_pos, tokens));
-
-
-    // Value assignment
-    std::unique_ptr<token> assignment_token;
-    const bool has_val_assignment = util::consuming_check(tokens, token_group::KEYWORD_LET, assignment_token);
-
-    if (assignment_policy == var_decl_assignment_policy::REQUIRE && !has_val_assignment)
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_LET,
-                                                           blasphemy::blasphemy_type::SYNTAX, declaration_pos);
-    }
-
-    if (assignment_policy == var_decl_assignment_policy::FORBID)
-    {
-        if (has_val_assignment)
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                fmt::format(
-                "{}: {}",
-                    blasphemy::details::UNEXPECTED_TOKEN,
-                    util::get_token_display_name(*assignment_token)
-                ),
-                blasphemy::blasphemy_type::SYNTAX,
-                assignment_token->get_code_position()
-            );
-        }
-
-        return {std::move(variable_decl_ast_node), nullptr};
-    }
-
-
-    std::unique_ptr<ast::op::assignment::assign_operator_ast_node> val_assignment = nullptr;
-
-    if (has_val_assignment)
-    {
-        val_assignment = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-            assignment_token->get_code_position(),
-
-            std::make_unique<variable_reference_ast_node>(
-                declaration_pos,
-                *variable_decl_ast_node
-            ),
-            value::parse_value(tokens)
-        );
-
-        util::ensure_end_op(tokens);
-    }
-
-    return {std::move(variable_decl_ast_node), std::move(val_assignment)};
+    return {std::move(decl_node), std::move(assignment)};
 }
 
 void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<token>> &tokens,

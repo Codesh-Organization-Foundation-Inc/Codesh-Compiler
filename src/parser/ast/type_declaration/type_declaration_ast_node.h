@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "field_declaration_ast_node.h"
 #include "output/jvm_target/constant_pool.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
@@ -43,6 +44,8 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
+    std::vector<std::unique_ptr<field_declaration_ast_node>> fields;
+
     std::unique_ptr<attributes_ast_node> attributes;
     
 
@@ -75,6 +78,9 @@ public:
 
     [[nodiscard]] type::custom_type_ast_node *get_super_class() const;
     void set_super_class(std::unique_ptr<type::custom_type_ast_node> super_class);
+
+    [[nodiscard]] const std::vector<std::unique_ptr<field_declaration_ast_node>>& get_fields() const;
+    void add_field(std::unique_ptr<field_declaration_ast_node> field);
 
     [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_interfaces() const;
     void add_interface(std::unique_ptr<type::custom_type_ast_node> interface);
