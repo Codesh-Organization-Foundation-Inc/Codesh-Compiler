@@ -17,7 +17,6 @@ class variable_declaration_ast_node : public impl::ast_node, public impl::i_cons
 protected:
     explicit variable_declaration_ast_node(blasphemy::code_position pos);
 
-
 public:
     [[nodiscard]] const std::string& get_name() const;
     void set_name(const std::string& name);

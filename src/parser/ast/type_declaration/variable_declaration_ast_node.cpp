@@ -41,7 +41,7 @@ void codesh::ast::type_decl::variable_declaration_ast_node::set_attributes(
 }
 
 void codesh::ast::type_decl::variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node& root_node,
-    output::jvm_target::constant_pool& constant_pool)
+        output::jvm_target::constant_pool& constant_pool)
 {
     constant_pool.goc_utf8_info(get_name());
     const int descriptor_cpi = constant_pool.goc_utf8_info(get_type()->generate_descriptor());
