@@ -32,44 +32,37 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     result.src_path = consume_argument(args);
     result.dest_path = consume_argument(args);
 
-    if (argc == 3)
-        return result;
-
-
-    for (int i = 3; i < argc; ++i)
+    while (!args.empty())
     {
-        std::string arg = argv[i];
+        std::string arg = consume_argument(args);
 
         if (arg == "--classpath")
         {
-            if (i + 1 >= argc)
-            {
+            if (args.empty()) {
                 blasphemy::get_blasphemy_collector().add_blasphemy(
                     blasphemy::details::NO_CLASSPATH_ARG,
                     blasphemy::blasphemy_type::INIT,
                     blasphemy::NO_CODE_POS,
                     true
                 );
+                break;
             }
 
-            std::stringstream stream(argv[++i]);
+            std::stringstream stream(consume_argument(args));
             std::string entry;
 
             while (std::getline(stream, entry, ';'))
             {
                 std::filesystem::path file_path(entry);
 
-                if (std::filesystem::is_directory(file_path) || is_zip(file_path))
+                if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
                 {
                     result.classpath.push_back(file_path);
                 }
                 else
                 {
                     blasphemy::get_blasphemy_collector().add_blasphemy(
-                        fmt::format(
-                            blasphemy::details::INVALID_CLASSPATH_ARG,
-                            entry
-                        ),
+                        fmt::format(blasphemy::details::INVALID_CLASSPATH_ARG, entry),
                         blasphemy::blasphemy_type::INIT,
                         blasphemy::NO_CODE_POS,
                         false
