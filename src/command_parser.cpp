@@ -68,7 +68,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         }
         else
         {
-            // add error
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                    blasphemy::details::UNKNOWN_FLAG,
+                    blasphemy::blasphemy_type::INIT,
+                    blasphemy::NO_CODE_POS,
+                    true
+                );
         }
     }
 
