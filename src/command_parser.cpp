@@ -7,7 +7,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
 
-    if (argc < 2)
+    if (argc < 3)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_MAIN_ARGS,
@@ -36,7 +36,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
                     blasphemy::details::NO_CLASSPATH_ARG,
                     blasphemy::blasphemy_type::INIT,
                     blasphemy::NO_CODE_POS,
-                    false
+                    true
                 );
 
             std::stringstream stream(argv[++i]);
@@ -52,7 +52,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
                 }
                 else
                 {
-                    blasphemy::blasphemy_collector().add_blasphemy(
+                    blasphemy::get_blasphemy_collector().add_blasphemy(
                         fmt::format(
                             blasphemy::details::INVALID_CLASSPATH_ARG,
                             entry
@@ -63,6 +63,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
                     );
                 }
             }
+        }
+        else
+        {
+            // add error
         }
     }
 
