@@ -62,25 +62,3 @@ void codesh::ast::local_variable_declaration_ast_node::set_bytecode_length(const
 {
     this->bytecode_length = length;
 }
-
-void codesh::ast::local_variable_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
-                                                                      output::jvm_target::constant_pool &constant_pool)
-{
-    constant_pool.goc_utf8_info(get_name());
-    const int descriptor_cpi = constant_pool.goc_utf8_info(get_type()->generate_descriptor());
-
-    // For object and array types, also add a Class entry so it can be referenced
-    // in the StackMapTable entries (verification):
-    if (get_type()->get_array_dimensions() != 0)
-    {
-        constant_pool.goc_class_info(descriptor_cpi);
-    }
-    else if (const auto custom_type = dynamic_cast<const type::custom_type_ast_node *>(get_type()))
-    {
-        constant_pool.goc_class_info(
-            constant_pool.goc_utf8_info(
-                custom_type->get_resolved_name().join()
-            )
-        );
-    }
-}

@@ -51,9 +51,6 @@ public:
     [[nodiscard]] size_t get_bytecode_length() const;
     void set_bytecode_length(size_t length);
 
-
-    void emit_constants(const compilation_unit_ast_node &root_node,
-                output::jvm_target::constant_pool &constant_pool) override;
 };
 
 }

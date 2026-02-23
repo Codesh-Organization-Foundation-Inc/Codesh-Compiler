@@ -19,9 +19,3 @@ std::string codesh::ast::type_decl::field_declaration_ast_node::generate_descrip
 {
     return get_type()->generate_descriptor(resolved);
 }
-
-void codesh::ast::type_decl::field_declaration_ast_node::emit_constants(const compilation_unit_ast_node&,
-        output::jvm_target::constant_pool& constant_pool)
-{
-}
-

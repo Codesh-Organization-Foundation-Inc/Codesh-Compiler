@@ -24,6 +24,5 @@ public:
 
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    void emit_constants(const compilation_unit_ast_node& root,output::jvm_target::constant_pool& constant_pool) override;
 };
 }
