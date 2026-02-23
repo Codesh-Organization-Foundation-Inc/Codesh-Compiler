@@ -51,7 +51,7 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_super_class(
 }
 
 const std::vector<std::unique_ptr<codesh::ast::type_decl::field_declaration_ast_node>>& codesh::ast::type_decl::
-type_declaration_ast_node::get_fields() const
+    type_declaration_ast_node::get_fields() const
 {
     return fields;
 }
