@@ -11,6 +11,17 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
+static void add_emor_symbol(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol,
+        std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types,
+        std::string method_descriptor);
+
+static void add_method_emor_string(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol);
+static void add_method_emor_int(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol);
+
+
 //TODO: Remove:
 static constexpr std::string ALIAS_STD_OUT = "פלט";
 
@@ -99,17 +110,54 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
         )
     ).first.get();
 
+    add_method_emor_string(emor_overloads, massof_symbol);
+    add_method_emor_int(emor_overloads, massof_symbol);
+}
 
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
-    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
-    attributes->set_is_static(true);
-
+static void add_method_emor_string(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol)
+{
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types;
     parameter_types.reserve(1);
     parameter_types.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
         codesh::blasphemy::NO_CODE_POS,
-        "java/lang/String")
+        "java/lang/String"
+    ));
+
+    add_emor_symbol(
+        emor_overloads,
+        massof_symbol,
+        std::move(parameter_types),
+        "(Ljava/lang/String;)V"
     );
+}
+
+static void add_method_emor_int(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol)
+{
+    std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types;
+    parameter_types.reserve(1);
+    parameter_types.push_back(std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+        codesh::blasphemy::NO_CODE_POS,
+        codesh::definition::primitive_type::INTEGER
+    ));
+
+    add_emor_symbol(
+        emor_overloads,
+        massof_symbol,
+        std::move(parameter_types),
+        "(I)V"
+    );
+}
+
+static void add_emor_symbol(codesh::semantic_analyzer::method_overloads_symbol &emor_overloads,
+        codesh::semantic_analyzer::type_symbol &massof_symbol,
+        std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> parameter_types,
+        std::string method_descriptor)
+{
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    attributes->set_is_static(true);
 
     auto return_type = std::make_unique<codesh::ast::type::primitive_type_ast_node>(
         codesh::blasphemy::NO_CODE_POS,
@@ -118,7 +166,7 @@ static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbo
 
     // Make the method symbol point to the original PrintStream's println
     emor_overloads.get_scope().add_symbol(
-        "(Ljava/lang/String;)V",
+        std::move(method_descriptor),
         std::make_unique<codesh::semantic_analyzer::method_symbol>(
             &emor_overloads,
             massof_symbol,
