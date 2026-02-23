@@ -2,7 +2,6 @@
 
 #include "output/jvm_target/constant_pool.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
-#include "type/custom_type_ast_node.h"
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::local_variable_symbol>> &codesh::ast::
     local_variable_declaration_ast_node::_get_resolved() const

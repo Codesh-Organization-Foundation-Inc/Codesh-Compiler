@@ -4,10 +4,10 @@
 
 
 codesh::ast::type_decl::variable_declaration_ast_node::variable_declaration_ast_node(
-        blasphemy::code_position pos) : ast_node(std::move(pos))
+        const blasphemy::code_position pos) :
+    ast_node(pos)
 {
 }
-
 
 const std::string& codesh::ast::type_decl::variable_declaration_ast_node::get_name() const
 {
