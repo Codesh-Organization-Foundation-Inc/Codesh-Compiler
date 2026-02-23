@@ -19,6 +19,11 @@ const rfs_t codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY = rfs(
 );
 const std::string codesh::blasphemy::details::NO_MAIN_ARGS =
     "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
+const std::string codesh::blasphemy::details::NO_CLASSPATH_ARG =
+    "מִנְחוֹת אֵינָם: נִדְרָשׁ עֵרֶךְ הַכְנָסָה לַדֶּגֶל";
+const rfs_t codesh::blasphemy::details::INVALID_CLASSPATH_ARG = rfs(
+    "דֶּרֶךְ תּוֹעָה הֱיֵה: הֵעָרֵךְ {} אֵינוֹ מַתְאִים "
+);
 
 // LEXICAL
 const std::string codesh::blasphemy::details::NO_BASAD =

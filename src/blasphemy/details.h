@@ -12,6 +12,8 @@ extern const fmt::runtime_format_string<> SOURCE_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> OUTPUT_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> DEST_PATH_NOT_DIRECTORY;
 extern const std::string NO_MAIN_ARGS;
+extern const std::string NO_CLASSPATH_ARG;
+extern const fmt::runtime_format_string<> INVALID_CLASSPATH_ARG;
 
 // LEXICAL
 extern const std::string NO_BASAD;
