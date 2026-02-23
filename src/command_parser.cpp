@@ -3,6 +3,8 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 
+static bool is_zip(const std::string &file_name);
+
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
@@ -46,7 +48,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
             {
                 std::filesystem::path file_path(entry);
 
-                if (std::filesystem::is_directory(file_path)) // add is_zip check
+                if (std::filesystem::is_directory(file_path) || is_zip(file_path))
                 {
                     result.classpath.push_back(file_path);
                 }
@@ -71,4 +73,19 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     return result;
+}
+
+static bool is_zip(const std::string &file_name)
+{
+    std::ifstream file;
+    file.open(file_name, std::ios::binary);
+
+    if (!file)
+        return false;
+
+    char magic[4];
+    file.read(magic, 4);
+
+    return magic[0] == 0x50 && magic[1] == 0x4B &&
+           magic[2] == 0x03 && magic[3] == 0x04;
 }
