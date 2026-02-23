@@ -188,11 +188,10 @@ static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         return;
     }
 
-    auto field_decl = std::make_unique<ast::type_decl::field_declaration_ast_node>(
-        name_token->get_code_position(),
-        codesh::definition::fully_qualified_name(name_token->get_content()),
-        std::move(field_type)
-    );
+    auto field_decl = std::make_unique<ast::type_decl::field_declaration_ast_node>(name_token->get_code_position());
+
+    field_decl->set_name(name_token->get_content());
+    field_decl->set_type(std::move(field_type));
 
     field_decl->set_attributes(parser::parse_modifiers(name_token->get_code_position(), tokens));
 
