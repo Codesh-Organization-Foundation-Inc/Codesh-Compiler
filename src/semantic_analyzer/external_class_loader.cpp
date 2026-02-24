@@ -32,6 +32,7 @@ static std::vector<std::string> read_interface_names(std::ifstream &file, const 
 static void read_magic(std::ifstream &file);
 static void parse_type(std::ifstream &file, const cp_strings &cp_strings);
 static void parse_fields(std::ifstream &file, const cp_strings &cp_strings);
+static void parse_methods(std::ifstream &file, const cp_strings &cp_strings);
 
 
 //TODO: Convert all errors to blasphemies
@@ -46,13 +47,42 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     read_u2(file); // major_version
 
     cp_strings cp_strings;
-    //TODO: Review if necessary to be saved
+    //TODO: Review if necessary to be cached
     const auto pool = parse_constant_pool(file, cp_strings);
 
     parse_type(file, cp_strings);
     parse_fields(file, cp_strings);
+    parse_methods(file, cp_strings);
 
     (void)table;
+}
+
+static void parse_methods(std::ifstream &file, const cp_strings &cp_strings)
+{
+    const auto methods_count = read_u2(file);
+    for (size_t i = 0; i < methods_count; i++)
+    {
+        const auto method_access_flags = read_u2(file);
+        const auto method_name_idx = read_u2(file);
+        const auto method_desc_idx = read_u2(file);
+        const auto method_attr_count = read_u2(file);
+
+        skip_attributes(file, method_attr_count);
+
+        const auto method_name = get_utf8(cp_strings, method_name_idx);
+        const auto method_descriptor = get_utf8(cp_strings, method_desc_idx);
+
+        // TODO: Register method_symbol for this method.
+        // Available variables:
+        //   std::string method_name        — e.g. "length", "<init>", "<clinit>"
+        //   std::string method_descriptor  — e.g. "()I", "(Ljava/lang/String;I)V"
+        //                                    Format: "(" + param_descriptors + ")" + return_descriptor
+        //   uint16_t    method_access_flags— raw JVM access flags
+        //   (type_symbol for the enclosing class is what you registered above)
+        (void)method_access_flags;
+        (void)method_name;
+        (void)method_descriptor;
+    }
 }
 
 static void parse_type(std::ifstream &file, const cp_strings &cp_strings)
