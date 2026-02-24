@@ -1,50 +1,101 @@
 #include "cp_info.h"
 
 #include <boost/functional/hash.hpp>
+#include <cstring>
 
-codesh::output::jvm_target::defs::cp_info::cp_info(const unsigned char tag) : tag(tag)
-{}
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "util.h"
+
+codesh::output::jvm_target::defs::cp_info::cp_info(constant_info_type type) :
+    tag(static_cast<unsigned char>(type))
+{
+}
 
 codesh::output::jvm_target::defs::cp_info::~cp_info() = default;
 
+codesh::output::jvm_target::defs::CONSTANT_Utf8_info::CONSTANT_Utf8_info(const std::string &utf8) :
+    cp_info(constant_info_type::UTF8)
+{
+    if (utf8.size() > 0xFFFF)
+    {
+        blasphemy::blasphemy_collector().add_blasphemy(
+            blasphemy::details::STRING_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT,
+            blasphemy::NO_CODE_POS,
+            true
+        );
+    }
 
-codesh::output::jvm_target::defs::CONSTANT_Utf8_info::CONSTANT_Utf8_info() :
-    cp_info(1)
-{}
+    util::put_int_bytes(length, 2, utf8.length()); // NOLINT(*-narrowing-conversions) (Handled overflow above)
+    bytes.insert(bytes.end(), utf8.begin(), utf8.end());
+}
 
-codesh::output::jvm_target::defs::CONSTANT_Integer_info::CONSTANT_Integer_info() :
-    cp_info(3)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Float_info::CONSTANT_Float_info() :
-    cp_info(4)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Long_info::CONSTANT_Long_info() :
-    cp_info(5)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Double_info::CONSTANT_Double_info() :
-    cp_info(6)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Class_info::CONSTANT_Class_info() :
-    cp_info(7)
-{}
-codesh::output::jvm_target::defs::CONSTANT_String_info::CONSTANT_String_info() :
-    cp_info(8)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Fieldref_info::CONSTANT_Fieldref_info() :
-    cp_info(9)
-{}
-codesh::output::jvm_target::defs::CONSTANT_Methodref_info::CONSTANT_Methodref_info() :
-    cp_info(10)
-{}
-codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info::CONSTANT_InterfaceMethodref_info() :
-    cp_info(11)
-{}
-codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::CONSTANT_NameAndType_info() :
-    cp_info(12)
-{}
+codesh::output::jvm_target::defs::CONSTANT_Integer_info::CONSTANT_Integer_info(const int num) :
+    cp_info(constant_info_type::INTEGER)
+{
+    util::put_int_bytes(bytes, 4, num);
+}
 
+codesh::output::jvm_target::defs::CONSTANT_Float_info::CONSTANT_Float_info(const float num) :
+    cp_info(constant_info_type::FLOATING)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &num, sizeof(bits));
+    util::put_int_bytes(bytes, 4, static_cast<int>(bits));
+}
 
-// Functions for std::unordered_map
+codesh::output::jvm_target::defs::CONSTANT_Long_info::CONSTANT_Long_info(const long long num) :
+    cp_info(constant_info_type::LONG_INT)
+{
+    util::put_int_bytes(high_bytes, 4, static_cast<int>(num >> 32));
+    util::put_int_bytes(low_bytes, 4, static_cast<int>(num & 0xFFFFFFFF));
+}
+
+codesh::output::jvm_target::defs::CONSTANT_Double_info::CONSTANT_Double_info(const double num) :
+    cp_info(constant_info_type::DOUBLE_FP)
+{
+    uint64_t bits;
+    std::memcpy(&bits, &num, sizeof(bits));
+    util::put_int_bytes(high_bytes, 4, static_cast<int>(bits >> 32));
+    util::put_int_bytes(low_bytes, 4, static_cast<int>(bits & 0xFFFFFFFF));
+}
+
+codesh::output::jvm_target::defs::CONSTANT_Class_info::CONSTANT_Class_info(const int name_index) :
+    cp_info(constant_info_type::CLASS_REF)
+{
+    util::put_int_bytes(this->name_index, 2, name_index);
+}
+
+codesh::output::jvm_target::defs::CONSTANT_String_info::CONSTANT_String_info(const int utf8_index) :
+    cp_info(constant_info_type::STRING_REF)
+{
+    util::put_int_bytes(string_index, 2, utf8_index);
+}
+
+codesh::output::jvm_target::defs::CONSTANT_Fieldref_info::CONSTANT_Fieldref_info(const int class_index,
+                                                                                 const int name_and_type_index) :
+    cp_info(constant_info_type::FIELDREF)
+{
+    util::put_int_bytes(this->class_index, 2, class_index);
+    util::put_int_bytes(this->name_and_type_index, 2, name_and_type_index);
+}
+
+codesh::output::jvm_target::defs::CONSTANT_Methodref_info::CONSTANT_Methodref_info(const int class_index,
+                                                                                   const int name_and_type_index) :
+    cp_info(constant_info_type::METHODREF)
+{
+    util::put_int_bytes(this->class_index, 2, class_index);
+    util::put_int_bytes(this->name_and_type_index, 2, name_and_type_index);
+}
+
+codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::CONSTANT_NameAndType_info(const int name_index,
+                                                                                       const int descriptor_index) :
+    cp_info(constant_info_type::NAME_AND_TYPE)
+{
+    util::put_int_bytes(this->name_index, 2, name_index);
+    util::put_int_bytes(this->descriptor_index, 2, descriptor_index);
+}
 
 size_t codesh::output::jvm_target::defs::CONSTANT_Utf8_info::hash_code() const
 {
@@ -129,7 +180,6 @@ size_t codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::hash_code() 
     return seed;
 }
 
-
 bool codesh::output::jvm_target::defs::CONSTANT_Utf8_info::operator==(const CONSTANT_Utf8_info &other) const
 {
     return tag == other.tag &&
@@ -188,27 +238,29 @@ bool codesh::output::jvm_target::defs::CONSTANT_Methodref_info::operator==(const
            std::equal(name_and_type_index, name_and_type_index + 2, other.name_and_type_index);
 }
 
-bool codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info::operator==(const CONSTANT_InterfaceMethodref_info &other) const
+bool codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info::operator==(
+        const CONSTANT_InterfaceMethodref_info &other) const
 {
     return tag == other.tag &&
            std::equal(class_index, class_index + 2, other.class_index) &&
            std::equal(name_and_type_index, name_and_type_index + 2, other.name_and_type_index);
 }
 
-bool codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::operator==(const CONSTANT_NameAndType_info &other) const
+bool codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::operator==(
+        const CONSTANT_NameAndType_info &other) const
 {
     return tag == other.tag &&
            std::equal(name_index, name_index + 2, other.name_index) &&
            std::equal(descriptor_index, descriptor_index + 2, other.descriptor_index);
 }
 
-
 size_t codesh::output::jvm_target::defs::cp_info_ptr_hash::operator()(const cp_info *obj) const
 {
     return obj->hash_code();
 }
 
-bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const cp_info *lhs, const cp_info *rhs) const
+bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const cp_info *lhs,
+        const cp_info *rhs) const
 {
     if (lhs->tag != rhs->tag)
         return false;
@@ -253,12 +305,14 @@ bool codesh::output::jvm_target::defs::cp_info_ptr_equal::operator()(const cp_in
     }
 }
 
-size_t codesh::output::jvm_target::defs::cp_info_unique_ptr_hash::operator()(const std::unique_ptr<const cp_info> &obj) const
+size_t codesh::output::jvm_target::defs::cp_info_unique_ptr_hash::operator()(
+        const std::unique_ptr<const cp_info> &obj) const
 {
     return obj->hash_code();
 }
 
-bool codesh::output::jvm_target::defs::cp_info_unique_ptr_equal::operator()(const std::unique_ptr<const cp_info> &lhs,
+bool codesh::output::jvm_target::defs::cp_info_unique_ptr_equal::operator()(
+        const std::unique_ptr<const cp_info> &lhs,
         const std::unique_ptr<const cp_info> &rhs) const
 {
     return cp_info_ptr_equal()(lhs.get(), rhs.get());

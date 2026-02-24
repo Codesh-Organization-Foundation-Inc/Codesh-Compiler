@@ -56,18 +56,6 @@ class constant_pool
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
     int goc_constant(std::unique_ptr<defs::cp_info> constant_info);
 
-    static std::unique_ptr<defs::CONSTANT_Utf8_info> utf8_info(const std::string &utf8);
-    static std::unique_ptr<defs::CONSTANT_String_info> string_info(int utf8_index);
-    static std::unique_ptr<defs::CONSTANT_Integer_info> integer_info(int num);
-    static std::unique_ptr<defs::CONSTANT_Float_info> float_info(float num);
-    static std::unique_ptr<defs::CONSTANT_Long_info> long_info(long long num);
-    static std::unique_ptr<defs::CONSTANT_Double_info> double_info(double num);
-
-    static std::unique_ptr<defs::CONSTANT_Methodref_info> methodref_info(int class_index, int name_and_type_index);
-    static std::unique_ptr<defs::CONSTANT_NameAndType_info> name_and_type_info(int name_index, int descriptor_index);
-    static std::unique_ptr<defs::CONSTANT_Class_info> class_info(int name_index);
-    static std::unique_ptr<defs::CONSTANT_Fieldref_info> fieldref_info(int class_index, int name_and_type_index);
-
 public:
     /**
      * Constructs a new constant pool using the provided AST node
