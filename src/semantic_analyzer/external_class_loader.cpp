@@ -141,7 +141,7 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
     {
         uint8_t tag = read_u1(file);
 
-        // We only care about Only UTF8 and CLASS_REF for the symbol table.
+        // We only care about Only UTF8 and CLASS_REF for the symbol table
         switch (static_cast<constant_info_type>(tag))
         {
         case constant_info_type::UTF8: {
@@ -156,10 +156,11 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         case constant_info_type::CLASS_REF: {
             const int name_jvm_idx = read_u2(file);
 
-            strings.emplace(i, strings[name_jvm_idx]); // class name = utf8 at name_index
+            strings.emplace(i, strings[name_jvm_idx]);
 
             break;
         }
+
         case constant_info_type::INTEGER:
         case constant_info_type::FLOATING:
             read_u4(file);
@@ -168,7 +169,7 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         case constant_info_type::DOUBLE_FP:
             read_u4(file);
             read_u4(file);
-            i++; // skip phantom slot
+            i++; // Skip phantom slot
             break;
         case constant_info_type::STRING_REF:
             read_u2(file);
