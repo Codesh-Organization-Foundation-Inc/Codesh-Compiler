@@ -11,7 +11,7 @@
 #include "output/jvm_target/defs/cp_info.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
-using cp_map = std::unordered_map<int, std::unique_ptr<codesh::output::jvm_target::defs::cp_info>>;
+using cp_map = std::vector<std::unique_ptr<codesh::output::jvm_target::defs::cp_info>>;
 /**
  * Maps a constant pool index to its associated string
  */
@@ -46,9 +46,12 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
 
 static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
 {
-    cp_map pool;
-
     const uint16_t cp_count = read_u2(file);
+
+    cp_map pool;
+    pool.reserve(cp_count);
+    pool.emplace_back(nullptr); // index 0 unused (CP is 1-based)
+
     for (int i = 1; i < cp_count; i++)
     {
         uint8_t tag = read_u1(file);
@@ -61,12 +64,12 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             file.read(utf8.data(), len);
 
             strings.emplace(i, utf8);
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>(utf8));
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>(utf8));
 
             break;
         }
         case constant_info_type::INTEGER: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Integer_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Integer_info>(
                 static_cast<int>(read_u4(file))
             ));
 
@@ -77,7 +80,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             float num;
             std::memcpy(&num, &bits_len, sizeof(num));
 
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Float_info>(num));
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Float_info>(num));
 
             break;
         }
@@ -85,9 +88,10 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             const uint32_t high = read_u4(file);
             const uint32_t low = read_u4(file);
 
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Long_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Long_info>(
                 static_cast<long long>(high) << 32 | low
             ));
+            pool.emplace_back(nullptr); // Phantom slot
 
             i++;
             break;
@@ -99,7 +103,9 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             uint64_t bits_len = static_cast<uint64_t>(high) << 32 | low;
             double num;
             std::memcpy(&num, &bits_len, sizeof(num));
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Double_info>(num));
+
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Double_info>(num));
+            pool.emplace_back(nullptr); // Phantom slot
 
             i++;
             break;
@@ -108,19 +114,19 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             const int name_jvm_idx = read_u2(file);
 
             strings.emplace(i, strings[name_jvm_idx]); // The class name should already be stored in the strings
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>(name_jvm_idx));
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>(name_jvm_idx));
 
             break;
         }
         case constant_info_type::STRING_REF: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_String_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_String_info>(
                 read_u2(file)
             ));
 
             break;
         }
         case constant_info_type::FIELDREF: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Fieldref_info>(
                 read_u2(file),
                 read_u2(file)
             ));
@@ -128,7 +134,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             break;
         }
         case constant_info_type::METHODREF: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Methodref_info>(
                 read_u2(file),
                 read_u2(file)
             ));
@@ -136,7 +142,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             break;
         }
         case constant_info_type::INTERFACE_METHODREF: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info>(
                 read_u2(file),
                 read_u2(file)
             ));
@@ -144,7 +150,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             break;
         }
         case constant_info_type::NAME_AND_TYPE: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>(
+            pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_NameAndType_info>(
                 read_u2(file),
                 read_u2(file)
             ));
