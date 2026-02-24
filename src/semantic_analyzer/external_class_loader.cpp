@@ -34,7 +34,8 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings);
 
 
 //TODO: Convert all errors to blasphemies
-void load_external_class_file(const std::filesystem::path &path, codesh::semantic_analyzer::symbol_table &table)
+void codesh::semantic_analyzer::load_external_class_file(
+        const std::filesystem::path &path, symbol_table &table)
 {
     std::ifstream file(path, std::ios::binary);
     if (!file)
