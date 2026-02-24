@@ -138,11 +138,15 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
 {
     const uint16_t cp_count = read_u2(file);
 
+    // CLASS_REF entries may forward-reference UTF8 entries that appear later in the constant pool.
+    // Hence, wait for the FULL resolution until all entries are read.
+    std::unordered_map<int, int> class_ref_indices;
+
     for (int i = 1; i < cp_count; i++)
     {
         uint8_t tag = read_u1(file);
 
-        // We only care about Only UTF8 and CLASS_REF for the symbol table
+        // We only care about UTF8 and CLASS_REF for the symbol table
         switch (static_cast<constant_info_type>(tag))
         {
         case constant_info_type::UTF8: {
@@ -156,8 +160,7 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         }
         case constant_info_type::CLASS_REF: {
             const int name_jvm_idx = read_u2(file);
-
-            strings.emplace(i, strings[name_jvm_idx]);
+            class_ref_indices.emplace(i, name_jvm_idx);
 
             break;
         }
@@ -184,6 +187,11 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         default:
             throw std::runtime_error("Unknown constant pool tag: " + std::to_string(tag));
         }
+    }
+
+    for (const auto &[class_idx, name_idx] : class_ref_indices)
+    {
+        strings.emplace(class_idx, get_utf8(strings, name_idx));
     }
 }
 
