@@ -182,7 +182,18 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         case constant_info_type::METHODREF:
         case constant_info_type::INTERFACE_METHODREF:
         case constant_info_type::NAME_AND_TYPE:
+        case constant_info_type::DYNAMIC:
+        case constant_info_type::INVOKE_DYNAMIC:
             read_u4(file);
+            break;
+        case constant_info_type::METHOD_HANDLE:
+            read_u1(file);
+            read_u2(file);
+            break;
+        case constant_info_type::METHOD_TYPE:
+        case constant_info_type::MODULE:
+        case constant_info_type::PACKAGE:
+            read_u2(file);
             break;
         default:
             throw std::runtime_error("Unknown constant pool tag: " + std::to_string(tag));

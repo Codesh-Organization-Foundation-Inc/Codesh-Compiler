@@ -20,6 +20,12 @@ enum class constant_info_type : unsigned char
     METHODREF = 10,
     INTERFACE_METHODREF = 11,
     NAME_AND_TYPE = 12,
+    METHOD_HANDLE = 15,
+    METHOD_TYPE = 16,
+    DYNAMIC = 17,
+    INVOKE_DYNAMIC = 18,
+    MODULE = 19,
+    PACKAGE = 20,
 };
 
 //NOTE: All classes here SHOULD ACT like structs.
