@@ -17,6 +17,7 @@ const rfs_t codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR = rfs(
 const rfs_t codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY = rfs(
     "דֶּרֶךְ תּוֹעָה הֱיֵה: נְתִיב הַיַּעַד {} אֵינוֹ אֶרֶץ"
 );
+// TODO: Change classpath error messages
 const rfs_t codesh::blasphemy::details::INVALID_CLASSPATH_ARG = rfs(
     "דֶּרֶךְ תּוֹעָה הֱיֵה: הֵעָרֵךְ {} אֵינוֹ מַתְאִים "
 );

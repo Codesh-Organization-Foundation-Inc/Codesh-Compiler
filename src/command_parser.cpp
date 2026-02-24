@@ -9,7 +9,7 @@ static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
-static void parse_classpath(std::queue<std::string> args, codesh::command_args& result);
+static void parse_classpath(std::queue<std::string> &args, codesh::command_args& result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -37,6 +37,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
         if (arg == "--classpath")
         {
+
             parse_classpath(args, result);
         }
         else
@@ -53,7 +54,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     return result;
 }
 
-static void parse_classpath(std::queue<std::string> args, codesh::command_args& result)
+static void parse_classpath(std::queue<std::string> &args, codesh::command_args& result)
 {
     if (args.empty())
     {
