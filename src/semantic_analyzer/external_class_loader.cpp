@@ -12,12 +12,19 @@
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 using cp_map = std::unordered_map<int, std::unique_ptr<codesh::output::jvm_target::defs::cp_info>>;
+/**
+ * Maps a constant pool index to its associated string
+ */
+using cp_strings = std::unordered_map<int, std::string>;
+
 using constant_info_type = codesh::output::jvm_target::defs::constant_info_type;
 
 static uint8_t read_u1(std::ifstream &file);
 static uint16_t read_u2(std::ifstream &file);
 static uint32_t read_u4(std::ifstream &file);
-static cp_map parse_constant_pool(std::ifstream &file);
+static std::string get_utf8(const cp_strings &strings, int idx);
+static std::string get_class_name(const cp_strings &strings, int idx);
+static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings);
 
 static void read_magic(std::ifstream &file);
 
@@ -33,10 +40,11 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     read_u2(file); // minor_version
     read_u2(file); // major_version
 
-    cp_map pool = parse_constant_pool(file);
+    cp_strings strings;
+    const auto pool = parse_constant_pool(file, strings);
 }
 
-static cp_map parse_constant_pool(std::ifstream &file)
+static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
 {
     cp_map pool;
 
@@ -52,6 +60,7 @@ static cp_map parse_constant_pool(std::ifstream &file)
             std::string utf8(len, '\0');
             file.read(utf8.data(), len);
 
+            strings.emplace(i, utf8);
             pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>(utf8));
 
             break;
@@ -96,9 +105,10 @@ static cp_map parse_constant_pool(std::ifstream &file)
             break;
         }
         case constant_info_type::CLASS_REF: {
-            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>(
-                read_u2(file)
-            ));
+            const int name_jvm_idx = read_u2(file);
+
+            strings.emplace(i, strings[name_jvm_idx]); // The class name should already be stored in the strings
+            pool.emplace(i, std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>(name_jvm_idx));
 
             break;
         }
@@ -149,12 +159,31 @@ static cp_map parse_constant_pool(std::ifstream &file)
     return pool;
 }
 
-
 static void read_magic(std::ifstream &file)
 {
     if (read_u4(file) != 0xCAFEBABE)
         throw std::runtime_error("Not a valid .class file");
 }
+
+
+static std::string get_utf8(const cp_strings &strings, const int idx)
+{
+    const auto it = strings.find(idx);
+    if (it == strings.end())
+        throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a UTF8 entry");
+
+    return it->second;
+}
+
+static std::string get_class_name(const cp_strings &strings, const int idx)
+{
+    const auto it = strings.find(idx);
+    if (it == strings.end())
+        throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
+
+    return it->second;
+}
+
 
 static uint8_t read_u1(std::ifstream &file)
 {
