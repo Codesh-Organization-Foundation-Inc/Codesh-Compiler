@@ -2,12 +2,16 @@
 
 #include <cstdint>
 #include <fstream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "blasphemy/blasphemy_collector.h"
+#include "defenition/fully_qualified_name.h"
 #include "output/jvm_target/defs/cp_info.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 /**
@@ -15,22 +19,32 @@
  */
 using cp_strings = std::unordered_map<int, std::string>;
 
-using constant_info_type = codesh::output::jvm_target::defs::constant_info_type;
+using codesh::output::jvm_target::defs::constant_info_type;
+using codesh::semantic_analyzer::country_symbol;
+using codesh::semantic_analyzer::type_symbol;
+using codesh::semantic_analyzer::field_symbol;
+using codesh::semantic_analyzer::method_symbol;
+using codesh::semantic_analyzer::method_overloads_symbol;
+using codesh::semantic_analyzer::symbol_table;
+using codesh::definition::fully_qualified_name;
 
 static uint8_t read_u1(std::ifstream &file);
 static uint16_t read_u2(std::ifstream &file);
 static uint32_t read_u4(std::ifstream &file);
 static void skip_attributes(std::ifstream &file, uint16_t count);
 static std::string get_utf8(const cp_strings &strings, int idx);
-static std::string get_class_name(const cp_strings &strings, int idx);
+static fully_qualified_name get_class_name(const cp_strings &strings, int idx);
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings);
 
-static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &strings);
+static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings);
 
 static void read_magic(std::ifstream &file);
-static void parse_type(std::ifstream &file, const cp_strings &strings);
-static void parse_fields(std::ifstream &file, const cp_strings &strings);
-static void parse_methods(std::ifstream &file, const cp_strings &strings);
+static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table);
+static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
+static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
+
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attributes_from_flags(uint16_t flags);
+static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name);
 
 
 //TODO: Convert all errors to blasphemies
@@ -48,14 +62,12 @@ void codesh::semantic_analyzer::load_external_class_file(
     cp_strings strings;
     parse_constant_pool(file, strings);
 
-    parse_type(file, strings);
-    parse_fields(file, strings);
-    parse_methods(file, strings);
-
-    (void)table;
+    type_symbol &type_sym = parse_type(file, strings, table);
+    parse_fields(file, strings, type_sym);
+    parse_methods(file, strings, type_sym);
 }
 
-static void parse_methods(std::ifstream &file, const cp_strings &strings)
+static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto methods_count = read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
@@ -83,31 +95,33 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings)
     }
 }
 
-static void parse_type(std::ifstream &file, const cp_strings &strings)
+static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
 {
     const auto access_flags = read_u2(file);
     const auto this_class_idx = read_u2(file);
-    const auto super_class_idx = read_u2(file);
-    const auto is_interface = (access_flags & 0x0200) != 0;
+
+    //TODO:
+    // read_u2(file); // super_class_idx
 
     const auto class_name = get_class_name(strings, this_class_idx);
-    const auto super_class_name = super_class_idx != 0 ? get_class_name(strings, super_class_idx) : "";
 
-    const auto interface_names = read_interface_names(file, strings);
+    //TODO:
+    // read_interface_names(file, strings);
 
-    // TODO: Register type_symbol for this type
-    // Available variables:
-    //   std::string        class_name        — e.g. "java/lang/String"
-    //   std::string        super_class_name  — e.g. "java/lang/Object", or "" for Object itself
-    //   std::vector<std::string> interface_names — e.g. {"java/io/Serializable", "java/lang/Comparable"}
-    //   uint16_t           access_flags      — raw JVM access flags (ACC_PUBLIC=0x0001, ACC_INTERFACE=0x0200, ACC_ABSTRACT=0x0400, ACC_FINAL=0x0010, ...)
-    //   bool               is_interface      — shorthand for (access_flags & 0x0200)
-    //   symbol_table&      table             — the symbol table to register into
+    country_symbol &country = find_or_create_country(table, class_name.omit_last().join());
 
-    (void)is_interface;
+    return country.get_scope().add_symbol(
+        class_name.get_last_part(),
+        std::make_unique<type_symbol>(
+            &country,
+            class_name,
+            make_attributes_from_flags(access_flags),
+            nullptr
+        )
+    ).first.get();
 }
 
-static void parse_fields(std::ifstream &file, const cp_strings &strings)
+static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto fields_count = read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
@@ -132,6 +146,74 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings)
         (void)field_name;
         (void)field_descriptor;
     }
+}
+
+static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name)
+{
+    country_symbol &root = table.resolve_country("").value();
+
+    if (package_name.empty())
+        return root;
+
+    // Walk each '/'-separated segment, creating country_symbols as needed
+    country_symbol *current = &root;
+    std::string accumulated;
+
+    size_t start = 0;
+    while (true)
+    {
+        const size_t slash_pos = package_name.find('/', start);
+        const bool last = slash_pos == std::string::npos;
+        const std::string part = package_name.substr(start, last ? std::string::npos : slash_pos - start);
+
+        if (!accumulated.empty())
+        {
+            accumulated += '/';
+        }
+        accumulated += part;
+
+        const auto existing = current->get_scope().resolve_local(part);
+        if (existing)
+        {
+            current = &dynamic_cast<country_symbol &>(existing->get());
+        }
+        else
+        {
+            current = &current->get_scope().add_symbol(
+                part,
+                std::make_unique<country_symbol>(
+                    accumulated.c_str(),
+                    current
+                )
+            ).first.get();
+        }
+
+        if (last)
+            break;
+
+        start = slash_pos + 1;
+    }
+
+    return *current;
+}
+
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attributes_from_flags(const uint16_t flags)
+{
+    auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+
+    if (flags & 0x0001)
+        result->set_visibility(codesh::definition::visibility::PUBLIC);
+    else if (flags & 0x0002)
+        result->set_visibility(codesh::definition::visibility::PRIVATE);
+    else if (flags & 0x0004)
+        result->set_visibility(codesh::definition::visibility::PROTECTED);
+    // else: PACKAGE_PRIVATE (default)
+
+    result->set_is_static(flags & 0x0008);
+    result->set_is_final(flags & 0x0010);
+    result->set_is_abstract((flags & 0x0400) != 0 || (flags & 0x0200) != 0); // ACC_ABSTRACT or ACC_INTERFACE
+
+    return result;
 }
 
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
@@ -212,15 +294,17 @@ static void read_magic(std::ifstream &file)
         throw std::runtime_error("Not a valid .class file");
 }
 
-static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &strings)
+static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings)
 {
     const auto interfaces = read_u2(file);
 
-    std::vector<std::string> interface_names;
+    std::vector<fully_qualified_name> interface_names;
     interface_names.reserve(interfaces);
 
     for (size_t i = 0; i < interfaces; i++)
+    {
         interface_names.push_back(get_class_name(strings, read_u2(file)));
+    }
 
     return interface_names;
 }
@@ -243,13 +327,13 @@ static std::string get_utf8(const cp_strings &strings, const int idx)
     return it->second;
 }
 
-static std::string get_class_name(const cp_strings &strings, const int idx)
+static fully_qualified_name get_class_name(const cp_strings &strings, const int idx)
 {
     const auto it = strings.find(idx);
     if (it == strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
-    return it->second;
+    return it->second.c_str();
 }
 
 static uint8_t read_u1(std::ifstream &file)
