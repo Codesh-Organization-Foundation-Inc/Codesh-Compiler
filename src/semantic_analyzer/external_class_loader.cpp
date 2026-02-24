@@ -22,9 +22,10 @@ using constant_info_type = codesh::output::jvm_target::defs::constant_info_type;
 static uint8_t read_u1(std::ifstream &file);
 static uint16_t read_u2(std::ifstream &file);
 static uint32_t read_u4(std::ifstream &file);
-static std::string get_utf8(const cp_strings &strings, int idx);
-static std::string get_class_name(const cp_strings &strings, int idx);
-static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings);
+static std::string get_utf8(const cp_strings &cp_strings, int idx);
+static std::string get_class_name(const cp_strings &cp_strings, int idx);
+static cp_map parse_constant_pool(std::ifstream &file, cp_strings &cp_strings);
+static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &cp_strings);
 
 static void read_magic(std::ifstream &file);
 
@@ -40,11 +41,41 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     read_u2(file); // minor_version
     read_u2(file); // major_version
 
-    cp_strings strings;
-    const auto pool = parse_constant_pool(file, strings);
+    cp_strings cp_strings;
+    //TODO: Review if necessary to be saved
+    const auto pool = parse_constant_pool(file, cp_strings);
+
+
+    const auto access_flags = read_u2(file);
+    const auto this_class_idx = read_u2(file);
+    const auto super_class_idx = read_u2(file);
+    const auto is_interface = (access_flags & 0x0200) != 0;
+
+
+    const auto class_name = get_class_name(cp_strings, this_class_idx);
+    const auto super_class_name = super_class_idx != 0 ? get_class_name(cp_strings, super_class_idx) : "";
+
+    const auto interface_names = read_interface_names(file, cp_strings);
+
+
+    // TODO: Register type_symbol for this class/interface
+    // Available variables:
+    //   std::string        class_name        — e.g. "java/lang/String"
+    //   std::string        super_class_name  — e.g. "java/lang/Object", or "" for Object itself
+    //   std::vector<std::string> interface_names — e.g. {"java/io/Serializable", "java/lang/Comparable"}
+    //   uint16_t           access_flags      — raw JVM access flags (ACC_PUBLIC=0x0001, ACC_INTERFACE=0x0200, ACC_ABSTRACT=0x0400, ACC_FINAL=0x0010, ...)
+    //   bool               is_interface      — shorthand for (access_flags & 0x0200)
+    //   symbol_table&      table             — the symbol table to register into
+
+    (void)access_flags;
+    (void)is_interface;
+    (void)class_name;
+    (void)super_class_name;
+    (void)interface_names;
+    (void)table;
 }
 
-static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
+static cp_map parse_constant_pool(std::ifstream &file, cp_strings &cp_strings)
 {
     const uint16_t cp_count = read_u2(file);
 
@@ -63,7 +94,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
             std::string utf8(len, '\0');
             file.read(utf8.data(), len);
 
-            strings.emplace(i, utf8);
+            cp_strings.emplace(i, utf8);
             pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Utf8_info>(utf8));
 
             break;
@@ -113,7 +144,7 @@ static cp_map parse_constant_pool(std::ifstream &file, cp_strings &strings)
         case constant_info_type::CLASS_REF: {
             const int name_jvm_idx = read_u2(file);
 
-            strings.emplace(i, strings[name_jvm_idx]); // The class name should already be stored in the strings
+            cp_strings.emplace(i, cp_strings[name_jvm_idx]); // The class name should already be stored in the strings
             pool.emplace_back(std::make_unique<codesh::output::jvm_target::defs::CONSTANT_Class_info>(name_jvm_idx));
 
             break;
@@ -171,20 +202,35 @@ static void read_magic(std::ifstream &file)
         throw std::runtime_error("Not a valid .class file");
 }
 
-
-static std::string get_utf8(const cp_strings &strings, const int idx)
+static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &cp_strings)
 {
-    const auto it = strings.find(idx);
-    if (it == strings.end())
+    const auto interfaces = read_u2(file);
+
+    std::vector<std::string> interface_names;
+    interface_names.reserve(interfaces);
+
+    for (size_t i = 0; i < interfaces; i++)
+    {
+        interface_names.push_back(get_class_name(cp_strings, read_u2(file)));
+    }
+
+    return interface_names;
+}
+
+
+static std::string get_utf8(const cp_strings &cp_strings, const int idx)
+{
+    const auto it = cp_strings.find(idx);
+    if (it == cp_strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a UTF8 entry");
 
     return it->second;
 }
 
-static std::string get_class_name(const cp_strings &strings, const int idx)
+static std::string get_class_name(const cp_strings &cp_strings, const int idx)
 {
-    const auto it = strings.find(idx);
-    if (it == strings.end())
+    const auto it = cp_strings.find(idx);
+    if (it == cp_strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
     return it->second;
