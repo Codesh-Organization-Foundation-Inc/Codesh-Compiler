@@ -27,9 +27,11 @@ static std::string get_utf8(const cp_strings &cp_strings, int idx);
 static std::string get_class_name(const cp_strings &cp_strings, int idx);
 static cp_map parse_constant_pool(std::ifstream &file, cp_strings &cp_strings);
 
-static void read_magic(std::ifstream &file);
-static void parse_fields(std::ifstream &file, const cp_strings &cp_strings);
 static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &cp_strings);
+
+static void read_magic(std::ifstream &file);
+static void parse_type(std::ifstream &file, const cp_strings &cp_strings);
+static void parse_fields(std::ifstream &file, const cp_strings &cp_strings);
 
 
 //TODO: Convert all errors to blasphemies
@@ -47,7 +49,14 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     //TODO: Review if necessary to be saved
     const auto pool = parse_constant_pool(file, cp_strings);
 
+    parse_type(file, cp_strings);
+    parse_fields(file, cp_strings);
 
+    (void)table;
+}
+
+static void parse_type(std::ifstream &file, const cp_strings &cp_strings)
+{
     const auto access_flags = read_u2(file);
     const auto this_class_idx = read_u2(file);
     const auto super_class_idx = read_u2(file);
@@ -59,8 +68,7 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
 
     const auto interface_names = read_interface_names(file, cp_strings);
 
-
-    // TODO: Register type_symbol for this class/interface
+    // TODO: Register type_symbol for this type
     // Available variables:
     //   std::string        class_name        — e.g. "java/lang/String"
     //   std::string        super_class_name  — e.g. "java/lang/Object", or "" for Object itself
@@ -69,14 +77,7 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     //   bool               is_interface      — shorthand for (access_flags & 0x0200)
     //   symbol_table&      table             — the symbol table to register into
 
-    parse_fields(file, cp_strings);
-
-    (void)access_flags;
     (void)is_interface;
-    (void)class_name;
-    (void)super_class_name;
-    (void)interface_names;
-    (void)table;
 }
 
 static void parse_fields(std::ifstream &file, const cp_strings &cp_strings)
@@ -94,7 +95,7 @@ static void parse_fields(std::ifstream &file, const cp_strings &cp_strings)
         const auto field_name = get_utf8(cp_strings, field_name_idx);
         const auto field_descriptor = get_utf8(cp_strings, field_desc_idx);
 
-        // TODO: Register field_symbol for this field.
+        // TODO: Register field_symbol for this field
         // Available variables:
         //   std::string field_name        — e.g. "hash"
         //   std::string field_descriptor  — e.g. "I", "Ljava/lang/String;", "[B"
