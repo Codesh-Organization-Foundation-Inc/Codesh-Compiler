@@ -9,7 +9,7 @@ static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
-static void parse_classpath(std::queue<std::string> &args, codesh::command_args& result);
+static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -27,7 +27,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
     auto args = create_args_queue(argc, argv);
 
-
     result.src_path = consume_argument(args);
     result.dest_path = consume_argument(args);
 
@@ -37,7 +36,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
         if (arg == "--classpath")
         {
-
             parse_classpath(args, result);
         }
         else
@@ -54,7 +52,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     return result;
 }
 
-static void parse_classpath(std::queue<std::string> &args, codesh::command_args& result)
+static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result)
 {
     if (args.empty())
     {
@@ -84,7 +82,8 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args&
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(codesh::blasphemy::details::INVALID_CLASSPATH_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS, false);
+            codesh::blasphemy::NO_CODE_POS, false
+        );
     }
 }
 
