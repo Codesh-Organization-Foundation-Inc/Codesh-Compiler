@@ -55,6 +55,8 @@ static type_symbol &add_type_symbol(const symbol_table &table,
         const fully_qualified_name &class_name);
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
         std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym);
+static void add_field_symbol(type_symbol &type_sym, const std::string &field_name, const std::string &field_descriptor,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes);
 
 
 //TODO: Convert all errors to blasphemies
@@ -178,7 +180,7 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings, type_sy
     const auto fields_count = read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
     {
-        const auto field_access_flags = read_u2(file);
+        auto attributes = flags_to_attributes(read_u2(file));
         const auto field_name_idx = read_u2(file);
         const auto field_desc_idx = read_u2(file);
         const auto field_attr_count = read_u2(file);
@@ -188,16 +190,30 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings, type_sy
         const auto field_name = get_utf8(strings, field_name_idx);
         const auto field_descriptor = get_utf8(strings, field_desc_idx);
 
-        // TODO: Register field_symbol for this field
-        // Available variables:
-        //   std::string field_name        — e.g. "hash"
-        //   std::string field_descriptor  — e.g. "I", "Ljava/lang/String;", "[B"
-        //   uint16_t    field_access_flags— raw JVM access flags
-        //   (type_symbol for the enclosing class is what you registered above)
-        (void)field_access_flags;
-        (void)field_name;
-        (void)field_descriptor;
+        add_field_symbol(
+            type_sym,
+            field_name,
+            field_descriptor,
+            std::move(attributes)
+        );
     }
+}
+
+static void add_field_symbol(type_symbol &type_sym, const std::string &field_name, const std::string &field_descriptor,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes)
+{
+    size_t pos = 0;
+
+    type_sym.get_scope().add_symbol(
+        field_name,
+        std::make_unique<field_symbol>(
+            &type_sym,
+            type_sym.get_full_name().with(field_name),
+            std::move(attributes),
+            descriptor_to_node_type(field_descriptor, pos),
+            nullptr
+        )
+    );
 }
 
 static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name)
