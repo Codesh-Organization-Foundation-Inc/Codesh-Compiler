@@ -48,15 +48,9 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
 static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
 static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
         size_t &pos);
-static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name);
 
-static type_symbol &add_type_symbol(const symbol_table &table,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes,
-        const fully_qualified_name &class_name);
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
         std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym);
-static void add_field_symbol(type_symbol &type_sym, const std::string &field_name, const std::string &field_descriptor,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes);
 
 
 //TODO: Convert all errors to blasphemies
@@ -103,7 +97,6 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
     }
 }
 
-//TODO: Consider making all these helper functions useful in places where we create such symbols
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
         std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym)
 {
@@ -152,26 +145,15 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
     //TODO:
     // read_interface_names(file, strings);
 
-    return add_type_symbol(
+    country_symbol &country = codesh::semantic_analyzer::util::find_or_create_country(
         table,
-        std::move(access_flags),
-        class_name
+        class_name.omit_last().join()
     );
-}
 
-static type_symbol &add_type_symbol(const symbol_table &table,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, const fully_qualified_name &class_name)
-{
-    country_symbol &country = find_or_create_country(table, class_name.omit_last().join());
-
-    return country.get_scope().add_symbol(
+    return codesh::semantic_analyzer::util::add_type_symbol(
+        country,
         class_name.get_last_part(),
-        std::make_unique<type_symbol>(
-            &country,
-            class_name,
-            std::move(attributes),
-            nullptr
-        )
+        std::move(access_flags)
     ).first.get();
 }
 
@@ -190,80 +172,16 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings, type_sy
         const auto field_name = get_utf8(strings, field_name_idx);
         const auto field_descriptor = get_utf8(strings, field_desc_idx);
 
-        add_field_symbol(
+        size_t pos = 0;
+        codesh::semantic_analyzer::util::add_field_symbol(
             type_sym,
             field_name,
-            field_descriptor,
-            std::move(attributes)
+            std::move(attributes),
+            descriptor_to_node_type(field_descriptor, pos)
         );
     }
 }
 
-static void add_field_symbol(type_symbol &type_sym, const std::string &field_name, const std::string &field_descriptor,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes)
-{
-    size_t pos = 0;
-
-    type_sym.get_scope().add_symbol(
-        field_name,
-        std::make_unique<field_symbol>(
-            &type_sym,
-            type_sym.get_full_name().with(field_name),
-            std::move(attributes),
-            descriptor_to_node_type(field_descriptor, pos),
-            nullptr
-        )
-    );
-}
-
-static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name)
-{
-    country_symbol &root = table.resolve_country("").value();
-
-    if (package_name.empty())
-        return root;
-
-    // Walk each '/'-separated segment, creating country_symbols as needed
-    country_symbol *current = &root;
-    std::string accumulated;
-
-    size_t start = 0;
-    while (true)
-    {
-        const size_t slash_pos = package_name.find('/', start);
-        const bool last = slash_pos == std::string::npos;
-        const std::string part = package_name.substr(start, last ? std::string::npos : slash_pos - start);
-
-        if (!accumulated.empty())
-        {
-            accumulated += '/';
-        }
-        accumulated += part;
-
-        const auto existing = current->get_scope().resolve_local(part);
-        if (existing)
-        {
-            current = &dynamic_cast<country_symbol &>(existing->get());
-        }
-        else
-        {
-            current = &current->get_scope().add_symbol(
-                part,
-                std::make_unique<country_symbol>(
-                    accumulated.c_str(),
-                    current
-                )
-            ).first.get();
-        }
-
-        if (last)
-            break;
-
-        start = slash_pos + 1;
-    }
-
-    return *current;
-}
 
 static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(const uint16_t flags)
 {

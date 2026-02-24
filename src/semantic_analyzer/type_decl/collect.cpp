@@ -4,6 +4,7 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/method_decl/collect.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/util.h"
 
 #include "blasphemy/blasphemy_collector.h"
 #include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
@@ -11,10 +12,10 @@
 
 static void collect_super_type(codesh::semantic_analyzer::type_symbol &type_sym,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
-        codesh::semantic_analyzer::country_symbol &country);
+                               const codesh::semantic_analyzer::country_symbol &country);
 static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
-        codesh::semantic_analyzer::country_symbol &country);
+                               const codesh::semantic_analyzer::country_symbol &country);
 static codesh::semantic_analyzer::type_symbol *resolve_type_by_name(
         const codesh::semantic_analyzer::country_symbol &country,
         codesh::ast::type::custom_type_ast_node &node);
@@ -30,15 +31,11 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
     const std::string name = type_decl.get_last_name(false);
     const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
 
-
-    const auto [it, inserted] = country.get_scope().add_symbol(
-        name, std::make_unique<type_symbol>(
-            &country,
-            country.get_full_name().with(name),
-
-            type_decl.get_attributes()->clone(),
-            &type_decl
-        )
+    const auto [it, inserted] = util::add_type_symbol(
+        country,
+        name,
+        type_decl.get_attributes()->clone(),
+        &type_decl
     );
 
     if (!inserted)
@@ -71,7 +68,7 @@ void codesh::semantic_analyzer::type_declaration::collect_inheritance(const sema
 
 static void collect_super_type(codesh::semantic_analyzer::type_symbol &type_sym,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
-        codesh::semantic_analyzer::country_symbol &country)
+        const codesh::semantic_analyzer::country_symbol &country)
 {
     if (auto *super_symbol = resolve_type_by_name(country, *type_decl.get_super_class()))
     {
@@ -81,7 +78,7 @@ static void collect_super_type(codesh::semantic_analyzer::type_symbol &type_sym,
 
 static void collect_interfaces(codesh::semantic_analyzer::type_symbol &type_sym,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl,
-        codesh::semantic_analyzer::country_symbol &country)
+        const codesh::semantic_analyzer::country_symbol &country)
 {
     for (const auto &interface_node : type_decl.get_interfaces())
     {

@@ -6,6 +6,7 @@
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "semantic_analyzer/util.h"
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
@@ -63,16 +64,10 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
-    auto &massof_symbol = country.get_scope().add_symbol(
+    auto &massof_symbol = codesh::semantic_analyzer::util::add_type_symbol(
+        country,
         CLASS_MASSOF,
-        std::make_unique<codesh::semantic_analyzer::type_symbol>(
-            &country,
-            country.get_full_name().with(CLASS_MASSOF),
-
-            std::move(attributes),
-
-            nullptr
-        )
+        std::move(attributes)
     ).first.get();
 
 
