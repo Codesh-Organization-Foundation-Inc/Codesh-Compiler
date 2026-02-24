@@ -1,5 +1,7 @@
 #include "external_class_loader.h"
 
+#include "util.h"
+
 #include <cstdint>
 #include <fstream>
 #include <memory>
@@ -44,7 +46,12 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings, type_sy
 static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
 
 static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attributes_from_flags(uint16_t flags);
+static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
+        size_t &pos);
 static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name);
+
+static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
+        uint16_t method_access_flags, type_symbol &type_sym);
 
 
 //TODO: Convert all errors to blasphemies
@@ -82,17 +89,43 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
         const auto method_name = get_utf8(strings, method_name_idx);
         const auto method_descriptor = get_utf8(strings, method_desc_idx);
 
-        // TODO: Register method_symbol for this method.
-        // Available variables:
-        //   std::string method_name        — e.g. "length", "<init>", "<clinit>"
-        //   std::string method_descriptor  — e.g. "()I", "(Ljava/lang/String;I)V"
-        //                                    Format: "(" + param_descriptors + ")" + return_descriptor
-        //   uint16_t    method_access_flags— raw JVM access flags
-        //   (type_symbol for the enclosing class is what you registered above)
-        (void)method_access_flags;
-        (void)method_name;
-        (void)method_descriptor;
+        add_method_symbol(method_descriptor, method_name, method_access_flags, type_sym);
     }
+}
+
+static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
+        const uint16_t method_access_flags, type_symbol &type_sym)
+{
+    // Parse descriptor "(param1param2...)return_type"
+    std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> param_types;
+
+    size_t pos = 1; // '('
+    while (pos < method_descriptor.size() && method_descriptor.at(pos) != ')')
+    {
+        param_types.push_back(descriptor_to_node_type(method_descriptor, pos));
+    }
+    pos++; // ')'
+
+    auto return_type = descriptor_to_node_type(method_descriptor, pos);
+
+
+    method_overloads_symbol &overloads = codesh::semantic_analyzer::util::get_method_overloads_symbol(
+        method_name,
+        type_sym
+    );
+
+    overloads.get_scope().add_symbol(
+        method_descriptor,
+        std::make_unique<method_symbol>(
+            &overloads,
+            type_sym,
+            type_sym.get_full_name().with(method_name),
+            make_attributes_from_flags(method_access_flags),
+            std::move(param_types),
+            std::move(return_type),
+            nullptr
+        )
+    );
 }
 
 static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
@@ -214,6 +247,12 @@ static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attribu
     result->set_is_abstract((flags & 0x0400) != 0 || (flags & 0x0200) != 0); // ACC_ABSTRACT or ACC_INTERFACE
 
     return result;
+}
+
+static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
+        size_t &pos)
+{
+    return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::blasphemy::NO_CODE_POS);
 }
 
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
