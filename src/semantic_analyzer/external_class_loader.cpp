@@ -50,6 +50,8 @@ static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type
         size_t &pos);
 static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name);
 
+static type_symbol &add_type_symbol(const symbol_table &table, uint16_t access_flags,
+        const fully_qualified_name &class_name);
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
         uint16_t method_access_flags, type_symbol &type_sym);
 
@@ -93,6 +95,7 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
     }
 }
 
+//TODO: Consider making all these helper functions useful in places where we create such symbols
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
         const uint16_t method_access_flags, type_symbol &type_sym)
 {
@@ -141,6 +144,12 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
     //TODO:
     // read_interface_names(file, strings);
 
+    return add_type_symbol(table, access_flags, class_name);
+}
+
+static type_symbol &add_type_symbol(const symbol_table &table, const uint16_t access_flags,
+        const fully_qualified_name &class_name)
+{
     country_symbol &country = find_or_create_country(table, class_name.omit_last().join());
 
     return country.get_scope().add_symbol(
