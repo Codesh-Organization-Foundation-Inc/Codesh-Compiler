@@ -89,6 +89,14 @@ codesh::output::jvm_target::defs::CONSTANT_Methodref_info::CONSTANT_Methodref_in
     util::put_int_bytes(this->name_and_type_index, 2, name_and_type_index);
 }
 
+codesh::output::jvm_target::defs::CONSTANT_InterfaceMethodref_info::CONSTANT_InterfaceMethodref_info(
+        const int class_index, const int name_and_type_index) :
+    cp_info(constant_info_type::INTERFACE_METHODREF)
+{
+    util::put_int_bytes(this->class_index, 2, class_index);
+    util::put_int_bytes(this->name_and_type_index, 2, name_and_type_index);
+}
+
 codesh::output::jvm_target::defs::CONSTANT_NameAndType_info::CONSTANT_NameAndType_info(const int name_index,
                                                                                        const int descriptor_index) :
     cp_info(constant_info_type::NAME_AND_TYPE)

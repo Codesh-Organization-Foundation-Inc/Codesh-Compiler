@@ -144,7 +144,7 @@ public:
 class CONSTANT_InterfaceMethodref_info : public cp_info
 {
 public:
-    CONSTANT_InterfaceMethodref_info();
+    CONSTANT_InterfaceMethodref_info(int class_index, int name_and_type_index);
 
     bool operator==(const CONSTANT_InterfaceMethodref_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
