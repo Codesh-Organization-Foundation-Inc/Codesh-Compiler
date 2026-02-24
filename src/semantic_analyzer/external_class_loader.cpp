@@ -22,12 +22,14 @@ using constant_info_type = codesh::output::jvm_target::defs::constant_info_type;
 static uint8_t read_u1(std::ifstream &file);
 static uint16_t read_u2(std::ifstream &file);
 static uint32_t read_u4(std::ifstream &file);
+static void skip_attributes(std::ifstream &file, uint16_t count);
 static std::string get_utf8(const cp_strings &cp_strings, int idx);
 static std::string get_class_name(const cp_strings &cp_strings, int idx);
 static cp_map parse_constant_pool(std::ifstream &file, cp_strings &cp_strings);
-static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &cp_strings);
 
 static void read_magic(std::ifstream &file);
+static void parse_fields(std::ifstream &file, const cp_strings &cp_strings);
+static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &cp_strings);
 
 
 //TODO: Convert all errors to blasphemies
@@ -67,12 +69,41 @@ void load_external_class_file(const std::filesystem::path &path, codesh::semanti
     //   bool               is_interface      — shorthand for (access_flags & 0x0200)
     //   symbol_table&      table             — the symbol table to register into
 
+    parse_fields(file, cp_strings);
+
     (void)access_flags;
     (void)is_interface;
     (void)class_name;
     (void)super_class_name;
     (void)interface_names;
     (void)table;
+}
+
+static void parse_fields(std::ifstream &file, const cp_strings &cp_strings)
+{
+    const auto fields_count = read_u2(file);
+    for (size_t fi = 0; fi < fields_count; fi++)
+    {
+        const auto field_access_flags = read_u2(file);
+        const auto field_name_idx = read_u2(file);
+        const auto field_desc_idx = read_u2(file);
+        const auto field_attr_count = read_u2(file);
+
+        skip_attributes(file, field_attr_count);
+
+        const auto field_name = get_utf8(cp_strings, field_name_idx);
+        const auto field_descriptor = get_utf8(cp_strings, field_desc_idx);
+
+        // TODO: Register field_symbol for this field.
+        // Available variables:
+        //   std::string field_name        — e.g. "hash"
+        //   std::string field_descriptor  — e.g. "I", "Ljava/lang/String;", "[B"
+        //   uint16_t    field_access_flags— raw JVM access flags
+        //   (type_symbol for the enclosing class is what you registered above)
+        (void)field_access_flags;
+        (void)field_name;
+        (void)field_descriptor;
+    }
 }
 
 static cp_map parse_constant_pool(std::ifstream &file, cp_strings &cp_strings)
@@ -215,6 +246,15 @@ static std::vector<std::string> read_interface_names(std::ifstream &file, const 
     }
 
     return interface_names;
+}
+
+static void skip_attributes(std::ifstream &file, const uint16_t count)
+{
+    for (uint16_t a = 0; a < count; a++)
+    {
+        read_u2(file);
+        file.seekg(read_u4(file), std::ios::cur);
+    }
 }
 
 
