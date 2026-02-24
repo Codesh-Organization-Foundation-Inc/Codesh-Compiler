@@ -9,7 +9,7 @@ static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
-
+static void parse_classpath(std::queue<std::string> args, codesh::command_args& result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -25,7 +25,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         );
     }
 
-    //TODO: Implement
     auto args = create_args_queue(argc, argv);
 
 
@@ -38,37 +37,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
         if (arg == "--classpath")
         {
-            if (args.empty()) {
-                blasphemy::get_blasphemy_collector().add_blasphemy(
-                    blasphemy::details::NO_CLASSPATH_ARG,
-                    blasphemy::blasphemy_type::INIT,
-                    blasphemy::NO_CODE_POS,
-                    true
-                );
-                break;
-            }
-
-            std::stringstream stream(consume_argument(args));
-            std::string entry;
-
-            while (std::getline(stream, entry, ';'))
-            {
-                std::filesystem::path file_path(entry);
-
-                if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
-                {
-                    result.classpath.push_back(file_path);
-                }
-                else
-                {
-                    blasphemy::get_blasphemy_collector().add_blasphemy(
-                        fmt::format(blasphemy::details::INVALID_CLASSPATH_ARG, entry),
-                        blasphemy::blasphemy_type::INIT,
-                        blasphemy::NO_CODE_POS,
-                        false
-                    );
-                }
-            }
+            parse_classpath(args, result);
         }
         else
         {
@@ -82,6 +51,40 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     return result;
+}
+
+static void parse_classpath(std::queue<std::string> args, codesh::command_args& result)
+{
+    if (args.empty())
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_CLASSPATH_ARG,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
+    }
+
+    std::stringstream stream(consume_argument(args));
+    std::string entry;
+
+    while (std::getline(stream, entry, ';'))
+    {
+        if (entry.empty())
+            continue;
+
+        std::filesystem::path file_path(entry);
+        if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
+        {
+            result.classpath.push_back(file_path);
+            continue;
+        }
+
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(codesh::blasphemy::details::INVALID_CLASSPATH_ARG, entry),
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS, false);
+    }
 }
 
 static bool is_zip(const std::string &file_name)
