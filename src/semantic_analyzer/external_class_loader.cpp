@@ -45,15 +45,16 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
 static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
 static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
 
-static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attributes_from_flags(uint16_t flags);
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
 static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
         size_t &pos);
 static country_symbol &find_or_create_country(const symbol_table &table, const std::string &package_name);
 
-static type_symbol &add_type_symbol(const symbol_table &table, uint16_t access_flags,
+static type_symbol &add_type_symbol(const symbol_table &table,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes,
         const fully_qualified_name &class_name);
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
-        uint16_t method_access_flags, type_symbol &type_sym);
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym);
 
 
 //TODO: Convert all errors to blasphemies
@@ -81,7 +82,7 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
     const auto methods_count = read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
     {
-        const auto method_access_flags = read_u2(file);
+        auto access_flags = flags_to_attributes(read_u2(file));
         const auto method_name_idx = read_u2(file);
         const auto method_desc_idx = read_u2(file);
         const auto method_attr_count = read_u2(file);
@@ -91,13 +92,18 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings, type_s
         const auto method_name = get_utf8(strings, method_name_idx);
         const auto method_descriptor = get_utf8(strings, method_desc_idx);
 
-        add_method_symbol(method_descriptor, method_name, method_access_flags, type_sym);
+        add_method_symbol(
+            method_descriptor,
+            method_name,
+            std::move(access_flags),
+            type_sym
+        );
     }
 }
 
 //TODO: Consider making all these helper functions useful in places where we create such symbols
 static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
-        const uint16_t method_access_flags, type_symbol &type_sym)
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym)
 {
     // Parse descriptor "(param1param2...)return_type"
     std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> param_types;
@@ -123,7 +129,7 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
             &overloads,
             type_sym,
             type_sym.get_full_name().with(method_name),
-            make_attributes_from_flags(method_access_flags),
+            std::move(attributes),
             std::move(param_types),
             std::move(return_type),
             nullptr
@@ -133,7 +139,7 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
 
 static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
 {
-    const auto access_flags = read_u2(file);
+    auto access_flags = flags_to_attributes(read_u2(file));
     const auto this_class_idx = read_u2(file);
 
     //TODO:
@@ -144,11 +150,15 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
     //TODO:
     // read_interface_names(file, strings);
 
-    return add_type_symbol(table, access_flags, class_name);
+    return add_type_symbol(
+        table,
+        std::move(access_flags),
+        class_name
+    );
 }
 
-static type_symbol &add_type_symbol(const symbol_table &table, const uint16_t access_flags,
-        const fully_qualified_name &class_name)
+static type_symbol &add_type_symbol(const symbol_table &table,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, const fully_qualified_name &class_name)
 {
     country_symbol &country = find_or_create_country(table, class_name.omit_last().join());
 
@@ -157,7 +167,7 @@ static type_symbol &add_type_symbol(const symbol_table &table, const uint16_t ac
         std::make_unique<type_symbol>(
             &country,
             class_name,
-            make_attributes_from_flags(access_flags),
+            std::move(attributes),
             nullptr
         )
     ).first.get();
@@ -239,7 +249,7 @@ static country_symbol &find_or_create_country(const symbol_table &table, const s
     return *current;
 }
 
-static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> make_attributes_from_flags(const uint16_t flags)
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(const uint16_t flags)
 {
     auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
 
