@@ -62,6 +62,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
             codesh::blasphemy::NO_CODE_POS,
             true
         );
+        return;
     }
 
     std::stringstream stream(consume_argument(args));
@@ -72,10 +73,10 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         if (entry.empty())
             continue;
 
-        std::filesystem::path file_path(entry);
+        const std::filesystem::path file_path(entry);
         if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
         {
-            result.classpath.push_back(file_path);
+            result.classpath.emplace_back(file_path);
             continue;
         }
 
@@ -118,7 +119,7 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
     std::queue<std::string> result;
     for (int i = 1; i < argc; ++i)
     {
-        result.push(argv[i]);
+        result.emplace(argv[i]);
     }
     return result;
 }
