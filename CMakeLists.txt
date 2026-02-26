@@ -221,6 +221,8 @@ add_executable(codeshc
         src/parser/ast/method/util.h
         src/semantic_analyzer/builtins.cpp
         src/semantic_analyzer/builtins.h
+        src/semantic_analyzer/external_class_loader.h
+        src/semantic_analyzer/external_class_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
