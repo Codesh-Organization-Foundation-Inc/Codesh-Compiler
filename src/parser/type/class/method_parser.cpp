@@ -42,7 +42,6 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
 {
     while (!tokens.empty())
     {
-        //TODO: Implement
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
