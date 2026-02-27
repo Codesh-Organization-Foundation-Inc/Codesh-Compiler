@@ -12,7 +12,7 @@ void codesh::semantic_analyzer::field_declaration::resolve(const semantic_contex
     if (!field_sym_opt.has_value())
         return;
 
-    const auto &field_sym = *static_cast<field_symbol *>(
+    const auto &field_sym = *static_cast<field_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
         &field_sym_opt->get()
     );
 
