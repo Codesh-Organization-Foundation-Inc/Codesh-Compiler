@@ -11,20 +11,15 @@
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
-#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
-#include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "primitive_value_parser.h"
-#include "util.h"
 
 #include "fmt/format.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
 #include "token/token_group.h"
-
-#include <functional>
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -42,6 +37,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     switch (tokens.front()->get_group())
     {
     // Primitives
+    case token_group::KEYWORD_THIS:
     case token_group::IDENTIFIER:
     case token_group::LITERAL_STRING:
     case token_group::LITERAL_NUMBER_INT:
