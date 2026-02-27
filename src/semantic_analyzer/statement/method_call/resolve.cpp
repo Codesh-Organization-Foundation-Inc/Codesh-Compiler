@@ -18,11 +18,40 @@
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
-        codesh::ast::method::operation::method_call_ast_node &method_call);
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type,
+        const codesh::ast::method::operation::method_call_ast_node &method_call);
+
+/**
+ * If `var_sym` holds a custom type that can be resolved, returns the corresponding type_symbol.
+ * Returns @c std::nullopt if the variable's type is primitive or not yet resolvable.
+ */
+static std::optional<std::reference_wrapper<const codesh::semantic_analyzer::type_symbol>>
+    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::variable_symbol &var_sym);
+
+struct local_result
+{
+    const codesh::semantic_analyzer::type_symbol *type;
+    const codesh::semantic_analyzer::variable_symbol *variable;
+};
+
+static std::optional<local_result> find_local_var_by_name(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        const std::string &name);
+
+/**
+ * Resolves the parent type of method call from imports, treating the name as a qualified type path
+ * with the last segment being the method name.
+ * Emits a semantic error and returns @c std::nullopt if the symbol is not found or is not a type.
+ */
+static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
 /**
@@ -59,7 +88,8 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     const auto result = resolve_method_call(
         context,
         containing_method,
-        method_call
+        method_call,
+        scope
     );
 
     if (!result.has_value())
@@ -111,10 +141,14 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
-        codesh::ast::method::operation::method_call_ast_node &method_call)
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &name = method_call.get_unresolved_name();
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
+    // Receiver = The variable being passed as "this" to the non-static method
+    // e.g. in ויעש מתשנה ל־מעשה
+    const codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
 
     // For new calls, the parent type is the constructed type, not the containing class.
     if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
@@ -138,30 +172,20 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
     else
     {
-        const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
-            context,
-            name,
-            method_call.get_code_position(),
-            // Ignore the last part of the name, which points to the method overloads.
-            // get_called_method_as_symbol already handles it.
-            name.get_parts().end() - 1
-        );
+        // Check if the front of the name matches a local variable in the scope.
+        // ויעש משתנה ל־מעשה...
+        const auto &front = name.get_parts().front();
+        if (const auto result = find_local_var_by_name(context, scope, front))
+        {
+            parent_type = result->type;
+            receiver_variable = result->variable;
+        }
 
-        if (!type_symbol.has_value())
-            return std::nullopt;
-
-        // A method must be contained in a type
-        parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
-
-        // If it isn't, then this supposed "method" cannot exist.
         if (parent_type == nullptr)
         {
-            context.blasphemy_consumer(fmt::format(
-                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
-                name.holy_join()
-            ), method_call.get_code_position());
-
-            return std::nullopt;
+            parent_type = resolve_parent_type_from_imports(context, method_call);
+            if (parent_type == nullptr)
+                return std::nullopt;
         }
     }
 
@@ -180,6 +204,41 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     method_call.set_resolved(resolved_method.value());
 
     return resolved_method;
+}
+
+static std::optional<local_result> find_local_var_by_name(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        const std::string &name)
+{
+    const auto local_res = scope.resolve_up(name);
+    if (!local_res.has_value())
+        return std::nullopt;
+
+    const auto *var_sym = dynamic_cast<const codesh::semantic_analyzer::variable_symbol *>(&local_res->get());
+    if (var_sym == nullptr)
+        return std::nullopt;
+
+    const auto resolved_type = resolve_variable_type(context, *var_sym);
+    if (!resolved_type.has_value())
+        return std::nullopt;
+
+    return local_result { &resolved_type->get(), var_sym };
+}
+
+static std::optional<std::reference_wrapper<const codesh::semantic_analyzer::type_symbol>>
+    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::variable_symbol &var_sym)
+{
+    const auto *custom_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(var_sym.get_type());
+    if (custom_type == nullptr)
+        return std::nullopt;
+
+    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type(context, *custom_type);
+    if (!resolved.has_value())
+        return std::nullopt;
+
+    return std::cref(resolved->get());
 }
 
 static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
@@ -244,6 +303,39 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
     }
 
     return all_succeed;
+}
+
+static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto &name = method_call.get_unresolved_name();
+
+    const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+        context,
+        name,
+        method_call.get_code_position(),
+        // Ignore the last part of the name, which points to the method overloads.
+        // get_called_method_as_symbol already handles it.
+        name.get_parts().end() - 1
+    );
+
+    if (!type_symbol.has_value())
+        return nullptr;
+
+    // A method must be contained in a type
+    const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
+
+    // If it isn't, then this supposed "method" cannot exist.
+    if (parent_type == nullptr)
+    {
+        context.blasphemy_consumer(fmt::format(
+            codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
+            name.holy_join()
+        ), method_call.get_code_position());
+    }
+
+    return parent_type;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
