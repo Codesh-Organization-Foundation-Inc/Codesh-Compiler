@@ -30,14 +30,14 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
  * If `var_sym` holds a custom type that can be resolved, returns the corresponding type_symbol.
  * Returns @c std::nullopt if the variable's type is primitive or not yet resolvable.
  */
-static std::optional<std::reference_wrapper<const codesh::semantic_analyzer::type_symbol>>
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
     resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::variable_symbol &var_sym);
 
 struct local_result
 {
-    const codesh::semantic_analyzer::type_symbol *type;
-    const codesh::semantic_analyzer::variable_symbol *variable;
+    codesh::semantic_analyzer::type_symbol *type;
+    codesh::semantic_analyzer::variable_symbol *variable;
 };
 
 static std::optional<local_result> find_local_var_by_name(
@@ -146,9 +146,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 {
     const auto &name = method_call.get_unresolved_name();
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
-    // Receiver = The variable being passed as "this" to the non-static method
+
+    // Receiver = The variable being passed as `this` to the non-static method
     // e.g. in ויעש מתשנה ל־מעשה
-    const codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
+    codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
 
     // For new calls, the parent type is the constructed type, not the containing class.
     if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
@@ -203,6 +204,18 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     // Update the AST node to the found result
     method_call.set_resolved(resolved_method.value());
 
+    // For non-static instance method calls on a local variable, prepend `this`
+    if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
+    {
+        auto receiver_node = std::make_unique<variable_reference_ast_node>(
+            method_call.get_code_position(),
+            codesh::definition::fully_qualified_name(name.get_parts().front())
+        );
+
+        receiver_node->set_resolved(*receiver_variable);
+        method_call.get_arguments().push_front(std::move(receiver_node));
+    }
+
     return resolved_method;
 }
 
@@ -215,7 +228,7 @@ static std::optional<local_result> find_local_var_by_name(
     if (!local_res.has_value())
         return std::nullopt;
 
-    const auto *var_sym = dynamic_cast<const codesh::semantic_analyzer::variable_symbol *>(&local_res->get());
+    auto *var_sym = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&local_res->get());
     if (var_sym == nullptr)
         return std::nullopt;
 
@@ -226,7 +239,7 @@ static std::optional<local_result> find_local_var_by_name(
     return local_result { &resolved_type->get(), var_sym };
 }
 
-static std::optional<std::reference_wrapper<const codesh::semantic_analyzer::type_symbol>>
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
     resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::variable_symbol &var_sym)
 {
@@ -238,7 +251,7 @@ static std::optional<std::reference_wrapper<const codesh::semantic_analyzer::typ
     if (!resolved.has_value())
         return std::nullopt;
 
-    return std::cref(resolved->get());
+    return resolved;
 }
 
 static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
