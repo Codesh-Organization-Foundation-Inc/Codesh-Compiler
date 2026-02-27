@@ -7,6 +7,7 @@
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
 
+
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
     resolve_custom_type(const semantic_context &context, const ast::type::custom_type_ast_node &custom_type_node)
 {
@@ -93,4 +94,82 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
     return containing_type.get_scope().add_symbol(
         name, std::make_unique<method_overloads_symbol>(&containing_type)
     ).first;
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find_or_create_country(
+        const symbol_table &table, const std::string &package_name)
+{
+    country_symbol &root = table.resolve_country("").value();
+
+    if (package_name.empty())
+        return root;
+
+    country_symbol *current = &root;
+    std::string accumulated;
+
+    size_t start = 0;
+    while (true)
+    {
+        const size_t slash_pos = package_name.find('/', start);
+        const bool last = slash_pos == std::string::npos;
+        const std::string part = package_name.substr(start, last ? std::string::npos : slash_pos - start);
+
+        if (!accumulated.empty())
+            accumulated += '/';
+        accumulated += part;
+
+        const auto existing = current->get_scope().resolve_local(part);
+        if (existing)
+        {
+            current = &dynamic_cast<country_symbol &>(existing->get());
+        }
+        else
+        {
+            current = &current->get_scope().add_symbol(
+                part,
+                std::make_unique<country_symbol>(accumulated.c_str(), current)
+            ).first.get();
+        }
+
+        if (last)
+            break;
+
+        start = slash_pos + 1;
+    }
+
+    return *current;
+}
+
+std::pair<
+    std::reference_wrapper<codesh::semantic_analyzer::type_symbol>,
+    bool
+> codesh::semantic_analyzer::util::add_type_symbol(country_symbol &country, const std::string &name,
+        std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        ast::type_decl::type_declaration_ast_node *decl)
+{
+    return country.get_scope().add_symbol(
+        name,
+        std::make_unique<type_symbol>(
+            &country,
+            country.get_full_name().with(name),
+            std::move(attributes),
+            decl
+        )
+    );
+}
+
+codesh::semantic_analyzer::field_symbol &codesh::semantic_analyzer::util::add_field_symbol(type_symbol &type_sym,
+        const std::string &name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        std::unique_ptr<ast::type::type_ast_node> type)
+{
+    return type_sym.get_scope().add_symbol(
+        name,
+        std::make_unique<field_symbol>(
+            &type_sym,
+            type_sym.get_full_name().with(name),
+            std::move(attributes),
+            std::move(type),
+            nullptr
+        )
+    ).first.get();
 }

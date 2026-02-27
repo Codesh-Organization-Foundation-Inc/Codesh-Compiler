@@ -1,13 +1,19 @@
 #include "external_class_loader.h"
 
+#include "util.h"
+
 #include <cstdint>
 #include <fstream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "blasphemy/blasphemy_collector.h"
+#include "defenition/fully_qualified_name.h"
 #include "output/jvm_target/defs/cp_info.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 /**
@@ -15,22 +21,36 @@
  */
 using cp_strings = std::unordered_map<int, std::string>;
 
-using constant_info_type = codesh::output::jvm_target::defs::constant_info_type;
+using codesh::output::jvm_target::defs::constant_info_type;
+using codesh::semantic_analyzer::country_symbol;
+using codesh::semantic_analyzer::type_symbol;
+using codesh::semantic_analyzer::field_symbol;
+using codesh::semantic_analyzer::method_symbol;
+using codesh::semantic_analyzer::method_overloads_symbol;
+using codesh::semantic_analyzer::symbol_table;
+using codesh::definition::fully_qualified_name;
 
 static uint8_t read_u1(std::ifstream &file);
 static uint16_t read_u2(std::ifstream &file);
 static uint32_t read_u4(std::ifstream &file);
 static void skip_attributes(std::ifstream &file, uint16_t count);
 static std::string get_utf8(const cp_strings &strings, int idx);
-static std::string get_class_name(const cp_strings &strings, int idx);
+static fully_qualified_name get_class_name(const cp_strings &strings, int idx);
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings);
 
-static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &strings);
+static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings);
 
 static void read_magic(std::ifstream &file);
-static void parse_type(std::ifstream &file, const cp_strings &strings);
-static void parse_fields(std::ifstream &file, const cp_strings &strings);
-static void parse_methods(std::ifstream &file, const cp_strings &strings);
+static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table);
+static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
+static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
+
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
+static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
+        size_t &pos);
+
+static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym);
 
 
 //TODO: Convert all errors to blasphemies
@@ -48,19 +68,17 @@ void codesh::semantic_analyzer::load_external_class_file(
     cp_strings strings;
     parse_constant_pool(file, strings);
 
-    parse_type(file, strings);
-    parse_fields(file, strings);
-    parse_methods(file, strings);
-
-    (void)table;
+    type_symbol &type_sym = parse_type(file, strings, table);
+    parse_fields(file, strings, type_sym);
+    parse_methods(file, strings, type_sym);
 }
 
-static void parse_methods(std::ifstream &file, const cp_strings &strings)
+static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto methods_count = read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
     {
-        const auto method_access_flags = read_u2(file);
+        auto access_flags = flags_to_attributes(read_u2(file));
         const auto method_name_idx = read_u2(file);
         const auto method_desc_idx = read_u2(file);
         const auto method_attr_count = read_u2(file);
@@ -70,49 +88,81 @@ static void parse_methods(std::ifstream &file, const cp_strings &strings)
         const auto method_name = get_utf8(strings, method_name_idx);
         const auto method_descriptor = get_utf8(strings, method_desc_idx);
 
-        // TODO: Register method_symbol for this method.
-        // Available variables:
-        //   std::string method_name        — e.g. "length", "<init>", "<clinit>"
-        //   std::string method_descriptor  — e.g. "()I", "(Ljava/lang/String;I)V"
-        //                                    Format: "(" + param_descriptors + ")" + return_descriptor
-        //   uint16_t    method_access_flags— raw JVM access flags
-        //   (type_symbol for the enclosing class is what you registered above)
-        (void)method_access_flags;
-        (void)method_name;
-        (void)method_descriptor;
+        add_method_symbol(
+            method_descriptor,
+            method_name,
+            std::move(access_flags),
+            type_sym
+        );
     }
 }
 
-static void parse_type(std::ifstream &file, const cp_strings &strings)
+static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
+        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym)
 {
-    const auto access_flags = read_u2(file);
-    const auto this_class_idx = read_u2(file);
-    const auto super_class_idx = read_u2(file);
-    const auto is_interface = (access_flags & 0x0200) != 0;
+    // Parse descriptor "(param1param2...)return_type"
+    std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> param_types;
 
-    const auto class_name = get_class_name(strings, this_class_idx);
-    const auto super_class_name = super_class_idx != 0 ? get_class_name(strings, super_class_idx) : "";
+    size_t pos = 1; // '('
+    while (pos < method_descriptor.size() && method_descriptor.at(pos) != ')')
+    {
+        param_types.push_back(descriptor_to_node_type(method_descriptor, pos));
+    }
+    pos++; // ')'
 
-    const auto interface_names = read_interface_names(file, strings);
+    auto return_type = descriptor_to_node_type(method_descriptor, pos);
 
-    // TODO: Register type_symbol for this type
-    // Available variables:
-    //   std::string        class_name        — e.g. "java/lang/String"
-    //   std::string        super_class_name  — e.g. "java/lang/Object", or "" for Object itself
-    //   std::vector<std::string> interface_names — e.g. {"java/io/Serializable", "java/lang/Comparable"}
-    //   uint16_t           access_flags      — raw JVM access flags (ACC_PUBLIC=0x0001, ACC_INTERFACE=0x0200, ACC_ABSTRACT=0x0400, ACC_FINAL=0x0010, ...)
-    //   bool               is_interface      — shorthand for (access_flags & 0x0200)
-    //   symbol_table&      table             — the symbol table to register into
 
-    (void)is_interface;
+    method_overloads_symbol &overloads = codesh::semantic_analyzer::util::get_method_overloads_symbol(
+        method_name,
+        type_sym
+    );
+
+    overloads.get_scope().add_symbol(
+        method_descriptor,
+        std::make_unique<method_symbol>(
+            &overloads,
+            type_sym,
+            type_sym.get_full_name().with(method_name),
+            std::move(attributes),
+            std::move(param_types),
+            std::move(return_type),
+            nullptr
+        )
+    );
 }
 
-static void parse_fields(std::ifstream &file, const cp_strings &strings)
+static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
+{
+    auto access_flags = flags_to_attributes(read_u2(file));
+    const auto this_class_idx = read_u2(file);
+
+    //TODO:
+    // read_u2(file); // super_class_idx
+
+    const auto class_name = get_class_name(strings, this_class_idx);
+
+    //TODO:
+    // read_interface_names(file, strings);
+
+    country_symbol &country = codesh::semantic_analyzer::util::find_or_create_country(
+        table,
+        class_name.omit_last().join()
+    );
+
+    return codesh::semantic_analyzer::util::add_type_symbol(
+        country,
+        class_name.get_last_part(),
+        std::move(access_flags)
+    ).first.get();
+}
+
+static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto fields_count = read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
     {
-        const auto field_access_flags = read_u2(file);
+        auto attributes = flags_to_attributes(read_u2(file));
         const auto field_name_idx = read_u2(file);
         const auto field_desc_idx = read_u2(file);
         const auto field_attr_count = read_u2(file);
@@ -122,16 +172,40 @@ static void parse_fields(std::ifstream &file, const cp_strings &strings)
         const auto field_name = get_utf8(strings, field_name_idx);
         const auto field_descriptor = get_utf8(strings, field_desc_idx);
 
-        // TODO: Register field_symbol for this field
-        // Available variables:
-        //   std::string field_name        — e.g. "hash"
-        //   std::string field_descriptor  — e.g. "I", "Ljava/lang/String;", "[B"
-        //   uint16_t    field_access_flags— raw JVM access flags
-        //   (type_symbol for the enclosing class is what you registered above)
-        (void)field_access_flags;
-        (void)field_name;
-        (void)field_descriptor;
+        size_t pos = 0;
+        codesh::semantic_analyzer::util::add_field_symbol(
+            type_sym,
+            field_name,
+            std::move(attributes),
+            descriptor_to_node_type(field_descriptor, pos)
+        );
     }
+}
+
+
+static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(const uint16_t flags)
+{
+    auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+
+    if (flags & 0x0001)
+        result->set_visibility(codesh::definition::visibility::PUBLIC);
+    else if (flags & 0x0002)
+        result->set_visibility(codesh::definition::visibility::PRIVATE);
+    else if (flags & 0x0004)
+        result->set_visibility(codesh::definition::visibility::PROTECTED);
+    // else: PACKAGE_PRIVATE (default)
+
+    result->set_is_static(flags & 0x0008);
+    result->set_is_final(flags & 0x0010);
+    result->set_is_abstract((flags & 0x0400) != 0 || (flags & 0x0200) != 0); // ACC_ABSTRACT or ACC_INTERFACE
+
+    return result;
+}
+
+static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
+        size_t &pos)
+{
+    return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::blasphemy::NO_CODE_POS);
 }
 
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
@@ -212,15 +286,17 @@ static void read_magic(std::ifstream &file)
         throw std::runtime_error("Not a valid .class file");
 }
 
-static std::vector<std::string> read_interface_names(std::ifstream &file, const cp_strings &strings)
+static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings)
 {
     const auto interfaces = read_u2(file);
 
-    std::vector<std::string> interface_names;
+    std::vector<fully_qualified_name> interface_names;
     interface_names.reserve(interfaces);
 
     for (size_t i = 0; i < interfaces; i++)
+    {
         interface_names.push_back(get_class_name(strings, read_u2(file)));
+    }
 
     return interface_names;
 }
@@ -243,13 +319,13 @@ static std::string get_utf8(const cp_strings &strings, const int idx)
     return it->second;
 }
 
-static std::string get_class_name(const cp_strings &strings, const int idx)
+static fully_qualified_name get_class_name(const cp_strings &strings, const int idx)
 {
     const auto it = strings.find(idx);
     if (it == strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
-    return it->second;
+    return it->second.c_str();
 }
 
 static uint8_t read_u1(std::ifstream &file)
