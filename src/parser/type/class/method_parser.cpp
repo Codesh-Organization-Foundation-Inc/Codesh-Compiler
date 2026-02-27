@@ -63,7 +63,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             }
 
             break;
-        }
+        } //test
 
         case token_group::KEYWORD_THIS:
         case token_group::IDENTIFIER:
