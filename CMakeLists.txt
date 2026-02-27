@@ -128,6 +128,8 @@ add_executable(codeshc
         src/semantic_analyzer/type_decl/collect.cpp
         src/semantic_analyzer/method_decl/collect.h
         src/semantic_analyzer/method_decl/collect.cpp
+        src/semantic_analyzer/field_decl/collect.h
+        src/semantic_analyzer/field_decl/collect.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h

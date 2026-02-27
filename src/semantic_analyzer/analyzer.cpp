@@ -14,6 +14,7 @@
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
@@ -102,7 +103,7 @@ void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_nod
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
     type_declaration::dispatch_collect_methods(context, country);
-    type_declaration::collect_fields(context, country);
+    field_declaration::collect(context, country);
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
