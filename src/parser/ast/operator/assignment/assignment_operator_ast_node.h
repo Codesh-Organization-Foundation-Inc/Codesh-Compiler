@@ -30,6 +30,9 @@ public:
     void emit_field_assignment(const semantic_analyzer::field_symbol &field, output::ir::code_block &containing_block,
             const semantic_analyzer::symbol_table &symbol_table,
             const type_decl::type_declaration_ast_node &containing_type_decl) const;
+    void emit_local_var_assignment(const semantic_analyzer::local_variable_symbol &local_var,
+            output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+            const type_decl::type_declaration_ast_node &containing_type_decl) const;
 };
 
 }

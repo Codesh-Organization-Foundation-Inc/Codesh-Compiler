@@ -39,19 +39,27 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
 {
     const auto &var_ref = get_left();
 
-    // Use field assignment version if relevant
     if (const auto *field = dynamic_cast<const semantic_analyzer::field_symbol *>(&var_ref.get_resolved()))
     {
         emit_field_assignment(*field, containing_block, symbol_table, containing_type_decl);
-        return;
     }
-
-    const auto *local_var = dynamic_cast<const semantic_analyzer::local_variable_symbol *>(&var_ref.get_resolved());
-    if (!local_var)
+    else if (const auto *local_var = dynamic_cast<const semantic_analyzer::local_variable_symbol *>(&var_ref.get_resolved()))
+    {
+        emit_local_var_assignment(*local_var, containing_block, symbol_table, containing_type_decl);
+    }
+    else
+    {
         throw std::runtime_error("Unsupported assignment target");
+    }
+}
 
-    const auto type = local_var->get_type()->to_instruction_type();
-    const auto lvt_index = local_var->get_jvm_index();
+void codesh::ast::op::assignment::assignment_operator_ast_node::emit_local_var_assignment(
+        const semantic_analyzer::local_variable_symbol &local_var, output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    const auto type = local_var.get_type()->to_instruction_type();
+    const auto lvt_index = local_var.get_jvm_index();
     const auto op_type = get_operator_type();
     const auto &rhs = get_right();
 
