@@ -12,7 +12,7 @@
  * Otherwise, uses imports and such regularly.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
@@ -106,7 +106,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
