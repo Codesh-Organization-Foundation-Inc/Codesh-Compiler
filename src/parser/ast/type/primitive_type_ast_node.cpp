@@ -1,5 +1,6 @@
 #include "primitive_type_ast_node.h"
 
+#include "custom_type_ast_node.h"
 #include "fmt/format.h"
 #include "lexer/trie/keywords.h"
 #include "output/ir/instruction/impl/typed_instruction.h"

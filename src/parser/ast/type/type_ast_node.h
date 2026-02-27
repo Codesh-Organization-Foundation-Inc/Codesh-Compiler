@@ -26,6 +26,14 @@ class type_ast_node : public impl::ast_node, public impl::i_descriptor_emitter,
 
 public:
     explicit type_ast_node(blasphemy::code_position code_position);
+  /**
+   * Generates a type node from the provided descriptor
+   * @param descriptor
+   * @param pos The position where the type descriptor is starting at
+   * @param code_position
+   */
+    static std::unique_ptr<type_ast_node> from_descriptor(const std::string &descriptor, size_t &pos,
+            blasphemy::code_position code_position);
 
     [[nodiscard]] int get_array_dimensions() const;
     void set_array_dimensions(int array_dimensions);

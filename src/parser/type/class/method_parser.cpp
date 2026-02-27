@@ -64,6 +64,28 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
         }
 
+        case token_group::KEYWORD_THIS:
+        case token_group::IDENTIFIER:
+        case token_group::LITERAL_STRING:
+        case token_group::LITERAL_NUMBER_INT:
+        case token_group::LITERAL_NUMBER_FLOAT:
+        case token_group::LITERAL_NUMBER_DOUBLE:
+        case token_group::LITERAL_CHAR:
+        case token_group::KEYWORD_TRUE:
+        case token_group::KEYWORD_FALSE:
+        case token_group::OPERATOR_ADDITION:
+        case token_group::OPERATOR_SUBTRACTION:
+        case token_group::OPERATOR_MULTIPLICATION:
+        case token_group::OPERATOR_DIVISION:
+        case token_group::OPERATOR_MODULO:
+        case token_group::OPEN_PARENTHESIS:
+        case token_group::OPERATOR_MINUS:
+        case token_group::OPERATOR_EQUALS:
+        case token_group::OPERATOR_NOT_EQUALS:
+        case token_group::OPERATOR_GREATER:
+        case token_group::OPERATOR_GREATER_EQUALS:
+        case token_group::OPERATOR_LESS:
+        case token_group::OPERATOR_LESS_EQUALS:
         case token_group::KEYWORD_REPLACE:
         case token_group::OPERATOR_ADDITION_ASSIGNMENT:
         case token_group::OPERATOR_DIVISION_ASSIGNMENT:
@@ -72,12 +94,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
         case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
         case token_group::OPERATOR_INCREMENT:
         case token_group::OPERATOR_DECREMENT:
-
-        case token_group::OPERATOR_ADDITION:
-        case token_group::OPERATOR_SUBTRACTION:
-        case token_group::OPERATOR_MULTIPLICATION:
-        case token_group::OPERATOR_DIVISION:
-        case token_group::OPERATOR_MODULO:
+        case token_group::KEYWORD_NEW:
             method_scope.add_statement(value::parse_value(tokens));
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
@@ -99,10 +116,8 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             break;
 
         case token_group::KEYWORD_RETURN:
-        {
             method_scope.add_statement(parse_return_operator(tokens));
             break;
-        }
 
         case token_group::SCOPE_END:
             tokens.pop();
