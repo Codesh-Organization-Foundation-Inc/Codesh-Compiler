@@ -30,6 +30,7 @@ enum class opcode : unsigned char
     DUP = 0x59,
 
     GET_STATIC = 0xB2,
+    PUT_STATIC = 0xB3,
 
     INVOKE_DYNAMIC = 0xBA,
     INVOKE_INTERFACE = 0xB9,
