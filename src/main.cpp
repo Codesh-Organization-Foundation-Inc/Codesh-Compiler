@@ -89,7 +89,7 @@ int main(const int argc, char **const argv)
     for (const auto &root_node : asts)
     {
         update_source_file(*root_node);
-        codesh::semantic_analyzer::collect_methods(*root_node, master_symbol_table);
+        codesh::semantic_analyzer::post_collect(*root_node, master_symbol_table);
     }
 
     for (const auto &root_node : asts)

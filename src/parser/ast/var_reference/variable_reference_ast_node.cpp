@@ -1,6 +1,7 @@
 #include "variable_reference_ast_node.h"
 
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/get_field_instruction.h"
 #include "output/ir/instruction/get_static_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/jvm_target/constant_pool.h"
@@ -49,6 +50,11 @@ std::optional<std::reference_wrapper<const codesh::ast::local_variable_declarati
     return producing_declaration;
 }
 
+std::optional<int> variable_reference_ast_node::get_field_cpi() const
+{
+    return field_cpi;
+}
+
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                                                  codesh::output::jvm_target::constant_pool &constant_pool)
 {
@@ -73,8 +79,20 @@ void variable_reference_ast_node::emit_ir(
 {
     if (field_cpi.has_value())
     {
-        //TODO: Expand beyond static
-        containing_block.add_instruction(std::make_unique<codesh::output::ir::get_static_instruction>(*field_cpi));
+        const auto *field = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved());
+        if (field->get_attributes().get_is_static())
+        {
+            containing_block.add_instruction(
+                std::make_unique<codesh::output::ir::get_static_instruction>(*field_cpi));
+        }
+        else
+        {
+            // Push 'this' (local var slot 0), then read the instance field
+            containing_block.add_instruction(std::make_unique<codesh::output::ir::load_instruction>(
+                codesh::output::ir::instruction_type::REFERENCE, 0));
+            containing_block.add_instruction(
+                std::make_unique<codesh::output::ir::get_field_instruction>(*field_cpi));
+        }
     }
     else if (const auto local_var = dynamic_cast<const codesh::semantic_analyzer::local_variable_symbol *>(&get_resolved()))
     {

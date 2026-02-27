@@ -24,4 +24,5 @@ void collect_inheritance(const semantic_context &context, country_symbol &countr
 
 //TODO: Move out?
 void dispatch_collect_methods(const semantic_context &context, country_symbol &country);
+void collect_fields(const semantic_context &context, country_symbol &country);
 }
