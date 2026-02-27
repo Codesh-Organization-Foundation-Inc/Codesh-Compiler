@@ -58,6 +58,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
             );
         }
     }
+    add_default_classpaths(result);
 
     return result;
 }
@@ -143,7 +144,7 @@ static void add_default_classpaths(codesh::command_args &result)
 
     if (result.is_talmud_codesh_classpath)
     {
-        const std::filesystem::path talmud_path = "TALMUD";
+        const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
 
         if (std::filesystem::exists(talmud_path))
         {
