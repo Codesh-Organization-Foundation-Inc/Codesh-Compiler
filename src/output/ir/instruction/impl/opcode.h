@@ -32,6 +32,7 @@ enum class opcode : unsigned char
     GET_STATIC = 0xB2,
     PUT_STATIC = 0xB3,
     GET_FIELD  = 0xB4,
+    PUT_FIELD  = 0xB5,
 
     INVOKE_DYNAMIC = 0xBA,
     INVOKE_INTERFACE = 0xB9,
