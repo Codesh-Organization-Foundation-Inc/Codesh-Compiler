@@ -174,6 +174,12 @@ add_executable(codeshc
         src/output/ir/instruction/operator_instruction.h
         src/output/ir/instruction/get_static_instruction.cpp
         src/output/ir/instruction/get_static_instruction.h
+        src/output/ir/instruction/get_field_instruction.cpp
+        src/output/ir/instruction/get_field_instruction.h
+        src/output/ir/instruction/put_field_instruction.cpp
+        src/output/ir/instruction/put_field_instruction.h
+        src/output/ir/instruction/put_static_instruction.cpp
+        src/output/ir/instruction/put_static_instruction.h
         src/output/ir/instruction/goto_instruction.cpp
         src/output/ir/instruction/goto_instruction.h
         src/output/ir/instruction/if_instruction.cpp
