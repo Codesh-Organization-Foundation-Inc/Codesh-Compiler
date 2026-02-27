@@ -8,6 +8,7 @@
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
+static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country);
 static void add_class_massof(codesh::semantic_analyzer::country_symbol &country);
 static void add_method_emor(codesh::semantic_analyzer::type_symbol &massof_symbol);
 
@@ -25,6 +26,8 @@ static void add_method_emor_int(codesh::semantic_analyzer::method_overloads_symb
 //TODO: Remove:
 static constexpr std::string ALIAS_STD_OUT = "פלט";
 
+static constexpr std::string ALIAS_LABUBU = "לאבובו";
+
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
 
@@ -35,6 +38,7 @@ void codesh::semantic_analyzer::builtins::add_builtins(const symbol_table &table
     country_symbol &country = table.resolve_country("").value();
 
     add_alias_ktuvim(country);
+    add_alias_labubu(country);
     add_class_massof(country);
 }
 
@@ -49,6 +53,25 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/String",
+
+            std::move(attributes),
+
+            nullptr
+        )
+    );
+}
+
+static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
+{
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    attributes->set_is_final(true);
+
+    country.get_scope().add_symbol(
+        ALIAS_LABUBU,
+        std::make_unique<codesh::semantic_analyzer::type_symbol>(
+            &country,
+            "java/lang/Object",
 
             std::move(attributes),
 
