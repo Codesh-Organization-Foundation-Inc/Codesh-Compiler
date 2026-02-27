@@ -11,6 +11,8 @@ static std::string consume_argument(std::queue<std::string> &args);
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 
+static void add_default_classpaths(codesh::command_args &result);
+
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
@@ -130,4 +132,26 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
         result.emplace(argv[i]);
     }
     return result;
+}
+
+static void add_default_classpaths(codesh::command_args &result)
+{
+    if (result.is_java_default_classpath)
+    {
+        result.classpath.emplace_back(".");
+    }
+
+    if (result.is_talmud_codesh_classpath)
+    {
+        const std::filesystem::path talmud_path = "TALMUD";
+
+        if (std::filesystem::exists(talmud_path))
+        {
+            result.classpath.emplace_back(talmud_path);
+        }
+        else
+        {
+            throw std::runtime_error("talmud path was not found");
+        }
+    }
 }
