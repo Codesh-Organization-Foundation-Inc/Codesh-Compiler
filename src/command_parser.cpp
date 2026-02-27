@@ -38,6 +38,14 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             parse_classpath(args, result);
         }
+        else if (arg == "--unholy")
+        {
+            result.is_talmud_codesh_classpath = false;
+        }
+        else if (arg == "--sinful")
+        {
+            result.is_java_default_classpath = false;
+        }
         else
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
