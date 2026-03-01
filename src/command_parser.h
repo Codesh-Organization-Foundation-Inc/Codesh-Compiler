@@ -12,6 +12,8 @@ struct command_args
     std::filesystem::path dest_path;
 
     std::vector<std::filesystem::path> classpath;
+
+    std::filesystem::path jre_path;
 };
 
 command_args parse_command(int argc, char **argv);
