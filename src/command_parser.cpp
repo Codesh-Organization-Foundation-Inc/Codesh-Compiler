@@ -33,10 +33,11 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     auto args = create_args_queue(argc, argv);
-    bool has_jre_flag = false;
 
     result.src_path = consume_argument(args);
     result.dest_path = consume_argument(args);
+
+    bool has_jre_flag = false;
 
     while (!args.empty())
     {
