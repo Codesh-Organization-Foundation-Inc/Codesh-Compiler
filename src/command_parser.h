@@ -13,6 +13,7 @@ struct command_args
 
     std::vector<std::filesystem::path> classpath;
 
+    bool is_jre;
     std::filesystem::path jre_path;
 };
 

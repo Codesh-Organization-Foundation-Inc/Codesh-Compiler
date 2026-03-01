@@ -11,10 +11,13 @@ static std::string consume_argument(std::queue<std::string> &args);
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 static void parse_jre(std::queue<std::string> &args, codesh::command_args &result);
+static std::filesystem::path get_default_jre_path();
+
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
+    result.is_jre = false;
 
     if (argc < 3)
     {
@@ -52,6 +55,11 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
                 true
             );
         }
+    }
+
+    if (!result.is_jre)
+    {
+        result.jre_path = get_default_jre_path();
     }
 
     return result;
@@ -116,7 +124,23 @@ static void parse_jre(std::queue<std::string> &args, codesh::command_args &resul
         );
     }
 
+    result.is_jre = true;
     result.jre_path = folder_path.string();
+}
+
+static std::filesystem::path get_default_jre_path()
+{
+#ifdef _WIN32
+    // Prefer JAVA_HOME if set
+    if (const char* java_home = std::getenv("JAVA_HOME"))
+    {
+        return std::filesystem::path(java_home) / "jre";
+    }
+
+    return "C:/Program Files/Java/jre-21";
+#else
+    return "/usr/lib/jvm/jre-21";
+#endif
 }
 
 static bool is_zip(const std::string &file_name)
