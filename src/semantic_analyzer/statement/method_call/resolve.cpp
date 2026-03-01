@@ -164,7 +164,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
         parent_type = &resolved_type->get();
     }
-    else if (name.is_single_part() || name.get_parts().front() == "this")
+    else if (!name.get_parts().empty() && (name.is_single_part() || name.get_parts().front() == "this"))
     {
         // Since this is name-only situation, the method must either be the classes' or a static import.
         //TODO: Handle static imports
