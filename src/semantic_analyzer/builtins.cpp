@@ -67,7 +67,7 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_is_final(true);
 
     country.get_scope().add_symbol(
-        codesh::semantic_analyzer::builtins::ALIAS_LABUBU,
+        codesh::semantic_analyzer::builtins::ALIAS_OBJECT,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/Object",

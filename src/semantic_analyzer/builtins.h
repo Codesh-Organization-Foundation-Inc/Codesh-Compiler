@@ -12,7 +12,7 @@ namespace codesh::semantic_analyzer::builtins
 inline constexpr std::string CLASS_RANGE = "טווח";
 
 inline constexpr std::string ALIAS_STRING = "כתובים";
-inline constexpr std::string ALIAS_LABUBU = "לאבובו";
+inline constexpr std::string ALIAS_OBJECT = "לאבובו";
 
 void add_builtins(const symbol_table &table);
 }

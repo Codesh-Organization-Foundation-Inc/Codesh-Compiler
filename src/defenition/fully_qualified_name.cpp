@@ -89,8 +89,12 @@ std::string codesh::definition::fully_qualified_name::join(const std::string &se
 
 std::string codesh::definition::fully_qualified_name::holy_join() const
 {
-    if (join() == "java/lang/String")
+    const auto joined = join();
+
+    if (joined == "java/lang/String")
         return semantic_analyzer::builtins::ALIAS_STRING;
+    if (joined == "java/lang/Object")
+        return semantic_analyzer::builtins::ALIAS_OBJECT;
 
 
     fully_qualified_name pretty_fqn;
