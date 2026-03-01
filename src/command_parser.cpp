@@ -38,6 +38,21 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             parse_classpath(args, result);
         }
+        else if (arg == "--jre")
+        {
+            if (args.empty())
+            {
+                blasphemy::get_blasphemy_collector().add_blasphemy(
+                    blasphemy::details::NO_JRE_ARG,
+                    blasphemy::blasphemy_type::INIT,
+                    blasphemy::NO_CODE_POS,
+                    true
+                );
+                continue;
+            }
+
+            result.jre_path = consume_argument(args);
+        }
         else
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
