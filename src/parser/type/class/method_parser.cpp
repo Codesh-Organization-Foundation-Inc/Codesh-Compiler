@@ -42,7 +42,6 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
 {
     while (!tokens.empty())
     {
-        //TODO: Implement
         switch (tokens.front()->get_group())
         {
         case token_group::KEYWORD_FUNCTION_CALL:
@@ -156,14 +155,7 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    // Handle explicit receiver: ויעש אנכי ל־methodName(...)
-    if (util::consuming_check(tokens, token_group::KEYWORD_THIS))
-    {
-        util::consuming_check(tokens, token_group::PUNCTUATION_DOT);
-        method_call_node->get_fqn().add("this");
-    }
-
-    util::parse_fqn(tokens, method_call_node->get_fqn());
+    util::parse_this_and_fqn(tokens, method_call_node->get_fqn());
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {

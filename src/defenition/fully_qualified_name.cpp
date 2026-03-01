@@ -1,6 +1,7 @@
 #include "fully_qualified_name.h"
 
 #include "fmt/xchar.h"
+#include "lexer/trie/keywords.h"
 
 #include <sstream>
 
@@ -87,5 +88,22 @@ std::string codesh::definition::fully_qualified_name::join(const std::string &se
 
 std::string codesh::definition::fully_qualified_name::holy_join() const
 {
-    return join(" ל־");
+    if (join() == "java/lang/String")
+        return lexer::trie::keyword::ALIAS_STRING;
+
+
+    fully_qualified_name pretty_fqn;
+    for (const auto &part : get_parts())
+    {
+        if (part == "this")
+        {
+            pretty_fqn.add(lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_THIS));
+        }
+        else
+        {
+            pretty_fqn.add(part);
+        }
+    }
+
+    return pretty_fqn.join(" ל־");
 }

@@ -127,3 +127,4 @@ void codesh::semantic_analyzer::type_declaration::dispatch_collect_methods(const
         }
     }
 }
+

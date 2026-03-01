@@ -1,6 +1,9 @@
 #include "assignment_operator_ast_node.h"
 
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
+#include "output/ir/instruction/put_field_instruction.h"
+#include "output/ir/instruction/put_static_instruction.h"
 #include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "output/ir/util.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
@@ -35,12 +38,28 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
     const auto &var_ref = get_left();
-    const auto *local_var = dynamic_cast<const semantic_analyzer::local_variable_symbol *>(&var_ref.get_resolved());
-    if (!local_var)
-        throw std::runtime_error("Unsupported assignment target");
 
-    const auto type = local_var->get_type()->to_instruction_type();
-    const auto lvt_index = local_var->get_jvm_index();
+    if (const auto *field = dynamic_cast<const semantic_analyzer::field_symbol *>(&var_ref.get_resolved()))
+    {
+        emit_field_assignment(*field, containing_block, symbol_table, containing_type_decl);
+    }
+    else if (const auto *local_var = dynamic_cast<const semantic_analyzer::local_variable_symbol *>(&var_ref.get_resolved()))
+    {
+        emit_local_var_assignment(*local_var, containing_block, symbol_table, containing_type_decl);
+    }
+    else
+    {
+        throw std::runtime_error("Unsupported assignment target");
+    }
+}
+
+void codesh::ast::op::assignment::assignment_operator_ast_node::emit_local_var_assignment(
+        const semantic_analyzer::local_variable_symbol &local_var, output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    const auto type = local_var.get_type()->to_instruction_type();
+    const auto lvt_index = local_var.get_jvm_index();
     const auto op_type = get_operator_type();
     const auto &rhs = get_right();
 
@@ -62,4 +81,37 @@ void codesh::ast::op::assignment::assignment_operator_ast_node::emit_ir(
         );
     }
     containing_block.set_is_consuming(false);
+}
+
+void codesh::ast::op::assignment::assignment_operator_ast_node::emit_field_assignment(
+        const semantic_analyzer::field_symbol &field, output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
+{
+    const auto &var_ref = get_left();
+    const bool is_static = field.get_attributes().get_is_static();
+
+    if (!is_static)
+    {
+        // Push this
+        containing_block.add_instruction(std::make_unique<output::ir::load_instruction>(
+            output::ir::instruction_type::REFERENCE,
+            0
+        ));
+    }
+
+
+    containing_block.set_is_consuming(true);
+    get_right().emit_ir(containing_block, symbol_table, containing_type_decl);
+    containing_block.set_is_consuming(false);
+
+    const int cpi = var_ref.get_field_cpi().value();
+    if (is_static)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::put_static_instruction>(cpi));
+    }
+    else
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::put_field_instruction>(cpi));
+    }
 }

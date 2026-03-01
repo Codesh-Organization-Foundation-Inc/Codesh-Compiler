@@ -87,4 +87,11 @@ bool consume_by(std::queue<std::unique_ptr<token>> &tokens);
 
 bool consume_punc_equal(std::queue<std::unique_ptr<token>> &tokens);
 
+/**
+ * Optionally consumes a leading `this` token (and its following dot), prepends "this" to @p fqn_out,
+ * then delegates to parse_fqn() for the rest of the name.
+ * Use this wherever both plain identifiers and `this.field` / `this.method` syntax should be accepted.
+ */
+void parse_this_and_fqn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out);
+
 }

@@ -1,18 +1,20 @@
 #include "resolve.h"
 
+#include "blasphemy/details.h"
+#include "fmt/args.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
-#include "blasphemy/details.h"
-#include "fmt/args.h"
 
 /**
  * If the requested name has a single part, will attempt to fetch by the method/class scope.
  * Otherwise, uses imports and such regularly.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
@@ -24,6 +26,14 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
 static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol &local_var,
                           const variable_reference_ast_node &var_ref_node,
                           const codesh::semantic_analyzer::method_scope_symbol &scope);
+
+/**
+ * Resolves a field reference of the form @c this.fieldName by looking up the field name
+ * directly in the enclosing type's scope.
+ */
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
 bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
@@ -106,13 +116,17 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
     if (!full_var_name.is_single_part())
     {
+        // If `this` was the first argument of the FQN, then it must be a field.
+        if (full_var_name.get_parts().front() == "this")
+            return find_field_symbol(context, var_ref_node, scope);
+
         return codesh::semantic_analyzer::symbol_table::resolve_from_imports(
             context,
             full_var_name,
@@ -138,4 +152,27 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     }
 
     return *result;
+}
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
+        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    const auto &type = scope.get_producing_node()
+        ->get_parent_method()
+        .get_resolved()
+        .get_parent_type();
+
+    const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
+    const auto result = type.get_scope().resolve_local(field_name);
+
+    if (!result.has_value())
+    {
+        context.blasphemy_consumer(fmt::format(
+            codesh::blasphemy::details::SYMBOL_NOT_FOUND,
+            field_name
+        ), var_ref_node.get_code_position());
+    }
+
+    return result;
 }

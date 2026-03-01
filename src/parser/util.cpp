@@ -282,6 +282,17 @@ bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens
     return true;
 }
 
+void codesh::parser::util::parse_this_and_fqn(std::queue<std::unique_ptr<token>> &tokens,
+        definition::fully_qualified_name &fqn_out)
+{
+    if (consuming_check(tokens, token_group::KEYWORD_THIS))
+    {
+        consuming_check(tokens, token_group::PUNCTUATION_DOT);
+        fqn_out.add("this");
+    }
+    parse_fqn(tokens, fqn_out);
+}
+
 bool codesh::parser::util::consume_punc_equal(std::queue<std::unique_ptr<token>> &tokens)
 {
     if (!consuming_check(tokens, token_group::PUNCTUATION_EQUAL)) {
