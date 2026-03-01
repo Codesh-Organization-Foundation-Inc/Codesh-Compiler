@@ -19,7 +19,6 @@ static void add_default_classpaths(codesh::command_args &result);
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
-    result.is_jre = false;
     result.is_java_default_classpath = false;
     result.is_talmud_codesh_classpath = true;
 
@@ -34,6 +33,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     auto args = create_args_queue(argc, argv);
+    bool has_jre_flag = false;
 
     result.src_path = consume_argument(args);
     result.dest_path = consume_argument(args);
@@ -48,6 +48,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         }
         else if (arg == "--jre")
         {
+            has_jre_flag = true;
             parse_jre(args, result);
         }
         else if (arg == "--unholy")
@@ -70,7 +71,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
     add_default_classpaths(result);
 
-    if (!result.is_jre)
+    if (!has_jre_flag)
     {
         result.jre_path = get_default_jre_path();
     }
@@ -138,7 +139,6 @@ static void parse_jre(std::queue<std::string> &args, codesh::command_args &resul
         );
     }
 
-    result.is_jre = true;
     result.jre_path = folder_path.string();
 }
 
@@ -150,10 +150,8 @@ static std::filesystem::path get_default_jre_path()
     {
         return std::filesystem::path(java_home) / "jre";
     }
-    // Common Windows jre path
     return "C:/Program Files/Java/jre-21";
 #else
-    // Common Linux / Unix jre path
     return "/usr/lib/jvm/jre-21";
 #endif
 }
