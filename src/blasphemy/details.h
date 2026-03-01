@@ -14,6 +14,7 @@ extern const fmt::runtime_format_string<> DEST_PATH_NOT_DIRECTORY;
 extern const fmt::runtime_format_string<> INVALID_CLASSPATH_ARG;
 extern const std::string NO_MAIN_ARGS;
 extern const std::string NO_CLASSPATH_ARG;
+extern const std::string NO_JRE_ARG;
 extern const std::string UNKNOWN_FLAG;
 
 // LEXICAL

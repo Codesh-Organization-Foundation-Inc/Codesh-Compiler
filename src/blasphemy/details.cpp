@@ -25,6 +25,8 @@ const std::string codesh::blasphemy::details::NO_MAIN_ARGS =
     "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
 const std::string codesh::blasphemy::details::NO_CLASSPATH_ARG =
     "מִנְחוֹת אֵינָם: נִדְרָשׁ עֵרֶךְ הַכְנָסָה לַדֶּגֶל";
+const std::string codesh::blasphemy::details::NO_JRE_ARG =
+    "מִנְחוֹת אֵינָם: נִדְרָשׁ עֵרֶךְ הַכְנָסָה לַדֶּגֶל";
 const std::string codesh::blasphemy::details::UNKNOWN_FLAG =
     "דֶּרֶךְ תּוֹעָה הֱיֵה: דֶּגֶל לֹא יָדוּעַ";
 
