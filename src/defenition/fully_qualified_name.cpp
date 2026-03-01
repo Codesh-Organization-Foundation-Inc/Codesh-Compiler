@@ -2,6 +2,7 @@
 
 #include "fmt/xchar.h"
 #include "lexer/trie/keywords.h"
+#include "semantic_analyzer/builtins.h"
 
 #include <sstream>
 
@@ -89,7 +90,7 @@ std::string codesh::definition::fully_qualified_name::join(const std::string &se
 std::string codesh::definition::fully_qualified_name::holy_join() const
 {
     if (join() == "java/lang/String")
-        return lexer::trie::keyword::ALIAS_STRING;
+        return semantic_analyzer::builtins::ALIAS_STRING;
 
 
     fully_qualified_name pretty_fqn;
