@@ -10,6 +10,7 @@ static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
+static void parse_jre(std::queue<std::string> &args, codesh::command_args &result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -40,18 +41,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         }
         else if (arg == "--jre")
         {
-            if (args.empty())
-            {
-                blasphemy::get_blasphemy_collector().add_blasphemy(
-                    blasphemy::details::NO_JRE_ARG,
-                    blasphemy::blasphemy_type::INIT,
-                    blasphemy::NO_CODE_POS,
-                    true
-                );
-                continue;
-            }
-
-            result.jre_path = consume_argument(args);
+            parse_jre(args, result);
         }
         else
         {
@@ -72,7 +62,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
     if (args.empty())
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_CLASSPATH_ARG,
+            codesh::blasphemy::details::NO_ARG,
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::blasphemy::NO_CODE_POS,
             true
@@ -96,11 +86,37 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         }
 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(codesh::blasphemy::details::INVALID_CLASSPATH_ARG, entry),
+            fmt::format(codesh::blasphemy::details::INVALID_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::blasphemy::NO_CODE_POS, false
         );
     }
+}
+
+static void parse_jre(std::queue<std::string> &args, codesh::command_args &result)
+{
+    if (args.empty())
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_ARG,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
+        return;
+    }
+
+    const std::filesystem::path folder_path(consume_argument(args));
+    if (!std::filesystem::is_directory(folder_path))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(codesh::blasphemy::details::INVALID_ARG, folder_path.string()),
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS, false
+        );
+    }
+
+    result.jre_path = folder_path.string();
 }
 
 static bool is_zip(const std::string &file_name)
