@@ -16,6 +16,8 @@ static void add_default_classpaths(codesh::command_args &result);
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
+    result.is_java_default_classpath = false;
+    result.is_talmud_codesh_classpath = true;
 
     if (argc < 3)
     {
@@ -46,7 +48,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         }
         else if (arg == "--sinful")
         {
-            result.is_java_default_classpath = false;
+            result.is_java_default_classpath = true;
         }
         else
         {
