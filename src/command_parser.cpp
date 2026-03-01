@@ -115,6 +115,7 @@ static void parse_jre(std::queue<std::string> &args, codesh::command_args &resul
     }
 
     const std::filesystem::path folder_path(consume_argument(args));
+
     if (!std::filesystem::is_directory(folder_path))
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -136,9 +137,10 @@ static std::filesystem::path get_default_jre_path()
     {
         return std::filesystem::path(java_home) / "jre";
     }
-
+    // Common Windows jre path
     return "C:/Program Files/Java/jre-21";
 #else
+    // Common Linux / Unix jre path
     return "/usr/lib/jvm/jre-21";
 #endif
 }
