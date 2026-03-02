@@ -3,7 +3,6 @@
 #include "util.h"
 #include "defenition/fully_qualified_name.h"
 
-#include <cstring>
 #include <optional>
 #include <fstream>
 #include <vector>
@@ -34,11 +33,13 @@ enum class jimage_attribute
     COMPRESSED
 };
 
-static jimage_offsets parse_header(std::ifstream &file);
-static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout);
-static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
-static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
-static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
+[[nodiscard]] static jimage_offsets parse_header(std::ifstream &file);
+[[nodiscard]] static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout);
+[[nodiscard]] static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
+[[nodiscard]] static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
+[[nodiscard]] static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &target_class);
+[[nodiscard]] static std::optional<uint64_t> get_class_index_offset(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class);
 static uint16_t read_u2_le(std::ifstream &file);
 static uint32_t read_u4_le(std::ifstream &file);
@@ -47,7 +48,7 @@ static uint64_t read_attr_value(std::ifstream &file, int size);
 
 //TIL: streamoff is an int representing file offsets
 //TODO: Maybe convert all file offsets to use streamoff if others exist
-static constexpr std::streamoff HEADER_SIZE = 24;
+static constexpr std::streamoff HEADER_SIZE = 28;
 
 
 bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesystem::path &path,
@@ -147,12 +148,29 @@ static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets 
 static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class)
 {
+    const auto class_index_offset = get_class_index_offset(file, layout, target_class);
+
     const auto offsets = load_offsets(file, layout);
     const auto strings = load_strings(file, layout);
     const auto redirections = load_redirect_table(file, layout);
 
+    //TODO: Implement
+    return std::nullopt;
+}
+
+static std::optional<uint64_t> get_class_index_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &target_class)
+{
+    const auto redirections = load_redirect_table(file, layout);
+
     const auto redirect_index = util::jimage_perfect_hash_index(target_class, layout.table_length);
     const auto redirect_value = redirections[redirect_index];
+
+    if (redirect_value == 0)
+    {
+        // Not a class file
+        return std::nullopt;
+    }
 
     if (redirect_value > 0)
     {
