@@ -22,3 +22,15 @@ uint32_t codesh::semantic_analyzer::external::util::read_u4(std::ifstream &file)
     const uint32_t low = read_u2(file);
     return high << 16 | low;
 }
+
+uint32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash(const std::string &str, const uint32_t seed)
+{
+    uint32_t result = seed;
+
+    for (const char chara : str)
+    {
+        result = result * 31 + chara;
+    }
+
+    return result;
+}

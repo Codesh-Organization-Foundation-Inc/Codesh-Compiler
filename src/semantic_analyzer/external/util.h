@@ -10,4 +10,6 @@ uint8_t read_u1(std::ifstream &file);
 uint16_t read_u2(std::ifstream &file);
 uint32_t read_u4(std::ifstream &file);
 
+uint32_t jimage_perfect_hash(const std::string &str, uint32_t seed);
+
 }
