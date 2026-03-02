@@ -317,6 +317,8 @@ add_executable(codeshc
         src/parser/ast/type_declaration/field_declaration_ast_node.h
         src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
+        src/semantic_analyzer/external/external_jimage_loader.h
+        src/semantic_analyzer/external/external_jimage_loader.cpp
 )
 
 # sudo dnf install boost-regex boost-devel
