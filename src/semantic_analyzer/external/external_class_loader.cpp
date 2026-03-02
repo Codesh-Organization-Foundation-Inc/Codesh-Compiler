@@ -55,12 +55,17 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
 
 //TODO: Convert all errors to blasphemies
 void codesh::semantic_analyzer::load_external_class_file(
-        const std::filesystem::path &path, symbol_table &table)
+        const std::filesystem::path &path, const symbol_table &table)
 {
     std::ifstream file(path, std::ios::binary);
     if (!file)
         throw std::runtime_error("Cannot open: " + path.string());
 
+    load_external_class_file(file, table);
+}
+
+void codesh::semantic_analyzer::load_external_class_file(std::ifstream &file, const symbol_table &table)
+{
     read_magic(file);
     read_u2(file); // minor_version
     read_u2(file); // major_version
