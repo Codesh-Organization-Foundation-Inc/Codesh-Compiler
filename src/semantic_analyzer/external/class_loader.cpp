@@ -1,6 +1,7 @@
 #include "class_loader.h"
 
 #include "../util.h"
+#include "util.h"
 
 #include <cstdint>
 #include <fstream>
@@ -21,6 +22,8 @@
  */
 using cp_strings = std::unordered_map<int, std::string>;
 
+namespace util = codesh::semantic_analyzer::external::util;
+
 using codesh::output::jvm_target::defs::constant_info_type;
 using codesh::semantic_analyzer::country_symbol;
 using codesh::semantic_analyzer::type_symbol;
@@ -30,9 +33,6 @@ using codesh::semantic_analyzer::method_overloads_symbol;
 using codesh::semantic_analyzer::symbol_table;
 using codesh::definition::fully_qualified_name;
 
-static uint8_t read_u1(std::ifstream &file);
-static uint16_t read_u2(std::ifstream &file);
-static uint32_t read_u4(std::ifstream &file);
 static void skip_attributes(std::ifstream &file, uint16_t count);
 static std::string get_utf8(const cp_strings &strings, int idx);
 static fully_qualified_name get_class_name(const cp_strings &strings, int idx);
@@ -67,8 +67,8 @@ void codesh::semantic_analyzer::external::load_class_file(
 void codesh::semantic_analyzer::external::load_class_file(std::ifstream &file, const symbol_table &table)
 {
     read_magic(file);
-    read_u2(file); // minor_version
-    read_u2(file); // major_version
+    util::read_u2(file); // minor_version
+    util::read_u2(file); // major_version
 
     cp_strings strings;
     parse_constant_pool(file, strings);
@@ -80,13 +80,13 @@ void codesh::semantic_analyzer::external::load_class_file(std::ifstream &file, c
 
 static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
-    const auto methods_count = read_u2(file);
+    const auto methods_count = util::read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
     {
-        auto access_flags = flags_to_attributes(read_u2(file));
-        const auto method_name_idx = read_u2(file);
-        const auto method_desc_idx = read_u2(file);
-        const auto method_attr_count = read_u2(file);
+        auto access_flags = flags_to_attributes(util::read_u2(file));
+        const auto method_name_idx = util::read_u2(file);
+        const auto method_desc_idx = util::read_u2(file);
+        const auto method_attr_count = util::read_u2(file);
 
         skip_attributes(file, method_attr_count);
 
@@ -139,11 +139,11 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
 
 static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
 {
-    auto access_flags = flags_to_attributes(read_u2(file));
-    const auto this_class_idx = read_u2(file);
+    auto access_flags = flags_to_attributes(util::read_u2(file));
+    const auto this_class_idx = util::read_u2(file);
 
     //TODO:
-    // read_u2(file); // super_class_idx
+    // util::read_u2(file); // super_class_idx
 
     const auto class_name = get_class_name(strings, this_class_idx);
 
@@ -164,13 +164,13 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
 
 static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
 {
-    const auto fields_count = read_u2(file);
+    const auto fields_count = util::read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
     {
-        auto attributes = flags_to_attributes(read_u2(file));
-        const auto field_name_idx = read_u2(file);
-        const auto field_desc_idx = read_u2(file);
-        const auto field_attr_count = read_u2(file);
+        auto attributes = flags_to_attributes(util::read_u2(file));
+        const auto field_name_idx = util::read_u2(file);
+        const auto field_desc_idx = util::read_u2(file);
+        const auto field_attr_count = util::read_u2(file);
 
         skip_attributes(file, field_attr_count);
 
@@ -215,7 +215,7 @@ static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type
 
 static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
 {
-    const uint16_t cp_count = read_u2(file);
+    const uint16_t cp_count = util::read_u2(file);
 
     // CLASS_REF entries may forward-reference UTF8 entries that appear later in the constant pool.
     // Hence, wait for the FULL resolution until all entries are read.
@@ -223,13 +223,13 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
 
     for (int i = 1; i < cp_count; i++)
     {
-        uint8_t tag = read_u1(file);
+        uint8_t tag = util::read_u1(file);
 
         // We only care about UTF8 and CLASS_REF for the symbol table
         switch (static_cast<constant_info_type>(tag))
         {
         case constant_info_type::UTF8: {
-            const uint16_t len = read_u2(file);
+            const uint16_t len = util::read_u2(file);
             std::string utf8(len, '\0');
             file.read(utf8.data(), len);
 
@@ -238,7 +238,7 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
             break;
         }
         case constant_info_type::CLASS_REF: {
-            const int name_jvm_idx = read_u2(file);
+            const int name_jvm_idx = util::read_u2(file);
             class_ref_indices.emplace(i, name_jvm_idx);
 
             break;
@@ -246,16 +246,16 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
 
         case constant_info_type::INTEGER:
         case constant_info_type::FLOATING:
-            read_u4(file);
+            util::read_u4(file);
             break;
         case constant_info_type::LONG_INT:
         case constant_info_type::DOUBLE_FP:
-            read_u4(file);
-            read_u4(file);
+            util::read_u4(file);
+            util::read_u4(file);
             i++; // Skip phantom slot
             break;
         case constant_info_type::STRING_REF:
-            read_u2(file);
+            util::read_u2(file);
             break;
         case constant_info_type::FIELDREF:
         case constant_info_type::METHODREF:
@@ -263,16 +263,16 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
         case constant_info_type::NAME_AND_TYPE:
         case constant_info_type::DYNAMIC:
         case constant_info_type::INVOKE_DYNAMIC:
-            read_u4(file);
+            util::read_u4(file);
             break;
         case constant_info_type::METHOD_HANDLE:
-            read_u1(file);
-            read_u2(file);
+            util::read_u1(file);
+            util::read_u2(file);
             break;
         case constant_info_type::METHOD_TYPE:
         case constant_info_type::MODULE:
         case constant_info_type::PACKAGE:
-            read_u2(file);
+            util::read_u2(file);
             break;
         default:
             throw std::runtime_error("Unknown constant pool tag: " + std::to_string(tag));
@@ -287,20 +287,20 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
 
 static void read_magic(std::ifstream &file)
 {
-    if (read_u4(file) != 0xCAFEBABE)
+    if (util::read_u4(file) != 0xCAFEBABE)
         throw std::runtime_error("Not a valid .class file");
 }
 
 static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings)
 {
-    const auto interfaces = read_u2(file);
+    const auto interfaces = util::read_u2(file);
 
     std::vector<fully_qualified_name> interface_names;
     interface_names.reserve(interfaces);
 
     for (size_t i = 0; i < interfaces; i++)
     {
-        interface_names.push_back(get_class_name(strings, read_u2(file)));
+        interface_names.push_back(get_class_name(strings, util::read_u2(file)));
     }
 
     return interface_names;
@@ -310,8 +310,8 @@ static void skip_attributes(std::ifstream &file, const uint16_t count)
 {
     for (uint16_t a = 0; a < count; a++)
     {
-        read_u2(file);
-        file.seekg(read_u4(file), std::ios::cur);
+        util::read_u2(file);
+        file.seekg(util::read_u4(file), std::ios::cur);
     }
 }
 
@@ -331,25 +331,4 @@ static fully_qualified_name get_class_name(const cp_strings &strings, const int 
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
     return it->second.c_str();
-}
-
-static uint8_t read_u1(std::ifstream &file)
-{
-    uint8_t byte;
-    file.read(reinterpret_cast<char *>(&byte), 1);
-    return byte;
-}
-
-static uint16_t read_u2(std::ifstream &file)
-{
-    const uint16_t high = read_u1(file);
-    const uint16_t low = read_u1(file);
-    return static_cast<uint16_t>(high << 8 | low);
-}
-
-static uint32_t read_u4(std::ifstream &file)
-{
-    const uint32_t high = read_u2(file);
-    const uint32_t low = read_u2(file);
-    return high << 16 | low;
 }
