@@ -2,6 +2,10 @@
 
 #include <filesystem>
 
+namespace codesh::definition
+{
+class fully_qualified_name;
+}
 namespace codesh::semantic_analyzer
 {
 class symbol_table;
@@ -12,6 +16,8 @@ namespace codesh::semantic_analyzer::external
 {
 /**
  * Loads all symbols of an external class file to the provided @p table
+ * @returns Whether the requested classfile was found within the jimage
  */
-void load_jimage_file(const std::filesystem::path &path, const symbol_table &table);
+bool load_jimage_class(const std::filesystem::path &path,
+        const definition::fully_qualified_name &class_name, const symbol_table &table);
 }
