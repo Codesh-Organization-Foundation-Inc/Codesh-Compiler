@@ -151,8 +151,17 @@ static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, con
     const auto strings = load_strings(file, layout);
     const auto redirections = load_redirect_table(file, layout);
 
-    //TODO: Implement
-    return std::nullopt;
+    const auto redirect_index = util::jimage_perfect_hash_index(target_class, layout.table_length);
+    const auto redirect_value = redirections[redirect_index];
+
+    if (redirect_value > 0)
+    {
+        // Direct slot
+        return static_cast<uint64_t>(redirect_value) - 1;
+    }
+
+    // Indirect slot; requires 2nd lookup where the seed is the current redirect value
+    return util::jimage_perfect_hash_index(target_class, layout.table_length, -redirect_value - 1);
 }
 
 
