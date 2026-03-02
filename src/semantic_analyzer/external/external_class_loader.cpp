@@ -1,6 +1,6 @@
 #include "external_class_loader.h"
 
-#include "util.h"
+#include "../util.h"
 
 #include <cstdint>
 #include <fstream>
