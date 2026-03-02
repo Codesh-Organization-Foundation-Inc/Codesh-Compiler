@@ -2,6 +2,9 @@
 
 #include <fstream>
 
+uint32_t jimage_perfect_hash(const std::string &str, uint32_t seed);
+
+
 uint8_t codesh::semantic_analyzer::external::util::read_u1(std::ifstream &file)
 {
     uint8_t byte;
@@ -23,7 +26,13 @@ uint32_t codesh::semantic_analyzer::external::util::read_u4(std::ifstream &file)
     return high << 16 | low;
 }
 
-uint32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash(const std::string &str, const uint32_t seed)
+uint32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
+        const uint32_t table_length, const uint32_t seed)
+{
+    return jimage_perfect_hash(str, seed) % table_length;
+}
+
+uint32_t jimage_perfect_hash(const std::string &str, const uint32_t seed)
 {
     uint32_t result = seed;
 

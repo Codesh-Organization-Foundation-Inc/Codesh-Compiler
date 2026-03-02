@@ -35,10 +35,11 @@ enum class jimage_attribute
 };
 
 static jimage_offsets parse_header(std::ifstream &file);
-static std::vector<uint32_t> read_offsets(std::ifstream &file, const jimage_offsets &layout);
-static std::vector<char> read_strings(std::ifstream &file, const jimage_offsets &layout);
-static std::optional<uint64_t> get_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::vector<uint32_t> &offsets, const std::vector<char> &strings, const std::string &target_class);
+static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout);
+static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
+static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
+static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &target_class);
 static uint16_t read_u2_le(std::ifstream &file);
 static uint32_t read_u4_le(std::ifstream &file);
 static uint64_t read_attr_value(std::ifstream &file, int size);
@@ -60,14 +61,9 @@ bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesyste
 
     const auto layout = parse_header(file);
 
-    const auto offsets = read_offsets(file, layout);
-    const auto strings = read_strings(file, layout);
-
-    const auto target_class_offset = get_target_class_offset(
+    const auto target_class_offset = load_target_class_offset(
         file,
         layout,
-        offsets,
-        strings,
         class_name.join()
     );
 
@@ -112,7 +108,20 @@ static jimage_offsets parse_header(std::ifstream &file)
     };
 }
 
-static std::vector<uint32_t> read_offsets(std::ifstream &file, const jimage_offsets &layout)
+static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout)
+{
+    file.seekg(HEADER_SIZE);
+
+    std::vector<int32_t> redirect(layout.table_length);
+    for (int32_t &entry : redirect)
+    {
+        entry = static_cast<int32_t>(read_u4_le(file));
+    }
+
+    return redirect;
+}
+
+static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout)
 {
     file.seekg(layout.offsets_start);
 
@@ -125,7 +134,7 @@ static std::vector<uint32_t> read_offsets(std::ifstream &file, const jimage_offs
     return offsets;
 }
 
-static std::vector<char> read_strings(std::ifstream &file, const jimage_offsets &layout)
+static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout)
 {
     file.seekg(layout.strings_start);
 
@@ -135,9 +144,13 @@ static std::vector<char> read_strings(std::ifstream &file, const jimage_offsets 
     return strings;
 }
 
-static std::optional<uint64_t> get_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::vector<uint32_t> &offsets, const std::vector<char> &strings, const std::string &target_class)
+static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &target_class)
 {
+    const auto offsets = load_offsets(file, layout);
+    const auto strings = load_strings(file, layout);
+    const auto redirections = load_redirect_table(file, layout);
+
     //TODO: Implement
     return std::nullopt;
 }
