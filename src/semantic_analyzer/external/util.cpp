@@ -2,7 +2,12 @@
 
 #include <fstream>
 
-uint32_t jimage_perfect_hash(const std::string &str, uint32_t seed);
+int32_t jimage_perfect_hash(const std::string &str, uint32_t seed);
+
+/*
+ * Prime used to generate hash for Perfect Hashing.
+ */
+static constexpr uint32_t HASH_MULTIPLIER = 0x01000193;
 
 
 uint8_t codesh::semantic_analyzer::external::util::read_u1(std::ifstream &file)
@@ -26,20 +31,26 @@ uint32_t codesh::semantic_analyzer::external::util::read_u4(std::ifstream &file)
     return high << 16 | low;
 }
 
-uint32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
+int32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
         const uint32_t table_length, const uint32_t seed)
 {
-    return jimage_perfect_hash(str, seed) % table_length;
+    return jimage_perfect_hash(str, seed) % static_cast<int32_t>(table_length);
 }
 
-uint32_t jimage_perfect_hash(const std::string &str, const uint32_t seed)
+int32_t jimage_perfect_hash(const std::string &str, const uint32_t seed)
 {
-    uint32_t result = seed;
+    // Copied from: https://github.com/openjdk/jdk/blob/86800eb2b34bd6ea7a77e7a9ac2f7dbce89c11fb/src/java.base/share/native/libjimage/imageFile.cpp#L59
 
-    for (const char chara : str)
+    // Access bytes as unsigned.
+    auto *bytes = reinterpret_cast<const unsigned char *>(str.data());
+    uint32_t useed = seed;
+
+    // Compute hash code.
+    for (auto byte = *bytes++; byte; byte = *bytes++)
     {
-        result = result * 31 + chara;
+        useed = useed * HASH_MULTIPLIER ^ byte;
     }
 
-    return result;
+    // Ensure the result is not signed.
+    return static_cast<int32_t>(useed & 0x7FFFFFFF);
 }

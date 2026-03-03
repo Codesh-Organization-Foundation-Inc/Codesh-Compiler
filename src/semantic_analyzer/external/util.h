@@ -16,6 +16,6 @@ uint32_t read_u4(std::ifstream &file);
  *
  * The redirect table's value should be used as a second-level lookup
  */
-uint32_t jimage_perfect_hash_index(const std::string &str, uint32_t table_length, uint32_t seed = 0);
+int32_t jimage_perfect_hash_index(const std::string &str, uint32_t table_length, uint32_t seed = 0);
 
 }
