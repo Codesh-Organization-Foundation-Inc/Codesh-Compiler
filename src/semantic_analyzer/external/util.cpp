@@ -1,13 +1,35 @@
 #include "util.h"
 
+#include "jimage_loader.h"
+
 #include <fstream>
 
-int32_t jimage_perfect_hash(const std::string &str, uint32_t seed);
+namespace util = codesh::semantic_analyzer::external::util;
+using codesh::semantic_analyzer::external::jimage_location_attribute;
 
-/*
- * Prime used to generate hash for Perfect Hashing.
+
+struct location_string_offsets
+{
+    uint64_t module;
+    uint64_t parent;
+    uint64_t base;
+    uint64_t extension;
+};
+
+
+int32_t jimage_perfect_hash(const std::string &str, int32_t seed);
+/**
+ * Pointer past matched prefix, or nullptr on mismatch.
  */
-static constexpr uint32_t HASH_MULTIPLIER = 0x01000193;
+[[nodiscard]] static const char* path_starts_with(const char* str, const char* prefix);
+
+/**
+ * Null-terminated string at @p offset in the strings table.
+ */
+[[nodiscard]] static const char* get_string_at(const std::vector<char> &strings, uint64_t offset);
+
+[[nodiscard]] static location_string_offsets parse_offsets(
+        const std::vector<unsigned char> &location_bytes, uint32_t location_offset);
 
 
 uint8_t codesh::semantic_analyzer::external::util::read_u1(std::ifstream &file)
@@ -31,26 +53,168 @@ uint32_t codesh::semantic_analyzer::external::util::read_u4(std::ifstream &file)
     return high << 16 | low;
 }
 
+
 int32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
-        const uint32_t table_length, const uint32_t seed)
+        const uint32_t table_length, const int32_t seed)
 {
     return jimage_perfect_hash(str, seed) % static_cast<int32_t>(table_length);
 }
 
-int32_t jimage_perfect_hash(const std::string &str, const uint32_t seed)
+int32_t jimage_perfect_hash(const std::string &str, const int32_t seed)
 {
     // Copied from: https://github.com/openjdk/jdk/blob/86800eb2b34bd6ea7a77e7a9ac2f7dbce89c11fb/src/java.base/share/native/libjimage/imageFile.cpp#L59
 
     // Access bytes as unsigned.
     auto *bytes = reinterpret_cast<const unsigned char *>(str.data());
-    uint32_t useed = seed;
+    auto useed = static_cast<uint32_t>(seed);
 
     // Compute hash code.
     for (auto byte = *bytes++; byte; byte = *bytes++)
     {
-        useed = useed * HASH_MULTIPLIER ^ byte;
+        useed = useed * util::HASH_MULTIPLIER ^ byte;
     }
 
     // Ensure the result is not signed.
     return static_cast<int32_t>(useed & 0x7FFFFFFF);
+}
+
+
+// Copied from: https://github.com/openjdk/jdk/blob/86800eb2b34bd6ea7a77e7a9ac2f7dbce89c11fb/src/java.base/share/native/libjimage/imageFile.cpp#L368
+bool util::verify_location(const std::vector<unsigned char> &location_bytes,
+        const std::vector<char> &strings, const uint32_t location_offset, const std::string &path)
+{
+    const auto offsets = parse_offsets(location_bytes, location_offset);
+
+    // Position to first character of the path string.
+    const char* next = path.c_str();
+
+    // Get module name string.
+    const char* module = get_string_at(strings, offsets.module);
+    // If module string is not empty, compare '/module/'.
+    if (*module != '\0')
+    {
+        if (*next++ != '/')
+            return false;
+        if (!((next = path_starts_with(next, module))))
+            return false;
+        if (*next++ != '/')
+            return false;
+    }
+
+    // Get parent (package) string.
+    const char* parent = get_string_at(strings, offsets.parent);
+    // If parent string is not empty, compare 'parent/'.
+    if (*parent != '\0')
+    {
+        if (!((next = path_starts_with(next, parent))))
+            return false;
+        if (*next++ != '/')
+            return false;
+    }
+
+    // Get base name string and compare.
+    const char* base = get_string_at(strings, offsets.base);
+    if (!((next = path_starts_with(next, base))))
+        return false;
+
+    // Get extension string.
+    const char* extension = get_string_at(strings, offsets.extension);
+    // If extension is not empty, compare '.extension'.
+    if (*extension != '\0')
+    {
+        if (*next++ != '.')
+            return false;
+        if (!((next = path_starts_with(next, extension))))
+            return false;
+    }
+
+    // True only if complete match and no more characters.
+    return *next == '\0';
+}
+
+static const char* path_starts_with(const char* str, const char* prefix)
+{
+    while (*prefix != '\0')
+    {
+        if (*str++ != *prefix++) return nullptr;
+    }
+
+    return str;
+}
+
+static const char* get_string_at(const std::vector<char> &strings, const uint64_t offset)
+{
+    return strings.data() + offset;
+}
+
+static location_string_offsets parse_offsets(
+        const std::vector<unsigned char> &location_bytes, const uint32_t location_offset)
+{
+    location_string_offsets offsets{};
+
+    size_t pos = location_offset;
+    while (pos < location_bytes.size())
+    {
+        const uint8_t header = location_bytes[pos++];
+        const uint8_t kind = header >> 3;
+        const uint8_t value_size = (header & 0x7) + 1;
+
+        if (kind == 0)
+            break;
+
+        uint64_t value = 0;
+        for (uint8_t i = 0; i < value_size; ++i)
+        {
+            value = value << 8 | location_bytes[pos++];
+        }
+
+        switch (static_cast<jimage_location_attribute>(kind))
+        {
+        case jimage_location_attribute::MODULE:
+            offsets.module = value;
+            break;
+        case jimage_location_attribute::PARENT:
+            offsets.parent = value;
+            break;
+        case jimage_location_attribute::BASE:
+            offsets.base = value;
+            break;
+        case jimage_location_attribute::EXTENSION:
+            offsets.extension = value;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    return offsets;
+}
+
+
+uint64_t codesh::semantic_analyzer::external::util::read_location_attribute(
+        const std::vector<unsigned char> &location_bytes, const uint32_t location_offset,
+        const jimage_location_attribute kind)
+{
+    size_t pos = location_offset;
+    while (pos < location_bytes.size())
+    {
+        const uint8_t header = location_bytes[pos++];
+        const uint8_t k = header >> 3;
+        const uint8_t value_size = (header & 0x7) + 1;
+
+        if (k == 0)
+            break;
+
+        uint64_t value = 0;
+        for (uint8_t i = 0; i < value_size; ++i)
+        {
+            value = value << 8 | location_bytes[pos++];
+        }
+
+        if (static_cast<jimage_location_attribute>(k) == kind)
+            return value;
+    }
+
+    return 0;
 }

@@ -1,13 +1,23 @@
 #include "jimage_loader.h"
 #include "class_loader.h"
-#include "util.h"
 #include "defenition/fully_qualified_name.h"
+#include "fmt/base.h"
+#include "fmt/xchar.h"
+#include "util.h"
 
-#include <optional>
 #include <fstream>
+#include <optional>
 #include <vector>
 
+/*
+ * Thank you o mighty lord and savior OpenJDK for being a free and open
+ * i will forever be in debt
+ * xoxo
+ * https://github.com/openjdk/jdk/blob/master/src/java.base/share/native/libjimage/imageFile.hpp
+ */
+
 namespace util = codesh::semantic_analyzer::external::util;
+using codesh::semantic_analyzer::external::jimage_location_attribute;
 
 // Keep JImage offsets to skip only the relevant parts using ifstream::seekg and skip everything else
 struct jimage_offsets
@@ -22,15 +32,10 @@ struct jimage_offsets
     std::streamoff data_start;
 };
 
-enum class jimage_attribute
+struct location_result
 {
-    END,
-    MODULE,
-    PARENT,
-    BASE,
-    EXTENSION,
-    OFFSET,
-    COMPRESSED
+    uint32_t index;
+    uint64_t size;
 };
 
 [[nodiscard]] static jimage_offsets parse_header(std::ifstream &file);
@@ -38,9 +43,11 @@ enum class jimage_attribute
 [[nodiscard]] static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &module_name, const std::string &target_class);
+[[nodiscard]] static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class);
-[[nodiscard]] static std::optional<uint64_t> get_class_index_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &target_class);
+static std::optional<jimage_location_attribute> get_location_attribute(std::ifstream &file,
+        const jimage_offsets &layout, uint32_t offset);
 static uint16_t read_u2_le(std::ifstream &file);
 static uint32_t read_u4_le(std::ifstream &file);
 static uint64_t read_attr_value(std::ifstream &file, int size);
@@ -52,7 +59,7 @@ static constexpr std::streamoff HEADER_SIZE = 28;
 
 
 bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesystem::path &path,
-        const definition::fully_qualified_name &class_name, const symbol_table &table)
+        const std::string &module_name, const definition::fully_qualified_name &class_name, const symbol_table &table)
 {
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open())
@@ -65,14 +72,19 @@ bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesyste
     const auto target_class_offset = load_target_class_offset(
         file,
         layout,
+        module_name,
         class_name.join()
     );
+    return false;
 
     if (!target_class_offset.has_value())
         return false;
 
 
-    file.seekg(layout.data_start + static_cast<std::streamoff>(target_class_offset.value()));
+    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(target_class_offset.value());
+    fmt::println("[JIMAGE] {}", class_file_offset);
+
+    file.seekg(layout.data_start + static_cast<std::streamoff>(class_file_offset));
     load_class_file(file, table);
     return true;
 }
@@ -135,6 +147,16 @@ static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offs
     return offsets;
 }
 
+static std::vector<unsigned char> load_locations(std::ifstream &file, const jimage_offsets &layout)
+{
+    file.seekg(layout.locations_start);
+
+    std::vector<unsigned char> locations(layout.locations_size);
+    file.read(reinterpret_cast<char *>(locations.data()), layout.locations_size);
+
+    return locations;
+}
+
 static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout)
 {
     file.seekg(layout.strings_start);
@@ -146,11 +168,8 @@ static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets 
 }
 
 static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &target_class)
+        const std::string &module_name, const std::string &target_class)
 {
-    const auto class_index_offset = get_class_index_offset(file, layout, target_class);
-
-    const auto offsets = load_offsets(file, layout);
     const auto strings = load_strings(file, layout);
     const auto redirections = load_redirect_table(file, layout);
 
@@ -158,7 +177,44 @@ static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, con
     return std::nullopt;
 }
 
-static std::optional<uint64_t> get_class_index_offset(std::ifstream &file, const jimage_offsets &layout,
+// I have 0 clue about the namings below, but I did my best job translating them from OpenJDK.
+static std::optional<location_result> get_location_index(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &module_name, const std::string &target_class)
+{
+    const auto offset_index = get_location_offset_index(
+        file,
+        layout,
+        fmt::format("/{}/{}", module_name, target_class)
+    );
+
+    if (!offset_index.has_value())
+        return std::nullopt;
+
+    const auto path = fmt::format("/{}/{}", module_name, target_class);
+    const auto location_offset = load_offsets(file, layout).at(*offset_index);
+
+    const auto locations = load_locations(file, layout);
+    const auto strings = load_strings(file, layout);
+
+    if (!util::verify_location(locations, strings, location_offset, path))
+        return std::nullopt;
+
+    return location_result {
+        static_cast<uint32_t>(*offset_index),
+        util::read_location_attribute(locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
+    };
+}
+
+static std::optional<jimage_location_attribute> get_location_attribute(std::ifstream &file,
+        const jimage_offsets &layout, const uint32_t offset)
+{
+    if (offset == 0)
+        return std::nullopt;
+
+    return static_cast<jimage_location_attribute>(load_locations(file, layout).at(offset));
+}
+
+static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class)
 {
     const auto redirections = load_redirect_table(file, layout);
@@ -166,20 +222,19 @@ static std::optional<uint64_t> get_class_index_offset(std::ifstream &file, const
     const auto redirect_index = util::jimage_perfect_hash_index(target_class, layout.table_length);
     const auto redirect_value = redirections[redirect_index];
 
-    if (redirect_value == 0)
-    {
-        // Not a class file
-        return std::nullopt;
-    }
-
-    if (redirect_value > 0)
+    if (redirect_value < 0)
     {
         // Direct slot
-        return static_cast<uint64_t>(redirect_value) - 1;
+        return -redirect_value - 1;
+    }
+    if (redirect_value > 0)
+    {
+        // Indirect slot; requires 2nd lookup where the seed is the current redirect value
+        return util::jimage_perfect_hash_index(target_class, layout.table_length, redirect_value);
     }
 
-    // Indirect slot; requires 2nd lookup where the seed is the current redirect value
-    return util::jimage_perfect_hash_index(target_class, layout.table_length, -redirect_value - 1);
+    // Not a class file
+    return std::nullopt;
 }
 
 
