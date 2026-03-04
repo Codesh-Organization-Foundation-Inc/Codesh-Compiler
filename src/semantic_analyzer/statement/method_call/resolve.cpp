@@ -70,6 +70,10 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
+static std::optional<parent_type_result> resolve_call_parent_type(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::op::new_ast_node &new_call);
+
 /**
  * @returns Whether all arguments were successfully resolved.
  */
@@ -167,12 +171,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
-    const auto parent_res = resolve_call_parent_type(context, containing_method, method_call, scope);
-    if (!parent_res.has_value())
+    const auto result = resolve_call_parent_type(context, containing_method, method_call, scope);
+    if (!result.has_value())
         return std::nullopt;
 
-    const auto *parent_type = parent_res->parent_type;
-    auto *receiver_variable = parent_res->receiver_variable;
+    const auto [parent_type, receiver_variable] = *result;
 
 
     const auto resolved_method = get_called_method_as_symbol(
@@ -211,54 +214,68 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 {
     const auto &name = method_call.get_unresolved_name();
 
-    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
+    if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
+        return resolve_call_parent_type(context, *new_call);
 
+    if (!name.get_parts().empty())
+    {
+        // For method calls prefixed by "this", we must be speaking of type members.
+        // For single-names, the method must either be a type member or a static import.
+        //TODO: Handle static imports
+        if (name.is_single_part() || name.get_parts().front() == "this")
+        {
+            return parent_type_result {
+                &containing_method.get_parent_type(),
+                nullptr
+            };
+        }
+    }
+
+
+    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
     // Receiver = The variable being passed as `this` to the non-static method
     // e.g. in ויעש מתשנה ל־מעשה
     codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
 
-    // For new calls, the parent type is the constructed type, not the containing class.
-    if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
+    // Check if the front of the name matches a local variable in the scope.
+    // ויעש משתנה ל־מעשה...
+    const auto &front = method_call.get_unresolved_name().get_parts().front();
+
+    if (const auto result = find_local_var_by_name(context, scope, front))
     {
-        const auto resolved_type = codesh::semantic_analyzer::util::resolve_custom_type(
-            context,
-            new_call->get_constructed_type()
-        );
-
-        if (!resolved_type.has_value())
-            return std::nullopt;
-
-        parent_type = &resolved_type->get();
+        parent_type = result->type;
+        receiver_variable = result->variable;
     }
-    else if (!name.get_parts().empty() && (name.is_single_part() || name.get_parts().front() == "this"))
-    {
-        // Since this is name-only situation, the method must either be the classes' or a static import.
-        //TODO: Handle static imports
 
-        parent_type = &containing_method.get_parent_type();
-    }
-    else
+    if (parent_type == nullptr)
     {
-        // Check if the front of the name matches a local variable in the scope.
-        // ויעש משתנה ל־מעשה...
-        const auto &front = name.get_parts().front();
-        if (const auto result = find_local_var_by_name(context, scope, front))
-        {
-            parent_type = result->type;
-            receiver_variable = result->variable;
-        }
-
+        parent_type = resolve_parent_type_from_imports(context, method_call);
         if (parent_type == nullptr)
-        {
-            parent_type = resolve_parent_type_from_imports(context, method_call);
-            if (parent_type == nullptr)
-                return std::nullopt;
-        }
+            return std::nullopt;
     }
 
     return parent_type_result {
         parent_type,
         receiver_variable
+    };
+}
+
+static std::optional<parent_type_result> resolve_call_parent_type(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::op::new_ast_node &new_call)
+{
+    // For new calls, the parent type is the constructed type, not the containing class.
+    const auto resolved_type = codesh::semantic_analyzer::util::resolve_custom_type(
+        context,
+        new_call.get_constructed_type()
+    );
+
+    if (!resolved_type.has_value())
+        return std::nullopt;
+
+    return parent_type_result {
+        &resolved_type->get(),
+        nullptr
     };
 }
 
