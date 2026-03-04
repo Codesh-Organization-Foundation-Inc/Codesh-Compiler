@@ -104,9 +104,8 @@ static void prepend_external_this_argument(
  *
  * @returns Whether the operation succeed
  */
-static bool try_prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
                                            codesh::ast::method::operation::method_call_ast_node &method_call,
-                                           const codesh::semantic_analyzer::method_symbol &resolved_method,
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope);
 
@@ -197,12 +196,21 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     // Update the AST node to the found result
     method_call.set_resolved(resolved_method.value());
 
-    // For non-static instance method calls on a local variable, prepend the receiver:
-    if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
-        prepend_external_this_argument(method_call, *receiver_variable);
+    // Handle prepending `this` for non-static method calls
+    if (!resolved_method->get().get_attributes().get_is_static())
+    {
+        // For calls on local variables, prepend the receiver:
+        if (receiver_variable != nullptr)
+        {
+            prepend_external_this_argument(method_call, *receiver_variable);
+        }
+        else
+        {
+            if (!prepend_implicit_this_argument(context, method_call, containing_method, scope))
+                return std::nullopt;
+        }
+    }
 
-    if (!try_prepend_implicit_this_argument(context, method_call, resolved_method->get(), containing_method, scope))
-        return std::nullopt;
 
     return resolved_method;
 }
@@ -376,24 +384,13 @@ static void prepend_external_this_argument(
     method_call.get_arguments().push_front(std::move(receiver_node));
 }
 
-static bool try_prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
                                            codesh::ast::method::operation::method_call_ast_node &method_call,
-                                           const codesh::semantic_analyzer::method_symbol &resolved_method,
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    // Skip static methods as `this` is only relevant for non-statics
-    if (resolved_method.get_attributes().get_is_static())
-        return true;
-
-    // Skip explicit calls as we handle implicit ones here
+    // Method calls get the result and do not need `this`
     if (method_call.has_nested_method())
-        return true;
-    if (method_call.get_unresolved_name().is_single_part())
-        return true;
-
-    const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
-    if (!fqn_parts.empty() && fqn_parts.front() == "this")
         return true;
 
     // New calls don't need `this`
