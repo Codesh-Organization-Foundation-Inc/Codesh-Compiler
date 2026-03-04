@@ -83,15 +83,26 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
                               const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
- * If the resolved method is non-static and the call targets the same class, prepends `this` as the first argument.
- * Emits a semantic error if the containing method is static.
- * @returns False if a semantic error was emitted, true otherwise.
+ * For non-static calls on a local variable receiver (e.g. @c obj / @c method), prepends the receiver variable
+ * as the first argument.
  */
-static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
-                                  codesh::ast::method::operation::method_call_ast_node &method_call,
-                                  const codesh::semantic_analyzer::method_symbol &resolved_method,
-                                  const codesh::semantic_analyzer::method_symbol &containing_method,
-                                  const codesh::semantic_analyzer::method_scope_symbol &scope);
+static void prepend_external_this_argument(
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        codesh::semantic_analyzer::variable_symbol &receiver_variable);
+
+/**
+ * For non-static calls targeting the same class (e.g. bare @c method or @c this / @c method), prepends @c this
+ * as the first argument.
+ *
+ * Emits a semantic error if the containing method is static.
+ *
+ * @returns Whether the operation succeed
+ */
+static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+                                           codesh::ast::method::operation::method_call_ast_node &method_call,
+                                           const codesh::semantic_analyzer::method_symbol &resolved_method,
+                                           const codesh::semantic_analyzer::method_symbol &containing_method,
+                                           const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
 
@@ -133,7 +144,7 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     //
     // A post-resolution pass in analyzer.cpp would require a lot of nested calls and such to get all the necessary
     // parameters below:
-    if (!prepend_this_argument(context, method_call, result.value().get(), containing_method, scope))
+    if (!prepend_implicit_this_argument(context, method_call, result.value().get(), containing_method, scope))
         return false;
 
 
@@ -191,16 +202,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     // Update the AST node to the found result
     method_call.set_resolved(resolved_method.value());
 
-    // For non-static instance method calls on a local variable, prepend `this`
+    // For non-static instance method calls on a local variable, prepend the receiver:
     if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
     {
-        auto receiver_node = std::make_unique<variable_reference_ast_node>(
-            method_call.get_code_position(),
-            codesh::definition::fully_qualified_name(name.get_parts().front())
-        );
-
-        receiver_node->set_resolved(*receiver_variable);
-        method_call.get_arguments().push_front(std::move(receiver_node));
+        prepend_external_this_argument(method_call, *receiver_variable);
     }
 
     return resolved_method;
@@ -318,11 +323,24 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symb
     return resolved;
 }
 
-static bool prepend_this_argument(const codesh::semantic_analyzer::semantic_context &context,
-                                  codesh::ast::method::operation::method_call_ast_node &method_call,
-                                  const codesh::semantic_analyzer::method_symbol &resolved_method,
-                                  const codesh::semantic_analyzer::method_symbol &containing_method,
-                                  const codesh::semantic_analyzer::method_scope_symbol &scope)
+static void prepend_external_this_argument(
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        codesh::semantic_analyzer::variable_symbol &receiver_variable)
+{
+    auto receiver_node = std::make_unique<variable_reference_ast_node>(
+        method_call.get_code_position(),
+        codesh::definition::fully_qualified_name(method_call.get_unresolved_name().get_parts().front())
+    );
+
+    receiver_node->set_resolved(receiver_variable);
+    method_call.get_arguments().push_front(std::move(receiver_node));
+}
+
+static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+                                           codesh::ast::method::operation::method_call_ast_node &method_call,
+                                           const codesh::semantic_analyzer::method_symbol &resolved_method,
+                                           const codesh::semantic_analyzer::method_symbol &containing_method,
+                                           const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
 
     const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
