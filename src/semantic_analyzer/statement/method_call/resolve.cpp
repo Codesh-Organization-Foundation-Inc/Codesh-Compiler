@@ -40,6 +40,12 @@ struct local_result
     codesh::semantic_analyzer::variable_symbol *variable;
 };
 
+struct parent_type_result
+{
+    const codesh::semantic_analyzer::type_symbol *parent_type;
+    codesh::semantic_analyzer::variable_symbol *receiver_variable;
+};
+
 static std::optional<local_result> find_local_var_by_name(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
@@ -53,6 +59,16 @@ static std::optional<local_result> find_local_var_by_name(
 static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
+
+/**
+ * Determines the parent type and optional receiver variable for a method call.
+ * @returns @c std::nullopt if the parent type cannot be resolved.
+ */
+static std::optional<parent_type_result> resolve_call_parent_type(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
  * @returns Whether all arguments were successfully resolved.
@@ -151,6 +167,50 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
+    const auto parent_res = resolve_call_parent_type(context, containing_method, method_call, scope);
+    if (!parent_res.has_value())
+        return std::nullopt;
+
+    const auto *parent_type = parent_res->parent_type;
+    auto *receiver_variable = parent_res->receiver_variable;
+
+
+    const auto resolved_method = get_called_method_as_symbol(
+        context,
+        *parent_type,
+        method_call
+    );
+
+    if (!resolved_method.has_value())
+        return std::nullopt;
+
+
+    // Update the AST node to the found result
+    method_call.set_resolved(resolved_method.value());
+
+    // For non-static instance method calls on a local variable, prepend `this`
+    if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
+    {
+        auto receiver_node = std::make_unique<variable_reference_ast_node>(
+            method_call.get_code_position(),
+            codesh::definition::fully_qualified_name(name.get_parts().front())
+        );
+
+        receiver_node->set_resolved(*receiver_variable);
+        method_call.get_arguments().push_front(std::move(receiver_node));
+    }
+
+    return resolved_method;
+}
+
+static std::optional<parent_type_result> resolve_call_parent_type(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    const auto &name = method_call.get_unresolved_name();
+
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
     // Receiver = The variable being passed as `this` to the non-static method
@@ -196,33 +256,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         }
     }
 
-
-    const auto resolved_method = get_called_method_as_symbol(
-        context,
-        *parent_type,
-        method_call
-    );
-
-    if (!resolved_method.has_value())
-        return std::nullopt;
-
-
-    // Update the AST node to the found result
-    method_call.set_resolved(resolved_method.value());
-
-    // For non-static instance method calls on a local variable, prepend `this`
-    if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
-    {
-        auto receiver_node = std::make_unique<variable_reference_ast_node>(
-            method_call.get_code_position(),
-            codesh::definition::fully_qualified_name(name.get_parts().front())
-        );
-
-        receiver_node->set_resolved(*receiver_variable);
-        method_call.get_arguments().push_front(std::move(receiver_node));
-    }
-
-    return resolved_method;
+    return parent_type_result {
+        parent_type,
+        receiver_variable
+    };
 }
 
 static std::optional<local_result> find_local_var_by_name(
