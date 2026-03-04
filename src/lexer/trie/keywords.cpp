@@ -179,8 +179,6 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
 
     {token_group::COMMENT_MULTILINE, u"ויאמר ה' לאמר:", word_boundary::BEFORE},
     {token_group::COMMENT_MULTILINE, u"וכה הגה ה' לאמר:", word_boundary::BEFORE},
-    {token_group::COMMENT_MULTILINE, u"ויאמר ה' לאמר:", word_boundary::BEFORE},
-    {token_group::COMMENT_ONE_LINER, u"וכה הגה ה' לאמר", word_boundary::BOTH},
 };
 
 static std::unordered_map<codesh::token_group, std::string> token_to_name_map()
