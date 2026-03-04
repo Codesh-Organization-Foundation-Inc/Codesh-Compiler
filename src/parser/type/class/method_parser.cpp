@@ -163,11 +163,11 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     {
         if (util::peeking_check(tokens, token_group::KEYWORD_FUNCTION_CALL))
         {
-            method_call_node->set_nested_method(parse_method_call(tokens));
+            method_call_node->set_chained_method(parse_method_call(tokens));
         }
         else if (util::peeking_check(tokens, token_group::KEYWORD_NEW))
         {
-            method_call_node->set_nested_method(value::parse_new_operator(tokens));
+            method_call_node->set_chained_method(value::parse_new_operator(tokens));
         }
 
 
@@ -182,7 +182,7 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     }
 
 
-    if (method_call_node->has_nested_method())
+    if (method_call_node->has_chained_method())
     {
         if (!util::consuming_check(tokens, token_group::PUNCTUATION_DOT))
         {
@@ -198,7 +198,7 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     else
     {
         // `this` as a prefix of a method call can only be done if it is the first part.
-        // A method call containing a nested method takes a method as the prefix.
+        // A method call containing a chained method takes a method as the prefix.
         // Hence prefixing `this` can only be done in this else branch.
         util::parse_this_and_fqn(tokens, method_call_node->get_fqn());
     }
@@ -326,7 +326,7 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
     auto &for_scope = method_scope.create_method_scope(scope_pos.value_or(for_pos));
     for_scope.add_local_variable(std::move(iterator_decl));
 
-    // The iterator variable will go into a nested scope so that its scope_begin_marker (IR generation stage)
+    // The iterator variable will go into a chained scope so that its scope_begin_marker (IR generation stage)
     // can be placed INSIDE the loop body (after the condition check).
     //
     // This gives them a bytecode_start_pc that correctly EXCLUDES the loop's edge.

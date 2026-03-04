@@ -48,21 +48,21 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
 }
 
 codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
-    get_nested_method() const
+    get_chained_method() const
 {
-    assert(nested_method.has_value() && "Tried to get nested method though one does not exist");
-    return *nested_method.value();
+    assert(chained_method.has_value() && "Tried to get chained method though one does not exist");
+    return *chained_method.value();
 }
 
-void codesh::ast::method::operation::method_call_ast_node::set_nested_method(
-        std::unique_ptr<method_call_ast_node> nested_method)
+void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
+        std::unique_ptr<method_call_ast_node> chained_method)
 {
-    this->nested_method.emplace(std::move(nested_method));
+    this->chained_method.emplace(std::move(chained_method));
 }
 
-bool codesh::ast::method::operation::method_call_ast_node::has_nested_method() const
+bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
 {
-    return nested_method.has_value();
+    return chained_method.has_value();
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
@@ -143,9 +143,9 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
     }
 
     // Emit for chained method
-    if (has_nested_method())
+    if (has_chained_method())
     {
-        get_nested_method().emit_constants(root_node, constant_pool);
+        get_chained_method().emit_constants(root_node, constant_pool);
     }
 }
 
@@ -156,11 +156,11 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
-    // Execute nested methods first
-    if (has_nested_method())
+    // Execute chained methods first
+    if (has_chained_method())
     {
         containing_block.set_is_consuming(true);
-        get_nested_method().emit_ir(containing_block, symbol_table, containing_type_decl);
+        get_chained_method().emit_ir(containing_block, symbol_table, containing_type_decl);
         containing_block.set_is_consuming(false);
     }
 

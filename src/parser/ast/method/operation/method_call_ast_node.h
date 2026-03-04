@@ -30,7 +30,7 @@ class method_call_ast_node : public var_reference::value_ast_node,
     definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
-    std::optional<std::unique_ptr<method_call_ast_node>> nested_method;
+    std::optional<std::unique_ptr<method_call_ast_node>> chained_method;
 
     std::deque<std::unique_ptr<value_ast_node>> arguments;
 
@@ -51,10 +51,10 @@ public:
     [[nodiscard]] const definition::fully_qualified_name &get_fqn() const;
 
 
-    [[nodiscard]] method_call_ast_node &get_nested_method() const;
-    void set_nested_method(std::unique_ptr<method_call_ast_node> nested_method);
+    [[nodiscard]] method_call_ast_node &get_chained_method() const;
+    void set_chained_method(std::unique_ptr<method_call_ast_node> chained_method);
 
-    [[nodiscard]] bool has_nested_method() const;
+    [[nodiscard]] bool has_chained_method() const;
 
 
     [[nodiscard]] type::type_ast_node *get_type() const override;

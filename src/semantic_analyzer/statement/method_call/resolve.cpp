@@ -74,8 +74,8 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::op::new_ast_node &new_call);
 
-static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
-        const codesh::ast::method::operation::method_call_ast_node &nested_method);
+static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
+        const codesh::ast::method::operation::method_call_ast_node &chained_method);
 
 /**
  * @returns Whether all arguments were successfully resolved.
@@ -156,13 +156,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     if (!resolve_arguments(context, method_call, containing_method, scope))
         return std::nullopt;
 
-    // Recursively resolve all nested methods first
-    if (method_call.has_nested_method())
+    // Recursively resolve all chained methods first
+    if (method_call.has_chained_method())
     {
         resolve_method_call(
             context,
             containing_method,
-            method_call.get_nested_method(),
+            method_call.get_chained_method(),
             scope
         );
     }
@@ -253,9 +253,9 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     // e.g. in ויעש מתשנה ל־מעשה
     codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
 
-    if (method_call.has_nested_method())
+    if (method_call.has_chained_method())
     {
-        return resolve_parent_type_for_nested_call(method_call.get_nested_method());
+        return resolve_parent_type_for_chained_call(method_call.get_chained_method());
     }
 
     // Check if the front of the name matches a local variable in the scope.
@@ -300,15 +300,15 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     };
 }
 
-static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
-        const codesh::ast::method::operation::method_call_ast_node &nested_method)
+static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
+        const codesh::ast::method::operation::method_call_ast_node &chained_method)
 {
-    if (!nested_method.is_resolved())
+    if (!chained_method.is_resolved())
         return std::nullopt;
 
     // For chained methods, `this` is their return value
     const auto *return_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(
-        &nested_method.get_resolved().get_return_type()
+        &chained_method.get_resolved().get_return_type()
     );
 
     if (return_type == nullptr)
@@ -382,7 +382,7 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
                                            const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     // Method calls get the result and do not need `this`
-    if (method_call.has_nested_method())
+    if (method_call.has_chained_method())
         return true;
 
     // New calls don't need `this`
