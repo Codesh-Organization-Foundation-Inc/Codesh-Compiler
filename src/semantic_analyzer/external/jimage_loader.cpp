@@ -42,18 +42,15 @@ struct location_result
 [[nodiscard]] static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
-[[nodiscard]] static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &module_name, const std::string &target_class);
+[[nodiscard]] static std::vector<unsigned char> load_locations(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class);
-static std::optional<jimage_location_attribute> get_location_attribute(std::ifstream &file,
-        const jimage_offsets &layout, uint32_t offset);
+[[nodiscard]] static std::optional<location_result> load_classfile_offset(std::ifstream &file,
+        const jimage_offsets &layout, const std::string &module_name, const std::string &target_class);
 static uint16_t read_u2_le(std::ifstream &file);
 static uint32_t read_u4_le(std::ifstream &file);
-static uint64_t read_attr_value(std::ifstream &file, int size);
 
-
-//TIL: streamoff is an int representing file offsets
+// TIL: streamoff is an int representing file offsets
 //TODO: Maybe convert all file offsets to use streamoff if others exist
 static constexpr std::streamoff HEADER_SIZE = 28;
 
@@ -69,19 +66,18 @@ bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesyste
 
     const auto layout = parse_header(file);
 
-    const auto target_class_offset = load_target_class_offset(
+    const auto target_class_offset = load_classfile_offset(
         file,
         layout,
         module_name,
         class_name.join()
     );
-    return false;
 
     if (!target_class_offset.has_value())
         return false;
 
 
-    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(target_class_offset.value());
+    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(target_class_offset->index);
     fmt::println("[JIMAGE] {}", class_file_offset);
 
     file.seekg(layout.data_start + static_cast<std::streamoff>(class_file_offset));
@@ -120,6 +116,30 @@ static jimage_offsets parse_header(std::ifstream &file)
         data_start
     };
 }
+
+static std::optional<location_result> load_classfile_offset(std::ifstream &file, const jimage_offsets &layout,
+        const std::string &module_name, const std::string &target_class)
+{
+    const auto path = fmt::format("/{}/{}.class", module_name, target_class);
+    const auto offset_index = get_location_offset_index(file, layout, path);
+
+    if (!offset_index.has_value())
+        return std::nullopt;
+
+    const auto location_offset = load_offsets(file, layout).at(*offset_index);
+
+    const auto locations = load_locations(file, layout);
+    const auto strings = load_strings(file, layout);
+
+    if (!util::verify_location(locations, strings, location_offset, path))
+        return std::nullopt;
+
+    return location_result {
+        static_cast<uint32_t>(*offset_index),
+        util::read_location_attribute(locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
+    };
+}
+
 
 static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout)
 {
@@ -167,53 +187,6 @@ static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets 
     return strings;
 }
 
-static std::optional<uint64_t> load_target_class_offset(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &module_name, const std::string &target_class)
-{
-    const auto strings = load_strings(file, layout);
-    const auto redirections = load_redirect_table(file, layout);
-
-    //TODO: Implement
-    return std::nullopt;
-}
-
-// I have 0 clue about the namings below, but I did my best job translating them from OpenJDK.
-static std::optional<location_result> get_location_index(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &module_name, const std::string &target_class)
-{
-    const auto offset_index = get_location_offset_index(
-        file,
-        layout,
-        fmt::format("/{}/{}", module_name, target_class)
-    );
-
-    if (!offset_index.has_value())
-        return std::nullopt;
-
-    const auto path = fmt::format("/{}/{}", module_name, target_class);
-    const auto location_offset = load_offsets(file, layout).at(*offset_index);
-
-    const auto locations = load_locations(file, layout);
-    const auto strings = load_strings(file, layout);
-
-    if (!util::verify_location(locations, strings, location_offset, path))
-        return std::nullopt;
-
-    return location_result {
-        static_cast<uint32_t>(*offset_index),
-        util::read_location_attribute(locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
-    };
-}
-
-static std::optional<jimage_location_attribute> get_location_attribute(std::ifstream &file,
-        const jimage_offsets &layout, const uint32_t offset)
-{
-    if (offset == 0)
-        return std::nullopt;
-
-    return static_cast<jimage_location_attribute>(load_locations(file, layout).at(offset));
-}
-
 static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class)
 {
@@ -222,9 +195,11 @@ static std::optional<int32_t> get_location_offset_index(std::ifstream &file, con
     const auto redirect_index = util::jimage_perfect_hash_index(target_class, layout.table_length);
     const auto redirect_value = redirections[redirect_index];
 
+    // ReSharper disable once CppDFAConstantConditions
     if (redirect_value < 0)
     {
         // Direct slot
+        // ReSharper disable once CppDFAUnreachableCode
         return -redirect_value - 1;
     }
     if (redirect_value > 0)
@@ -251,13 +226,4 @@ static uint32_t read_u4_le(std::ifstream &file)
     const uint32_t lo = read_u2_le(file);
     const uint32_t hi = read_u2_le(file);
     return lo | hi << 16;
-}
-
-// Location attribute values are big-endian even inside the LE jimage format
-static uint64_t read_attr_value(std::ifstream &file, int const size)
-{
-    uint64_t value = 0;
-    for (int i = 0; i < size; ++i)
-        value = value << 8 | util::read_u1(file);
-    return value;
 }
