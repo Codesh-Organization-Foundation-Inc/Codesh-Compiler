@@ -74,6 +74,12 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::op::new_ast_node &new_call);
 
+static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        codesh::ast::method::operation::method_call_ast_node &nested_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
+
 /**
  * @returns Whether all arguments were successfully resolved.
  */
@@ -242,6 +248,16 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     // e.g. in ויעש מתשנה ל־מעשה
     codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
 
+    if (method_call.has_nested_method())
+    {
+        return resolve_parent_type_for_nested_call(
+            context,
+            containing_method,
+            method_call.get_nested_method(),
+            scope
+        );
+    }
+
     // Check if the front of the name matches a local variable in the scope.
     // ויעש משתנה ל־מעשה...
     const auto &front = method_call.get_unresolved_name().get_parts().front();
@@ -280,6 +296,40 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     return parent_type_result {
         &resolved_type->get(),
+        nullptr
+    };
+}
+
+static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        codesh::ast::method::operation::method_call_ast_node &nested_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    const auto nested_result = resolve_method_call(
+        context,
+        containing_method,
+        nested_method,
+        scope
+    );
+
+    if (!nested_result.has_value())
+        return std::nullopt;
+
+    // For chained methods, `this` is their return value
+    const auto *return_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(
+        &nested_result->get().get_return_type()
+    );
+
+    if (return_type == nullptr)
+    {
+        // Non-custom return type - can't chain further calls on it.
+        // E.g. a primitive
+        return std::nullopt;
+    }
+
+    return parent_type_result {
+        &return_type->get_resolved(),
         nullptr
     };
 }
