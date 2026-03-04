@@ -32,7 +32,7 @@ struct jimage_offsets
     std::streamoff data_start;
 };
 
-struct location_result
+struct class_file_lookup_result
 {
     uint32_t index;
     uint64_t size;
@@ -45,7 +45,7 @@ struct location_result
 [[nodiscard]] static std::vector<unsigned char> load_locations(std::ifstream &file, const jimage_offsets &layout);
 [[nodiscard]] static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
         const std::string &target_class);
-[[nodiscard]] static std::optional<location_result> load_classfile_offset(std::ifstream &file,
+[[nodiscard]] static std::optional<class_file_lookup_result> lookup_class_file(std::ifstream &file,
         const jimage_offsets &layout, const std::string &module_name, const std::string &target_class);
 static uint16_t read_u2_le(std::ifstream &file);
 static uint32_t read_u4_le(std::ifstream &file);
@@ -66,21 +66,20 @@ bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesyste
 
     const auto layout = parse_header(file);
 
-    const auto target_class_offset = load_classfile_offset(
+    const auto class_file_lookup = lookup_class_file(
         file,
         layout,
         module_name,
         class_name.join()
     );
 
-    if (!target_class_offset.has_value())
+    if (!class_file_lookup.has_value())
         return false;
 
 
-    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(target_class_offset->index);
-    fmt::println("[JIMAGE] {}", class_file_offset);
-
+    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(class_file_lookup->index);
     file.seekg(layout.data_start + static_cast<std::streamoff>(class_file_offset));
+
     load_class_file(file, table);
     return true;
 }
@@ -117,7 +116,7 @@ static jimage_offsets parse_header(std::ifstream &file)
     };
 }
 
-static std::optional<location_result> load_classfile_offset(std::ifstream &file, const jimage_offsets &layout,
+static std::optional<class_file_lookup_result> lookup_class_file(std::ifstream &file, const jimage_offsets &layout,
         const std::string &module_name, const std::string &target_class)
 {
     const auto path = fmt::format("/{}/{}.class", module_name, target_class);
@@ -134,7 +133,7 @@ static std::optional<location_result> load_classfile_offset(std::ifstream &file,
     if (!util::verify_location(locations, strings, location_offset, path))
         return std::nullopt;
 
-    return location_result {
+    return class_file_lookup_result {
         static_cast<uint32_t>(*offset_index),
         util::read_location_attribute(locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
     };
