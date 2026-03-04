@@ -141,6 +141,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
             constant_emitter->emit_constants(root_node, constant_pool);
         }
     }
+
+    // Emit for chained method
+    if (has_nested_method())
+    {
+        get_nested_method().emit_constants(root_node, constant_pool);
+    }
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
@@ -149,6 +155,14 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 {
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
+
+    // Execute nested methods first
+    if (has_nested_method())
+    {
+        containing_block.set_is_consuming(true);
+        get_nested_method().emit_ir(containing_block, symbol_table, containing_type_decl);
+        containing_block.set_is_consuming(false);
+    }
 
     // Load arguments
     for (const auto &argument : arguments)
