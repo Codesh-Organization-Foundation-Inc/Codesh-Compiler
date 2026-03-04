@@ -11,6 +11,7 @@
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "parser/type/type_parser.h"
 #include "parser/util.h"
+#include "parser/value/new_value_parser.h"
 #include "parser/value/value_parser.h"
 
 static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
@@ -155,7 +156,38 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    util::parse_this_and_fqn(tokens, method_call_node->get_fqn());
+    // Nested method calls (method().method()...)
+    if (util::peeking_check(tokens, token_group::KEYWORD_FUNCTION_CALL))
+    {
+        method_call_node->set_nested_method(parse_method_call(tokens));
+    }
+    else if (util::peeking_check(tokens, token_group::KEYWORD_NEW))
+    {
+        method_call_node->set_nested_method(value::parse_new_operator(tokens));
+    }
+
+
+    if (method_call_node->has_nested_method())
+    {
+        if (!util::consuming_check(tokens, token_group::PUNCTUATION_DOT))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_PUNCTUATION_DOT,
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.empty() ? call_pos : tokens.front()->get_code_position()
+            );
+        }
+
+        util::parse_fqn(tokens, method_call_node->get_fqn());
+    }
+    else
+    {
+        // `this` as a prefix of a method call can only be done if it is the first part.
+        // A method call containing a nested method takes a method as the prefix.
+        // Hence prefixing `this` can only be done in this else branch.
+        util::parse_this_and_fqn(tokens, method_call_node->get_fqn());
+    }
+
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {

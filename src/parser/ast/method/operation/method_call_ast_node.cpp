@@ -45,6 +45,26 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
+std::optional<std::reference_wrapper<codesh::ast::method::operation::method_call_ast_node>> codesh::ast::method::
+        operation::method_call_ast_node::get_nested_method() const
+{
+    if (nested_method.has_value())
+        return *nested_method.value();
+
+    return std::nullopt;
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_nested_method(
+        std::unique_ptr<method_call_ast_node> nested_method)
+{
+    this->nested_method.emplace(std::move(nested_method));
+}
+
+bool codesh::ast::method::operation::method_call_ast_node::has_nested_method() const
+{
+    return nested_method.has_value();
+}
+
 codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
 {
     return &get_resolved().get_return_type();

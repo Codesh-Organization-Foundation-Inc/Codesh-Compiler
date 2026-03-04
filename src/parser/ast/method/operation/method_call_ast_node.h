@@ -30,6 +30,8 @@ class method_call_ast_node : public var_reference::value_ast_node,
     definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol;
 
+    std::optional<std::unique_ptr<method_call_ast_node>> nested_method;
+
     std::deque<std::unique_ptr<value_ast_node>> arguments;
 
     static size_t determine_stack_delta(const type::type_ast_node &type);
@@ -47,6 +49,12 @@ public:
 
     [[nodiscard]] definition::fully_qualified_name &get_fqn();
     [[nodiscard]] const definition::fully_qualified_name &get_fqn() const;
+
+
+    [[nodiscard]] std::optional<std::reference_wrapper<method_call_ast_node>> get_nested_method() const;
+    void set_nested_method(std::unique_ptr<method_call_ast_node> nested_method);
+
+    [[nodiscard]] bool has_nested_method() const;
 
 
     [[nodiscard]] type::type_ast_node *get_type() const override;

@@ -247,7 +247,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symb
     if (custom_type == nullptr)
         return std::nullopt;
 
-    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type(context, *custom_type);
+    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type(
+        context,
+        *custom_type
+    );
+
     if (!resolved.has_value())
         return std::nullopt;
 
