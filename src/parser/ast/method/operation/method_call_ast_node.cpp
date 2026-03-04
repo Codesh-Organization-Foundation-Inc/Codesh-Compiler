@@ -11,6 +11,8 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
+#include <assert.h>
+
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
 {
@@ -45,13 +47,11 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
-std::optional<std::reference_wrapper<codesh::ast::method::operation::method_call_ast_node>> codesh::ast::method::
-        operation::method_call_ast_node::get_nested_method() const
+codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
+    get_nested_method() const
 {
-    if (nested_method.has_value())
-        return *nested_method.value();
-
-    return std::nullopt;
+    assert(nested_method.has_value() && "Tried to get nested method though one does not exist");
+    return *nested_method.value();
 }
 
 void codesh::ast::method::operation::method_call_ast_node::set_nested_method(

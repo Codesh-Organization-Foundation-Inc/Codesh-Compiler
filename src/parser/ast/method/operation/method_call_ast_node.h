@@ -51,7 +51,7 @@ public:
     [[nodiscard]] const definition::fully_qualified_name &get_fqn() const;
 
 
-    [[nodiscard]] std::optional<std::reference_wrapper<method_call_ast_node>> get_nested_method() const;
+    [[nodiscard]] method_call_ast_node &get_nested_method() const;
     void set_nested_method(std::unique_ptr<method_call_ast_node> nested_method);
 
     [[nodiscard]] bool has_nested_method() const;
