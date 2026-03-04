@@ -52,6 +52,12 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
  */
 static codesh::semantic_analyzer::country_symbol &get_own_country(
         const codesh::ast::compilation_unit_ast_node &ast_root, const codesh::semantic_analyzer::symbol_table &table);
+/**
+ * Adds @p country to @p countries only if it is not already present (compared by address).
+ */
+static void add_country(
+        std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> &countries,
+        codesh::semantic_analyzer::country_symbol &country);
 
 
 const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
@@ -313,12 +319,8 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
     // Global country always comes first
     countries.push_back(table.resolve_country("").value());
 
-    // Include a book's own package country for same-package type resolution
-    auto &own = get_own_country(ast_root, table);
-    if (&own != &countries.front().get())
-    {
-        countries.emplace_back(own);
-    }
+    // Include the file's own package country for same-package type resolution
+    add_country(countries, get_own_country(ast_root, table));
 
     for (const auto &import_decl : ast_root.get_import_declarations())
     {
@@ -336,25 +338,20 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
             continue;
         }
 
-        auto &country = codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
-
-        // Avoid double-adding
-        // Doing this by address as the method above *finds* an existing country symbol.
-        bool already_present = false;
-        for (const auto &other_country : countries)
-        {
-            if (&country == &other_country.get())
-            {
-                already_present = true;
-                break;
-            }
-        }
-
-        if (!already_present)
-        {
-            countries.emplace_back(country);
-        }
+        add_country(countries, codesh::semantic_analyzer::util::find_or_create_country(table, country_path));
     }
 
     return countries;
+}
+
+static void add_country(std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> &countries,
+        codesh::semantic_analyzer::country_symbol &country)
+{
+    for (const auto &other_country : countries)
+    {
+        if (&country == &other_country.get())
+            return;
+    }
+
+    countries.emplace_back(country);
 }
