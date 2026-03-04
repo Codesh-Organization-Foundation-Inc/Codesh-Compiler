@@ -27,8 +27,6 @@ static void add_method_emor_int(codesh::semantic_analyzer::method_overloads_symb
 //TODO: Remove:
 static constexpr std::string ALIAS_STD_OUT = "פלט";
 
-static constexpr std::string ALIAS_LABUBU = "לאבובו";
-
 static constexpr std::string CLASS_MASSOF = "מסוף";
 static constexpr std::string METHOD_EMOR = "אמר";
 
@@ -50,7 +48,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_is_final(true);
 
     country.get_scope().add_symbol(
-        codesh::lexer::trie::keyword::ALIAS_STRING,
+        codesh::semantic_analyzer::builtins::ALIAS_STRING,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/String",
@@ -69,7 +67,7 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
     attributes->set_is_final(true);
 
     country.get_scope().add_symbol(
-        ALIAS_LABUBU,
+        codesh::semantic_analyzer::builtins::ALIAS_OBJECT,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/Object",

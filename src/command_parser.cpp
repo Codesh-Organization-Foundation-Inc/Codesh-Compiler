@@ -10,10 +10,17 @@ static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
+static void parse_jre(std::queue<std::string> &args, codesh::command_args &result);
+static std::filesystem::path get_default_jre_path();
+
+
+static void add_default_classpaths(codesh::command_args &result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result {};
+    result.is_java_default_classpath = false;
+    result.is_talmud_codesh_classpath = true;
 
     if (argc < 3)
     {
@@ -30,6 +37,8 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     result.src_path = consume_argument(args);
     result.dest_path = consume_argument(args);
 
+    bool has_jre_flag = false;
+
     while (!args.empty())
     {
         std::string arg = consume_argument(args);
@@ -37,6 +46,19 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         if (arg == "--classpath")
         {
             parse_classpath(args, result);
+        }
+        else if (arg == "--jre")
+        {
+            has_jre_flag = true;
+            parse_jre(args, result);
+        }
+        else if (arg == "--unholy")
+        {
+            result.is_talmud_codesh_classpath = false;
+        }
+        else if (arg == "--sinful")
+        {
+            result.is_java_default_classpath = true;
         }
         else
         {
@@ -48,6 +70,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
             );
         }
     }
+    add_default_classpaths(result);
+
+    if (!has_jre_flag)
+    {
+        result.jre_path = get_default_jre_path();
+    }
 
     return result;
 }
@@ -57,7 +85,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
     if (args.empty())
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_CLASSPATH_ARG,
+            codesh::blasphemy::details::NO_ARG,
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::blasphemy::NO_CODE_POS,
             true
@@ -81,11 +109,52 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         }
 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(codesh::blasphemy::details::INVALID_CLASSPATH_ARG, entry),
+            fmt::format(codesh::blasphemy::details::INVALID_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::blasphemy::NO_CODE_POS, false
         );
     }
+}
+
+static void parse_jre(std::queue<std::string> &args, codesh::command_args &result)
+{
+    if (args.empty())
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_ARG,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
+        return;
+    }
+
+    const std::filesystem::path folder_path(consume_argument(args));
+
+    if (!std::filesystem::is_directory(folder_path))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(codesh::blasphemy::details::INVALID_ARG, folder_path.string()),
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS, false
+        );
+    }
+
+    result.jre_path = folder_path.string();
+}
+
+static std::filesystem::path get_default_jre_path()
+{
+#ifdef _WIN32
+    // Prefer JAVA_HOME if set
+    if (const char* java_home = std::getenv("JAVA_HOME"))
+    {
+        return std::filesystem::path(java_home) / "jre";
+    }
+    return "C:/Program Files/Java/jre-21";
+#else
+    return "/usr/lib/jvm/jre-21";
+#endif
 }
 
 static bool is_zip(const std::string &file_name)
@@ -122,4 +191,26 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
         result.emplace(argv[i]);
     }
     return result;
+}
+
+static void add_default_classpaths(codesh::command_args &result)
+{
+    if (result.is_java_default_classpath)
+    {
+        result.classpath.emplace_back(".");
+    }
+
+    if (result.is_talmud_codesh_classpath)
+    {
+        const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
+
+        if (std::filesystem::exists(talmud_path))
+        {
+            result.classpath.emplace_back(talmud_path);
+        }
+        else
+        {
+            throw std::runtime_error("talmud path was not found");
+        }
+    }
 }

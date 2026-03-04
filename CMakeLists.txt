@@ -231,8 +231,8 @@ add_executable(codeshc
         src/parser/ast/method/util.h
         src/semantic_analyzer/builtins.cpp
         src/semantic_analyzer/builtins.h
-        src/semantic_analyzer/external_class_loader.h
-        src/semantic_analyzer/external_class_loader.cpp
+        src/semantic_analyzer/external/class_loader.h
+        src/semantic_analyzer/external/class_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
@@ -317,12 +317,19 @@ add_executable(codeshc
         src/parser/ast/type_declaration/field_declaration_ast_node.h
         src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
+        src/semantic_analyzer/external/jimage_loader.h
+        src/semantic_analyzer/external/jimage_loader.cpp
+        src/semantic_analyzer/external/util.cpp
+        src/semantic_analyzer/external/util.h
 )
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
 target_link_libraries(codeshc Boost::boost Boost::regex)
+
+find_package(ZLIB REQUIRED)
+target_link_libraries(codeshc ZLIB::ZLIB)
 
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)

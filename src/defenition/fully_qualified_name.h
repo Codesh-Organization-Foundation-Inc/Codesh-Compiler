@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -15,6 +16,8 @@ class fully_qualified_name
 {
     std::vector<std::string> parts;
     bool _is_wildcard;
+
+    [[nodiscard]] std::optional<std::string> parse_alias() const;
 
 public:
     fully_qualified_name();
