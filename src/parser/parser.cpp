@@ -52,10 +52,12 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
         default:
             blasphemy::get_blasphemy_collector().add_blasphemy(
+                //TODO: Move to formattable details
                 tokens.empty() ? blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
                     "{}: {}",
                     blasphemy::details::UNEXPECTED_TOKEN,
-                    util::get_token_display_name(*tokens.front()) ),
+                    util::get_token_display_name(*tokens.front())
+                ),
                 blasphemy::blasphemy_type::SYNTAX,
                 tokens.front()->get_code_position()
             );
