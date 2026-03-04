@@ -2,12 +2,11 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
-#include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_new_operator(
+std::unique_ptr<codesh::ast::op::new_ast_node> codesh::parser::value::parse_new_operator(
         std::queue<std::unique_ptr<token>> &tokens)
 {
     const auto new_pos = tokens.front()->get_code_position();
