@@ -3,6 +3,10 @@
 #include "jimage_loader.h"
 
 #include <fstream>
+#include <stdexcept>
+#include <string_view>
+
+#include <zlib.h>
 
 namespace util = codesh::semantic_analyzer::external::util;
 using codesh::semantic_analyzer::external::jimage_location_attribute;
@@ -32,21 +36,21 @@ int32_t jimage_perfect_hash(const std::string &str, int32_t seed);
         const std::vector<unsigned char> &location_bytes, uint32_t location_offset);
 
 
-uint8_t codesh::semantic_analyzer::external::util::read_u1(std::ifstream &file)
+uint8_t codesh::semantic_analyzer::external::util::read_u1(std::istream &file)
 {
     uint8_t byte;
     file.read(reinterpret_cast<char *>(&byte), 1);
     return byte;
 }
 
-uint16_t codesh::semantic_analyzer::external::util::read_u2(std::ifstream &file)
+uint16_t codesh::semantic_analyzer::external::util::read_u2(std::istream &file)
 {
     const uint16_t high = read_u1(file);
     const uint16_t low = read_u1(file);
     return static_cast<uint16_t>(high << 8 | low);
 }
 
-uint32_t codesh::semantic_analyzer::external::util::read_u4(std::ifstream &file)
+uint32_t codesh::semantic_analyzer::external::util::read_u4(std::istream &file)
 {
     const uint32_t high = read_u2(file);
     const uint32_t low = read_u2(file);
@@ -217,4 +221,25 @@ uint64_t codesh::semantic_analyzer::external::util::read_location_attribute(
     }
 
     return 0;
+}
+
+// 100% AI slop right here
+std::vector<uint8_t> util::decompress_resource(const std::vector<uint8_t> &compressed,
+        const uint64_t uncompressed_size, const std::vector<char> &strings)
+{
+    // JImage compressed block: 2-byte BE string-table offset of decompressor name, then payload
+    const auto name_offset = static_cast<uint16_t>(compressed[0] << 8 | compressed[1]);
+    const char *name = strings.data() + name_offset;
+    if (std::string_view(name) != "zip")
+        throw std::runtime_error(std::string("Unsupported JImage decompressor: ") + name);
+
+    std::vector<uint8_t> result(uncompressed_size);
+    auto dest_len = static_cast<uLongf>(uncompressed_size);
+    const auto *src = compressed.data() + sizeof(uint16_t);
+    const auto src_len = compressed.size() - sizeof(uint16_t);
+
+    if (uncompress(result.data(), &dest_len, src, src_len) != Z_OK)
+        throw std::runtime_error("JImage zlib decompression failed");
+
+    return result;
 }

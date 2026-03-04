@@ -1,4 +1,5 @@
 #include "jimage_loader.h"
+
 #include "class_loader.h"
 #include "defenition/fully_qualified_name.h"
 #include "fmt/base.h"
@@ -7,10 +8,12 @@
 
 #include <fstream>
 #include <optional>
+#include <sstream>
+#include <stdexcept>
 #include <vector>
 
 /*
- * Thank you o mighty lord and savior OpenJDK for being a free and open
+ * Thank you o mighty lord and savior OpenJDK for being a free and open software
  * i will forever be in debt
  * xoxo
  * https://github.com/openjdk/jdk/blob/master/src/java.base/share/native/libjimage/imageFile.hpp
@@ -40,14 +43,22 @@ jimage_loader::~jimage_loader()
 bool jimage_loader::load(const std::string &module_name, const definition::fully_qualified_name &class_name,
         const symbol_table &table)
 {
-    const auto class_file_lookup = lookup_class_file(module_name, class_name.join());
-    if (!class_file_lookup.has_value())
+    const auto lookup = lookup_class_file(module_name, class_name.join());
+    if (!lookup.has_value())
         return false;
 
-    const auto class_file_offset = _layout.data_start + static_cast<std::streamoff>(class_file_lookup->index);
-    _file.seekg(_layout.data_start + static_cast<std::streamoff>(class_file_offset));
+    const auto file_offset = _layout.data_start + static_cast<std::streamoff>(lookup->data_offset);
 
-    load_class_file(_file, table);
+    if (lookup->compressed_size == 0)
+    {
+        _file.seekg(file_offset);
+        load_class_file(_file, table);
+    }
+    else
+    {
+        load_compressed_class_file(file_offset, *lookup, table);
+    }
+
     return true;
 }
 
@@ -92,13 +103,15 @@ std::optional<codesh::semantic_analyzer::external::class_file_lookup_result> jim
     if (!offset_index.has_value())
         return std::nullopt;
 
-    const auto location_offset = _offsets.at(*offset_index);
 
+    const auto location_offset = _offsets.at(*offset_index);
     if (!util::verify_location(_locations, _strings, location_offset, path))
         return std::nullopt;
 
+
     return class_file_lookup_result {
-        static_cast<uint32_t>(*offset_index),
+        util::read_location_attribute(_locations, location_offset, jimage_location_attribute::OFFSET),
+        util::read_location_attribute(_locations, location_offset, jimage_location_attribute::COMPRESSED),
         util::read_location_attribute(_locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
     };
 }
@@ -149,9 +162,9 @@ std::vector<char> jimage_loader::load_strings()
     return strings;
 }
 
-std::optional<int32_t> jimage_loader::get_location_offset_index(const std::string &target_class) const
+std::optional<int32_t> jimage_loader::get_location_offset_index(const std::string &path) const
 {
-    const auto redirect_index = util::jimage_perfect_hash_index(target_class, _layout.table_length);
+    const auto redirect_index = util::jimage_perfect_hash_index(path, _layout.table_length);
     const auto redirect_value = _redirect_table[redirect_index];
 
     // ReSharper disable once CppDFAConstantConditions
@@ -164,11 +177,26 @@ std::optional<int32_t> jimage_loader::get_location_offset_index(const std::strin
     if (redirect_value > 0)
     {
         // Indirect slot; requires 2nd lookup where the seed is the current redirect value
-        return util::jimage_perfect_hash_index(target_class, _layout.table_length, redirect_value);
+        return util::jimage_perfect_hash_index(path, _layout.table_length, redirect_value);
     }
 
     // Not a class file
     return std::nullopt;
+}
+
+
+void jimage_loader::load_compressed_class_file(const std::streamoff file_offset,
+        const class_file_lookup_result &lookup, const symbol_table &table)
+{
+    std::vector<uint8_t> compressed(lookup.compressed_size);
+    _file.seekg(file_offset);
+    _file.read(reinterpret_cast<char *>(compressed.data()), static_cast<std::streamsize>(lookup.compressed_size));
+
+    const auto uncompressed = util::decompress_resource(compressed, lookup.size, _strings);
+
+    std::string buf(uncompressed.begin(), uncompressed.end());
+    std::istringstream stream(std::move(buf), std::ios::binary);
+    load_class_file(stream, table);
 }
 
 

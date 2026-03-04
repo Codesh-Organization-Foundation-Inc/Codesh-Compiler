@@ -10,9 +10,9 @@
 namespace codesh::semantic_analyzer::external::util
 {
 
-uint8_t read_u1(std::ifstream &file);
-uint16_t read_u2(std::ifstream &file);
-uint32_t read_u4(std::ifstream &file);
+uint8_t read_u1(std::istream &file);
+uint16_t read_u2(std::istream &file);
+uint32_t read_u4(std::istream &file);
 
 /*
  * Prime used to generate hash for Perfect Hashing.
@@ -38,5 +38,8 @@ int32_t jimage_perfect_hash_index(const std::string &str, uint32_t table_length,
  */
 [[nodiscard]] uint64_t read_location_attribute(const std::vector<unsigned char> &location_bytes,
         uint32_t location_offset, jimage_location_attribute kind);
+
+[[nodiscard]] std::vector<uint8_t> decompress_resource(const std::vector<uint8_t> &compressed,
+        uint64_t uncompressed_size, const std::vector<char> &strings);
 
 }

@@ -46,7 +46,17 @@ struct jimage_offsets
 
 struct class_file_lookup_result
 {
-    uint32_t index;
+    /**
+     * Bytes past data_start
+     */
+    uint64_t data_offset;
+    /**
+     * Contains a valid value when @c jimage_location_attribute::COMPRESSED: 0 otherwise
+     */
+    uint64_t compressed_size;
+    /**
+     * File size IF UNCOMPRESSED
+     */
     uint64_t size;
 };
 
@@ -70,6 +80,9 @@ class jimage_loader
     [[nodiscard]] std::optional<int32_t> get_location_offset_index(const std::string &path) const;
     [[nodiscard]] std::optional<class_file_lookup_result> lookup_class_file(
             const std::string &module_name, const std::string &target_class) const;
+
+    void load_compressed_class_file(std::streamoff file_offset, const class_file_lookup_result &lookup,
+            const symbol_table &table);
 
     // Re-implemented from utils because reverse order matters here
     uint16_t read_u2_le();

@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <fstream>
+#include <istream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -33,17 +34,17 @@ using codesh::semantic_analyzer::method_overloads_symbol;
 using codesh::semantic_analyzer::symbol_table;
 using codesh::definition::fully_qualified_name;
 
-static void skip_attributes(std::ifstream &file, uint16_t count);
+static void skip_attributes(std::istream &file, uint16_t count);
 static std::string get_utf8(const cp_strings &strings, int idx);
 static fully_qualified_name get_class_name(const cp_strings &strings, int idx);
-static void parse_constant_pool(std::ifstream &file, cp_strings &strings);
+static void parse_constant_pool(std::istream &file, cp_strings &strings);
 
-static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings);
+static std::vector<fully_qualified_name> read_interface_names(std::istream &file, const cp_strings &strings);
 
-static void read_magic(std::ifstream &file);
-static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table);
-static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
-static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym);
+static void read_magic(std::istream &file);
+static type_symbol &parse_type(std::istream &file, const cp_strings &strings, const symbol_table &table);
+static void parse_fields(std::istream &file, const cp_strings &strings, type_symbol &type_sym);
+static void parse_methods(std::istream &file, const cp_strings &strings, type_symbol &type_sym);
 
 static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
 static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
@@ -64,7 +65,7 @@ void codesh::semantic_analyzer::external::load_class_file(
     load_class_file(file, table);
 }
 
-void codesh::semantic_analyzer::external::load_class_file(std::ifstream &file, const symbol_table &table)
+void codesh::semantic_analyzer::external::load_class_file(std::istream &file, const symbol_table &table)
 {
     read_magic(file);
     util::read_u2(file); // minor_version
@@ -78,7 +79,7 @@ void codesh::semantic_analyzer::external::load_class_file(std::ifstream &file, c
     parse_methods(file, strings, type_sym);
 }
 
-static void parse_methods(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
+static void parse_methods(std::istream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto methods_count = util::read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
@@ -137,7 +138,7 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
     );
 }
 
-static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, const symbol_table &table)
+static type_symbol &parse_type(std::istream &file, const cp_strings &strings, const symbol_table &table)
 {
     auto access_flags = flags_to_attributes(util::read_u2(file));
     const auto this_class_idx = util::read_u2(file);
@@ -162,7 +163,7 @@ static type_symbol &parse_type(std::ifstream &file, const cp_strings &strings, c
     ).first.get();
 }
 
-static void parse_fields(std::ifstream &file, const cp_strings &strings, type_symbol &type_sym)
+static void parse_fields(std::istream &file, const cp_strings &strings, type_symbol &type_sym)
 {
     const auto fields_count = util::read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
@@ -213,7 +214,7 @@ static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type
     return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::blasphemy::NO_CODE_POS);
 }
 
-static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
+static void parse_constant_pool(std::istream &file, cp_strings &strings)
 {
     const uint16_t cp_count = util::read_u2(file);
 
@@ -285,13 +286,13 @@ static void parse_constant_pool(std::ifstream &file, cp_strings &strings)
     }
 }
 
-static void read_magic(std::ifstream &file)
+static void read_magic(std::istream &file)
 {
     if (util::read_u4(file) != 0xCAFEBABE)
         throw std::runtime_error("Not a valid .class file");
 }
 
-static std::vector<fully_qualified_name> read_interface_names(std::ifstream &file, const cp_strings &strings)
+static std::vector<fully_qualified_name> read_interface_names(std::istream &file, const cp_strings &strings)
 {
     const auto interfaces = util::read_u2(file);
 
@@ -306,7 +307,7 @@ static std::vector<fully_qualified_name> read_interface_names(std::ifstream &fil
     return interface_names;
 }
 
-static void skip_attributes(std::ifstream &file, const uint16_t count)
+static void skip_attributes(std::istream &file, const uint16_t count)
 {
     for (uint16_t a = 0; a < count; a++)
     {

@@ -328,6 +328,9 @@ find_package(Boost REQUIRED COMPONENTS regex headers)
 
 target_link_libraries(codeshc Boost::boost Boost::regex)
 
+find_package(ZLIB REQUIRED)
+target_link_libraries(codeshc ZLIB::ZLIB)
+
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
