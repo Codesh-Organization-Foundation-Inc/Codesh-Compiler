@@ -141,7 +141,6 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     {
         parse_methods_call_parameters(tokens, *method_call_node);
     }
-
     return method_call_node;
 }
 
@@ -374,14 +373,11 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
         if (!util::peeking_check(tokens, token_group::CLOSE_PARENTHESIS))
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
-                tokens.empty() ? blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
-                    "{}: {}",
-                    blasphemy::details::UNEXPECTED_TOKEN,
-                    util::get_token_display_name(*tokens.front())
-                ),
+                blasphemy::details::NO_CLOSE_PARENTHESIS,
                 blasphemy::blasphemy_type::SYNTAX,
                 tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
             );
+            return;
         }
     }
 }
