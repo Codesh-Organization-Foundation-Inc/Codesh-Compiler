@@ -104,7 +104,7 @@ static void prepend_external_this_argument(
  *
  * @returns Whether the operation succeed
  */
-static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+static bool try_prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
                                            codesh::ast::method::operation::method_call_ast_node &method_call,
                                            const codesh::semantic_analyzer::method_symbol &resolved_method,
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -150,7 +150,7 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     //
     // A post-resolution pass in analyzer.cpp would require a lot of nested calls and such to get all the necessary
     // parameters below:
-    if (!prepend_implicit_this_argument(context, method_call, result.value().get(), containing_method, scope))
+    if (!try_prepend_implicit_this_argument(context, method_call, result.value().get(), containing_method, scope))
         return false;
 
 
@@ -386,20 +386,28 @@ static void prepend_external_this_argument(
     method_call.get_arguments().push_front(std::move(receiver_node));
 }
 
-static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
+static bool try_prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
                                            codesh::ast::method::operation::method_call_ast_node &method_call,
                                            const codesh::semantic_analyzer::method_symbol &resolved_method,
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-
     const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
-    const bool is_explicit_this_call = !fqn_parts.empty() && fqn_parts.front() == "this";
-    const bool is_same_class_call = method_call.get_unresolved_name().is_single_part() || is_explicit_this_call;
 
-    const bool is_new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call) != nullptr;
-    if (resolved_method.get_attributes().get_is_static() || is_new_call || !is_same_class_call)
+    // Skip static methods as `this` is only relevant for non-statics
+    if (resolved_method.get_attributes().get_is_static())
         return true;
+
+    // Skip explicit calls as we handle implicit ones here
+    if (!fqn_parts.empty() && fqn_parts.front() == "this")
+        return true;
+    if (method_call.get_unresolved_name().is_single_part())
+        return true;
+
+    // New calls don't need `this`
+    if (dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
+        return true;
+
 
     if (containing_method.get_attributes().get_is_static())
     {
