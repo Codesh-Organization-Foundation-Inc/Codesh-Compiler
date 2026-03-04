@@ -18,87 +18,54 @@
 
 namespace util = codesh::semantic_analyzer::external::util;
 using codesh::semantic_analyzer::external::jimage_location_attribute;
+using codesh::semantic_analyzer::external::jimage_loader;
 
-// Keep JImage offsets to skip only the relevant parts using ifstream::seekg and skip everything else
-struct jimage_offsets
+jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, std::ios::binary)
 {
-    // header_size is constantly HEADER_SIZE
-    uint32_t table_length;
-    uint32_t locations_size;
-    uint32_t strings_size;
-    std::streamoff offsets_start;
-    std::streamoff locations_start;
-    std::streamoff strings_start;
-    std::streamoff data_start;
-};
-
-struct class_file_lookup_result
-{
-    uint32_t index;
-    uint64_t size;
-};
-
-[[nodiscard]] static jimage_offsets parse_header(std::ifstream &file);
-[[nodiscard]] static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout);
-[[nodiscard]] static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout);
-[[nodiscard]] static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout);
-[[nodiscard]] static std::vector<unsigned char> load_locations(std::ifstream &file, const jimage_offsets &layout);
-[[nodiscard]] static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &target_class);
-[[nodiscard]] static std::optional<class_file_lookup_result> lookup_class_file(std::ifstream &file,
-        const jimage_offsets &layout, const std::string &module_name, const std::string &target_class);
-static uint16_t read_u2_le(std::ifstream &file);
-static uint32_t read_u4_le(std::ifstream &file);
-
-// TIL: streamoff is an int representing file offsets
-//TODO: Maybe convert all file offsets to use streamoff if others exist
-static constexpr std::streamoff HEADER_SIZE = 28;
-
-
-bool codesh::semantic_analyzer::external::load_jimage_class(const std::filesystem::path &path,
-        const std::string &module_name, const definition::fully_qualified_name &class_name, const symbol_table &table)
-{
-    std::ifstream file(path, std::ios::binary);
-    if (!file.is_open())
-    {
+    if (!_file.is_open())
         throw std::runtime_error("Could not open " + path.string());
-    }
 
-    const auto layout = parse_header(file);
+    _layout = parse_header();
+    _redirect_table = load_redirect_table();
+    _offsets = load_offsets();
+    _locations = load_locations();
+    _strings = load_strings();
+}
 
-    const auto class_file_lookup = lookup_class_file(
-        file,
-        layout,
-        module_name,
-        class_name.join()
-    );
+jimage_loader::~jimage_loader()
+{
+    _file.close();
+}
 
+bool jimage_loader::load(const std::string &module_name, const definition::fully_qualified_name &class_name,
+        const symbol_table &table)
+{
+    const auto class_file_lookup = lookup_class_file(module_name, class_name.join());
     if (!class_file_lookup.has_value())
         return false;
 
+    const auto class_file_offset = _layout.data_start + static_cast<std::streamoff>(class_file_lookup->index);
+    _file.seekg(_layout.data_start + static_cast<std::streamoff>(class_file_offset));
 
-    const auto class_file_offset = layout.data_start + static_cast<std::streamoff>(class_file_lookup->index);
-    file.seekg(layout.data_start + static_cast<std::streamoff>(class_file_offset));
-
-    load_class_file(file, table);
+    load_class_file(_file, table);
     return true;
 }
 
-static jimage_offsets parse_header(std::ifstream &file)
+codesh::semantic_analyzer::external::jimage_offsets jimage_loader::parse_header()
 {
-    if (read_u4_le(file) != 0xCAFEDADA)
+    if (read_u4_le() != 0xCAFEDADA)
     {
         throw std::runtime_error("Invalid JImage");
     }
 
-    read_u2_le(file); // major_version
-    read_u2_le(file); // minor_version
-    read_u4_le(file); // flags
-    read_u4_le(file); // resource_count
+    read_u2_le(); // major_version
+    read_u2_le(); // minor_version
+    read_u4_le(); // flags
+    read_u4_le(); // resource_count
 
-    const auto table_length = read_u4_le(file);
-    const auto locations_size = read_u4_le(file);
-    const auto strings_size = read_u4_le(file);
+    const auto table_length = read_u4_le();
+    const auto locations_size = read_u4_le();
+    const auto strings_size = read_u4_le();
 
     const auto offsets_start = HEADER_SIZE + static_cast<std::streamoff>(table_length) * 4;
     const auto locations_start = HEADER_SIZE + static_cast<std::streamoff>(table_length) * 8;
@@ -116,83 +83,76 @@ static jimage_offsets parse_header(std::ifstream &file)
     };
 }
 
-static std::optional<class_file_lookup_result> lookup_class_file(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &module_name, const std::string &target_class)
+std::optional<codesh::semantic_analyzer::external::class_file_lookup_result> jimage_loader::lookup_class_file(
+        const std::string &module_name, const std::string &target_class) const
 {
     const auto path = fmt::format("/{}/{}.class", module_name, target_class);
-    const auto offset_index = get_location_offset_index(file, layout, path);
+    const auto offset_index = get_location_offset_index(path);
 
     if (!offset_index.has_value())
         return std::nullopt;
 
-    const auto location_offset = load_offsets(file, layout).at(*offset_index);
+    const auto location_offset = _offsets.at(*offset_index);
 
-    const auto locations = load_locations(file, layout);
-    const auto strings = load_strings(file, layout);
-
-    if (!util::verify_location(locations, strings, location_offset, path))
+    if (!util::verify_location(_locations, _strings, location_offset, path))
         return std::nullopt;
 
     return class_file_lookup_result {
         static_cast<uint32_t>(*offset_index),
-        util::read_location_attribute(locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
+        util::read_location_attribute(_locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
     };
 }
 
-
-static std::vector<int32_t> load_redirect_table(std::ifstream &file, const jimage_offsets &layout)
+std::vector<int32_t> jimage_loader::load_redirect_table()
 {
-    file.seekg(HEADER_SIZE);
+    _file.seekg(HEADER_SIZE);
 
-    std::vector<int32_t> redirect(layout.table_length);
+    std::vector<int32_t> redirect(_layout.table_length);
     for (int32_t &entry : redirect)
     {
-        entry = static_cast<int32_t>(read_u4_le(file));
+        entry = static_cast<int32_t>(read_u4_le());
     }
 
     return redirect;
 }
 
-static std::vector<uint32_t> load_offsets(std::ifstream &file, const jimage_offsets &layout)
+std::vector<uint32_t> jimage_loader::load_offsets()
 {
-    file.seekg(layout.offsets_start);
+    _file.seekg(_layout.offsets_start);
 
-    std::vector<uint32_t> offsets(layout.table_length);
+    std::vector<uint32_t> offsets(_layout.table_length);
     for (uint32_t &entry : offsets)
     {
-        entry = read_u4_le(file);
+        entry = read_u4_le();
     }
 
     return offsets;
 }
 
-static std::vector<unsigned char> load_locations(std::ifstream &file, const jimage_offsets &layout)
+std::vector<unsigned char> jimage_loader::load_locations()
 {
-    file.seekg(layout.locations_start);
+    _file.seekg(_layout.locations_start);
 
-    std::vector<unsigned char> locations(layout.locations_size);
-    file.read(reinterpret_cast<char *>(locations.data()), layout.locations_size);
+    std::vector<unsigned char> locations(_layout.locations_size);
+    _file.read(reinterpret_cast<char *>(locations.data()), _layout.locations_size);
 
     return locations;
 }
 
-static std::vector<char> load_strings(std::ifstream &file, const jimage_offsets &layout)
+std::vector<char> jimage_loader::load_strings()
 {
-    file.seekg(layout.strings_start);
+    _file.seekg(_layout.strings_start);
 
-    std::vector<char> strings(layout.strings_size);
-    file.read(strings.data(), layout.strings_size);
+    std::vector<char> strings(_layout.strings_size);
+    _file.read(strings.data(), _layout.strings_size);
 
     return strings;
 }
 
-static std::optional<int32_t> get_location_offset_index(std::ifstream &file, const jimage_offsets &layout,
-        const std::string &target_class)
+std::optional<int32_t> jimage_loader::get_location_offset_index(const std::string &target_class) const
 {
-    const auto redirections = load_redirect_table(file, layout);
-
-    const auto redirect_index = util::jimage_perfect_hash_index(target_class, layout.table_length);
-    const auto redirect_value = redirections[redirect_index];
+    const auto redirect_index = util::jimage_perfect_hash_index(target_class, _layout.table_length);
+    const auto redirect_value = _redirect_table[redirect_index];
 
     // ReSharper disable once CppDFAConstantConditions
     if (redirect_value < 0)
@@ -204,7 +164,7 @@ static std::optional<int32_t> get_location_offset_index(std::ifstream &file, con
     if (redirect_value > 0)
     {
         // Indirect slot; requires 2nd lookup where the seed is the current redirect value
-        return util::jimage_perfect_hash_index(target_class, layout.table_length, redirect_value);
+        return util::jimage_perfect_hash_index(target_class, _layout.table_length, redirect_value);
     }
 
     // Not a class file
@@ -212,17 +172,16 @@ static std::optional<int32_t> get_location_offset_index(std::ifstream &file, con
 }
 
 
-// Re-implemented because reverse order matters here
-static uint16_t read_u2_le(std::ifstream &file)
+uint16_t jimage_loader::read_u2_le()
 {
-    const uint16_t lo = util::read_u1(file);
-    const uint16_t hi = util::read_u1(file);
+    const uint16_t lo = util::read_u1(_file);
+    const uint16_t hi = util::read_u1(_file);
     return static_cast<uint16_t>(lo | hi << 8);
 }
 
-static uint32_t read_u4_le(std::ifstream &file)
+uint32_t jimage_loader::read_u4_le()
 {
-    const uint32_t lo = read_u2_le(file);
-    const uint32_t hi = read_u2_le(file);
+    const uint32_t lo = read_u2_le();
+    const uint32_t hi = read_u2_le();
     return lo | hi << 16;
 }
