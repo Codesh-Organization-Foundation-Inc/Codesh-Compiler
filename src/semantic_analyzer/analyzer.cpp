@@ -20,6 +20,7 @@
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
+#include "util.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
@@ -41,6 +42,9 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
 static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context);
+static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
+    collect_lookup_countries(const codesh::ast::compilation_unit_ast_node &ast_root,
+        const codesh::semantic_analyzer::symbol_table &table);
 
 
 const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
@@ -61,11 +65,8 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_node &ast_root,
                                                 const symbol_table &table)
 {
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        table.resolve_country("").value()
-    };
-    country_symbol &country = lookup_countries.back();
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    country_symbol &country = table.resolve_country("").value();
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
@@ -77,28 +78,11 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
     type_declaration::collect_inheritance(context, country);
 }
 
-void codesh::semantic_analyzer::collect_methods(const ast::compilation_unit_ast_node &ast_root,
-                                                const symbol_table &table)
-{
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        table.resolve_country("").value()
-    };
-    country_symbol &country = lookup_countries.back();
-
-    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
-
-    type_declaration::dispatch_collect_methods(context, country);
-}
-
 void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_node &ast_root,
                                              const symbol_table &table)
 {
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        table.resolve_country("").value()
-    };
-    country_symbol &country = lookup_countries.back();
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    country_symbol &country = table.resolve_country("").value();
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
@@ -109,11 +93,8 @@ void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_nod
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
                                         const symbol_table &table)
 {
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        table.resolve_country("").value()
-    };
-    const country_symbol &country = lookup_countries.back();
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    const country_symbol &country = table.resolve_country("").value();
 
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
@@ -302,4 +283,53 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     this_param->set_type(std::move(this_class_type));
 
     return this_param;
+}
+
+
+static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> collect_lookup_countries(
+        const codesh::ast::compilation_unit_ast_node &ast_root,
+        const codesh::semantic_analyzer::symbol_table &table)
+{
+    std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> countries;
+
+    // Global country always comes first
+    countries.push_back(table.resolve_country("").value());
+
+    for (const auto &import_decl : ast_root.get_import_declarations())
+    {
+        const auto &country_name = import_decl->get_country_name();
+
+        // On-demand (wildcard) import: the whole package_name IS the country.
+        // Specific import: strip the type name to get the parent country.
+        const std::string country_path = import_decl->get_is_on_demand()
+            ? country_name.join("/")
+            : country_name.omit_last().join("/");
+
+        if (country_path.empty())
+        {
+            // Global country already exists
+            continue;
+        }
+
+        auto &country = codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
+
+        // Avoid double-adding
+        // Doing this by address as the method above *finds* an existing country symbol.
+        bool already_present = false;
+        for (const auto &other_country : countries)
+        {
+            if (&country == &other_country.get())
+            {
+                already_present = true;
+                break;
+            }
+        }
+
+        if (!already_present)
+        {
+            countries.emplace_back(country);
+        }
+    }
+
+    return countries;
 }
