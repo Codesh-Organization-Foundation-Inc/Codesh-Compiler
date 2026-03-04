@@ -143,17 +143,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     }
 
 
-    //NOTE: This call is here and not in analyzer.cpp because it requires the resolved method symbol,
-    // which is only available after resolve_method_call() completes.
-    // analyzer.cpp only sees a bool result from statement::resolve() and has no access to the intermediate
-    // resolution state.
-    //
-    // A post-resolution pass in analyzer.cpp would require a lot of nested calls and such to get all the necessary
-    // parameters below:
-    if (!try_prepend_implicit_this_argument(context, method_call, result.value().get(), containing_method, scope))
-        return false;
-
-
     //TODO: Remove this once Talmud Codesh implements this method by itself:
     // Manually pass System.out to every מסוף ל־אמר call
     if (method_call.get_unresolved_name().join() == "מסוף/אמר")
@@ -210,9 +199,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     // For non-static instance method calls on a local variable, prepend the receiver:
     if (receiver_variable != nullptr && !resolved_method->get().get_attributes().get_is_static())
-    {
         prepend_external_this_argument(method_call, *receiver_variable);
-    }
+
+    if (!try_prepend_implicit_this_argument(context, method_call, resolved_method->get(), containing_method, scope))
+        return std::nullopt;
 
     return resolved_method;
 }
