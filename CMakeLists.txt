@@ -128,6 +128,10 @@ add_executable(codeshc
         src/semantic_analyzer/type_decl/collect.cpp
         src/semantic_analyzer/method_decl/collect.h
         src/semantic_analyzer/method_decl/collect.cpp
+        src/semantic_analyzer/field_decl/collect.h
+        src/semantic_analyzer/field_decl/collect.cpp
+        src/semantic_analyzer/field_decl/resolve.h
+        src/semantic_analyzer/field_decl/resolve.cpp
         src/semantic_analyzer/symbol_table/symbol.h
         src/parser/ast/method/constructor_declaration_ast_node.cpp
         src/parser/ast/method/constructor_declaration_ast_node.h
@@ -174,6 +178,12 @@ add_executable(codeshc
         src/output/ir/instruction/operator_instruction.h
         src/output/ir/instruction/get_static_instruction.cpp
         src/output/ir/instruction/get_static_instruction.h
+        src/output/ir/instruction/get_field_instruction.cpp
+        src/output/ir/instruction/get_field_instruction.h
+        src/output/ir/instruction/put_field_instruction.cpp
+        src/output/ir/instruction/put_field_instruction.h
+        src/output/ir/instruction/put_static_instruction.cpp
+        src/output/ir/instruction/put_static_instruction.h
         src/output/ir/instruction/goto_instruction.cpp
         src/output/ir/instruction/goto_instruction.h
         src/output/ir/instruction/if_instruction.cpp
@@ -221,6 +231,8 @@ add_executable(codeshc
         src/parser/ast/method/util.h
         src/semantic_analyzer/builtins.cpp
         src/semantic_analyzer/builtins.h
+        src/semantic_analyzer/external/class_loader.h
+        src/semantic_analyzer/external/class_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
@@ -268,6 +280,12 @@ add_executable(codeshc
         src/parser/ast/operator/assignment/division_assignment_operator_ast_node.h
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.cpp
         src/parser/ast/operator/assignment/modulo_assignment_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_decrement_operator_ast_node.h
+        src/parser/ast/operator/assignment/increment_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/increment_operator_ast_node.h
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/decrement_operator_ast_node.h
         src/parser/ast/method/operation/block/if_ast_node.cpp
         src/parser/ast/method/operation/block/if_ast_node.h
         src/parser/ast/impl/operator_ast_node.h
@@ -291,12 +309,29 @@ add_executable(codeshc
         src/output/ir/util.h
         src/parser/value/biblical_numbers_parser.cpp
         src/parser/value/biblical_numbers_parser.h
+        src/output/ir/instruction/dup_instruction.cpp
+        src/output/ir/instruction/dup_instruction.h
+        src/output/ir/instruction/new_instruction.cpp
+        src/output/ir/instruction/new_instruction.h
+        src/output/ir/instruction/pop_instruction.cpp
+        src/output/ir/instruction/pop_instruction.h
+        src/parser/ast/type_declaration/field_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/field_declaration_ast_node.h
+        src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/variable_declaration_ast_node.h
+        src/semantic_analyzer/external/jimage_loader.h
+        src/semantic_analyzer/external/jimage_loader.cpp
+        src/semantic_analyzer/external/util.cpp
+        src/semantic_analyzer/external/util.h
 )
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
 target_link_libraries(codeshc Boost::boost Boost::regex)
+
+find_package(ZLIB REQUIRED)
+target_link_libraries(codeshc ZLIB::ZLIB)
 
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)

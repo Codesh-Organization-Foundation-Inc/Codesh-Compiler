@@ -63,6 +63,8 @@ public:
         get_producing_declaration() const;
 
 
+    [[nodiscard]] std::optional<int> get_field_cpi() const;
+
     void emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
                         codesh::output::jvm_target::constant_pool &constant_pool) override;
 

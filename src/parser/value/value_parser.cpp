@@ -38,6 +38,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     switch (tokens.front()->get_group())
     {
     // Primitives
+    case token_group::KEYWORD_THIS:
     case token_group::IDENTIFIER:
     case token_group::LITERAL_STRING:
     case token_group::LITERAL_NUMBER_INT:
@@ -122,11 +123,14 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         break;
 
     // Assignment operations
+    case token_group::KEYWORD_REPLACE:
     case token_group::OPERATOR_ADDITION_ASSIGNMENT:
     case token_group::OPERATOR_DIVISION_ASSIGNMENT:
     case token_group::OPERATOR_MODULO_ASSIGNMENT:
     case token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT:
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
+    case token_group::OPERATOR_INCREMENT:
+    case token_group::OPERATOR_DECREMENT:
         eval_ast_node = parse_assignment_operator(tokens);
         break;
 

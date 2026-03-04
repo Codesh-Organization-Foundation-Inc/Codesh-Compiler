@@ -36,11 +36,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
     switch (tokens.front()->get_group())
     {
+    case token_group::KEYWORD_THIS:
     case token_group::IDENTIFIER: {
         auto id_pos = tokens.front()->get_code_position();
 
         definition::fully_qualified_name value;
-        util::parse_fqn(tokens, value);
+        util::parse_this_and_fqn(tokens, value);
 
         eval_ast_node = std::make_unique<variable_reference_ast_node>(id_pos, value);
 

@@ -37,6 +37,11 @@ codesh::ast::method::method_scope_ast_node &codesh::ast::block::for_ast_node::ge
     return body_scope;
 }
 
+codesh::ast::method::method_scope_ast_node &codesh::ast::block::for_ast_node::get_iterator_declaration_scope() const
+{
+    return *body_scope.get_method_scopes().front();
+}
+
 void codesh::ast::block::for_ast_node::set_statement_index(const size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
@@ -52,6 +57,8 @@ void codesh::ast::block::for_ast_node::emit_constants(const compilation_unit_ast
         cp_emitter->emit_constants(root_node, constant_pool);
     }
     body_scope.emit_constants(root_node, constant_pool);
+
+    get_iterator_declaration_scope().emit_constants(root_node, constant_pool);
 
 
     if (const auto range = dynamic_cast<const collection::range_ast_node *>(collection.get()))
@@ -86,16 +93,11 @@ void codesh::ast::block::for_ast_node::emit_ir(
         it_lvt
     ));
 
-    // Manually emit body scope
+    // Emit body variables scope: its scope_begin_marker lands inside the loop body
+    // (after the condition check), so body-declared variables get a bytecode_start_pc
+    // that correctly excludes the loop back-edge target.
     output::ir::code_block body_block;
-    for (const auto &method_op : body_scope.get_body())
-    {
-        const auto ir_emitter = dynamic_cast<i_ir_emitter *>(method_op.get());
-        if (!ir_emitter)
-            continue;
-
-        ir_emitter->emit_ir(body_block, symbol_table, containing_type_decl);
-    }
+    get_iterator_declaration_scope().emit_ir(body_block, symbol_table, containing_type_decl);
 
     // Emit the skip
     output::ir::util::emit_increment_by_value_optimized(

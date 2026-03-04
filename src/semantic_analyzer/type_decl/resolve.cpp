@@ -1,4 +1,5 @@
 #include "resolve.h"
+#include "semantic_analyzer/field_decl/resolve.h"
 #include "semantic_analyzer/method_decl/resolve.h"
 
 #include "fmt/xchar.h"
@@ -21,6 +22,10 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
     const type_symbol &type = *static_cast<type_symbol *>(&country.get_scope().resolve_local(name).value().get()); // NOLINT(*-pro-type-static-cast-downcast)
 
 
+    for (const auto &field_decl : type_decl.get_fields())
+    {
+        field_declaration::resolve(new_context, type, *field_decl);
+    }
     for (const auto &method_decl : type_decl.get_all_methods())
     {
         method_declaration::resolve(new_context, type, *method_decl);

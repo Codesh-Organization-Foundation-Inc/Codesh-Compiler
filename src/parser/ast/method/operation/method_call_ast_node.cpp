@@ -60,7 +60,7 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
 
     const auto &method = get_resolved();
 
-    std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
+    std::deque<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
         param_types.emplace_back(*param);
@@ -130,17 +130,13 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
-    if (!method.get_attributes().get_is_static())
-    {
-        //TODO: Handle passing 'this' instances
-        throw std::runtime_error("Calling non-static methods not yet supported");
-    }
-
     // Load arguments
     for (const auto &argument : arguments)
     {
+        containing_block.set_is_consuming(true);
         argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
+    containing_block.set_is_consuming(false);
 
     // Call method
     const int method_cpi = cp.get_methodref_index(
@@ -155,11 +151,14 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    //FIXME: Specifically make sout calls virtual because no non-static support yet exists
-    const bool is_sout = get_unresolved_name().join() == "מסוף/אמר";
+    //TODO: Remove after Talmud Codesh
+    const bool forcefeed_static = method.get_full_name().join() == "java/io/PrintStream/println";
+    const auto invokation_type = method.get_attributes().get_is_static() && !forcefeed_static
+        ? output::ir::invokation_type::STATIC
+        : output::ir::invokation_type::VIRTUAL;
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
-        is_sout ? output::ir::invokation_type::VIRTUAL : output::ir::invokation_type::STATIC,
+        invokation_type,
         method_cpi,
         arguments.size()
     ));

@@ -2,11 +2,14 @@
 
 #include "semantic_analyzer/symbol_table/symbol.h"
 
+#include <memory>
 #include <string>
+#include <utility>
 
 namespace codesh::semantic_analyzer
 {
 struct semantic_context;
+class symbol_table;
 }
 namespace codesh::definition
 {
@@ -17,6 +20,11 @@ namespace codesh::ast
 namespace type
 {
 class custom_type_ast_node;
+class type_ast_node;
+}
+namespace type_decl
+{
+class type_declaration_ast_node;
 }
 class compilation_unit_ast_node;
 }
@@ -57,4 +65,26 @@ bool are_types_compatible(const ast::type::type_ast_node &from, const ast::type:
  */
 [[nodiscard]] method_overloads_symbol &get_method_overloads_symbol(const std::string &name,
         type_symbol &containing_type);
+
+/**
+ * Finds or creates the nested country_symbol hierarchy for a '/'-separated package name
+ * within the symbol table, creating missing intermediate countries as needed.
+ */
+[[nodiscard]] country_symbol &find_or_create_country(const symbol_table &table,
+        const std::string &package_name);
+
+/**
+ * Creates a @c type_symbol in the given @p country and adds it to its scope.
+ * @returns The symbol and whether it did not exist before (operation succeed).
+ */
+[[nodiscard]] std::pair<std::reference_wrapper<type_symbol>, bool> add_type_symbol(country_symbol &country,
+        const std::string &name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        ast::type_decl::type_declaration_ast_node *decl = nullptr);
+
+/**
+ * Creates a field_symbol in the given type and adds it to its scope.
+ */
+field_symbol &add_field_symbol(type_symbol &type_sym, const std::string &name,
+        std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        std::unique_ptr<ast::type::type_ast_node> type);
 }

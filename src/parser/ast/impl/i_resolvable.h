@@ -24,7 +24,7 @@ public:
     [[nodiscard]] virtual const definition::fully_qualified_name &get_unresolved_name() const = 0;
     /**
      * @returns The resolved type name.
-     * Shorthand for @code @link i_resolvable_symbol<T>::get_full_name \endlink \endcode
+     * Shorthand for @c i_resolvable_symbol<T>::get_full_name
      */
     [[nodiscard]] const definition::fully_qualified_name &get_resolved_name() const;
 

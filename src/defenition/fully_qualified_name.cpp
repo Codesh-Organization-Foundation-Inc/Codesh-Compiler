@@ -1,6 +1,8 @@
 #include "fully_qualified_name.h"
 
 #include "fmt/xchar.h"
+#include "lexer/trie/keywords.h"
+#include "semantic_analyzer/builtins.h"
 
 #include <sstream>
 
@@ -87,5 +89,35 @@ std::string codesh::definition::fully_qualified_name::join(const std::string &se
 
 std::string codesh::definition::fully_qualified_name::holy_join() const
 {
-    return join(" ל־");
+    if (const auto result = parse_alias())
+    {
+        return result.value();
+    }
+
+    fully_qualified_name pretty_fqn;
+    for (const auto &part : get_parts())
+    {
+        if (part == "this")
+        {
+            pretty_fqn.add(lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_THIS));
+        }
+        else
+        {
+            pretty_fqn.add(part);
+        }
+    }
+
+    return pretty_fqn.join(" ל־");
+}
+
+std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
+{
+    const auto joined = join();
+
+    if (joined == "java/lang/String")
+        return semantic_analyzer::builtins::ALIAS_STRING;
+    if (joined == "java/lang/Object")
+        return semantic_analyzer::builtins::ALIAS_OBJECT;
+
+    return std::nullopt;
 }

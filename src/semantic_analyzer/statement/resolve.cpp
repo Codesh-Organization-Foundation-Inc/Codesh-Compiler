@@ -6,9 +6,9 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "defenition/primitive_type.h"
-#include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/collection/collection_ast_node.h"
+#include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/impl/binary_ast_node.h"
 #include "parser/ast/impl/unary_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
@@ -94,11 +94,21 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         return all_succeed;
     }
 
+    if (const auto range = dynamic_cast<ast::collection::range_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_value(context, range->get_from(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_to(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_skip(), containing_method, scope);
+        return all_succeed;
+    }
+
     if (const auto for_node = dynamic_cast<ast::block::for_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
         all_succeed &= resolve_value(context, for_node->get_collection(), containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, for_node->get_body_scope());
+        all_succeed &= resolve_scope(context, containing_method, for_node->get_iterator_declaration_scope());
         all_succeed &= is_collection(for_node->get_collection());
         return all_succeed;
     }

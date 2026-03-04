@@ -30,6 +30,10 @@ public:
     [[nodiscard]] local_variable_declaration_ast_node &get_iterator() const;
     [[nodiscard]] var_reference::value_ast_node &get_collection() const;
     [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;
+    /**
+     * @returns The first inner scope of the for loop, which always only keeps the iterator declaration.
+     */
+    [[nodiscard]] method::method_scope_ast_node &get_iterator_declaration_scope() const;
 
     void set_statement_index(size_t statement_index) override;
 

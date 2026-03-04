@@ -17,8 +17,16 @@ const rfs_t codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR = rfs(
 const rfs_t codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY = rfs(
     "דֶּרֶךְ תּוֹעָה הֱיֵה: נְתִיב הַיַּעַד {} אֵינוֹ אֶרֶץ"
 );
+// TODO: Change argument error messages
+const rfs_t codesh::blasphemy::details::INVALID_ARG = rfs(
+    "דֶּרֶךְ תּוֹעָה הֱיֵה: הֵעָרֵךְ {} אֵינוֹ מַתְאִים"
+);
 const std::string codesh::blasphemy::details::NO_MAIN_ARGS =
     "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
+const std::string codesh::blasphemy::details::NO_ARG =
+    "מִנְחוֹת אֵינָם: נִדְרָשׁ עֵרֶךְ הַכְנָסָה לַדֶּגֶל";
+const std::string codesh::blasphemy::details::UNKNOWN_FLAG =
+    "דֶּרֶךְ תּוֹעָה הֱיֵה: דֶּגֶל לֹא יָדוּעַ";
 
 // LEXICAL
 const std::string codesh::blasphemy::details::NO_BASAD =
@@ -47,8 +55,10 @@ const std::string codesh::blasphemy::details::NO_SCOPE_END =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ויתם";
 const std::string codesh::blasphemy::details::NO_KEYWORD_SHALL_BE =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה היה";
+const std::string codesh::blasphemy::details::NO_KEYWORD_PUNC_EQUAL =
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ב־";
 const std::string codesh::blasphemy::details::NO_KEYWORD_BY =
-    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה פי";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה פי־";
 const std::string codesh::blasphemy::details::NO_KEYWORD_TO =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עד";
 const std::string codesh::blasphemy::details::NO_KEYWORD_FROM =
@@ -134,6 +144,9 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_TYPE_DECLARATION = rfs(
 );
 const rfs_t codesh::blasphemy::details::DUPLICATE_METHOD_DECLARATION = rfs(
     "נֵאִיפַה תִּהְיֶה: הֻכְרַז מַעֲשֶׂה כָּפוּל: {}"
+);
+const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rfs(
+    "קְרִיאָה אֵינָהּ כְּשֵׁרָה: וָלֹא־תְּבַשֵּׁל מַעֲשֶׂה כְּלָלִי {} בָּאֵנוּ כְּלָלֵי"
 );
 
 // OUTPUT

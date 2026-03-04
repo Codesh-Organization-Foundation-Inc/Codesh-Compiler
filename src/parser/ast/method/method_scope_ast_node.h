@@ -20,7 +20,7 @@ class method_scope_ast_node : public impl::ast_node,
     method_declaration_ast_node &parent_method;
 
     std::deque<std::unique_ptr<operation::method_operation_ast_node>> body;
-    std::vector<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
+    std::deque<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
     std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
 
@@ -43,9 +43,10 @@ public:
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
     void push_front_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
 
-    [[nodiscard]] const std::vector<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
+    [[nodiscard]] const std::deque<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
         const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
+    void add_local_variable_front(std::unique_ptr<local_variable_declaration_ast_node> statement);
 
 
     method_scope_ast_node &create_method_scope(blasphemy::code_position code_position);

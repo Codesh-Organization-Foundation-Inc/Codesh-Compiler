@@ -57,7 +57,7 @@ void codesh::ast::method::method_scope_ast_node::push_front_statement(
     body.emplace_front(std::move(statement));
 }
 
-const std::vector<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+const std::deque<std::unique_ptr<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
     method_scope_ast_node::get_local_variables() const
 {
     return local_variables;
@@ -68,6 +68,13 @@ void codesh::ast::method::method_scope_ast_node::add_local_variable(
 {
     statement->set_accessible_from(body.size());
     local_variables.emplace_back(std::move(statement));
+}
+
+void codesh::ast::method::method_scope_ast_node::add_local_variable_front(
+    std::unique_ptr<local_variable_declaration_ast_node> statement)
+{
+    statement->set_accessible_from(body.size());
+    local_variables.emplace_front(std::move(statement));
 }
 
 codesh::ast::method::method_scope_ast_node &codesh::ast::method::method_scope_ast_node::

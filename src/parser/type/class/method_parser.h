@@ -4,6 +4,7 @@
 #include "parser/ast/operator/assignment/assignment_operator_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/method/operation/block/for_ast_node.h"
+#include "parser/type/type_parser.h"
 
 #include <memory>
 #include <queue>
@@ -29,15 +30,6 @@ void parse_method_scope(std::queue<std::unique_ptr<token>> &tokens, ast::method:
 
 [[nodiscard]] std::unique_ptr<ast::method::operation::method_call_ast_node> parse_method_call(
         std::queue<std::unique_ptr<token>> &tokens);
-
-enum class var_decl_assignment_policy
-{
-    ALLOW, // Optionally allows value assignment
-    //FIXME: REQUIRE is a result of laziness around making default values.
-    //TODO: Add it then remove this
-    REQUIRE, // Requires value assignment
-    FORBID // Forbids value assignment
-};
 
 /**
  * Parses a variable declaration.

@@ -14,6 +14,7 @@
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
@@ -72,6 +73,8 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
     {
         type_declaration::collect(context, *type_decl, country);
     }
+
+    type_declaration::collect_inheritance(context, country);
 }
 
 void codesh::semantic_analyzer::collect_methods(const ast::compilation_unit_ast_node &ast_root,
@@ -86,6 +89,21 @@ void codesh::semantic_analyzer::collect_methods(const ast::compilation_unit_ast_
     const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
 
     type_declaration::dispatch_collect_methods(context, country);
+}
+
+void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_node &ast_root,
+                                             const symbol_table &table)
+{
+    //TODO: Use actual countries
+    const std::vector lookup_countries = {
+        table.resolve_country("").value()
+    };
+    country_symbol &country = lookup_countries.back();
+
+    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+
+    type_declaration::dispatch_collect_methods(context, country);
+    field_declaration::collect(context, country);
 }
 
 void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
@@ -219,8 +237,9 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
         for (const auto &method : type_decl->get_all_methods())
         {
             // This is only relevant for void-returning methods
-            const codesh::ast::type::primitive_type_ast_node *return_type =
-                dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(method->get_return_type());
+            const auto return_type = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(
+                method->get_return_type()
+            );
 
             if (return_type == nullptr)
                 continue;
@@ -257,7 +276,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
             if (method_decl->get_attributes()->get_is_static())
                 continue;
 
-            method_decl->add_parameter(
+            method_decl->add_parameter_front(
                 create_this_param(*class_decl)
             );
         }
