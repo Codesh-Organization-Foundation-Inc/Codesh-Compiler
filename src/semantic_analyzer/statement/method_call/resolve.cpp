@@ -392,16 +392,18 @@ static bool try_prepend_implicit_this_argument(const codesh::semantic_analyzer::
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
-
     // Skip static methods as `this` is only relevant for non-statics
     if (resolved_method.get_attributes().get_is_static())
         return true;
 
     // Skip explicit calls as we handle implicit ones here
-    if (!fqn_parts.empty() && fqn_parts.front() == "this")
+    if (method_call.has_nested_method())
         return true;
     if (method_call.get_unresolved_name().is_single_part())
+        return true;
+
+    const auto &fqn_parts = method_call.get_unresolved_name().get_parts();
+    if (!fqn_parts.empty() && fqn_parts.front() == "this")
         return true;
 
     // New calls don't need `this`
