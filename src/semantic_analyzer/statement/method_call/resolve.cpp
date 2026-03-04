@@ -145,6 +145,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &name = method_call.get_unresolved_name();
+    if (name.get_parts().empty())
+    {
+        // Error in parsing phase; Ignore
+        return std::nullopt;
+    }
+
     const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
 
     // Receiver = The variable being passed as `this` to the non-static method
