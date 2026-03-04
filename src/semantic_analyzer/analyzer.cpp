@@ -313,6 +313,13 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
     // Global country always comes first
     countries.push_back(table.resolve_country("").value());
 
+    // Include a book's own package country for same-package type resolution
+    auto &own = get_own_country(ast_root, table);
+    if (&own != &countries.front().get())
+    {
+        countries.emplace_back(own);
+    }
+
     for (const auto &import_decl : ast_root.get_import_declarations())
     {
         const auto &country_name = import_decl->get_country_name();
