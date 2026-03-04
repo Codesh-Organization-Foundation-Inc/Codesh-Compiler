@@ -75,10 +75,7 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::ast::op::new_ast_node &new_call);
 
 static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
-        const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::method_symbol &containing_method,
-        codesh::ast::method::operation::method_call_ast_node &nested_method,
-        const codesh::semantic_analyzer::method_scope_symbol &scope);
+        const codesh::ast::method::operation::method_call_ast_node &nested_method);
 
 /**
  * @returns Whether all arguments were successfully resolved.
@@ -116,11 +113,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
                                                      const method_symbol &containing_method,
                                                      const method_scope_symbol &scope)
 {
-    // We must first resolve the method's arguments
-    // if we want to determine which argument types we pass forward (overloading)
-    if (!resolve_arguments(context, method_call, containing_method, scope))
-        return false;
-
     const auto result = resolve_method_call(
         context,
         containing_method,
@@ -130,16 +122,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 
     if (!result.has_value())
         return false;
-
-
-    // For new calls, also resolve the constructed type:
-    if (const auto new_call = dynamic_cast<const ast::op::new_ast_node *>(&method_call))
-    {
-        util::resolve_type_node(
-            context,
-            new_call->get_constructed_type()
-        );
-    }
 
 
     //TODO: Remove this once Talmud Codesh implements this method by itself:
@@ -169,6 +151,22 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
+    // We must first resolve the method's arguments
+    // if we want to determine which argument types we pass forward (overloading)
+    if (!resolve_arguments(context, method_call, containing_method, scope))
+        return std::nullopt;
+
+    // Recursively resolve all nested methods first
+    if (method_call.has_nested_method())
+    {
+        resolve_method_call(
+            context,
+            containing_method,
+            method_call.get_nested_method(),
+            scope
+        );
+    }
+
     const auto &name = method_call.get_unresolved_name();
     if (name.get_parts().empty())
     {
@@ -212,6 +210,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
 
+    // For new calls, also resolve the constructed type:
+    if (const auto new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
+    {
+        codesh::semantic_analyzer::util::resolve_type_node(
+            context,
+            new_call->get_constructed_type()
+        );
+    }
+
     return resolved_method;
 }
 
@@ -248,12 +255,7 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     if (method_call.has_nested_method())
     {
-        return resolve_parent_type_for_nested_call(
-            context,
-            containing_method,
-            method_call.get_nested_method(),
-            scope
-        );
+        return resolve_parent_type_for_nested_call(method_call.get_nested_method());
     }
 
     // Check if the front of the name matches a local variable in the scope.
@@ -299,24 +301,14 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 }
 
 static std::optional<parent_type_result> resolve_parent_type_for_nested_call(
-        const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::method_symbol &containing_method,
-        codesh::ast::method::operation::method_call_ast_node &nested_method,
-        const codesh::semantic_analyzer::method_scope_symbol &scope)
+        const codesh::ast::method::operation::method_call_ast_node &nested_method)
 {
-    const auto nested_result = resolve_method_call(
-        context,
-        containing_method,
-        nested_method,
-        scope
-    );
-
-    if (!nested_result.has_value())
+    if (!nested_method.is_resolved())
         return std::nullopt;
 
     // For chained methods, `this` is their return value
     const auto *return_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(
-        &nested_result->get().get_return_type()
+        &nested_method.get_resolved().get_return_type()
     );
 
     if (return_type == nullptr)
