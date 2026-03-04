@@ -156,14 +156,29 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    // Nested method calls (method().method()...)
-    if (util::peeking_check(tokens, token_group::KEYWORD_FUNCTION_CALL))
+    // Nested method calls (method().method().method()...)
+    // for us it's do (do (do method).method).method
+    // ויעש כי־ויעש כי־ויעש מעשה כי־טוב ל־מעשה כי־טוב ל־מעשה:
+    if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {
-        method_call_node->set_nested_method(parse_method_call(tokens));
-    }
-    else if (util::peeking_check(tokens, token_group::KEYWORD_NEW))
-    {
-        method_call_node->set_nested_method(value::parse_new_operator(tokens));
+        if (util::peeking_check(tokens, token_group::KEYWORD_FUNCTION_CALL))
+        {
+            method_call_node->set_nested_method(parse_method_call(tokens));
+        }
+        else if (util::peeking_check(tokens, token_group::KEYWORD_NEW))
+        {
+            method_call_node->set_nested_method(value::parse_new_operator(tokens));
+        }
+
+
+        if (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_CLOSE_PARENTHESIS,
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.empty() ? call_pos : tokens.front()->get_code_position()
+            );
+        }
     }
 
 

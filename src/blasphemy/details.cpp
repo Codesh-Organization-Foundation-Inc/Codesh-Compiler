@@ -68,7 +68,7 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_SKIP =
 const std::string codesh::blasphemy::details::NO_KEYWORD_AGAINST =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה לנגד";
 const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP =
-    "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה סִיֹּמֶת שׁוּרָה";
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה סִיּוּם פָּסוּק";
 const std::string codesh::blasphemy::details::NO_PUNCTUATION_DOT =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה ל־";
 const std::string codesh::blasphemy::details::UNEXPECTED_TOKEN =
