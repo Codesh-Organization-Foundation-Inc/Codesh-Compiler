@@ -16,10 +16,15 @@
 namespace ast = codesh::ast;
 namespace parser = codesh::parser;
 
-static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens,
         ast::type_decl::class_declaration_ast_node *class_node);
+
+[[nodiscard]] static std::pair<
+    std::unique_ptr<ast::type_decl::field_declaration_ast_node>,
+    std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
+> parse_field_declaration(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::blasphemy::code_position declaration_pos);
 
 static void parse_method_signature_to(
         ast::type_decl::type_declaration_ast_node &type_decl, codesh::blasphemy::code_position code_position,
@@ -54,6 +59,27 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
         code_position,
         definition::fully_qualified_name(name_token->get_content())
     );
+
+
+    if (util::consuming_check(tokens, token_group::KEYWORD_EXTENDS))
+    {
+        if (const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens))
+        {
+            auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
+                super_name->get_code_position(),
+                definition::fully_qualified_name(super_name->get_content())
+            );
+
+            node->set_super_class(std::move(super_type));
+        }
+        else
+        {
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_IDENTIFIER,
+                blasphemy::blasphemy_type::SYNTAX, code_position
+            );
+        }
+    }
 
 
     // Get attributes
@@ -102,9 +128,21 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
             default:
                 // Assume fields by default as they can either be custom types (identifiers)
                 // or primitives (other tokens).
-                parse_field_scope(tokens);
+                auto [var_decl, var_assignment] =
+                    parse_field_declaration(tokens, let_pos);
+
+                class_node->add_field(std::move(var_decl));
+
+                // Add the produced assignment statement to the method body if one was generated
+                if (var_assignment != nullptr)
+                {
+                    //TODO: Implement field initialization
+                    // method_scope.add_statement(std::move(var_assignment));
+                }
+
                 break;
             }
+
             break;
         }
 
@@ -114,8 +152,11 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         }
 
         default: {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
-                                                                   codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                //TODO: Rename to DOES_NOT
+                codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
+                codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position()
+            );
             return;
         }
 
@@ -126,26 +167,22 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
         codesh::blasphemy::blasphemy_type::SYNTAX, class_node->get_code_position());
 }
 
-static void parse_field_scope(std::queue<std::unique_ptr<codesh::token>> &tokens)
+static std::pair<
+    std::unique_ptr<ast::type_decl::field_declaration_ast_node>,
+    std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
+> parse_field_declaration(std::queue<std::unique_ptr<codesh::token>> &tokens,
+        codesh::blasphemy::code_position declaration_pos)
 {
-    const codesh::token_group type_token = parser::util::consume_token(tokens,
-            codesh::blasphemy::details::NO_TYPE)->get_group();
+    auto decl_node = std::make_unique<ast::type_decl::field_declaration_ast_node>(declaration_pos);
+    auto assignment = parser::parse_variable_declaration(
+        *decl_node,
+        declaration_pos,
+        tokens,
+        //TODO: Implement field initialization
+        parser::var_decl_assignment_policy::FORBID
+    );
 
-
-    if (type_token != codesh::token_group::IDENTIFIER)
-    {
-        // TODO: Parse token group as type and see if it is a primitive
-        constexpr bool isPrimitive = false;
-
-        if (!isPrimitive && type_token != codesh::token_group::KEYWORD_VAR)
-        {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(codesh::blasphemy::details::NO_IDENTIFIER,
-                codesh::blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
-        }
-    }
-
-    //TODO: Support fields
-    throw std::runtime_error("Fields not yet supported");
+    return {std::move(decl_node), std::move(assignment)};
 }
 
 static void parse_method_signature_to(

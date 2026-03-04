@@ -1,9 +1,32 @@
 #pragma once
+
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace codesh::output::jvm_target::defs
 {
+
+enum class constant_info_type : unsigned char
+{
+    UTF8 = 1,
+    INTEGER = 3,
+    FLOATING = 4,
+    LONG_INT = 5,
+    DOUBLE_FP = 6,
+    CLASS_REF = 7,
+    STRING_REF = 8,
+    FIELDREF = 9,
+    METHODREF = 10,
+    INTERFACE_METHODREF = 11,
+    NAME_AND_TYPE = 12,
+    METHOD_HANDLE = 15,
+    METHOD_TYPE = 16,
+    DYNAMIC = 17,
+    INVOKE_DYNAMIC = 18,
+    MODULE = 19,
+    PACKAGE = 20,
+};
 
 //NOTE: All classes here SHOULD ACT like structs.
 // This is defined as a class only for the convenience of auto-placing tags.
@@ -11,7 +34,7 @@ namespace codesh::output::jvm_target::defs
 class cp_info
 {
 public:
-    explicit cp_info(unsigned char tag);
+    explicit cp_info(constant_info_type type);
     virtual ~cp_info();
 
     [[nodiscard]] virtual size_t hash_code() const = 0;
@@ -23,7 +46,7 @@ public:
 class CONSTANT_Utf8_info : public cp_info
 {
 public:
-    CONSTANT_Utf8_info();
+    explicit CONSTANT_Utf8_info(const std::string &utf8);
 
     bool operator==(const CONSTANT_Utf8_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -35,7 +58,7 @@ public:
 class CONSTANT_Integer_info : public cp_info
 {
 public:
-    CONSTANT_Integer_info();
+    explicit CONSTANT_Integer_info(int num);
 
     bool operator==(const CONSTANT_Integer_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -46,7 +69,7 @@ public:
 class CONSTANT_Float_info : public cp_info
 {
 public:
-    CONSTANT_Float_info();
+    explicit CONSTANT_Float_info(float num);
 
     bool operator==(const CONSTANT_Float_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -57,7 +80,7 @@ public:
 class CONSTANT_Long_info : public cp_info
 {
 public:
-    CONSTANT_Long_info();
+    explicit CONSTANT_Long_info(long long num);
 
     bool operator==(const CONSTANT_Long_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -69,7 +92,7 @@ public:
 class CONSTANT_Double_info : public cp_info
 {
 public:
-    CONSTANT_Double_info();
+    explicit CONSTANT_Double_info(double num);
 
     bool operator==(const CONSTANT_Double_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -81,7 +104,7 @@ public:
 class CONSTANT_Class_info : public cp_info
 {
 public:
-    CONSTANT_Class_info();
+    explicit CONSTANT_Class_info(int name_index);
 
     bool operator==(const CONSTANT_Class_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -92,7 +115,7 @@ public:
 class CONSTANT_String_info : public cp_info
 {
 public:
-    CONSTANT_String_info();
+    explicit CONSTANT_String_info(int utf8_index);
 
     bool operator==(const CONSTANT_String_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -103,7 +126,7 @@ public:
 class CONSTANT_Fieldref_info : public cp_info
 {
 public:
-    CONSTANT_Fieldref_info();
+    CONSTANT_Fieldref_info(int class_index, int name_and_type_index);
 
     bool operator==(const CONSTANT_Fieldref_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -115,7 +138,7 @@ public:
 class CONSTANT_Methodref_info : public cp_info
 {
 public:
-    CONSTANT_Methodref_info();
+    CONSTANT_Methodref_info(int class_index, int name_and_type_index);
 
     bool operator==(const CONSTANT_Methodref_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -127,7 +150,7 @@ public:
 class CONSTANT_InterfaceMethodref_info : public cp_info
 {
 public:
-    CONSTANT_InterfaceMethodref_info();
+    CONSTANT_InterfaceMethodref_info(int class_index, int name_and_type_index);
 
     bool operator==(const CONSTANT_InterfaceMethodref_info &other) const;
     [[nodiscard]] size_t hash_code() const override;
@@ -139,7 +162,7 @@ public:
 class CONSTANT_NameAndType_info : public cp_info
 {
 public:
-    CONSTANT_NameAndType_info();
+    CONSTANT_NameAndType_info(int name_index, int descriptor_index);
 
     bool operator==(const CONSTANT_NameAndType_info &other) const;
     [[nodiscard]] size_t hash_code() const override;

@@ -16,6 +16,8 @@ public:
 
     [[nodiscard]] type::custom_type_ast_node &get_constructed_type() const;
 
+    [[nodiscard]] type::type_ast_node *get_type() const override;
+
     [[nodiscard]] std::string to_pretty_string() const override;
 
     void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,

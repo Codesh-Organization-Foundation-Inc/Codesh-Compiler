@@ -10,7 +10,7 @@
 #include <utility>
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::ast::type_decl::
-    type_declaration_ast_node::_get_resolved() const
+        type_declaration_ast_node::_get_resolved() const
 {
     return resolved_symbol;
 }
@@ -45,9 +45,32 @@ codesh::ast::type::custom_type_ast_node *codesh::ast::type_decl::type_declaratio
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::set_super_class(
-    std::unique_ptr<type::custom_type_ast_node> super_class)
+        std::unique_ptr<type::custom_type_ast_node> super_class)
 {
     this->super_class = std::move(super_class);
+}
+
+const std::vector<std::unique_ptr<codesh::ast::type_decl::field_declaration_ast_node>>& codesh::ast::type_decl::
+        type_declaration_ast_node::get_fields() const
+{
+    return fields;
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::add_field(std::unique_ptr<field_declaration_ast_node> field)
+{
+    fields.push_back(std::move(field));
+}
+
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::type_decl::
+        type_declaration_ast_node::get_interfaces() const
+{
+    return interfaces;
+}
+
+void codesh::ast::type_decl::type_declaration_ast_node::add_interface(
+    std::unique_ptr<type::custom_type_ast_node> interface)
+{
+    interfaces.push_back(std::move(interface));
 }
 
 codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::type_declaration_ast_node::get_attributes()
@@ -56,13 +79,13 @@ codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::type_declar
     return this->attributes.get();
 }
 void codesh::ast::type_decl::type_declaration_ast_node::set_attributes(
-    std::unique_ptr<attributes_ast_node> attributes)
+        std::unique_ptr<attributes_ast_node> attributes)
 {
     this->attributes = std::move(attributes);
 }
 
 const codesh::output::jvm_target::constant_pool &codesh::ast::type_decl::
-    type_declaration_ast_node::get_constant_pool() const
+        type_declaration_ast_node::get_constant_pool() const
 {
     if (constant_pool == nullptr)
         throw std::runtime_error("Attempted to get constant pool in type, yet it was uninitialized");
@@ -77,7 +100,7 @@ void codesh::ast::type_decl::type_declaration_ast_node::set_constant_pool(
 }
 
 const std::deque<std::unique_ptr<codesh::ast::method::method_declaration_ast_node>> &codesh::ast::type_decl::
-    type_declaration_ast_node::get_all_methods() const
+        type_declaration_ast_node::get_all_methods() const
 {
     return all_methods;
 }
@@ -90,14 +113,14 @@ void codesh::ast::type_decl::type_declaration_ast_node::add_method(
 }
 
 void codesh::ast::type_decl::type_declaration_ast_node::add_constructor(
-    std::unique_ptr<method::constructor_declaration_ast_node> constructor_decl)
+        std::unique_ptr<method::constructor_declaration_ast_node> constructor_decl)
 {
     all_methods.push_front(std::move(constructor_decl));
     constructors.push_back(static_cast<method::constructor_declaration_ast_node *>(all_methods.front().get())); // NOLINT(*-pro-type-static-cast-downcast)
 }
 
 const std::vector<codesh::ast::method::constructor_declaration_ast_node *> &codesh::ast::type_decl::
-    type_declaration_ast_node::get_constructors() const
+        type_declaration_ast_node::get_constructors() const
 {
     return constructors;
 }

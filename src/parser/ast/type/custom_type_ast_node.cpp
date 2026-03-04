@@ -56,9 +56,6 @@ std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const
         ? get_resolved().get_full_name()
         : get_unresolved_name();
 
-    if (fqn.join() == "java/lang/String")
-        return lexer::trie::keyword::ALIAS_STRING;
-
     return fqn.holy_join();
 }
 
