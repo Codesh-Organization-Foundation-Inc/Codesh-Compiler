@@ -223,7 +223,7 @@ uint64_t codesh::semantic_analyzer::external::util::read_location_attribute(
     return 0;
 }
 
-// 100% AI slop right here
+// 100% AI slop below
 std::vector<uint8_t> util::decompress_resource(const std::vector<uint8_t> &compressed,
         const uint64_t uncompressed_size, const std::vector<char> &strings)
 {
