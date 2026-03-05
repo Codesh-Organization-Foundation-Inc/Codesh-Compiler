@@ -22,8 +22,7 @@ class symbol_table final : public i_scope_containing_symbol
     named_symbol_map scope;
 
 public:
-    explicit symbol_table(const ast::compilation_unit_ast_node &root_node);
-
+    symbol_table();
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 

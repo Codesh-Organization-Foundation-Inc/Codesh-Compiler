@@ -11,7 +11,7 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
-codesh::semantic_analyzer::symbol_table::symbol_table(const ast::compilation_unit_ast_node &root_node) :
+codesh::semantic_analyzer::symbol_table::symbol_table() :
     scope(ALLOWED_SYMBOL_TYPES)
 {
     // Add the global scope
