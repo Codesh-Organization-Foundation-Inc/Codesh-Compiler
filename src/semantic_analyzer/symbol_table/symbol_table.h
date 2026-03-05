@@ -26,7 +26,7 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 
-    [[nodiscard]] static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(
+    [[nodiscard]] static std::optional<std::reference_wrapper<symbol>> resolve(
             const semantic_context &context, const definition::fully_qualified_name &full_name,
             blasphemy::code_position code_pos,
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
