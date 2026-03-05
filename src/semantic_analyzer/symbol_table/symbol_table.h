@@ -21,12 +21,6 @@ class symbol_table final : public i_scope_containing_symbol
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
-    //TODO:
-    // void static collect_countries(ast::compilation_unit_ast_node &root_node);
-
-    //TODO:
-    // void static collect_fields(ast::type_decl::class_declaration_ast_node &class_decl);
-
 public:
     explicit symbol_table(const ast::compilation_unit_ast_node &root_node);
 
