@@ -1,7 +1,6 @@
 #include "builtins.h"
 
 #include "blasphemy/blasphemy_collector.h"
-#include "lexer/trie/keywords.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
@@ -52,9 +51,9 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/String",
-
+            nullptr,
+            std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
-
             nullptr
         )
     );
@@ -71,9 +70,9 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             "java/lang/Object",
-
+            nullptr,
+            std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
-
             nullptr
         )
     );
@@ -88,7 +87,9 @@ static void add_class_massof(codesh::semantic_analyzer::country_symbol &country)
     auto &massof_symbol = codesh::semantic_analyzer::util::add_type_symbol(
         country,
         CLASS_MASSOF,
-        std::move(attributes)
+        std::move(attributes),
+        nullptr,
+        {}
     ).first.get();
 
 

@@ -147,6 +147,8 @@ std::pair<
     bool
 > codesh::semantic_analyzer::util::add_type_symbol(country_symbol &country, const std::string &name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        std::unique_ptr<ast::type::custom_type_ast_node> super_type,
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces,
         ast::type_decl::type_declaration_ast_node *decl)
 {
     return country.get_scope().add_symbol(
@@ -154,6 +156,8 @@ std::pair<
         std::make_unique<type_symbol>(
             &country,
             country.get_full_name().with(name),
+            std::move(super_type),
+            std::move(interfaces),
             std::move(attributes),
             decl
         )

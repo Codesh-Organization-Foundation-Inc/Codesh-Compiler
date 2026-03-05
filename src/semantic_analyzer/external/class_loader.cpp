@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "parser/ast/type/custom_type_ast_node.h"
+
 #include "blasphemy/blasphemy_collector.h"
 #include "defenition/fully_qualified_name.h"
 #include "output/jvm_target/defs/cp_info.h"
@@ -142,14 +144,27 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
 {
     auto access_flags = flags_to_attributes(util::read_u2(file));
     const auto this_class_idx = util::read_u2(file);
-
-    //TODO:
-    // util::read_u2(file); // super_class_idx
+    const auto super_class_idx = util::read_u2(file);
 
     const auto class_name = get_class_name(strings, this_class_idx);
+    const auto super_class_name = get_class_name(strings, super_class_idx);
 
-    //TODO:
-    // read_interface_names(file, strings);
+    auto super_type_node = super_class_idx != 0
+        ? std::make_unique<codesh::ast::type::custom_type_ast_node>(
+            codesh::blasphemy::NO_CODE_POS,
+            super_class_name
+        )
+        : nullptr;
+
+    const auto interfaces = read_interface_names(file, strings);
+    std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> iface_nodes;
+    iface_nodes.reserve(interfaces.size());
+    for (const auto &iface_name : interfaces)
+    {
+        iface_nodes.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+            codesh::blasphemy::NO_CODE_POS, iface_name
+        ));
+    }
 
     country_symbol &country = codesh::semantic_analyzer::util::find_or_create_country(
         table,
@@ -159,7 +174,9 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
     return codesh::semantic_analyzer::util::add_type_symbol(
         country,
         class_name.get_last_part(),
-        std::move(access_flags)
+        std::move(access_flags),
+        std::move(super_type_node),
+        std::move(iface_nodes)
     ).first.get();
 }
 

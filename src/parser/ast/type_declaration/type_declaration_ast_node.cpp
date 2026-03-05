@@ -67,6 +67,22 @@ const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &cod
     return interfaces;
 }
 
+std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> codesh::ast::type_decl::
+        type_declaration_ast_node::get_interfaces_copy() const
+{
+    std::vector<std::unique_ptr<type::custom_type_ast_node>> results;
+
+    results.reserve(interfaces.size());
+    for (const auto &iface : interfaces)
+    {
+        results.push_back(std::unique_ptr<type::custom_type_ast_node>(
+            static_cast<type::custom_type_ast_node *>(iface->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
+        ));
+    }
+
+    return results;
+}
+
 void codesh::ast::type_decl::type_declaration_ast_node::add_interface(
     std::unique_ptr<type::custom_type_ast_node> interface)
 {

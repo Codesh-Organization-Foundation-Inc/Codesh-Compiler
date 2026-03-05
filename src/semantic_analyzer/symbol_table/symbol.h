@@ -1,15 +1,22 @@
 #pragma once
 
 #include "defenition/fully_qualified_name.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/type/type_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "scope.h"
 #include "symbol.h"
 #include "symbol_type.h"
-#include "parser/ast/local_variable_declaration_ast_node.h"
 
 #include <map>
+#include <memory>
 #include <optional>
+#include <vector>
+
+namespace codesh::ast::type
+{
+class custom_type_ast_node;
+}
 
 namespace codesh::semantic_analyzer
 {
@@ -121,13 +128,15 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
-    type_symbol *super_type = nullptr;
-    std::vector<type_symbol *> interfaces;
+    const std::unique_ptr<ast::type::custom_type_ast_node> super_type;
+    const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
     type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
+            std::unique_ptr<ast::type::custom_type_ast_node> super_type,
+            std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
@@ -135,11 +144,9 @@ public:
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
-    [[nodiscard]] type_symbol *get_super_type() const;
-    void set_super_type(type_symbol *super_type);
+    [[nodiscard]] ast::type::custom_type_ast_node &get_super_type() const;
 
-    [[nodiscard]] const std::vector<type_symbol *> &get_interfaces() const;
-    void add_interface(type_symbol *interface_symbol);
+    [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_interfaces() const;
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;

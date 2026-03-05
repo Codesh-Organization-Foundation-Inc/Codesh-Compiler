@@ -87,8 +87,6 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
     {
         type_declaration::collect(context, *type_decl, country);
     }
-
-    type_declaration::collect_inheritance(context, country);
 }
 
 void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_node &ast_root,
