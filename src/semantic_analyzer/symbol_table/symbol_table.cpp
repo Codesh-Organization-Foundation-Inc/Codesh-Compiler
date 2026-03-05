@@ -57,6 +57,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
         return result.value();
     }
 
+    const definition::fully_qualified_name name(name_start_fr, name_end_fr);
+    if (const auto result = try_load_external_symbols(context, name))
+    {
+        return result.value();
+    }
+
 
     context.blasphemy_consumer(fmt::format(
         "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
@@ -67,8 +73,8 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 }
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
-    resolve_from_imports(const semantic_context &context, const std::vector<std::string>::const_iterator name_end,
-                         const std::vector<std::string>::const_iterator name_start)
+    resolve_from_imports(const semantic_context &context, const std::vector<std::string>::const_iterator name_start,
+                         const std::vector<std::string>::const_iterator name_end)
 {
     for (const auto &country : context.lookup_countries)
     {
@@ -82,6 +88,13 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
             return result.value();
     }
 
+    return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
+    try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name)
+{
+    //TODO: Implement
     return std::nullopt;
 }
 

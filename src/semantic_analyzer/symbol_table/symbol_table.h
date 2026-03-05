@@ -22,7 +22,15 @@ class symbol_table final : public i_scope_containing_symbol
     named_symbol_map scope;
 
     static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
-            std::vector<std::string>::const_iterator name_end, std::vector<std::string>::const_iterator name_start);
+            std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
+
+    /**
+     * Load ALL external symbols related to a type, if one exists
+     *
+     * @returns The found symbol, @c std::nullopt otherwise
+     */
+    static std::optional<std::reference_wrapper<symbol>> try_load_external_symbols(const semantic_context &context,
+            const definition::fully_qualified_name &name);
 
 public:
     symbol_table();
@@ -32,6 +40,7 @@ public:
     [[nodiscard]] static std::optional<std::reference_wrapper<symbol>> resolve(
             const semantic_context &context, const definition::fully_qualified_name &full_name,
             blasphemy::code_position code_pos,
+            //FIXME: They're flipped
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt);
 
