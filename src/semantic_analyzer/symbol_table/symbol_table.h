@@ -21,6 +21,9 @@ class symbol_table final : public i_scope_containing_symbol
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
+    static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
+            std::vector<std::string>::const_iterator name_end, std::vector<std::string>::const_iterator name_start);
+
 public:
     symbol_table();
 

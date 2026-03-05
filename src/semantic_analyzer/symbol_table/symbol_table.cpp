@@ -44,23 +44,43 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
         return std::nullopt;
 
+    const auto name_start_fr = name_start.value_or(full_name.get_parts().begin());
+    const auto name_end_fr = name_end.value_or(full_name.get_parts().end());
 
-    for (const auto &country : context.lookup_countries)
+
+    if (const auto result = resolve_from_imports(
+        context,
+        name_start_fr,
+        name_end_fr
+    ))
     {
-        const auto result = resolve_method_from_scope_container(
-            country,
-            name_start.value_or(full_name.get_parts().begin()),
-            name_end.value_or(full_name.get_parts().end())
-        );
-
-        if (result.has_value())
-            return result.value();
+        return result.value();
     }
+
 
     context.blasphemy_consumer(fmt::format(
         "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
         full_name.holy_join()
     ), code_pos);
+
+    return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
+    resolve_from_imports(const semantic_context &context, const std::vector<std::string>::const_iterator name_end,
+                         const std::vector<std::string>::const_iterator name_start)
+{
+    for (const auto &country : context.lookup_countries)
+    {
+        const auto result = resolve_method_from_scope_container(
+            country,
+            name_start,
+            name_end
+        );
+
+        if (result.has_value())
+            return result.value();
+    }
 
     return std::nullopt;
 }
