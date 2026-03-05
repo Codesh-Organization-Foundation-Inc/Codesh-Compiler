@@ -7,19 +7,19 @@ namespace codesh::ast::op::assignment
 
 class cast_ast_node : public impl::binary_ast_node
 {
-    std::unique_ptr<value_ast_node> value;
-    std::unique_ptr<type::type_ast_node> type;
+    std::unique_ptr<value_ast_node> left;
+    std::unique_ptr<type::type_ast_node> right;
 
 public:
     cast_ast_node(
-        std::unique_ptr<value_ast_node> value,
-        std::unique_ptr<type::type_ast_node> target_type);
+        std::unique_ptr<value_ast_node> left,
+        std::unique_ptr<type::type_ast_node> right);
 
-    value_ast_node& get_value();
-    const value_ast_node& get_value() const;
+    [[nodiscard]] value_ast_node& get_left();
+    [[nodiscard]] const value_ast_node& get_left() const;
 
-    type::type_ast_node& get_target_type();
-    const type::type_ast_node& get_target_type() const;
+    [[nodiscard]] type::type_ast_node& get_right();
+    [[nodiscard]] const type::type_ast_node& get_right() const;
 };
 
 }
