@@ -11,7 +11,7 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
-#include <assert.h>
+#include <cassert>
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
