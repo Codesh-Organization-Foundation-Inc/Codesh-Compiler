@@ -15,6 +15,11 @@ public:
         std::unique_ptr<variable_reference_ast_node> value,
         std::unique_ptr<type::type_ast_node> target_type);
 
+    variable_reference_ast_node& get_value();
+    const variable_reference_ast_node& get_value() const;
+
+    type::type_ast_node& get_target_type();
+    const type::type_ast_node& get_target_type() const;
 };
 
 }
