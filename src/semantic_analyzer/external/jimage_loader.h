@@ -90,7 +90,6 @@ class jimage_loader
 
 public:
     explicit jimage_loader(const std::filesystem::path &path);
-    ~jimage_loader();
 
     bool load(const std::string &module_name, const definition::fully_qualified_name &class_name,
               const symbol_table &table);

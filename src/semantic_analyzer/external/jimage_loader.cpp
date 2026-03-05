@@ -35,11 +35,6 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
     _strings = load_strings();
 }
 
-jimage_loader::~jimage_loader()
-{
-    _file.close();
-}
-
 bool jimage_loader::load(const std::string &module_name, const definition::fully_qualified_name &class_name,
         const symbol_table &table)
 {
