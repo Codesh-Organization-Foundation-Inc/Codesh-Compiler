@@ -11,8 +11,9 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
-codesh::semantic_analyzer::symbol_table::symbol_table() :
-    scope(ALLOWED_SYMBOL_TYPES)
+codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths) :
+    scope(ALLOWED_SYMBOL_TYPES),
+    classpaths(classpaths)
 {
     // Add the global scope
     scope.add_symbol("", std::make_unique<country_symbol>(""));
@@ -39,7 +40,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     resolve(const semantic_context &context, const definition::fully_qualified_name &full_name,
         const blasphemy::code_position code_pos, const std::optional<std::vector<std::string>::const_iterator> name_end,
-        const std::optional<std::vector<std::string>::const_iterator> name_start)
+        const std::optional<std::vector<std::string>::const_iterator> name_start) const
 {
     if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
         return std::nullopt;
@@ -92,7 +93,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 }
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
-    try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name)
+    try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name) const
 {
     //TODO: Implement
     return std::nullopt;

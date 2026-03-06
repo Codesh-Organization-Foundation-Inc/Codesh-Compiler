@@ -104,7 +104,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         const std::filesystem::path file_path(entry);
         if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
         {
-            result.classpath.emplace_back(file_path);
+            result.classpaths.emplace_back(file_path);
             continue;
         }
 
@@ -197,7 +197,7 @@ static void add_default_classpaths(codesh::command_args &result)
 {
     if (result.is_java_default_classpath)
     {
-        result.classpath.emplace_back(".");
+        result.classpaths.emplace_back(".");
     }
 
     if (result.is_talmud_codesh_classpath)
@@ -206,7 +206,7 @@ static void add_default_classpaths(codesh::command_args &result)
 
         if (std::filesystem::exists(talmud_path))
         {
-            result.classpath.emplace_back(talmud_path);
+            result.classpaths.emplace_back(talmud_path);
         }
         else
         {

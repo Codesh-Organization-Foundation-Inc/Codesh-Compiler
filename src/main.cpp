@@ -68,7 +68,7 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
-    const codesh::semantic_analyzer::symbol_table master_symbol_table;
+    const codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths);
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     for (const auto &root_node : asts)

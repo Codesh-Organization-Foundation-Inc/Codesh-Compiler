@@ -20,7 +20,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
 
     const auto &full_name = custom_type_node.get_unresolved_name();
 
-    const auto result_raw = symbol_table::resolve(
+    const auto result_raw = context.symbol_table_.resolve(
         context,
         full_name,
         blasphemy::NO_CODE_POS

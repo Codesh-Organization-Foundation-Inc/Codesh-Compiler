@@ -427,7 +427,7 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
 {
     const auto &name = method_call.get_unresolved_name();
 
-    const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve(
+    const auto type_symbol = context.symbol_table_.resolve(
         context,
         name,
         method_call.get_code_position(),
