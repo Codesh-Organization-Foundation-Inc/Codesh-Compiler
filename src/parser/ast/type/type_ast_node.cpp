@@ -25,7 +25,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_no
     }
 
 
-    const auto type_letter = descriptor.at(++pos);
+    const auto type_letter = descriptor.at(pos++);
 
     std::unique_ptr<type_ast_node> result;
     switch (type_letter)
