@@ -69,6 +69,7 @@ int main(const int argc, char **const argv)
 
     // SEMANTIC ANALYZING
     const codesh::semantic_analyzer::symbol_table master_symbol_table;
+    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     for (const auto &root_node : asts)
     {
@@ -77,7 +78,6 @@ int main(const int argc, char **const argv)
         codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
     }
 
-    codesh::semantic_analyzer::builtins::add_builtins(master_symbol_table);
 
     // Collect all methods BEFORE analyzation and not during regular symbols collection as methods both need
     // types to be resolved in order to be collected but are also mandatory to be collected before analyzation
