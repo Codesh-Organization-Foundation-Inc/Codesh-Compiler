@@ -97,27 +97,25 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
 }
 
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find_or_create_country(
-        const symbol_table &table, const std::string &country_name)
+        const symbol_table &table, const std::string &package_name)
 {
     country_symbol &root = table.resolve_country("").value();
 
-    if (country_name.empty())
+    if (package_name.empty())
         return root;
 
-    auto *current = &root;
+    country_symbol *current = &root;
     std::string accumulated;
 
     size_t start = 0;
     while (true)
     {
-        const auto slash_pos = country_name.find('/', start);
-        const auto last = slash_pos == std::string::npos;
-        const auto part = country_name.substr(start, last ? std::string::npos : slash_pos - start);
+        const size_t slash_pos = package_name.find('/', start);
+        const bool last = slash_pos == std::string::npos;
+        const std::string part = package_name.substr(start, last ? std::string::npos : slash_pos - start);
 
         if (!accumulated.empty())
-        {
             accumulated += '/';
-        }
         accumulated += part;
 
         const auto existing = current->get_scope().resolve_local(part);

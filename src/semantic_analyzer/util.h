@@ -71,7 +71,7 @@ bool are_types_compatible(const ast::type::type_ast_node &from, const ast::type:
  * within the symbol table, creating missing intermediate countries as needed.
  */
 [[nodiscard]] country_symbol &find_or_create_country(const symbol_table &table,
-        const std::string &country_name);
+        const std::string &package_name);
 
 /**
  * Creates a @c type_symbol in the given @p country and adds it to its scope.

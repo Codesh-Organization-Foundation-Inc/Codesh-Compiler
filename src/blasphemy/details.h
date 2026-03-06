@@ -38,7 +38,6 @@ extern const std::string NO_KEYWORD_FROM;
 extern const std::string NO_KEYWORD_SKIP;
 extern const std::string NO_KEYWORD_AGAINST;
 extern const std::string NO_PUNCTUATION_END_OP;
-extern const std::string NO_PUNCTUATION_DOT;
 extern const std::string NO_TYPE;
 extern const std::string UNEXPECTED_DECLARATION;
 extern const std::string UNEXPECTED_TOKEN;

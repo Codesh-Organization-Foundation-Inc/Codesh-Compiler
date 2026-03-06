@@ -196,7 +196,6 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_PUNCTUATION_END_OP,
             blasphemy::blasphemy_type::SYNTAX,
-            //FIXME: Add code pos parameter
             tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
         );
     }

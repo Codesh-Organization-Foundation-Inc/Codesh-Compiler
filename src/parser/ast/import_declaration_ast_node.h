@@ -8,14 +8,14 @@ namespace codesh::ast
 
 class import_declaration_ast_node final : public impl::ast_node
 {
-    definition::fully_qualified_name country_name;
+    definition::fully_qualified_name package_name;
     bool is_on_demand;
     bool is_static;
 
 public:
     explicit import_declaration_ast_node(blasphemy::code_position code_position);
 
-    [[nodiscard]] definition::fully_qualified_name &get_country_name();
+    [[nodiscard]] definition::fully_qualified_name &get_package_name();
     [[nodiscard]] bool get_is_on_demand() const;
     [[nodiscard]] bool get_is_static() const;
 

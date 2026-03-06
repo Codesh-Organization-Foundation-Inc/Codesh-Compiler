@@ -36,9 +36,9 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
     }
 
 
-    util::parse_fqn(tokens, import_node->get_country_name());
+    util::parse_fqn(tokens, import_node->get_package_name());
 
-    if (import_node->get_country_name().is_wildcard())
+    if (import_node->get_package_name().is_wildcard())
     {
         import_node->set_is_on_demand(true);
     }
