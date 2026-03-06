@@ -115,10 +115,22 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     // i.e. the programmer entered "java.lang.String" explicitly
     auto was_loaded = try_load_candidate(name.join());
 
+    // Otherwise, the programmer may have entered "String" explicitly;
+    // Try for each import
+
+    // 1. Default imports (java.lang, Talmud Codesh)
     if (!was_loaded)
     {
-        // Otherwise, the programmer may have entered "String" explicitly;
-        // Try for each import
+        for (const auto &import : default_imports)
+        {
+            const auto candidate = import + "/" + name.join();
+
+            if ((was_loaded = try_load_candidate(candidate)))
+                break;
+        }
+    }
+    if (!was_loaded)
+    {
         for (const auto &country : context.lookup_countries)
         {
             const auto candidate = country.get().get_full_name().join() + "/" + name.join();
