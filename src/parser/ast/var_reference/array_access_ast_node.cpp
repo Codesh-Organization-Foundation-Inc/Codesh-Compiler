@@ -22,4 +22,5 @@ codesh::ast::var_reference::value_ast_node& codesh::ast::op::array_access_ast_no
 
 codesh::ast::type::type_ast_node* codesh::ast::op::array_access_ast_node::get_type() const
 {
+    return nullptr;
 }
