@@ -323,6 +323,8 @@ add_executable(codeshc
         src/semantic_analyzer/external/jimage_loader.cpp
         src/semantic_analyzer/external/util.cpp
         src/semantic_analyzer/external/util.h
+        src/parser/ast/operator/assignment/cast_ast_node.cpp
+        src/parser/ast/operator/assignment/cast_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
