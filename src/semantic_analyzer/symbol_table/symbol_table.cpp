@@ -111,38 +111,8 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name) const
 {
-    // First try for the name itself
-    // i.e. the programmer entered "java.lang.String" explicitly
-    auto was_loaded = try_load_candidate(name.join());
-
-    // Otherwise, the programmer may have entered "String" explicitly;
-    // Try for each import
-
-    // 1. Default imports (java.lang, Talmud Codesh)
-    if (!was_loaded)
-    {
-        for (const auto &import : default_imports)
-        {
-            const auto candidate = import + "/" + name.join();
-
-            if ((was_loaded = try_load_candidate(candidate)))
-                break;
-        }
-    }
-    if (!was_loaded)
-    {
-        for (const auto &country : context.lookup_countries)
-        {
-            const auto candidate = country.get().get_full_name().join() + "/" + name.join();
-
-            if ((was_loaded = try_load_candidate(candidate)))
-                break;
-        }
-    }
-
-    if (!was_loaded)
+    if (!try_load_any_candidate(context, name))
         return std::nullopt;
-
 
     // Resolve the loaded symbol
     // Do imports first as it is most likely
@@ -168,6 +138,34 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     //TODO: Convert to Codesh warning
     throw std::runtime_error("Failed to load external symbol");
+}
+
+bool codesh::semantic_analyzer::symbol_table::try_load_any_candidate(
+        const semantic_context &context, const definition::fully_qualified_name &name) const
+{
+    // First try for the name itself
+    // i.e. the programmer entered "java.lang.String" explicitly
+    if (try_load_candidate(name.join()))
+        return true;
+
+    // Otherwise, the programmer may have entered "String" explicitly;
+    // Try for each import
+
+    // 1. Default imports (java.lang, Talmud Codesh)
+    for (const auto &import : default_imports)
+    {
+        if (try_load_candidate(import + "/" + name.join()))
+            return true;
+    }
+
+    // 2. Explicit imports from the source file
+    for (const auto &country : context.lookup_countries)
+    {
+        if (try_load_candidate(country.get().get_full_name().join() + "/" + name.join()))
+            return true;
+    }
+
+    return false;
 }
 
 bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const
