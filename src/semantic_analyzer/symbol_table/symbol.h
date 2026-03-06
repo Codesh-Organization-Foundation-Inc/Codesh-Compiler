@@ -57,6 +57,8 @@ class i_scope_containing_symbol
 protected:
     [[nodiscard]] virtual symbols_collection &get_scope() = 0;
 
+    [[nodiscard]] virtual std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const;
+
 public:
     virtual ~i_scope_containing_symbol();
 
@@ -115,9 +117,8 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 {
     const definition::fully_qualified_name full_name;
 
-    static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_symbol_map scope;
-
+    named_symbol_map fields_scope;
+    named_symbol_map methods_scope;
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
@@ -125,6 +126,9 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
     std::vector<type_symbol *> interfaces;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
+
+protected:
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const override;
 
 public:
     type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
@@ -143,6 +147,9 @@ public:
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
+
+    [[nodiscard]] named_symbol_map &get_field_scope();
+    [[nodiscard]] const named_symbol_map &get_field_scope() const;
 
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
 };

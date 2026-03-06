@@ -164,7 +164,7 @@ codesh::semantic_analyzer::field_symbol &codesh::semantic_analyzer::util::add_fi
         const std::string &name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         std::unique_ptr<ast::type::type_ast_node> type)
 {
-    return type_sym.get_scope().add_symbol(
+    return type_sym.get_field_scope().add_symbol(
         name,
         std::make_unique<field_symbol>(
             &type_sym,

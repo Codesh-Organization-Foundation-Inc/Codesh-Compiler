@@ -23,7 +23,7 @@ void codesh::semantic_analyzer::field_declaration::collect(const semantic_contex
 
         for (const auto &field_decl : type_decl->get_fields())
         {
-            type_sym.get_scope().add_symbol(
+            type_sym.get_field_scope().add_symbol(
                 field_decl->get_name(),
                 std::make_unique<field_symbol>(
                     &type_sym,
