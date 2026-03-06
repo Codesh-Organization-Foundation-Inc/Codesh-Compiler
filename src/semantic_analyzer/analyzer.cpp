@@ -2,19 +2,20 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/blasphemy_consumer.h"
+#include "builtins.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/constructor_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/method/operation/super_call_ast_node.h"
-#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
-#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
@@ -60,7 +61,8 @@ static void add_country(
         codesh::semantic_analyzer::country_symbol &country);
 
 
-const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
+    builtins::ALIAS_OBJECT.data();
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)

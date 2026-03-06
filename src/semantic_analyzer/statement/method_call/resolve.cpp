@@ -123,25 +123,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
     if (!result.has_value())
         return false;
 
-
-    //TODO: Remove this once Talmud Codesh implements this method by itself:
-    // Manually pass System.out to every מסוף ל־אמר call
-    if (method_call.get_unresolved_name().join() == "מסוף/אמר")
-    {
-        auto system_in_reference = std::make_unique<variable_reference_ast_node>(blasphemy::NO_CODE_POS, "מסוף/פלט");
-        system_in_reference->set_resolved(
-            *static_cast<field_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                &symbol_table::resolve(
-                    context,
-                    "מסוף/פלט",
-                    method_call.get_code_position()
-                )->get()
-            )
-        );
-
-        method_call.get_arguments().push_front(std::move(system_in_reference));
-    }
-
     return true;
 }
 
