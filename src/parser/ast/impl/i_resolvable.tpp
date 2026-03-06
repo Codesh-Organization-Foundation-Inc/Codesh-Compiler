@@ -3,13 +3,21 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "semantic_analyzer/symbol_table/symbol.h"
 
-#include <cassert>
+#include <iostream>
 
 template <typename T>
 const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<T>::get_resolved_name() const
 {
     const std::optional<std::reference_wrapper<T>> &resolved = this->_get_resolved();
-    assert(resolved.has_value() && "Attempted to get resolved name while none exists");
+
+    if (!resolved)
+    {
+        //TODO: Throw:
+        // throw std::runtime_error("Attempted to get resolved name while none exists");
+
+        std::cerr << "NOTICE: USING UNRESOLVED NAME " << get_unresolved_name().join() << std::endl;
+        return get_unresolved_name();
+    }
 
     return resolved.value().get().get_full_name();
 }
