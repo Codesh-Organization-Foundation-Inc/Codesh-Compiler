@@ -1,7 +1,10 @@
 #pragma once
 
 #include "blasphemy/blasphemy_collector.h"
+#include "semantic_analyzer/external/jimage_loader.h"
 #include "symbol.h"
+
+#include <string>
 
 namespace codesh::ast
 {
@@ -26,6 +29,8 @@ class symbol_table final : public i_scope_containing_symbol
     static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
             std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
+    country_symbol *global_scope;
+
     /**
      * Load ALL external symbols related to a type, if one exists
      *
@@ -34,8 +39,12 @@ class symbol_table final : public i_scope_containing_symbol
     std::optional<std::reference_wrapper<symbol>> try_load_external_symbols(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
+    [[nodiscard]] bool try_load_candidate(const std::string &candidate) const;
+
 public:
     explicit symbol_table(const std::vector<std::filesystem::path> &classpaths);
+
+    [[nodiscard]] country_symbol &get_global_scope() const;
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 

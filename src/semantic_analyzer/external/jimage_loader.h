@@ -60,6 +60,8 @@ struct class_file_lookup_result
     uint64_t size;
 };
 
+[[nodiscard]] bool is_jimage(const std::filesystem::path &path);
+
 class jimage_loader
 {
     static constexpr std::streamoff HEADER_SIZE = 28;
@@ -83,10 +85,6 @@ class jimage_loader
 
     void load_compressed_class_file(std::streamoff file_offset, const class_file_lookup_result &lookup,
             const symbol_table &table);
-
-    // Re-implemented from utils because reverse order matters here
-    uint16_t read_u2_le();
-    uint32_t read_u4_le();
 
 public:
     explicit jimage_loader(const std::filesystem::path &path);

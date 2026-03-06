@@ -18,7 +18,7 @@ static void add_default_classpaths(codesh::command_args &result);
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
-    command_args result {};
+    command_args result{};
     result.is_java_default_classpath = false;
     result.is_talmud_codesh_classpath = true;
 
@@ -76,6 +76,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     {
         result.jre_path = get_default_jre_path();
     }
+    //TODO: Check whether jre_path and the default classpaths truly exist
 
     return result;
 }
@@ -195,22 +196,26 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
 
 static void add_default_classpaths(codesh::command_args &result)
 {
+    result.classpaths.emplace_back(".");
+
     if (result.is_java_default_classpath)
     {
-        result.classpaths.emplace_back(".");
+        result.classpaths.emplace_back(get_default_jre_path() / "lib/modules");
     }
 
     if (result.is_talmud_codesh_classpath)
     {
-        const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
-
-        if (std::filesystem::exists(talmud_path))
-        {
-            result.classpaths.emplace_back(talmud_path);
-        }
-        else
-        {
-            throw std::runtime_error("talmud path was not found");
-        }
+        //FIXME: Not the path
+        // const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
+        //
+        // //TODO: Move to yet-to-exist check after this function is run
+        // if (std::filesystem::exists(talmud_path))
+        // {
+        //     result.classpaths.emplace_back(talmud_path);
+        // }
+        // else
+        // {
+        //     throw std::runtime_error("talmud path was not found");
+        // }
     }
 }

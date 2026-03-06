@@ -3,7 +3,11 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/blasphemy_consumer.h"
 #include "defenition/definitions.h"
+#include "semantic_analyzer/external/class_loader.h"
+#include "semantic_analyzer/external/jimage_loader.h"
 #include "semantic_analyzer/semantic_context.h"
+
+#include <filesystem>
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
@@ -11,12 +15,22 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
+static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jimage_loader>> jimage_cache;
+
+
 codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths) :
     scope(ALLOWED_SYMBOL_TYPES),
     classpaths(classpaths)
 {
-    // Add the global scope
-    scope.add_symbol("", std::make_unique<country_symbol>(""));
+    global_scope = &scope.add_symbol(
+        "",
+        std::make_unique<country_symbol>("")
+    ).first.get();
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_scope() const
+{
+    return *global_scope;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
@@ -95,8 +109,81 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name) const
 {
-    //TODO: Implement
-    return std::nullopt;
+    // First try for the name itself
+    // i.e. the programmer entered "java.lang.String" explicitly
+    auto was_loaded = try_load_candidate(name.join());
+
+    if (!was_loaded)
+    {
+        // Otherwise, the programmer may have entered "String" explicitly;
+        // Try for each import
+        for (const auto &country : context.lookup_countries)
+        {
+            const auto candidate = country.get().get_full_name().join() + "/" + name.join();
+
+            if ((was_loaded = try_load_candidate(candidate)))
+                break;
+        }
+    }
+
+    if (!was_loaded)
+        return std::nullopt;
+
+
+    // Resolve the loaded symbol
+    // Do imports first as it is most likely
+    if (const auto result = resolve_from_imports(
+        context,
+        name.get_parts().begin(),
+        name.get_parts().end()
+    ))
+    {
+        return result;
+    }
+
+    // Then from the global scope
+    const auto &fqn_parts = name.get_parts();
+    if (const auto result = resolve_method_from_scope_container(
+        *global_scope,
+        fqn_parts.begin(),
+        fqn_parts.end())
+    )
+    {
+        return result;
+    }
+
+    //TODO: Convert to Codesh warning
+    throw std::runtime_error("Failed to load external symbol");
+}
+
+bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const
+{
+    for (const auto &classpath : classpaths)
+    {
+        if (std::filesystem::is_directory(classpath))
+        {
+            // A classpath directory may only contain class files
+            const auto class_file_path = classpath / (candidate + ".class");
+            if (std::filesystem::exists(class_file_path))
+            {
+                external::load_class_file(class_file_path, *this);
+                return true;
+            }
+        }
+        else if (external::is_jimage(classpath))
+        {
+            const auto key = classpath.string();
+            if (!jimage_cache.contains(key))
+            {
+                jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
+            }
+
+            if (jimage_cache.at(key)->load("java.base", candidate.data(), *this))
+                return true;
+        }
+    }
+
+    return false;
 }
 
 codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope()

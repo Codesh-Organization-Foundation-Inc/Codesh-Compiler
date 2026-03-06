@@ -99,7 +99,7 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find_or_create_country(
         const symbol_table &table, const std::string &country_name)
 {
-    country_symbol &root = table.resolve_country("").value();
+    country_symbol &root = table.get_global_scope();
 
     if (country_name.empty())
         return root;
