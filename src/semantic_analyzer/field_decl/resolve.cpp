@@ -8,7 +8,7 @@
 void codesh::semantic_analyzer::field_declaration::resolve(const semantic_context &context,
         const type_symbol &type, const ast::type_decl::field_declaration_ast_node &field_decl)
 {
-    const auto field_sym_opt = type.get_scope().resolve_local(field_decl.get_name());
+    const auto field_sym_opt = type.get_field_scope().resolve_local(field_decl.get_name());
     if (!field_sym_opt.has_value())
         return;
 

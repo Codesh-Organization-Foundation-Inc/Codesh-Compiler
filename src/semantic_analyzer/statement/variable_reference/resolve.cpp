@@ -164,7 +164,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         .get_parent_type();
 
     const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
-    const auto result = type.get_scope().resolve_local(field_name);
+    const auto result = type.get_field_scope().resolve_local(field_name);
 
     if (!result.has_value())
     {
