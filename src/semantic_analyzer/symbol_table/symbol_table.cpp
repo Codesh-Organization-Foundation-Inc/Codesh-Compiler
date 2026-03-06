@@ -18,8 +18,10 @@
 static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jimage_loader>> jimage_cache;
 
 
-codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths) :
+codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths,
+        std::vector<std::string> default_country_lookups) :
     scope(ALLOWED_SYMBOL_TYPES),
+    default_imports(std::move(default_country_lookups)),
     classpaths(classpaths)
 {
     global_scope = &scope.add_symbol(

@@ -24,6 +24,10 @@ class symbol_table final : public i_scope_containing_symbol
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
+    /**
+     * Imports that will be looked into even if a book did not specify them explictly.
+     */
+    const std::vector<std::string> default_imports;
     const std::vector<std::filesystem::path> &classpaths;
 
     static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
@@ -42,7 +46,8 @@ class symbol_table final : public i_scope_containing_symbol
     [[nodiscard]] bool try_load_candidate(const std::string &candidate) const;
 
 public:
-    explicit symbol_table(const std::vector<std::filesystem::path> &classpaths);
+    symbol_table(const std::vector<std::filesystem::path> &classpaths,
+            std::vector<std::string> default_country_lookups);
 
     [[nodiscard]] country_symbol &get_global_scope() const;
 
