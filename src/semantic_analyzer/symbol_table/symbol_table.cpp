@@ -57,6 +57,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
         return result.value();
     }
 
+    const definition::fully_qualified_name name(name_start_fr, name_end_fr);
+    if (const auto result = try_load_external_symbols(context, name))
+    {
+        return result.value();
+    }
+
 
     context.blasphemy_consumer(fmt::format(
         "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
@@ -82,6 +88,13 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
             return result.value();
     }
 
+    return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
+    try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name)
+{
+    //TODO: Implement
     return std::nullopt;
 }
 

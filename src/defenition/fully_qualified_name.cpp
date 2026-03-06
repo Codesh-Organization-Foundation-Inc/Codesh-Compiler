@@ -33,6 +33,14 @@ codesh::definition::fully_qualified_name::fully_qualified_name(std::string part)
     add(std::move(part));
 }
 
+codesh::definition::fully_qualified_name::fully_qualified_name(
+        const std::vector<std::string>::const_iterator name_start,
+        const std::vector<std::string>::const_iterator name_end) :
+    parts(name_start, name_end),
+    _is_wildcard(false)
+{
+}
+
 codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::with(std::string part)
     const
 {
