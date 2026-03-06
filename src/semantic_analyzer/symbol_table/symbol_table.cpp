@@ -140,28 +140,44 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     throw std::runtime_error("Failed to load external symbol");
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_any_candidate(
-        const semantic_context &context, const definition::fully_qualified_name &name) const
+bool codesh::semantic_analyzer::symbol_table::try_load_prefixes(
+        const std::string &import_prefix, const definition::fully_qualified_name &name) const
 {
-    // First try for the name itself
-    // i.e. the programmer entered "java.lang.String" explicitly
-    if (try_load_candidate(name.join()))
-        return true;
+    const auto &parts = name.get_parts();
 
-    // Otherwise, the programmer may have entered "String" explicitly;
-    // Try for each import
-
-    // 1. Default imports (java.lang, Talmud Codesh)
-    for (const auto &import : default_imports)
+    for (auto end = parts.end(); end != parts.begin(); --end)
     {
-        if (try_load_candidate(import + "/" + name.join()))
+        const definition::fully_qualified_name prefix(parts.begin(), end);
+
+        const auto candidate = import_prefix.empty()
+            ? prefix.join()
+            : import_prefix + "/" + prefix.join();
+
+        if (try_load_candidate(candidate))
             return true;
     }
 
-    // 2. Explicit imports from the source file
+    return false;
+}
+
+bool codesh::semantic_analyzer::symbol_table::try_load_any_candidate(
+        const semantic_context &context, const definition::fully_qualified_name &name) const
+{
+    // 1. Direct absolute FQN (programmer wrote "java/lang/String" explicitly)
+    if (try_load_prefixes("", name))
+        return true;
+
+    // 2. Default imports (java/lang, Talmud Codesh)
+    for (const auto &import : default_imports)
+    {
+        if (try_load_prefixes(import, name))
+            return true;
+    }
+
+    // 3. Explicit imports from the source file
     for (const auto &country : context.lookup_countries)
     {
-        if (try_load_candidate(country.get().get_full_name().join() + "/" + name.join()))
+        if (try_load_prefixes(country.get().get_full_name().join(), name))
             return true;
     }
 

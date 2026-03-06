@@ -44,6 +44,8 @@ class symbol_table final : public i_scope_containing_symbol
             const definition::fully_qualified_name &name) const;
 
     [[nodiscard]] bool try_load_candidate(const std::string &candidate) const;
+    [[nodiscard]] bool try_load_prefixes(const std::string &import_prefix,
+            const definition::fully_qualified_name &name) const;
     [[nodiscard]] bool try_load_any_candidate(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
