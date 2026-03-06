@@ -325,6 +325,8 @@ add_executable(codeshc
         src/semantic_analyzer/external/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
         src/parser/ast/var_reference/array_access_ast_node.h
+        src/parser/ast/operator/assignment/cast_ast_node.cpp
+        src/parser/ast/operator/assignment/cast_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
