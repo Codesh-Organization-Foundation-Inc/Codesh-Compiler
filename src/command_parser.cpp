@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "output/jvm_target/class_file_builder.h"
 
 #include <queue>
 
@@ -13,8 +14,17 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
 static void parse_jre(std::queue<std::string> &args, codesh::command_args &result);
 static std::filesystem::path get_default_jre_path();
 
-
 static void add_default_classpaths(codesh::command_args &result);
+
+
+const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
+
+#ifdef _WIN32
+const std::string JRE_PATH = "C:/Program Files/Java/" + COMMON_JRE_DIR;
+#else
+const std::string DEFAULT_JRE_PATH = "/usr/lib/jvm/" + COMMON_JRE_DIR;
+#endif
+
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
@@ -150,12 +160,10 @@ static std::filesystem::path get_default_jre_path()
     // Prefer JAVA_HOME if set
     if (const char* java_home = std::getenv("JAVA_HOME"))
     {
-        return std::filesystem::path(java_home) / "jre";
+        return std::filesystem::path(java_home) / COMMON_JRE_DIR;
     }
-    return "C:/Program Files/Java/jre-21";
-#else
-    return "/usr/lib/jvm/jre-21";
 #endif
+    return DEFAULT_JRE_PATH;
 }
 
 static bool is_zip(const std::string &file_name)
