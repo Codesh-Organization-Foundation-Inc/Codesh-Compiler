@@ -8,6 +8,7 @@
 #include "semantic_analyzer/semantic_context.h"
 
 #include <filesystem>
+#include <iostream>
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
@@ -115,9 +116,28 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     if (!load_result)
         return std::nullopt;
 
-    const auto &loaded_name_parts = load_result->first.get_parts();
+    const auto &[loaded_name, name_suffix] = load_result.value();
 
-    // Resolve the loaded symbol
+    const auto loaded_symbol = resolve_loaded_symbol(context, loaded_name);
+    if (!loaded_symbol)
+        return std::nullopt;
+
+    if (!name_suffix.has_value())
+        return loaded_symbol;
+
+    const auto *inner_scope = dynamic_cast<const i_scope_containing_symbol *>(&loaded_symbol->get());
+    if (!inner_scope)
+        return std::nullopt;
+
+    const auto &suffix_parts = name_suffix->get_parts();
+    return resolve_method_from_scope_container(*inner_scope, suffix_parts.begin(), suffix_parts.end());
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
+    resolve_loaded_symbol(const semantic_context &context, const definition::fully_qualified_name &name) const
+{
+    const auto &loaded_name_parts = name.get_parts();
+
     // Do imports first as it is most likely
     if (const auto result = resolve_from_imports(
         context,
@@ -138,8 +158,9 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
         return result;
     }
 
-    //TODO: Convert to Codesh warning
-    throw std::runtime_error("Failed to load external symbol");
+    //TODO: Throw Codesh warning instead
+    std::cout << "Loaded a broken class file" << std::endl;
+    return std::nullopt;
 }
 
 std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::symbol_table::try_load_prefixes(

@@ -53,6 +53,9 @@ class symbol_table final : public i_scope_containing_symbol
     std::optional<std::reference_wrapper<symbol>> try_load_external_symbols(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
+    std::optional<std::reference_wrapper<symbol>> resolve_loaded_symbol(const semantic_context &context,
+            const definition::fully_qualified_name &name) const;
+
     [[nodiscard]] bool try_load_candidate(const std::string &candidate) const;
     /**
      * @return The prefix and suffix of the split name, or @c nullptr if the loading was not successful.
