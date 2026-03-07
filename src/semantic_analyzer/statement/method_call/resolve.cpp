@@ -427,7 +427,7 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
 {
     const auto &name = method_call.get_unresolved_name();
 
-    const auto type_symbol = context.symbol_table_.resolve(
+    const auto resolved = context.symbol_table_.resolve(
         context,
         name,
         method_call.get_code_position(),
@@ -436,22 +436,30 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
         name.get_parts().end() - 1
     );
 
-    if (!type_symbol.has_value())
+    if (!resolved.has_value())
         return nullptr;
 
-    // A method must be contained in a type
-    const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
+    // There are a few possible methods a method can be called from:
+    // - Directly from the type
+    if (const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&resolved->get()))
+        return parent_type;
 
-    // If it isn't, then this supposed "method" cannot exist.
-    if (parent_type == nullptr)
+    // - Via a variable/field
+    if (const auto *field = dynamic_cast<const codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
     {
-        context.blasphemy_consumer(fmt::format(
-            codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
-            name.holy_join()
-        ), method_call.get_code_position());
+        // Resolve the value through the field's declared type
+        const auto field_type = resolve_variable_type(context, *field);
+        if (field_type.has_value())
+            return &field_type->get();
     }
 
-    return parent_type;
+    // If it's neither a type nor a field, then this supposed "method" cannot exist.
+    context.blasphemy_consumer(fmt::format(
+        codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
+        name.holy_join()
+    ), method_call.get_code_position());
+
+    return nullptr;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
