@@ -490,13 +490,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         auto &method_symbol = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        // Skip 'this' when matching
+        // Skip 'this' when matching.
+        // 'this' is injected at parameter_types[0] during prepare() for locally-defined methods.
         //
-        // Constructors and non-static methods both have it implicitly as param[0];
-        // callers don't pass it explicitly.
-        //
-        // It is injected later.
-        const size_t param_offset = method_symbol.get_attributes().get_is_static() ? 0 : 1;
+        // External methods (loaded from .class files) follow the JVM descriptor convention where
+        // 'this' is never part of the descriptor, so no offset is needed for them.
+        const bool is_external = method_symbol.get_producing_node() == nullptr;
+        const size_t param_offset = !is_external && !method_symbol.get_attributes().get_is_static() ? 1 : 0;
 
         const auto &method_params = method_symbol.get_parameter_types();
         const auto &arguments = method_call.get_arguments();
