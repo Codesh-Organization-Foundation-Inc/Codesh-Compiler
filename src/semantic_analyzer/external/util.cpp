@@ -57,6 +57,19 @@ uint32_t codesh::semantic_analyzer::external::util::read_u4(std::istream &file)
     return high << 16 | low;
 }
 
+uint16_t codesh::semantic_analyzer::external::util::read_u2_le(std::istream &file)
+{
+    const uint16_t lo = read_u1(file);
+    const uint16_t hi = read_u1(file);
+    return static_cast<uint16_t>(lo | hi << 8);
+}
+
+uint32_t codesh::semantic_analyzer::external::util::read_u4_le(std::istream &file)
+{
+    const uint32_t lo = read_u2_le(file);
+    const uint32_t hi = read_u2_le(file);
+    return lo | hi << 16;
+}
 
 int32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
         const uint32_t table_length, const int32_t seed)

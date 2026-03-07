@@ -2,19 +2,20 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/blasphemy_consumer.h"
+#include "builtins.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/constructor_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/method/operation/super_call_ast_node.h"
-#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
-#include "semantic_analyzer/field_decl/collect.h"
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
@@ -60,7 +61,8 @@ static void add_country(
         codesh::semantic_analyzer::country_symbol &country);
 
 
-const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
+    builtins::ALIAS_OBJECT.data();
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
@@ -81,7 +83,7 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
     const auto lookup_countries = collect_lookup_countries(ast_root, table);
     country_symbol &country = get_own_country(ast_root, table);
 
-    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
 
     for (const auto &type_decl : context.root.get_type_declarations())
     {
@@ -95,7 +97,7 @@ void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_nod
     const auto lookup_countries = collect_lookup_countries(ast_root, table);
     country_symbol &country = get_own_country(ast_root, table);
 
-    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
 
     type_declaration::dispatch_collect_methods(context, country);
     field_declaration::collect(context, country);
@@ -107,7 +109,7 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
     const auto lookup_countries = collect_lookup_countries(ast_root, table);
     const country_symbol &country = get_own_country(ast_root, table);
 
-    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
 
     for (const auto &type_decl : context.root.get_type_declarations())
     {
@@ -303,7 +305,7 @@ static codesh::semantic_analyzer::country_symbol &get_own_country(
     const std::string country_path = ast_root.get_package_name().join("/");
 
     if (country_path.empty())
-        return table.resolve_country("").value();
+        return table.get_global_scope();
 
     return codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
 }
@@ -315,7 +317,7 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
     std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> countries;
 
     // Global country always comes first
-    countries.push_back(table.resolve_country("").value());
+    countries.emplace_back(table.get_global_scope());
 
     // Include the file's own package country for same-package type resolution
     add_country(countries, get_own_country(ast_root, table));

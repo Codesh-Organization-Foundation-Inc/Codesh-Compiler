@@ -20,6 +20,7 @@
 
 #include <utf8.h>
 
+static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -68,7 +69,8 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
-    const codesh::semantic_analyzer::symbol_table master_symbol_table;
+    const codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
+    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     for (const auto &root_node : asts)
     {
@@ -77,7 +79,6 @@ int main(const int argc, char **const argv)
         codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
     }
 
-    codesh::semantic_analyzer::builtins::add_builtins(master_symbol_table);
 
     // Collect all methods BEFORE analyzation and not during regular symbols collection as methods both need
     // types to be resolved in order to be collected but are also mandatory to be collected before analyzation
@@ -133,6 +134,22 @@ int main(const int argc, char **const argv)
     }
 
     return EXIT_SUCCESS;
+}
+
+static std::vector<std::string> generate_default_imports(const codesh::command_args &args)
+{
+    std::vector<std::string> results;
+
+    if (args.is_java_default_classpath)
+    {
+        results.emplace_back("java/lang");
+    }
+    if (args.is_talmud_codesh_classpath)
+    {
+        results.emplace_back("ישראל/קודש/בן/משה");
+    }
+
+    return results;
 }
 
 static void update_source_file(const std::filesystem::path &source_file_path)

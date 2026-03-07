@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "output/jvm_target/class_file_builder.h"
 
 #include <queue>
 
@@ -13,12 +14,21 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
 static void parse_jre(std::queue<std::string> &args, codesh::command_args &result);
 static std::filesystem::path get_default_jre_path();
 
-
 static void add_default_classpaths(codesh::command_args &result);
+
+
+const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
+
+#ifdef _WIN32
+const std::string JRE_PATH = "C:/Program Files/Java/" + COMMON_JRE_DIR;
+#else
+const std::string DEFAULT_JRE_PATH = "/usr/lib/jvm/" + COMMON_JRE_DIR;
+#endif
+
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
-    command_args result {};
+    command_args result{};
     result.is_java_default_classpath = false;
     result.is_talmud_codesh_classpath = true;
 
@@ -76,6 +86,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     {
         result.jre_path = get_default_jre_path();
     }
+    //TODO: Check whether jre_path and the default classpaths truly exist
 
     return result;
 }
@@ -104,7 +115,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         const std::filesystem::path file_path(entry);
         if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
         {
-            result.classpath.emplace_back(file_path);
+            result.classpaths.emplace_back(file_path);
             continue;
         }
 
@@ -149,12 +160,10 @@ static std::filesystem::path get_default_jre_path()
     // Prefer JAVA_HOME if set
     if (const char* java_home = std::getenv("JAVA_HOME"))
     {
-        return std::filesystem::path(java_home) / "jre";
+        return std::filesystem::path(java_home) / COMMON_JRE_DIR;
     }
-    return "C:/Program Files/Java/jre-21";
-#else
-    return "/usr/lib/jvm/jre-21";
 #endif
+    return DEFAULT_JRE_PATH;
 }
 
 static bool is_zip(const std::string &file_name)
@@ -195,22 +204,26 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
 
 static void add_default_classpaths(codesh::command_args &result)
 {
+    result.classpaths.emplace_back(".");
+
     if (result.is_java_default_classpath)
     {
-        result.classpath.emplace_back(".");
+        result.classpaths.emplace_back(get_default_jre_path() / "lib/modules");
     }
 
     if (result.is_talmud_codesh_classpath)
     {
-        const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
-
-        if (std::filesystem::exists(talmud_path))
-        {
-            result.classpath.emplace_back(talmud_path);
-        }
-        else
-        {
-            throw std::runtime_error("talmud path was not found");
-        }
+        //FIXME: Not the path
+        // const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
+        //
+        // //TODO: Move to yet-to-exist check after this function is run
+        // if (std::filesystem::exists(talmud_path))
+        // {
+        //     result.classpaths.emplace_back(talmud_path);
+        // }
+        // else
+        // {
+        //     throw std::runtime_error("talmud path was not found");
+        // }
     }
 }

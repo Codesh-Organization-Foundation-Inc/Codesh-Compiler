@@ -26,14 +26,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
-/**
- * If `var_sym` holds a custom type that can be resolved, returns the corresponding type_symbol.
- * Returns @c std::nullopt if the variable's type is primitive or not yet resolvable.
- */
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
-    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::variable_symbol &var_sym);
-
 struct local_result
 {
     codesh::semantic_analyzer::type_symbol *type;
@@ -43,10 +35,22 @@ struct local_result
 struct parent_type_result
 {
     const codesh::semantic_analyzer::type_symbol *parent_type;
+    /**
+     * Receiver = The variable being passed as `this` to the non-static method
+     */
     codesh::semantic_analyzer::variable_symbol *receiver_variable;
 };
 
-static std::optional<local_result> find_local_var_by_name(
+/**
+ * Looks up @p name in the current method scope.
+ *
+ * If found and the symbol is a variable with a resolvable custom type, returns the
+ * resolved type alongside the variable symbol.
+ *
+ * @returns @c std::nullopt if the name is not found, does not refer to a variable,
+ * or the variable's type is primitive / not yet resolvable.
+ */
+static std::optional<local_result> find_custom_type_local_var_by_name(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
         const std::string &name);
@@ -54,9 +58,9 @@ static std::optional<local_result> find_local_var_by_name(
 /**
  * Resolves the parent type of method call from imports, treating the name as a qualified type path
  * with the last segment being the method name.
- * Emits a semantic error and returns @c std::nullopt if the symbol is not found or is not a type.
+ * Emits a semantic error and returns @c std::nullopt if the symbol is not found or cannot yield a type.
  */
-static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+static std::optional<parent_type_result> resolve_parent_type_from_imports(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
@@ -122,25 +126,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 
     if (!result.has_value())
         return false;
-
-
-    //TODO: Remove this once Talmud Codesh implements this method by itself:
-    // Manually pass System.out to every מסוף ל־אמר call
-    if (method_call.get_unresolved_name().join() == "מסוף/אמר")
-    {
-        auto system_in_reference = std::make_unique<variable_reference_ast_node>(blasphemy::NO_CODE_POS, "מסוף/פלט");
-        system_in_reference->set_resolved(
-            *static_cast<field_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                &symbol_table::resolve(
-                    context,
-                    "מסוף/פלט",
-                    method_call.get_code_position()
-                )->get()
-            )
-        );
-
-        method_call.get_arguments().push_front(std::move(system_in_reference));
-    }
 
     return true;
 }
@@ -248,12 +233,6 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         }
     }
 
-
-    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
-    // Receiver = The variable being passed as `this` to the non-static method
-    // e.g. in ויעש מתשנה ל־מעשה
-    codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
-
     if (method_call.has_chained_method())
     {
         return resolve_parent_type_for_chained_call(method_call.get_chained_method());
@@ -263,23 +242,15 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     // ויעש משתנה ל־מעשה...
     const auto &front = method_call.get_unresolved_name().get_parts().front();
 
-    if (const auto result = find_local_var_by_name(context, scope, front))
+    if (const auto result = find_custom_type_local_var_by_name(context, scope, front))
     {
-        parent_type = result->type;
-        receiver_variable = result->variable;
+        return parent_type_result {
+            result->type,
+            result->variable
+        };
     }
 
-    if (parent_type == nullptr)
-    {
-        parent_type = resolve_parent_type_from_imports(context, method_call);
-        if (parent_type == nullptr)
-            return std::nullopt;
-    }
-
-    return parent_type_result {
-        parent_type,
-        receiver_variable
-    };
+    return resolve_parent_type_from_imports(context, method_call);
 }
 
 static std::optional<parent_type_result> resolve_call_parent_type(
@@ -325,7 +296,7 @@ static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
     };
 }
 
-static std::optional<local_result> find_local_var_by_name(
+static std::optional<local_result> find_custom_type_local_var_by_name(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
         const std::string &name)
@@ -338,30 +309,17 @@ static std::optional<local_result> find_local_var_by_name(
     if (var_sym == nullptr)
         return std::nullopt;
 
-    const auto resolved_type = resolve_variable_type(context, *var_sym);
+    const auto resolved_type = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context,
+        *var_sym->get_type()
+    );
     if (!resolved_type.has_value())
         return std::nullopt;
 
-    return local_result { &resolved_type->get(), var_sym };
-}
-
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
-    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::variable_symbol &var_sym)
-{
-    const auto *custom_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(var_sym.get_type());
-    if (custom_type == nullptr)
-        return std::nullopt;
-
-    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type(
-        context,
-        *custom_type
-    );
-
-    if (!resolved.has_value())
-        return std::nullopt;
-
-    return resolved;
+    return local_result {
+        &resolved_type->get(),
+        var_sym
+    };
 }
 
 static void prepend_external_this_argument(
@@ -440,13 +398,13 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
     return all_succeed;
 }
 
-static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+static std::optional<parent_type_result> resolve_parent_type_from_imports(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto &name = method_call.get_unresolved_name();
 
-    const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve(
+    const auto resolved = context.symbol_table_.resolve(
         context,
         name,
         method_call.get_code_position(),
@@ -455,22 +413,44 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
         name.get_parts().end() - 1
     );
 
-    if (!type_symbol.has_value())
-        return nullptr;
+    if (!resolved.has_value())
+        return std::nullopt;
 
-    // A method must be contained in a type
-    const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&type_symbol->get());
-
-    // If it isn't, then this supposed "method" cannot exist.
-    if (parent_type == nullptr)
+    // There are a few possible methods a method can be called from:
+    // - Directly from the type
+    if (const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&resolved->get()))
     {
-        context.blasphemy_consumer(fmt::format(
-            codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
-            name.holy_join()
-        ), method_call.get_code_position());
+        return parent_type_result {
+            parent_type,
+            nullptr
+        };
     }
 
-    return parent_type;
+    // - Via a variable/field (e.g. System.out.println)
+    if (auto *field = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
+    {
+        // Field type must be custom for it to have contents (e.g System.out.println, out is PrintStream)
+        const auto field_type = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context,
+            *field->get_type()
+        );
+
+        if (field_type.has_value())
+        {
+            return parent_type_result {
+                &field_type->get(),
+                field
+            };
+        }
+    }
+
+    // If it's neither a type nor a field, then this supposed "method" cannot exist.
+    context.blasphemy_consumer(fmt::format(
+        codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
+        name.holy_join()
+    ), method_call.get_code_position());
+
+    return std::nullopt;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
@@ -503,13 +483,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     {
         auto &method_symbol = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        // Skip 'this' when matching
+        // Skip 'this' when matching.
+        // 'this' is injected at parameter_types[0] during prepare() for locally-defined methods.
         //
-        // Constructors and non-static methods both have it implicitly as param[0];
-        // callers don't pass it explicitly.
-        //
-        // It is injected later in resolve().
-        const size_t param_offset = method_symbol.get_attributes().get_is_static() ? 0 : 1;
+        // External methods (loaded from .class files) follow the JVM descriptor convention where
+        // 'this' is never part of the descriptor, so no offset is needed for them.
+        const bool is_external = method_symbol.get_producing_node() == nullptr;
+        const size_t param_offset = !is_external && !method_symbol.get_attributes().get_is_static() ? 1 : 0;
 
         const auto &method_params = method_symbol.get_parameter_types();
         const auto &arguments = method_call.get_arguments();
@@ -529,13 +509,23 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         {
             const auto method_param_type = method_params.at(i + param_offset).get();
             const auto argument_value = arguments.at(i).get();
+            const auto argument_type = argument_value->get_type();
 
             // Make sure this isn't an error argument
-            if (argument_value->get_type() == nullptr)
+            if (argument_type == nullptr)
                 return std::nullopt;
 
 
-            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_value->get_type(), *method_param_type))
+            // Resolve the parameter before using it.
+            // While a programmer-written method is guaranteed to have been resolved,
+            // external ones are not.
+            //
+            // Generically check regardless.
+            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *method_param_type))
+                continue;
+
+
+            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_type, *method_param_type))
             {
                 //TODO: Consider "best match", don't just return (casting etc.)
                 return method_symbol;

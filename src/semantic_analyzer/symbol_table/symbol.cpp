@@ -104,11 +104,13 @@ codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::ge
 
 codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_scope()
 {
+    // Out of necessity
     return methods_scope;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_scope() const
 {
+    // Out of necessity
     return methods_scope;
 }
 
@@ -125,9 +127,9 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::ty
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::type_symbol::
     resolve_own(const std::string &name) const
 {
-    const auto r = fields_scope.resolve_local(name);
-    if (r.has_value())
-        return r;
+    const auto resolved = fields_scope.resolve_local(name);
+    if (resolved.has_value())
+        return resolved;
 
     return methods_scope.resolve_local(name);
 }

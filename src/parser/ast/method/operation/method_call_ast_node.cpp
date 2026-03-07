@@ -86,7 +86,12 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
         param_types.emplace_back(*param);
     }
 
-    return util::generate_method_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
+    return util::generate_method_descriptor(
+        get_resolved(),
+        method.get_return_type(),
+        param_types,
+        method.get_attributes()
+    );
 }
 
 const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
@@ -185,9 +190,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    //TODO: Remove after Talmud Codesh
-    const bool forcefeed_static = method.get_full_name().join() == "java/io/PrintStream/println";
-    const auto invokation_type = method.get_attributes().get_is_static() && !forcefeed_static
+    const auto invokation_type = method.get_attributes().get_is_static()
         ? output::ir::invokation_type::STATIC
         : output::ir::invokation_type::VIRTUAL;
 
