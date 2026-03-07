@@ -52,7 +52,7 @@ enum class token_group : int
     KEYWORD_ABSTRACT, // רוחני
     KEYWORD_THIS, // אנכי
     KEYWORD_SUPER, // אבי
-    KEYWORD_AS, // בתור
+    KEYWORD_AS, // בתור־
 
     OPERATOR_ADDITION, // ויוסף ל-
     OPERATOR_SUBTRACTION, // ויוחסר מן
