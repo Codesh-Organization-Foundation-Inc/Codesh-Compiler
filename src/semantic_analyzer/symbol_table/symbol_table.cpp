@@ -264,16 +264,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (it == end)
         return std::nullopt;
 
-    // We can only resolve for named symbol maps.
-    // If the container is not a named symbol map - it means that we've hit a local scope (i.e a method),
-    // in which case it is unnamed and thus unaccessible anyway.
-    const auto &named_scope_container = dynamic_cast<const codesh::semantic_analyzer::named_symbol_map *>(
-        &scope_container.get_scope()
-    );
-    if (named_scope_container == nullptr)
-        return std::nullopt;
-
-    const auto symbol_raw = named_scope_container->resolve_local(*it);
+    const auto symbol_raw = scope_container.resolve_own(*it);
     if (!symbol_raw.has_value())
         return std::nullopt;
 
