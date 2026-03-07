@@ -43,6 +43,9 @@ struct local_result
 struct parent_type_result
 {
     const codesh::semantic_analyzer::type_symbol *parent_type;
+    /**
+     * Receiver = The variable being passed as `this` to the non-static method
+     */
     codesh::semantic_analyzer::variable_symbol *receiver_variable;
 };
 
@@ -54,9 +57,9 @@ static std::optional<local_result> find_local_var_by_name(
 /**
  * Resolves the parent type of method call from imports, treating the name as a qualified type path
  * with the last segment being the method name.
- * Emits a semantic error and returns @c std::nullopt if the symbol is not found or is not a type.
+ * Emits a semantic error and returns @c std::nullopt if the symbol is not found or cannot yield a type.
  */
-static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+static std::optional<parent_type_result> resolve_parent_type_from_imports(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
@@ -229,12 +232,6 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         }
     }
 
-
-    const codesh::semantic_analyzer::type_symbol *parent_type = nullptr;
-    // Receiver = The variable being passed as `this` to the non-static method
-    // e.g. in ויעש מתשנה ל־מעשה
-    codesh::semantic_analyzer::variable_symbol *receiver_variable = nullptr;
-
     if (method_call.has_chained_method())
     {
         return resolve_parent_type_for_chained_call(method_call.get_chained_method());
@@ -246,21 +243,13 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     if (const auto result = find_local_var_by_name(context, scope, front))
     {
-        parent_type = result->type;
-        receiver_variable = result->variable;
+        return parent_type_result {
+            result->type,
+            result->variable
+        };
     }
 
-    if (parent_type == nullptr)
-    {
-        parent_type = resolve_parent_type_from_imports(context, method_call);
-        if (parent_type == nullptr)
-            return std::nullopt;
-    }
-
-    return parent_type_result {
-        parent_type,
-        receiver_variable
-    };
+    return resolve_parent_type_from_imports(context, method_call);
 }
 
 static std::optional<parent_type_result> resolve_call_parent_type(
@@ -421,7 +410,7 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
     return all_succeed;
 }
 
-static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_imports(
+static std::optional<parent_type_result> resolve_parent_type_from_imports(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
@@ -437,20 +426,29 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
     );
 
     if (!resolved.has_value())
-        return nullptr;
+        return std::nullopt;
 
     // There are a few possible methods a method can be called from:
     // - Directly from the type
     if (const auto *parent_type = dynamic_cast<const codesh::semantic_analyzer::type_symbol *>(&resolved->get()))
-        return parent_type;
-
-    // - Via a variable/field
-    if (const auto *field = dynamic_cast<const codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
     {
-        // Resolve the value through the field's declared type
+        return parent_type_result {
+            parent_type,
+            nullptr
+        };
+    }
+
+    // - Via a variable/field (e.g. System / out / println())
+    if (auto *field = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
+    {
         const auto field_type = resolve_variable_type(context, *field);
         if (field_type.has_value())
-            return &field_type->get();
+        {
+            return parent_type_result {
+                &field_type->get(),
+                field
+            };
+        }
     }
 
     // If it's neither a type nor a field, then this supposed "method" cannot exist.
@@ -459,7 +457,7 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
         name.holy_join()
     ), method_call.get_code_position());
 
-    return nullptr;
+    return std::nullopt;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
@@ -497,7 +495,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         // Constructors and non-static methods both have it implicitly as param[0];
         // callers don't pass it explicitly.
         //
-        // It is injected later in resolve().
+        // It is injected later.
         const size_t param_offset = method_symbol.get_attributes().get_is_static() ? 0 : 1;
 
         const auto &method_params = method_symbol.get_parameter_types();
