@@ -131,8 +131,9 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
         auto system_in_reference = std::make_unique<variable_reference_ast_node>(blasphemy::NO_CODE_POS, "מסוף/פלט");
         system_in_reference->set_resolved(
             *static_cast<field_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
-                &symbol_table::resolve_from_imports(
-                    context, "מסוף/פלט",
+                &symbol_table::resolve(
+                    context,
+                    "מסוף/פלט",
                     method_call.get_code_position()
                 )->get()
             )
@@ -445,7 +446,7 @@ static const codesh::semantic_analyzer::type_symbol *resolve_parent_type_from_im
 {
     const auto &name = method_call.get_unresolved_name();
 
-    const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+    const auto type_symbol = codesh::semantic_analyzer::symbol_table::resolve(
         context,
         name,
         method_call.get_code_position(),

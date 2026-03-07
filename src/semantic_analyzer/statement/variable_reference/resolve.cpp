@@ -127,7 +127,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         if (full_var_name.get_parts().front() == "this")
             return find_field_symbol(context, var_ref_node, scope);
 
-        return codesh::semantic_analyzer::symbol_table::resolve_from_imports(
+        return codesh::semantic_analyzer::symbol_table::resolve(
             context,
             full_var_name,
             var_ref_node.get_code_position()

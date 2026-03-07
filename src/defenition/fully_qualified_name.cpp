@@ -60,7 +60,7 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_is_wildcard(bool wildcard)
+void codesh::definition::fully_qualified_name::set_is_wildcard(const bool wildcard)
 {
     _is_wildcard = wildcard;
 }

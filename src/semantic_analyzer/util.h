@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace codesh::semantic_analyzer
 {
@@ -79,6 +80,8 @@ bool are_types_compatible(const ast::type::type_ast_node &from, const ast::type:
  */
 [[nodiscard]] std::pair<std::reference_wrapper<type_symbol>, bool> add_type_symbol(country_symbol &country,
         const std::string &name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        std::unique_ptr<ast::type::custom_type_ast_node> super_type = nullptr,
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces = {},
         ast::type_decl::type_declaration_ast_node *decl = nullptr);
 
 /**

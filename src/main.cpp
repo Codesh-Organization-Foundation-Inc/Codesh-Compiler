@@ -14,7 +14,6 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -35,9 +34,6 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
         codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
         const codesh::semantic_analyzer::symbol_table &symbol_table);
-
-static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
 
 
 int main(const int argc, char **const argv)
@@ -72,7 +68,7 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
-    const auto master_symbol_table = build_master_symbol_table(asts);
+    const codesh::semantic_analyzer::symbol_table master_symbol_table;
 
     for (const auto &root_node : asts)
     {
@@ -191,15 +187,6 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
     }
 
     return results;
-}
-
-static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts)
-{
-    if (asts.empty())
-        throw std::runtime_error("Cannot build a master symbol table without compilation units");
-
-    return codesh::semantic_analyzer::symbol_table(*asts.front());
 }
 
 static bool validate_output_path(const std::filesystem::path &dest_path, const bool is_project)

@@ -10,6 +10,10 @@ namespace codesh::semantic_analyzer
 {
 class type_symbol;
 }
+namespace codesh::ast::type_decl
+{
+class type_declaration_ast_node;
+}
 namespace codesh::ast::type
 {
 
