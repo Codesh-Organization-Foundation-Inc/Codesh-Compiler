@@ -115,23 +115,24 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     if (!load_result)
         return std::nullopt;
 
+    const auto &loaded_name_parts = load_result->first.get_parts();
+
     // Resolve the loaded symbol
     // Do imports first as it is most likely
     if (const auto result = resolve_from_imports(
         context,
-        name.get_parts().begin(),
-        name.get_parts().end()
+        loaded_name_parts.begin(),
+        loaded_name_parts.end()
     ))
     {
         return result;
     }
 
     // Then from the global scope
-    const auto &fqn_parts = name.get_parts();
     if (const auto result = resolve_method_from_scope_container(
         *global_scope,
-        fqn_parts.begin(),
-        fqn_parts.end())
+        loaded_name_parts.begin(),
+        loaded_name_parts.end())
     )
     {
         return result;
@@ -163,7 +164,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
             }
 
             return std::pair{
-                std::move(prefix),
+                candidate.data(),
                 std::move(suffix)
             };
         }
