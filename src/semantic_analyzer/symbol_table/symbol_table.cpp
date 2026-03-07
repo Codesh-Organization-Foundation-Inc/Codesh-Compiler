@@ -111,7 +111,8 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name) const
 {
-    if (!try_load_any_candidate(context, name))
+    const auto load_result = try_load_any_candidate(context, name);
+    if (!load_result)
         return std::nullopt;
 
     // Resolve the loaded symbol
@@ -140,48 +141,59 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     throw std::runtime_error("Failed to load external symbol");
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_prefixes(
+std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::symbol_table::try_load_prefixes(
         const std::string &import_prefix, const definition::fully_qualified_name &name) const
 {
     const auto &parts = name.get_parts();
 
     for (auto end = parts.end(); end != parts.begin(); --end)
     {
-        const definition::fully_qualified_name prefix(parts.begin(), end);
+        definition::fully_qualified_name prefix(parts.begin(), end);
 
         const auto candidate = import_prefix.empty()
             ? prefix.join()
             : import_prefix + "/" + prefix.join();
 
         if (try_load_candidate(candidate))
-            return true;
+        {
+            std::optional<definition::fully_qualified_name> suffix;
+            if (end != name.get_parts().end())
+            {
+                suffix.emplace(end, name.get_parts().end());
+            }
+
+            return std::pair{
+                std::move(prefix),
+                std::move(suffix)
+            };
+        }
     }
 
-    return false;
+    return std::nullopt;
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_any_candidate(
+std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::symbol_table::try_load_any_candidate(
         const semantic_context &context, const definition::fully_qualified_name &name) const
 {
     // 1. Direct absolute FQN (programmer wrote "java/lang/String" explicitly)
-    if (try_load_prefixes("", name))
-        return true;
+    if (const auto result = try_load_prefixes("", name))
+        return result;
 
     // 2. Default imports (java/lang, Talmud Codesh)
     for (const auto &import : default_imports)
     {
-        if (try_load_prefixes(import, name))
-            return true;
+        if (const auto result = try_load_prefixes(import, name))
+            return result;
     }
 
     // 3. Explicit imports from the source file
     for (const auto &country : context.lookup_countries)
     {
-        if (try_load_prefixes(country.get().get_full_name().join(), name))
-            return true;
+        if (const auto result = try_load_prefixes(country.get().get_full_name().join(), name))
+            return result;
     }
 
-    return false;
+    return std::nullopt;
 }
 
 bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const

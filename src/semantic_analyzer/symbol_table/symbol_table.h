@@ -19,6 +19,16 @@ struct semantic_context;
 namespace codesh::semantic_analyzer
 {
 
+/**
+ * Represents an FQN that was split into a prefix and a suffix, if one exists.
+ *
+ * If a suffix does not exist, then the original name is the same as the prefix.
+ */
+using split_fqn = std::pair<
+    definition::fully_qualified_name,
+    std::optional<definition::fully_qualified_name>
+>;
+
 class symbol_table final : public i_scope_containing_symbol
 {
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
@@ -44,9 +54,17 @@ class symbol_table final : public i_scope_containing_symbol
             const definition::fully_qualified_name &name) const;
 
     [[nodiscard]] bool try_load_candidate(const std::string &candidate) const;
-    [[nodiscard]] bool try_load_prefixes(const std::string &import_prefix,
-            const definition::fully_qualified_name &name) const;
-    [[nodiscard]] bool try_load_any_candidate(const semantic_context &context,
+    /**
+     * @return The prefix and suffix of the split name, or @c nullptr if the loading was not successful.
+     *
+     * The FQN will be split if an earlier part of the name was loadable.
+     *
+     * For instance, calling @c System.out.println will result in the name @c System/out being passed.
+     * In that case, the return value will be a @c System suffix (what was loaded) and @c out (what was omitted).
+     */
+    [[nodiscard]] std::optional<split_fqn> try_load_prefixes(
+            const std::string &import_prefix, const definition::fully_qualified_name &name) const;
+    [[nodiscard]] std::optional<split_fqn> try_load_any_candidate(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
 public:
