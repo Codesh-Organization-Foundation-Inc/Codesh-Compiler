@@ -30,6 +30,10 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
+static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_casting(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
 {
@@ -175,7 +179,10 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             tokens.pop();
             return parse_range(tokens, std::move(eval_ast_node));
         }
-
+        case codesh::token_group::KEYWORD_AS:{
+            tokens.pop();
+            return parse_casting(tokens, std::move(eval_ast_node));
+        }
         case codesh::token_group::OPERATOR_NOT: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
@@ -228,4 +235,11 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::move(to_val),
         std::move(skip_val)
     );
+}
+
+static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_casting(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
+{
+
 }
