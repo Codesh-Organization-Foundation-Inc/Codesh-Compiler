@@ -438,7 +438,7 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
         };
     }
 
-    // - Via a variable/field (e.g. System / out / println())
+    // - Via a variable/field (e.g. System.out.println)
     if (auto *field = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
     {
         const auto field_type = resolve_variable_type(context, *field);
@@ -516,13 +516,23 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         {
             const auto method_param_type = method_params.at(i + param_offset).get();
             const auto argument_value = arguments.at(i).get();
+            const auto argument_type = argument_value->get_type();
 
             // Make sure this isn't an error argument
-            if (argument_value->get_type() == nullptr)
+            if (argument_type == nullptr)
                 return std::nullopt;
 
 
-            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_value->get_type(), *method_param_type))
+            // Resolve the parameter before using it.
+            // While a programmer-written method is guaranteed to have been resolved,
+            // external ones are not.
+            //
+            // Generically check regardless.
+            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *method_param_type))
+                continue;
+
+
+            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_type, *method_param_type))
             {
                 //TODO: Consider "best match", don't just return (casting etc.)
                 return method_symbol;

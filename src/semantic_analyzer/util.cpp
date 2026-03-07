@@ -46,6 +46,9 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
         ast::type::custom_type_ast_node &custom_type_node,
         const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
 {
+    if (custom_type_node.is_resolved())
+        return true;
+
     const auto result = resolve_custom_type(
         context,
         custom_type_node
