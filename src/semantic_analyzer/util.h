@@ -41,10 +41,24 @@ namespace codesh::semantic_analyzer::util
         const ast::type::custom_type_ast_node &custom_type_node);
 
 /**
- * @return Whether the type was successfully resolved
+ * @return The resolved type symbol if it was successfully resolved - @c std::nullopt otherwise
+ * @param context
+ * @param custom_type_node
  * @param related_type_node A 2nd node that will get resolved with the exact same result, if found.
  */
-bool resolve_custom_type_node(const semantic_context &context, ast::type::custom_type_ast_node &custom_type_node,
+std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type_node(const semantic_context &context,
+        ast::type::custom_type_ast_node &custom_type_node,
+        std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node = std::nullopt);
+
+/**
+ * @return The resolved type symbol if the provided @p type_node was a @c custom_type_node and was successfully
+ * resolved - @c std::nullopt otherwise
+ * @param context
+ * @param type_node
+ * @param related_type_node A 2nd node that will get resolved with the exact same result, if found.
+ */
+std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type_node(const semantic_context &context,
+        ast::type::type_ast_node &type_node,
         std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node = std::nullopt);
 
 /**
@@ -54,6 +68,8 @@ bool resolve_custom_type_node(const semantic_context &context, ast::type::custom
  * For instance, a boolean is simply a primitive boolean that doesn't link anywhere.
  *
  * @return Whether the type was successfully resolved
+ * @param context
+ * @param type_node
  * @param related_type_node A 2nd node that will get resolved with the exact same result, if found.
  */
 bool resolve_type_node(const semantic_context &context, ast::type::type_ast_node &type_node,

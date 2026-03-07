@@ -26,14 +26,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
-/**
- * If `var_sym` holds a custom type that can be resolved, returns the corresponding type_symbol.
- * Returns @c std::nullopt if the variable's type is primitive or not yet resolvable.
- */
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
-    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::variable_symbol &var_sym);
-
 struct local_result
 {
     codesh::semantic_analyzer::type_symbol *type;
@@ -49,7 +41,16 @@ struct parent_type_result
     codesh::semantic_analyzer::variable_symbol *receiver_variable;
 };
 
-static std::optional<local_result> find_local_var_by_name(
+/**
+ * Looks up @p name in the current method scope.
+ *
+ * If found and the symbol is a variable with a resolvable custom type, returns the
+ * resolved type alongside the variable symbol.
+ *
+ * @returns @c std::nullopt if the name is not found, does not refer to a variable,
+ * or the variable's type is primitive / not yet resolvable.
+ */
+static std::optional<local_result> find_custom_type_local_var_by_name(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
         const std::string &name);
@@ -241,7 +242,7 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     // ויעש משתנה ל־מעשה...
     const auto &front = method_call.get_unresolved_name().get_parts().front();
 
-    if (const auto result = find_local_var_by_name(context, scope, front))
+    if (const auto result = find_custom_type_local_var_by_name(context, scope, front))
     {
         return parent_type_result {
             result->type,
@@ -295,7 +296,7 @@ static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
     };
 }
 
-static std::optional<local_result> find_local_var_by_name(
+static std::optional<local_result> find_custom_type_local_var_by_name(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
         const std::string &name)
@@ -308,30 +309,17 @@ static std::optional<local_result> find_local_var_by_name(
     if (var_sym == nullptr)
         return std::nullopt;
 
-    const auto resolved_type = resolve_variable_type(context, *var_sym);
+    const auto resolved_type = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context,
+        *var_sym->get_type()
+    );
     if (!resolved_type.has_value())
         return std::nullopt;
 
-    return local_result { &resolved_type->get(), var_sym };
-}
-
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>>
-    resolve_variable_type(const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::variable_symbol &var_sym)
-{
-    const auto *custom_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(var_sym.get_type());
-    if (custom_type == nullptr)
-        return std::nullopt;
-
-    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type(
-        context,
-        *custom_type
-    );
-
-    if (!resolved.has_value())
-        return std::nullopt;
-
-    return resolved;
+    return local_result {
+        &resolved_type->get(),
+        var_sym
+    };
 }
 
 static void prepend_external_this_argument(
@@ -441,7 +429,12 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
     // - Via a variable/field (e.g. System.out.println)
     if (auto *field = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&resolved->get()))
     {
-        const auto field_type = resolve_variable_type(context, *field);
+        // Field type must be custom for it to have contents (e.g System.out.println, out is PrintStream)
+        const auto field_type = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context,
+            *field->get_type()
+        );
+
         if (field_type.has_value())
         {
             return parent_type_result {

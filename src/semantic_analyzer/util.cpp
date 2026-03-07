@@ -42,12 +42,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     return *result;
 }
 
-bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_context &context,
-        ast::type::custom_type_ast_node &custom_type_node,
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
+    resolve_custom_type_node(const semantic_context &context, ast::type::custom_type_ast_node &custom_type_node,
         const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
 {
     if (custom_type_node.is_resolved())
-        return true;
+        return custom_type_node.get_resolved();
 
     const auto result = resolve_custom_type(
         context,
@@ -55,7 +55,7 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
     );
 
     if (!result.has_value())
-        return false;
+        return std::nullopt;
 
 
     custom_type_node.set_resolved(result.value());
@@ -66,12 +66,27 @@ bool codesh::semantic_analyzer::util::resolve_custom_type_node(const semantic_co
         custom_type.set_resolved(result.value());
     }
 
-    return true;
+    return result;
 }
 
-bool codesh::semantic_analyzer::util::resolve_type_node(
-    const semantic_context &context, ast::type::type_ast_node &type_node,
-    const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
+    resolve_custom_type_node(const semantic_context &context, ast::type::type_ast_node &type_node,
+                             const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
+{
+    auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(&type_node);
+    if (!custom_type)
+        return std::nullopt;
+
+    return resolve_custom_type_node(
+        context,
+        *custom_type,
+        related_type_node
+    );
+}
+
+bool codesh::semantic_analyzer::util::resolve_type_node(const semantic_context &context,
+        ast::type::type_ast_node &type_node,
+        const std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node)
 {
     auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(&type_node);
     if (!custom_type)
@@ -81,7 +96,7 @@ bool codesh::semantic_analyzer::util::resolve_type_node(
         context,
         *custom_type,
         related_type_node
-    );
+    ).has_value();
 }
 
 bool codesh::semantic_analyzer::util::are_types_compatible(const ast::type::type_ast_node &from,
