@@ -180,7 +180,7 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             tokens.pop();
             return parse_range(tokens, std::move(eval_ast_node));
         }
-        case codesh::token_group::KEYWORD_AS:{
+        case codesh::token_group::KEYWORD_AS: {
             tokens.pop();
             return parse_casting(tokens, std::move(eval_ast_node));
         }
