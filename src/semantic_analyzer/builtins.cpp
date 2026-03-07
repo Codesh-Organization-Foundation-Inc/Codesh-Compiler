@@ -11,7 +11,7 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
 
 void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &table)
 {
-    //TODO: Properly wrap in countries
+    //TODO: Properly wrap in Talmud Codesh country
     country_symbol &country = table.get_global_scope();
 
     add_alias_ktuvim(country);

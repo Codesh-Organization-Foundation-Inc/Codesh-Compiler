@@ -7,6 +7,7 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
+#include "semantic_analyzer/builtins.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -53,7 +54,10 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
             str_pos,
-            std::make_unique<ast::type::custom_type_ast_node>(str_pos, "java/lang/String"),
+            std::make_unique<ast::type::custom_type_ast_node>(
+                str_pos,
+                definition::fully_qualified_name(semantic_analyzer::builtins::ALIAS_STRING)
+            ),
 
             util::consume_alnum_identifier_token(
                 tokens, "לא אמור לקרות"
