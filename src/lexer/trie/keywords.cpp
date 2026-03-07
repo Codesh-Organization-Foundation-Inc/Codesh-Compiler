@@ -52,6 +52,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_ABSTRACT, u"רוחני", word_boundary::BOTH},
     {token_group::KEYWORD_THIS, u"אנכי", word_boundary::BOTH},
     {token_group::KEYWORD_SUPER, u"אבי", word_boundary::BOTH},
+    {token_group::KEYWORD_AS, u"בתור", word_boundary::BOTH},
 
     {token_group::OPERATOR_ADDITION, u"ויוסף ל־", word_boundary::BEFORE},
     {token_group::OPERATOR_SUBTRACTION, u"ויוחסר מן", word_boundary::BOTH},
