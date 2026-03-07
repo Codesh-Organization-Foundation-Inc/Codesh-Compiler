@@ -18,6 +18,7 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
@@ -58,6 +59,11 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
     if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&stmnt))
     {
         return variable_reference::resolve(context, *var_ref, scope);
+    }
+
+    if (const auto str = dynamic_cast<ast::var_reference::evaluable_ast_node<std::string> *>(&stmnt))
+    {
+        return util::resolve_type_node(context, *str->get_type());
     }
 
 
