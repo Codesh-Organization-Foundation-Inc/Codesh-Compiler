@@ -240,7 +240,7 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs)
 {
     auto type_node = codesh::parser::util::parse_type(tokens);
 
@@ -258,8 +258,8 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting
     }
 
     return std::make_unique<codesh::ast::op::assignment::cast_ast_node>(
-        eval_ast_node->get_code_position(),
-        std::move(eval_ast_node),
+        lhs->get_code_position(),
+        std::move(lhs),
         std::move(type_node)
     );
 }
