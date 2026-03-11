@@ -260,6 +260,6 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting
     return std::make_unique<codesh::ast::op::assignment::cast_ast_node>(
         eval_ast_node->get_code_position(),
         std::move(eval_ast_node),
-        type_node.release()
+        std::move(type_node)
     );
 }
