@@ -82,7 +82,7 @@ enum class token_group : int
     KEYWORD_NULL, // תהו
 
     KEYWORD_ARRAY, // כמסדר
-    KEYWORD_INDEX, // במקום i
+    KEYWORD_INDEX, // במקום
     KEYWORD_REPLACE, // ויחלף
     PUNCTUATION_EQUAL, // ב־
 
