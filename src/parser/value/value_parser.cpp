@@ -20,6 +20,7 @@
 #include "fmt/format.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
+#include "parser/ast/var_reference/array_access_ast_node.h"
 #include "token/token_group.h"
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
@@ -27,6 +28,10 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
 static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+
+static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_access(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
@@ -175,7 +180,10 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             tokens.pop();
             return parse_range(tokens, std::move(eval_ast_node));
         }
-
+        case codesh::token_group::KEYWORD_INDEX: {
+            tokens.pop();
+            return parse_array_access(tokens, std::move(eval_ast_node));
+        }
         case codesh::token_group::OPERATOR_NOT: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
@@ -228,4 +236,20 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::move(to_val),
         std::move(skip_val)
     );
+}
+
+static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_access(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
+{
+
+    auto index_value = codesh::parser::value::parse_value(tokens);
+
+    return std::make_unique<codesh::ast::op::array_access_ast_node>(
+        codesh::blasphemy::NO_CODE_POS,
+        std::move(eval_ast_node),
+        std::move(index_value)
+        );
+
+
 }
