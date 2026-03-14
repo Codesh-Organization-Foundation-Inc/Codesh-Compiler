@@ -1,7 +1,11 @@
 #include "widen_util.h"
 
 #include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type/widening_cast_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
+#include "semantic_analyzer/util.h"
 
+#include <cassert>
 #include <set>
 #include <unordered_map>
 
@@ -59,8 +63,7 @@ static const std::unordered_map<primitive_type, std::set<primitive_type>> WIDENI
     },
 };
 
-bool codesh::semantic_analyzer::util::can_widen_to(const primitive_type from,
-                                                   const primitive_type to)
+bool codesh::semantic_analyzer::util::can_widen_to(const primitive_type from, const primitive_type to)
 {
     const auto it = WIDENING_MAP.find(from);
     if (it == WIDENING_MAP.end())
@@ -81,8 +84,8 @@ bool codesh::semantic_analyzer::util::can_widen_to(const ast::type::type_ast_nod
 }
 
 std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primitive_type(
-    const ast::type::type_ast_node &from,
-    const ast::type::type_ast_node &to)
+        const ast::type::type_ast_node &from,
+        const ast::type::type_ast_node &to)
 {
     const auto *from_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&from);
     const auto *to_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&to);
@@ -100,4 +103,35 @@ std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primi
         return from_type;
 
     return std::nullopt;
+}
+
+codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::widen_value(
+        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const ast::type::type_ast_node &expected_type)
+{
+    assert(value_node->get_type() != nullptr && "Value must have a type");
+    const auto &type = *value_node->get_type();
+
+    if (are_types_compatible(type, expected_type))
+        return {true, (std::move(value_node))};
+
+    if (can_widen_to(type, expected_type))
+    {
+        const auto &expected_prim_type = dynamic_cast<const ast::type::primitive_type_ast_node &>(expected_type);
+        const auto code_pos = value_node->get_code_position();
+
+        return {
+            true,
+            std::make_unique<ast::type::widening_cast_ast_node>(
+                code_pos,
+                std::move(value_node),
+                std::make_unique<ast::type::primitive_type_ast_node>(
+                    code_pos,
+                    expected_prim_type.get_type()
+                )
+            )
+        };
+    }
+
+    return {false, (std::move(value_node))};
 }

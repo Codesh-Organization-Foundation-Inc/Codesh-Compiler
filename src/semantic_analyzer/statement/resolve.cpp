@@ -25,18 +25,20 @@
 #include "semantic_analyzer/util.h"
 #include "semantic_analyzer/util/widen_util.h"
 
-static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
-                          codesh::ast::var_reference::value_ast_node &val_node,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope);
+using namespace codesh::semantic_analyzer;
 
-static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
+static bool resolve_value(const semantic_context &context,
+                          codesh::ast::var_reference::value_ast_node &val_node,
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope);
+
+static bool resolve_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
                           const codesh::ast::method::method_scope_ast_node &scope_node);
 
-static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope,
+static bool resolve_conditioned_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope,
                           const codesh::ast::block::conditioned_scope_container &conditioned_scope);
 
 static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
@@ -48,10 +50,10 @@ static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_nod
 static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node);
 
 
-bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
-                                                   ast::method::operation::method_operation_ast_node &stmnt,
-                                                   const method_symbol &containing_method,
-                                                   const method_scope_symbol &scope)
+bool statement::resolve(const semantic_context &context,
+                        ast::method::operation::method_operation_ast_node &stmnt,
+                        const method_symbol &containing_method,
+                        const method_scope_symbol &scope)
 {
     if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(&stmnt))
     {
@@ -132,34 +134,20 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
             return false;
 
 
-        const auto &return_type = *return_node->get_return_value()->get_type();
         const auto &expected_return_type = containing_method.get_return_type();
 
-        if (!util::are_types_compatible(return_type, expected_return_type))
-        {
-            if (util::can_widen_to(return_type, expected_return_type))
-            {
-                const auto *expected_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(
-                    &expected_return_type);
-                auto rv = return_node->take_return_value();
-                const auto rv_pos = rv->get_code_position();
-                return_node->set_return_value(
-                    std::make_unique<ast::type::widening_cast_ast_node>(
-                        rv_pos,
-                        std::move(rv),
-                        std::make_unique<ast::type::primitive_type_ast_node>(
-                            rv_pos,
-                            expected_prim->get_type()
-                        )
-                    )
-                );
-                return true;
-            }
+        auto [are_types_compatible, return_value] = util::widen_value(
+            return_node->take_return_value(),
+            expected_return_type
+        );
+        return_node->set_return_value(std::move(return_value));
 
+        if (!are_types_compatible)
+        {
             context.blasphemy_consumer(
                 fmt::format(
                     blasphemy::details::RETURN_TYPE_MISMATCH,
-                    return_type.to_pretty_string(),
+                    return_node->get_return_value()->get_type()->to_pretty_string(),
                     expected_return_type.to_pretty_string()
                 ),
                 return_node->get_code_position()
@@ -221,28 +209,28 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 }
 
 
-static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
+static bool resolve_value(const semantic_context &context,
                           codesh::ast::var_reference::value_ast_node &val_node,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope)
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope)
 {
     if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
     {
-        return codesh::semantic_analyzer::statement::variable_reference::resolve(context, *var_ref, scope);
+        return statement::variable_reference::resolve(context, *var_ref, scope);
     }
 
-    return codesh::semantic_analyzer::statement::resolve(context, val_node, containing_method, scope);
+    return statement::resolve(context, val_node, containing_method, scope);
 }
 
-static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
+static bool resolve_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
                           const codesh::ast::method::method_scope_ast_node &scope_node)
 {
     bool all_succeed = true;
 
     for (const auto &statement : scope_node.get_body())
     {
-        all_succeed &= codesh::semantic_analyzer::statement::resolve(
+        all_succeed &= statement::resolve(
             context,
             *statement,
             containing_method,
@@ -253,10 +241,10 @@ static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &con
     return all_succeed;
 }
 
-static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope,
-                          const codesh::ast::block::conditioned_scope_container &conditioned_scope)
+static bool resolve_conditioned_scope(const semantic_context &context,
+                                      const method_symbol &containing_method,
+                                      const method_scope_symbol &scope,
+                                      const codesh::ast::block::conditioned_scope_container &conditioned_scope)
 {
     bool all_succeed = true;
     all_succeed &= resolve_value(context, *conditioned_scope.condition, containing_method, scope);

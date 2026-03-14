@@ -5,7 +5,8 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
-codesh::ast::method::operation::return_ast_node::return_ast_node(blasphemy::code_position code_position,
+codesh::ast::method::operation::return_ast_node::return_ast_node(
+        const blasphemy::code_position code_position,
         std::unique_ptr<var_reference::value_ast_node> return_value) :
     method_operation_ast_node(code_position),
     return_value(std::move(return_value))
@@ -17,8 +18,8 @@ codesh::ast::var_reference::value_ast_node *codesh::ast::method::operation::retu
     return return_value.get();
 }
 
-std::unique_ptr<codesh::ast::var_reference::value_ast_node>
-codesh::ast::method::operation::return_ast_node::take_return_value()
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::ast::method::operation::return_ast_node::
+    take_return_value()
 {
     return std::move(return_value);
 }
@@ -29,7 +30,7 @@ void codesh::ast::method::operation::return_ast_node::set_return_value(
     return_value = std::move(new_value);
 }
 
-void codesh::ast::method::operation::return_ast_node::set_statement_index(size_t statement_index)
+void codesh::ast::method::operation::return_ast_node::set_statement_index(const size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
 
