@@ -20,6 +20,7 @@
 #include "fmt/format.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
+#include "parser/ast/operator/assignment/cast_ast_node.h"
 #include "token/token_group.h"
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
@@ -27,6 +28,10 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
 static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+
+static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
 
@@ -175,6 +180,10 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             tokens.pop();
             return parse_range(tokens, std::move(eval_ast_node));
         }
+        case codesh::token_group::KEYWORD_AS: {
+            tokens.pop();
+            return parse_casting(tokens, std::move(eval_ast_node));
+        }
         case codesh::token_group::OPERATOR_NOT: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
@@ -232,5 +241,31 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::move(eval_ast_node),
         std::move(to_val),
         std::move(skip_val)
+    );
+}
+
+static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
+        std::queue<std::unique_ptr<codesh::token>> &tokens,
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs)
+{
+    auto type_node = codesh::parser::util::parse_type(tokens);
+
+    if (!type_node)
+    {
+        const auto error_pos = tokens.front()->get_code_position();
+
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_TYPE,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            error_pos
+        );
+
+        return std::make_unique<codesh::ast::var_reference::error_value_ast_node>(error_pos);
+    }
+
+    return std::make_unique<codesh::ast::op::assignment::cast_ast_node>(
+        lhs->get_code_position(),
+        std::move(lhs),
+        std::move(type_node)
     );
 }
