@@ -127,6 +127,10 @@ static bool args_match_exactly(const codesh::semantic_analyzer::semantic_context
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
 
+static bool args_are_widen_compatible(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
+        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
+
 
 
 bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
@@ -587,30 +591,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (params.size() - offset != arguments.size())
             continue;
 
-        if (arguments.empty())
-            return method;
-
-        bool all_compatible = true;
-        for (size_t i = 0; i < arguments.size(); i++)
-        {
-            auto &param_type = *params.at(i + offset).get();
-            const auto &arg_type  = *arguments.at(i)->get_type();
-
-            if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
-            {
-                all_compatible = false;
-                break;
-            }
-
-            if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type) &&
-                !codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
-            {
-                all_compatible = false;
-                break;
-            }
-        }
-
-        if (!all_compatible)
+        if (!args_are_widen_compatible(context, params, arguments, offset))
             continue;
 
         // Wrap each argument that needs widening
@@ -631,6 +612,30 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
     return std::nullopt;
+}
+
+static bool args_are_widen_compatible(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
+        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
+{
+    for (size_t i = 0; i < arguments.size(); i++)
+    {
+        auto &param_type = *params.at(i + offset);
+        const auto &arg_type = *arguments.at(i)->get_type();
+
+        if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
+        {
+            return false;
+        }
+
+        if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type) &&
+            !codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)
