@@ -15,7 +15,7 @@ const codesh::ast::var_reference::value_ast_node &codesh::ast::op::assignment::c
     return *left;
 }
 
-const codesh::ast::type::type_ast_node& codesh::ast::op::assignment::cast_ast_node::get_right() const
+const codesh::ast::type::type_ast_node &codesh::ast::op::assignment::cast_ast_node::get_right() const
 {
     return *right;
 }

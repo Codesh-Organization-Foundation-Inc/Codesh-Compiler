@@ -16,7 +16,7 @@ public:
         std::unique_ptr<type::type_ast_node> right);
 
     [[nodiscard]] const value_ast_node &get_left() const;
-    [[nodiscard]] const type::type_ast_node& get_right() const;
+    [[nodiscard]] const type::type_ast_node &get_right() const;
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
