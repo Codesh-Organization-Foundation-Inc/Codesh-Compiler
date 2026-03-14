@@ -64,7 +64,7 @@ std::optional<std::reference_wrapper<codesh::ast::type_decl::type_declaration_as
     return known_type_declaration;
 }
 
-codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::to_instruction_type() const
+codesh::output::ir::instruction_type codesh::ast::type::custom_type_ast_node::_to_instruction_type() const
 {
     return output::ir::instruction_type::REFERENCE;
 }

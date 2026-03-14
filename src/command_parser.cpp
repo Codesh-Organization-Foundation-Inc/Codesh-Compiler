@@ -14,20 +14,21 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
 static std::filesystem::path parse_directory_path(std::queue<std::string> &args);
 static std::filesystem::path get_default_jre_path();
 
-static void add_default_classpaths(codesh::command_args &result);
+static void add_default_classpaths(codesh::command_args &args);
 
-const std::string LIB_PATH =
 #ifdef _WIN32
-    "C:/Program Files/Java/"
+const std::string LIB_PATH = "C:/Program Files/";
+const std::string COMMON_JAVA_PATH = LIB_PATH + "Java/";
 #else
-    "/usr/lib/jvm/"
+const std::string LIB_PATH = "/usr/lib/";
+const std::string COMMON_JAVA_PATH = LIB_PATH + "jvm/";
 #endif
-;
+
 
 const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
 const std::string COMMON_TALMUD_CODESH_PATH = "קודש/תלמוד־קודש";
 
-const std::string DEFAULT_JRE_PATH = LIB_PATH + COMMON_JRE_DIR;
+const std::string DEFAULT_JRE_PATH = COMMON_JAVA_PATH + COMMON_JRE_DIR;
 const std::string DEFAULT_TALMUD_CODESH_PATH = LIB_PATH + COMMON_TALMUD_CODESH_PATH;
 
 
@@ -91,7 +92,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
             );
         }
     }
-    add_default_classpaths(result);
 
     if (!has_jre_path)
     {
@@ -99,8 +99,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
     if (!has_talmud_codesh_path)
     {
-        result.talmud_codesh_path = get_default_jre_path();
+        result.talmud_codesh_path = DEFAULT_TALMUD_CODESH_PATH;
     }
+
+    add_default_classpaths(result);
     //TODO: Check whether the paths truly exist
 
     return result;
@@ -217,28 +219,17 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
     return result;
 }
 
-static void add_default_classpaths(codesh::command_args &result)
+static void add_default_classpaths(codesh::command_args &args)
 {
-    result.classpaths.emplace_back(".");
+    args.classpaths.emplace_back(".");
 
-    if (result.is_java_default_classpath)
+    if (args.is_java_default_classpath)
     {
-        result.classpaths.emplace_back(get_default_jre_path() / "lib/modules");
+        args.classpaths.emplace_back(args.jre_path / "lib/modules");
     }
 
-    if (result.is_talmud_codesh_classpath)
+    if (args.is_talmud_codesh_classpath)
     {
-        //FIXME: Not the path
-        // const std::filesystem::path talmud_path = "../resources/lib-src/ישראל";
-        //
-        // //TODO: Move to yet-to-exist check after this function is run
-        // if (std::filesystem::exists(talmud_path))
-        // {
-        //     result.classpaths.emplace_back(talmud_path);
-        // }
-        // else
-        // {
-        //     throw std::runtime_error("talmud path was not found");
-        // }
+        args.classpaths.emplace_back(args.talmud_codesh_path);
     }
 }

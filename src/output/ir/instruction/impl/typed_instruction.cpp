@@ -1,9 +1,9 @@
 #include "typed_instruction.h"
 
 codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type, const unsigned char index) :
-    type(type),
     index(index),
-    stack_delta(get_stack_delta())
+    stack_delta(get_stack_delta(type)),
+    type(type)
 {
 }
 
@@ -37,7 +37,7 @@ void codesh::output::ir::typed_instruction::emit(std::vector<instruction_contain
     }
 }
 
-size_t codesh::output::ir::typed_instruction::get_stack_delta() const
+size_t codesh::output::ir::typed_instruction::get_stack_delta(const instruction_type type)
 {
     switch (type)
     {

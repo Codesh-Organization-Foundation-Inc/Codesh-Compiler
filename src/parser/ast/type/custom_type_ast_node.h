@@ -39,6 +39,8 @@ protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
         const override;
 
+    [[nodiscard]] output::ir::instruction_type _to_instruction_type() const override;
+
 public:
     custom_type_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
     custom_type_ast_node(blasphemy::code_position code_position, ast::type_decl::type_declaration_ast_node &type_decl);
@@ -62,8 +64,6 @@ public:
      */
     [[nodiscard]] std::optional<std::reference_wrapper<ast::type_decl::type_declaration_ast_node>>
         get_known_type_declaration() const;
-
-    [[nodiscard]] output::ir::instruction_type to_instruction_type() const override;
 };
 
 }
