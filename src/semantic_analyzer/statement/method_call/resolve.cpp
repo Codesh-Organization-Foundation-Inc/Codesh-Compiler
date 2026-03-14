@@ -575,6 +575,14 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (params.size() - offset != arguments.size())
             continue;
 
+        // At this point, it is bound that the method arguments are the same size.
+        // `arguments` does not include an implicit `this`.
+        //
+        // So if the arguments' size is 0, it means that this method does not get any parameters;
+        // No arguments means an early exact match.
+        if (arguments.empty())
+            return method;
+
         const auto args_match_result = check_args_match(
             context,
             match_type,
