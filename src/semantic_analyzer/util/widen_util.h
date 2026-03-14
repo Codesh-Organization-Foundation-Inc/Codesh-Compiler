@@ -25,14 +25,13 @@ struct widen_result
 
 
 /**
- * @returns True if @p from can be widened to @p to per the JVM specs, false otherwise.
+ * @returns @c true if @p from can be widened to @p to per the JVM specs, false otherwise.
  */
 [[nodiscard]] bool can_widen_to(definition::primitive_type from, definition::primitive_type to);
 
 /**
- * Requires both to be primitive_type_ast_nodes; Returns false otherwise.
- *
- * @returns True if @p from can be widened to @p to per the JVM specs, false otherwise.
+ * @returns @c true if @p from can be widened to @p to per the JVM specs, false otherwise.
+ * Returns @c false for non-primitives.
  */
 [[nodiscard]] bool can_widen_to(const ast::type::type_ast_node &from, const ast::type::type_ast_node &to);
 
@@ -44,9 +43,16 @@ struct widen_result
         const ast::type::type_ast_node &to);
 
 /**
- * @returns The @p value_node wrapped in a @c widening_cast_ast_node, @p value_node itself if unnecessary.
+ * Wraps @p value_node in a @c widening_cast_ast_node targeting @p target_type only if it's REALLY needed.
  */
-[[nodiscard]] widen_result widen_value(std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+[[nodiscard]] widen_result make_widening_cast_maybe(std::unique_ptr<ast::var_reference::value_ast_node> value_node,
     const ast::type::type_ast_node &expected_type);
+
+/**
+ * Wraps @p value_node in a @c widening_cast_ast_node targeting @p target_type
+ */
+[[nodiscard]] std::unique_ptr<ast::var_reference::value_ast_node> make_widening_cast(
+        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const ast::type::type_ast_node &target_type);
 
 }

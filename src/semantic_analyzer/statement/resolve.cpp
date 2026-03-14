@@ -136,7 +136,7 @@ bool statement::resolve(const semantic_context &context,
 
         const auto &expected_return_type = containing_method.get_return_type();
 
-        auto [are_types_compatible, return_value] = util::widen_value(
+        auto [are_types_compatible, return_value] = util::make_widening_cast_maybe(
             return_node->take_return_value(),
             expected_return_type
         );

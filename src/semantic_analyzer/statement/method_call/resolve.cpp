@@ -8,8 +8,6 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
-#include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
@@ -615,29 +613,17 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (!all_compatible)
             continue;
 
-        // Wrap each argument that needs widening.
+        // Wrap each argument that needs widening
         auto &mut_arguments = method_call.get_arguments();
         for (size_t i = 0; i < mut_arguments.size(); i++)
         {
-            const auto &param_type = *params.at(i + offset).get();
-            const auto &arg_type = *mut_arguments.at(i)->get_type();
-
-            if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
+            const auto &param_type = *params.at(i + offset);
+            if (!codesh::semantic_analyzer::util::do_types_match(*mut_arguments.at(i)->get_type(), param_type))
             {
-                const auto *target_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(&param_type);
-                if (target_prim)
-                {
-                    auto inner   = std::move(mut_arguments.at(i));
-                    const auto p = inner->get_code_position();
-                    mut_arguments.at(i) = std::make_unique<codesh::ast::type::widening_cast_ast_node>(
-                        p,
-                        std::move(inner),
-                        std::make_unique<codesh::ast::type::primitive_type_ast_node>(
-                            p,
-                            target_prim->get_type()
-                        )
-                    );
-                }
+                mut_arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
+                    std::move(mut_arguments.at(i)),
+                    param_type
+                );
             }
         }
 

@@ -105,7 +105,7 @@ std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primi
     return std::nullopt;
 }
 
-codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::widen_value(
+codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::make_widening_cast_maybe(
         std::unique_ptr<ast::var_reference::value_ast_node> value_node,
         const ast::type::type_ast_node &expected_type)
 {
@@ -113,25 +113,32 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::w
     const auto &type = *value_node->get_type();
 
     if (do_types_match(type, expected_type))
-        return {true, (std::move(value_node))};
+        return {true, std::move(value_node)};
 
     if (can_widen_to(type, expected_type))
     {
-        const auto &expected_prim_type = dynamic_cast<const ast::type::primitive_type_ast_node &>(expected_type);
-        const auto code_pos = value_node->get_code_position();
-
         return {
             true,
-            std::make_unique<ast::type::widening_cast_ast_node>(
-                code_pos,
-                std::move(value_node),
-                std::make_unique<ast::type::primitive_type_ast_node>(
-                    code_pos,
-                    expected_prim_type.get_type()
-                )
-            )
+            make_widening_cast(std::move(value_node), expected_type)
         };
     }
 
-    return {false, (std::move(value_node))};
+    return {false, std::move(value_node)};
+}
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::semantic_analyzer::util::make_widening_cast(
+        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const ast::type::type_ast_node &target_type)
+{
+    const auto &target_prim = dynamic_cast<const ast::type::primitive_type_ast_node &>(target_type);
+    const auto code_pos = value_node->get_code_position();
+
+    return std::make_unique<ast::type::widening_cast_ast_node>(
+        code_pos,
+        std::move(value_node),
+        std::make_unique<ast::type::primitive_type_ast_node>(
+            code_pos,
+            target_prim.get_type()
+        )
+    );
 }
