@@ -42,6 +42,13 @@ enum class opcode : unsigned char
 
     WIDE = 0xC4,
 
+    I2L = 0x85,
+    I2F = 0x86,
+    I2D = 0x87,
+    L2F = 0x89,
+    L2D = 0x8A,
+    F2D = 0x8B,
+
     I_INC = 0x84,
 
     I_ADD = 0x60,
