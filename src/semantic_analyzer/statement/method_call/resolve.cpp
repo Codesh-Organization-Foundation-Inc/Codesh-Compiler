@@ -525,13 +525,19 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         auto &method = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 
         const size_t offset = param_offset_of(method);
-        const auto &params  = method.get_parameter_types();
+        const auto &params = method.get_parameter_types();
 
         if (params.size() - offset != arguments.size())
             continue;
 
+        // At this point, it is bound that the method arguments are the same size.
+        // `arguments` does not include an implicit `this`.
+        //
+        // So if the arguments' size is 0, it means that this method does not get any parameters;
+        // No arguments means an early exact match.
         if (arguments.empty())
             return method;
+
 
         bool all_exact = true;
         for (size_t i = 0; i < arguments.size(); i++)
