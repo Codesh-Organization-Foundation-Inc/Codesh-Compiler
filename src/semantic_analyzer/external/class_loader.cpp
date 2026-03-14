@@ -147,14 +147,17 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
     const auto super_class_idx = util::read_u2(file);
 
     const auto class_name = get_class_name(strings, this_class_idx);
-    const auto super_class_name = get_class_name(strings, super_class_idx);
 
-    auto super_type_node = super_class_idx != 0
-        ? std::make_unique<codesh::ast::type::custom_type_ast_node>(
+    std::unique_ptr<codesh::ast::type::custom_type_ast_node> super_type_node;
+    if (super_class_idx != 0)
+    {
+        const auto super_class_name = get_class_name(strings, super_class_idx);
+
+        super_type_node = std::make_unique<codesh::ast::type::custom_type_ast_node>(
             codesh::blasphemy::NO_CODE_POS,
             super_class_name
-        )
-        : nullptr;
+        );
+    }
 
     const auto interfaces = read_interface_names(file, strings);
     std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> iface_nodes;
