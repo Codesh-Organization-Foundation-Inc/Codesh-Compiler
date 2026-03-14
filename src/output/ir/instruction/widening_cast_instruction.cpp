@@ -14,20 +14,20 @@ struct widening_entry
 static const std::unordered_map<instruction_type, std::unordered_map<instruction_type, widening_entry>> WIDENING_MAP = {
     {
         instruction_type::INT, {
-            {instruction_type::LONG, {opcode::I2L, 1}},
-            {instruction_type::FLOAT, {opcode::I2F, 0}},
-            {instruction_type::DOUBLE, {opcode::I2D, 1}}
+            {instruction_type::LONG, {opcode::CAST_INT_TO_LONG, 1}},
+            {instruction_type::FLOAT, {opcode::CAST_INT_TO_FLOAT, 0}},
+            {instruction_type::DOUBLE, {opcode::CAST_INT_TO_DOUBLE, 1}}
         }
     },
     {
         instruction_type::LONG, {
-            {instruction_type::FLOAT, {opcode::L2F, -1}},
-            {instruction_type::DOUBLE, {opcode::L2D, 1}}
+            {instruction_type::FLOAT, {opcode::CAST_LONG_TO_FLOAT, -1}},
+            {instruction_type::DOUBLE, {opcode::CAST_LONG_TO_DOUBLE, 1}}
         }
     },
     {
         instruction_type::FLOAT, {
-            {instruction_type::DOUBLE, {opcode::F2D, 1}}
+            {instruction_type::DOUBLE, {opcode::CAST_FLOAT_TO_DOUBLE, 1}}
         }
     },
 };

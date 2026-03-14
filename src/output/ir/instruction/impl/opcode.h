@@ -42,12 +42,12 @@ enum class opcode : unsigned char
 
     WIDE = 0xC4,
 
-    I2L = 0x85,
-    I2F = 0x86,
-    I2D = 0x87,
-    L2F = 0x89,
-    L2D = 0x8A,
-    F2D = 0x8B,
+    CAST_INT_TO_LONG = 0x85,
+    CAST_INT_TO_FLOAT = 0x86,
+    CAST_INT_TO_DOUBLE = 0x87,
+    CAST_LONG_TO_FLOAT = 0x89,
+    CAST_LONG_TO_DOUBLE = 0x8A,
+    CAST_FLOAT_TO_DOUBLE = 0x8B,
 
     I_INC = 0x84,
 
