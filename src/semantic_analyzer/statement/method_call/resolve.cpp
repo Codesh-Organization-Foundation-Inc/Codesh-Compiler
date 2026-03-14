@@ -125,6 +125,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
 
+static bool args_match_exactly(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
+        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
+
 
 
 bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_context &context,
@@ -152,6 +156,17 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
+    // Verify that there aren't any error types (error_value_ast_node)
+    // The error they cause during semantic analysis is that their type is null,
+    // so check that instead of dynamic_cast:
+    const auto &arguments = method_call.get_arguments();
+
+    for (const auto &arg : arguments)
+    {
+        if (arg->get_type() == nullptr)
+            return std::nullopt;
+    }
+
     // We must first resolve the method's arguments
     // if we want to determine which argument types we pass forward (overloading)
     if (!resolve_arguments(context, method_call, containing_method, scope))
@@ -473,6 +488,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
+
     const auto method_overloads_raw = type.get_scope().resolve_local(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
@@ -530,42 +546,30 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (params.size() - offset != arguments.size())
             continue;
 
-        // At this point, it is bound that the method arguments are the same size.
-        // `arguments` does not include an implicit `this`.
-        //
-        // So if the arguments' size is 0, it means that this method does not get any parameters;
-        // No arguments means an early exact match.
-        if (arguments.empty())
-            return method;
-
-
-        bool all_exact = true;
-        for (size_t i = 0; i < arguments.size(); i++)
-        {
-            const auto param_type = params.at(i + offset).get();
-            const auto arg_type   = arguments.at(i)->get_type();
-
-            if (arg_type == nullptr)
-                return std::nullopt;
-
-            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *param_type))
-            {
-                all_exact = false;
-                break;
-            }
-
-            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type))
-            {
-                all_exact = false;
-                break;
-            }
-        }
-
-        if (all_exact)
+        if (args_match_exactly(context, params, arguments, offset))
             return method;
     }
 
     return std::nullopt;
+}
+
+static bool args_match_exactly(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
+        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
+{
+    for (size_t i = 0; i < arguments.size(); i++)
+    {
+        auto &param_type = *params.at(i + offset);
+        const auto &arg_type = *arguments.at(i)->get_type();
+
+        if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
+            return false;
+
+        if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
+            return false;
+    }
+
+    return true;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_widening_overload(
@@ -591,20 +595,17 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         bool all_compatible = true;
         for (size_t i = 0; i < arguments.size(); i++)
         {
-            const auto param_type = params.at(i + offset).get();
-            const auto arg_type   = arguments.at(i)->get_type();
+            auto &param_type = *params.at(i + offset).get();
+            const auto &arg_type  = *arguments.at(i)->get_type();
 
-            if (arg_type == nullptr)
-                return std::nullopt;
-
-            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *param_type))
+            if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
             {
                 all_compatible = false;
                 break;
             }
 
-            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type) &&
-                !codesh::semantic_analyzer::util::can_widen_to(*arg_type, *param_type))
+            if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type) &&
+                !codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
             {
                 all_compatible = false;
                 break;
@@ -618,12 +619,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         auto &mut_arguments = method_call.get_arguments();
         for (size_t i = 0; i < mut_arguments.size(); i++)
         {
-            const auto param_type = params.at(i + offset).get();
-            const auto arg_type   = mut_arguments.at(i)->get_type();
+            const auto &param_type = *params.at(i + offset).get();
+            const auto &arg_type = *mut_arguments.at(i)->get_type();
 
-            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type))
+            if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
             {
-                const auto *target_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(param_type);
+                const auto *target_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(&param_type);
                 if (target_prim)
                 {
                     auto inner   = std::move(mut_arguments.at(i));
