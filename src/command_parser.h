@@ -17,6 +17,7 @@ struct command_args
     bool is_talmud_codesh_classpath; // Disabled by --unholy
 
     std::filesystem::path jre_path;
+    std::filesystem::path talmud_codesh_path;
 };
 
 command_args parse_command(int argc, char **argv);
