@@ -1,0 +1,103 @@
+#include "widen_util.h"
+
+#include "parser/ast/type/primitive_type_ast_node.h"
+
+#include <set>
+#include <unordered_map>
+
+using namespace codesh::definition;
+
+static const std::unordered_map<primitive_type, std::set<primitive_type>> WIDENING_MAP = {
+    {
+        primitive_type::BYTE,
+        {
+            primitive_type::SHORT,
+            primitive_type::INTEGER,
+            primitive_type::LONG,
+            primitive_type::FLOAT,
+            primitive_type::DOUBLE
+        }
+    },
+    {
+        primitive_type::SHORT,
+        {
+            primitive_type::INTEGER,
+            primitive_type::LONG,
+            primitive_type::FLOAT,
+            primitive_type::DOUBLE
+        }
+    },
+    {
+        primitive_type::CHAR,
+        {
+            primitive_type::INTEGER,
+            primitive_type::LONG,
+            primitive_type::FLOAT,
+            primitive_type::DOUBLE
+        }
+    },
+    {
+        primitive_type::INTEGER,
+        {
+            primitive_type::LONG,
+            primitive_type::FLOAT,
+            primitive_type::DOUBLE
+        }
+    },
+    {
+        primitive_type::LONG,
+        {
+            primitive_type::FLOAT,
+            primitive_type::DOUBLE
+        }
+    },
+    {
+        primitive_type::FLOAT,
+        {
+            primitive_type::DOUBLE
+        }
+    },
+};
+
+bool codesh::semantic_analyzer::util::can_widen_to(const primitive_type from,
+                                                   const primitive_type to)
+{
+    const auto it = WIDENING_MAP.find(from);
+    if (it == WIDENING_MAP.end())
+        return false;
+
+    return it->second.contains(to);
+}
+
+bool codesh::semantic_analyzer::util::can_widen_to(const ast::type::type_ast_node &from,
+                                                   const ast::type::type_ast_node &to)
+{
+    const auto *from_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&from);
+    const auto *to_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&to);
+    if (!from_prim || !to_prim)
+        return false;
+
+    return can_widen_to(from_prim->get_type(), to_prim->get_type());
+}
+
+std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primitive_type(
+    const ast::type::type_ast_node &from,
+    const ast::type::type_ast_node &to)
+{
+    const auto *from_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&from);
+    const auto *to_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(&to);
+    if (!from_prim || !to_prim)
+        return std::nullopt;
+
+    const auto from_type = from_prim->get_type();
+    const auto to_type = to_prim->get_type();
+
+    if (from_type == to_type)
+        return from_type;
+    if (can_widen_to(from_type, to_type))
+        return to_type;
+    if (can_widen_to(to_type, from_type))
+        return from_type;
+
+    return std::nullopt;
+}

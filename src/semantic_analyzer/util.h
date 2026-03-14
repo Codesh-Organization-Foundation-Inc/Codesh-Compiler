@@ -3,10 +3,12 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
+//TODO: Move file to ./util
 namespace codesh::semantic_analyzer
 {
 struct semantic_context;
