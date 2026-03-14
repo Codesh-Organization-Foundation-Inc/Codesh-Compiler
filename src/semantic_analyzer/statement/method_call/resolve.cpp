@@ -160,6 +160,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
+    // We must first resolve the method's arguments
+    // if we want to determine which argument types we pass forward (overloading)
+    if (!resolve_arguments(context, method_call, containing_method, scope))
+        return std::nullopt;
+
     // Verify that there aren't any error types (error_value_ast_node)
     // The error they cause during semantic analysis is that their type is null,
     // so check that instead of dynamic_cast:
@@ -170,11 +175,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (arg->get_type() == nullptr)
             return std::nullopt;
     }
-
-    // We must first resolve the method's arguments
-    // if we want to determine which argument types we pass forward (overloading)
-    if (!resolve_arguments(context, method_call, containing_method, scope))
-        return std::nullopt;
 
     // Recursively resolve all chained methods first
     if (method_call.has_chained_method())

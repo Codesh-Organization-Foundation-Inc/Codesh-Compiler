@@ -26,8 +26,8 @@ void codesh::ast::type::widening_cast_ast_node::set_statement_index(const size_t
 }
 
 void codesh::ast::type::widening_cast_ast_node::emit_constants(
-    const compilation_unit_ast_node &root_node,
-    output::jvm_target::constant_pool &constant_pool)
+        const compilation_unit_ast_node &root_node,
+        output::jvm_target::constant_pool &constant_pool)
 {
     if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(inner.get()))
     {
@@ -36,19 +36,18 @@ void codesh::ast::type::widening_cast_ast_node::emit_constants(
 }
 
 void codesh::ast::type::widening_cast_ast_node::emit_ir(
-    output::ir::code_block &containing_block,
-    const semantic_analyzer::symbol_table &symbol_table,
-    const ast::type_decl::type_declaration_ast_node &containing_type_decl) const
+        output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+        const ast::type_decl::type_declaration_ast_node &containing_type_decl) const
 {
     inner->emit_ir(containing_block, symbol_table, containing_type_decl);
 
-    const auto from_instr = inner->get_type()->to_instruction_type();
-    const auto to_instr   = target_type->to_instruction_type();
+    const auto from_instruction = inner->get_type()->to_instruction_type();
+    const auto to_instruction = target_type->to_instruction_type();
 
-    if (from_instr != to_instr)
+    if (from_instruction != to_instruction)
     {
         containing_block.add_instruction(
-            std::make_unique<output::ir::widening_cast_instruction>(from_instr, to_instr)
+            std::make_unique<output::ir::widening_cast_instruction>(from_instruction, to_instruction)
         );
     }
 }
