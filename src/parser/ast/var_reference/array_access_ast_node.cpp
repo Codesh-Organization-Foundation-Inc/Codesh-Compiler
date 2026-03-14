@@ -25,8 +25,8 @@ codesh::ast::type::type_ast_node* codesh::ast::op::array_access_ast_node::get_ty
     return nullptr;
 }
 
-void codesh::ast::op::array_access_ast_node::emit_ir(output::ir::code_block& containing_block,
-        const semantic_analyzer::symbol_table& symbol_table,
-        const type_decl::type_declaration_ast_node& containing_type_decl) const
+void codesh::ast::op::array_access_ast_node::emit_ir(output::ir::code_block &containing_block,
+        const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
 }
