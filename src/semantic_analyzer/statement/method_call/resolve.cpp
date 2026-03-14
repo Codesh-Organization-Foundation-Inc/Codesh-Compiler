@@ -8,10 +8,13 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/widen_util.h"
 
 #include <ranges>
 
@@ -24,7 +27,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type,
-        const codesh::ast::method::operation::method_call_ast_node &method_call);
+        codesh::ast::method::operation::method_call_ast_node &method_call);
 
 struct local_result
 {
@@ -170,7 +173,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto resolved_method = get_called_method_as_symbol(
         context,
         *parent_type,
-        method_call
+        method_call  // non-const: may wrap args with widening_cast_ast_node
     );
 
     if (!resolved_method.has_value())
@@ -456,7 +459,7 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> get_called_method_as_symbol(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type,
-        const codesh::ast::method::operation::method_call_ast_node &method_call)
+        codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto method_overloads_raw = type.get_scope().resolve_local(method_call.get_last_name(false));
     if (!method_overloads_raw)
@@ -478,59 +481,122 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
-    // Verify parameter types
+    const auto &arguments = method_call.get_arguments();
+
+    // Helper lambda: compute the param offset for an overload.
+    const auto param_offset_of = [](const codesh::semantic_analyzer::method_symbol &ms) -> size_t
+    {
+        const bool is_external = ms.get_producing_node() == nullptr;
+        return !is_external && !ms.get_attributes().get_is_static() ? 1 : 0;
+    };
+
+    // --- Pass 1: exact match ---
     for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
     {
-        auto &method_symbol = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
+        auto &ms = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-        // Skip 'this' when matching.
-        // 'this' is injected at parameter_types[0] during prepare() for locally-defined methods.
-        //
-        // External methods (loaded from .class files) follow the JVM descriptor convention where
-        // 'this' is never part of the descriptor, so no offset is needed for them.
-        const bool is_external = method_symbol.get_producing_node() == nullptr;
-        const size_t param_offset = !is_external && !method_symbol.get_attributes().get_is_static() ? 1 : 0;
+        const size_t offset = param_offset_of(ms);
+        const auto &params  = ms.get_parameter_types();
 
-        const auto &method_params = method_symbol.get_parameter_types();
-        const auto &arguments = method_call.get_arguments();
-
-        if (method_params.size() - param_offset != arguments.size())
+        if (params.size() - offset != arguments.size())
             continue;
 
-
-        // If they're both 0-args long, then they're a perfect match.
         if (arguments.empty())
-        {
-            return method_symbol;
-        }
+            return ms;
 
-
+        bool all_exact = true;
         for (size_t i = 0; i < arguments.size(); i++)
         {
-            const auto method_param_type = method_params.at(i + param_offset).get();
-            const auto argument_value = arguments.at(i).get();
-            const auto argument_type = argument_value->get_type();
+            const auto param_type = params.at(i + offset).get();
+            const auto arg_type   = arguments.at(i)->get_type();
 
-            // Make sure this isn't an error argument
-            if (argument_type == nullptr)
+            if (arg_type == nullptr)
                 return std::nullopt;
 
-
-            // Resolve the parameter before using it.
-            // While a programmer-written method is guaranteed to have been resolved,
-            // external ones are not.
-            //
-            // Generically check regardless.
-            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *method_param_type))
-                continue;
-
-
-            if (codesh::semantic_analyzer::util::are_types_compatible(*argument_type, *method_param_type))
+            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *param_type))
             {
-                //TODO: Consider "best match", don't just return (casting etc.)
-                return method_symbol;
+                all_exact = false;
+                break;
+            }
+
+            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type))
+            {
+                all_exact = false;
+                break;
             }
         }
+
+        if (all_exact)
+            return ms;
+    }
+
+    // --- Pass 2: widening ---
+    for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
+    {
+        auto &ms = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
+
+        const size_t offset = param_offset_of(ms);
+        const auto &params  = ms.get_parameter_types();
+
+        if (params.size() - offset != arguments.size())
+            continue;
+
+        if (arguments.empty())
+            return ms;
+
+        bool all_compatible = true;
+        for (size_t i = 0; i < arguments.size(); i++)
+        {
+            const auto param_type = params.at(i + offset).get();
+            const auto arg_type   = arguments.at(i)->get_type();
+
+            if (arg_type == nullptr)
+                return std::nullopt;
+
+            if (!codesh::semantic_analyzer::util::resolve_type_node(context, *param_type))
+            {
+                all_compatible = false;
+                break;
+            }
+
+            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type) &&
+                !codesh::semantic_analyzer::util::can_widen_to(*arg_type, *param_type))
+            {
+                all_compatible = false;
+                break;
+            }
+        }
+
+        if (!all_compatible)
+            continue;
+
+        // Wrap each argument that needs widening.
+        auto &mut_arguments = method_call.get_arguments();
+        for (size_t i = 0; i < mut_arguments.size(); i++)
+        {
+            const auto param_type = params.at(i + offset).get();
+            const auto arg_type   = mut_arguments.at(i)->get_type();
+
+            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type))
+            {
+                const auto *target_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(param_type);
+                if (target_prim)
+                {
+                    auto inner   = std::move(mut_arguments.at(i));
+                    const auto p = inner->get_code_position();
+                    mut_arguments.at(i) = std::make_unique<codesh::ast::type::widening_cast_ast_node>(
+                        p,
+                        std::move(inner),
+                        std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                            p,
+                            target_prim->get_type()
+                        )
+                    );
+                }
+            }
+        }
+
+        return ms;
     }
 
     context.blasphemy_consumer(

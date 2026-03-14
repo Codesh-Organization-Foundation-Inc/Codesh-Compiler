@@ -18,15 +18,17 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/widen_util.h"
 
 static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
-                               codesh::ast::var_reference::value_ast_node &val_node,
-                               const codesh::semantic_analyzer::method_symbol &containing_method,
-                               const codesh::semantic_analyzer::method_scope_symbol &scope);
+                          codesh::ast::var_reference::value_ast_node &val_node,
+                          const codesh::semantic_analyzer::method_symbol &containing_method,
+                          const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
                           const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -133,7 +135,27 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         const auto &return_type = *return_node->get_return_value()->get_type();
         const auto &expected_return_type = containing_method.get_return_type();
 
-        if (!util::are_types_compatible(return_type, expected_return_type)) {
+        if (!util::are_types_compatible(return_type, expected_return_type))
+        {
+            if (util::can_widen_to(return_type, expected_return_type))
+            {
+                const auto *expected_prim = dynamic_cast<const ast::type::primitive_type_ast_node *>(
+                    &expected_return_type);
+                auto rv = return_node->take_return_value();
+                const auto rv_pos = rv->get_code_position();
+                return_node->set_return_value(
+                    std::make_unique<ast::type::widening_cast_ast_node>(
+                        rv_pos,
+                        std::move(rv),
+                        std::make_unique<ast::type::primitive_type_ast_node>(
+                            rv_pos,
+                            expected_prim->get_type()
+                        )
+                    )
+                );
+                return true;
+            }
+
             context.blasphemy_consumer(
                 fmt::format(
                     blasphemy::details::RETURN_TYPE_MISMATCH,
@@ -178,6 +200,8 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         // Do not perform value validation with an invalid variable reference
         if (all_succeed)
         {
+            binary_op->apply_widening_conversions();
+
             if (!binary_op->is_value_valid())
             {
                 context.blasphemy_consumer(fmt::format(

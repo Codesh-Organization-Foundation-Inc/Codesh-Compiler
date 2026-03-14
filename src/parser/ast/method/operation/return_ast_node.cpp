@@ -17,6 +17,18 @@ codesh::ast::var_reference::value_ast_node *codesh::ast::method::operation::retu
     return return_value.get();
 }
 
+std::unique_ptr<codesh::ast::var_reference::value_ast_node>
+codesh::ast::method::operation::return_ast_node::take_return_value()
+{
+    return std::move(return_value);
+}
+
+void codesh::ast::method::operation::return_ast_node::set_return_value(
+    std::unique_ptr<var_reference::value_ast_node> new_value)
+{
+    return_value = std::move(new_value);
+}
+
 void codesh::ast::method::operation::return_ast_node::set_statement_index(size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
