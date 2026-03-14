@@ -8,12 +8,20 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 
+#include <cassert>
+
+#ifndef NDEBUG
+static auto UNEXPECTED_EOF_ASSERTION = "Unexpected EOF blasphemy that wasn't meant to happen. "
+      "Or we just forgot to add an error message.";
+#endif
+
+
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
         codesh::blasphemy::code_position code_position);
 
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
-        const std::string &no_tokens_blasphemy_details)
+        const std::optional<std::string> &no_tokens_blasphemy_details)
 {
     ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
 
@@ -41,14 +49,16 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 }
 
 std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_identifier_token(
-        std::queue<std::unique_ptr<token>> &tokens, const std::string &no_tokens_blasphemy_details)
+        std::queue<std::unique_ptr<token>> &tokens, const std::optional<std::string> &no_tokens_blasphemy_details)
 {
     std::unique_ptr<token> token = consume_token(tokens, no_tokens_blasphemy_details);
 
     if (token::get_token_type(token->get_group()) != token_type::IDENTIFIER)
     {
+        assert(no_tokens_blasphemy_details.has_value() && UNEXPECTED_EOF_ASSERTION);
+
         blasphemy::get_blasphemy_collector().add_blasphemy(
-            no_tokens_blasphemy_details,
+            *no_tokens_blasphemy_details,
             blasphemy::blasphemy_type::SYNTAX,
             token->get_code_position()
         );
@@ -175,13 +185,14 @@ bool codesh::parser::util::peeking_check(const std::queue<std::unique_ptr<token>
 }
 
 void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
-        const std::string &no_tokens_blasphemy_details)
+                                               const std::optional<std::string> &no_tokens_blasphemy_details)
 {
     if (tokens.empty())
     {
-        // TODO: Switch error message to take from parameter
+        assert(no_tokens_blasphemy_details.has_value() && UNEXPECTED_EOF_ASSERTION);
+
         blasphemy::get_blasphemy_collector().add_blasphemy(
-            no_tokens_blasphemy_details,
+            *no_tokens_blasphemy_details,
             blasphemy::blasphemy_type::SYNTAX,
             blasphemy::NO_CODE_POS,
             true
