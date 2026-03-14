@@ -14,6 +14,9 @@ class typed_instruction : public instruction
     static constexpr size_t CONSTANT_INDEXES_COUNT = 4;
 
     const unsigned char index;
+    const size_t stack_delta;
+
+    size_t get_stack_delta() const;
 
 protected:
     instruction_type type;

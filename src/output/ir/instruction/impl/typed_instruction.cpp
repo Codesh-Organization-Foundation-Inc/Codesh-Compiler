@@ -2,7 +2,8 @@
 
 codesh::output::ir::typed_instruction::typed_instruction(const instruction_type type, const unsigned char index) :
     type(type),
-    index(index)
+    index(index),
+    stack_delta(get_stack_delta())
 {
 }
 
@@ -21,7 +22,7 @@ void codesh::output::ir::typed_instruction::emit(std::vector<instruction_contain
             first_non_generic
                 + *type * CONSTANT_INDEXES_COUNT
                 + index,
-            1
+            stack_delta
         );
     }
     else
@@ -31,7 +32,20 @@ void codesh::output::ir::typed_instruction::emit(std::vector<instruction_contain
                 static_cast<unsigned char>(*first_generic() + *type),
                 index
             },
-            1
+            stack_delta
         );
+    }
+}
+
+size_t codesh::output::ir::typed_instruction::get_stack_delta() const
+{
+    switch (type)
+    {
+    case instruction_type::DOUBLE:
+    case instruction_type::LONG:
+        return 2;
+
+    default:
+        return 1;
     }
 }
