@@ -175,7 +175,6 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             tokens.pop();
             return parse_range(tokens, std::move(eval_ast_node));
         }
-
         case codesh::token_group::OPERATOR_NOT: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
@@ -206,6 +205,9 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
 {
+    const auto code_pos = codesh::parser::util::consume_token(tokens, "לא יקרה")
+        ->get_code_position();
+
     auto to_val = codesh::parser::value::parse_value(tokens);
 
     std::unique_ptr<codesh::ast::var_reference::value_ast_node> skip_val = nullptr;
@@ -216,14 +218,17 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
     else
     {
         skip_val = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
-            codesh::blasphemy::NO_CODE_POS,
-            std::make_unique<codesh::ast::type::primitive_type_ast_node>(codesh::blasphemy::NO_CODE_POS, codesh::definition::primitive_type::INTEGER),
+            code_pos,
+            std::make_unique<codesh::ast::type::primitive_type_ast_node>(
+                code_pos,
+                codesh::definition::primitive_type::INTEGER
+            ),
             1
         );
     }
 
     return std::make_unique<codesh::ast::collection::range_ast_node>(
-        codesh::blasphemy::NO_CODE_POS,
+        code_pos,
         std::move(eval_ast_node),
         std::move(to_val),
         std::move(skip_val)

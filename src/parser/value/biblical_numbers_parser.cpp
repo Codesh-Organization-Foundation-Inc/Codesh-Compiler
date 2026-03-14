@@ -343,7 +343,7 @@ std::optional<codesh::parser::value::biblical_number> codesh::parser::value::bib
         return std::nullopt;
     }
 
-    auto token = util::consume_token(tokens, "לא יקרה");
+    auto token = util::consume_token(tokens);
 
     if (token_group == token_group::KEYWORD_BIBLICAL_DECIMAL_SEPARATOR)
     {
