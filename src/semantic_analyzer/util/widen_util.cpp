@@ -112,7 +112,7 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::w
     assert(value_node->get_type() != nullptr && "Value must have a type");
     const auto &type = *value_node->get_type();
 
-    if (are_types_compatible(type, expected_type))
+    if (do_types_match(type, expected_type))
         return {true, (std::move(value_node))};
 
     if (can_widen_to(type, expected_type))

@@ -548,7 +548,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
                 break;
             }
 
-            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type))
+            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type))
             {
                 all_exact = false;
                 break;
@@ -597,7 +597,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
                 break;
             }
 
-            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type) &&
+            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type) &&
                 !codesh::semantic_analyzer::util::can_widen_to(*arg_type, *param_type))
             {
                 all_compatible = false;
@@ -615,7 +615,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             const auto param_type = params.at(i + offset).get();
             const auto arg_type   = mut_arguments.at(i)->get_type();
 
-            if (!codesh::semantic_analyzer::util::are_types_compatible(*arg_type, *param_type))
+            if (!codesh::semantic_analyzer::util::do_types_match(*arg_type, *param_type))
             {
                 const auto *target_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(param_type);
                 if (target_prim)

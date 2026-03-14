@@ -26,7 +26,7 @@ codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::
 
 bool codesh::ast::impl::binary_ast_node::is_value_valid() const
 {
-    return semantic_analyzer::util::are_types_compatible(*get_left().get_type(), *get_right().get_type());
+    return semantic_analyzer::util::do_types_match(*get_left().get_type(), *get_right().get_type());
 }
 
 bool codesh::ast::impl::binary_ast_node::apply_widening_conversions()
@@ -36,7 +36,7 @@ bool codesh::ast::impl::binary_ast_node::apply_widening_conversions()
     if (!left_type || !right_type)
         return false;
 
-    if (semantic_analyzer::util::are_types_compatible(*left_type, *right_type))
+    if (semantic_analyzer::util::do_types_match(*left_type, *right_type))
         return true;
 
     const auto *left_prim = dynamic_cast<const type::primitive_type_ast_node *>(left_type);
