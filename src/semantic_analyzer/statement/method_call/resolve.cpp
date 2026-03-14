@@ -29,6 +29,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
+
 struct local_result
 {
     codesh::semantic_analyzer::type_symbol *type;
@@ -173,7 +175,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     const auto resolved_method = get_called_method_as_symbol(
         context,
         *parent_type,
-        method_call  // non-const: may wrap args with widening_cast_ast_node
+        method_call
     );
 
     if (!resolved_method.has_value())
@@ -483,13 +485,6 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     const auto &arguments = method_call.get_arguments();
 
-    // Helper lambda: compute the param offset for an overload.
-    const auto param_offset_of = [](const codesh::semantic_analyzer::method_symbol &ms) -> size_t
-    {
-        const bool is_external = ms.get_producing_node() == nullptr;
-        return !is_external && !ms.get_attributes().get_is_static() ? 1 : 0;
-    };
-
     // --- Pass 1: exact match ---
     for (const auto &symbol : method_overloads->get_scope().internals() | std::views::values)
     {
@@ -609,4 +604,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         method_call.get_code_position()
     );
     return std::nullopt;
+}
+
+static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)
+{
+    const bool is_external = method.get_producing_node() == nullptr;
+
+    return !is_external && !method.get_attributes().get_is_static()
+        ? 1
+        : 0;
 }
