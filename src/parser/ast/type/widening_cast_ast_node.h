@@ -20,7 +20,7 @@ namespace codesh::ast::type
  */
 class widening_cast_ast_node final : public var_reference::value_ast_node, public impl::i_constant_pool_emitter
 {
-    std::unique_ptr<value_ast_node> inner;
+    std::unique_ptr<value_ast_node> child;
     std::unique_ptr<primitive_type_ast_node> target_type;
 
 public:
