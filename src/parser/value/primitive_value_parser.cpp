@@ -54,10 +54,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
             str_pos,
             std::make_unique<ast::type::custom_type_ast_node>(str_pos, "java/lang/String"),
-
-            util::consume_alnum_identifier_token(
-                tokens, "לא אמור לקרות"
-            )->get_content()
+            util::consume_alnum_identifier_token(tokens)->get_content()
         );
 
         break;
@@ -144,9 +141,7 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
         pos,
         std::make_unique<codesh::ast::type::primitive_type_ast_node>(pos, primitive_type),
         mapper(
-            codesh::parser::util::consume_alnum_identifier_token(
-                tokens, "לא אמור לקרות"
-            )->get_content()
+            codesh::parser::util::consume_alnum_identifier_token(tokens)->get_content()
         )
     );
 }

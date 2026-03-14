@@ -13,7 +13,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
     auto import_pos = tokens.front()->get_code_position();
     tokens.pop();
 
-    std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>(
+    auto import_node = std::make_unique<ast::import_declaration_ast_node>(
         import_pos
     );
 
