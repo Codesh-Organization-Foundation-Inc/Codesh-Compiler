@@ -31,6 +31,12 @@ struct parent_type_result
     codesh::semantic_analyzer::variable_symbol *receiver_variable;
 };
 
+enum class args_match_result
+{
+    EXACT,
+    REQUIRES_WIDENING
+};
+
 /**
  * Looks up @p name in the current method scope.
  *
@@ -111,23 +117,19 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_exact_overload(
-        const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
-        codesh::ast::method::operation::method_call_ast_node &method_call);
-
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_widening_overload(
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_from_overload(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
 
-static bool args_match_exactly(const codesh::semantic_analyzer::semantic_context &context,
-        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
-        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
-
-static bool args_are_widen_compatible(const codesh::semantic_analyzer::semantic_context &context,
+/**
+ * @returns A vector describing each arguments' match result against the original parameters,
+ * or @c std::nullopt if at least one argument cannot be cast to the desired parameters.
+ */
+static std::optional<std::vector<args_match_result>> check_args_match(
+        const codesh::semantic_analyzer::semantic_context &context,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
 
@@ -490,8 +492,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
+    const auto method_overloads_raw = type.get_scope().resolve_local(
+        method_call.get_last_name(false)
+    );
 
-    const auto method_overloads_raw = type.get_scope().resolve_local(method_call.get_last_name(false));
     if (!method_overloads_raw)
     {
         context.blasphemy_consumer(fmt::format(
@@ -501,7 +505,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
-    const auto *method_overloads = dynamic_cast<const codesh::semantic_analyzer::method_overloads_symbol *>(&method_overloads_raw->get());
+    const auto *method_overloads = dynamic_cast<const codesh::semantic_analyzer::method_overloads_symbol *>(
+        &method_overloads_raw->get()
+    );
+
     if (!method_overloads)
     {
         context.blasphemy_consumer(fmt::format(
@@ -512,10 +519,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
 
-    if (const auto method = resolve_exact_overload(context, *method_overloads, method_call))
-        return method;
+    const auto method = resolve_method_from_overload(
+        context,
+        *method_overloads,
+        method_call
+    );
 
-    if (const auto method = resolve_widening_overload(context, *method_overloads, method_call))
+    if (method.has_value())
         return method;
 
 
@@ -531,55 +541,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     return std::nullopt;
 }
 
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_exact_overload(
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_from_overload(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto &arguments = method_call.get_arguments();
-
-    for (const auto &symbol : method_overloads.get_scope().internals() | std::views::values)
-    {
-        auto &method = *static_cast<codesh::semantic_analyzer::method_symbol *>(symbol.get()); // NOLINT(*-pro-type-static-cast-downcast)
-
-        const size_t offset = param_offset_of(method);
-        const auto &params = method.get_parameter_types();
-
-        if (params.size() - offset != arguments.size())
-            continue;
-
-        if (args_match_exactly(context, params, arguments, offset))
-            return method;
-    }
-
-    return std::nullopt;
-}
-
-static bool args_match_exactly(const codesh::semantic_analyzer::semantic_context &context,
-        const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
-        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
-{
-    for (size_t i = 0; i < arguments.size(); i++)
-    {
-        auto &param_type = *params.at(i + offset);
-        const auto &arg_type = *arguments.at(i)->get_type();
-
-        if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
-            return false;
-
-        if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
-            return false;
-    }
-
-    return true;
-}
-
-static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_widening_overload(
-        const codesh::semantic_analyzer::semantic_context &context,
-        const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
-        codesh::ast::method::operation::method_call_ast_node &method_call)
-{
-    const auto &arguments = method_call.get_arguments();
+    auto &arguments = method_call.get_arguments();
 
     for (const auto &symbol : method_overloads.get_scope().internals() | std::views::values)
     {
@@ -591,19 +558,18 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (params.size() - offset != arguments.size())
             continue;
 
-        if (!args_are_widen_compatible(context, params, arguments, offset))
+        const auto args_match_result = check_args_match(context, params, arguments, offset);
+        if (!args_match_result.has_value())
             continue;
 
         // Wrap each argument that needs widening
-        auto &mut_arguments = method_call.get_arguments();
-        for (size_t i = 0; i < mut_arguments.size(); i++)
+        for (size_t i = 0; i < arguments.size(); i++)
         {
-            const auto &param_type = *params.at(i + offset);
-            if (!codesh::semantic_analyzer::util::do_types_match(*mut_arguments.at(i)->get_type(), param_type))
+            if (args_match_result->at(i) == args_match_result::REQUIRES_WIDENING)
             {
-                mut_arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
-                    std::move(mut_arguments.at(i)),
-                    param_type
+                arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
+                    std::move(arguments.at(i)),
+                    *params.at(i + offset)
                 );
             }
         }
@@ -614,28 +580,36 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     return std::nullopt;
 }
 
-static bool args_are_widen_compatible(const codesh::semantic_analyzer::semantic_context &context,
+static std::optional<std::vector<args_match_result>> check_args_match(
+        const codesh::semantic_analyzer::semantic_context &context,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
 {
+    std::vector<args_match_result> match_results;
+    match_results.reserve(arguments.size());
+
     for (size_t i = 0; i < arguments.size(); i++)
     {
         auto &param_type = *params.at(i + offset);
         const auto &arg_type = *arguments.at(i)->get_type();
 
         if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
-        {
-            return false;
-        }
+            return std::nullopt;
 
-        if (!codesh::semantic_analyzer::util::do_types_match(arg_type, param_type) &&
-            !codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
+        if (codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
         {
-            return false;
+            match_results.push_back(args_match_result::EXACT);
+        }
+        else
+        {
+            if (!codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
+                return std::nullopt;
+
+            match_results.push_back(args_match_result::REQUIRES_WIDENING);
         }
     }
 
-    return true;
+    return match_results;
 }
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)
