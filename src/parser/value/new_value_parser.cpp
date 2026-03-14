@@ -10,8 +10,7 @@
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_new_operator(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    const auto new_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    const auto new_pos = util::consume_token(tokens)->get_code_position();
 
     auto parsed_type = util::parse_type(tokens);
     const auto *custom_type = dynamic_cast<ast::type::custom_type_ast_node *>(parsed_type.get());

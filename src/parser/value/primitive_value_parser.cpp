@@ -152,8 +152,7 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<T>> make_e
         codesh::definition::primitive_type primitive_type,
         T value)
 {
-    auto pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     return std::make_unique<codesh::ast::var_reference::evaluable_ast_node<T>>(
         pos,
