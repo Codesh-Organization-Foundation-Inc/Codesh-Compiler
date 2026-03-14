@@ -247,10 +247,11 @@ static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_acces
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
 {
+    auto op_pos = tokens.front()->get_code_position();
     auto index_value = codesh::parser::value::parse_value(tokens);
 
     return std::make_unique<codesh::ast::op::array_access_ast_node>(
-        codesh::blasphemy::NO_CODE_POS,
+        op_pos,
         std::move(eval_ast_node),
         std::move(index_value)
     );
