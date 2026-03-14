@@ -31,6 +31,12 @@ struct parent_type_result
     codesh::semantic_analyzer::variable_symbol *receiver_variable;
 };
 
+enum class args_match_type
+{
+    EXACT_ONLY,
+    ALLOW_WIDENING
+};
+
 enum class args_match_result
 {
     EXACT,
@@ -118,7 +124,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_from_overload(
-        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::semantic_context &context, args_match_type match_type,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
@@ -129,7 +135,7 @@ static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &me
  * or @c std::nullopt if at least one argument cannot be cast to the desired parameters.
  */
 static std::optional<std::vector<args_match_result>> check_args_match(
-        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::semantic_context &context, args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
 
@@ -519,14 +525,25 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     }
 
 
-    const auto method = resolve_method_from_overload(
+    const auto exact_method = resolve_method_from_overload(
         context,
+        args_match_type::EXACT_ONLY,
         *method_overloads,
         method_call
     );
 
-    if (method.has_value())
-        return method;
+    if (exact_method.has_value())
+        return exact_method;
+
+    const auto ma_zot_omeret_beereh_method = resolve_method_from_overload(
+        context,
+        args_match_type::ALLOW_WIDENING,
+        *method_overloads,
+        method_call
+    );
+
+    if (ma_zot_omeret_beereh_method.has_value())
+        return ma_zot_omeret_beereh_method;
 
 
     context.blasphemy_consumer(
@@ -542,7 +559,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_from_overload(
-        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::semantic_context &context, const args_match_type match_type,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
@@ -558,7 +575,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (params.size() - offset != arguments.size())
             continue;
 
-        const auto args_match_result = check_args_match(context, params, arguments, offset);
+        const auto args_match_result = check_args_match(
+            context,
+            match_type,
+            params,
+            arguments,
+            offset
+        );
         if (!args_match_result.has_value())
             continue;
 
@@ -582,6 +605,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
 static std::optional<std::vector<args_match_result>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context,
+        const args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
 {
@@ -605,7 +629,10 @@ static std::optional<std::vector<args_match_result>> check_args_match(
             if (!codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
                 return std::nullopt;
 
-            match_results.push_back(args_match_result::REQUIRES_WIDENING);
+            if (match_type == args_match_type::ALLOW_WIDENING)
+                match_results.push_back(args_match_result::REQUIRES_WIDENING);
+            else
+                return std::nullopt;
         }
     }
 
