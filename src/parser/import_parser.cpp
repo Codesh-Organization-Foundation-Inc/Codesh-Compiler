@@ -10,8 +10,7 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    auto import_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto import_pos = util::consume_token(tokens)->get_code_position();
 
     auto import_node = std::make_unique<ast::import_declaration_ast_node>(
         import_pos

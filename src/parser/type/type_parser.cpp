@@ -24,8 +24,7 @@ static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_ini
 std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse_type_declaration(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    const auto declaration_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    const auto declaration_pos = util::consume_token(tokens)->get_code_position();
 
     switch (util::consume_token(tokens, blasphemy::details::UNEXPECTED_DECLARATION)->get_group())
     {

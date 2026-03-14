@@ -150,8 +150,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
 std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::parser::parse_method_call(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    auto call_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto call_pos = util::consume_token(tokens)->get_code_position();
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
@@ -168,8 +167,7 @@ std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::method_scope_ast_node &method_scope)
 {
-    auto if_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto if_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     auto if_node = std::make_unique<codesh::ast::block::if_ast_node>(
         if_pos,
@@ -221,8 +219,7 @@ static std::unique_ptr<codesh::ast::block::while_ast_node> parse_while_statement
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::ast::method::method_scope_ast_node &method_scope)
 {
-    auto while_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto while_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     auto condition = codesh::parser::value::parse_value(tokens);
 
@@ -241,8 +238,7 @@ static std::unique_ptr<codesh::ast::block::while_ast_node> parse_while_statement
 static std::unique_ptr<codesh::ast::method::operation::return_ast_node> parse_return_operator(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
-    const auto return_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    const auto return_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     auto return_value = codesh::parser::value::parse_value(tokens);
 
@@ -317,8 +313,7 @@ std::pair<
 > codesh::parser::parse_variable_declaration(std::queue<std::unique_ptr<token>> &tokens,
         const var_decl_assignment_policy assignment_policy)
 {
-    const auto declaration_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    const auto declaration_pos = util::consume_token(tokens)->get_code_position();
 
     auto decl_node = std::make_unique<ast::local_variable_declaration_ast_node>(declaration_pos);
     auto assignment = parse_variable_declaration(
