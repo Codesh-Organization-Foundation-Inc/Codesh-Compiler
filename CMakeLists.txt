@@ -385,3 +385,5 @@ target_link_libraries(codeshc fmt::fmt)
 
 # Support includes starting from relative paths
 target_include_directories(codeshc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+install(TARGETS codeshc DESTINATION .)
