@@ -22,9 +22,6 @@
 #include <filesystem>
 #include <functional>
 
-#include <ranges>
-#include <set>
-
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
         const semantic_analyzer::symbol_table &symbol_table,

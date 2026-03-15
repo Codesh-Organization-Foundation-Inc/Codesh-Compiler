@@ -6,12 +6,12 @@
 #include "semantic_analyzer/util.h"
 
 #include <cassert>
-#include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace codesh::definition;
 
-static const std::unordered_map<primitive_type, std::set<primitive_type>> WIDENING_MAP = {
+static const std::unordered_map<primitive_type, std::unordered_set<primitive_type>> WIDENING_MAP = {
     {
         primitive_type::BYTE,
         {

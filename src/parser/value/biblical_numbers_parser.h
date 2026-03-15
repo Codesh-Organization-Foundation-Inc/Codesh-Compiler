@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <queue>
-#include <set>
+#include <unordered_set>
 
 namespace codesh::parser::value
 {
@@ -48,7 +48,7 @@ class biblical_numbers_parser
         HANDLE_PERIOD
     };
 
-    static const std::set<parsing_state> ACCEPTING_STATES;
+    static const std::unordered_set<parsing_state> ACCEPTING_STATES;
 
     void handle_addition();
     void handle_multiplication();
