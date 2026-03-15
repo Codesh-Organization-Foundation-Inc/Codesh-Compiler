@@ -12,9 +12,11 @@
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/poly_util.h"
 #include "semantic_analyzer/util/widen_util.h"
 
 #include <ranges>
+#include <unordered_set>
 
 struct local_result
 {
@@ -35,12 +37,6 @@ enum class args_match_type
 {
     EXACT_ONLY,
     ALLOW_WIDENING
-};
-
-enum class args_match_result
-{
-    EXACT,
-    REQUIRES_WIDENING
 };
 
 /**
@@ -131,10 +127,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
 
 /**
- * @returns A vector describing each arguments' match result against the original parameters,
+ * @returns A set describing whether an argument at index should widen to allow for a match,
  * or @c std::nullopt if at least one argument cannot be cast to the desired parameters.
  */
-static std::optional<std::vector<args_match_result>> check_args_match(
+static std::optional<std::unordered_set<size_t>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context, args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
@@ -593,10 +589,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         if (!args_match_result.has_value())
             continue;
 
+        const auto &needs_widening = args_match_result.value();
+
         // Wrap each argument that needs widening
         for (size_t i = 0; i < arguments.size(); i++)
         {
-            if (args_match_result->at(i) == args_match_result::REQUIRES_WIDENING)
+            if (needs_widening.contains(i))
             {
                 arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
                     std::move(arguments.at(i)),
@@ -611,13 +609,13 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     return std::nullopt;
 }
 
-static std::optional<std::vector<args_match_result>> check_args_match(
+static std::optional<std::unordered_set<size_t>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context,
         const args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
         const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
 {
-    std::vector<args_match_result> match_results;
+    std::unordered_set<size_t> match_results;
     match_results.reserve(arguments.size());
 
     for (size_t i = 0; i < arguments.size(); i++)
@@ -628,17 +626,17 @@ static std::optional<std::vector<args_match_result>> check_args_match(
         if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
             return std::nullopt;
 
-        if (codesh::semantic_analyzer::util::do_types_match(arg_type, param_type))
-        {
-            match_results.push_back(args_match_result::EXACT);
-        }
-        else
+
+        const bool is_exact_type = codesh::semantic_analyzer::util::do_types_match(arg_type, param_type)
+            || codesh::semantic_analyzer::util::can_poly_cast_to(arg_type, param_type);
+
+        if (!is_exact_type)
         {
             if (!codesh::semantic_analyzer::util::can_widen_to(arg_type, param_type))
                 return std::nullopt;
 
             if (match_type == args_match_type::ALLOW_WIDENING)
-                match_results.push_back(args_match_result::REQUIRES_WIDENING);
+                match_results.emplace(i);
             else
                 return std::nullopt;
         }
