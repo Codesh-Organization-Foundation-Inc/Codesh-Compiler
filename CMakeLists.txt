@@ -333,6 +333,8 @@ add_executable(codeshc
         src/parser/ast/operator/assignment/cast_ast_node.h
         src/semantic_analyzer/util/widen_util.cpp
         src/semantic_analyzer/util/widen_util.h
+        src/semantic_analyzer/util/poly_util.cpp
+        src/semantic_analyzer/util/poly_util.h
 )
 
 # sudo dnf install boost-regex boost-devel

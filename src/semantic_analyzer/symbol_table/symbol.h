@@ -145,6 +145,8 @@ public:
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
+    [[nodiscard]] bool has_super_type() const;
+
     [[nodiscard]] ast::type::custom_type_ast_node &get_super_type() const;
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_interfaces() const;
