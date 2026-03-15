@@ -16,7 +16,7 @@ class typed_instruction : public instruction
     const unsigned char index;
     const size_t stack_delta;
 
-    size_t get_stack_delta() const;
+    static size_t get_stack_delta(instruction_type type);
 
 protected:
     instruction_type type;
