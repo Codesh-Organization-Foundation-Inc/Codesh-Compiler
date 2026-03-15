@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if (( EUID != 0 )); then
     echo "וִיבַקֵּשׁ ה' לְהָרִץ אֶת־הַסְּקְרִיפְּט בְּסַמְכוּת שֹׁרֶשׁ"
     exit 1
@@ -18,8 +20,6 @@ cmake --install ./build --prefix $CODESH_PATH
 # Link to the compiler in bin
 ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
-
-#TODO: Compress Talmud Codesh into JAR file after JAR loading is implemented
 
 mkdir -p $TALMUD_CODESH_PATH
 $CODESH_EXECUTABLE ./resources/lib-src/ $TALMUD_CODESH_PATH --sinful
