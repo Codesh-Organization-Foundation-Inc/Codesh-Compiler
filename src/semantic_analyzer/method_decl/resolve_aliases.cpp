@@ -1,13 +1,13 @@
 #include "resolve_aliases.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../semantic_context.h"
-#include "../util.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &context,
         codesh::semantic_analyzer::type_symbol &type);
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
-                          codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name);
+                          const codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semantic_context &context, type_symbol &type)
@@ -22,7 +22,9 @@ static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_co
     if (!bereshit)
         return;
 
-    const auto bereshit_method_overloads = dynamic_cast<codesh::semantic_analyzer::method_overloads_symbol *>(&bereshit.value().get());
+    const auto bereshit_method_overloads = dynamic_cast<codesh::semantic_analyzer::method_overloads_symbol *>(
+        &bereshit.value().get()
+    );
     if (!bereshit_method_overloads)
         return;
 
@@ -33,7 +35,7 @@ static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_co
     if (!bereshit_method.has_value())
         return;
 
-    codesh::ast::method::method_declaration_ast_node &method_node = *bereshit_method->get().get_producing_node();
+    const auto &method_node = *bereshit_method->get().get_producing_node();
 
 
     // Validate flags
@@ -50,7 +52,8 @@ static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_co
 
 
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
-                          codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name)
+                          const codesh::ast::method::method_declaration_ast_node &method_node,
+                          const std::string &new_name)
 {
     const std::string old_name = method_node.get_last_name(false);
 

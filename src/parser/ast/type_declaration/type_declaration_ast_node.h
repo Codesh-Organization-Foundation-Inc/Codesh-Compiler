@@ -1,25 +1,34 @@
 #pragma once
 
-#include "../impl/ast_node.h"
-#include "../impl/i_descriptor_emitter.h"
 #include "attributes_ast_node.h"
+#include "defenition/fully_qualified_name.h"
+#include "parser/ast/impl/ast_node.h"
+#include "parser/ast/impl/i_descriptor_emitter.h"
 
+#include <deque>
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "../../../output/jvm_target/constant_pool.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../impl/i_resolvable.h"
-#include "../method/constructor_declaration_ast_node.h"
+#include "field_declaration_ast_node.h"
+#include "output/jvm_target/constant_pool.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/impl/i_resolvable.h"
 
 namespace codesh::semantic_analyzer
 {
 class type_symbol;
 }
+namespace codesh::ast::method
+{
+class method_declaration_ast_node;
+class constructor_declaration_ast_node;
+}
 namespace codesh::ast::type
 {
 class custom_type_ast_node;
 }
+
 
 namespace codesh::ast::type_decl
 {
@@ -30,17 +39,19 @@ class type_declaration_ast_node : public impl::ast_node, public impl::i_descript
     std::unique_ptr<output::jvm_target::constant_pool> constant_pool;
 
     std::unique_ptr<type::custom_type_ast_node> super_class;
-    //TODO: Add implements
+    std::vector<std::unique_ptr<type::custom_type_ast_node>> interfaces;
 
-    const definition::fully_qualified_class_name name;
+    const definition::fully_qualified_name name;
     std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> resolved_symbol;
 
+    std::vector<std::unique_ptr<field_declaration_ast_node>> fields;
+
     std::unique_ptr<attributes_ast_node> attributes;
+    
 
-
-    std::list<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
-    std::list<method::method_declaration_ast_node *> methods;
-    std::list<method::constructor_declaration_ast_node *> constructors;
+    std::deque<std::unique_ptr<method::method_declaration_ast_node>> all_methods;
+    std::vector<method::method_declaration_ast_node *> methods;
+    std::vector<method::constructor_declaration_ast_node *> constructors;
 
     static void emit_metadata(const compilation_unit_ast_node &root_node,
             output::jvm_target::constant_pool &constant_pool);
@@ -50,7 +61,7 @@ protected:
         const override;
 
 public:
-    explicit type_declaration_ast_node(definition::fully_qualified_class_name name);
+    type_declaration_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
     ~type_declaration_ast_node() override;
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;
@@ -62,11 +73,18 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_unresolved_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
 
     [[nodiscard]] type::custom_type_ast_node *get_super_class() const;
     void set_super_class(std::unique_ptr<type::custom_type_ast_node> super_class);
+
+    [[nodiscard]] const std::vector<std::unique_ptr<field_declaration_ast_node>>& get_fields() const;
+    void add_field(std::unique_ptr<field_declaration_ast_node> field);
+
+    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_interfaces() const;
+    [[nodiscard]] std::vector<std::unique_ptr<type::custom_type_ast_node>> get_interfaces_copy() const;
+    void add_interface(std::unique_ptr<type::custom_type_ast_node> interface);
 
 
     [[nodiscard]] attributes_ast_node *get_attributes() const;
@@ -76,12 +94,12 @@ public:
      * @return All methods, including constructors.
      * Constructors are placed first, then methods.
      */
-    [[nodiscard]] const std::list<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
-    void add_method(std::unique_ptr<method::method_declaration_ast_node> method);
-    void add_method(std::unique_ptr<method::constructor_declaration_ast_node> method);
+    [[nodiscard]] const std::deque<std::unique_ptr<method::method_declaration_ast_node>> &get_all_methods() const;
+    void add_method(std::unique_ptr<method::method_declaration_ast_node> method_decl);
+    void add_constructor(std::unique_ptr<method::constructor_declaration_ast_node> constructor_decl);
 
-    [[nodiscard]] const std::list<method::constructor_declaration_ast_node *> &get_constructors() const;
-    [[nodiscard]] const std::list<method::method_declaration_ast_node *> &get_methods() const;
+    [[nodiscard]] const std::vector<method::constructor_declaration_ast_node *> &get_constructors() const;
+    [[nodiscard]] const std::vector<method::method_declaration_ast_node *> &get_methods() const;
 
     void emit_constants(const compilation_unit_ast_node &root_node,
                         output::jvm_target::constant_pool &constant_pool) override;

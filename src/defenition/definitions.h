@@ -4,10 +4,15 @@
 
 namespace codesh::definition
 {
-const std::string SOURCE_FILE_EXTENSION = ".אמן";
+inline const std::string JVM_CONSTRUCTOR_NAME = "<init>";
+
+inline const std::string SOURCE_FILE_EXTENSION = ".אמן";
 
 /**
  * The identifier used when there was an error parsing an identifier
  */
-const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
+inline const std::string ERROR_IDENTIFIER_CONTENT = "סְדוֹם וַעֲמֹרָה";
+
+inline const fmt::runtime_format_string<> CONSTRUCTOR_PRETTY_STRING = fmt::runtime("בְּרִיאַת {}");
+inline const fmt::runtime_format_string<> METHOD_PRETTY_STRING = fmt::runtime("וּשְׁמוֹ {}");
 }

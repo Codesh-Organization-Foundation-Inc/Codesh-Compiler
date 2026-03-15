@@ -13,7 +13,8 @@ enum class token_group : int
     SCOPE_END, // ויתם:
 
     OPEN_PARENTHESIS, // כי־
-    CLOSE_PARENTHESIS, // ויחדל
+    CLOSE_PARENTHESIS, // כי־טוב
+    TOV, // טוב
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_IMPORT, // ויבא
@@ -26,6 +27,7 @@ enum class token_group : int
     KEYWORD_RETURN, // וישב
 
     KEYWORD_METHOD, // מעשה
+    KEYWORD_CONSTRUCTOR, // בריאה
     KEYWORD_FUNCTION_CALL, // ויעש
     KEYWORD_TAKES, // ויקח
 
@@ -128,8 +130,6 @@ enum class token_group : int
 
     COMMENT_MULTILINE, // כה הגה ה' לאמור: ... ויחדל:
     COMMENT_ONE_LINER, // כה הגה ה'
-
-
 
 
     // REGEX Matches

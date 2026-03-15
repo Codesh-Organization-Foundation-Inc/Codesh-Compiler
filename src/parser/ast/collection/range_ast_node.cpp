@@ -1,19 +1,27 @@
 #include "range_ast_node.h"
 
-#include "../../../semantic_analyzer/builtins.h"
+#include "semantic_analyzer/builtins.h"
 
-codesh::ast::collection::range_ast_node::range_ast_node(std::unique_ptr<value_ast_node> from,
-                                                        std::unique_ptr<value_ast_node> to,
-                                                        std::unique_ptr<value_ast_node> skip) :
+codesh::ast::collection::range_ast_node::range_ast_node(blasphemy::code_position code_position,
+        std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
+        std::unique_ptr<value_ast_node> skip) :
+    collection_ast_node(code_position),
     from(std::move(from)),
     to(std::move(to)),
     skip(std::move(skip)),
     type(std::make_unique<type::custom_type_ast_node>(
-        definition::fully_qualified_class_name(semantic_analyzer::builtins::CLASS_RANGE)
+        code_position, definition::fully_qualified_name(semantic_analyzer::builtins::CLASS_RANGE)
     ))
 {
 }
 
+void codesh::ast::collection::range_ast_node::set_statement_index(const size_t statement_index)
+{
+    collection_ast_node::set_statement_index(statement_index);
+    from->set_statement_index(statement_index);
+    to->set_statement_index(statement_index);
+    skip->set_statement_index(statement_index);
+}
 
 codesh::ast::var_reference::value_ast_node &codesh::ast::collection::range_ast_node::get_from() const
 {

@@ -1,9 +1,13 @@
 #include "attributes_ast_node.h"
 
-#include "../../../output/jvm_target/class_file_builder.h"
+#include "output/jvm_target/class_file_builder.h"
 
-codesh::ast::type_decl::attributes_ast_node::attributes_ast_node()
-    : visibility(definition::visibility::PACKAGE_PRIVATE), is_static(false), is_final(false), is_abstract(false)
+codesh::ast::type_decl::attributes_ast_node::attributes_ast_node(const blasphemy::code_position code_position) :
+    ast_node(code_position),
+    visibility(definition::visibility::PACKAGE_PRIVATE),
+    is_static(false),
+    is_final(false),
+    is_abstract(false)
 {
 }
 

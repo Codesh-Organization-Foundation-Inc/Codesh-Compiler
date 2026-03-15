@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "blasphemy/blasphemy_collector.h"
 #include "token_group.h"
 
 #include <memory>
@@ -14,14 +15,20 @@ enum class token_type : int;
 
 class token
 {
+    const blasphemy::code_position code_position;
+
     const token_type type;
     const token_group group;
 
 public:
-    token(token_type type, token_group group);
+    token(blasphemy::code_position code_position, token_type type, token_group group);
     virtual ~token();
 
-    [[nodiscard]] static std::unique_ptr<token> from_regex_group_id(int group_id, const std::string &content);
+    [[nodiscard]] static std::unique_ptr<token> from_regex_group_id(blasphemy::code_position code_position,
+            int group_id, const std::u16string &content);
+
+
+    [[nodiscard]] blasphemy::code_position get_code_position() const;
 
     [[nodiscard]] token_type get_type() const;
     [[nodiscard]] token_group get_group() const;
@@ -34,7 +41,7 @@ class identifier_token final : public token
     std::string content;
 
 public:
-    identifier_token(token_group group, std::string content);
+    identifier_token(blasphemy::code_position code_position, token_group group, std::string content);
 
     [[nodiscard]] std::string get_content() const;
     void set_content(std::string content);

@@ -9,7 +9,10 @@ class symbol_table;
 
 namespace codesh::semantic_analyzer::builtins
 {
-const std::string CLASS_RANGE = "טווח";
+inline constexpr std::string CLASS_RANGE = "טווח";
 
-void add_builtins(const symbol_table &table);
+inline constexpr std::string ALIAS_STRING = "כתובים";
+inline constexpr std::string ALIAS_OBJECT = "לאבובו";
+
+void collect_builtins(const symbol_table &table);
 }

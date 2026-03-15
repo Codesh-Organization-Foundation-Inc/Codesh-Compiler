@@ -1,39 +1,39 @@
 #pragma once
 
-#include "../var_reference/value_ast_node.h"
-#include "i_constant_pool_emitter.h"
+#include "parser/ast/var_reference/value_ast_node.h"
+#include "defenition/primitive_type.h"
+#include "operator_ast_node.h"
 
+#include <cstddef>
 #include <memory>
 
 namespace codesh::ast::impl
 {
 
-class binary_ast_node : public var_reference::value_ast_node, public i_constant_pool_emitter
+class binary_ast_node : public operator_ast_node<2>
 {
-    const std::unique_ptr<value_ast_node> left;
-    const std::unique_ptr<value_ast_node> right;
-
-    //FIXME: REMOVE THIS!!
-    const std::unique_ptr<type::type_ast_node> type;
+    void wrap_child_in_widening_cast(std::size_t index, definition::primitive_type target);
 
 protected:
-    binary_ast_node(std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right);
+    binary_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+            std::unique_ptr<value_ast_node> right);
 
 public:
     [[nodiscard]] virtual value_ast_node &get_left() const;
     [[nodiscard]] value_ast_node &get_right() const;
 
-    void set_statement_index(size_t statement_index) override;
+    //TODO: Nodes like ++ should specify that only numerical types are allowed.
+    [[nodiscard]] bool is_value_valid() const override;
 
+    /**
+     * Wraps the narrower child in a widening_cast_ast_node if the two types differ
+     * but are widen-compatible. Returns true if types are now compatible (or already were).
+     *
+     * Call only after both children are resolved!
+     */
+    bool apply_widening_conversions();
 
-    // FIXME: REMOVE THIS!!
-    // Each node should set the type for itself.
     [[nodiscard]] type::type_ast_node *get_type() const override;
-
-
-    void emit_constants(const compilation_unit_ast_node &root_node,
-                        output::jvm_target::constant_pool &constant_pool) override;
 };
-
 
 }

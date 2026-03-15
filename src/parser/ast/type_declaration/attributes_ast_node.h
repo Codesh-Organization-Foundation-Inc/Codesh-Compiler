@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../../defenition/visibility.h"
-#include "../impl/ast_node.h"
+#include "defenition/visibility.h"
+#include "parser/ast/impl/ast_node.h"
 
 #include <memory>
 #include <vector>
@@ -21,7 +21,7 @@ class attributes_ast_node final : public impl::ast_node
     bool is_abstract;
 
 public:
-    attributes_ast_node();
+    explicit attributes_ast_node(blasphemy::code_position code_position);
 
     [[nodiscard]] std::unique_ptr<attributes_ast_node> clone() const;
 

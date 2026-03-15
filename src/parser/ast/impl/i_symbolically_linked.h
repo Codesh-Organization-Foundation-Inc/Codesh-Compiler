@@ -6,7 +6,7 @@ namespace codesh::ast::impl
 {
 
 /**
- * @tparam T The symbol type. Must extend {@link i_ast_produced}.
+ * @tparam T The symbol type. Must extend @link i_ast_produced \endlink.
  */
 template <typename T>
 class i_symbolically_linked
@@ -19,6 +19,7 @@ public:
 
     virtual void set_resolved(T &symbol) = 0;
     [[nodiscard]] T &get_resolved() const;
+    [[nodiscard]] bool is_resolved() const;
 };
 
 }

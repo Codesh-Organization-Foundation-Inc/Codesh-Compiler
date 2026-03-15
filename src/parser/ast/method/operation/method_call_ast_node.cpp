@@ -1,10 +1,17 @@
 #include "method_call_ast_node.h"
 
-#include "../../../../output/ir/code_block.h"
-#include "../../../../semantic_analyzer/symbol_table/symbol.h"
-#include "../../var_reference/evaluable_ast_node.h"
-#include "../util.h"
+#include "defenition/definitions.h"
 #include "fmt/xchar.h"
+#include "output/ir/code_block.h"
+#include "output/ir/instruction/invoke_instruction.h"
+#include "output/ir/instruction/marker_instruction.h"
+#include "parser/ast/method/util.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+
+#include <cassert>
 
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
@@ -12,26 +19,55 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
     return resolved_symbol;
 }
 
+codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
+        const blasphemy::code_position code_position) :
+    value_ast_node(code_position)
+{
+}
+
 void codesh::ast::method::operation::method_call_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
 {
     resolved_symbol.emplace(symbol);
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
+const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_unresolved_name()
     const
 {
     return name;
 }
 
-codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqn()
 {
     return name;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::operation::method_call_ast_node::get_fqcn()
+const codesh::definition::fully_qualified_name &codesh::ast::method::operation::method_call_ast_node::get_fqn()
     const
 {
     return name;
+}
+
+codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
+    get_chained_method() const
+{
+    assert(chained_method.has_value() && "Tried to get chained method though one does not exist");
+    return *chained_method.value();
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
+        std::unique_ptr<method_call_ast_node> chained_method)
+{
+    this->chained_method.emplace(std::move(chained_method));
+}
+
+bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
+{
+    return chained_method.has_value();
+}
+
+codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
+{
+    return &get_resolved().get_return_type();
 }
 
 std::string codesh::ast::method::operation::method_call_ast_node::generate_descriptor(const bool resolved) const
@@ -44,13 +80,18 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
 
     const auto &method = get_resolved();
 
-    std::vector<std::reference_wrapper<type::type_ast_node>> param_types;
+    std::deque<std::reference_wrapper<type::type_ast_node>> param_types;
     for (const auto &param : method.get_parameter_types())
     {
         param_types.emplace_back(*param);
     }
 
-    return util::generate_method_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
+    return util::generate_method_descriptor(
+        get_resolved(),
+        method.get_return_type(),
+        param_types,
+        method.get_attributes()
+    );
 }
 
 const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
@@ -65,7 +106,7 @@ std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh:
     return arguments;
 }
 
-void codesh::ast::method::operation::method_call_ast_node::set_statement_index(size_t statement_index)
+void codesh::ast::method::operation::method_call_ast_node::set_statement_index(const size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
 
@@ -73,6 +114,14 @@ void codesh::ast::method::operation::method_call_ast_node::set_statement_index(s
     {
         argument->set_statement_index(statement_index);
     }
+}
+
+std::string codesh::ast::method::operation::method_call_ast_node::to_pretty_string() const
+{
+    return fmt::format(
+        definition::METHOD_PRETTY_STRING,
+        get_last_name(false)
+    );
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_constants(
@@ -97,6 +146,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
             constant_emitter->emit_constants(root_node, constant_pool);
         }
     }
+
+    // Emit for chained method
+    if (has_chained_method())
+    {
+        get_chained_method().emit_constants(root_node, constant_pool);
+    }
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
@@ -106,17 +161,21 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
-    if (!method.get_attributes().get_is_static())
+    // Execute chained methods first
+    if (has_chained_method())
     {
-        //TODO: Handle passing 'this' instances
-        throw std::runtime_error("Calling non-static methods not yet supported");
+        containing_block.set_is_consuming(true);
+        get_chained_method().emit_ir(containing_block, symbol_table, containing_type_decl);
+        containing_block.set_is_consuming(false);
     }
 
     // Load arguments
     for (const auto &argument : arguments)
     {
+        containing_block.set_is_consuming(true);
         argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
+    containing_block.set_is_consuming(false);
 
     // Call method
     const int method_cpi = cp.get_methodref_index(
@@ -131,12 +190,49 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    //FIXME: Specifically make sout calls virtual because no non-static support yet exists
-    const bool is_sout = get_unresolved_name().join() == "מסוף/אמר";
+    const auto invokation_type = method.get_attributes().get_is_static()
+        ? output::ir::invokation_type::STATIC
+        : output::ir::invokation_type::VIRTUAL;
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
-        is_sout ? output::ir::invokation_type::VIRTUAL : output::ir::invokation_type::STATIC,
+        invokation_type,
         method_cpi,
         arguments.size()
     ));
+
+
+    // If the method call has returned something, we should update the stack delta accordingly.
+    const auto &return_type = method.get_return_type();
+    const auto stack_delta = determine_stack_delta(return_type);
+
+    if (stack_delta != 0)
+    {
+        containing_block.add_instruction(std::make_unique<output::ir::stack_size_delta_marker>(stack_delta));
+    }
+}
+
+size_t codesh::ast::method::operation::method_call_ast_node::determine_stack_delta(const type::type_ast_node &type)
+{
+    if (const auto primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(&type))
+    {
+        switch (primitive_type->get_type())
+        {
+        case definition::primitive_type::VOID:
+            return 0;
+
+        case definition::primitive_type::LONG:
+        case definition::primitive_type::DOUBLE:
+            return 2;
+
+        default:
+            return 1;
+        }
+    }
+
+    if (dynamic_cast<const type::custom_type_ast_node *>(&type))
+    {
+        return 1;
+    }
+
+    throw std::invalid_argument("Unknown type");
 }

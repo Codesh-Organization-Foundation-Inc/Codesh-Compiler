@@ -5,12 +5,13 @@
 #include <ranges>
 
 [[nodiscard]] static std::string generate_unresolved_parameter_descriptors(
-        const std::vector<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types);
+        const std::deque<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types);
 
 
 std::string codesh::ast::method::util::generate_method_descriptor(
-        const bool resolved, const type::type_ast_node &return_type,
-        const std::vector<std::reference_wrapper<type::type_ast_node>> &parameter_types,
+        const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol,
+        const type::type_ast_node &return_type,
+        const std::deque<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes)
 {
     // In JVM, a method descriptor is defined as such:
@@ -18,17 +19,17 @@ std::string codesh::ast::method::util::generate_method_descriptor(
 
     return fmt::format(
         "({}){}",
-        generate_parameters_descriptor(resolved, parameter_types, attributes),
-        return_type.generate_descriptor(resolved)
+        generate_parameters_descriptor(resolved_symbol, parameter_types, attributes),
+        return_type.generate_descriptor(resolved_symbol.has_value())
     );
 }
 
 std::string codesh::ast::method::util::generate_parameters_descriptor(
-        const bool resolved,
-        const std::vector<std::reference_wrapper<type::type_ast_node>> &parameter_types,
+        const std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol,
+        const std::deque<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes)
 {
-    if (!resolved)
+    if (!resolved_symbol)
         return generate_unresolved_parameter_descriptors(parameter_types);
 
 
@@ -38,7 +39,9 @@ std::string codesh::ast::method::util::generate_parameters_descriptor(
     auto it = param_types.begin();
 
     // If the method isn't static, skip the first parameter ('this').
-    if (!attributes.get_is_static())
+    // NOTE that external symbols do NOT have 'this' prepended.
+    const auto is_external = resolved_symbol->get().get_producing_node() == nullptr;
+    if (!is_external && !attributes.get_is_static())
     {
         ++it;
     }
@@ -58,7 +61,7 @@ std::string codesh::ast::method::util::generate_parameters_descriptor(
 }
 
 static std::string generate_unresolved_parameter_descriptors(
-        const std::vector<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types)
+        const std::deque<std::reference_wrapper<codesh::ast::type::type_ast_node>> &parameter_types)
 {
     auto descriptors = parameter_types
         | std::views::transform([](const codesh::ast::type::type_ast_node &var_type) {

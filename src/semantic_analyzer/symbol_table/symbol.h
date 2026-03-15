@@ -1,20 +1,48 @@
 #pragma once
 
-#include "../../output/jvm_target/class_file_builder.h"
-#include "../../parser/ast/method/method_declaration_ast_node.h"
-#include "../../parser/ast/type/type_ast_node.h"
-#include "../../parser/ast/type_declaration/type_declaration_ast_node.h"
+#include "defenition/fully_qualified_name.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/type/type_ast_node.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "scope.h"
 #include "symbol.h"
 #include "symbol_type.h"
 
 #include <map>
+#include <memory>
 #include <optional>
+#include <vector>
+
+namespace codesh::ast::type
+{
+class custom_type_ast_node;
+}
 
 namespace codesh::semantic_analyzer
 {
 class method_symbol;
 class i_scope_containing_symbol;
+}
+
+namespace codesh::ast
+{
+class local_variable_declaration_ast_node;
+}
+namespace codesh::ast::method
+{
+class method_scope_ast_node;
+class method_declaration_ast_node;
+}
+namespace codesh::ast::type_decl
+{
+class type_declaration_ast_node;
+class field_declaration_ast_node;
+class variable_declaration_ast_node;
+}
+
+namespace codesh::semantic_analyzer
+{
+class type_symbol;
 
 
 class symbol
@@ -38,6 +66,8 @@ protected:
 
 public:
     virtual ~i_scope_containing_symbol();
+
+    [[nodiscard]] virtual std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const;
 
     [[nodiscard]] virtual const symbols_collection &get_scope() const = 0;
 
@@ -67,54 +97,65 @@ template <typename T>
 class i_resolvable_symbol : public i_ast_produced<T>
 {
 public:
-    [[nodiscard]] virtual const definition::fully_qualified_class_name &get_full_name() const = 0;
+    [[nodiscard]] virtual const definition::fully_qualified_name &get_full_name() const = 0;
 };
 
 
 //TODO: Attach ast node
 class country_symbol final : public symbol, public i_scope_containing_symbol
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
 
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
 public:
-    explicit country_symbol(definition::fully_qualified_class_name full_name,
+    explicit country_symbol(definition::fully_qualified_name full_name,
             i_scope_containing_symbol *parent_symbol = nullptr, ast::impl::ast_node *producing_node = nullptr);
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const;
 };
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
 
-    static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
-    named_symbol_map scope;
-
+    named_symbol_map fields_scope;
+    named_symbol_map methods_scope;
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
-    //TODO: Add super type
-    // const std::unique_ptr<ast::type::type_ast_node> super_type;
+    const std::unique_ptr<ast::type::custom_type_ast_node> super_type;
+    const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces;
+
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
 public:
-    type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+    type_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
+            std::unique_ptr<ast::type::custom_type_ast_node> super_type,
+            std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             ast::type_decl::type_declaration_ast_node *producing_node);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;
 
+    [[nodiscard]] ast::type::custom_type_ast_node &get_super_type() const;
+
+    [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_interfaces() const;
+
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
+
+    [[nodiscard]] named_symbol_map &get_field_scope();
+    [[nodiscard]] const named_symbol_map &get_field_scope() const;
+
+    [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const override;
 
     [[nodiscard]] ast::type_decl::type_declaration_ast_node *get_producing_node() const override;
 };
@@ -128,26 +169,28 @@ public:
 
     [[nodiscard]] ast::type::type_ast_node *get_type() const;
 
-    [[nodiscard]] virtual ast::local_variable_declaration_ast_node *get_producing_node() const = 0;
+    //NOTE: Circular dependency that requires splitting the files,
+    // something which I can't be bothered to do for a simple type limitation
+    // [[nodiscard]] virtual ast::type_decl::variable_declaration_ast_node *get_producing_node() const = 0;
 };
 
-class field_symbol final : public variable_symbol, public i_resolvable_symbol<ast::local_variable_declaration_ast_node>
+class field_symbol final : public variable_symbol, public i_resolvable_symbol<ast::type_decl::field_declaration_ast_node>
 {
-    const definition::fully_qualified_class_name full_name;
+    const definition::fully_qualified_name full_name;
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
-    ast::local_variable_declaration_ast_node *producing_node;
+    ast::type_decl::field_declaration_ast_node *producing_node;
 
 public:
-    field_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_class_name full_name,
+    field_symbol(i_scope_containing_symbol *parent_symbol, definition::fully_qualified_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::unique_ptr<ast::type::type_ast_node> type,
-            ast::local_variable_declaration_ast_node *producing_node = nullptr);
+            ast::type_decl::field_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::type_decl::attributes_ast_node &get_attributes() const;
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
 
-    [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
+    [[nodiscard]] ast::type_decl::field_declaration_ast_node *get_producing_node() const override;
 };
 
 class local_variable_symbol final : public variable_symbol,
@@ -161,7 +204,14 @@ public:
             size_t index, ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
-    [[nodiscard]] size_t get_index() const;
+    /**
+     * Returns the index of the variable as per the JVM specifications.
+     *
+     * That means that long and double types occupy 2 slots. This affects later slots as well.
+     *
+     * @return The index of the variable as per the JVM specifications.
+     */
+    [[nodiscard]] int get_jvm_index() const;
 };
 
 
@@ -181,7 +231,11 @@ public:
 };
 
 
-using indexed_locals_container = std::map<std::string, std::reference_wrapper<local_variable_symbol>>;
+struct indexed_locals_container
+{
+    std::map<std::string, std::reference_wrapper<local_variable_symbol>> name_to_var;
+    size_t slots_used;
+};
 
 class method_scope_symbol final : public symbol, public i_ast_produced<ast::method::method_scope_ast_node>,
     public i_scope_containing_symbol
@@ -221,7 +275,7 @@ public:
 class method_symbol final : public symbol, public i_resolvable_symbol<ast::method::method_declaration_ast_node>,
     public i_scope_containing_symbol
 {
-    definition::fully_qualified_class_name full_name;
+    definition::fully_qualified_name full_name;
 
     const std::unique_ptr<ast::type_decl::attributes_ast_node> attributes;
 
@@ -242,7 +296,7 @@ protected:
 
 public:
     method_symbol(i_scope_containing_symbol *parent_symbol, type_symbol &parent_type,
-            definition::fully_qualified_class_name full_name,
+            definition::fully_qualified_name full_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type,
@@ -251,8 +305,8 @@ public:
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope,
             ast::method::method_scope_ast_node &producing_node);
 
-    [[nodiscard]] const definition::fully_qualified_class_name &get_full_name() const override;
-    void set_full_name(definition::fully_qualified_class_name name);
+    [[nodiscard]] const definition::fully_qualified_name &get_full_name() const override;
+    void set_full_name(definition::fully_qualified_name name);
 
 
     [[nodiscard]] const ast::type_decl::attributes_ast_node &get_attributes() const;

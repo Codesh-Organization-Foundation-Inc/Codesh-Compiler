@@ -1,20 +1,27 @@
 #include "analyzer.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/blasphemy_consumer.h"
-#include "../parser/ast/method/operation/return_ast_node.h"
-#include "../parser/ast/method/operation/super_call_ast_node.h"
-#include "../parser/ast/type/custom_type_ast_node.h"
-#include "../parser/ast/type/primitive_type_ast_node.h"
-#include "../parser/ast/type_declaration/attributes_ast_node.h"
-#include "../parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/blasphemy_consumer.h"
 #include "builtins.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/constructor_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
+#include "parser/ast/method/operation/return_ast_node.h"
+#include "parser/ast/method/operation/super_call_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type_declaration/attributes_ast_node.h"
+#include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "semantic_analyzer/field_decl/collect.h"
+#include "semantic_analyzer/statement/resolve.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/type_decl/collect.h"
+#include "semantic_analyzer/type_decl/resolve.h"
+#include "semantic_analyzer/type_decl/resolve_aliases.h"
 #include "semantic_context.h"
-#include "statement/resolve.h"
-#include "symbol_table/symbol.h"
-#include "type_decl/collect.h"
-#include "type_decl/resolve.h"
-#include "type_decl/resolve_aliases.h"
+#include "symbol_table/symbol_table.h"
+#include "util.h"
 
 /**
  * When found that a class does not extend anything, will automatically extend `java/lang/Object`.
@@ -36,9 +43,26 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl);
 
 static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_context &context);
+static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
+    collect_lookup_countries(const codesh::ast::compilation_unit_ast_node &ast_root,
+        const codesh::semantic_analyzer::symbol_table &table);
+
+/**
+ * @returns the country that owns the type declarations of the given compilation unit, or the global
+ * country (@c "") if no package is declared.
+ */
+static codesh::semantic_analyzer::country_symbol &get_own_country(
+        const codesh::ast::compilation_unit_ast_node &ast_root, const codesh::semantic_analyzer::symbol_table &table);
+/**
+ * Adds @p country to @p countries only if it is not already present (compared by address).
+ */
+static void add_country(
+        std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> &countries,
+        codesh::semantic_analyzer::country_symbol &country);
 
 
-const codesh::definition::fully_qualified_class_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME = "java/lang/Object";
+const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
+    builtins::ALIAS_OBJECT.data();
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
@@ -53,28 +77,40 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
 }
 
-void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root)
+void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_node &ast_root,
+                                                const symbol_table &table)
 {
-    const symbol_table &table = ast_root.get_symbol_table();
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    country_symbol &country = get_own_country(ast_root, table);
 
-    //TODO: Use actual countries
-    const std::vector lookup_countries = {
-        table.resolve_country("").value()
-    };
-    country_symbol &country = lookup_countries.back();
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
 
-    const semantic_context context = {lookup_countries, ast_root, blasphemy::semantic_consumer};
-
-
-    //FIXME: This should be entirely replaced with Talmud Codesh once interoperability is implemented
-    builtins::add_builtins(table);
-
-
-    //TODO: Iterate over each and every country, then INSIDE do the following:
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         type_declaration::collect(context, *type_decl, country);
     }
+}
+
+void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_node &ast_root,
+                                             const symbol_table &table)
+{
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    country_symbol &country = get_own_country(ast_root, table);
+
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
+
+    type_declaration::dispatch_collect_methods(context, country);
+    field_declaration::collect(context, country);
+}
+
+void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
+                                        const symbol_table &table)
+{
+    const auto lookup_countries = collect_lookup_countries(ast_root, table);
+    const country_symbol &country = get_own_country(ast_root, table);
+
+    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
+
     for (const auto &type_decl : context.root.get_type_declarations())
     {
         type_declaration::resolve(context, *type_decl, country);
@@ -82,7 +118,6 @@ void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &as
 
     // Only after collecting all types should we resolve all the methods' bodies:
     resolve_method_bodies(context);
-
 
     type_declaration::resolve_aliases(context, country);
 }
@@ -97,7 +132,7 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
 
         for (const auto &method_decl : type_decl->get_all_methods())
         {
-            const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->get_last_name(false));
+            const auto method_context = context.with_consumer("בְּמַעֲשֶׂה", method_decl->to_pretty_string());
 
             //TODO: Handle multiple scopes
             const codesh::ast::method::method_scope_ast_node &method_scope = method_decl->get_method_scope();
@@ -127,6 +162,7 @@ static void add_default_super_class(const codesh::ast::compilation_unit_ast_node
 
 
         type_decl->set_super_class(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+            type_decl->get_code_position(),
             codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME
         ));
     }
@@ -144,13 +180,20 @@ static void add_default_constructor(const codesh::ast::compilation_unit_ast_node
         if (!class_decl->get_constructors().empty())
             continue;
 
-        auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>();
+        const auto code_pos = class_decl->get_code_position();
 
-        auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+        auto custom_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(code_pos, *type_decl);
+
+        auto constructor_decl = std::make_unique<codesh::ast::method::constructor_declaration_ast_node>(
+            code_pos,
+            std::move(custom_type)
+        );
+
+        auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(code_pos);
         attributes_node->set_visibility(codesh::definition::visibility::PUBLIC);
         constructor_decl->set_attributes(std::move(attributes_node));
 
-        class_decl->add_method(std::move(constructor_decl));
+        class_decl->add_constructor(std::move(constructor_decl));
     }
 }
 
@@ -173,7 +216,7 @@ static void add_default_super_call(const codesh::ast::compilation_unit_ast_node 
                 continue;
 
             scope.push_front_statement(
-                std::make_unique<codesh::ast::method::operation::super_call_ast_node>()
+                std::make_unique<codesh::ast::method::operation::super_call_ast_node>(scope.get_code_position())
             );
         }
     }
@@ -187,8 +230,9 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
         for (const auto &method : type_decl->get_all_methods())
         {
             // This is only relevant for void-returning methods
-            const codesh::ast::type::primitive_type_ast_node *return_type =
-                dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(method->get_return_type());
+            const auto return_type = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(
+                method->get_return_type()
+            );
 
             if (return_type == nullptr)
                 continue;
@@ -204,7 +248,8 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
                 continue;
 
             scope.add_statement(
-                std::make_unique<codesh::ast::method::operation::return_ast_node>()
+                //TODO: Add code position for ויתם
+                std::make_unique<codesh::ast::method::operation::return_ast_node>(codesh::blasphemy::NO_CODE_POS)
             );
         }
     }
@@ -224,7 +269,7 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
             if (method_decl->get_attributes()->get_is_static())
                 continue;
 
-            method_decl->add_parameter(
+            method_decl->add_parameter_front(
                 create_this_param(*class_decl)
             );
         }
@@ -234,15 +279,79 @@ static void add_this_param_to_non_static_methods(const codesh::ast::compilation_
 static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_this_param(
         const codesh::ast::type_decl::class_declaration_ast_node &class_decl)
 {
-    auto this_param = std::make_unique<codesh::ast::local_variable_declaration_ast_node>();
+    auto this_param = std::make_unique<codesh::ast::local_variable_declaration_ast_node>(
+        class_decl.get_code_position()
+    );
     this_param->set_name("this");
 
-    auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>();
+    auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
     attributes_node->set_is_final(true);
     this_param->set_attributes(std::move(attributes_node));
 
-    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(class_decl.get_unresolved_name());
+    auto this_class_type = std::make_unique<codesh::ast::type::custom_type_ast_node>(
+        class_decl.get_code_position(),
+        class_decl.get_unresolved_name()
+    );
     this_param->set_type(std::move(this_class_type));
 
     return this_param;
+}
+
+
+static codesh::semantic_analyzer::country_symbol &get_own_country(
+        const codesh::ast::compilation_unit_ast_node &ast_root,
+        const codesh::semantic_analyzer::symbol_table &table)
+{
+    const std::string country_path = ast_root.get_package_name().join("/");
+
+    if (country_path.empty())
+        return table.get_global_scope();
+
+    return codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
+}
+
+static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> collect_lookup_countries(
+        const codesh::ast::compilation_unit_ast_node &ast_root,
+        const codesh::semantic_analyzer::symbol_table &table)
+{
+    std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> countries;
+
+    // Global country always comes first
+    countries.emplace_back(table.get_global_scope());
+
+    // Include the file's own package country for same-package type resolution
+    add_country(countries, get_own_country(ast_root, table));
+
+    for (const auto &import_decl : ast_root.get_import_declarations())
+    {
+        const auto &country_name = import_decl->get_country_name();
+
+        // On-demand (wildcard) import: the whole package_name IS the country.
+        // Specific import: strip the type name to get the parent country.
+        const std::string country_path = import_decl->get_is_on_demand()
+            ? country_name.join("/")
+            : country_name.omit_last().join("/");
+
+        if (country_path.empty())
+        {
+            // Global country already exists
+            continue;
+        }
+
+        add_country(countries, codesh::semantic_analyzer::util::find_or_create_country(table, country_path));
+    }
+
+    return countries;
+}
+
+static void add_country(std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> &countries,
+        codesh::semantic_analyzer::country_symbol &country)
+{
+    for (const auto &other_country : countries)
+    {
+        if (&country == &other_country.get())
+            return;
+    }
+
+    countries.emplace_back(country);
 }

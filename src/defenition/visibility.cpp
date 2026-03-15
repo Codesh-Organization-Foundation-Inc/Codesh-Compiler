@@ -1,7 +1,7 @@
 #include "visibility.h"
 
-#include "../token/token.h"
-#include "../token/token_group.h"
+#include "token/token.h"
+#include "token/token_group.h"
 
 std::optional<codesh::definition::visibility> codesh::definition::token_group_to_visibility(
     const token *const token)

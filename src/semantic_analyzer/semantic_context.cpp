@@ -2,19 +2,21 @@
 
 #include "fmt/xchar.h"
 
-codesh::semantic_analyzer::semantic_context::semantic_context(const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
+codesh::semantic_analyzer::semantic_context::semantic_context(const symbol_table &symbol_table_,
+        const std::vector<std::reference_wrapper<country_symbol>> &lookup_countries,
         const ast::compilation_unit_ast_node &root,
-        const blasphemy::blasphemy_consumer &blasphemy_consumer) :
+        blasphemy::blasphemy_consumer blasphemy_consumer) :
+    symbol_table_(symbol_table_),
     lookup_countries(lookup_countries),
     root(root),
-    blasphemy_consumer(blasphemy_consumer)
+    blasphemy_consumer(std::move(blasphemy_consumer))
 {
 }
 
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(
-    const blasphemy::blasphemy_consumer &blasphemy_consumer) const
+    blasphemy::blasphemy_consumer blasphemy_consumer) const
 {
-    return {lookup_countries, root, blasphemy_consumer};
+    return {symbol_table_, lookup_countries, root, std::move(blasphemy_consumer)};
 }
 
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(

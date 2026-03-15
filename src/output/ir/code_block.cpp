@@ -1,6 +1,11 @@
 #include "code_block.h"
 
-#include "../../parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/method_declaration_ast_node.h"
+
+
+codesh::output::ir::code_block::code_block(): is_consuming(false)
+{
+}
 
 size_t codesh::output::ir::code_block::size() const
 {
@@ -14,7 +19,7 @@ size_t codesh::output::ir::code_block::size() const
     return result;
 }
 
-const std::list<std::unique_ptr<codesh::output::ir::instruction>> &codesh::output::ir::code_block::get_instructions()
+const std::vector<std::unique_ptr<codesh::output::ir::instruction>> &codesh::output::ir::code_block::get_instructions()
     const
 {
     return instructions;
@@ -23,6 +28,16 @@ const std::list<std::unique_ptr<codesh::output::ir::instruction>> &codesh::outpu
 void codesh::output::ir::code_block::add_instruction(std::unique_ptr<instruction> instruction)
 {
     instructions.emplace_back(std::move(instruction));
+}
+
+bool codesh::output::ir::code_block::get_is_consuming() const
+{
+    return is_consuming;
+}
+
+void codesh::output::ir::code_block::set_is_consuming(const bool is_consuming)
+{
+    this->is_consuming = is_consuming;
 }
 
 void codesh::output::ir::code_block::consume_code_block(code_block block)

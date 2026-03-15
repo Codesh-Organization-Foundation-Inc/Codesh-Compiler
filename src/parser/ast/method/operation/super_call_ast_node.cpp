@@ -1,9 +1,12 @@
 #include "super_call_ast_node.h"
 
-#include "../../../../output/ir/code_block.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
+#include "output/ir/code_block.h"
 // ReSharper disable once CppUnusedIncludeDirective
-#include "../../../../semantic_analyzer/symbol_table/symbol.h"
-#include "../../type/custom_type_ast_node.h"
+#include "defenition/definitions.h"
+#include "output/ir/instruction/invoke_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 
 void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
@@ -26,7 +29,7 @@ void codesh::ast::method::operation::super_call_ast_node::emit_ir(
         ),
 
         cp.get_name_and_type_index(
-            cp.get_utf8_index("<init>"),
+            cp.get_utf8_index(definition::JVM_CONSTRUCTOR_NAME),
             //TODO: Match parameters list
             cp.get_utf8_index("()V")
         )

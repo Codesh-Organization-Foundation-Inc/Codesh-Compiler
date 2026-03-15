@@ -3,15 +3,21 @@
 #include <utility>
 
 codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type,
-        std::string source_stem) :
-    source_stem(std::move(source_stem)),
+        std::filesystem::path source_path) :
+    ast_node(blasphemy::NO_CODE_POS),
+    source_path(std::move(source_path)),
     basad_type(basad_type)
 {
 }
 
+const std::filesystem::path &codesh::ast::compilation_unit_ast_node::get_source_path() const
+{
+    return this->source_path;
+}
+
 std::string codesh::ast::compilation_unit_ast_node::get_source_stem() const
 {
-    return this->source_stem;
+    return source_path.stem();
 }
 
 codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const
@@ -19,57 +25,36 @@ codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad
     return this->basad_type;
 }
 
-codesh::definition::fully_qualified_class_name &codesh::ast::compilation_unit_ast_node::get_package_name()
+codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_ast_node::get_package_name()
 {
     return this->package_name;
 }
 
-std::list<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+std::vector<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_import_declarations()
 {
     return this->import_declarations;
 }
 
-std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+std::vector<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_type_declarations()
 {
     return this->type_declarations;
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::compilation_unit_ast_node::get_package_name() const
+const codesh::definition::fully_qualified_name &codesh::ast::compilation_unit_ast_node::get_package_name() const
 {
     return this->package_name;
 }
 
-const std::list<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::import_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_import_declarations() const
 {
     return this->import_declarations;
 }
 
-const std::list<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
+const std::vector<std::unique_ptr<codesh::ast::type_decl::type_declaration_ast_node>> &codesh::ast::compilation_unit_ast_node::
     get_type_declarations() const
 {
     return this->type_declarations;
-}
-
-const codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table() const
-{
-    if (!symbol_table)
-        throw std::runtime_error("Attempted to get a symbol table instance, yet none was set");
-
-    return symbol_table.value();
-}
-
-codesh::semantic_analyzer::symbol_table &codesh::ast::compilation_unit_ast_node::get_symbol_table()
-{
-    if (!symbol_table)
-        throw std::runtime_error("Attempted to get a symbol table instance, yet none was set");
-
-    return symbol_table.value();
-}
-
-void codesh::ast::compilation_unit_ast_node::construct_symbol_table()
-{
-    symbol_table.emplace(*this);
 }

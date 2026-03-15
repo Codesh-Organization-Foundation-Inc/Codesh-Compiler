@@ -1,31 +1,44 @@
 #include "resolve.h"
-#include "method_call/resolve.h"
-#include "variable_reference/resolve.h"
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../parser/ast/impl/binary_ast_node.h"
-#include "../../parser/ast/impl/unary_ast_node.h"
-#include "../../parser/ast/collection/collection_ast_node.h"
-#include "../../parser/ast/method/operation/block/for_ast_node.h"
-#include "../../parser/ast/method/operation/block/if_ast_node.h"
-#include "../../parser/ast/method/operation/block/while_ast_node.h"
-#include "../../parser/ast/type/primitive_type_ast_node.h"
-#include "../../parser/ast/var_reference/variable_reference_ast_node.h"
-#include "../../semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/statement/method_call/resolve.h"
+#include "semantic_analyzer/statement/variable_reference/resolve.h"
 
-static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
-                               codesh::ast::var_reference::value_ast_node &val_node,
-                               const codesh::semantic_analyzer::method_symbol &containing_method,
-                               const codesh::semantic_analyzer::method_scope_symbol &scope);
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "defenition/primitive_type.h"
+#include "fmt/xchar.h"
+#include "parser/ast/collection/collection_ast_node.h"
+#include "parser/ast/collection/range_ast_node.h"
+#include "parser/ast/impl/binary_ast_node.h"
+#include "parser/ast/impl/unary_ast_node.h"
+#include "parser/ast/method/method_scope_ast_node.h"
+#include "parser/ast/method/operation/block/for_ast_node.h"
+#include "parser/ast/method/operation/block/if_ast_node.h"
+#include "parser/ast/method/operation/block/while_ast_node.h"
+#include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/return_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type/widening_cast_ast_node.h"
+#include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "parser/ast/var_reference/variable_reference_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/widen_util.h"
 
-static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
+using namespace codesh::semantic_analyzer;
+
+static bool resolve_value(const semantic_context &context,
+                          codesh::ast::var_reference::value_ast_node &val_node,
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope);
+
+static bool resolve_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
                           const codesh::ast::method::method_scope_ast_node &scope_node);
 
-static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope,
+static bool resolve_conditioned_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope,
                           const codesh::ast::block::conditioned_scope_container &conditioned_scope);
 
 static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &val_node,
@@ -37,10 +50,10 @@ static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_nod
 static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node);
 
 
-bool codesh::semantic_analyzer::statement::resolve(const semantic_context &context,
-                                                   ast::method::operation::method_operation_ast_node &stmnt,
-                                                   const method_symbol &containing_method,
-                                                   const method_scope_symbol &scope)
+bool statement::resolve(const semantic_context &context,
+                        ast::method::operation::method_operation_ast_node &stmnt,
+                        const method_symbol &containing_method,
+                        const method_scope_symbol &scope)
 {
     if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(&stmnt))
     {
@@ -52,7 +65,13 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         return variable_reference::resolve(context, *var_ref, scope);
     }
 
+    if (const auto str = dynamic_cast<ast::var_reference::evaluable_ast_node<std::string> *>(&stmnt))
+    {
+        return util::resolve_type_node(context, *str->get_type());
+    }
 
+
+    //TODO: Move to separate resolvers
     if (const auto if_node = dynamic_cast<ast::block::if_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
@@ -85,19 +104,79 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         return all_succeed;
     }
 
+    if (const auto range = dynamic_cast<ast::collection::range_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_value(context, range->get_from(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_to(), containing_method, scope);
+        all_succeed &= resolve_value(context, range->get_skip(), containing_method, scope);
+        return all_succeed;
+    }
+
     if (const auto for_node = dynamic_cast<ast::block::for_ast_node *>(&stmnt))
     {
         bool all_succeed = true;
         all_succeed &= resolve_value(context, for_node->get_collection(), containing_method, scope);
         all_succeed &= resolve_scope(context, containing_method, for_node->get_body_scope());
+        all_succeed &= resolve_scope(context, containing_method, for_node->get_iterator_declaration_scope());
         all_succeed &= is_collection(for_node->get_collection());
         return all_succeed;
+    }
+
+    if (const auto return_node = dynamic_cast<ast::method::operation::return_ast_node *>(&stmnt))
+    {
+        if (return_node->get_return_value() == nullptr)
+            return true;
+
+        // Perform compatibility check only if we could resolve the return value
+        // Otherwise it's a useless, guaranteed error.
+        if (!resolve_value(context, *return_node->get_return_value(), containing_method, scope))
+            return false;
+
+
+        const auto &expected_return_type = containing_method.get_return_type();
+
+        auto [are_types_compatible, return_value] = util::make_widening_cast_maybe(
+            return_node->take_return_value(),
+            expected_return_type
+        );
+        return_node->set_return_value(std::move(return_value));
+
+        if (!are_types_compatible)
+        {
+            context.blasphemy_consumer(
+                fmt::format(
+                    blasphemy::details::RETURN_TYPE_MISMATCH,
+                    return_node->get_return_value()->get_type()->to_pretty_string(),
+                    expected_return_type.to_pretty_string()
+                ),
+                return_node->get_code_position()
+            );
+            return false;
+        }
+
+        return true;
     }
 
 
     if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
     {
-        return resolve_value(context, unary_op->get_child(), containing_method, scope);
+        if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
+        {
+            return false;
+        }
+
+        if (!unary_op->is_value_valid())
+        {
+            context.blasphemy_consumer(fmt::format(
+                blasphemy::details::UNARY_TYPE_MISMATCH,
+                unary_op->get_child().get_type()->to_pretty_string(),
+                unary_op->to_pretty_string()
+            ), unary_op->get_code_position());
+            return false;
+        }
+
+        return true;
     }
 
     if (const auto binary_op = dynamic_cast<ast::impl::binary_ast_node *>(&stmnt))
@@ -105,6 +184,23 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
         bool all_succeed = true;
         all_succeed &= resolve_value(context, binary_op->get_left(), containing_method, scope);
         all_succeed &= resolve_value(context, binary_op->get_right(), containing_method, scope);
+
+        // Do not perform value validation with an invalid variable reference
+        if (all_succeed)
+        {
+            binary_op->apply_widening_conversions();
+
+            if (!binary_op->is_value_valid())
+            {
+                context.blasphemy_consumer(fmt::format(
+                    blasphemy::details::BINARY_TYPE_MISMATCH,
+                    binary_op->get_left().get_type()->to_pretty_string(),
+                    binary_op->get_right().get_type()->to_pretty_string(),
+                    binary_op->to_pretty_string()
+                ), binary_op->get_code_position());
+                all_succeed = false;
+            }
+        }
         return all_succeed;
     }
 
@@ -113,28 +209,28 @@ bool codesh::semantic_analyzer::statement::resolve(const semantic_context &conte
 }
 
 
-static bool resolve_value(const codesh::semantic_analyzer::semantic_context &context,
+static bool resolve_value(const semantic_context &context,
                           codesh::ast::var_reference::value_ast_node &val_node,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope)
+                          const method_symbol &containing_method,
+                          const method_scope_symbol &scope)
 {
     if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
     {
-        return codesh::semantic_analyzer::statement::variable_reference::resolve(context, *var_ref, scope);
+        return statement::variable_reference::resolve(context, *var_ref, scope);
     }
 
-    return codesh::semantic_analyzer::statement::resolve(context, val_node, containing_method, scope);
+    return statement::resolve(context, val_node, containing_method, scope);
 }
 
-static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
+static bool resolve_scope(const semantic_context &context,
+                          const method_symbol &containing_method,
                           const codesh::ast::method::method_scope_ast_node &scope_node)
 {
     bool all_succeed = true;
 
     for (const auto &statement : scope_node.get_body())
     {
-        all_succeed &= codesh::semantic_analyzer::statement::resolve(
+        all_succeed &= statement::resolve(
             context,
             *statement,
             containing_method,
@@ -145,10 +241,10 @@ static bool resolve_scope(const codesh::semantic_analyzer::semantic_context &con
     return all_succeed;
 }
 
-static bool resolve_conditioned_scope(const codesh::semantic_analyzer::semantic_context &context,
-                          const codesh::semantic_analyzer::method_symbol &containing_method,
-                          const codesh::semantic_analyzer::method_scope_symbol &scope,
-                          const codesh::ast::block::conditioned_scope_container &conditioned_scope)
+static bool resolve_conditioned_scope(const semantic_context &context,
+                                      const method_symbol &containing_method,
+                                      const method_scope_symbol &scope,
+                                      const codesh::ast::block::conditioned_scope_container &conditioned_scope)
 {
     bool all_succeed = true;
     all_succeed &= resolve_value(context, *conditioned_scope.condition, containing_method, scope);
@@ -169,7 +265,8 @@ static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         blasphemy_details,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }
@@ -190,7 +287,8 @@ static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         codesh::blasphemy::details::ITERATOR_NOT_COLLECTION,
-        codesh::blasphemy::blasphemy_type::SEMANTIC
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        val_node.get_code_position()
     );
     return false;
 }

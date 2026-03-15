@@ -1,14 +1,13 @@
 #include "import_declaration_ast_node.h"
 
-#include "../../defenition/fully_qualified_class_name.h"
 
-codesh::ast::import_declaration_ast_node::import_declaration_ast_node() :
-    is_on_demand(false), is_static(false)
-{};
+codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const blasphemy::code_position code_position) :
+    ast_node(code_position), is_on_demand(false), is_static(false)
+{}
 
-codesh::definition::fully_qualified_class_name &codesh::ast::import_declaration_ast_node::get_package_name()
+codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_country_name()
 {
-    return this->package_name;
+    return this->country_name;
 }
 
 bool codesh::ast::import_declaration_ast_node::get_is_on_demand() const
@@ -22,9 +21,9 @@ bool codesh::ast::import_declaration_ast_node::get_is_static() const
 }
 
 void codesh::ast::import_declaration_ast_node::set_package_name(
-        const definition::fully_qualified_class_name &package_name)
+        const definition::fully_qualified_name &package_name)
 {
-    this->package_name = package_name;
+    this->country_name = package_name;
 }
 void codesh::ast::import_declaration_ast_node::set_is_on_demand(const bool is_on_demand)
 {

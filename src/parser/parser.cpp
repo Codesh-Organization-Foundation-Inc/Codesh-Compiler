@@ -1,33 +1,35 @@
 #include "parser.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/details.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
 #include "compilation_unit_parser.h"
 #include "import_parser.h"
-#include "type/type_parser.h"
+#include "parser/type/type_parser.h"
 #include "util.h"
 
 namespace ast = codesh::ast;
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
-        const std::string &source_stem)
+        const std::filesystem::path &source_path)
 {
     if (tokens.empty())
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_BASAD,
             blasphemy::blasphemy_type::LEXICAL,
-            std::nullopt,
+            blasphemy::NO_CODE_POS,
             true
         );
     }
 
-    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_stem);
+
+    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_path);
 
     if (root_node->get_basad_type() == definition::basad_type::IAW)
     {
         //TODO: Return the joke program
+        // (Do not even make the compilation unit yet)
         return root_node;
     }
 
@@ -49,8 +51,11 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
             break;
 
         default:
-            blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_SHALL_BE,
-                blasphemy::blasphemy_type::SYNTAX);
+            blasphemy::get_blasphemy_collector().add_blasphemy(
+                blasphemy::details::NO_KEYWORD_SHALL_BE,
+                blasphemy::blasphemy_type::SYNTAX,
+                tokens.front()->get_code_position()
+            );
             tokens.pop();
             break;
         }

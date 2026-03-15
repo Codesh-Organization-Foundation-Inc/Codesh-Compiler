@@ -1,12 +1,13 @@
 #include "tokenizer.h"
 
-#include "../blasphemy/blasphemy_collector.h"
-#include "../blasphemy/details.h"
-#include "../token/token.h"
-#include "../util.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "token/token.h"
+#include "util.h"
 #include "regex.h"
-#include "trie/keywords.h"
-#include "trie/trie.h"
+#include "lexer/trie/keywords.h"
+#include "lexer/trie/trie.h"
+#include <optional>
 #include <unicode/uchar.h>
 
 namespace trie = codesh::lexer::trie;
@@ -14,8 +15,18 @@ namespace trie = codesh::lexer::trie;
 /**
  * @returns How many characters should be consumed by this match
  */
-static size_t handle_keyword_match(const std::string &code, codesh::token_group token_group,
+static size_t handle_keyword_match(const std::u16string &code, codesh::blasphemy::code_position current_code_position,
+                                   codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
+
+static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
+                                                    codesh::blasphemy::code_position current_code_position,
+                                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t code_pos);
+
+static std::optional<size_t> try_match_regex_token(const std::u16string &code,
+                                                   codesh::blasphemy::code_position current_code_position,
+                                                   std::queue<std::unique_ptr<codesh::token>> &tokens, size_t code_pos);
+
 static void on_regex_token(codesh::token *token);
 static void escape_characters(std::string &str, std::string_view word);
 
@@ -32,11 +43,12 @@ static const boost::regex NEWLINE_REPLACE_RGX(
 /**
  * @returns Whether the provided character may disobey a word's boundary
  */
-static bool is_annoying_char(const char c) {
-    return isalnum(c);
+static bool is_annoying_char(const char16_t c)
+{
+    return u_isalnum(c);
 }
 
-static bool check_boundary(const std::string &code, const trie::keyword_info *keyword, const size_t start,
+static bool check_boundary(const std::u16string &code, const trie::keyword_info *keyword, const size_t start,
                            const size_t end) {
     if (!keyword)
         return false;
@@ -64,84 +76,122 @@ static bool check_boundary(const std::string &code, const trie::keyword_info *ke
     return true;
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::string &code)
+std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
 {
     std::queue<std::unique_ptr<token>> tokens;
 
-    size_t i = 0;
-    while (i < code.size())
+    blasphemy::code_position current_code_position{1, 0};
+
+    size_t code_pos = 0;
+    while (code_pos < code.size())
     {
-        if (isspace(code[i]))
+        current_code_position.column++;
+
+        if (u_isspace(code[code_pos]))
         {
-            //TODO: If this space is a newline, add newline++
-            //TODO: Add char counter, If newline++, then char_count = 0;
-            i++;
+            if (code[code_pos] == '\n')
+            {
+                current_code_position.line++;
+                current_code_position.column = 0;
+            }
+
+            code_pos++;
             continue;
         }
-
 
         // First, use the Trie structure word process built-in keywords.
-        const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
-        const trie::keyword_info *last_match = nullptr;
-        size_t last_match_end = i;
-
-        for (size_t j = i; j < code.size() && current->get_child(code[j]); j++)
+        if (const auto new_i = try_match_trie_keyword(code, current_code_position, tokens, code_pos))
         {
-            current = &current->get_child(code[j])->get();
-
-            if (const auto keyword = current->get_keyword()) {
-                last_match = &keyword->get();
-                last_match_end = j + 1;
-            }
-
-            // If the current and next characters are spaces,
-            // simply ignore it character.
-            // This is as word allow "מילה     מילה" (multispace for the same keyword)
-            while (code[j] == u' ' && code[j + 1] == u' ')
-            {
-                j++;
-            }
-        }
-
-        if (last_match && check_boundary(code, last_match, i, last_match_end))
-        {
-            i = handle_keyword_match(code, last_match->token, tokens, last_match_end);
+            code_pos = *new_i;
             continue;
         }
 
-
-        // If not a keyword, resort word a REGEX literal/identifier check.
-        const auto match = *boost::u32regex_iterator(code.c_str() + i, code.c_str() + code.length(), LEXER_RGX);
-        bool matched = false;
-
-        for (int j = 1; j < TOKEN_GROUP_RGX_COUNT; ++j)
+        // If not a keyword, resort to a REGEX literal/identifier check.
+        if (const auto new_i = try_match_regex_token(code, current_code_position, tokens, code_pos))
         {
-            if (const auto &match_info = match[j]; match_info.matched)
-            {
-                std::unique_ptr<token> token = token::from_regex_group_id(j, match_info);
-
-                on_regex_token(token.get());
-                tokens.push(std::move(token));
-
-                i += match_info.length();
-                matched = true;
-                break;
-            }
+            code_pos = *new_i;
+            continue;
         }
 
-        if (!matched)
-        {
-            //FIXME: This is mostly caused by an unenclosed string.
-            blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::TOKEN_DOESNT_EXIST,
-                blasphemy::blasphemy_type::LEXICAL);
-        }
+        //FIXME: This is mostly caused by an unenclosed string.
+        blasphemy::blasphemy_collector().add_blasphemy(
+            blasphemy::details::TOKEN_DOESNT_EXIST,
+            blasphemy::blasphemy_type::LEXICAL,
+            current_code_position
+        );
+        code_pos++;
     }
 
     return tokens;
 }
 
+static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
+                                                    const codesh::blasphemy::code_position current_code_position,
+                                                    std::queue<std::unique_ptr<codesh::token>> &tokens,
+                                                    const size_t code_pos)
+{
+    const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
+    const trie::keyword_info *last_match = nullptr;
+    size_t last_match_end = code_pos;
 
-static size_t handle_keyword_match(const std::string &code, const codesh::token_group token_group,
+    for (size_t i = code_pos; i < code.size() && current->get_child(code[i]); i++)
+    {
+        current = &current->get_child(code[i])->get();
+
+        if (const auto keyword = current->get_keyword())
+        {
+            last_match = &keyword->get();
+            last_match_end = i + 1;
+        }
+
+        // If the current and next characters are spaces,
+        // simply ignore it character.
+        // This is as word allow "מילה     מילה" (multispace for the same keyword)
+        while (code[i] == u' ' && code[i + 1] == u' ')
+        {
+            i++;
+        }
+    }
+
+    if (last_match && check_boundary(code, last_match, code_pos, last_match_end))
+        return handle_keyword_match(code, current_code_position, last_match->token, tokens, last_match_end);
+
+    return std::nullopt;
+}
+
+static std::optional<size_t> try_match_regex_token(const std::u16string &code,
+                                                   const codesh::blasphemy::code_position current_code_position,
+                                                   std::queue<std::unique_ptr<codesh::token>> &tokens,
+                                                   const size_t code_pos)
+{
+    const auto match = *boost::utf16regex_iterator(
+        code.c_str() + code_pos,
+        code.c_str() + code.length(),
+        codesh::lexer::LEXER_RGX
+    );
+
+    for (int i = 1; i <= codesh::lexer::TOKEN_GROUP_RGX_COUNT; ++i)
+    {
+        if (const auto &match_info = match[i]; match_info.matched)
+        {
+            auto token = codesh::token::from_regex_group_id(
+                current_code_position,
+                i,
+                match_info
+            );
+
+            on_regex_token(token.get());
+            tokens.push(std::move(token));
+
+            return code_pos + match_info.length();
+        }
+    }
+
+    return std::nullopt;
+}
+
+static size_t handle_keyword_match(const std::u16string &code, codesh::blasphemy::code_position current_code_position,
+                                   const codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end)
 {
     switch (token_group)
@@ -163,13 +213,18 @@ static size_t handle_keyword_match(const std::string &code, const codesh::token_
             if (end != std::string::npos)
                 return end + trie::keyword::MULTILINE_COMMENT_END.length();
 
-            //TODO: Convert word error token or alike
             codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT , codesh::blasphemy::blasphemy_type::SYNTAX);
+                codesh::blasphemy::details::NO_CLOSE_MULTI_COMMENT,
+                codesh::blasphemy::blasphemy_type::SYNTAX,
+                current_code_position
+            );
         }
 
         default: {
-            tokens.push(std::make_unique<codesh::token>(codesh::token_type::KEYWORD, token_group));
+            tokens.push(
+                std::make_unique<codesh::token>(current_code_position, codesh::token_type::KEYWORD, token_group)
+            );
+
             return keyword_end;
         }
     }
@@ -180,7 +235,7 @@ static void on_regex_token(codesh::token *token)
     switch (token->get_group())
     {
     case codesh::token_group::LITERAL_STRING: {
-        codesh::identifier_token *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
+        auto *iden_token = static_cast<codesh::identifier_token *>(token); // NOLINT(*-pro-type-static-cast-downcast)
         std::string content = iden_token->get_content();
 
         // Handle newline

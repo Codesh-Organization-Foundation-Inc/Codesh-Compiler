@@ -1,7 +1,8 @@
 #include "method_declaration_ast_node.h"
 
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
-#include "fmt/xchar.h"
+#include "defenition/definitions.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 #include "util.h"
 
 #include <ranges>
@@ -13,18 +14,28 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-    definition::fully_qualified_class_name name) : name(std::move(name)), method_scope(*this)
+        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+    ast_node(code_position), name(std::move(name)), method_scope(code_position, *this)
 {
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_descriptor(const bool resolved) const
 {
-    return util::generate_method_descriptor(resolved, *return_type, parameter_types, *attributes);
+    return util::generate_method_descriptor(
+        resolved ? resolved_symbol : std::nullopt,
+        *return_type,
+        parameter_types,
+        *attributes
+    );
 }
 
 std::string codesh::ast::method::method_declaration_ast_node::generate_parameters_descriptor(const bool resolved) const
 {
-    return util::generate_parameters_descriptor(resolved, parameter_types, *attributes);
+    return util::generate_parameters_descriptor(
+        resolved ? resolved_symbol : std::nullopt,
+        parameter_types,
+        *attributes
+    );
 }
 
 void codesh::ast::method::method_declaration_ast_node::set_resolved(semantic_analyzer::method_symbol &symbol)
@@ -32,7 +43,7 @@ void codesh::ast::method::method_declaration_ast_node::set_resolved(semantic_ana
     resolved_symbol.emplace(symbol);
 }
 
-const codesh::definition::fully_qualified_class_name &codesh::ast::method::method_declaration_ast_node::
+const codesh::definition::fully_qualified_name &codesh::ast::method::method_declaration_ast_node::
     get_unresolved_name() const
 {
     return name;
@@ -76,7 +87,7 @@ bool codesh::ast::method::method_declaration_ast_node::has_inner_scopes() const
     return !method_scope.get_method_scopes().empty();
 }
 
-const std::vector<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
+const std::deque<std::reference_wrapper<codesh::ast::local_variable_declaration_ast_node>> &codesh::ast::method::
     method_declaration_ast_node::get_parameters() const
 {
     return parameters;
@@ -91,16 +102,33 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter(
     method_scope.add_local_variable(std::move(parameter));
 }
 
-const std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+void codesh::ast::method::method_declaration_ast_node::add_parameter_front(
+    std::unique_ptr<local_variable_declaration_ast_node> parameter)
+{
+    parameter_types.emplace_front(*parameter->get_type());
+    parameters.emplace_front(*parameter);
+
+    method_scope.add_local_variable_front(std::move(parameter));
+}
+
+const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown() const
 {
     return exceptions_thrown;
 }
 
-std::list<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
+std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
     get_exceptions_thrown()
 {
     return exceptions_thrown;
+}
+
+std::string codesh::ast::method::method_declaration_ast_node::to_pretty_string() const
+{
+    return fmt::format(
+        definition::METHOD_PRETTY_STRING,
+        get_last_name(false)
+    );
 }
 
 void codesh::ast::method::method_declaration_ast_node::emit_constants(const compilation_unit_ast_node &root_node,
@@ -116,6 +144,10 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
         constant_pool.goc_utf8_info("StackMapTable");
     }
 
+    for (const auto &param : parameters)
+    {
+        param.get().emit_constants(root_node, constant_pool);
+    }
 
     constant_pool.goc_name_and_type_info(
         constant_pool.goc_utf8_info(get_last_name(true)),

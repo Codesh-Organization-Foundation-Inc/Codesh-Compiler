@@ -1,19 +1,20 @@
 #include "class_file_writer.h"
 
 #include <filesystem>
+#include <fmt/xchar.h>
 #include <fstream>
 
 #include <ranges>
 
 #include <vector>
 
-#include "../../blasphemy/blasphemy_collector.h"
-#include "../../blasphemy/details.h"
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "defs/methods_info_entry.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "blasphemy/details.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "output/jvm_target/defs/methods_info_entry.h"
 
-#include "./defs/attribute_info_entry.h"
-#include "defs/class_file.h"
+#include "output/jvm_target/defs/attribute_info_entry.h"
+#include "output/jvm_target/defs/class_file.h"
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
 static void write_methods(std::ofstream &out,
@@ -28,15 +29,25 @@ static void write_stack_map_frame(std::ofstream &out,
 
 
 void codesh::output::jvm_target::write_to_file(const defs::class_file &class_file,
-    const ast::compilation_unit_ast_node &root_node,
-    const ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &destination)
+                                               const ast::type_decl::type_declaration_ast_node &type_decl,
+                                               const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(destination / (type_decl.get_last_name(false) + ".class"), std::ios::binary);
+    std::ofstream destination_file(
+        destination / (type_decl.get_last_name(false) + ".class"),
+        std::ios::binary
+    );
 
     if (!destination_file)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::SOURCE_FILE_OPEN_ERROR,
-            blasphemy::blasphemy_type::OUTPUT, std::nullopt, true);
+        blasphemy::blasphemy_collector().add_blasphemy(
+            fmt::format(
+                blasphemy::details::SOURCE_FILE_OPEN_ERROR,
+                (destination / (type_decl.get_last_name(false) + ".class")).string()
+            ),
+            blasphemy::blasphemy_type::OUTPUT,
+            blasphemy::NO_CODE_POS,
+            true
+        );
     }
 
 
@@ -96,6 +107,20 @@ static void write_constant_pool(std::ofstream &out, const codesh::output::jvm_ta
         else if (const auto integer_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Integer_info *>(&info.get()))
         {
             write_bytes(out, integer_info->bytes, 4);
+        }
+        else if (const auto float_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Float_info *>(&info.get()))
+        {
+            write_bytes(out, float_info->bytes, 4);
+        }
+        else if (const auto long_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Long_info *>(&info.get()))
+        {
+            write_bytes(out, long_info->high_bytes, 4);
+            write_bytes(out, long_info->low_bytes, 4);
+        }
+        else if (const auto double_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_Double_info *>(&info.get()))
+        {
+            write_bytes(out, double_info->high_bytes, 4);
+            write_bytes(out, double_info->low_bytes, 4);
         }
         else if (const auto string_info = dynamic_cast<const codesh::output::jvm_target::defs::CONSTANT_String_info *>(&info.get()))
         {

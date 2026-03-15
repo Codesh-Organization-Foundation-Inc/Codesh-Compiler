@@ -1,13 +1,14 @@
 #pragma once
 
-#include "../impl/ast_node.h"
+#include "parser/ast/impl/ast_node.h"
 
-#include "../../../output/jvm_target/class_file_builder.h"
-#include "../impl/i_constant_pool_emitter.h"
-#include "../local_variable_declaration_ast_node.h"
-#include "operation/method_operation_ast_node.h"
+#include "output/jvm_target/class_file_builder.h"
+#include "parser/ast/impl/i_constant_pool_emitter.h"
+#include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/method/operation/method_operation_ast_node.h"
 
-#include <list>
+#include <deque>
+#include <vector>
 
 namespace codesh::ast::method
 {
@@ -18,8 +19,8 @@ class method_scope_ast_node : public impl::ast_node,
 {
     method_declaration_ast_node &parent_method;
 
-    std::list<std::unique_ptr<operation::method_operation_ast_node>> body;
-    std::list<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
+    std::deque<std::unique_ptr<operation::method_operation_ast_node>> body;
+    std::deque<std::unique_ptr<local_variable_declaration_ast_node>> local_variables;
 
     std::vector<std::unique_ptr<method_scope_ast_node>> method_scopes;
 
@@ -30,26 +31,25 @@ protected:
         const override;
 
 public:
-    explicit method_scope_ast_node(method_declaration_ast_node &parent_method);
+    method_scope_ast_node(blasphemy::code_position code_position, method_declaration_ast_node &parent_method);
 
     void set_resolved(semantic_analyzer::method_scope_symbol &symbol) override;
 
 
     [[nodiscard]] method_declaration_ast_node &get_parent_method() const;
 
-    void set_bytecode_position(size_t bytecode_position);
 
-
-    [[nodiscard]] const std::list<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
+    [[nodiscard]] const std::deque<std::unique_ptr<operation::method_operation_ast_node>> &get_body() const;
     void add_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
     void push_front_statement(std::unique_ptr<operation::method_operation_ast_node> statement);
 
-    [[nodiscard]] const std::list<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
+    [[nodiscard]] const std::deque<std::unique_ptr<local_variable_declaration_ast_node>> &get_local_variables()
         const;
     void add_local_variable(std::unique_ptr<local_variable_declaration_ast_node> statement);
+    void add_local_variable_front(std::unique_ptr<local_variable_declaration_ast_node> statement);
 
 
-    method_scope_ast_node &create_method_scope();
+    method_scope_ast_node &create_method_scope(blasphemy::code_position code_position);
     [[nodiscard]] const std::vector<std::unique_ptr<method_scope_ast_node>> &get_method_scopes() const;
 
 

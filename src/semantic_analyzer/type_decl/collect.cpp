@@ -1,39 +1,66 @@
 #include "collect.h"
 
-#include "../../parser/ast/compilation_unit_ast_node.h"
-#include "../method_decl/collect.h"
+#include "parser/ast/compilation_unit_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "semantic_analyzer/method_decl/collect.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/util.h"
 
-#include "../semantic_context.h"
-#include "../../blasphemy/blasphemy_collector.h"
+#include "blasphemy/blasphemy_collector.h"
+#include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
+#include "semantic_analyzer/semantic_context.h"
+
 
 void codesh::semantic_analyzer::type_declaration::collect(const semantic_context &context,
         ast::type_decl::type_declaration_ast_node &type_decl, country_symbol &country)
 {
-    const std::string name = type_decl.get_last_name(false);
-    const semantic_context new_context = context.with_consumer("בָּעֶצֶם", name);
+    // No reason to collect error nodes
+    if (dynamic_cast<const ast::type_decl::error_type_declaration_ast_node *>(&type_decl))
+        return;
 
+    const auto name = type_decl.get_last_name(false);
+    const auto new_context = context.with_consumer("בָּעֶצֶם", name);
 
-    const auto [it, inserted] = country.get_scope().add_symbol(
-        name, std::make_unique<type_symbol>(
-            &country,
-            country.get_full_name().with(name),
-
-            type_decl.get_attributes()->clone(),
-            &type_decl
-        )
+    const auto [it, inserted] = util::add_type_symbol(
+        country,
+        name,
+        type_decl.get_attributes()->clone(),
+        std::unique_ptr<ast::type::custom_type_ast_node>(
+            static_cast<ast::type::custom_type_ast_node *>(type_decl.get_super_class()->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
+        ),
+        type_decl.get_interfaces_copy(),
+        &type_decl
     );
 
     if (!inserted)
     {
         new_context.blasphemy_consumer(fmt::format(
-            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
-            type_decl.get_unresolved_name().join()
-        ));
+            "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
+            type_decl.get_unresolved_name().holy_join()
+        ), type_decl.get_code_position());
     }
+}
 
 
-    for (const auto &method_decl : type_decl.get_all_methods())
+void codesh::semantic_analyzer::type_declaration::dispatch_collect_methods(const semantic_context &context,
+        country_symbol &country)
+{
+    for (const auto &type_decl : context.root.get_type_declarations())
     {
-        method_declaration::collect(new_context, *method_decl, it.get());
+        const auto name = type_decl->get_last_name(false);
+        const auto new_context = context.with_consumer("בָּעֶצֶם", name);
+
+        const auto type_symbol_raw = country.get_scope().resolve_local(name);
+        if (!type_symbol_raw.has_value())
+            continue;
+
+        auto &type_symbol = *static_cast<semantic_analyzer::type_symbol *>( // NOLINT(*-pro-type-static-cast-downcast)
+            &type_symbol_raw->get()
+        );
+
+        for (const auto &method_decl : type_decl->get_all_methods())
+        {
+            method_declaration::collect(new_context, *method_decl, type_symbol);
+        }
     }
 }

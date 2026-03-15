@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../../parser/ast/method/operation/method_call_ast_node.h"
-#include "defs/cp_info.h"
+#include "output/jvm_target/defs/cp_info.h"
 
 #include <memory>
 #include <string>
@@ -57,15 +56,6 @@ class constant_pool
     // Each of these Get or Creates (GoC) return the index of the constant in the pool (CPI).
     int goc_constant(std::unique_ptr<defs::cp_info> constant_info);
 
-    static std::unique_ptr<defs::CONSTANT_Utf8_info> utf8_info(const std::string &utf8);
-    static std::unique_ptr<defs::CONSTANT_String_info> string_info(int utf8_index);
-    static std::unique_ptr<defs::CONSTANT_Integer_info> integer_info(int num);
-
-    static std::unique_ptr<defs::CONSTANT_Methodref_info> methodref_info(int class_index, int name_and_type_index);
-    static std::unique_ptr<defs::CONSTANT_NameAndType_info> name_and_type_info(int name_index, int descriptor_index);
-    static std::unique_ptr<defs::CONSTANT_Class_info> class_info(int name_index);
-    static std::unique_ptr<defs::CONSTANT_Fieldref_info> fieldref_info(int class_index, int name_and_type_index);
-
 public:
     /**
      * Constructs a new constant pool using the provided AST node
@@ -76,6 +66,9 @@ public:
     int goc_utf8_info(const std::string &utf8);
     int goc_string_info(int utf8_index);
     int goc_integer_info(int num);
+    int goc_float_info(float num);
+    int goc_long_info(long long num);
+    int goc_double_info(double num);
 
     int goc_methodref_info(int class_index, int name_and_type_index);
     int goc_name_and_type_info(int name_index, int descriptor_index);
@@ -87,6 +80,9 @@ public:
     [[nodiscard]] int get_utf8_index(const std::string &utf8) const;
     [[nodiscard]] int get_string_index(int utf8_index) const;
     [[nodiscard]] int get_integer_index(int num) const;
+    [[nodiscard]] int get_float_index(float num) const;
+    [[nodiscard]] int get_long_index(long long num) const;
+    [[nodiscard]] int get_double_index(double num) const;
 
     [[nodiscard]] int get_methodref_index(int class_index, int name_and_type_index) const;
     [[nodiscard]] int get_name_and_type_index(int name_index, int descriptor_index) const;

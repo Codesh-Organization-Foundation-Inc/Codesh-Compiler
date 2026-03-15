@@ -1,16 +1,21 @@
 #include "variable_reference_ast_node.h"
 
-#include "../../../output/ir/code_block.h"
-#include "../../../semantic_analyzer/symbol_table/symbol.h"
+#include "output/ir/code_block.h"
+#include "output/ir/instruction/get_field_instruction.h"
+#include "output/ir/instruction/get_static_instruction.h"
+#include "output/ir/instruction/load_instruction.h"
+#include "output/jvm_target/constant_pool.h"
+#include "semantic_analyzer/symbol_table/symbol.h"
 
-variable_reference_ast_node::variable_reference_ast_node(codesh::definition::fully_qualified_class_name name) :
-    name(std::move(name))
+variable_reference_ast_node::variable_reference_ast_node(const codesh::blasphemy::code_position code_position, codesh::definition::fully_qualified_name name) :
+    value_ast_node(code_position), name(std::move(name))
 {
 }
 
 variable_reference_ast_node::variable_reference_ast_node(
+        const codesh::blasphemy::code_position code_position,
         const codesh::ast::local_variable_declaration_ast_node &producing_declaration) :
-    name(codesh::definition::fully_qualified_class_name(producing_declaration.get_name())),
+    value_ast_node(code_position), name(codesh::definition::fully_qualified_name(producing_declaration.get_name())),
     producing_declaration(producing_declaration)
 {
 }
@@ -34,7 +39,7 @@ codesh::ast::type::type_ast_node *variable_reference_ast_node::get_type() const
     return get_resolved().get_type();
 }
 
-const codesh::definition::fully_qualified_class_name &variable_reference_ast_node::get_unresolved_name() const
+const codesh::definition::fully_qualified_name &variable_reference_ast_node::get_unresolved_name() const
 {
     return name;
 }
@@ -43,6 +48,11 @@ std::optional<std::reference_wrapper<const codesh::ast::local_variable_declarati
     variable_reference_ast_node::get_producing_declaration() const
 {
     return producing_declaration;
+}
+
+std::optional<int> variable_reference_ast_node::get_field_cpi() const
+{
+    return field_cpi;
 }
 
 void variable_reference_ast_node::emit_constants(const codesh::ast::compilation_unit_ast_node &root_node,
@@ -69,14 +79,26 @@ void variable_reference_ast_node::emit_ir(
 {
     if (field_cpi.has_value())
     {
-        //TODO: Expand beyond static
-        containing_block.add_instruction(std::make_unique<codesh::output::ir::get_static_instruction>(*field_cpi));
+        const auto *field = dynamic_cast<const codesh::semantic_analyzer::field_symbol *>(&get_resolved());
+        if (field->get_attributes().get_is_static())
+        {
+            containing_block.add_instruction(
+                std::make_unique<codesh::output::ir::get_static_instruction>(*field_cpi));
+        }
+        else
+        {
+            // Push 'this' (local var slot 0), then read the instance field
+            containing_block.add_instruction(std::make_unique<codesh::output::ir::load_instruction>(
+                codesh::output::ir::instruction_type::REFERENCE, 0));
+            containing_block.add_instruction(
+                std::make_unique<codesh::output::ir::get_field_instruction>(*field_cpi));
+        }
     }
     else if (const auto local_var = dynamic_cast<const codesh::semantic_analyzer::local_variable_symbol *>(&get_resolved()))
     {
         containing_block.add_instruction(std::make_unique<codesh::output::ir::load_instruction>(
             local_var->get_type()->to_instruction_type(),
-            local_var->get_index()
+            local_var->get_jvm_index()
         ));
     }
     else
