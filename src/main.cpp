@@ -51,12 +51,12 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 
 int main(const int argc, char **const argv)
 {
-    std::puts("המוציא לשאלה החל");
+    std::puts("וַיָּחֶל הַמּוֹצִיא בִשְׁאֵלָה אֶת כׇּל־מְלַאכְתּוֹ\n");
 
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
-    fmt::println("מן: {}", args.src_path.string());
-    fmt::println("אל: {}", args.dest_path.string());
+    fmt::println("מוֹצִיא מִן: {}", args.src_path.string());
+    fmt::println("אֶל: {}", args.dest_path.string());
 
     // Collect all source files in the project
     std::vector<std::filesystem::path> source_files;
@@ -65,7 +65,7 @@ int main(const int argc, char **const argv)
     std::error_code error;
     if (std::filesystem::is_directory(args.src_path, error))
     {
-        std::puts("היעד הינו תיקייה: מוציא לשאלה את כלל הספרים בתוכה.");
+        std::puts("הַיַּעַד הִנּוֹ תִּיקִיָּה: וְיקַמְפֵּל אֶת כְּלָל־סִפְרֵי הַמָּקוֹר אֲשֶׁר בְּתוֹכוֹ");
         codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path);
 
         collect_source_files(args.src_path, source_files);
@@ -73,7 +73,7 @@ int main(const int argc, char **const argv)
     }
     else
     {
-        std::puts("היעד הינו ספר");
+        std::puts("הַיַּעַד הִנּוֹ סֵפֶר");
         codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path.parent_path());
 
         // We don't care about its file extension so long as the user forced this source file, I guess.
@@ -82,15 +82,15 @@ int main(const int argc, char **const argv)
     }
 
 
-    std::puts("\n-----------");
-
     //TESTS
     //codesh::test::descriptor();
 
 
+    std::puts("\n---------------------\n");
     const auto asts = parse_source_files(source_files);
-    std::puts("\n-----------\n");
+    std::puts("\n---------------------\n");
     const auto master_symbol_table = analyze_asts(asts, args);
+    std::puts("\n---------------------\n");
 
 
     // BLASPHEMIES
@@ -109,7 +109,8 @@ int main(const int argc, char **const argv)
     if (!build_class_files(asts, args, is_project, master_symbol_table))
         return EXIT_FAILURE;
 
-    std::puts("\nכלל ספרי המקור הוחזרו בשאלה בהצלחה");
+
+    std::puts("\nוַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
     return EXIT_SUCCESS;
 }
 
@@ -141,7 +142,7 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const std::vector<std::filesystem::path> &source_files)
 {
-    std::puts("הליך הפרסור החל\n");
+    std::puts("וְיַחֵל עֵת הַפֵּרוּשׁ הַתַּחְבִּירִי\n");
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> results;
 
     const auto process_amount = source_files.size();
@@ -149,7 +150,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
     for (const auto &source_file_path : source_files)
     {
-        fmt::println("{} מן־{}: מפרסר את {}", processed, process_amount, source_file_path.string());
+        fmt::println("{} מִן־{}: מְפָרֵשׁ אֶת {}", processed, process_amount, source_file_path.string());
         update_source_file(source_file_path);
 
         // LEXING
@@ -173,7 +174,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args)
 {
-    std::puts("הליך הניתוח החל\n");
+    std::puts("וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
 
     codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
@@ -223,7 +224,7 @@ static void log_analysis_progress(const size_t processed, const size_t total, co
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
     fmt::println(
-        "ניתוח {} מן־שלוש: {} מן־{}: מנתח את {}",
+        "נִתּוּחַ {} מִן־שְׁלֹשׁ: {} מן־{}: מְנַתֵּחַ אֶת {}",
         pass_name,
         processed,
         total,
