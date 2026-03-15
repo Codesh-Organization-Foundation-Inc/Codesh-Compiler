@@ -21,7 +21,7 @@
 
 #include <utf8.h>
 
-static void print_tefilat_hahotsaa_besheela();
+static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
 [[nodiscard]] static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
 static void update_source_file(const std::filesystem::path &source_file_path);
@@ -29,19 +29,19 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 
 [[nodiscard]] static std::string read_file(const std::string &file_name);
 [[nodiscard]] static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
-        const std::vector<std::filesystem::path> &source_files);
+        const codesh::command_args &args, const std::vector<std::filesystem::path> &source_files);
 static void collect_source_files(const std::filesystem::path &path,
         std::vector<std::filesystem::path> &source_files_out);
 static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
-static void log_analysis_progress(size_t processed, size_t total, const std::string &pass_name,
-        const codesh::ast::compilation_unit_ast_node &root_node);
+static void log_analysis_progress(const codesh::command_args &args, size_t processed, size_t total,
+        const std::string &pass_name, const codesh::ast::compilation_unit_ast_node &root_node);
 
 [[nodiscard]] static codesh::semantic_analyzer::symbol_table analyze_asts(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args);
+        const codesh::command_args &args,
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, bool is_project,
@@ -50,20 +50,24 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
         codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
         const codesh::semantic_analyzer::symbol_table &symbol_table);
 
+template <typename... T>
+static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args);
+static void println(const codesh::command_args &args, const std::string &msg);
+
 
 int main(const int argc, char **const argv)
 {
-    std::puts("וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ");
-
-    std::puts("");
-    print_tefilat_hahotsaa_besheela();
-    std::puts("\n");
-
-
     const codesh::command_args args = codesh::parse_command(argc, argv);
+    
+    println(args, "וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ");
 
-    fmt::println("מוֹצִיא מִן: {}", args.src_path.string());
-    fmt::println("אֶל: {}", args.dest_path.string());
+    println(args, "");
+    print_tefilat_hahotsaa_besheela(args);
+    println(args, "\n");
+
+
+    printfln(args, "מוֹצִיא מִן: {}", args.src_path.string());
+    printfln(args, "אֶל: {}", args.dest_path.string());
 
     // Collect all source files in the project
     std::vector<std::filesystem::path> source_files;
@@ -72,7 +76,7 @@ int main(const int argc, char **const argv)
     std::error_code error;
     if (std::filesystem::is_directory(args.src_path, error))
     {
-        std::puts("הַיַּעַד הִנּוֹ תִּיקִיָּה: וְיקַמְפֵּל אֶת כְּלָל־סִפְרֵי הַמָּקוֹר אֲשֶׁר בְּתוֹכוֹ");
+        println(args, "הַיַּעַד הִנּוֹ תִּיקִיָּה: וְיקַמְפֵּל אֶת כְּלָל־סִפְרֵי הַמָּקוֹר אֲשֶׁר בְּתוֹכוֹ");
         codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path);
 
         collect_source_files(args.src_path, source_files);
@@ -80,7 +84,7 @@ int main(const int argc, char **const argv)
     }
     else
     {
-        std::puts("הַיַּעַד הִנּוֹ סֵפֶר");
+        println(args, "הַיַּעַד הִנּוֹ סֵפֶר");
         codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path.parent_path());
 
         // We don't care about its file extension so long as the user forced this source file, I guess.
@@ -93,11 +97,11 @@ int main(const int argc, char **const argv)
     //codesh::test::descriptor();
 
 
-    std::puts("\n---------------------\n");
-    const auto asts = parse_source_files(source_files);
-    std::puts("");
-    const auto master_symbol_table = analyze_asts(asts, args);
-    std::puts("");
+    println(args, "\n---------------------\n");
+    const auto asts = parse_source_files(args, source_files);
+    println(args, "");
+    const auto master_symbol_table = analyze_asts(args, asts);
+    println(args, "");
 
 
     // BLASPHEMIES
@@ -117,20 +121,20 @@ int main(const int argc, char **const argv)
         return EXIT_FAILURE;
 
 
-    std::puts("\n---------------------\n");
-    std::puts("וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
+    println(args, "\n---------------------\n");
+    println(args, "וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
     return EXIT_SUCCESS;
 }
 
-static void print_tefilat_hahotsaa_besheela()
+static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
 {
-    std::puts("\tתְּפִלָּה לְעֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה");
-    std::puts("");
-    std::puts("יְהִי רָצוֹן מִלְּפָנֶיךָ אֲדוֹן כָּל הַתַּחְבּוּלָה וּבוֹרֵא כָּל הַנְּתִיבוֹת:");
-    std::puts("שֶׁיַּעֲלֶה מַעֲשֵׂה הַכְּתָב לְפָנֶיךָ כְּרֵיחַ נִיחוֹחַ וְלֹא יִמָּצֵא בּוֹ עָווֹן וְלֹא חֵטְא וְלֹא שְׁגִיאַת רֵיק מִתּוֹכֶן.");
-    std::puts("הָאֵר עֵינַי בַּתָּנֶךְ שֶׁפָּתַחְתִּי לְמַעַן אֵדַע אֵימָתַי לִקְרֹא 'וַיֹּאמֶר' וְאֵימָתַי לַחְתֹּם 'וַיִּתֹּם' וְלֹא אֶחְטָא בְּגִלְגּוּל שֶׁאֵין לוֹ קֵץ.");
-    std::puts("שְׁמֹר נָא עַל הַמַּחְסָנִית מִלְּהִתְמַלֵּא וְעַל הַזִּכָּרוֹן מִלִּדְלֹף. הַרְחֵק מִמֶּנִּי מְחַבְּלֵי קוֹד וּמַטְעֵי הַגְדָּרוֹת.");
-    std::puts("וִיהִי נֹעַם הַמְּעַבֵּד עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ וּבְעֵת הַהַרָצָה יָאִיר לָנוּ הַמָּסָךְ בְּאוֹר הַהַצְלָחָה וְנֹאמַר אָמֵן.");
+    println(args, "\tתְּפִלָּה לְעֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה");
+    println(args, "");
+    println(args, "יְהִי רָצוֹן מִלְּפָנֶיךָ אֲדוֹן כָּל הַתַּחְבּוּלָה וּבוֹרֵא כָּל הַנְּתִיבוֹת:");
+    println(args, "שֶׁיַּעֲלֶה מַעֲשֵׂה הַכְּתָב לְפָנֶיךָ כְּרֵיחַ נִיחוֹחַ וְלֹא יִמָּצֵא בּוֹ עָווֹן וְלֹא חֵטְא וְלֹא שְׁגִיאַת רֵיק מִתּוֹכֶן.");
+    println(args, "הָאֵר עֵינַי בַּתָּנֶךְ שֶׁפָּתַחְתִּי לְמַעַן אֵדַע אֵימָתַי לִקְרֹא 'וַיֹּאמֶר' וְאֵימָתַי לַחְתֹּם 'וַיִּתֹּם' וְלֹא אֶחְטָא בְּגִלְגּוּל שֶׁאֵין לוֹ קֵץ.");
+    println(args, "שְׁמֹר נָא עַל הַמַּחְסָנִית מִלְּהִתְמַלֵּא וְעַל הַזִּכָּרוֹן מִלִּדְלֹף. הַרְחֵק מִמֶּנִּי מְחַבְּלֵי קוֹד וּמַטְעֵי הַגְדָּרוֹת.");
+    println(args, "וִיהִי נֹעַם הַמְּעַבֵּד עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ וּבְעֵת הַהַרָצָה יָאִיר לָנוּ הַמָּסָךְ בְּאוֹר הַהַצְלָחָה וְנֹאמַר אָמֵן.");
 }
 
 static std::vector<std::string> generate_default_imports(const codesh::command_args &args)
@@ -159,9 +163,9 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 }
 
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
-        const std::vector<std::filesystem::path> &source_files)
+        const codesh::command_args &args, const std::vector<std::filesystem::path> &source_files)
 {
-    std::puts("וְיַחֵל עֵת הַפֵּרוּשׁ הַתַּחְבִּירִי\n");
+    println(args, "וְיַחֵל עֵת הַפֵּרוּשׁ הַתַּחְבִּירִי\n");
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> results;
 
     const auto process_amount = source_files.size();
@@ -169,7 +173,8 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
     for (const auto &source_file_path : source_files)
     {
-        fmt::println(
+        printfln(
+            args,
             "{} מִן־{}: מְפָרֵשׁ אֶת {}",
             processed,
             process_amount,
@@ -195,10 +200,10 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 }
 
 static codesh::semantic_analyzer::symbol_table analyze_asts(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args)
+        const codesh::command_args &args,
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts)
 {
-    std::puts("וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
+    println(args, "וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
 
     codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
@@ -208,7 +213,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
     for (const auto &root_node : asts)
     {
-        log_analysis_progress(processed, process_amount, "אחד", *root_node);
+        log_analysis_progress(args, processed, process_amount, "אחד", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::prepare(*root_node);
@@ -223,7 +228,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     // This pass happens between symbol collection and analysis.
     for (const auto &root_node : asts)
     {
-        log_analysis_progress(processed, process_amount, "שתיים", *root_node);
+        log_analysis_progress(args, processed, process_amount, "שתיים", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::post_collect(*root_node, master_symbol_table);
@@ -233,7 +238,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
     for (const auto &root_node : asts)
     {
-        log_analysis_progress(processed, process_amount, "שלוש", *root_node);
+        log_analysis_progress(args, processed, process_amount, "שלוש", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::analyze(*root_node, master_symbol_table);
@@ -244,10 +249,11 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     return master_symbol_table;
 }
 
-static void log_analysis_progress(const size_t processed, const size_t total, const std::string &pass_name,
-        const codesh::ast::compilation_unit_ast_node &root_node)
+static void log_analysis_progress(const codesh::command_args &args, const size_t processed, const size_t total,
+        const std::string &pass_name, const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    fmt::println(
+    printfln(
+        args,
         "נִתּוּחַ {} מִן־שְׁלֹשׁ: {} מן־{}: מְנַתֵּחַ אֶת {}",
         pass_name,
         processed,
@@ -280,7 +286,7 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
         const codesh::command_args &args, const bool is_project,
         const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
-    std::puts("וַיְחַל עֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה\n");
+    println(args, "וַיְחַל עֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה\n");
 
     const auto process_amount = asts.size();
     size_t processed = 1;
@@ -289,7 +295,8 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
     // So for each type declaration, build one class file:
     for (const auto &root_node : asts)
     {
-        fmt::println(
+        printfln(
+            args,
             "{} מִן־{}: מוֹצִיא בְּשֶׁאָלָה אֶת {}",
             processed,
             process_amount,
@@ -422,4 +429,21 @@ static void collect_source_files(const std::filesystem::path &path, std::vector<
 
 
     source_files_out.push_back(path);
+}
+
+template <typename... T>
+static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args)
+{
+    if (args.lsp_mode)
+        return;
+
+    fmt::println(fmt, std::forward<T>(format_args)...);
+}
+
+static void println(const codesh::command_args &args, const std::string &msg)
+{
+    if (args.lsp_mode)
+        return;
+
+    std::puts(msg.c_str());
 }
