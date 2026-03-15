@@ -13,16 +13,18 @@ TALMUD_CODESH_PATH="$CODESH_PATH/תלמוד־קודש"
 
 
 # Compile codeshc
-cmake --build ./build
+cmake -B ./cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build ./cmake-build-release
 
 # Deploy to CODESH_PATH
 mkdir -p $CODESH_PATH
-cmake --install ./build --prefix $CODESH_PATH
+cp ./cmake-build-release/codeshc $CODESH_PATH/
 
 # Link to the compiler in bin
 ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
 
+# Build Talmud Codesh
 mkdir -p $TALMUD_CODESH_PATH
 $CODESH_EXECUTABLE ./resources/lib-src/ $TALMUD_CODESH_PATH --sinful
 
