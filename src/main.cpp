@@ -89,7 +89,7 @@ int main(const int argc, char **const argv)
 
 
     const auto asts = parse_source_files(source_files);
-    std::puts("-----------");
+    std::puts("\n-----------\n");
     const auto master_symbol_table = analyze_asts(asts, args);
 
 
@@ -141,7 +141,7 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const std::vector<std::filesystem::path> &source_files)
 {
-    std::puts("הליך הפרסור החל");
+    std::puts("הליך הפרסור החל\n");
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> results;
 
     const auto process_amount = source_files.size();
@@ -149,7 +149,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
     for (const auto &source_file_path : source_files)
     {
-        fmt::println("[{}/{}] מפרסר כעת את {}", processed, process_amount, source_file_path.string());
+        fmt::println("{} מן־{}: מפרסר את {}", processed, process_amount, source_file_path.string());
         update_source_file(source_file_path);
 
         // LEXING
@@ -173,7 +173,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args)
 {
-    std::puts("הליך הניתוח החל");
+    std::puts("הליך הניתוח החל\n");
 
     codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
@@ -223,10 +223,10 @@ static void log_analysis_progress(const size_t processed, const size_t total, co
         const codesh::ast::compilation_unit_ast_node &root_node)
 {
     fmt::println(
-        "[{}/{}] [מעבר {} מתוך שלוש] מנתח כעת את {}",
+        "ניתוח {} מן־שלוש: {} מן־{}: מנתח את {}",
+        pass_name,
         processed,
         total,
-        pass_name,
         root_node.get_source_path().string()
     );
 }
