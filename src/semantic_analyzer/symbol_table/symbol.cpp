@@ -165,6 +165,11 @@ const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::ty
     return *attributes;
 }
 
+bool codesh::semantic_analyzer::type_symbol::has_super_type() const
+{
+    return super_type != nullptr;
+}
+
 codesh::ast::type::custom_type_ast_node &codesh::semantic_analyzer::type_symbol::get_super_type() const
 {
     return *super_type;

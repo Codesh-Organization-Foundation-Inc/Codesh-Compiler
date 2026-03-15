@@ -333,6 +333,8 @@ add_executable(codeshc
         src/parser/ast/operator/assignment/cast_ast_node.h
         src/semantic_analyzer/util/widen_util.cpp
         src/semantic_analyzer/util/widen_util.h
+        src/semantic_analyzer/util/poly_util.cpp
+        src/semantic_analyzer/util/poly_util.h
 )
 
 # sudo dnf install boost-regex boost-devel
@@ -385,3 +387,5 @@ target_link_libraries(codeshc fmt::fmt)
 
 # Support includes starting from relative paths
 target_include_directories(codeshc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+install(TARGETS codeshc DESTINATION .)

@@ -178,6 +178,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_BIBLICAL_THOUSAND_ADDED, u"ואלף", word_boundary::BOTH},
     {token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED, u"ורבבה", word_boundary::BOTH},
 
+    {token_group::COMMENT_ONE_LINER, u"וכה הגה ה' לאמר", word_boundary::BEFORE},
     {token_group::COMMENT_MULTILINE, u"ויאמר ה' לאמר:", word_boundary::BEFORE},
     {token_group::COMMENT_MULTILINE, u"וכה הגה ה' לאמר:", word_boundary::BEFORE},
 };

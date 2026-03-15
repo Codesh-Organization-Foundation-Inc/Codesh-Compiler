@@ -4,14 +4,15 @@
 #include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/poly_util.h"
 
 #include <cassert>
-#include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace codesh::definition;
 
-static const std::unordered_map<primitive_type, std::set<primitive_type>> WIDENING_MAP = {
+static const std::unordered_map<primitive_type, std::unordered_set<primitive_type>> WIDENING_MAP = {
     {
         primitive_type::BYTE,
         {
@@ -122,6 +123,9 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::m
             make_widening_cast(std::move(value_node), expected_type)
         };
     }
+
+    if (can_poly_cast_to(type, expected_type))
+        return {true, std::move(value_node)};
 
     return {false, std::move(value_node)};
 }
