@@ -99,6 +99,8 @@ add_executable(codeshc
         src/parser/ast/type/custom_type_ast_node.h
         src/parser/ast/type/primitive_type_ast_node.cpp
         src/parser/ast/type/primitive_type_ast_node.h
+        src/parser/ast/type/widening_cast_ast_node.cpp
+        src/parser/ast/type/widening_cast_ast_node.h
         src/defenition/primitive_type.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
@@ -164,6 +166,8 @@ add_executable(codeshc
         src/output/ir/instruction/load_instruction.h
         src/output/ir/instruction/return_instruction.cpp
         src/output/ir/instruction/return_instruction.h
+        src/output/ir/instruction/widening_cast_instruction.cpp
+        src/output/ir/instruction/widening_cast_instruction.h
         src/output/ir/instruction/invoke_instruction.cpp
         src/output/ir/instruction/invoke_instruction.h
         src/output/ir/instruction/load_int_constant_instruction.cpp
@@ -321,6 +325,8 @@ add_executable(codeshc
         src/semantic_analyzer/external/jimage_loader.cpp
         src/semantic_analyzer/external/util.cpp
         src/semantic_analyzer/external/util.h
+        src/semantic_analyzer/util/widen_util.cpp
+        src/semantic_analyzer/util/widen_util.h
 )
 
 # sudo dnf install boost-regex boost-devel

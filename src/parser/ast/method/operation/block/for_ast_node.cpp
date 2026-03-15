@@ -10,7 +10,6 @@
 #include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
-#include "parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::ast::block::for_ast_node::for_ast_node(const blasphemy::code_position code_position,
                            std::unique_ptr<var_reference::value_ast_node> collection,

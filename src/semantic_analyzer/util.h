@@ -3,10 +3,12 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
+//TODO: Move file to ./util
 namespace codesh::semantic_analyzer
 {
 struct semantic_context;
@@ -75,7 +77,7 @@ std::optional<std::reference_wrapper<type_symbol>> resolve_custom_type_node(cons
 bool resolve_type_node(const semantic_context &context, ast::type::type_ast_node &type_node,
         std::optional<std::reference_wrapper<ast::type::type_ast_node>> related_type_node = std::nullopt);
 
-bool are_types_compatible(const ast::type::type_ast_node &from, const ast::type::type_ast_node &to);
+bool do_types_match(const ast::type::type_ast_node &from, const ast::type::type_ast_node &to);
 
 /**
  * Either creates or returns the requested method overloads symbol.

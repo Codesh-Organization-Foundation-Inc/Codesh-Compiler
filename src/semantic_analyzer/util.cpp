@@ -99,10 +99,9 @@ bool codesh::semantic_analyzer::util::resolve_type_node(const semantic_context &
     ).has_value();
 }
 
-bool codesh::semantic_analyzer::util::are_types_compatible(const ast::type::type_ast_node &from,
+bool codesh::semantic_analyzer::util::do_types_match(const ast::type::type_ast_node &from,
                                                            const ast::type::type_ast_node &to)
 {
-    //FIXME: Should check for auto conversions (and convert!) if not an exact match.
     return from.generate_descriptor() == to.generate_descriptor();
 }
 
