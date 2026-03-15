@@ -11,6 +11,8 @@ struct command_args
     std::filesystem::path src_path;
     std::filesystem::path dest_path;
 
+    bool lsp_mode;
+
     std::vector<std::filesystem::path> classpaths;
 
     bool is_java_default_classpath; // Enabled by --sinful

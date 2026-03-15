@@ -82,6 +82,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             result.is_java_default_classpath = true;
         }
+        else if (arg == "--lsp")
+        {
+            result.lsp_mode = true;
+        }
         else
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
