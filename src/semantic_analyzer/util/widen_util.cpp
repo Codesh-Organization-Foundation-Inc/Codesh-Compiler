@@ -4,6 +4,7 @@
 #include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/poly_util.h"
 
 #include <cassert>
 #include <unordered_map>
@@ -122,6 +123,9 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::m
             make_widening_cast(std::move(value_node), expected_type)
         };
     }
+
+    if (can_poly_cast_to(type, expected_type))
+        return {true, std::move(value_node)};
 
     return {false, std::move(value_node)};
 }
