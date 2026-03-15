@@ -21,6 +21,8 @@
 
 #include <utf8.h>
 
+static void print_tefilat_hahotsaa_besheela();
+
 [[nodiscard]] static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -51,7 +53,12 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 
 int main(const int argc, char **const argv)
 {
-    std::puts("וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ\n");
+    std::puts("וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ");
+
+    std::puts("");
+    print_tefilat_hahotsaa_besheela();
+    std::puts("\n");
+
 
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
@@ -113,6 +120,17 @@ int main(const int argc, char **const argv)
     std::puts("\n---------------------\n");
     std::puts("וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
     return EXIT_SUCCESS;
+}
+
+static void print_tefilat_hahotsaa_besheela()
+{
+    std::puts("\tתְּפִלָּה לְעֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה");
+    std::puts("");
+    std::puts("יְהִי רָצוֹן מִלְּפָנֶיךָ אֲדוֹן כָּל הַתַּחְבּוּלָה וּבוֹרֵא כָּל הַנְּתִיבוֹת:");
+    std::puts("שֶׁיַּעֲלֶה מַעֲשֵׂה הַכְּתָב לְפָנֶיךָ כְּרֵיחַ נִיחוֹחַ וְלֹא יִמָּצֵא בּוֹ עָווֹן וְלֹא חֵטְא וְלֹא שְׁגִיאַת רֵיק מִתּוֹכֶן.");
+    std::puts("הָאֵר עֵינַי בַּתָּנֶךְ שֶׁפָּתַחְתִּי לְמַעַן אֵדַע אֵימָתַי לִקְרֹא 'וַיֹּאמֶר' וְאֵימָתַי לַחְתֹּם 'וַיִּתֹּם' וְלֹא אֶחְטָא בְּגִלְגּוּל שֶׁאֵין לוֹ קֵץ.");
+    std::puts("שְׁמֹר נָא עַל הַמַּחְסָנִית מִלְּהִתְמַלֵּא וְעַל הַזִּכָּרוֹן מִלִּדְלֹף. הַרְחֵק מִמֶּנִּי מְחַבְּלֵי קוֹד וּמַטְעֵי הַגְדָּרוֹת.");
+    std::puts("וִיהִי נֹעַם הַמְּעַבֵּד עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ וּבְעֵת הַהַרָצָה יָאִיר לָנוּ הַמָּסָךְ בְּאוֹר הַהַצְלָחָה וְנֹאמַר אָמֵן.");
 }
 
 static std::vector<std::string> generate_default_imports(const codesh::command_args &args)
