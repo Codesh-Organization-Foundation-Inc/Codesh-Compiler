@@ -1,5 +1,6 @@
 #include "assignment_operator_ast_node.h"
 
+#include "semantic_analyzer/util/poly_util.h"
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/ir/instruction/put_field_instruction.h"
@@ -24,6 +25,19 @@ codesh::ast::type::type_ast_node *codesh::ast::op::assignment::assignment_operat
 {
     // In assignment, the return type is determined by the left operand.
     return get_left().get_type();
+}
+
+bool codesh::ast::op::assignment::assignment_operator_ast_node::is_value_valid() const
+{
+    if (binary_ast_node::is_value_valid())
+        return true;
+
+    const auto *lhs_type = get_left().get_type();
+    const auto *rhs_type = get_right().get_type();
+    if (!lhs_type || !rhs_type)
+        return false;
+
+    return semantic_analyzer::util::can_poly_cast_to(*rhs_type, *lhs_type);
 }
 
 void codesh::ast::op::assignment::assignment_operator_ast_node::emit_constants(

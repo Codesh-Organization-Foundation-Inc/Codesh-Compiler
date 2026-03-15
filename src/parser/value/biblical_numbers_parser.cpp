@@ -11,11 +11,11 @@
 #include <unordered_map>
 
 // To save up on calculations, these are the only relevant powers of 10 (as defined by the available keywords)
-static const std::set POWERS_OF_10 = {
+static const std::unordered_set POWERS_OF_10 = {
     10, 100, 1000, 10000
 };
 
-const std::set<codesh::parser::value::biblical_numbers_parser::parsing_state> codesh::parser::value::
+const std::unordered_set<codesh::parser::value::biblical_numbers_parser::parsing_state> codesh::parser::value::
     biblical_numbers_parser::ACCEPTING_STATES =
 {
     parsing_state::START,

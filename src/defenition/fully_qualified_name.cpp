@@ -41,6 +41,11 @@ codesh::definition::fully_qualified_name::fully_qualified_name(
 {
 }
 
+bool codesh::definition::fully_qualified_name::operator==(const fully_qualified_name &other) const
+{
+    return parts == other.parts && _is_wildcard == other._is_wildcard;
+}
+
 codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::with(std::string part)
     const
 {

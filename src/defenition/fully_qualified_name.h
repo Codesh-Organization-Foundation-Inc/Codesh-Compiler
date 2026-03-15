@@ -29,6 +29,10 @@ public:
     fully_qualified_name(std::vector<std::string>::const_iterator name_start,
             std::vector<std::string>::const_iterator name_end);
 
+
+    [[nodiscard]] bool operator==(const fully_qualified_name &other) const;
+
+
     /**
      * Clones this FQN and appends the provided part to it
      */
