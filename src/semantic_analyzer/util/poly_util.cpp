@@ -5,7 +5,7 @@
 
 bool codesh::semantic_analyzer::util::is_subtype_of(const type_symbol &subtype, const type_symbol &supertype)
 {
-    if (&subtype == &supertype)
+    if (subtype.get_full_name() == supertype.get_full_name())
         return true;
 
     if (subtype.has_super_type())
