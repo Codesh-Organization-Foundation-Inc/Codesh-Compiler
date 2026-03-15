@@ -34,6 +34,9 @@ static bool validate_output_path(const std::filesystem::path &dest_path, bool is
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
+static void log_analysis_progress(size_t processed, size_t total, const std::string &pass_name,
+        const codesh::ast::compilation_unit_ast_node &root_node);
+
 [[nodiscard]] static codesh::semantic_analyzer::symbol_table analyze_asts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args);
@@ -180,13 +183,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
     for (const auto &root_node : asts)
     {
-        fmt::println(
-            "[{}/{}] [מעבר {} מתוך שלוש] מנתח כעת את {}",
-            processed,
-            process_amount,
-            "אחד",
-            root_node->get_source_stem()
-        );
+        log_analysis_progress(processed, process_amount, "אחד", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::prepare(*root_node);
@@ -201,13 +198,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     // This pass happens between symbol collection and analysis.
     for (const auto &root_node : asts)
     {
-        fmt::println(
-            "[{}/{}] [מעבר {} מתוך שלוש] מנתח כעת את {}",
-            processed,
-            process_amount,
-            "שתיים",
-            root_node->get_source_stem()
-        );
+        log_analysis_progress(processed, process_amount, "שתיים", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::post_collect(*root_node, master_symbol_table);
@@ -217,13 +208,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
     for (const auto &root_node : asts)
     {
-        fmt::println(
-            "[{}/{}] [מעבר {} מתוך שלוש] מנתח כעת את {}",
-            processed,
-            process_amount,
-            "שלוש",
-            root_node->get_source_stem()
-        );
+        log_analysis_progress(processed, process_amount, "שלוש", *root_node);
 
         update_source_file(*root_node);
         codesh::semantic_analyzer::analyze(*root_node, master_symbol_table);
@@ -232,6 +217,18 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     }
 
     return master_symbol_table;
+}
+
+static void log_analysis_progress(const size_t processed, const size_t total, const std::string &pass_name,
+        const codesh::ast::compilation_unit_ast_node &root_node)
+{
+    fmt::println(
+        "[{}/{}] [מעבר {} מתוך שלוש] מנתח כעת את {}",
+        processed,
+        total,
+        pass_name,
+        root_node.get_source_path().string()
+    );
 }
 
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
