@@ -51,7 +51,7 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 
 int main(const int argc, char **const argv)
 {
-    std::puts("וַיָּחֶל הַמּוֹצִיא בִשְׁאֵלָה אֶת כׇּל־מְלַאכְתּוֹ\n");
+    std::puts("וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ\n");
 
     const codesh::command_args args = codesh::parse_command(argc, argv);
 
@@ -110,7 +110,8 @@ int main(const int argc, char **const argv)
         return EXIT_FAILURE;
 
 
-    std::puts("\nוַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
+    std::puts("\n---------------------\n");
+    std::puts("וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
     return EXIT_SUCCESS;
 }
 
@@ -150,7 +151,12 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
     for (const auto &source_file_path : source_files)
     {
-        fmt::println("{} מִן־{}: מְפָרֵשׁ אֶת {}", processed, process_amount, source_file_path.string());
+        fmt::println(
+            "{} מִן־{}: מְפָרֵשׁ אֶת {}",
+            processed,
+            process_amount,
+            source_file_path.string()
+        );
         update_source_file(source_file_path);
 
         // LEXING
@@ -180,7 +186,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     const auto process_amount = asts.size() * 3; // 3 passes
-    size_t processed = 0;
+    size_t processed = 1;
 
     for (const auto &root_node : asts)
     {
@@ -256,10 +262,22 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
         const codesh::command_args &args, const bool is_project,
         const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
+    std::puts("וַיְחַל עֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה\n");
+
+    const auto process_amount = asts.size();
+    size_t processed = 1;
+
     // A class file represents a single file.
     // So for each type declaration, build one class file:
     for (const auto &root_node : asts)
     {
+        fmt::println(
+            "{} מִן־{}: מוֹצִיא בְּשֶׁאָלָה אֶת {}",
+            processed,
+            process_amount,
+            root_node->get_source_path().string()
+        );
+
         update_source_file(*root_node);
         const auto &source_file_path = root_node->get_source_path();
 
@@ -277,6 +295,8 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
 
             build_class_file(*root_node, *type_declaration, output_dir.value(), symbol_table);
         }
+
+        processed++;
     }
 
     return true;
