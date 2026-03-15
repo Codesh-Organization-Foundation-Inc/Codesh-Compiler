@@ -335,6 +335,8 @@ add_executable(codeshc
         src/semantic_analyzer/util/widen_util.h
         src/semantic_analyzer/util/poly_util.cpp
         src/semantic_analyzer/util/poly_util.h
+        src/lsp/lsp_receiever.cpp
+        src/lsp/lsp_receiver.h
 )
 
 # sudo dnf install boost-regex boost-devel

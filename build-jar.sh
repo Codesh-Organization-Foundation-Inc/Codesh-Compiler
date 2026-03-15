@@ -24,7 +24,7 @@ ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 # Build Talmud Codesh
 TALMUD_CODESH_PATH_TEMP=/tmp/talmud-codesh
 mkdir -p $TALMUD_CODESH_PATH_TEMP
-$CODESH_EXECUTABLE ./resources/lib-src/ $TALMUD_CODESH_PATH_TEMP --sinful
+$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $TALMUD_CODESH_PATH --sinful
 
 # Package as JAR file
 jar cf $CODESH_PATH/תלמוד־קודש.jar -C $TALMUD_CODESH_PATH_TEMP .

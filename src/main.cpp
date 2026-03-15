@@ -1,14 +1,15 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "command_parser.h"
+#include "defenition/definitions.h"
 #include "lexer/tokenizer.h"
+#include "lsp/lsp_receiver.h"
 #include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/class_file_writer.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
 #include "semantic_analyzer/builtins.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
-#include "defenition/definitions.h"
 
 #include <filesystem>
 #include <fmt/xchar.h>
@@ -20,6 +21,9 @@
 #include <vector>
 
 #include <utf8.h>
+
+static int compile(const codesh::command_args &args);
+static int lsp_server(const codesh::command_args &args);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
@@ -58,7 +62,38 @@ static void println(const codesh::command_args &args, const std::string &msg);
 int main(const int argc, char **const argv)
 {
     const codesh::command_args args = codesh::parse_command(argc, argv);
-    
+
+    if (args.lsp_mode)
+    {
+        return lsp_server(args);
+    }
+
+    return compile(args);
+}
+
+static int compile(const codesh::command_args &args)
+{
+    if (!args.src_path)
+    {
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::SRC_NOT_PROVIDED,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
+        return EXIT_FAILURE;
+    }
+    if (!args.dest_path)
+    {
+        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::DEST_NOT_PROVIDED,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::blasphemy::NO_CODE_POS,
+            true
+        );
+        return EXIT_FAILURE;
+    }
+
     println(args, "וַיָּחֶל הַמּוֹצִיא בְּשֶׁאֵלֶּה אֶת כׇּל־מְלַאכְתּוֹ");
 
     println(args, "");
@@ -66,29 +101,29 @@ int main(const int argc, char **const argv)
     println(args, "\n");
 
 
-    printfln(args, "מוֹצִיא מִן: {}", args.src_path.string());
-    printfln(args, "אֶל: {}", args.dest_path.string());
+    printfln(args, "מוֹצִיא מִן: {}", args.src_path->string());
+    printfln(args, "אֶל: {}", args.dest_path->string());
 
     // Collect all source files in the project
     std::vector<std::filesystem::path> source_files;
     bool is_project;
 
     std::error_code error;
-    if (std::filesystem::is_directory(args.src_path, error))
+    if (std::filesystem::is_directory(*args.src_path, error))
     {
         println(args, "הַיַּעַד הִנּוֹ תִּיקִיָּה: וְיקַמְפֵּל אֶת כְּלָל־סִפְרֵי הַמָּקוֹר אֲשֶׁר בְּתוֹכוֹ");
-        codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path);
+        codesh::blasphemy::get_blasphemy_collector().set_source_directory(*args.src_path);
 
-        collect_source_files(args.src_path, source_files);
+        collect_source_files(*args.src_path, source_files);
         is_project = true;
     }
     else
     {
         println(args, "הַיַּעַד הִנּוֹ סֵפֶר");
-        codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path.parent_path());
+        codesh::blasphemy::get_blasphemy_collector().set_source_directory(args.src_path->parent_path());
 
         // We don't care about its file extension so long as the user forced this source file, I guess.
-        source_files.push_back(args.src_path);
+        source_files.push_back(*args.src_path);
         is_project = false;
     }
 
@@ -123,7 +158,7 @@ int main(const int argc, char **const argv)
     }
 
 
-    if (!validate_output_path(args.dest_path, is_project))
+    if (!validate_output_path(*args.dest_path, is_project))
         return EXIT_FAILURE;
     if (!build_class_files(asts, args, is_project, master_symbol_table))
         return EXIT_FAILURE;
@@ -131,6 +166,12 @@ int main(const int argc, char **const argv)
 
     println(args, "\n---------------------\n");
     println(args, "וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
+    return EXIT_SUCCESS;
+}
+
+static int lsp_server(const codesh::command_args &)
+{
+    codesh::lsp::wait_lsp_request();
     return EXIT_SUCCESS;
 }
 
@@ -317,8 +358,8 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
         for (auto &type_declaration : root_node->get_type_declarations())
         {
             const auto output_dir = get_output_path(
-                args.dest_path,
-                args.src_path,
+                *args.dest_path,
+                *args.src_path,
                 source_file_path,
                 is_project
             );

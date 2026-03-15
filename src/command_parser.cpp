@@ -50,9 +50,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
     auto args = create_args_queue(argc, argv);
 
-    result.src_path = consume_argument(args);
-    result.dest_path = consume_argument(args);
-
     bool has_jre_path = false;
     bool has_talmud_codesh_path = false;
 
@@ -60,7 +57,15 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     {
         std::string arg = consume_argument(args);
 
-        if (arg == "--classpath")
+        if (arg == "--src")
+        {
+            result.src_path = consume_argument(args);
+        }
+        else if (arg == "--dest")
+        {
+            result.dest_path = consume_argument(args);
+        }
+        else if (arg == "--classpath")
         {
             parse_classpath(args, result);
         }
