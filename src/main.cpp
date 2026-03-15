@@ -88,9 +88,9 @@ int main(const int argc, char **const argv)
 
     std::puts("\n---------------------\n");
     const auto asts = parse_source_files(source_files);
-    std::puts("\n---------------------\n");
+    std::puts("");
     const auto master_symbol_table = analyze_asts(asts, args);
-    std::puts("\n---------------------\n");
+    std::puts("");
 
 
     // BLASPHEMIES
