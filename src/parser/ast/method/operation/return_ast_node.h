@@ -22,6 +22,9 @@ public:
 
     [[nodiscard]] var_reference::value_ast_node *get_return_value() const;
 
+    [[nodiscard]] std::unique_ptr<var_reference::value_ast_node> take_return_value();
+    void set_return_value(std::unique_ptr<var_reference::value_ast_node> new_value);
+
     void set_statement_index(size_t statement_index) override;
 
 

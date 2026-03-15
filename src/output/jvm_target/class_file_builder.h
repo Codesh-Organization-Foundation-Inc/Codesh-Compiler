@@ -39,6 +39,7 @@ namespace codesh::output::jvm_target
 {
 
 constexpr int JAVA_TARGET_VERSION = 65;
+constexpr int JAVA_RELEASE_VERSION = 21;
 
 enum class access_flag : uint16_t
 {

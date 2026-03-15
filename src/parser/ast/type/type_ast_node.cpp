@@ -1,6 +1,7 @@
 #include "type_ast_node.h"
 
 #include "custom_type_ast_node.h"
+#include "output/ir/instruction/impl/typed_instruction.h"
 #include "primitive_type_ast_node.h"
 
 codesh::ast::type::type_ast_node::type_ast_node(const blasphemy::code_position code_position) :
@@ -25,7 +26,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_no
     }
 
 
-    const auto type_letter = descriptor.at(++pos);
+    const auto type_letter = descriptor.at(pos++);
 
     std::unique_ptr<type_ast_node> result;
     switch (type_letter)
@@ -86,4 +87,12 @@ int codesh::ast::type::type_ast_node::get_array_dimensions() const
 void codesh::ast::type::type_ast_node::set_array_dimensions(const int array_dimensions)
 {
     this->array_dimensions = array_dimensions;
+}
+
+codesh::output::ir::instruction_type codesh::ast::type::type_ast_node::to_instruction_type() const
+{
+    if (array_dimensions > 0)
+        return output::ir::instruction_type::REFERENCE;
+
+    return _to_instruction_type();
 }

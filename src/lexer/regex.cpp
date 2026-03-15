@@ -2,7 +2,6 @@
 
 #include "fmt/xchar.h"
 
-#include <format>
 #include <ranges>
 #include <vector>
 

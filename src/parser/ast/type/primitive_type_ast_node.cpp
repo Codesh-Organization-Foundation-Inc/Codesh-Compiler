@@ -44,7 +44,7 @@ codesh::definition::primitive_type codesh::ast::type::primitive_type_ast_node::g
     return type;
 }
 
-codesh::output::ir::instruction_type codesh::ast::type::primitive_type_ast_node::to_instruction_type() const
+codesh::output::ir::instruction_type codesh::ast::type::primitive_type_ast_node::_to_instruction_type() const
 {
     switch (get_type())
     {

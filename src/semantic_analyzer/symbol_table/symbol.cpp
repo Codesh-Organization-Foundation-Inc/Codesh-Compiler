@@ -2,6 +2,7 @@
 
 #include "defenition/primitive_type.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
@@ -31,15 +32,22 @@ codesh::semantic_analyzer::i_scope_containing_symbol *codesh::semantic_analyzer:
 codesh::semantic_analyzer::i_scope_containing_symbol::~i_scope_containing_symbol() = default;
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
-    i_scope_containing_symbol::resolve_up(const std::string &name) const
+    i_scope_containing_symbol::resolve_own(const std::string &name) const
 {
     if (const auto &named_symbol_container = dynamic_cast<const named_symbol_map *>(&get_scope()))
     {
-        const auto &result = named_symbol_container->resolve_local(name);
-
-        if (result.has_value())
-            return result;
+        return named_symbol_container->resolve_local(name);
     }
+
+    return std::nullopt;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::
+    i_scope_containing_symbol::resolve_up(const std::string &name) const
+{
+    const auto result = resolve_own(name);
+    if (result.has_value())
+        return result;
 
     if (const auto &parent = dynamic_cast<const symbol &>(*this).get_parent_symbol())
     {
@@ -96,22 +104,49 @@ codesh::ast::type::type_ast_node *codesh::semantic_analyzer::variable_symbol::ge
 
 codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_scope()
 {
-    return scope;
+    // Out of necessity
+    return methods_scope;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_scope() const
 {
-    return scope;
+    // Out of necessity
+    return methods_scope;
+}
+
+codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_field_scope()
+{
+    return fields_scope;
+}
+
+const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::type_symbol::get_field_scope() const
+{
+    return fields_scope;
+}
+
+std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::type_symbol::
+    resolve_own(const std::string &name) const
+{
+    const auto resolved = fields_scope.resolve_local(name);
+    if (resolved.has_value())
+        return resolved;
+
+    return methods_scope.resolve_local(name);
 }
 
 codesh::semantic_analyzer::type_symbol::type_symbol(i_scope_containing_symbol *const parent_symbol,
         definition::fully_qualified_name full_name,
+        std::unique_ptr<ast::type::custom_type_ast_node> super_type,
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interfaces,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         ast::type_decl::type_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::TYPE),
     full_name(std::move(full_name)),
-    scope(ALLOWED_SYMBOL_TYPES),
+    fields_scope({symbol_type::FIELD}),
+    methods_scope({symbol_type::METHOD_OVERLOADS}),
     producing_node(producing_node),
+    super_type(std::move(super_type)),
+    interfaces(std::move(interfaces)),
     attributes(std::move(attributes))
 {
     if (producing_node != nullptr)
@@ -130,24 +165,15 @@ const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::ty
     return *attributes;
 }
 
-codesh::semantic_analyzer::type_symbol *codesh::semantic_analyzer::type_symbol::get_super_type() const
+codesh::ast::type::custom_type_ast_node &codesh::semantic_analyzer::type_symbol::get_super_type() const
 {
-    return super_type;
+    return *super_type;
 }
 
-void codesh::semantic_analyzer::type_symbol::set_super_type(type_symbol *const super_type)
-{
-    this->super_type = super_type;
-}
-
-const std::vector<codesh::semantic_analyzer::type_symbol *> &codesh::semantic_analyzer::type_symbol::get_interfaces() const
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::semantic_analyzer::type_symbol::
+    get_interfaces() const
 {
     return interfaces;
-}
-
-void codesh::semantic_analyzer::type_symbol::add_interface(type_symbol *const interface_symbol)
-{
-    interfaces.push_back(interface_symbol);
 }
 
 codesh::semantic_analyzer::field_symbol::field_symbol(i_scope_containing_symbol *const parent_symbol,
@@ -405,10 +431,6 @@ const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analy
     symbol_type::COUNTRY
 };
 
-const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::type_symbol::ALLOWED_SYMBOL_TYPES = {
-    symbol_type::METHOD_OVERLOADS,
-    symbol_type::FIELD
-};
 
 const std::vector<codesh::semantic_analyzer::symbol_type> codesh::semantic_analyzer::method_overloads_symbol::ALLOWED_SYMBOL_TYPES = {
     symbol_type::METHOD,
