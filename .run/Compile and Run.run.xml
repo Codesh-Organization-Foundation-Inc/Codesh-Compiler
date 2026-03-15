@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Compile and Run" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="java -cp .:/usr/lib/קודש/תלמוד־קודש תוכנית" />
+    <option name="SCRIPT_TEXT" value="java -cp .:/usr/lib/קודש/תלמוד־קודש.jar תוכנית" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
