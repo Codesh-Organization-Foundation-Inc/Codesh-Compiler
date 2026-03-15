@@ -26,6 +26,9 @@ public:
     fully_qualified_name(const char *binary_fqn); // NOLINT(*-explicit-constructor)
     explicit fully_qualified_name(std::string part);
 
+    fully_qualified_name(std::vector<std::string>::const_iterator name_start,
+            std::vector<std::string>::const_iterator name_end);
+
     /**
      * Clones this FQN and appends the provided part to it
      */

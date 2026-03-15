@@ -26,7 +26,7 @@
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs);
 
 static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -34,16 +34,16 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
 
 static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_access(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> value);
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node);
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> value);
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
+    std::unique_ptr<ast::var_reference::value_ast_node> lhs;
 
     switch (tokens.front()->get_group())
     {
@@ -57,7 +57,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::LITERAL_CHAR:
     case token_group::KEYWORD_TRUE:
     case token_group::KEYWORD_FALSE:
-        eval_ast_node = parse_primitive_value(tokens);
+        lhs = parse_primitive_value(tokens);
         break;
 
     // Biblical numbers
@@ -108,7 +108,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::KEYWORD_BIBLICAL_HUNDRED_ADDED:
     case token_group::KEYWORD_BIBLICAL_THOUSAND_ADDED:
     case token_group::KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED:
-        eval_ast_node = biblical_numbers_parser(tokens).parse();
+        lhs = biblical_numbers_parser(tokens).parse();
         break;
 
     // Arithmetic operations
@@ -119,7 +119,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::OPERATOR_MODULO:
     case token_group::OPEN_PARENTHESIS:
     case token_group::OPERATOR_MINUS:
-        eval_ast_node = parse_arithmetic_value(tokens);
+        lhs = parse_arithmetic_value(tokens);
         break;
 
     // Boolean operations
@@ -129,7 +129,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::OPERATOR_GREATER_EQUALS:
     case token_group::OPERATOR_LESS:
     case token_group::OPERATOR_LESS_EQUALS:
-        eval_ast_node = parse_boolean_value(tokens);
+        lhs = parse_boolean_value(tokens);
         break;
 
     // Assignment operations
@@ -141,11 +141,11 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::OPERATOR_SUBTRACTION_ASSIGNMENT:
     case token_group::OPERATOR_INCREMENT:
     case token_group::OPERATOR_DECREMENT:
-        eval_ast_node = parse_assignment_operator(tokens);
+        lhs = parse_assignment_operator(tokens);
         break;
 
     case token_group::KEYWORD_FUNCTION_CALL:
-        eval_ast_node = parse_method_call(tokens);
+        lhs = parse_method_call(tokens);
         break;
 
     // New operator
@@ -155,7 +155,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     default: {
         const auto error_pos = tokens.front()->get_code_position();
         const auto token_name = util::get_token_display_name(*tokens.front());
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos);
+        lhs = std::make_unique<ast::var_reference::error_value_ast_node>(error_pos);
         tokens.pop();
 
         blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -171,49 +171,52 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
     }
 
-    return check_extras(tokens, std::move(eval_ast_node));
+    return check_extras(tokens, std::move(lhs));
 }
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
     std::queue<std::unique_ptr<codesh::token>> &tokens,
-    std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node
+    std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs
 )
 {
     switch (tokens.front()->get_group())
     {
         case codesh::token_group::KEYWORD_TO: {
             tokens.pop();
-            return parse_range(tokens, std::move(eval_ast_node));
+            return parse_range(tokens, std::move(lhs));
         }
         case codesh::token_group::KEYWORD_INDEX: {
-            return parse_array_access(tokens, std::move(eval_ast_node));
+            return parse_array_access(tokens, std::move(lhs));
         }
         case codesh::token_group::KEYWORD_AS: {
             tokens.pop();
-            return parse_casting(tokens, std::move(eval_ast_node));
+            return parse_casting(tokens, std::move(lhs));
         }
         case codesh::token_group::OPERATOR_NOT: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
 
-            return std::make_unique<codesh::ast::op::not_operator_ast_node>(op_pos, std::move(eval_ast_node));
+            return std::make_unique<codesh::ast::op::not_operator_ast_node>(op_pos, std::move(lhs));
         }
         case codesh::token_group::OPERATOR_AND: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
 
-            return std::make_unique<codesh::ast::op::and_operator_ast_node>(op_pos, std::move(eval_ast_node),
+            return std::make_unique<codesh::ast::op::and_operator_ast_node>(op_pos, std::move(lhs),
                 codesh::parser::value::parse_value(tokens));
         }
         case codesh::token_group::OPERATOR_OR: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
 
-            return std::make_unique<codesh::ast::op::or_operator_ast_node>(op_pos, std::move(eval_ast_node),
-                codesh::parser::value::parse_value(tokens));
+            return std::make_unique<codesh::ast::op::or_operator_ast_node>(
+                op_pos,
+                std::move(lhs),
+                codesh::parser::value::parse_value(tokens)
+            );
         }
         default: {
-            return eval_ast_node;
+            return lhs;
         }
     }
 }
@@ -222,8 +225,7 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
 {
-    const auto code_pos = codesh::parser::util::consume_token(tokens, "לא יקרה")
-        ->get_code_position();
+    const auto code_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     auto to_val = codesh::parser::value::parse_value(tokens);
 
@@ -254,21 +256,21 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
 
 static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_access(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> value)
 {
     auto op_pos = tokens.front()->get_code_position();
     auto index_value = codesh::parser::value::parse_value(tokens);
 
     return std::make_unique<codesh::ast::op::array_access_ast_node>(
         op_pos,
-        std::move(eval_ast_node),
+        std::move(value),
         std::move(index_value)
     );
 }
 
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
-        std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs)
+        std::unique_ptr<codesh::ast::var_reference::value_ast_node> value)
 {
     auto type_node = codesh::parser::util::parse_type(tokens);
 
@@ -286,8 +288,8 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting
     }
 
     return std::make_unique<codesh::ast::op::assignment::cast_ast_node>(
-        lhs->get_code_position(),
-        std::move(lhs),
+        value->get_code_position(),
+        std::move(value),
         std::move(type_node)
     );
 }

@@ -14,6 +14,9 @@ uint8_t read_u1(std::istream &file);
 uint16_t read_u2(std::istream &file);
 uint32_t read_u4(std::istream &file);
 
+uint16_t read_u2_le(std::istream &file);
+uint32_t read_u4_le(std::istream &file);
+
 /*
  * Prime used to generate hash for Perfect Hashing.
  */

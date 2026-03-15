@@ -23,6 +23,15 @@ namespace util = codesh::semantic_analyzer::external::util;
 using codesh::semantic_analyzer::external::jimage_location_attribute;
 using codesh::semantic_analyzer::external::jimage_loader;
 
+bool codesh::semantic_analyzer::external::is_jimage(const std::filesystem::path &path)
+{
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open())
+        return false;
+
+    return util::read_u4_le(file) == 0xCAFEDADA;
+}
+
 jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, std::ios::binary)
 {
     if (!_file.is_open())
@@ -33,11 +42,6 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
     _offsets = load_offsets();
     _locations = load_locations();
     _strings = load_strings();
-}
-
-jimage_loader::~jimage_loader()
-{
-    _file.close();
 }
 
 bool jimage_loader::load(const std::string &module_name, const definition::fully_qualified_name &class_name,
@@ -64,19 +68,19 @@ bool jimage_loader::load(const std::string &module_name, const definition::fully
 
 codesh::semantic_analyzer::external::jimage_offsets jimage_loader::parse_header()
 {
-    if (read_u4_le() != 0xCAFEDADA)
+    if (util::read_u4_le(_file) != 0xCAFEDADA)
     {
         throw std::runtime_error("Invalid JImage");
     }
 
-    read_u2_le(); // major_version
-    read_u2_le(); // minor_version
-    read_u4_le(); // flags
-    read_u4_le(); // resource_count
+    util::read_u2_le(_file); // major_version
+    util::read_u2_le(_file); // minor_version
+    util::read_u4_le(_file); // flags
+    util::read_u4_le(_file); // resource_count
 
-    const auto table_length = read_u4_le();
-    const auto locations_size = read_u4_le();
-    const auto strings_size = read_u4_le();
+    const auto table_length = util::read_u4_le(_file);
+    const auto locations_size = util::read_u4_le(_file);
+    const auto strings_size = util::read_u4_le(_file);
 
     const auto offsets_start = HEADER_SIZE + static_cast<std::streamoff>(table_length) * 4;
     const auto locations_start = HEADER_SIZE + static_cast<std::streamoff>(table_length) * 8;
@@ -123,7 +127,7 @@ std::vector<int32_t> jimage_loader::load_redirect_table()
     std::vector<int32_t> redirect(_layout.table_length);
     for (int32_t &entry : redirect)
     {
-        entry = static_cast<int32_t>(read_u4_le());
+        entry = static_cast<int32_t>(util::read_u4_le(_file));
     }
 
     return redirect;
@@ -136,7 +140,7 @@ std::vector<uint32_t> jimage_loader::load_offsets()
     std::vector<uint32_t> offsets(_layout.table_length);
     for (uint32_t &entry : offsets)
     {
-        entry = read_u4_le();
+        entry = util::read_u4_le(_file);
     }
 
     return offsets;
@@ -197,19 +201,4 @@ void jimage_loader::load_compressed_class_file(const std::streamoff file_offset,
     std::string buf(uncompressed.begin(), uncompressed.end());
     std::istringstream stream(std::move(buf), std::ios::binary);
     load_class_file(stream, table);
-}
-
-
-uint16_t jimage_loader::read_u2_le()
-{
-    const uint16_t lo = util::read_u1(_file);
-    const uint16_t hi = util::read_u1(_file);
-    return static_cast<uint16_t>(lo | hi << 8);
-}
-
-uint32_t jimage_loader::read_u4_le()
-{
-    const uint32_t lo = read_u2_le();
-    const uint32_t hi = read_u2_le();
-    return lo | hi << 16;
 }

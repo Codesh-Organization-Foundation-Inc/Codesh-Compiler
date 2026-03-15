@@ -19,6 +19,7 @@ public:
 
     virtual void set_resolved(T &symbol) = 0;
     [[nodiscard]] T &get_resolved() const;
+    [[nodiscard]] bool is_resolved() const;
 };
 
 }

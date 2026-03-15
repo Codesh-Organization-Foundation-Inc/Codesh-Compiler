@@ -7,6 +7,7 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
+#include "semantic_analyzer/builtins.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -32,7 +33,7 @@ static std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<bool>> mak
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_primitive_value(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    std::unique_ptr<ast::var_reference::value_ast_node> eval_ast_node;
+    std::unique_ptr<ast::var_reference::value_ast_node> value;
 
     switch (tokens.front()->get_group())
     {
@@ -40,10 +41,10 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::IDENTIFIER: {
         auto id_pos = tokens.front()->get_code_position();
 
-        definition::fully_qualified_name value;
-        util::parse_this_and_fqn(tokens, value);
+        definition::fully_qualified_name name;
+        util::parse_this_and_fqn(tokens, name);
 
-        eval_ast_node = std::make_unique<variable_reference_ast_node>(id_pos, value);
+        value = std::make_unique<variable_reference_ast_node>(id_pos, name);
 
         break;
     }
@@ -51,9 +52,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::LITERAL_STRING: {
         auto str_pos = tokens.front()->get_code_position();
 
-        eval_ast_node = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
+        value = std::make_unique<ast::var_reference::evaluable_ast_node<std::string>>(
             str_pos,
-            std::make_unique<ast::type::custom_type_ast_node>(str_pos, "java/lang/String"),
+            std::make_unique<ast::type::custom_type_ast_node>(
+                str_pos,
+                definition::fully_qualified_name(semantic_analyzer::builtins::ALIAS_STRING)
+            ),
+
             util::consume_alnum_identifier_token(tokens)->get_content()
         );
 
@@ -61,7 +66,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
 
     case token_group::LITERAL_NUMBER_INT: {
-        eval_ast_node = make_evaluable<int>(
+        value = make_evaluable<int>(
             tokens, definition::primitive_type::INTEGER,
 
             [](const std::string &content) {
@@ -73,7 +78,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
 
     case token_group::LITERAL_NUMBER_FLOAT: {
-        eval_ast_node = make_evaluable<float>(
+        value = make_evaluable<float>(
             tokens, definition::primitive_type::FLOAT,
 
             [](const std::string &content) {
@@ -85,7 +90,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
 
     case token_group::LITERAL_NUMBER_DOUBLE: {
-        eval_ast_node = make_evaluable<double>(
+        value = make_evaluable<double>(
             tokens, definition::primitive_type::DOUBLE,
 
             [](const std::string &content) {
@@ -97,7 +102,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
 
     case token_group::LITERAL_CHAR: {
-        eval_ast_node = make_evaluable<char>(
+        value = make_evaluable<char>(
             tokens, definition::primitive_type::CHAR,
 
             [](const std::string &content) {
@@ -109,23 +114,23 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     }
 
     case token_group::KEYWORD_TRUE: {
-        eval_ast_node = make_bool_evaluable(tokens, true);
+        value = make_bool_evaluable(tokens, true);
 
         break;
     }
 
     case token_group::KEYWORD_FALSE: {
-        eval_ast_node = make_bool_evaluable(tokens, false);
+        value = make_bool_evaluable(tokens, false);
 
         break;
     }
 
     default: {
-        eval_ast_node = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position());
+        value = std::make_unique<ast::var_reference::error_value_ast_node>(tokens.front()->get_code_position());
     }
     }
 
-    return eval_ast_node;
+    return value;
 }
 
 

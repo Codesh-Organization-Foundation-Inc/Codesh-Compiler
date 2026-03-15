@@ -14,13 +14,13 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <utf8.h>
 
+static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -35,9 +35,6 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
         codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
         const codesh::semantic_analyzer::symbol_table &symbol_table);
-
-static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
 
 
 int main(const int argc, char **const argv)
@@ -72,7 +69,8 @@ int main(const int argc, char **const argv)
     const auto asts = parse_source_files(source_files);
 
     // SEMANTIC ANALYZING
-    const auto master_symbol_table = build_master_symbol_table(asts);
+    const codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
+    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     for (const auto &root_node : asts)
     {
@@ -81,7 +79,6 @@ int main(const int argc, char **const argv)
         codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
     }
 
-    codesh::semantic_analyzer::builtins::add_builtins(master_symbol_table);
 
     // Collect all methods BEFORE analyzation and not during regular symbols collection as methods both need
     // types to be resolved in order to be collected but are also mandatory to be collected before analyzation
@@ -140,6 +137,22 @@ int main(const int argc, char **const argv)
     return EXIT_SUCCESS;
 }
 
+static std::vector<std::string> generate_default_imports(const codesh::command_args &args)
+{
+    std::vector<std::string> results;
+
+    if (args.is_java_default_classpath)
+    {
+        results.emplace_back("java/lang");
+    }
+    if (args.is_talmud_codesh_classpath)
+    {
+        results.emplace_back("ישראל/קודש/בן/משה");
+    }
+
+    return results;
+}
+
 static void update_source_file(const std::filesystem::path &source_file_path)
 {
     codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
@@ -192,15 +205,6 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
     }
 
     return results;
-}
-
-static codesh::semantic_analyzer::symbol_table build_master_symbol_table(
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts)
-{
-    if (asts.empty())
-        throw std::runtime_error("Cannot build a master symbol table without compilation units");
-
-    return codesh::semantic_analyzer::symbol_table(*asts.front());
 }
 
 static bool validate_output_path(const std::filesystem::path &dest_path, const bool is_project)

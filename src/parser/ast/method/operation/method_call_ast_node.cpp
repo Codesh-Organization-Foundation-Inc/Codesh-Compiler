@@ -11,6 +11,9 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
+#include <cassert>
+
+
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
 {
@@ -45,6 +48,24 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
+codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
+    get_chained_method() const
+{
+    assert(chained_method.has_value() && "Tried to get chained method though one does not exist");
+    return *chained_method.value();
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
+        std::unique_ptr<method_call_ast_node> chained_method)
+{
+    this->chained_method.emplace(std::move(chained_method));
+}
+
+bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
+{
+    return chained_method.has_value();
+}
+
 codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
 {
     return &get_resolved().get_return_type();
@@ -66,7 +87,12 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
         param_types.emplace_back(*param);
     }
 
-    return util::generate_method_descriptor(true, method.get_return_type(), param_types, method.get_attributes());
+    return util::generate_method_descriptor(
+        get_resolved(),
+        method.get_return_type(),
+        param_types,
+        method.get_attributes()
+    );
 }
 
 const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
@@ -121,6 +147,12 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
             constant_emitter->emit_constants(root_node, constant_pool);
         }
     }
+
+    // Emit for chained method
+    if (has_chained_method())
+    {
+        get_chained_method().emit_constants(root_node, constant_pool);
+    }
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
@@ -129,6 +161,14 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 {
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
+
+    // Execute chained methods first
+    if (has_chained_method())
+    {
+        containing_block.set_is_consuming(true);
+        get_chained_method().emit_ir(containing_block, symbol_table, containing_type_decl);
+        containing_block.set_is_consuming(false);
+    }
 
     // Load arguments
     for (const auto &argument : arguments)
@@ -151,9 +191,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    //TODO: Remove after Talmud Codesh
-    const bool forcefeed_static = method.get_full_name().join() == "java/io/PrintStream/println";
-    const auto invokation_type = method.get_attributes().get_is_static() && !forcefeed_static
+    const auto invokation_type = method.get_attributes().get_is_static()
         ? output::ir::invokation_type::STATIC
         : output::ir::invokation_type::VIRTUAL;
 
