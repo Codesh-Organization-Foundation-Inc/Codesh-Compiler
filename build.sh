@@ -4,17 +4,24 @@ if (( EUID != 0 )); then
 fi
 
 CODESH_PATH="/usr/lib/קודש"
-mkdir -p $CODESH_PATH
+CODESH_EXECUTABLE=$CODESH_PATH/codeshc
+TALMUD_CODESH_PATH="$CODESH_PATH/תלמוד־קודש"
 
-#TODO: Install Codesh in /usr/lib/codeshc and put it in PATH
-CODESH_EXECUTABLE=./cmake-build-debug/codeshc
+
+# Compile codeshc
+cmake --build ./build
+
+# Deploy to CODESH_PATH
+mkdir -p $CODESH_PATH
+cmake --install ./build --prefix $CODESH_PATH
+
+# Link to the compiler in bin
+ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
 
 #TODO: Compress Talmud Codesh into JAR file after JAR loading is implemented
 
-TALMUD_CODESH_PATH="$CODESH_PATH/תלמוד־קודש"
-
 mkdir -p $TALMUD_CODESH_PATH
 $CODESH_EXECUTABLE ./resources/lib-src/ $TALMUD_CODESH_PATH --sinful
 
-echo "וְיִשְׂמַח ה' כִּי־הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וִיאַחֵל לְיוֹצֵר קִדּוּד נָעִים וַיִּתֹּם"
+echo "וְיִשְׂמַח ה' כִּי־הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וִיאַחֵל לְיוֹצֵר קִדּוּד נָעִים וְיִתַּם"

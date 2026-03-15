@@ -192,3 +192,4 @@ CMakeUserPresets.json
 
 CLAUDE.md
 *.kate-swp
+build/
