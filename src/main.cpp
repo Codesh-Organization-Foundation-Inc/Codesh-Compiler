@@ -106,7 +106,15 @@ int main(const int argc, char **const argv)
 
     // BLASPHEMIES
     // This includes both errors and warnings, so print it anyway
-    codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
+    if (!args.lsp_mode)
+    {
+        codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
+    }
+    else
+    {
+        //TODO: Print JSON
+        return EXIT_SUCCESS;
+    }
 
     // Do NOT proceed with compilation if there were compilation errors
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
