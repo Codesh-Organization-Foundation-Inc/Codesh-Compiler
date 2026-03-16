@@ -35,18 +35,15 @@ const std::string DEFAULT_TALMUD_CODESH_PATH = LIB_PATH + COMMON_TALMUD_CODESH_P
 codesh::command_args codesh::parse_command(const int argc, char **argv)
 {
     command_args result{};
+
+    if (argc == 1)
+    {
+        //TODO: Print help
+        return result;
+    }
+
     result.is_java_default_classpath = false;
     result.is_talmud_codesh_classpath = true;
-
-    if (argc < 3)
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::NO_MAIN_ARGS,
-            blasphemy::blasphemy_type::INIT,
-            blasphemy::NO_CODE_POS,
-            true
-        );
-    }
 
     auto args = create_args_queue(argc, argv);
 
