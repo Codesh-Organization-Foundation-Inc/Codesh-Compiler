@@ -111,6 +111,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         // First, use the Trie structure word process built-in keywords.
         if (const auto new_i = try_match_trie_keyword(code, current_code_position, tokens, code_pos))
         {
+            current_code_position.column += *new_i - code_pos - 1;
             code_pos = *new_i;
             continue;
         }
@@ -118,6 +119,7 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         // If not a keyword, resort to a REGEX literal/identifier check.
         if (const auto new_i = try_match_regex_token(code, current_code_position, tokens, code_pos))
         {
+            current_code_position.column += *new_i - code_pos - 1;
             code_pos = *new_i;
             continue;
         }
