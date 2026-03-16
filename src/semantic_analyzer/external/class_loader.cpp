@@ -160,12 +160,13 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
     }
 
     const auto interfaces = read_interface_names(file, strings);
-    std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> iface_nodes;
-    iface_nodes.reserve(interfaces.size());
-    for (const auto &iface_name : interfaces)
+    std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> interface_nodes;
+    interface_nodes.reserve(interfaces.size());
+    for (const auto &interface_name : interfaces)
     {
-        iface_nodes.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
-            codesh::blasphemy::NO_CODE_POS, iface_name
+        interface_nodes.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
+            codesh::blasphemy::NO_CODE_POS,
+            interface_name
         ));
     }
 
@@ -179,7 +180,7 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
         class_name.get_last_part(),
         std::move(access_flags),
         std::move(super_type_node),
-        std::move(iface_nodes)
+        std::move(interface_nodes)
     ).first.get();
 }
 
