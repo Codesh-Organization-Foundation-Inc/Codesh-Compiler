@@ -57,7 +57,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
         code_position,
-        definition::fully_qualified_name(name_token->get_content())
+        definition::fully_qualified_name(name_token->get_code_position(), name_token->get_content())
     );
 
 
@@ -67,7 +67,7 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
         {
             auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
                 super_name->get_code_position(),
-                definition::fully_qualified_name(super_name->get_content())
+                definition::fully_qualified_name(super_name->get_code_position(), super_name->get_content())
             );
 
             node->set_super_class(std::move(super_type));
@@ -224,7 +224,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 
     auto method_decl = std::make_unique<ast::method::method_declaration_ast_node>(
         code_position,
-        codesh::definition::fully_qualified_name(name_token->get_content())
+        codesh::definition::fully_qualified_name(name_token->get_code_position(), name_token->get_content())
     );
 
     parse_method_signature_continuation(*method_decl, code_position, tokens);

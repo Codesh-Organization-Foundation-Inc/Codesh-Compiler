@@ -28,7 +28,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
         codesh::semantic_analyzer::builtins::ALIAS_STRING,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
-            "java/lang/String",
+            codesh::definition::fully_qualified_name::parse("java/lang/String", codesh::blasphemy::NO_CODE_POS),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
@@ -47,7 +47,7 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
         codesh::semantic_analyzer::builtins::ALIAS_OBJECT,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
-            "java/lang/Object",
+            codesh::definition::fully_qualified_name::parse("java/lang/Object", codesh::blasphemy::NO_CODE_POS),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),

@@ -352,5 +352,5 @@ static fully_qualified_name get_class_name(const cp_strings &strings, const int 
     if (it == strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
-    return it->second.c_str();
+    return fully_qualified_name::parse(it->second, codesh::blasphemy::NO_CODE_POS);
 }

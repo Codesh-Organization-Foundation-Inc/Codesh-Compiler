@@ -15,7 +15,8 @@ variable_reference_ast_node::variable_reference_ast_node(const codesh::blasphemy
 variable_reference_ast_node::variable_reference_ast_node(
         const codesh::blasphemy::code_position code_position,
         const codesh::ast::local_variable_declaration_ast_node &producing_declaration) :
-    value_ast_node(code_position), name(codesh::definition::fully_qualified_name(producing_declaration.get_name())),
+    value_ast_node(code_position),
+    name(codesh::definition::fully_qualified_name(code_position, producing_declaration.get_name())),
     producing_declaration(producing_declaration)
 {
 }

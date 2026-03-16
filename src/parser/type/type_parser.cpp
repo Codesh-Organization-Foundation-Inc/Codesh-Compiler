@@ -115,7 +115,7 @@ static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_ini
         assignment_token->get_code_position(),
         std::make_unique<variable_reference_ast_node>(
             pos,
-            codesh::definition::fully_qualified_name(dest.get_name())
+            codesh::definition::fully_qualified_name(pos, dest.get_name())
         ),
         codesh::parser::value::parse_value(tokens)
     );

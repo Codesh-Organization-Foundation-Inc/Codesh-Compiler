@@ -27,7 +27,7 @@ codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::fil
 {
     global_scope = &scope.add_symbol(
         "",
-        std::make_unique<country_symbol>("")
+        std::make_unique<country_symbol>(definition::fully_qualified_name(blasphemy::NO_CODE_POS))
     ).first.get();
 }
 
@@ -75,7 +75,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
         return result.value();
     }
 
-    const definition::fully_qualified_name name(name_start_fr, name_end_fr);
+    const definition::fully_qualified_name name(blasphemy::NO_CODE_POS, name_start_fr, name_end_fr);
     if (const auto result = try_load_external_symbols(context, name))
     {
         return result.value();
@@ -170,7 +170,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
 
     for (auto end = parts.end(); end != parts.begin(); --end)
     {
-        definition::fully_qualified_name prefix(parts.begin(), end);
+        definition::fully_qualified_name prefix(blasphemy::NO_CODE_POS, parts.begin(), end);
 
         const auto candidate = import_prefix.empty()
             ? prefix.join()
@@ -181,11 +181,11 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
             std::optional<definition::fully_qualified_name> suffix;
             if (end != name.get_parts().end())
             {
-                suffix.emplace(end, name.get_parts().end());
+                suffix.emplace(blasphemy::NO_CODE_POS, end, name.get_parts().end());
             }
 
             return std::pair{
-                candidate.data(),
+                definition::fully_qualified_name::parse(candidate, blasphemy::NO_CODE_POS),
                 std::move(suffix)
             };
         }
@@ -240,7 +240,7 @@ bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::stri
                 jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
             }
 
-            if (jimage_cache.at(key)->load("java.base", candidate.data(), *this))
+            if (jimage_cache.at(key)->load("java.base", definition::fully_qualified_name::parse(candidate, blasphemy::NO_CODE_POS), *this))
                 return true;
         }
     }

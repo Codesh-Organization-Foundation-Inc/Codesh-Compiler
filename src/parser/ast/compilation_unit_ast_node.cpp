@@ -6,7 +6,8 @@ codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definiti
         std::filesystem::path source_path) :
     ast_node(blasphemy::NO_CODE_POS),
     source_path(std::move(source_path)),
-    basad_type(basad_type)
+    basad_type(basad_type),
+    package_name(blasphemy::NO_CODE_POS)
 {
 }
 

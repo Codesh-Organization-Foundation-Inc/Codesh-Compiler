@@ -62,7 +62,7 @@ static void add_country(
 
 
 const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
-    builtins::ALIAS_OBJECT.data();
+    codesh::definition::fully_qualified_name::parse(std::string(builtins::ALIAS_OBJECT), blasphemy::NO_CODE_POS);
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)

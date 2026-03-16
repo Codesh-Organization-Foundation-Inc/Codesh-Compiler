@@ -364,7 +364,10 @@ static void prepend_external_this_argument(
 {
     auto receiver_node = std::make_unique<variable_reference_ast_node>(
         method_call.get_code_position(),
-        codesh::definition::fully_qualified_name(method_call.get_unresolved_name().get_parts().front())
+        codesh::definition::fully_qualified_name(
+            method_call.get_code_position(),
+            method_call.get_unresolved_name().get_parts().front()
+        )
     );
 
     receiver_node->set_resolved(receiver_variable);
@@ -401,7 +404,7 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 
     auto this_var = std::make_unique<variable_reference_ast_node>(
         method_call.get_code_position(),
-        "this"
+        codesh::definition::fully_qualified_name(method_call.get_code_position(), std::string("this"))
     );
     this_var->set_resolved(this_var_symbol);
     method_call.get_arguments().push_front(std::move(this_var));

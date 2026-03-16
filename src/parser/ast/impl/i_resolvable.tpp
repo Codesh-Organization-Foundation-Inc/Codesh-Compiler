@@ -4,7 +4,10 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 //NOTE: Circular dependency with definition.h, so just write it directly.
-static const codesh::definition::fully_qualified_name ERROR_FQN = "סְדוֹם וַעֲמֹרָה";
+static const codesh::definition::fully_qualified_name ERROR_FQN = codesh::definition::fully_qualified_name(
+    codesh::blasphemy::NO_CODE_POS,
+    "סְדוֹם וַעֲמֹרָה"
+);
 
 template <typename T>
 const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<T>::get_resolved_name() const

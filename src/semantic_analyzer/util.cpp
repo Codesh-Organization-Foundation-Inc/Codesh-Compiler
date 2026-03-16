@@ -144,7 +144,10 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find
         {
             current = &current->get_scope().add_symbol(
                 part,
-                std::make_unique<country_symbol>(accumulated.c_str(), current)
+                std::make_unique<country_symbol>(
+                    definition::fully_qualified_name::parse(accumulated, blasphemy::NO_CODE_POS),
+                    current
+                )
             ).first.get();
         }
 

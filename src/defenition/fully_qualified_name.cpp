@@ -6,15 +6,33 @@
 
 #include <sstream>
 
-codesh::definition::fully_qualified_name::fully_qualified_name() :
-    _is_wildcard(false)
+codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position) :
+    _is_wildcard(false),
+    code_position(code_position)
 {
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const char *binary_fqn) :
-    fully_qualified_name()
+codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position,
+        std::string part) :
+    fully_qualified_name(code_position)
 {
-    std::istringstream fqn_stream(binary_fqn);
+    add(std::move(part));
+}
+
+codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position,
+        const std::vector<std::string>::const_iterator name_start,
+        const std::vector<std::string>::const_iterator name_end) :
+    parts(name_start, name_end),
+    _is_wildcard(false),
+    code_position(code_position)
+{
+}
+
+codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::parse(
+        const std::string &fqn_str, const blasphemy::code_position code_position)
+{
+    fully_qualified_name result(code_position);
+    std::istringstream fqn_stream(fqn_str);
 
     // Split by '/'
     std::string item;
@@ -22,23 +40,11 @@ codesh::definition::fully_qualified_name::fully_qualified_name(const char *binar
     {
         if (!item.empty())
         {
-            add(item);
+            result.add(item);
         }
     }
-}
 
-codesh::definition::fully_qualified_name::fully_qualified_name(std::string part) :
-    fully_qualified_name()
-{
-    add(std::move(part));
-}
-
-codesh::definition::fully_qualified_name::fully_qualified_name(
-        const std::vector<std::string>::const_iterator name_start,
-        const std::vector<std::string>::const_iterator name_end) :
-    parts(name_start, name_end),
-    _is_wildcard(false)
-{
+    return result;
 }
 
 bool codesh::definition::fully_qualified_name::operator==(const fully_qualified_name &other) const
@@ -107,7 +113,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
         return result.value();
     }
 
-    fully_qualified_name pretty_fqn;
+    fully_qualified_name pretty_fqn(code_position);
     for (const auto &part : get_parts())
     {
         if (part == "this")

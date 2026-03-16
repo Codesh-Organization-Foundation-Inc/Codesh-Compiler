@@ -10,7 +10,8 @@ codesh::ast::collection::range_ast_node::range_ast_node(blasphemy::code_position
     to(std::move(to)),
     skip(std::move(skip)),
     type(std::make_unique<type::custom_type_ast_node>(
-        code_position, definition::fully_qualified_name(semantic_analyzer::builtins::CLASS_RANGE)
+        code_position,
+        definition::fully_qualified_name(code_position, semantic_analyzer::builtins::CLASS_RANGE)
     ))
 {
 }

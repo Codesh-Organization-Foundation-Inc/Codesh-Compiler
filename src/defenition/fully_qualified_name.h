@@ -1,5 +1,7 @@
 #pragma once
 
+#include "blasphemy/blasphemy_collector.h"
+
 #include <optional>
 #include <string>
 #include <vector>
@@ -17,17 +19,21 @@ class fully_qualified_name
     std::vector<std::string> parts;
     bool _is_wildcard;
 
+    blasphemy::code_position code_position;
+
     [[nodiscard]] std::optional<std::string> parse_alias() const;
 
 public:
-    fully_qualified_name();
+    explicit fully_qualified_name(blasphemy::code_position code_position);
+    fully_qualified_name(blasphemy::code_position code_position, std::string part);
 
-    // ReSharper disable once CppNonExplicitConvertingConstructor
-    fully_qualified_name(const char *binary_fqn); // NOLINT(*-explicit-constructor)
-    explicit fully_qualified_name(std::string part);
+    fully_qualified_name(blasphemy::code_position code_position,
+            std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
-    fully_qualified_name(std::vector<std::string>::const_iterator name_start,
-            std::vector<std::string>::const_iterator name_end);
+    /**
+     * Parses an FQN separated by slashes
+     */
+    static fully_qualified_name parse(const std::string &fqn_str, blasphemy::code_position code_position);
 
 
     [[nodiscard]] bool operator==(const fully_qualified_name &other) const;
@@ -45,6 +51,7 @@ public:
 
     void set_is_wildcard(bool wildcard);
     [[nodiscard]] bool is_wildcard() const;
+
 
     [[nodiscard]] bool is_single_part() const;
     [[nodiscard]] std::string get_last_part() const;

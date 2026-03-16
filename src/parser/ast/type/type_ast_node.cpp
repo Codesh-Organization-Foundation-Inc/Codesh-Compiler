@@ -67,7 +67,10 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_no
         const std::string class_name = descriptor.substr(pos, end - pos);
         pos = end + 1;
 
-        result = std::make_unique<custom_type_ast_node>(code_position, class_name.c_str());
+        result = std::make_unique<custom_type_ast_node>(
+            code_position,
+            definition::fully_qualified_name::parse(class_name, code_position)
+        );
         break;
     }
 

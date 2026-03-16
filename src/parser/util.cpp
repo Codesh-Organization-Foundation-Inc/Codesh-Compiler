@@ -120,7 +120,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     case token_group::IDENTIFIER:
     {
-        definition::fully_qualified_name name;
+        definition::fully_qualified_name name(type_pos);
         parse_fqn(tokens, name);
 
         result = std::make_unique<ast::type::custom_type_ast_node>(type_pos, name);
@@ -138,7 +138,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
         return std::make_unique<ast::type::custom_type_ast_node>(
             type_pos,
-            definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT)
+            definition::fully_qualified_name(type_pos, definition::ERROR_IDENTIFIER_CONTENT)
         );
     }
 

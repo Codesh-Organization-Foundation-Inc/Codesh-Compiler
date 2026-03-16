@@ -41,7 +41,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::IDENTIFIER: {
         auto id_pos = tokens.front()->get_code_position();
 
-        definition::fully_qualified_name name;
+        definition::fully_qualified_name name(id_pos);
         util::parse_this_and_fqn(tokens, name);
 
         value = std::make_unique<variable_reference_ast_node>(id_pos, name);
@@ -56,7 +56,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             str_pos,
             std::make_unique<ast::type::custom_type_ast_node>(
                 str_pos,
-                definition::fully_qualified_name(semantic_analyzer::builtins::ALIAS_STRING)
+                definition::fully_qualified_name(str_pos, std::string(semantic_analyzer::builtins::ALIAS_STRING))
             ),
 
             util::consume_alnum_identifier_token(tokens)->get_content()
