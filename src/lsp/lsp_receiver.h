@@ -21,6 +21,6 @@ struct diagnostics_request final : request
 /**
  * @returns The LSP request. May be @c nullptr if the request was already handled by this function.
  */
-std::unique_ptr<request> wait_for_request();
+[[nodiscard]] std::unique_ptr<request> wait_for_request();
 
 }

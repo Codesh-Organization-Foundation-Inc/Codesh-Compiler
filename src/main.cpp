@@ -20,10 +20,10 @@
 #include <utility>
 #include <vector>
 
-#include <utf8.h>
-
 static int compile(const codesh::command_args &args);
 [[noreturn]] static void lsp_server(const codesh::command_args &args);
+static void handle_lsp_diagnostic_request(const codesh::command_args &args,
+        const codesh::lsp::diagnostics_request &request);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
@@ -141,15 +141,7 @@ static int compile(const codesh::command_args &args)
 
     // BLASPHEMIES
     // This includes both errors and warnings, so print it anyway
-    if (!args.lsp_mode)
-    {
-        codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
-    }
-    else
-    {
-        //TODO: Print JSON
-        return EXIT_SUCCESS;
-    }
+    codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
 
     // Do NOT proceed with compilation if there were compilation errors
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
@@ -169,12 +161,25 @@ static int compile(const codesh::command_args &args)
     return EXIT_SUCCESS;
 }
 
-static void lsp_server(const codesh::command_args &)
+static void lsp_server(const codesh::command_args &args)
 {
     while (true)
     {
-        codesh::lsp::wait_for_request();
+        const auto request = codesh::lsp::wait_for_request();
+        if (request == nullptr)
+            continue;
+
+        if (const auto diagnostics_req = dynamic_cast<const codesh::lsp::diagnostics_request *>(request.get()))
+        {
+            handle_lsp_diagnostic_request(args, *diagnostics_req);
+        }
     }
+}
+
+static void handle_lsp_diagnostic_request(const codesh::command_args &args,
+        const codesh::lsp::diagnostics_request &request)
+{
+    auto tokens = codesh::lexer::tokenize_code(request.file_contents);
 }
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
@@ -234,11 +239,8 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
         update_source_file(source_file_path);
 
         // LEXING
-        const std::string source_file = read_file(source_file_path);
-        // Convert the string to UTF-8.
-        // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
-        const std::u16string utf16_code = utf8::utf8to16(source_file);
-        auto tokens = codesh::lexer::tokenize_code(utf16_code);
+        const std::string code = read_file(source_file_path);
+        auto tokens = codesh::lexer::tokenize_code(code);
 
         // PARSING
         auto ast = codesh::parser::parse(tokens, source_file_path);
