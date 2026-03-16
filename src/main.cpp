@@ -128,10 +128,6 @@ static int compile(const codesh::command_args &args)
     }
 
 
-    //TESTS
-    //codesh::test::descriptor();
-
-
     println(args, "\n---------------------\n");
     const auto asts = parse_source_files(args, source_files);
     println(args, "");
