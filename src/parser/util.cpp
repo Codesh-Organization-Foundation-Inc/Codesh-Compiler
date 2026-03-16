@@ -236,6 +236,10 @@ void codesh::parser::util::parse_fqn(std::queue<std::unique_ptr<token>> &tokens,
         }
         else
         {
+            if (fqn_out.get_parts().empty())
+            {
+                fqn_out.set_code_position(id->get_code_position());
+            }
             fqn_out.add(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
         }
 
@@ -296,8 +300,10 @@ bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens
 void codesh::parser::util::parse_this_and_fqn(std::queue<std::unique_ptr<token>> &tokens,
         definition::fully_qualified_name &fqn_out)
 {
-    if (consuming_check(tokens, token_group::KEYWORD_THIS))
+    std::unique_ptr<token> this_token;
+    if (consuming_check(tokens, token_group::KEYWORD_THIS, this_token))
     {
+        fqn_out.set_code_position(this_token->get_code_position());
         consuming_check(tokens, token_group::PUNCTUATION_DOT);
         fqn_out.add("this");
     }

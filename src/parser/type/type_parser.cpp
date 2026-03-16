@@ -17,6 +17,7 @@ namespace ast = codesh::ast;
 static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_init_var_assignment_node(
         const ast::type_decl::variable_declaration_ast_node &dest,
         codesh::blasphemy::code_position pos,
+        codesh::blasphemy::code_position name_pos,
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::parser::var_decl_assignment_policy policy);
 
@@ -64,7 +65,13 @@ std::unique_ptr<ast::op::assignment::assign_operator_ast_node> codesh::parser::p
     dest.set_name(name_token->get_content());
     dest.set_attributes(parse_modifiers(pos, tokens));
 
-    auto assignment = create_init_var_assignment_node(dest, pos, tokens, policy);
+    auto assignment = create_init_var_assignment_node(
+        dest,
+        pos,
+        name_token->get_code_position(),
+        tokens,
+        policy
+    );
 
     util::ensure_end_op(tokens);
     return assignment;
@@ -73,6 +80,7 @@ std::unique_ptr<ast::op::assignment::assign_operator_ast_node> codesh::parser::p
 static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_init_var_assignment_node(
         const ast::type_decl::variable_declaration_ast_node &dest,
         const codesh::blasphemy::code_position pos,
+        const codesh::blasphemy::code_position name_pos,
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         const codesh::parser::var_decl_assignment_policy policy)
 {
@@ -115,7 +123,7 @@ static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_ini
         assignment_token->get_code_position(),
         std::make_unique<variable_reference_ast_node>(
             pos,
-            codesh::definition::fully_qualified_name(pos, dest.get_name())
+            codesh::definition::fully_qualified_name(name_pos, dest.get_name())
         ),
         codesh::parser::value::parse_value(tokens)
     );

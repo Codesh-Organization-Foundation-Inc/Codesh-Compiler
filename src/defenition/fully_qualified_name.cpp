@@ -79,6 +79,11 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
+void codesh::definition::fully_qualified_name::set_code_position(const blasphemy::code_position pos)
+{
+    code_position = pos;
+}
+
 void codesh::definition::fully_qualified_name::set_is_wildcard(const bool wildcard)
 {
     _is_wildcard = wildcard;
