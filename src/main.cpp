@@ -89,10 +89,6 @@ int main(const int argc, char **const argv)
     }
 
 
-    //TESTS
-    //codesh::test::descriptor();
-
-
     std::puts("\n---------------------\n");
     const auto asts = parse_source_files(source_files);
     std::puts("");
