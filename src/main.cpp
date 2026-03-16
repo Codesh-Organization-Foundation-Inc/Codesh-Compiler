@@ -189,6 +189,12 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
     //TODO: Could be optimized if we cache the master AST and always remove the source and re-add it or something
     analyze_asts(args, asts);
+
+
+    // Now that all the errors were collected, send them:
+    codesh::lsp::send_diagnostics_response(request);
+    // Clear for the next round
+    codesh::blasphemy::get_blasphemy_collector().clear();
 }
 
 constexpr std::string_view FILE_URI_PREFIX = "file://";

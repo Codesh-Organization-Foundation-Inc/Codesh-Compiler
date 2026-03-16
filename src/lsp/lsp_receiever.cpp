@@ -1,3 +1,4 @@
+#include "blasphemy/blasphemy_collector.h"
 #include "lsp_receiver.h"
 
 #include <fstream>
@@ -9,8 +10,6 @@
 
 // Specs from https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/
 
-static const std::string DUMMY_FILE = "/home/stavlpc/CLionProjects/Codesh-Compiler/lsp_dump.json";
-
 static const std::string CONTENT_LENGTH_KEY = "Content-Length: ";
 static const std::string CONTENT_TYPE_KEY = "Content-Type: ";
 
@@ -19,6 +18,7 @@ static std::string get_file_uri(const nlohmann::json &params_obj);
 static nlohmann::json build_response(const nlohmann::json &request);
 static void send_response(const nlohmann::json &response);
 static void write_to_dummy(const std::string &contents);
+static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy_info &info, int severity);
 
 codesh::lsp::request::~request() = default;
 
@@ -81,6 +81,65 @@ std::unique_ptr<codesh::lsp::request> codesh::lsp::wait_for_request()
     write_to_dummy(body);
 
     return process_lsp_request(nlohmann::json::parse(body));
+}
+
+static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy_info &info, int severity)
+{
+    size_t line = 0;
+    size_t column = 0;
+
+    if (info.code_pos.has_value() && info.code_pos != codesh::blasphemy::NO_CODE_POS)
+    {
+        // We use 1-based lines/columns; LSP uses 0-based.
+        line = info.code_pos->line - 1;
+        column = info.code_pos->column - 1;
+    }
+
+    const nlohmann::json range = {
+        {"start", {
+            {"line", line},
+            {"character", column}
+        }},
+        {"end", {
+            //TODO: Get keyword by some map, then length
+            {"line", line},
+            {"character", column + 3}
+        }}
+    };
+
+    return {
+        {"range", range},
+        {"severity", severity},
+        {"message", info.details}
+    };
+}
+
+void codesh::lsp::send_diagnostics_response(const diagnostics_request &request)
+{
+    const auto &collector = blasphemy::get_blasphemy_collector();
+
+    nlohmann::json diagnostics = nlohmann::json::array();
+
+    for (const auto &blasphemy : collector.get_all_blasphemies())
+    {
+        diagnostics.push_back(blasphemy_to_diagnostic(blasphemy, 1)); // 1 = Error
+    }
+
+    for (const auto &warning : collector.get_all_warnings())
+    {
+        diagnostics.push_back(blasphemy_to_diagnostic(warning, 2)); // 2 = Warning
+    }
+
+    const nlohmann::json notification = {
+        {"jsonrpc", "2.0"},
+        {"method", "textDocument/publishDiagnostics"},
+        {"params", {
+            {"uri", request.file_uri},
+            {"diagnostics", diagnostics}
+        }}
+    };
+
+    send_response(notification);
 }
 
 static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann::json &request)
@@ -146,6 +205,8 @@ static void send_response(const nlohmann::json &response)
 
 static void write_to_dummy(const std::string &contents)
 {
-    std::ofstream temp(DUMMY_FILE, std::ios::app);
-    temp << contents << "\n";
+    // static const std::string DUMMY_FILE = "/home/stavlpc/CLionProjects/Codesh-Compiler/lsp_dump.json";
+
+    // std::ofstream temp(DUMMY_FILE, std::ios::app);
+    // temp << contents << "\n";
 }

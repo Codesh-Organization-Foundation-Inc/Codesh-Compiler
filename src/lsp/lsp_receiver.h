@@ -23,4 +23,6 @@ struct diagnostics_request final : request
  */
 [[nodiscard]] std::unique_ptr<request> wait_for_request();
 
+void send_diagnostics_response(const diagnostics_request &request);
+
 }
