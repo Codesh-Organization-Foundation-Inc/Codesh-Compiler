@@ -44,8 +44,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, bool is
 static void log_analysis_progress(const codesh::command_args &args, size_t processed, size_t total,
         const std::string &pass_name, const codesh::ast::compilation_unit_ast_node &root_node);
 
-[[nodiscard]] static codesh::semantic_analyzer::symbol_table analyze_asts(
-        const codesh::command_args &args,
+static codesh::semantic_analyzer::symbol_table analyze_asts(const codesh::command_args &args,
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
@@ -183,7 +182,13 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 {
     const auto source_path = uri_to_path(request.file_uri);
     auto tokens = codesh::lexer::tokenize_code(request.file_contents);
-    auto ast = codesh::parser::parse(tokens, source_path);
+
+    std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> asts;
+    asts.reserve(1);
+    asts.emplace_back(codesh::parser::parse(tokens, source_path));
+
+    //TODO: Could be optimized if we cache the master AST and always remove the source and re-add it or something
+    analyze_asts(args, asts);
 }
 
 constexpr std::string_view FILE_URI_PREFIX = "file://";
