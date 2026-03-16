@@ -12,6 +12,10 @@ struct request
 
 struct diagnostics_request final : request
 {
+    std::string file_uri;
+    std::string file_contents;
+
+    diagnostics_request(std::string file_uri, std::string file_contents);
 };
 
 /**

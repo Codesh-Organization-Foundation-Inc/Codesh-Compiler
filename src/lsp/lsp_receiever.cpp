@@ -15,11 +15,18 @@ static const std::string CONTENT_LENGTH_KEY = "Content-Length: ";
 static const std::string CONTENT_TYPE_KEY = "Content-Type: ";
 
 static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann::json &request);
+static std::string get_file_uri(const nlohmann::json &params_obj);
 static nlohmann::json build_response(const nlohmann::json &request);
 static void send_response(const nlohmann::json &response);
 static void write_to_dummy(const std::string &contents);
 
 codesh::lsp::request::~request() = default;
+
+codesh::lsp::diagnostics_request::diagnostics_request(std::string file_uri, std::string file_contents) :
+    file_uri(std::move(file_uri)),
+    file_contents(std::move(file_contents))
+{
+}
 
 std::unique_ptr<codesh::lsp::request> codesh::lsp::wait_for_request()
 {
@@ -92,8 +99,32 @@ static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann:
 
         send_response(response);
     }
+    else if (method == "textDocument/didOpen")
+    {
+        const auto &params = request.at("params");
+
+
+        return std::make_unique<codesh::lsp::diagnostics_request>(
+            get_file_uri(params),
+            params.at("textDocument").at("text").get<std::string>()
+        );
+    }
+    else if (method == "textDocument/didChange")
+    {
+        const auto &params = request.at("params");
+
+        return std::make_unique<codesh::lsp::diagnostics_request>(
+            get_file_uri(params),
+            params.at("contentChanges").at("text").get<std::string>()
+        );
+    }
 
     return nullptr;
+}
+
+static std::string get_file_uri(const nlohmann::json &params_obj)
+{
+    return params_obj.at("textDocument").at("uri").get<std::string>();
 }
 
 static nlohmann::json build_response(const nlohmann::json &request)
