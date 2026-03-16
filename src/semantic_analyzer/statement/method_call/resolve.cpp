@@ -506,7 +506,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         context.blasphemy_consumer(fmt::format(
             codesh::blasphemy::details::METHOD_NOT_FOUND,
             method_call.to_pretty_string()
-        ), method_call.get_code_position());
+        ), method_call.get_name_position());
         return std::nullopt;
     }
 
