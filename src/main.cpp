@@ -24,6 +24,7 @@ static int compile(const codesh::command_args &args);
 [[noreturn]] static void lsp_server(const codesh::command_args &args);
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
         const codesh::lsp::diagnostics_request &request);
+[[nodiscard]] static std::filesystem::path uri_to_path(const std::string &file_uri);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
@@ -161,6 +162,7 @@ static int compile(const codesh::command_args &args)
     return EXIT_SUCCESS;
 }
 
+
 static void lsp_server(const codesh::command_args &args)
 {
     while (true)
@@ -179,8 +181,21 @@ static void lsp_server(const codesh::command_args &args)
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
         const codesh::lsp::diagnostics_request &request)
 {
+    const auto source_path = uri_to_path(request.file_uri);
     auto tokens = codesh::lexer::tokenize_code(request.file_contents);
+    auto ast = codesh::parser::parse(tokens, source_path);
 }
+
+constexpr std::string_view FILE_URI_PREFIX = "file://";
+
+static std::filesystem::path uri_to_path(const std::string &file_uri)
+{
+    if (file_uri.starts_with(FILE_URI_PREFIX))
+        return file_uri.substr(FILE_URI_PREFIX.size());
+
+    return file_uri;
+}
+
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
 {
