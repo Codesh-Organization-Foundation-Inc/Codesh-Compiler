@@ -79,14 +79,15 @@ std::unique_ptr<codesh::lsp::request> codesh::lsp::wait_for_request()
 static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann::json &request)
 {
     const auto method = request.at("method").get<std::string>();
-    write_to_dummy(method);
 
     if (method == "initialize")
     {
         auto response = build_response(request);
 
         response["result"] = {
-            {"capabilities", {}}
+            {"capabilities", {
+                {"textDocumentSync", 1}
+            }}
         };
 
         send_response(response);
