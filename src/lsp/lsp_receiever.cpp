@@ -174,7 +174,7 @@ static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann:
 
         return std::make_unique<codesh::lsp::diagnostics_request>(
             get_file_uri(params),
-            params.at("contentChanges").at("text").get<std::string>()
+            params.at("contentChanges").at(0).at("text").get<std::string>()
         );
     }
 
