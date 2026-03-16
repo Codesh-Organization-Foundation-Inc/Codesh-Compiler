@@ -1,8 +1,13 @@
 #include "lsp_receiver.h"
 
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+
+// Specs from https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/
+
+static const std::string DUMMY_FILE = "/home/stavlpc/CLionProjects/Codesh-Compiler/lsp_dump.json";
 
 static const std::string CONTENT_LENGTH_KEY = "Content-Length: ";
 static const std::string CONTENT_TYPE_KEY = "Content-Type: ";
@@ -56,6 +61,9 @@ codesh::lsp::request codesh::lsp::wait_lsp_request()
 
     body.resize(content_length);
     std::cin.read(body.data(), content_length);
+
+    std::ofstream temp(DUMMY_FILE, std::ios::app);
+    temp << body << "\n";
 
     return {};
 }
