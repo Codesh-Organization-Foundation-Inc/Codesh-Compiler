@@ -23,7 +23,7 @@
 #include <utf8.h>
 
 static int compile(const codesh::command_args &args);
-static int lsp_server(const codesh::command_args &args);
+[[noreturn]] static void lsp_server(const codesh::command_args &args);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
@@ -65,7 +65,7 @@ int main(const int argc, char **const argv)
 
     if (args.lsp_mode)
     {
-        return lsp_server(args);
+        lsp_server(args);
     }
 
     return compile(args);
@@ -169,10 +169,12 @@ static int compile(const codesh::command_args &args)
     return EXIT_SUCCESS;
 }
 
-static int lsp_server(const codesh::command_args &)
+static void lsp_server(const codesh::command_args &)
 {
-    codesh::lsp::wait_lsp_request();
-    return EXIT_SUCCESS;
+    while (true)
+    {
+        codesh::lsp::wait_lsp_request();
+    }
 }
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
