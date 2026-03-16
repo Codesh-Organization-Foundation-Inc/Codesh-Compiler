@@ -5,12 +5,17 @@
 #include <stdexcept>
 #include <string>
 
+#include <nlohmann/json.hpp>
+
 // Specs from https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/
 
 static const std::string DUMMY_FILE = "/home/stavlpc/CLionProjects/Codesh-Compiler/lsp_dump.json";
 
 static const std::string CONTENT_LENGTH_KEY = "Content-Length: ";
 static const std::string CONTENT_TYPE_KEY = "Content-Type: ";
+
+static codesh::lsp::request process_lsp_request(const nlohmann::json &body);
+
 
 codesh::lsp::request codesh::lsp::wait_lsp_request()
 {
@@ -65,5 +70,10 @@ codesh::lsp::request codesh::lsp::wait_lsp_request()
     std::ofstream temp(DUMMY_FILE, std::ios::app);
     temp << body << "\n";
 
+    return process_lsp_request(nlohmann::json::parse(body));
+}
+
+static codesh::lsp::request process_lsp_request(const nlohmann::json &body)
+{
     return {};
 }
