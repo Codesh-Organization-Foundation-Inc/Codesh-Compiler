@@ -30,7 +30,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
     if (root_node->get_basad_type() == definition::basad_type::IAW)
     {
-        std::cout << "אם אתה מאמין באללה אז תאמין שהקוד עובד"<< std::endl;
+        std::cout << "אם אתה מאמין באללה אז תאמין שהקוד עובד" << std::endl;
         std::exit(0);
     }
 
