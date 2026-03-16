@@ -106,8 +106,6 @@ add_executable(codeshc
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/type/type_ast_node.cpp
         src/parser/ast/impl/i_descriptor_emitter.h
-        src/test.cpp
-        src/test.h
         src/output/jvm_target/class_file_builder.cpp
         src/output/jvm_target/class_file_builder.h
         src/output/jvm_target/stack_map_table_builder.cpp
