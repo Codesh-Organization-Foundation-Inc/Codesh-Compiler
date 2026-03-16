@@ -8,6 +8,8 @@ namespace codesh::blasphemy::details
 {
 
 // INIT
+extern const std::string SRC_NOT_PROVIDED;
+extern const std::string DEST_NOT_PROVIDED;
 extern const fmt::runtime_format_string<> SOURCE_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> OUTPUT_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> DEST_PATH_NOT_DIRECTORY;

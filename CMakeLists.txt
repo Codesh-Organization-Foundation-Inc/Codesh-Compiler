@@ -335,21 +335,23 @@ add_executable(codeshc
         src/semantic_analyzer/util/widen_util.h
         src/semantic_analyzer/util/poly_util.cpp
         src/semantic_analyzer/util/poly_util.h
+        src/lsp/lsp_receiever.cpp
+        src/lsp/lsp_receiver.h
 )
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
-target_link_libraries(codeshc Boost::boost Boost::regex)
+target_link_libraries(codeshc PRIVATE Boost::boost Boost::regex)
 
 find_package(ZLIB REQUIRED)
-target_link_libraries(codeshc ZLIB::ZLIB)
+target_link_libraries(codeshc PRIVATE ZLIB::ZLIB)
 
 # sudo dnf install libicu-devel
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
 
-target_link_libraries(codeshc
+target_link_libraries(codeshc PRIVATE
         ${ICU_LIBRARIES} icui18n
         icuuc
         icudata
@@ -382,7 +384,16 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(fmt)
-target_link_libraries(codeshc fmt::fmt)
+target_link_libraries(codeshc PRIVATE fmt::fmt)
+
+# nlohmann_json
+FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
+target_link_libraries(codeshc PRIVATE nlohmann_json::nlohmann_json)
 
 
 # Support includes starting from relative paths

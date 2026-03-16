@@ -27,6 +27,8 @@ struct code_position
 {
     size_t line;
     size_t column;
+
+    bool operator==(const code_position &other) const;
 };
 
 constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
@@ -79,6 +81,14 @@ public:
      * Whether any error exists
      */
     [[nodiscard]] bool has_errors() const;
+
+
+    // For LSP mostly
+    [[nodiscard]] const std::vector<blasphemy_info> &get_all_blasphemies() const;
+    [[nodiscard]] const std::vector<blasphemy_info> &get_all_warnings() const;
+
+    void clear();
+
 
     /**
      * Prints all errors

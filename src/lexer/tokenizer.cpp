@@ -2,13 +2,14 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
-#include "token/token.h"
-#include "util.h"
-#include "regex.h"
 #include "lexer/trie/keywords.h"
 #include "lexer/trie/trie.h"
+#include "regex.h"
+#include "token/token.h"
+#include "util.h"
 #include <optional>
 #include <unicode/uchar.h>
+#include <utf8.h>
 
 namespace trie = codesh::lexer::trie;
 
@@ -74,6 +75,14 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
 
 
     return true;
+}
+
+std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::string &code)
+{
+    // Convert the string to UTF-8.
+    // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
+    const std::u16string utf16_code = utf8::utf8to16(code);
+    return tokenize_code(utf16_code);
 }
 
 std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 namespace codesh
@@ -8,8 +9,10 @@ namespace codesh
 
 struct command_args
 {
-    std::filesystem::path src_path;
-    std::filesystem::path dest_path;
+    std::optional<std::filesystem::path> src_path;
+    std::optional<std::filesystem::path> dest_path;
+
+    bool lsp_mode;
 
     std::vector<std::filesystem::path> classpaths;
 

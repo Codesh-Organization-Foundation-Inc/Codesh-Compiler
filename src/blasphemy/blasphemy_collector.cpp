@@ -58,6 +58,23 @@ bool codesh::blasphemy::blasphemy_collector::has_errors() const
     return !blasphemies.empty();
 }
 
+const std::vector<codesh::blasphemy::blasphemy_info> &codesh::blasphemy::blasphemy_collector::get_all_blasphemies()
+    const
+{
+    return blasphemies;
+}
+
+const std::vector<codesh::blasphemy::blasphemy_info> &codesh::blasphemy::blasphemy_collector::get_all_warnings() const
+{
+    return warnings;
+}
+
+void codesh::blasphemy::blasphemy_collector::clear()
+{
+    blasphemies.clear();
+    warnings.clear();
+}
+
 void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_info &blasphemy,
         const std::string &color) const
 {
@@ -99,6 +116,11 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 
     for (const auto &warning : warnings)
         print_blasphemy(warning, PRETTY_PRINT_YELLOW);
+}
+
+bool codesh::blasphemy::code_position::operator==(const code_position &other) const
+{
+    return line == other.line && column == other.column;
 }
 
 std::string codesh::blasphemy::blasphemy_collector::type_to_string(const blasphemy_type type)

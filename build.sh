@@ -26,6 +26,6 @@ ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
 # Build Talmud Codesh
 mkdir -p $TALMUD_CODESH_PATH
-$CODESH_EXECUTABLE ./resources/lib-src/ $TALMUD_CODESH_PATH --sinful
+$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $TALMUD_CODESH_PATH --sinful
 
 echo "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"

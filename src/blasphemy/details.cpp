@@ -8,6 +8,10 @@ static rfs_t rfs(const std::string_view str)
 
 
 // INIT
+const std::string codesh::blasphemy::details::SRC_NOT_PROVIDED =
+    "סֵפֶר לֹא הֱיֵה: לֹא סֻפַּק סֵפֶר הַמּוֹצָא";
+const std::string codesh::blasphemy::details::DEST_NOT_PROVIDED =
+    "סֵפֶר לֹא הֱיֵה: לֹא סֻפַּק סֵפֶר הַיַּעַד";
 const rfs_t codesh::blasphemy::details::SOURCE_FILE_OPEN_ERROR = rfs(
     "סֵפֶר אָטוּם הֱיֵה: לֹא נִתַּן לִפְתֹּחַ אֶת סֵפֶר הַמּוֹצָא {}"
 );
