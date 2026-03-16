@@ -14,10 +14,14 @@ static const std::string DUMMY_FILE = "/home/stavlpc/CLionProjects/Codesh-Compil
 static const std::string CONTENT_LENGTH_KEY = "Content-Length: ";
 static const std::string CONTENT_TYPE_KEY = "Content-Type: ";
 
-static codesh::lsp::request process_lsp_request(const nlohmann::json &body);
+static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann::json &request);
+static nlohmann::json build_response(const nlohmann::json &request);
+static void send_response(const nlohmann::json &response);
+static void write_to_dummy(const std::string &contents);
 
+codesh::lsp::request::~request() = default;
 
-codesh::lsp::request codesh::lsp::wait_lsp_request()
+std::unique_ptr<codesh::lsp::request> codesh::lsp::wait_for_request()
 {
     int content_length = -1;
     std::string body;
@@ -67,13 +71,49 @@ codesh::lsp::request codesh::lsp::wait_lsp_request()
     body.resize(content_length);
     std::cin.read(body.data(), content_length);
 
-    std::ofstream temp(DUMMY_FILE, std::ios::app);
-    temp << body << "\n";
+    write_to_dummy(body);
 
     return process_lsp_request(nlohmann::json::parse(body));
 }
 
-static codesh::lsp::request process_lsp_request(const nlohmann::json &body)
+static std::unique_ptr<codesh::lsp::request> process_lsp_request(const nlohmann::json &request)
 {
-    return {};
+    const auto method = request.at("method").get<std::string>();
+    write_to_dummy(method);
+
+    if (method == "initialize")
+    {
+        auto response = build_response(request);
+
+        response["result"] = {
+            {"capabilities", {}}
+        };
+
+        send_response(response);
+    }
+
+    return nullptr;
+}
+
+static nlohmann::json build_response(const nlohmann::json &request)
+{
+    return {
+        {"id", request.at("id").get<int>()},
+        {"jsonrpc", request.at("jsonrpc").get<std::string>()}
+    };
+}
+
+static void send_response(const nlohmann::json &response)
+{
+    const std::string payload = response.dump();
+    std::cout << CONTENT_LENGTH_KEY << payload.size() << "\r\n\r\n" << payload;
+    std::cout.flush();
+
+    write_to_dummy(payload);
+}
+
+static void write_to_dummy(const std::string &contents)
+{
+    std::ofstream temp(DUMMY_FILE, std::ios::app);
+    temp << contents << "\n";
 }

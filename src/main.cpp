@@ -173,7 +173,7 @@ static void lsp_server(const codesh::command_args &)
 {
     while (true)
     {
-        codesh::lsp::wait_lsp_request();
+        codesh::lsp::wait_for_request();
     }
 }
 
