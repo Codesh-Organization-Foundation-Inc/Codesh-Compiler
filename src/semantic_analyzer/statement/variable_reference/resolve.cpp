@@ -130,7 +130,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         return context.symbol_table_.resolve(
             context,
             full_var_name,
-            var_ref_node.get_code_position()
+            var_ref_node.get_unresolved_name().get_code_position()
         );
     }
 

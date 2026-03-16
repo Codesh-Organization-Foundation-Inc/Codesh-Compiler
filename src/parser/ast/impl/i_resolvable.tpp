@@ -21,6 +21,12 @@ const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<
 }
 
 template <typename T>
+codesh::blasphemy::code_position codesh::ast::impl::i_resolvable<T>::get_name_position() const
+{
+    return get_unresolved_name().get_code_position();
+}
+
+template <typename T>
 const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<T>::get_name(
     const bool resolved) const
 {

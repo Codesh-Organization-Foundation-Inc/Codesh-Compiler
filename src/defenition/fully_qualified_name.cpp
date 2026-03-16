@@ -84,6 +84,11 @@ void codesh::definition::fully_qualified_name::set_code_position(const blasphemy
     code_position = pos;
 }
 
+codesh::blasphemy::code_position codesh::definition::fully_qualified_name::get_code_position() const
+{
+    return code_position;
+}
+
 void codesh::definition::fully_qualified_name::set_is_wildcard(const bool wildcard)
 {
     _is_wildcard = wildcard;

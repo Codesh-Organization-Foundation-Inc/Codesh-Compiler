@@ -446,7 +446,7 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
     const auto resolved = context.symbol_table_.resolve(
         context,
         name,
-        method_call.get_code_position(),
+        method_call.get_name_position(),
         // Ignore the last part of the name, which points to the method overloads.
         // get_called_method_as_symbol already handles it.
         name.get_parts().end() - 1

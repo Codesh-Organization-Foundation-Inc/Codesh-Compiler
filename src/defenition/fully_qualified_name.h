@@ -50,6 +50,7 @@ public:
     [[nodiscard]] const std::vector<std::string> &get_parts() const;
 
     void set_code_position(blasphemy::code_position pos);
+    [[nodiscard]] blasphemy::code_position get_code_position() const;
 
     void set_is_wildcard(bool wildcard);
     [[nodiscard]] bool is_wildcard() const;

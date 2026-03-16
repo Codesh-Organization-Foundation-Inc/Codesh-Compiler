@@ -28,6 +28,8 @@ public:
      */
     [[nodiscard]] const definition::fully_qualified_name &get_resolved_name() const;
 
+    [[nodiscard]] blasphemy::code_position get_name_position() const;
+
     /**
      * @param resolved When true, behaves like @link get_resolved_name \endlink.
      * When false, behaves like @link get_unresolved_name \endlink

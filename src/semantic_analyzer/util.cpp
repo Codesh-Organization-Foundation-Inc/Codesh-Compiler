@@ -23,7 +23,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     const auto result_raw = context.symbol_table_.resolve(
         context,
         full_name,
-        custom_type_node.get_code_position()
+        custom_type_node.get_name_position()
     );
 
     if (!result_raw.has_value())
