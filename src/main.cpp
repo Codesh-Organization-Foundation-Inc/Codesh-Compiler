@@ -190,8 +190,10 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
     // Now that all the errors were collected, send them:
     codesh::lsp::send_diagnostics_response(request);
+    
     // Clear for the next round
     codesh::blasphemy::get_blasphemy_collector().clear();
+    codesh::lexer::get_global_source_info_map().clear();
 }
 
 constexpr std::string_view FILE_URI_PREFIX = "file://";
