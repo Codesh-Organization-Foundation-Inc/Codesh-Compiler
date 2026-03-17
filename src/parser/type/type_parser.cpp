@@ -16,8 +16,8 @@ namespace ast = codesh::ast;
 
 static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_init_var_assignment_node(
         const ast::type_decl::variable_declaration_ast_node &dest,
-        codesh::blasphemy::code_position pos,
-        codesh::blasphemy::code_position name_pos,
+        codesh::lexer::code_position pos,
+        codesh::lexer::code_position name_pos,
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         codesh::parser::var_decl_assignment_policy policy);
 
@@ -47,7 +47,7 @@ std::unique_ptr<ast::type_decl::type_declaration_ast_node> codesh::parser::parse
 
 std::unique_ptr<ast::op::assignment::assign_operator_ast_node> codesh::parser::parse_variable_declaration(
         ast::type_decl::variable_declaration_ast_node &dest,
-        const blasphemy::code_position pos,
+        const lexer::code_position pos,
         std::queue<std::unique_ptr<token>> &tokens,
         const var_decl_assignment_policy policy)
 {
@@ -79,8 +79,8 @@ std::unique_ptr<ast::op::assignment::assign_operator_ast_node> codesh::parser::p
 
 static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_init_var_assignment_node(
         const ast::type_decl::variable_declaration_ast_node &dest,
-        const codesh::blasphemy::code_position pos,
-        const codesh::blasphemy::code_position name_pos,
+        const codesh::lexer::code_position pos,
+        const codesh::lexer::code_position name_pos,
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         const codesh::parser::var_decl_assignment_policy policy)
 {
@@ -131,7 +131,7 @@ static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_ini
 
 
 std::unique_ptr<ast::type_decl::attributes_ast_node> codesh::parser::parse_modifiers(
-        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
+        lexer::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
 {
     auto node = std::make_unique<ast::type_decl::attributes_ast_node>(
         code_position

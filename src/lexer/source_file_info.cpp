@@ -1,8 +1,8 @@
-#include "source_keyword_info.h"
+#include "source_file_info.h"
 
 #include <boost/functional/hash.hpp>
 
-size_t codesh::lexer::code_position_hasher::operator()(const blasphemy::code_position &pos) const noexcept
+size_t codesh::lexer::code_position_hasher::operator()(const code_position &pos) const noexcept
 {
     size_t seed = 0;
     boost::hash_combine(seed, pos.line);

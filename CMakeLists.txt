@@ -15,8 +15,8 @@ add_executable(codeshc
         src/parser/parser.cpp
         src/lexer/tokenizer.h
         src/lexer/tokenizer.cpp
-        src/lexer/source_keyword_info.cpp
-        src/lexer/source_keyword_info.h
+        src/lexer/source_file_info.cpp
+        src/lexer/source_file_info.h
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp

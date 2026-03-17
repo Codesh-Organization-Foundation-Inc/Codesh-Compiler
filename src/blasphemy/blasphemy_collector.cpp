@@ -26,7 +26,7 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
-        code_position code_pos, const bool is_fatal)
+        lexer::code_position code_pos, const bool is_fatal)
 {
     blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
 
@@ -38,7 +38,7 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
 }
 
 void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
-        code_position code_pos)
+        lexer::code_position code_pos)
 {
     warnings.emplace_back(std::move(details), type, code_pos, false);
 }
@@ -118,7 +118,7 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
         print_blasphemy(warning, PRETTY_PRINT_YELLOW);
 }
 
-bool codesh::blasphemy::code_position::operator==(const code_position &other) const
+bool codesh::lexer::code_position::operator==(const code_position &other) const
 {
     return line == other.line && column == other.column;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fmt/xchar.h"
+#include "lexer/source_file_info.h"
 
 #include <filesystem>
 #include <optional>
@@ -23,22 +24,14 @@ enum class blasphemy_type
     UNKNOWN
 };
 
-struct code_position
-{
-    size_t line;
-    size_t column;
-
-    bool operator==(const code_position &other) const;
-};
-
-constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
+constexpr lexer::code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
 
 struct blasphemy_info
 {
     std::string details;
     blasphemy_type type;
 
-    std::optional<code_position> code_pos;
+    std::optional<lexer::code_position> code_pos;
 
     bool is_fatal;
 };
@@ -66,9 +59,9 @@ public:
      * @param code_pos The location in the source code where the error was initiated from
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
-    void add_blasphemy(std::string details, blasphemy_type type, code_position code_pos, bool is_fatal = false);
+    void add_blasphemy(std::string details, blasphemy_type type, lexer::code_position code_pos, bool is_fatal = false);
 
-    void add_warning(std::string details, blasphemy_type type, code_position code_pos);
+    void add_warning(std::string details, blasphemy_type type, lexer::code_position code_pos);
 
     void set_source_directory(std::filesystem::path source_directory_path);
 

@@ -13,7 +13,7 @@ class import_declaration_ast_node final : public impl::ast_node
     bool is_static;
 
 public:
-    explicit import_declaration_ast_node(blasphemy::code_position code_position);
+    explicit import_declaration_ast_node(lexer::code_position code_position);
 
     [[nodiscard]] definition::fully_qualified_name &get_package_name();
     [[nodiscard]] bool get_is_on_demand() const;

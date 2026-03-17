@@ -1,7 +1,7 @@
 #include "import_declaration_ast_node.h"
 
 
-codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const blasphemy::code_position code_position) :
+codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const lexer::code_position code_position) :
     ast_node(code_position), package_name(code_position), is_on_demand(false), is_static(false)
 {}
 

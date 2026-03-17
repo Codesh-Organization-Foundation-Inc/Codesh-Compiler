@@ -2,7 +2,7 @@
 
 #include "semantic_analyzer/builtins.h"
 
-codesh::ast::collection::range_ast_node::range_ast_node(blasphemy::code_position code_position,
+codesh::ast::collection::range_ast_node::range_ast_node(lexer::code_position code_position,
         std::unique_ptr<value_ast_node> from, std::unique_ptr<value_ast_node> to,
         std::unique_ptr<value_ast_node> skip) :
     collection_ast_node(code_position),

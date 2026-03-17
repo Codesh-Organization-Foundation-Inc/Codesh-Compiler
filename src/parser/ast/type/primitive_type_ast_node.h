@@ -20,7 +20,7 @@ protected:
     [[nodiscard]] output::ir::instruction_type _to_instruction_type() const override;
 
 public:
-    primitive_type_ast_node(blasphemy::code_position code_position, definition::primitive_type type);
+    primitive_type_ast_node(lexer::code_position code_position, definition::primitive_type type);
 
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;

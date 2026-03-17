@@ -2,7 +2,7 @@
 
 #include "lexer/trie/keywords.h"
 
-codesh::ast::op::minus_operator_ast_node::minus_operator_ast_node(const blasphemy::code_position code_position,
+codesh::ast::op::minus_operator_ast_node::minus_operator_ast_node(const lexer::code_position code_position,
         std::unique_ptr<value_ast_node> child):
     unary_ast_node(code_position, std::move(child))
 {

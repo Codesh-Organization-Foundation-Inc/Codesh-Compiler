@@ -21,7 +21,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
-        const blasphemy::code_position code_position) :
+        const lexer::code_position code_position) :
     value_ast_node(code_position),
     name(code_position)
 {

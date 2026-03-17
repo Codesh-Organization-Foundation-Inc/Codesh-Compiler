@@ -4,7 +4,7 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 
 codesh::ast::op::assignment::increment_decrement_operator_ast_node::increment_decrement_operator_ast_node(
-        const blasphemy::code_position code_position,
+        const lexer::code_position code_position,
         std::unique_ptr<variable_reference_ast_node> variable) :
     assignment_operator_ast_node(
         code_position,

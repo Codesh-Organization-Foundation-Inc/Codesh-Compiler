@@ -9,7 +9,7 @@ namespace codesh::ast::op
 class addition_operator_ast_node final : public impl::binary_ast_node, public i_math_operator_holder
 {
 public:
-    addition_operator_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+    addition_operator_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> left,
             std::unique_ptr<value_ast_node> right);
 
     [[nodiscard]] std::string to_pretty_string() const override;

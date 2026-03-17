@@ -6,7 +6,7 @@
 #include "parser/ast/type/primitive_type_ast_node.h"
 
 codesh::ast::method::operation::return_ast_node::return_ast_node(
-        const blasphemy::code_position code_position,
+        const lexer::code_position code_position,
         std::unique_ptr<var_reference::value_ast_node> return_value) :
     method_operation_ast_node(code_position),
     return_value(std::move(return_value))

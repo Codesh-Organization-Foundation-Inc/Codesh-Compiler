@@ -1,7 +1,7 @@
 #include "cast_ast_node.h"
 
 codesh::ast::op::assignment::cast_ast_node::cast_ast_node(
-        blasphemy::code_position code_position,
+        lexer::code_position code_position,
         std::unique_ptr<value_ast_node> left,
         std::unique_ptr<type::type_ast_node> right) :
     value_ast_node(code_position),

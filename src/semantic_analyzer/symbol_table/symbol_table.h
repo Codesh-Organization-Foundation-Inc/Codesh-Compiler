@@ -80,7 +80,7 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(
             const semantic_context &context, const definition::fully_qualified_name &full_name,
-            blasphemy::code_position code_pos,
+            lexer::code_position code_pos,
             //FIXME: They're flipped
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt) const;

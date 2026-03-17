@@ -13,12 +13,12 @@
 #include "parser/util.h"
 #include "parser/value/value_parser.h"
 
-static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
+static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
-        codesh::blasphemy::code_position fallback_position);
+        codesh::lexer::code_position fallback_position);
 
 static std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -201,7 +201,7 @@ std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
 
 static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
-        codesh::blasphemy::code_position fallback_position)
+        codesh::lexer::code_position fallback_position)
 {
     auto condition = codesh::parser::value::parse_value(tokens);
 
@@ -289,7 +289,7 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 }
 
 
-static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
+static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     std::unique_ptr<codesh::token> token;

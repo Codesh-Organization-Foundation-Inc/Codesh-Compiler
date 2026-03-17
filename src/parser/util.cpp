@@ -17,7 +17,7 @@ static auto UNEXPECTED_EOF_ASSERTION = "Unexpected EOF blasphemy that wasn't mea
 
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
-        codesh::blasphemy::code_position code_position);
+        codesh::lexer::code_position code_position);
 
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
@@ -72,7 +72,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
 }
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
-        codesh::blasphemy::code_position code_position)
+        codesh::lexer::code_position code_position)
 {
     return std::make_unique<codesh::identifier_token>(
         code_position,

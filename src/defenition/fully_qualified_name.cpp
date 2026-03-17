@@ -6,20 +6,20 @@
 
 #include <sstream>
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position) :
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position) :
     _is_wildcard(false),
     code_position(code_position)
 {
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position,
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position,
         std::string part) :
     fully_qualified_name(code_position)
 {
     add(std::move(part));
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::code_position code_position,
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position,
         const std::vector<std::string>::const_iterator name_start,
         const std::vector<std::string>::const_iterator name_end) :
     parts(name_start, name_end),
@@ -29,7 +29,7 @@ codesh::definition::fully_qualified_name::fully_qualified_name(const blasphemy::
 }
 
 codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::parse(
-        const std::string &fqn_str, const blasphemy::code_position code_position)
+        const std::string &fqn_str, const lexer::code_position code_position)
 {
     fully_qualified_name result(code_position);
     std::istringstream fqn_stream(fqn_str);
@@ -79,12 +79,12 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_code_position(const blasphemy::code_position pos)
+void codesh::definition::fully_qualified_name::set_code_position(const lexer::code_position pos)
 {
     code_position = pos;
 }
 
-codesh::blasphemy::code_position codesh::definition::fully_qualified_name::get_code_position() const
+codesh::lexer::code_position codesh::definition::fully_qualified_name::get_code_position() const
 {
     return code_position;
 }

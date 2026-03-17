@@ -28,7 +28,7 @@ protected:
     [[nodiscard]] virtual output::ir::instruction_type _to_instruction_type() const = 0;
 
 public:
-    explicit type_ast_node(blasphemy::code_position code_position);
+    explicit type_ast_node(lexer::code_position code_position);
   /**
    * Generates a type node from the provided descriptor
    * @param descriptor
@@ -36,7 +36,7 @@ public:
    * @param code_position
    */
     static std::unique_ptr<type_ast_node> from_descriptor(const std::string &descriptor, size_t &pos,
-            blasphemy::code_position code_position);
+            lexer::code_position code_position);
 
     [[nodiscard]] int get_array_dimensions() const;
     void set_array_dimensions(int array_dimensions);

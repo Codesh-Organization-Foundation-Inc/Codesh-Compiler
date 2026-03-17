@@ -14,7 +14,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+        const lexer::code_position code_position, definition::fully_qualified_name name) :
     ast_node(code_position), name(std::move(name)), method_scope(code_position, *this)
 {
 }

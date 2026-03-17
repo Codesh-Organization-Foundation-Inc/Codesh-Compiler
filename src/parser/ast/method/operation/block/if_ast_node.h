@@ -50,7 +50,7 @@ class if_ast_node final : public method::operation::method_operation_ast_node, p
             const type_decl::type_declaration_ast_node &containing_type_decl) ;
 
 public:
-    if_ast_node(blasphemy::code_position code_position, conditioned_scope_container if_branch);
+    if_ast_node(lexer::code_position code_position, conditioned_scope_container if_branch);
 
 
     [[nodiscard]] const conditioned_scope_container &get_if_branch() const;

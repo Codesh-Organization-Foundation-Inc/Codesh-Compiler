@@ -24,7 +24,7 @@ namespace codesh::parser
 {
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> parse_class_declaration(
-        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens);
+        lexer::code_position code_position, std::queue<std::unique_ptr<token>> &tokens);
 
 std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> parse_parameter_list(
         std::queue<std::unique_ptr<token>> &tokens);

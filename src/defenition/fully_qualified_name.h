@@ -19,21 +19,21 @@ class fully_qualified_name
     std::vector<std::string> parts;
     bool _is_wildcard;
 
-    blasphemy::code_position code_position;
+    lexer::code_position code_position;
 
     [[nodiscard]] std::optional<std::string> parse_alias() const;
 
 public:
-    explicit fully_qualified_name(blasphemy::code_position code_position);
-    fully_qualified_name(blasphemy::code_position code_position, std::string part);
+    explicit fully_qualified_name(lexer::code_position code_position);
+    fully_qualified_name(lexer::code_position code_position, std::string part);
 
-    fully_qualified_name(blasphemy::code_position code_position,
+    fully_qualified_name(lexer::code_position code_position,
             std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
     /**
      * Parses an FQN separated by slashes
      */
-    static fully_qualified_name parse(const std::string &fqn_str, blasphemy::code_position code_position);
+    static fully_qualified_name parse(const std::string &fqn_str, lexer::code_position code_position);
 
 
     [[nodiscard]] bool operator==(const fully_qualified_name &other) const;
@@ -49,8 +49,8 @@ public:
     void add(std::string part);
     [[nodiscard]] const std::vector<std::string> &get_parts() const;
 
-    void set_code_position(blasphemy::code_position pos);
-    [[nodiscard]] blasphemy::code_position get_code_position() const;
+    void set_code_position(lexer::code_position pos);
+    [[nodiscard]] lexer::code_position get_code_position() const;
 
     void set_is_wildcard(bool wildcard);
     [[nodiscard]] bool is_wildcard() const;

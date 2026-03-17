@@ -4,7 +4,7 @@
 #include "parser/ast/type/primitive_type_ast_node.h"
 
 codesh::ast::method::constructor_declaration_ast_node::constructor_declaration_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<type::custom_type_ast_node> constructed_type) :
+        const lexer::code_position code_position, std::unique_ptr<type::custom_type_ast_node> constructed_type) :
     method_declaration_ast_node(
         code_position,
         definition::fully_qualified_name(blasphemy::NO_CODE_POS, definition::JVM_CONSTRUCTOR_NAME)

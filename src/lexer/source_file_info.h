@@ -1,11 +1,18 @@
 #pragma once
 
-#include "blasphemy/blasphemy_collector.h"
-
+#include <filesystem>
 #include <unordered_map>
+#include <vector>
 
 namespace codesh::lexer
 {
+struct code_position
+{
+    size_t line;
+    size_t column;
+
+    bool operator==(const code_position &other) const;
+};
 
 /**
  * Details relating to a keyword as it originally appeared in the original source code
@@ -18,11 +25,11 @@ struct source_keyword_info
 
 struct code_position_hasher
 {
-    size_t operator()(const blasphemy::code_position &pos) const noexcept;
+    size_t operator()(const code_position &pos) const noexcept;
 };
 
 using code_pos_to_source_keyword_info = std::unordered_map<
-    blasphemy::code_position,
+    code_position,
     source_keyword_info,
     code_position_hasher
 >;

@@ -6,7 +6,7 @@
 #include "parser/ast/method/operation/method_operation_ast_node.h"
 
 codesh::ast::type::widening_cast_ast_node::widening_cast_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<value_ast_node> inner,
+        const lexer::code_position code_position, std::unique_ptr<value_ast_node> inner,
         std::unique_ptr<primitive_type_ast_node> target_type) :
     value_ast_node(code_position),
     child(std::move(inner)),

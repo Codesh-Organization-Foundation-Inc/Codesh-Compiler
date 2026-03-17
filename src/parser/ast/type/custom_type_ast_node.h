@@ -42,8 +42,8 @@ protected:
     [[nodiscard]] output::ir::instruction_type _to_instruction_type() const override;
 
 public:
-    custom_type_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
-    custom_type_ast_node(blasphemy::code_position code_position, ast::type_decl::type_declaration_ast_node &type_decl);
+    custom_type_ast_node(lexer::code_position code_position, definition::fully_qualified_name name);
+    custom_type_ast_node(lexer::code_position code_position, ast::type_decl::type_declaration_ast_node &type_decl);
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;
 

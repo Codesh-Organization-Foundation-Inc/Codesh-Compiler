@@ -6,7 +6,7 @@
 #include "semantic_analyzer/util.h"
 #include "semantic_analyzer/util/widen_util.h"
 
-codesh::ast::impl::binary_ast_node::binary_ast_node(const blasphemy::code_position code_position,
+codesh::ast::impl::binary_ast_node::binary_ast_node(const lexer::code_position code_position,
                                                     std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right) :
     operator_ast_node(code_position)
 {

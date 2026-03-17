@@ -7,13 +7,13 @@
 #include "output/jvm_target/constant_pool.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
-variable_reference_ast_node::variable_reference_ast_node(const codesh::blasphemy::code_position code_position, codesh::definition::fully_qualified_name name) :
+variable_reference_ast_node::variable_reference_ast_node(const codesh::lexer::code_position code_position, codesh::definition::fully_qualified_name name) :
     value_ast_node(code_position), name(std::move(name))
 {
 }
 
 variable_reference_ast_node::variable_reference_ast_node(
-        const codesh::blasphemy::code_position code_position,
+        const codesh::lexer::code_position code_position,
         const codesh::ast::local_variable_declaration_ast_node &producing_declaration) :
     value_ast_node(code_position),
     name(codesh::definition::fully_qualified_name(code_position, producing_declaration.get_name())),

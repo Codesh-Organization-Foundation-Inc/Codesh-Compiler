@@ -24,7 +24,7 @@ class widening_cast_ast_node final : public var_reference::value_ast_node, publi
     std::unique_ptr<primitive_type_ast_node> target_type;
 
 public:
-    widening_cast_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> inner,
+    widening_cast_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> inner,
         std::unique_ptr<primitive_type_ast_node> target_type);
 
     [[nodiscard]] type_ast_node *get_type() const override;

@@ -1,6 +1,6 @@
 #include "compilation_unit_ast_node.h"
 
-#include "lexer/source_keyword_info.h"
+#include "lexer/source_file_info.h"
 
 #include <utility>
 
