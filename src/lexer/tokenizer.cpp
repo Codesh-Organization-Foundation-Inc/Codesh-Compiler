@@ -105,6 +105,10 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     source_info->path = std::move(path);
     result.file_id = file_id;
 
+    // main.cpp only provided the blasphemy collector with the file path.
+    // Now it can also have access to the file ID.
+    blasphemy::get_blasphemy_collector().set_source_file(file_id);
+
 
     code_position curr_keyword_pos{1, 0};
 
@@ -157,7 +161,7 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos,
 {
     const size_t keyword_length = new_code_pos - code_pos - 1;
 
-    source_info.keywords_info.emplace(
+    source_info.keyword_infos.emplace(
         curr_keyword_pos,
         codesh::lexer::source_keyword_info {
             keyword_length

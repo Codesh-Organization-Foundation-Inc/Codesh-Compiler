@@ -14,6 +14,11 @@ codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const size_t f
 {
 }
 
+size_t codesh::ast::compilation_unit_ast_node::get_file_id() const
+{
+    return file_id;
+}
+
 const std::filesystem::path &codesh::ast::compilation_unit_ast_node::get_source_path() const
 {
     return this->source_path;

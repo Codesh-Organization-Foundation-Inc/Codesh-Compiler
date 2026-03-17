@@ -29,6 +29,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
 [[nodiscard]] static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
+static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -231,13 +232,17 @@ static std::vector<std::string> generate_default_imports(const codesh::command_a
     return results;
 }
 
-static void update_source_file(const std::filesystem::path &source_file_path)
+static void update_source_file(const size_t file_id)
 {
-    codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(file_id);
 }
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    update_source_file(root_node.get_source_path());
+    update_source_file(root_node.get_file_id());
+}
+static void update_source_file(const std::filesystem::path &source_file_path)
+{
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
 }
 
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(

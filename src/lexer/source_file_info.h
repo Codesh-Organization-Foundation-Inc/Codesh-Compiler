@@ -41,12 +41,12 @@ using code_pos_to_source_keyword_info = std::unordered_map<
 struct source_file_info
 {
     std::filesystem::path path;
-    code_pos_to_source_keyword_info keywords_info;
+    code_pos_to_source_keyword_info keyword_infos;
 };
 
 
 using global_source_info_map = std::vector<source_file_info>;
 
-global_source_info_map &get_global_source_info_map();
+[[nodiscard]] global_source_info_map &get_global_source_info_map();
 
 }

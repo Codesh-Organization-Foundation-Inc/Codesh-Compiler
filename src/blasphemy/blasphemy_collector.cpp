@@ -28,7 +28,7 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
         lexer::code_position code_pos, const bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(details), type, code_pos, is_fatal);
+    blasphemies.emplace_back(std::move(details), type, file_id, code_pos, is_fatal);
 
     if (is_fatal)
     {
@@ -40,7 +40,7 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
 void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
         lexer::code_position code_pos)
 {
-    warnings.emplace_back(std::move(details), type, code_pos, false);
+    warnings.emplace_back(std::move(details), type, file_id, code_pos, false);
 }
 
 void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesystem::path source_directory_path)
@@ -48,9 +48,18 @@ void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesyste
     this->source_directory_path = std::move(source_directory_path);
 }
 
+void codesh::blasphemy::blasphemy_collector::set_source_file(const size_t file_id)
+{
+    const auto &[path, _] = lexer::get_global_source_info_map().at(file_id);
+
+    this->file_id = file_id;
+    this->relative_source_path = std::filesystem::relative(path, source_directory_path);
+}
+
 void codesh::blasphemy::blasphemy_collector::set_source_file(const std::filesystem::path &source_file_path)
 {
-    relative_source_path = std::filesystem::relative(source_file_path, source_directory_path);
+    this->file_id = std::nullopt;
+    this->relative_source_path = std::filesystem::relative(source_file_path, source_directory_path);
 }
 
 bool codesh::blasphemy::blasphemy_collector::has_errors() const

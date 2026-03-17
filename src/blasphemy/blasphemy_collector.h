@@ -29,6 +29,7 @@ struct blasphemy_info
     std::string details;
     blasphemy_type type;
 
+    std::optional<size_t> file_id;
     std::optional<lexer::code_position> code_pos;
 
     bool is_fatal;
@@ -37,6 +38,7 @@ struct blasphemy_info
 
 class blasphemy_collector
 {
+    std::optional<size_t> file_id;
     std::filesystem::path source_directory_path;
     std::filesystem::path relative_source_path;
 
@@ -64,7 +66,13 @@ public:
     void set_source_directory(std::filesystem::path source_directory_path);
 
     /**
-     * Makes all blasphemies from this point on blame the provided `source_path`
+     * Makes all blasphemies from this point on blame the provided file.
+     */
+    void set_source_file(size_t file_id);
+    /**
+     * Makes all blasphemies from this point on blame the provided file.
+     *
+     * Use only when the file is not yet tokenized
      */
     void set_source_file(const std::filesystem::path &source_file_path);
 

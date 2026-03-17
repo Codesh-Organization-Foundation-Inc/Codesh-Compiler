@@ -26,6 +26,7 @@ class compilation_unit_ast_node final : public impl::ast_node
 public:
     compilation_unit_ast_node(size_t file_id, definition::basad_type basad_type);
 
+    [[nodiscard]] size_t get_file_id() const;
     [[nodiscard]] const std::filesystem::path &get_source_path() const;
     /**
      * @returns The source file name with no extension
