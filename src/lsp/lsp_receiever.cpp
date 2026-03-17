@@ -88,11 +88,21 @@ static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy
     size_t line = 0;
     size_t column = 0;
 
-    if (info.code_pos.has_value() && info.code_pos != codesh::lexer::NO_CODE_POS)
+    const bool has_code_pos = info.code_pos.has_value() && info.code_pos != codesh::lexer::NO_CODE_POS;
+    if (has_code_pos)
     {
         // We use 1-based lines/columns; LSP uses 0-based.
         line = info.code_pos->line - 1;
         column = info.code_pos->column - 1;
+    }
+
+    size_t keyword_length = 3; // default
+    if (info.file_id.has_value() && has_code_pos)
+    {
+        keyword_length = codesh::lexer::
+            get_global_source_info_map().at(*info.file_id)
+            .keyword_infos.at(*info.code_pos)
+            .length;
     }
 
     const nlohmann::json range = {
@@ -101,9 +111,9 @@ static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy
             {"character", column}
         }},
         {"end", {
-            //TODO: Get keyword by some map, then length
+            //TODO: Support ranges
             {"line", line},
-            {"character", column + 3}
+            {"character", column + keyword_length}
         }}
     };
 
