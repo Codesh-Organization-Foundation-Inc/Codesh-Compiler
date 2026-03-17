@@ -1,6 +1,6 @@
 #include "analyzer.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "blasphemy/blasphemy_consumer.h"
 #include "builtins.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"

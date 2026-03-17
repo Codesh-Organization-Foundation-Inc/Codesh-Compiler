@@ -1,6 +1,6 @@
 #include "symbol_table.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "blasphemy/blasphemy_consumer.h"
 #include "defenition/definitions.h"
 #include "semantic_analyzer/external/class_loader.h"

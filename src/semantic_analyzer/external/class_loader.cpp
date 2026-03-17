@@ -14,7 +14,7 @@
 
 #include "parser/ast/type/custom_type_ast_node.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "defenition/fully_qualified_name.h"
 #include "output/jvm_target/defs/cp_info.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
