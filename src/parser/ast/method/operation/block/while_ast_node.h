@@ -20,7 +20,7 @@ class while_ast_node final : public method::operation::method_operation_ast_node
     method::method_scope_ast_node &body_scope;
 
 public:
-    while_ast_node(blasphemy::code_position code_position, std::unique_ptr<var_reference::value_ast_node> condition, method::method_scope_ast_node &body_scope);
+    while_ast_node(lexer::code_position code_position, std::unique_ptr<var_reference::value_ast_node> condition, method::method_scope_ast_node &body_scope);
 
     [[nodiscard]] var_reference::value_ast_node &get_condition() const;
     [[nodiscard]] method::method_scope_ast_node &get_body_scope() const;

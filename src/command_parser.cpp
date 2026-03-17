@@ -93,7 +93,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::UNKNOWN_FLAG,
                 blasphemy::blasphemy_type::INIT,
-                blasphemy::NO_CODE_POS,
+                lexer::NO_CODE_POS,
                 true
             );
         }
@@ -121,7 +121,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_ARG,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         return;
@@ -145,7 +145,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(codesh::blasphemy::details::INVALID_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS, false
+            codesh::lexer::NO_CODE_POS, false
         );
     }
 }
@@ -157,7 +157,7 @@ static std::filesystem::path parse_directory_path(std::queue<std::string> &args)
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_ARG,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         throw std::runtime_error("");
@@ -170,7 +170,7 @@ static std::filesystem::path parse_directory_path(std::queue<std::string> &args)
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(codesh::blasphemy::details::INVALID_ARG, folder_path.string()),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS, false
+            codesh::lexer::NO_CODE_POS, false
         );
     }
 

@@ -6,7 +6,7 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/util.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 
@@ -34,10 +34,10 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
 
     if (!inserted)
     {
-        new_context.blasphemy_consumer(fmt::format(
+        new_context.throw_blasphemy(fmt::format(
             "נֵאִיפַת עֶצֶם תִּהְיֶה: כִּי־מֻגְדָּר הָעֶצֶם {} מְסַפֵּר פְּעָמִים בְּאוֹתוֹ הַעַמּוּד",
             type_decl.get_unresolved_name().holy_join()
-        ), type_decl.get_code_position());
+        ), type_decl.get_name_range());
     }
 }
 

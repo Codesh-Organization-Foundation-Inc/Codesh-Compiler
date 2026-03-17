@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "semantic_analyzer/external/jimage_loader.h"
 #include "symbol.h"
 
@@ -80,7 +80,6 @@ public:
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve(
             const semantic_context &context, const definition::fully_qualified_name &full_name,
-            blasphemy::code_position code_pos,
             //FIXME: They're flipped
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt) const;

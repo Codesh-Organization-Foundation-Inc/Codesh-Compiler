@@ -1,11 +1,10 @@
-
 #include "while_ast_node.h"
 
 #include "output/ir/condition_block_builder.h"
 #include "output/ir/instruction/goto_instruction.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
-codesh::ast::block::while_ast_node::while_ast_node(const blasphemy::code_position code_position,
+codesh::ast::block::while_ast_node::while_ast_node(const lexer::code_position code_position,
         std::unique_ptr<var_reference::value_ast_node> condition,
         method::method_scope_ast_node &body_scope) :
     method_operation_ast_node(code_position),

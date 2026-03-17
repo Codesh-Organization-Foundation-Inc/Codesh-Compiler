@@ -13,12 +13,12 @@
 #include "parser/util.h"
 #include "parser/value/value_parser.h"
 
-static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
+static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
-        codesh::blasphemy::code_position fallback_position);
+        codesh::lexer::code_position fallback_position);
 
 static std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
@@ -99,7 +99,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-                    blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position());
+                    blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position());
             }
             break;
 
@@ -201,7 +201,7 @@ std::unique_ptr<codesh::ast::block::if_ast_node> parse_if_statement(
 
 static codesh::ast::block::conditioned_scope_container parse_conditioned_scope(
         std::queue<std::unique_ptr<codesh::token>> &tokens, codesh::ast::method::method_scope_ast_node &method_scope,
-        codesh::blasphemy::code_position fallback_position)
+        codesh::lexer::code_position fallback_position)
 {
     auto condition = codesh::parser::value::parse_value(tokens);
 
@@ -289,7 +289,7 @@ static std::unique_ptr<codesh::ast::block::for_ast_node> parse_for_statement(
 }
 
 
-static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin(
+static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     std::unique_ptr<codesh::token> token;
@@ -298,7 +298,7 @@ static std::optional<codesh::blasphemy::code_position> check_consume_scope_begin
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_SCOPE_BEGIN,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? codesh::lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return std::nullopt;
@@ -342,7 +342,7 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::NO_CLOSE_PARENTHESIS,
                 blasphemy::blasphemy_type::SYNTAX,
-                tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+                tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
             );
             return;
         }

@@ -12,7 +12,7 @@ class array_access_ast_node : public var_reference::value_ast_node
     std::unique_ptr<value_ast_node> index;
 
 public:
-    array_access_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> array,
+    array_access_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> array,
             std::unique_ptr<value_ast_node> index);
 
     [[nodiscard]] value_ast_node &get_array() const;

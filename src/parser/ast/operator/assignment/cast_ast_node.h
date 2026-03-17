@@ -12,7 +12,7 @@ class cast_ast_node : public var_reference::value_ast_node
     std::unique_ptr<type::type_ast_node> right;
 
 public:
-    cast_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+    cast_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> left,
         std::unique_ptr<type::type_ast_node> right);
 
     [[nodiscard]] const value_ast_node &get_left() const;

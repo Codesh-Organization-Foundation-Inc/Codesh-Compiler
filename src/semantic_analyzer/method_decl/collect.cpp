@@ -1,6 +1,6 @@
 #include "collect.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
@@ -42,10 +42,10 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
     if (!inserted)
     {
         //TODO: Print full method signature
-        new_context.blasphemy_consumer(fmt::format(
+        new_context.throw_blasphemy(fmt::format(
             blasphemy::details::DUPLICATE_METHOD_DECLARATION,
             method_name
-        ), method_decl.get_code_position());
+        ), method_decl.get_name_range());
     }
 
     collect_local_variables(method_decl.get_method_scope(), it.get().get_method_scope());

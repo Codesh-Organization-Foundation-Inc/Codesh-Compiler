@@ -1,12 +1,12 @@
 #include "array_access_ast_node.h"
 
 codesh::ast::op::array_access_ast_node::array_access_ast_node(
-        blasphemy::code_position code_position,
+        const lexer::code_position code_position,
         std::unique_ptr<value_ast_node> array,
-        std::unique_ptr<value_ast_node> index)
-    : value_ast_node(code_position),
-      array(std::move(array)),
-      index(std::move(index))
+        std::unique_ptr<value_ast_node> index) :
+    value_ast_node(code_position),
+    array(std::move(array)),
+    index(std::move(index))
 {
 }
 

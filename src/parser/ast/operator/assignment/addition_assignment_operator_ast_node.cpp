@@ -3,7 +3,7 @@
 #include "lexer/trie/keywords.h"
 
 codesh::ast::op::assignment::addition_assignment_operator_ast_node::addition_assignment_operator_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
+        const lexer::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
         std::unique_ptr<value_ast_node> right) :
     assignment_operator_ast_node(code_position, std::move(left), std::move(right))
 {

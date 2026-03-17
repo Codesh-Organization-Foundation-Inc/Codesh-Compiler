@@ -168,7 +168,7 @@ static bool consume_against(std::queue<std::unique_ptr<codesh::token>> &tokens)
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_KEYWORD_AGAINST,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? codesh::lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;

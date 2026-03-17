@@ -35,7 +35,7 @@ protected:
         const override;
 
 public:
-    explicit local_variable_declaration_ast_node(blasphemy::code_position code_position);
+    explicit local_variable_declaration_ast_node(lexer::code_position code_position);
 
     void set_resolved(semantic_analyzer::local_variable_symbol &symbol) override;
 

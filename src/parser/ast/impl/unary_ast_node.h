@@ -12,7 +12,7 @@ namespace codesh::ast::impl
 class unary_ast_node : public operator_ast_node<1>
 {
 protected:
-    unary_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> child);
+    unary_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> child);
 
 public:
     [[nodiscard]] value_ast_node &get_child() const;

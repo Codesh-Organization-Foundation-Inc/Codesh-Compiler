@@ -1,12 +1,12 @@
 #include "binary_ast_node.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type/widening_cast_ast_node.h"
 #include "semantic_analyzer/util.h"
 #include "semantic_analyzer/util/widen_util.h"
 
-codesh::ast::impl::binary_ast_node::binary_ast_node(const blasphemy::code_position code_position,
+codesh::ast::impl::binary_ast_node::binary_ast_node(const lexer::code_position code_position,
                                                     std::unique_ptr<value_ast_node> left, std::unique_ptr<value_ast_node> right) :
     operator_ast_node(code_position)
 {

@@ -61,7 +61,7 @@ protected:
         const override;
 
 public:
-    type_declaration_ast_node(blasphemy::code_position code_position, definition::fully_qualified_name name);
+    type_declaration_ast_node(lexer::code_position code_position, definition::fully_qualified_name name);
     ~type_declaration_ast_node() override;
 
     void set_resolved(semantic_analyzer::type_symbol &symbol) override;

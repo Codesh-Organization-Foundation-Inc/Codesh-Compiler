@@ -12,10 +12,10 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilation_unit(
-        std::queue<std::unique_ptr<token>> &tokens, const std::filesystem::path &source_path)
+        std::queue<std::unique_ptr<token>> &tokens, const size_t file_id)
 {
-    std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        parse_basad_type(tokens), source_path
+    auto node = std::make_unique<ast::compilation_unit_ast_node>(
+        file_id, parse_basad_type(tokens)
     );
 
     if (!tokens.empty())
@@ -43,7 +43,7 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_BASAD,
             codesh::blasphemy::blasphemy_type::LEXICAL,
-            {1, 0},
+            codesh::lexer::code_position {1, 0},
             true
         );
 

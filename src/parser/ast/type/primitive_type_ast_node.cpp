@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const blasphemy::code_position code_position,
+codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const lexer::code_position code_position,
         const definition::primitive_type type) :
     type_ast_node(code_position), type(type)
 {

@@ -8,7 +8,7 @@ namespace codesh::ast::op::assignment
 class decrement_operator_ast_node final : public increment_decrement_operator_ast_node
 {
 public:
-    decrement_operator_ast_node(blasphemy::code_position code_position,
+    decrement_operator_ast_node(lexer::code_position code_position,
             std::unique_ptr<variable_reference_ast_node> variable);
 
     [[nodiscard]] std::string to_pretty_string() const override;
