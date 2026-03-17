@@ -159,7 +159,7 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos,
         codesh::lexer::code_position &curr_keyword_pos,
         codesh::lexer::source_file_info &source_info)
 {
-    const size_t keyword_length = new_code_pos - code_pos - 1;
+    const size_t keyword_length = new_code_pos - code_pos;
 
     source_info.keyword_infos.emplace(
         curr_keyword_pos,
@@ -168,7 +168,7 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos,
         }
     );
 
-    curr_keyword_pos.column += keyword_length;
+    curr_keyword_pos.column += keyword_length - 1;
     code_pos = new_code_pos;
 }
 
