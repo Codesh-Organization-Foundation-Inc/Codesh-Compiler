@@ -1,5 +1,7 @@
 #include "parser.h"
 
+#include <iostream>
+
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "compilation_unit_parser.h"
@@ -28,9 +30,8 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
     if (root_node->get_basad_type() == definition::basad_type::IAW)
     {
-        //TODO: Return the joke program
-        // (Do not even make the compilation unit yet)
-        return root_node;
+        std::cout << "אם אתה מאמין באללה אז תאמין שהקוד עובד" << std::endl;
+        std::exit(0);
     }
 
 
