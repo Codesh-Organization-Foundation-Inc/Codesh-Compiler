@@ -99,7 +99,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             if (!util::consuming_check(tokens, token_group::PUNCTUATION_END_OP))
             {
                 blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_PUNCTUATION_END_OP,
-                    blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position());
+                    blasphemy::blasphemy_type::SYNTAX, tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position());
             }
             break;
 
@@ -298,7 +298,7 @@ static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_SCOPE_BEGIN,
             codesh::blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? codesh::blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? codesh::lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return std::nullopt;
@@ -342,7 +342,7 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::NO_CLOSE_PARENTHESIS,
                 blasphemy::blasphemy_type::SYNTAX,
-                tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+                tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
             );
             return;
         }

@@ -18,7 +18,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_BASAD,
             blasphemy::blasphemy_type::LEXICAL,
-            blasphemy::NO_CODE_POS,
+            lexer::NO_CODE_POS,
             true
         );
     }

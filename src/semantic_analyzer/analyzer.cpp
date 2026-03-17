@@ -62,7 +62,7 @@ static void add_country(
 
 
 const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
-    codesh::definition::fully_qualified_name::parse(std::string(builtins::ALIAS_OBJECT), blasphemy::NO_CODE_POS);
+    codesh::definition::fully_qualified_name::parse(std::string(builtins::ALIAS_OBJECT), lexer::NO_CODE_POS);
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
@@ -249,7 +249,7 @@ static void add_default_return_statement(const codesh::ast::compilation_unit_ast
 
             scope.add_statement(
                 //TODO: Add code position for ויתם
-                std::make_unique<codesh::ast::method::operation::return_ast_node>(codesh::blasphemy::NO_CODE_POS)
+                std::make_unique<codesh::ast::method::operation::return_ast_node>(codesh::lexer::NO_CODE_POS)
             );
         }
     }
@@ -284,7 +284,7 @@ static std::unique_ptr<codesh::ast::local_variable_declaration_ast_node> create_
     );
     this_param->set_name("this");
 
-    auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    auto attributes_node = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
     attributes_node->set_is_final(true);
     this_param->set_attributes(std::move(attributes_node));
 

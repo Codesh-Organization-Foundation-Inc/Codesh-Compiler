@@ -6,7 +6,7 @@
 
 //NOTE: Circular dependency with definition.h, so just write it directly.
 static const auto ERROR_FQN = codesh::definition::fully_qualified_name(
-    codesh::blasphemy::NO_CODE_POS,
+    codesh::lexer::NO_CODE_POS,
     "סְדוֹם וַעֲמֹרָה"
 );
 

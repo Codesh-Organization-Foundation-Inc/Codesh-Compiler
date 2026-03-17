@@ -35,7 +35,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
         context.blasphemy_consumer(fmt::format(
             blasphemy::details::NOT_AN_OBJECT,
             full_name.holy_join()
-        ), blasphemy::NO_CODE_POS);
+        ), lexer::NO_CODE_POS);
         return std::nullopt;
     }
 
@@ -145,7 +145,7 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find
             current = &current->get_scope().add_symbol(
                 part,
                 std::make_unique<country_symbol>(
-                    definition::fully_qualified_name::parse(accumulated, blasphemy::NO_CODE_POS),
+                    definition::fully_qualified_name::parse(accumulated, lexer::NO_CODE_POS),
                     current
                 )
             ).first.get();

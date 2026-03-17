@@ -194,7 +194,7 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
         blasphemy::get_blasphemy_collector().add_blasphemy(
             *no_tokens_blasphemy_details,
             blasphemy::blasphemy_type::SYNTAX,
-            blasphemy::NO_CODE_POS,
+            lexer::NO_CODE_POS,
             true
         );
     }
@@ -207,7 +207,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_PUNCTUATION_END_OP,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
     }
 }
@@ -288,7 +288,7 @@ bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_BY,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;
@@ -316,7 +316,7 @@ bool codesh::parser::util::consume_punc_equal(std::queue<std::unique_ptr<token>>
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_PUNC_EQUAL,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;

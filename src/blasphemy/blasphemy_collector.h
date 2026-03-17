@@ -24,8 +24,6 @@ enum class blasphemy_type
     UNKNOWN
 };
 
-constexpr lexer::code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
-
 struct blasphemy_info
 {
     std::string details;

@@ -20,7 +20,7 @@ void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &t
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 {
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
@@ -28,7 +28,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
         codesh::semantic_analyzer::builtins::ALIAS_STRING,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
-            codesh::definition::fully_qualified_name::parse("java/lang/String", codesh::blasphemy::NO_CODE_POS),
+            codesh::definition::fully_qualified_name::parse("java/lang/String", codesh::lexer::NO_CODE_POS),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
@@ -39,7 +39,7 @@ static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)
 
 static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
 {
-    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
     attributes->set_visibility(codesh::definition::visibility::PUBLIC);
     attributes->set_is_final(true);
 
@@ -47,7 +47,7 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
         codesh::semantic_analyzer::builtins::ALIAS_OBJECT,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
-            codesh::definition::fully_qualified_name::parse("java/lang/Object", codesh::blasphemy::NO_CODE_POS),
+            codesh::definition::fully_qualified_name::parse("java/lang/Object", codesh::lexer::NO_CODE_POS),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),

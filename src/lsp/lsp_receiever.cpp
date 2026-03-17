@@ -88,7 +88,7 @@ static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy
     size_t line = 0;
     size_t column = 0;
 
-    if (info.code_pos.has_value() && info.code_pos != codesh::blasphemy::NO_CODE_POS)
+    if (info.code_pos.has_value() && info.code_pos != codesh::lexer::NO_CODE_POS)
     {
         // We use 1-based lines/columns; LSP uses 0-based.
         line = info.code_pos->line - 1;

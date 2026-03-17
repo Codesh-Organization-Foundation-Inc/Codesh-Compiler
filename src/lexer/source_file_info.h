@@ -14,6 +14,9 @@ struct code_position
     bool operator==(const code_position &other) const;
 };
 
+constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
+
+
 /**
  * Details relating to a keyword as it originally appeared in the original source code
  */

@@ -78,7 +78,7 @@ static int compile(const codesh::command_args &args)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::SRC_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         return EXIT_FAILURE;
@@ -88,7 +88,7 @@ static int compile(const codesh::command_args &args)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::DEST_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         return EXIT_FAILURE;
@@ -417,7 +417,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
             dest_path.string()
         ),
         codesh::blasphemy::blasphemy_type::INIT,
-        codesh::blasphemy::NO_CODE_POS,
+        codesh::lexer::NO_CODE_POS,
         true
     );
 
@@ -447,7 +447,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
                 source_file_path.string()
             ),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
 
@@ -472,7 +472,7 @@ static std::string read_file(const std::string &file_name)
                 file_name
             ),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
     }

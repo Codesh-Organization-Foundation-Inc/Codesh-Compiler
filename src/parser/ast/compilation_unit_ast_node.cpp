@@ -6,11 +6,11 @@
 
 codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const size_t file_id,
         const definition::basad_type basad_type) :
-    ast_node(blasphemy::NO_CODE_POS),
+    ast_node(lexer::NO_CODE_POS),
     file_id(file_id),
     source_path(lexer::get_global_source_info_map().at(file_id).path),
     basad_type(basad_type),
-    package_name(blasphemy::NO_CODE_POS)
+    package_name(lexer::NO_CODE_POS)
 {
 }
 
