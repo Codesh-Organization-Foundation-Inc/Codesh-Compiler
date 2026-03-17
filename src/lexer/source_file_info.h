@@ -1,8 +1,8 @@
 #pragma once
 
+#include <deque>
 #include <filesystem>
 #include <unordered_map>
-#include <vector>
 
 namespace codesh::lexer
 {
@@ -45,7 +45,7 @@ struct source_file_info
 };
 
 
-using global_source_info_map = std::vector<source_file_info>;
+using global_source_info_map = std::deque<source_file_info>;
 
 [[nodiscard]] global_source_info_map &get_global_source_info_map();
 
