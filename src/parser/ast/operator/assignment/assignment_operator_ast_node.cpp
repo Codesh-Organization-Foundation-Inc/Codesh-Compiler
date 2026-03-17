@@ -10,7 +10,7 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 codesh::ast::op::assignment::assignment_operator_ast_node::assignment_operator_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
+        const lexer::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
         std::unique_ptr<value_ast_node> right) :
     binary_ast_node(code_position, std::move(left), std::move(right))
 {

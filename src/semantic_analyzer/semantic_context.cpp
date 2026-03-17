@@ -13,6 +13,19 @@ codesh::semantic_analyzer::semantic_context::semantic_context(const symbol_table
 {
 }
 
+void codesh::semantic_analyzer::semantic_context::throw_blasphemy(std::string details,
+                                                                  const lexer::code_range &source_range)
+    const
+{
+    blasphemy_consumer(std::move(details), source_range);
+}
+
+void codesh::semantic_analyzer::semantic_context::throw_blasphemy(std::string details,
+                                                                  const lexer::code_position code_pos) const
+{
+    blasphemy_consumer(std::move(details), {code_pos, code_pos});
+}
+
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::semantic_context::with_consumer(
     blasphemy::blasphemy_consumer blasphemy_consumer) const
 {

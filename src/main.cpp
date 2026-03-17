@@ -29,6 +29,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
 [[nodiscard]] static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
+static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -78,7 +79,7 @@ static int compile(const codesh::command_args &args)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::SRC_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         return EXIT_FAILURE;
@@ -88,7 +89,7 @@ static int compile(const codesh::command_args &args)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::DEST_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
         return EXIT_FAILURE;
@@ -177,11 +178,11 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
         const codesh::lsp::diagnostics_request &request)
 {
     const auto source_path = uri_to_path(request.file_uri);
-    auto tokens = codesh::lexer::tokenize_code(request.file_contents);
+    auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents);
 
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> asts;
     asts.reserve(1);
-    asts.emplace_back(codesh::parser::parse(tokens, source_path));
+    asts.emplace_back(codesh::parser::parse(tokens, file_id));
 
     //TODO: Could be optimized if we cache the master AST and always remove the source and re-add it or something
     analyze_asts(args, asts);
@@ -189,8 +190,10 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
     // Now that all the errors were collected, send them:
     codesh::lsp::send_diagnostics_response(request);
+    
     // Clear for the next round
     codesh::blasphemy::get_blasphemy_collector().clear();
+    codesh::lexer::get_global_source_info_map().clear();
 }
 
 constexpr std::string_view FILE_URI_PREFIX = "file://";
@@ -231,13 +234,17 @@ static std::vector<std::string> generate_default_imports(const codesh::command_a
     return results;
 }
 
-static void update_source_file(const std::filesystem::path &source_file_path)
+static void update_source_file(const size_t file_id)
 {
-    codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(file_id);
 }
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node)
 {
-    update_source_file(root_node.get_source_path());
+    update_source_file(root_node.get_file_id());
+}
+static void update_source_file(const std::filesystem::path &source_file_path)
+{
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(source_file_path);
 }
 
 static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
@@ -249,23 +256,23 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
     const auto process_amount = source_files.size();
     size_t processed = 1;
 
-    for (const auto &source_file_path : source_files)
+    for (const auto &source_path : source_files)
     {
         printfln(
             args,
             "{} מִן־{}: מְפָרֵשׁ אֶת {}",
             processed,
             process_amount,
-            source_file_path.string()
+            source_path.string()
         );
-        update_source_file(source_file_path);
+        update_source_file(source_path);
 
         // LEXING
-        const std::string code = read_file(source_file_path);
-        auto tokens = codesh::lexer::tokenize_code(code);
+        const std::string code = read_file(source_path);
+        auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
 
         // PARSING
-        auto ast = codesh::parser::parse(tokens, source_file_path);
+        auto ast = codesh::parser::parse(tokens, file_id);
 
         results.push_back(std::move(ast));
         processed++;
@@ -417,7 +424,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
             dest_path.string()
         ),
         codesh::blasphemy::blasphemy_type::INIT,
-        codesh::blasphemy::NO_CODE_POS,
+        codesh::lexer::NO_CODE_POS,
         true
     );
 
@@ -447,7 +454,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
                 source_file_path.string()
             ),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
 
@@ -472,7 +479,7 @@ static std::string read_file(const std::string &file_name)
                 file_name
             ),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             true
         );
     }

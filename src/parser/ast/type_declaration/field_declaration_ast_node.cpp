@@ -1,6 +1,6 @@
 #include "field_declaration_ast_node.h"
 
-codesh::ast::type_decl::field_declaration_ast_node::field_declaration_ast_node(const blasphemy::code_position pos) :
+codesh::ast::type_decl::field_declaration_ast_node::field_declaration_ast_node(const lexer::code_position pos) :
         variable_declaration_ast_node(pos)
 {
 }

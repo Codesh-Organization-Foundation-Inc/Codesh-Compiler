@@ -21,7 +21,7 @@ class attributes_ast_node final : public impl::ast_node
     bool is_abstract;
 
 public:
-    explicit attributes_ast_node(blasphemy::code_position code_position);
+    explicit attributes_ast_node(lexer::code_position code_position);
 
     [[nodiscard]] std::unique_ptr<attributes_ast_node> clone() const;
 

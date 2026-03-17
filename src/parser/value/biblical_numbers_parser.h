@@ -4,6 +4,7 @@
 #include "token/token.h"
 
 #include <memory>
+#include <optional>
 #include <queue>
 #include <unordered_set>
 

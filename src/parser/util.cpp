@@ -17,7 +17,7 @@ static auto UNEXPECTED_EOF_ASSERTION = "Unexpected EOF blasphemy that wasn't mea
 
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
-        codesh::blasphemy::code_position code_position);
+        codesh::lexer::code_position code_position);
 
 
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
@@ -72,7 +72,7 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_alnum_id
 }
 
 static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
-        codesh::blasphemy::code_position code_position)
+        codesh::lexer::code_position code_position)
 {
     return std::make_unique<codesh::identifier_token>(
         code_position,
@@ -120,7 +120,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
     case token_group::IDENTIFIER:
     {
-        definition::fully_qualified_name name;
+        definition::fully_qualified_name name(type_pos);
         parse_fqn(tokens, name);
 
         result = std::make_unique<ast::type::custom_type_ast_node>(type_pos, name);
@@ -138,7 +138,7 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 
         return std::make_unique<ast::type::custom_type_ast_node>(
             type_pos,
-            definition::fully_qualified_name(definition::ERROR_IDENTIFIER_CONTENT)
+            definition::fully_qualified_name(type_pos, definition::ERROR_IDENTIFIER_CONTENT)
         );
     }
 
@@ -194,7 +194,7 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
         blasphemy::get_blasphemy_collector().add_blasphemy(
             *no_tokens_blasphemy_details,
             blasphemy::blasphemy_type::SYNTAX,
-            blasphemy::NO_CODE_POS,
+            lexer::NO_CODE_POS,
             true
         );
     }
@@ -207,7 +207,7 @@ void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tok
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_PUNCTUATION_END_OP,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
     }
 }
@@ -236,6 +236,11 @@ void codesh::parser::util::parse_fqn(std::queue<std::unique_ptr<token>> &tokens,
         }
         else
         {
+            if (fqn_out.get_parts().empty())
+            {
+                fqn_out.set_start(id->get_code_position());
+            }
+            fqn_out.set_end_position(id->get_code_position());
             fqn_out.add(static_cast<identifier_token *>(id.get())->get_content()); // NOLINT(*-pro-type-static-cast-downcast)
         }
 
@@ -284,7 +289,7 @@ bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_BY,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;
@@ -296,8 +301,10 @@ bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens
 void codesh::parser::util::parse_this_and_fqn(std::queue<std::unique_ptr<token>> &tokens,
         definition::fully_qualified_name &fqn_out)
 {
-    if (consuming_check(tokens, token_group::KEYWORD_THIS))
+    std::unique_ptr<token> this_token;
+    if (consuming_check(tokens, token_group::KEYWORD_THIS, this_token))
     {
+        fqn_out.set_start(this_token->get_code_position());
         consuming_check(tokens, token_group::PUNCTUATION_DOT);
         fqn_out.add("this");
     }
@@ -310,7 +317,7 @@ bool codesh::parser::util::consume_punc_equal(std::queue<std::unique_ptr<token>>
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_PUNC_EQUAL,
             blasphemy::blasphemy_type::SYNTAX,
-            tokens.empty() ? blasphemy::NO_CODE_POS : tokens.front()->get_code_position()
+            tokens.empty() ? lexer::NO_CODE_POS : tokens.front()->get_code_position()
         );
 
         return false;

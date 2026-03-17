@@ -17,7 +17,7 @@ class return_ast_node final : public method_operation_ast_node, public impl::i_c
 public:
     using method_operation_ast_node::method_operation_ast_node;
 
-    return_ast_node(blasphemy::code_position code_position,
+    return_ast_node(lexer::code_position code_position,
             std::unique_ptr<var_reference::value_ast_node> return_value);
 
     [[nodiscard]] var_reference::value_ast_node *get_return_value() const;

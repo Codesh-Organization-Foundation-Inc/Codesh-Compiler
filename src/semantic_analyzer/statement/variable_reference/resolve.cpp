@@ -52,9 +52,12 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
             const auto &local_var_node = local_var->get_producing_node();
 
             // TODO: Proper message
-            context.blasphemy_consumer(fmt::format(
-                blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION, local_var_node->get_name()),
-                var_ref_node.get_code_position()
+            context.throw_blasphemy(
+                fmt::format(
+                    blasphemy::details::VARIABLE_REFERENCED_BEFORE_CREATION,
+                    local_var_node->get_name()
+                ),
+                var_ref_node.get_unresolved_name().get_source_range()
             );
         }
     }
@@ -103,10 +106,10 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     const auto var_symbol = dynamic_cast<codesh::semantic_analyzer::variable_symbol *>(&result.value().get());
     if (var_symbol == nullptr)
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::NOT_A_VARIABLE,
             var_ref_node.get_unresolved_name().holy_join()
-        ), var_ref_node.get_code_position());
+        ), var_ref_node.get_unresolved_name().get_source_range());
 
         return false;
     }
@@ -129,8 +132,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 
         return context.symbol_table_.resolve(
             context,
-            full_var_name,
-            var_ref_node.get_code_position()
+            full_var_name
         );
     }
 
@@ -143,10 +145,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     const auto result = scope.resolve_up(var_name);
     if (!result.has_value())
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::SYMBOL_NOT_FOUND,
             var_name
-        ), var_ref_node.get_code_position());
+        ), var_ref_node.get_unresolved_name().get_source_range());
 
         return std::nullopt;
     }
@@ -168,10 +170,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 
     if (!result.has_value())
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::SYMBOL_NOT_FOUND,
             field_name
-        ), var_ref_node.get_code_position());
+        ), var_ref_node.get_unresolved_name().get_source_range());
     }
 
     return result;

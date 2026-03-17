@@ -3,7 +3,7 @@
 #include "lexer/trie/keywords.h"
 
 codesh::ast::op::greater_equals_operator_ast_node::greater_equals_operator_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+        const lexer::code_position code_position, std::unique_ptr<value_ast_node> left,
         std::unique_ptr<value_ast_node> right) :
     boolean_binary_ast_node(code_position, std::move(left), std::move(right))
 {

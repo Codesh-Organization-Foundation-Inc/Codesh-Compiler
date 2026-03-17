@@ -5,6 +5,7 @@
 #include "lexer/trie/keywords.h"
 #include "lexer/trie/trie.h"
 #include "regex.h"
+#include "source_file_info.h"
 #include "token/token.h"
 #include "util.h"
 #include <optional>
@@ -14,18 +15,28 @@
 namespace trie = codesh::lexer::trie;
 
 /**
+ * Pushes a new file entry to @c get_global_source_info_map
+ *
+ * @returns The new file's associated ID to access @c get_global_source_info_map, and a pointer to the entry itself.
+ */
+static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry();
+
+static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::lexer::code_position &curr_keyword_pos,
+        codesh::lexer::source_file_info &source_info);
+
+/**
  * @returns How many characters should be consumed by this match
  */
-static size_t handle_keyword_match(const std::u16string &code, codesh::blasphemy::code_position current_code_position,
+static size_t handle_keyword_match(const std::u16string &code, codesh::lexer::code_position current_code_position,
                                    codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t keyword_end);
 
 static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
-                                                    codesh::blasphemy::code_position current_code_position,
+                                                    codesh::lexer::code_position current_code_position,
                                                     std::queue<std::unique_ptr<codesh::token>> &tokens, size_t code_pos);
 
 static std::optional<size_t> try_match_regex_token(const std::u16string &code,
-                                                   codesh::blasphemy::code_position current_code_position,
+                                                   codesh::lexer::code_position current_code_position,
                                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t code_pos);
 
 static void on_regex_token(codesh::token *token);
@@ -77,31 +88,41 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
     return true;
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::string &code)
 {
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
     const std::u16string utf16_code = utf8::utf8to16(code);
-    return tokenize_code(utf16_code);
+        return tokenize_code(std::move(path), utf16_code);
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::u16string &code)
 {
-    std::queue<std::unique_ptr<token>> tokens;
+    lexing_result result;
+    auto &tokens = result.tokens;
 
-    blasphemy::code_position current_code_position{1, 0};
+    const auto [file_id, source_info] = create_file_entry();
+    source_info->path = std::move(path);
+    result.file_id = file_id;
+
+    // main.cpp only provided the blasphemy collector with the file path.
+    // Now it can also have access to the file ID.
+    blasphemy::get_blasphemy_collector().set_source_file(file_id);
+
+
+    code_position curr_keyword_pos{1, 0};
 
     size_t code_pos = 0;
     while (code_pos < code.size())
     {
-        current_code_position.column++;
+        curr_keyword_pos.column++;
 
         if (u_isspace(code[code_pos]))
         {
             if (code[code_pos] == '\n')
             {
-                current_code_position.line++;
-                current_code_position.column = 0;
+                curr_keyword_pos.line++;
+                curr_keyword_pos.column = 0;
             }
 
             code_pos++;
@@ -109,16 +130,16 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         }
 
         // First, use the Trie structure word process built-in keywords.
-        if (const auto new_i = try_match_trie_keyword(code, current_code_position, tokens, code_pos))
+        if (const auto new_code_pos = try_match_trie_keyword(code, curr_keyword_pos, tokens, code_pos))
         {
-            code_pos = *new_i;
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
             continue;
         }
 
         // If not a keyword, resort to a REGEX literal/identifier check.
-        if (const auto new_i = try_match_regex_token(code, current_code_position, tokens, code_pos))
+        if (const auto new_code_pos = try_match_regex_token(code, curr_keyword_pos, tokens, code_pos))
         {
-            code_pos = *new_i;
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
             continue;
         }
 
@@ -126,16 +147,43 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         blasphemy::blasphemy_collector().add_blasphemy(
             blasphemy::details::TOKEN_DOESNT_EXIST,
             blasphemy::blasphemy_type::LEXICAL,
-            current_code_position
+            curr_keyword_pos
         );
         code_pos++;
     }
 
-    return tokens;
+    return result;
+}
+
+static void step_keyword(size_t &code_pos, const size_t new_code_pos,
+        codesh::lexer::code_position &curr_keyword_pos,
+        codesh::lexer::source_file_info &source_info)
+{
+    const size_t keyword_length = new_code_pos - code_pos;
+
+    source_info.keyword_infos.emplace(
+        curr_keyword_pos,
+        codesh::lexer::source_keyword_info {
+            keyword_length
+        }
+    );
+
+    curr_keyword_pos.column += keyword_length - 1;
+    code_pos = new_code_pos;
+}
+
+static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry()
+{
+    auto &keyword_infos = codesh::lexer::get_global_source_info_map();
+
+    const auto new_id = keyword_infos.size();
+    auto &entry = keyword_infos.emplace_back();
+
+    return {new_id, &entry};
 }
 
 static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
-                                                    const codesh::blasphemy::code_position current_code_position,
+                                                    const codesh::lexer::code_position current_code_position,
                                                     std::queue<std::unique_ptr<codesh::token>> &tokens,
                                                     const size_t code_pos)
 {
@@ -169,7 +217,7 @@ static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
 }
 
 static std::optional<size_t> try_match_regex_token(const std::u16string &code,
-                                                   const codesh::blasphemy::code_position current_code_position,
+                                                   const codesh::lexer::code_position current_code_position,
                                                    std::queue<std::unique_ptr<codesh::token>> &tokens,
                                                    const size_t code_pos)
 {
@@ -199,7 +247,7 @@ static std::optional<size_t> try_match_regex_token(const std::u16string &code,
     return std::nullopt;
 }
 
-static size_t handle_keyword_match(const std::u16string &code, codesh::blasphemy::code_position current_code_position,
+static size_t handle_keyword_match(const std::u16string &code, codesh::lexer::code_position current_code_position,
                                    const codesh::token_group token_group,
                                    std::queue<std::unique_ptr<codesh::token>> &tokens, const size_t keyword_end)
 {

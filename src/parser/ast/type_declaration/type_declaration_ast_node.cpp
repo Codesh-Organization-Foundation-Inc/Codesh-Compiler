@@ -16,7 +16,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
-        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+        const lexer::code_position code_position, definition::fully_qualified_name name) :
     ast_node(code_position), name(std::move(name))
 {
 }

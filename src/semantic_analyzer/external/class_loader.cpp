@@ -14,7 +14,7 @@
 
 #include "parser/ast/type/custom_type_ast_node.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "defenition/fully_qualified_name.h"
 #include "output/jvm_target/defs/cp_info.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
@@ -154,7 +154,7 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
         const auto super_class_name = get_class_name(strings, super_class_idx);
 
         super_type_node = std::make_unique<codesh::ast::type::custom_type_ast_node>(
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             super_class_name
         );
     }
@@ -165,7 +165,7 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
     for (const auto &interface_name : interfaces)
     {
         interface_nodes.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
-            codesh::blasphemy::NO_CODE_POS,
+            codesh::lexer::NO_CODE_POS,
             interface_name
         ));
     }
@@ -212,7 +212,7 @@ static void parse_fields(std::istream &file, const cp_strings &strings, type_sym
 
 static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(const uint16_t flags)
 {
-    auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::blasphemy::NO_CODE_POS);
+    auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
 
     if (flags & 0x0001)
         result->set_visibility(codesh::definition::visibility::PUBLIC);
@@ -232,7 +232,7 @@ static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_att
 static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
         size_t &pos)
 {
-    return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::blasphemy::NO_CODE_POS);
+    return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::lexer::NO_CODE_POS);
 }
 
 static void parse_constant_pool(std::istream &file, cp_strings &strings)
@@ -352,5 +352,5 @@ static fully_qualified_name get_class_name(const cp_strings &strings, const int 
     if (it == strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
-    return it->second.c_str();
+    return fully_qualified_name::parse(it->second, codesh::lexer::NO_CODE_POS);
 }

@@ -41,7 +41,7 @@ protected:
         override;
 
 public:
-    explicit method_call_ast_node(blasphemy::code_position code_position);
+    explicit method_call_ast_node(lexer::code_position code_position);
 
     void set_resolved(semantic_analyzer::method_symbol &symbol) override;
 

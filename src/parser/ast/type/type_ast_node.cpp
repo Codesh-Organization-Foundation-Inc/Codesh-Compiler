@@ -4,14 +4,14 @@
 #include "output/ir/instruction/impl/typed_instruction.h"
 #include "primitive_type_ast_node.h"
 
-codesh::ast::type::type_ast_node::type_ast_node(const blasphemy::code_position code_position) :
+codesh::ast::type::type_ast_node::type_ast_node(const lexer::code_position code_position) :
     ast_node(code_position),
     array_dimensions(0)
 {
 }
 
 std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_node::from_descriptor(
-        const std::string &descriptor, size_t &pos, const blasphemy::code_position code_position)
+        const std::string &descriptor, size_t &pos, const lexer::code_position code_position)
 {
     int array_dimensions = 0;
     while (pos < descriptor.size() && descriptor[pos] == '[')
@@ -67,7 +67,10 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_no
         const std::string class_name = descriptor.substr(pos, end - pos);
         pos = end + 1;
 
-        result = std::make_unique<custom_type_ast_node>(code_position, class_name.c_str());
+        result = std::make_unique<custom_type_ast_node>(
+            code_position,
+            definition::fully_qualified_name::parse(class_name, code_position)
+        );
         break;
     }
 
