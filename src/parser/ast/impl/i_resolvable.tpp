@@ -22,9 +22,9 @@ const codesh::definition::fully_qualified_name &codesh::ast::impl::i_resolvable<
 }
 
 template <typename T>
-codesh::lexer::code_position codesh::ast::impl::i_resolvable<T>::get_name_position() const
+codesh::lexer::code_range codesh::ast::impl::i_resolvable<T>::get_name_range() const
 {
-    return get_unresolved_name().get_code_position();
+    return get_unresolved_name().get_source_range();
 }
 
 template <typename T>

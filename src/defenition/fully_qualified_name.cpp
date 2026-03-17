@@ -6,32 +6,32 @@
 
 #include <sstream>
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position) :
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start) :
     _is_wildcard(false),
-    code_position(code_position)
+    source_range(start, start)
 {
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position,
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start,
         std::string part) :
-    fully_qualified_name(code_position)
+    fully_qualified_name(start)
 {
     add(std::move(part));
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position code_position,
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start,
         const std::vector<std::string>::const_iterator name_start,
         const std::vector<std::string>::const_iterator name_end) :
     parts(name_start, name_end),
     _is_wildcard(false),
-    code_position(code_position)
+    source_range(start, start)
 {
 }
 
 codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::parse(
-        const std::string &fqn_str, const lexer::code_position code_position)
+        const std::string &fqn_str, const lexer::code_position start)
 {
-    fully_qualified_name result(code_position);
+    fully_qualified_name result(start);
     std::istringstream fqn_stream(fqn_str);
 
     // Split by '/'
@@ -79,14 +79,19 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_code_position(const lexer::code_position pos)
+void codesh::definition::fully_qualified_name::set_start(const lexer::code_position pos)
 {
-    code_position = pos;
+    source_range.start = pos;
 }
 
-codesh::lexer::code_position codesh::definition::fully_qualified_name::get_code_position() const
+void codesh::definition::fully_qualified_name::set_end_position(const lexer::code_position pos)
 {
-    return code_position;
+    source_range.end = pos;
+}
+
+const codesh::lexer::code_range &codesh::definition::fully_qualified_name::get_source_range() const
+{
+    return source_range;
 }
 
 void codesh::definition::fully_qualified_name::set_is_wildcard(const bool wildcard)
@@ -123,7 +128,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
         return result.value();
     }
 
-    fully_qualified_name pretty_fqn(code_position);
+    fully_qualified_name pretty_fqn(source_range.start);
     for (const auto &part : get_parts())
     {
         if (part == "this")

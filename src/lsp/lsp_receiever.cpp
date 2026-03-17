@@ -1,7 +1,6 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "lsp_receiver.h"
 
-#include <fstream>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -19,6 +18,7 @@ static nlohmann::json build_response(const nlohmann::json &request);
 static void send_response(const nlohmann::json &response);
 static void write_to_dummy(const std::string &contents);
 static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy_info &info, int severity);
+static codesh::lexer::code_position token_to_lsp_end(const codesh::lexer::code_position &pos_1based, const std::optional<size_t> &file_id);
 
 codesh::lsp::request::~request() = default;
 
@@ -85,35 +85,29 @@ std::unique_ptr<codesh::lsp::request> codesh::lsp::wait_for_request()
 
 static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy_info &info, int severity)
 {
-    size_t line = 0;
-    size_t column = 0;
+    // We use 1-based lines/columns; LSP uses 0-based.
+    const bool has_range = info.source_range.has_value()
+        && info.source_range->start != codesh::lexer::NO_CODE_POS;
 
-    const bool has_code_pos = info.code_pos.has_value() && info.code_pos != codesh::lexer::NO_CODE_POS;
-    if (has_code_pos)
-    {
-        // We use 1-based lines/columns; LSP uses 0-based.
-        line = info.code_pos->line - 1;
-        column = info.code_pos->column - 1;
-    }
+    const auto start_pos = has_range
+        ? codesh::lexer::code_position {
+            info.source_range->start.line - 1,
+            info.source_range->start.column - 1
+        }
+        : codesh::lexer::code_position {0, 0};
 
-    size_t keyword_length = 3; // default
-    if (info.file_id.has_value() && has_code_pos)
-    {
-        keyword_length = codesh::lexer::
-            get_global_source_info_map().at(*info.file_id)
-            .keyword_infos.at(*info.code_pos)
-            .length;
-    }
+    const auto end_pos = has_range
+        ? token_to_lsp_end(info.source_range->end, info.file_id)
+        : codesh::lexer::code_position{0, 0};
 
     const nlohmann::json range = {
         {"start", {
-            {"line", line},
-            {"character", column}
+            {"line", start_pos.line},
+            {"character", start_pos.column}
         }},
         {"end", {
-            //TODO: Support ranges
-            {"line", line},
-            {"character", column + keyword_length}
+            {"line", end_pos.line},
+            {"character", end_pos.column}
         }}
     };
 
@@ -122,6 +116,25 @@ static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy
         {"severity", severity},
         {"message", info.details}
     };
+}
+
+static codesh::lexer::code_position token_to_lsp_end(const codesh::lexer::code_position &pos_1based,
+        const std::optional<size_t> &file_id)
+{
+    codesh::lexer::code_position result = {pos_1based.line - 1, pos_1based.column - 1};
+
+    size_t keyword_length = 3; // default
+    if (file_id.has_value())
+    {
+        const auto &keyword_infos = codesh::lexer::get_global_source_info_map()
+            .at(*file_id).keyword_infos;
+
+        if (const auto it = keyword_infos.find(pos_1based); it != keyword_infos.end())
+            keyword_length = it->second.length;
+    }
+
+    result.column += keyword_length;
+    return result;
 }
 
 void codesh::lsp::send_diagnostics_response(const diagnostics_request &request)

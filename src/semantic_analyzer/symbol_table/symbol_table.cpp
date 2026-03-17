@@ -56,7 +56,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     resolve(const semantic_context &context, const definition::fully_qualified_name &full_name,
-        const lexer::code_position code_pos, const std::optional<std::vector<std::string>::const_iterator> name_end,
+        const std::optional<std::vector<std::string>::const_iterator> name_end,
         const std::optional<std::vector<std::string>::const_iterator> name_start) const
 {
     if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
@@ -82,10 +82,10 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     }
 
 
-    context.blasphemy_consumer(fmt::format(
+    context.throw_blasphemy(fmt::format(
         "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
         full_name.holy_join()
-    ), code_pos);
+    ), full_name.get_source_range());
 
     return std::nullopt;
 }

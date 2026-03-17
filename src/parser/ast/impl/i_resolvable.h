@@ -28,7 +28,7 @@ public:
      */
     [[nodiscard]] const definition::fully_qualified_name &get_resolved_name() const;
 
-    [[nodiscard]] lexer::code_position get_name_position() const;
+    [[nodiscard]] lexer::code_range get_name_range() const;
 
     /**
      * @param resolved When true, behaves like @link get_resolved_name \endlink.

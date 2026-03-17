@@ -390,10 +390,15 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 
     if (containing_method.get_attributes().get_is_static())
     {
-        context.blasphemy_consumer(
-            fmt::format(codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT,
-                        method_call.get_last_name(false)),
-            method_call.get_code_position()
+        context.throw_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT,
+                method_call.get_last_name(false)
+            ),
+            {
+                method_call.get_unresolved_name().get_source_range().start,
+                method_call.get_name_range().end
+            }
         );
         return false;
     }
@@ -446,7 +451,6 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
     const auto resolved = context.symbol_table_.resolve(
         context,
         name,
-        method_call.get_name_position(),
         // Ignore the last part of the name, which points to the method overloads.
         // get_called_method_as_symbol already handles it.
         name.get_parts().end() - 1
@@ -484,10 +488,10 @@ static std::optional<parent_type_result> resolve_parent_type_from_imports(
     }
 
     // If it's neither a type nor a field, then this supposed "method" cannot exist.
-    context.blasphemy_consumer(fmt::format(
+    context.throw_blasphemy(fmt::format(
         codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
         name.holy_join()
-    ), method_call.get_code_position());
+    ), method_call.get_name_range());
 
     return std::nullopt;
 }
@@ -503,10 +507,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     if (!method_overloads_raw)
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::METHOD_NOT_FOUND,
             method_call.to_pretty_string()
-        ), method_call.get_name_position());
+        ), method_call.get_name_range());
         return std::nullopt;
     }
 
@@ -516,10 +520,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     if (!method_overloads)
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::NOT_A_METHOD,
             method_call.to_pretty_string()
-        ), method_call.get_code_position());
+        ), method_call.get_name_range());
         return std::nullopt;
     }
 
@@ -545,14 +549,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return ma_zot_omeret_beereh_method;
 
 
-    context.blasphemy_consumer(
+    context.throw_blasphemy(
         fmt::format(
             codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH,
             //TODO: Pretty print argument types
             "טודו",
             method_call.to_pretty_string()
         ),
-        method_call.get_code_position()
+        //TODO: Highlight arguments, not method name
+        method_call.get_name_range()
     );
     return std::nullopt;
 }

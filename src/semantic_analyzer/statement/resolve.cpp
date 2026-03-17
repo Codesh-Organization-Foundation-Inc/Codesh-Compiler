@@ -144,7 +144,7 @@ bool statement::resolve(const semantic_context &context,
 
         if (!are_types_compatible)
         {
-            context.blasphemy_consumer(
+            context.throw_blasphemy(
                 fmt::format(
                     blasphemy::details::RETURN_TYPE_MISMATCH,
                     return_node->get_return_value()->get_type()->to_pretty_string(),
@@ -168,7 +168,7 @@ bool statement::resolve(const semantic_context &context,
 
         if (!unary_op->is_value_valid())
         {
-            context.blasphemy_consumer(fmt::format(
+            context.throw_blasphemy(fmt::format(
                 blasphemy::details::UNARY_TYPE_MISMATCH,
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
@@ -192,12 +192,18 @@ bool statement::resolve(const semantic_context &context,
 
             if (!binary_op->is_value_valid())
             {
-                context.blasphemy_consumer(fmt::format(
-                    blasphemy::details::BINARY_TYPE_MISMATCH,
-                    binary_op->get_left().get_type()->to_pretty_string(),
-                    binary_op->get_right().get_type()->to_pretty_string(),
-                    binary_op->to_pretty_string()
-                ), binary_op->get_code_position());
+                context.throw_blasphemy(
+                    fmt::format(
+                        blasphemy::details::BINARY_TYPE_MISMATCH,
+                        binary_op->get_left().get_type()->to_pretty_string(),
+                        binary_op->get_right().get_type()->to_pretty_string(),
+                        binary_op->to_pretty_string()
+                    ),
+                    {
+                        binary_op->get_code_position(),
+                        binary_op->get_right().get_code_position()
+                    }
+                );
                 all_succeed = false;
             }
         }

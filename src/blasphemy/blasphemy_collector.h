@@ -8,6 +8,10 @@
 #include <string>
 #include <vector>
 
+namespace codesh::definition
+{
+class fully_qualified_name;
+}
 namespace codesh::blasphemy
 {
 
@@ -30,7 +34,7 @@ struct blasphemy_info
     blasphemy_type type;
 
     std::optional<size_t> file_id;
-    std::optional<lexer::code_position> code_pos;
+    std::optional<lexer::code_range> source_range;
 
     bool is_fatal;
 };
@@ -51,17 +55,22 @@ class blasphemy_collector
 
     void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color) const;
 
+
 public:
+    void add_blasphemy(std::string details, blasphemy_type type, lexer::code_range source_range, bool is_fatal = false);
+
     /**
      * Adds a new blasphemy
      * @param details The message to display
      * @param type The blasphemy type
-     * @param code_pos The location in the source code where the error was initiated from
+     * @param code_start_pos The location in the source code where the error was initiated from
      * @param is_fatal Whether the error is so bad such as it should immediately cease the compiler's flow
      */
-    void add_blasphemy(std::string details, blasphemy_type type, lexer::code_position code_pos, bool is_fatal = false);
+    void add_blasphemy(std::string details, blasphemy_type type, lexer::code_position code_start_pos,
+            bool is_fatal = false);
 
-    void add_warning(std::string details, blasphemy_type type, lexer::code_position code_pos);
+    void add_warning(std::string details, blasphemy_type type, lexer::code_range source_range);
+    void add_warning(std::string details, blasphemy_type type, lexer::code_position start_code_pos);
 
     void set_source_directory(std::filesystem::path source_directory_path);
 

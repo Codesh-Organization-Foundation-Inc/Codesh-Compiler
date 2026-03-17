@@ -16,6 +16,12 @@ struct code_position
 
 constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
 
+struct code_range
+{
+    code_position start;
+    code_position end;
+};
+
 
 /**
  * Details relating to a keyword as it originally appeared in the original source code

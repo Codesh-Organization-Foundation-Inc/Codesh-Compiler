@@ -1,7 +1,6 @@
 #include "util.h"
 
 #include "blasphemy/details.h"
-#include "fmt/compile.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_context.h"
@@ -22,8 +21,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
 
     const auto result_raw = context.symbol_table_.resolve(
         context,
-        full_name,
-        custom_type_node.get_name_position()
+        full_name
     );
 
     if (!result_raw.has_value())
@@ -32,10 +30,10 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     const auto result = dynamic_cast<type_symbol *>(&result_raw->get());
     if (!result)
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             blasphemy::details::NOT_AN_OBJECT,
             full_name.holy_join()
-        ), lexer::NO_CODE_POS);
+        ), full_name.get_source_range());
         return std::nullopt;
     }
 

@@ -1,5 +1,6 @@
 #include "blasphemy_collector.h"
 
+#include "defenition/fully_qualified_name.h"
 #include "fmt/xchar.h"
 
 #include <iostream>
@@ -26,9 +27,9 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
 
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
-        lexer::code_position code_pos, const bool is_fatal)
+                                                           lexer::code_range source_range, bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(details), type, file_id, code_pos, is_fatal);
+    blasphemies.emplace_back(std::move(details), type, file_id, source_range, is_fatal);
 
     if (is_fatal)
     {
@@ -37,10 +38,43 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
     }
 }
 
-void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
-        lexer::code_position code_pos)
+void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, const blasphemy_type type,
+                                                           const lexer::code_position code_start_pos, const bool is_fatal)
 {
-    warnings.emplace_back(std::move(details), type, file_id, code_pos, false);
+    add_blasphemy(
+        std::move(details),
+        type,
+        {
+            code_start_pos,
+            code_start_pos,
+        },
+        is_fatal
+    );
+}
+
+void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
+                                                         lexer::code_range source_range)
+{
+    warnings.emplace_back(
+        std::move(details),
+        type,
+        file_id,
+        source_range,
+        false
+    );
+}
+
+void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, blasphemy_type type,
+                                                         const lexer::code_position start_code_pos)
+{
+    add_warning(
+        std::move(details),
+        type,
+        lexer::code_range {
+            start_code_pos,
+            start_code_pos
+        }
+    );
 }
 
 void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesystem::path source_directory_path)
@@ -101,12 +135,14 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
         relative_source_path.string()
     );
 
-    if (const auto &code_pos = blasphemy.code_pos; code_pos->column != -1)
+    if (const auto &code_pos = blasphemy.source_range)
     {
+        const auto [line, column] = code_pos->start;
+
         fmt::print(stderr,
             " פֶּרֶק {} פָּסוּק {}",
-            std::to_string(code_pos->line),
-            std::to_string(code_pos->column)
+            std::to_string(line),
+            std::to_string(column)
         );
     }
 
