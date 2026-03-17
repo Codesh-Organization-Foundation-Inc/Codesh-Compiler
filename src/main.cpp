@@ -177,7 +177,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
         const codesh::lsp::diagnostics_request &request)
 {
     const auto source_path = uri_to_path(request.file_uri);
-    auto [tokens, file_id] = codesh::lexer::tokenize_code(request.file_contents);
+    auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents);
 
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> asts;
     asts.reserve(1);
@@ -249,23 +249,23 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
     const auto process_amount = source_files.size();
     size_t processed = 1;
 
-    for (const auto &source_file_path : source_files)
+    for (const auto &source_path : source_files)
     {
         printfln(
             args,
             "{} מִן־{}: מְפָרֵשׁ אֶת {}",
             processed,
             process_amount,
-            source_file_path.string()
+            source_path.string()
         );
-        update_source_file(source_file_path);
+        update_source_file(source_path);
 
         // LEXING
-        const std::string code = read_file(source_file_path);
-        auto [tokens, file_id] = codesh::lexer::tokenize_code(code);
+        const std::string code = read_file(source_path);
+        auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
 
         // PARSING
-        auto ast = codesh::parser::parse(tokens, source_file_path);
+        auto ast = codesh::parser::parse(tokens, source_path);
 
         results.push_back(std::move(ast));
         processed++;

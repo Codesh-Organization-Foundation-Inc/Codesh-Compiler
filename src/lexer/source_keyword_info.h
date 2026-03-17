@@ -26,11 +26,16 @@ using code_pos_to_source_keyword_info = std::unordered_map<
     source_keyword_info,
     code_position_hasher
 >;
-using file_id_to_code_pos_to_source_keyword_info = std::vector<code_pos_to_source_keyword_info>;
 
-// shorten it lol
-using global_source_info_map = file_id_to_code_pos_to_source_keyword_info;
 
+struct source_file_info
+{
+    std::filesystem::path path;
+    code_pos_to_source_keyword_info keywords_info;
+};
+
+
+using global_source_info_map = std::vector<source_file_info>;
 
 global_source_info_map &get_global_source_info_map();
 

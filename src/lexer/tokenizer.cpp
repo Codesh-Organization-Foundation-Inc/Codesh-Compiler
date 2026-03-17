@@ -19,10 +19,10 @@ namespace trie = codesh::lexer::trie;
  *
  * @returns The new file's associated ID to access @c get_global_source_info_map, and a pointer to the entry itself.
  */
-static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry();
+static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry();
 
 static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::blasphemy::code_position &curr_keyword_pos,
-        codesh::lexer::code_pos_to_source_keyword_info &keyword_info_map);
+        codesh::lexer::source_file_info &source_info);
 
 /**
  * @returns How many characters should be consumed by this match
@@ -88,20 +88,21 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
     return true;
 }
 
-codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::string &code)
 {
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
     const std::u16string utf16_code = utf8::utf8to16(code);
-    return tokenize_code(utf16_code);
+        return tokenize_code(std::move(path), utf16_code);
 }
 
-codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::u16string &code)
 {
     lexing_result result;
     auto &tokens = result.tokens;
 
-    const auto [file_id, keyword_info_map] = create_file_entry();
+    const auto [file_id, source_info] = create_file_entry();
+    source_info->path = std::move(path);
     result.file_id = file_id;
 
 
@@ -127,14 +128,14 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &
         // First, use the Trie structure word process built-in keywords.
         if (const auto new_code_pos = try_match_trie_keyword(code, curr_keyword_pos, tokens, code_pos))
         {
-            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *keyword_info_map);
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
             continue;
         }
 
         // If not a keyword, resort to a REGEX literal/identifier check.
         if (const auto new_code_pos = try_match_regex_token(code, curr_keyword_pos, tokens, code_pos))
         {
-            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *keyword_info_map);
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
             continue;
         }
 
@@ -152,11 +153,11 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &
 
 static void step_keyword(size_t &code_pos, const size_t new_code_pos,
         codesh::blasphemy::code_position &curr_keyword_pos,
-        codesh::lexer::code_pos_to_source_keyword_info &keyword_info_map)
+        codesh::lexer::source_file_info &source_info)
 {
     const size_t keyword_length = new_code_pos - code_pos - 1;
 
-    keyword_info_map.emplace(
+    source_info.keywords_info.emplace(
         curr_keyword_pos,
         codesh::lexer::source_keyword_info {
             keyword_length
@@ -167,7 +168,7 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos,
     code_pos = new_code_pos;
 }
 
-static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry()
+static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry()
 {
     auto &keyword_infos = codesh::lexer::get_global_source_info_map();
 
