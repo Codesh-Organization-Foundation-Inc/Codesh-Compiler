@@ -15,7 +15,8 @@ namespace codesh::ast
 
 class compilation_unit_ast_node final : public impl::ast_node
 {
-    const std::filesystem::path source_path;
+    const size_t file_id;
+    const std::filesystem::path &source_path;
 
     const definition::basad_type basad_type;
     definition::fully_qualified_name package_name;
@@ -23,7 +24,7 @@ class compilation_unit_ast_node final : public impl::ast_node
     std::vector<std::unique_ptr<type_decl::type_declaration_ast_node>> type_declarations;
 
 public:
-    compilation_unit_ast_node(definition::basad_type basad_type, std::filesystem::path source_path);
+    compilation_unit_ast_node(size_t file_id, definition::basad_type basad_type);
 
     [[nodiscard]] const std::filesystem::path &get_source_path() const;
     /**

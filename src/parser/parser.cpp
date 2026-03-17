@@ -11,7 +11,7 @@ namespace ast = codesh::ast;
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
-        const std::filesystem::path &source_path)
+        const size_t file_id)
 {
     if (tokens.empty())
     {
@@ -24,7 +24,7 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
     }
 
 
-    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_path);
+    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, file_id);
 
     if (root_node->get_basad_type() == definition::basad_type::IAW)
     {

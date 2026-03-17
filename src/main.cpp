@@ -181,7 +181,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> asts;
     asts.reserve(1);
-    asts.emplace_back(codesh::parser::parse(tokens, source_path));
+    asts.emplace_back(codesh::parser::parse(tokens, file_id));
 
     //TODO: Could be optimized if we cache the master AST and always remove the source and re-add it or something
     analyze_asts(args, asts);
@@ -265,7 +265,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
         auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
 
         // PARSING
-        auto ast = codesh::parser::parse(tokens, source_path);
+        auto ast = codesh::parser::parse(tokens, file_id);
 
         results.push_back(std::move(ast));
         processed++;

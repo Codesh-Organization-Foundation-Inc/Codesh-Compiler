@@ -9,6 +9,6 @@ namespace codesh::parser
 {
 
 std::unique_ptr<ast::compilation_unit_ast_node> parse_compilation_unit(std::queue<std::unique_ptr<token>> &tokens,
-    const std::filesystem::path &source_path);
+        size_t file_id);
 
 }

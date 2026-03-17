@@ -1,11 +1,14 @@
 #include "compilation_unit_ast_node.h"
 
+#include "lexer/source_keyword_info.h"
+
 #include <utility>
 
-codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const definition::basad_type basad_type,
-        std::filesystem::path source_path) :
+codesh::ast::compilation_unit_ast_node::compilation_unit_ast_node(const size_t file_id,
+        const definition::basad_type basad_type) :
     ast_node(blasphemy::NO_CODE_POS),
-    source_path(std::move(source_path)),
+    file_id(file_id),
+    source_path(lexer::get_global_source_info_map().at(file_id).path),
     basad_type(basad_type),
     package_name(blasphemy::NO_CODE_POS)
 {

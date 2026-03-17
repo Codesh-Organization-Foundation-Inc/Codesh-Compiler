@@ -10,5 +10,5 @@
 namespace codesh::parser
 {
 [[nodiscard]] std::unique_ptr<ast::compilation_unit_ast_node> parse(std::queue<std::unique_ptr<token>> &tokens,
-        const std::filesystem::path &source_path);
+        size_t file_id);
 }
