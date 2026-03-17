@@ -1,10 +1,11 @@
 #pragma once
 
 // ReSharper disable once CppUnusedIncludeDirective
+#include "blasphemy/blasphemy_collector.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 //NOTE: Circular dependency with definition.h, so just write it directly.
-static const codesh::definition::fully_qualified_name ERROR_FQN = codesh::definition::fully_qualified_name(
+static const auto ERROR_FQN = codesh::definition::fully_qualified_name(
     codesh::blasphemy::NO_CODE_POS,
     "סְדוֹם וַעֲמֹרָה"
 );

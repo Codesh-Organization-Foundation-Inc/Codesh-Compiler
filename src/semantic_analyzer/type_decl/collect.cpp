@@ -6,7 +6,7 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/util.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 

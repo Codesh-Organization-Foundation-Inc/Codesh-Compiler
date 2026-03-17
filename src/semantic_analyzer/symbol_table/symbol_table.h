@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "semantic_analyzer/external/jimage_loader.h"
 #include "symbol.h"
 

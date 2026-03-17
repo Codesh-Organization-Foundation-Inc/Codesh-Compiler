@@ -6,6 +6,8 @@
 #include "token/token.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 
+#include <optional>
+
 namespace codesh
 {
 namespace definition

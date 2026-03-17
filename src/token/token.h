@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "token_group.h"
 
 #include <memory>

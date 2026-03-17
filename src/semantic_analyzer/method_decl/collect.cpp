@@ -1,6 +1,6 @@
 #include "collect.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
