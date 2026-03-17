@@ -19,6 +19,8 @@ class fully_qualified_name
     std::vector<std::string> parts;
     bool _is_wildcard;
 
+    //TODO: Make FQNs save start & end positions, update in all call sites, add entry blasphemy_info, use in LSP as range end
+    // Rename the below to start:
     lexer::code_position code_position;
 
     [[nodiscard]] std::optional<std::string> parse_alias() const;
