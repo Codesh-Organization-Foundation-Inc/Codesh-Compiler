@@ -21,6 +21,9 @@ namespace trie = codesh::lexer::trie;
  */
 static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry();
 
+static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::blasphemy::code_position &curr_keyword_pos,
+        codesh::lexer::code_pos_to_source_keyword_info &keyword_info_map);
+
 /**
  * @returns How many characters should be consumed by this match
  */
@@ -102,19 +105,19 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &
     result.file_id = file_id;
 
 
-    blasphemy::code_position current_code_position{1, 0};
+    blasphemy::code_position curr_keyword_pos{1, 0};
 
     size_t code_pos = 0;
     while (code_pos < code.size())
     {
-        current_code_position.column++;
+        curr_keyword_pos.column++;
 
         if (u_isspace(code[code_pos]))
         {
             if (code[code_pos] == '\n')
             {
-                current_code_position.line++;
-                current_code_position.column = 0;
+                curr_keyword_pos.line++;
+                curr_keyword_pos.column = 0;
             }
 
             code_pos++;
@@ -122,18 +125,16 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &
         }
 
         // First, use the Trie structure word process built-in keywords.
-        if (const auto new_i = try_match_trie_keyword(code, current_code_position, tokens, code_pos))
+        if (const auto new_code_pos = try_match_trie_keyword(code, curr_keyword_pos, tokens, code_pos))
         {
-            current_code_position.column += *new_i - code_pos - 1;
-            code_pos = *new_i;
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *keyword_info_map);
             continue;
         }
 
         // If not a keyword, resort to a REGEX literal/identifier check.
-        if (const auto new_i = try_match_regex_token(code, current_code_position, tokens, code_pos))
+        if (const auto new_code_pos = try_match_regex_token(code, curr_keyword_pos, tokens, code_pos))
         {
-            current_code_position.column += *new_i - code_pos - 1;
-            code_pos = *new_i;
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *keyword_info_map);
             continue;
         }
 
@@ -141,12 +142,29 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &
         blasphemy::blasphemy_collector().add_blasphemy(
             blasphemy::details::TOKEN_DOESNT_EXIST,
             blasphemy::blasphemy_type::LEXICAL,
-            current_code_position
+            curr_keyword_pos
         );
         code_pos++;
     }
 
     return result;
+}
+
+static void step_keyword(size_t &code_pos, const size_t new_code_pos,
+        codesh::blasphemy::code_position &curr_keyword_pos,
+        codesh::lexer::code_pos_to_source_keyword_info &keyword_info_map)
+{
+    const size_t keyword_length = new_code_pos - code_pos - 1;
+
+    keyword_info_map.emplace(
+        curr_keyword_pos,
+        codesh::lexer::source_keyword_info {
+            keyword_length
+        }
+    );
+
+    curr_keyword_pos.column += keyword_length;
+    code_pos = new_code_pos;
 }
 
 static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry()
