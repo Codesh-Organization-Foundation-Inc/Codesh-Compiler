@@ -5,6 +5,7 @@
 #include "lexer/trie/keywords.h"
 #include "lexer/trie/trie.h"
 #include "regex.h"
+#include "source_keyword_info.h"
 #include "token/token.h"
 #include "util.h"
 #include <optional>
@@ -12,6 +13,13 @@
 #include <utf8.h>
 
 namespace trie = codesh::lexer::trie;
+
+/**
+ * Pushes a new file entry to @c get_global_source_info_map
+ *
+ * @returns The new file's associated ID to access @c get_global_source_info_map, and a pointer to the entry itself.
+ */
+static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry();
 
 /**
  * @returns How many characters should be consumed by this match
@@ -77,7 +85,7 @@ static bool check_boundary(const std::u16string &code, const trie::keyword_info 
     return true;
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::string &code)
 {
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
@@ -85,9 +93,14 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
     return tokenize_code(utf16_code);
 }
 
-std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const std::u16string &code)
+codesh::lexer::lexing_result codesh::lexer::tokenize_code(const std::u16string &code)
 {
-    std::queue<std::unique_ptr<token>> tokens;
+    lexing_result result;
+    auto &tokens = result.tokens;
+
+    const auto [file_id, keyword_info_map] = create_file_entry();
+    result.file_id = file_id;
+
 
     blasphemy::code_position current_code_position{1, 0};
 
@@ -133,7 +146,17 @@ std::queue<std::unique_ptr<codesh::token>> codesh::lexer::tokenize_code(const st
         code_pos++;
     }
 
-    return tokens;
+    return result;
+}
+
+static std::pair<size_t, codesh::lexer::code_pos_to_source_keyword_info *> create_file_entry()
+{
+    auto &keyword_infos = codesh::lexer::get_global_source_info_map();
+
+    const auto new_id = keyword_infos.size();
+    auto &entry = keyword_infos.emplace_back();
+
+    return {new_id, &entry};
 }
 
 static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
