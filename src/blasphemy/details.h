@@ -35,6 +35,7 @@ extern const std::string NO_SCOPE_END;
 extern const std::string NO_KEYWORD_SHALL_BE;
 extern const std::string NO_KEYWORD_PUNC_EQUAL;
 extern const std::string NO_KEYWORD_BY;
+extern const std::string NO_KEYWORD_THE;
 extern const std::string NO_KEYWORD_TO;
 extern const std::string NO_KEYWORD_FROM;
 extern const std::string NO_KEYWORD_SKIP;
