@@ -13,6 +13,8 @@
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/ast/type_declaration/field_declaration_ast_node.h"
+#include "output/jvm_target/defs/fields_info_entry.h"
 #include "util.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
@@ -56,7 +58,6 @@ void codesh::output::jvm_target::class_file_builder::build() const
     util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
     util::put_int_bytes(class_file.interfaces_count, 2, 0);
-    util::put_int_bytes(class_file.fields_count, 2, 0);
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -65,6 +66,7 @@ void codesh::output::jvm_target::class_file_builder::build() const
     else
     {
         // TODO: Handle
+        util::put_int_bytes(class_file.fields_count, 2, 0);
         util::put_int_bytes(class_file.methods_count, 2, 0);
     }
 
@@ -76,6 +78,16 @@ void codesh::output::jvm_target::class_file_builder::build() const
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
     const ast::type_decl::class_declaration_ast_node &class_decl) const
 {
+    for (const auto &field_decl : class_decl.get_fields())
+    {
+        add_field(*field_decl);
+    }
+
+    util::put_int_bytes(
+        class_file.fields_count, 2,
+        static_cast<int>(class_decl.get_fields().size())
+    );
+
     for (const auto &method_decl : class_decl.get_all_methods())
     {
         add_method(*method_decl);
@@ -106,6 +118,33 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     }
 }
 
+
+void codesh::output::jvm_target::class_file_builder::add_field(
+        const ast::type_decl::field_declaration_ast_node &field_decl) const
+{
+    class_file.fields_info.push_back(create_field_entry(field_decl));
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry> codesh::output::jvm_target::class_file_builder::
+    create_field_entry(const ast::type_decl::field_declaration_ast_node &field_decl) const
+{
+    auto entry = std::make_unique<defs::fields_info_entry>();
+
+    set_access_flags(entry->access_flags, field_decl.get_attributes()->get_access_flags());
+    util::put_int_bytes(
+        entry->name_index,
+        2,
+        constant_pool_.get_utf8_index(field_decl.get_name())
+    );
+    util::put_int_bytes(
+        entry->descriptor_index,
+        2,
+        constant_pool_.get_utf8_index(field_decl.generate_descriptor(true))
+    );
+    util::put_int_bytes(entry->attributes_count, 2, 0);
+
+    return entry;
+}
 
 void codesh::output::jvm_target::class_file_builder::add_method(
         const ast::method::method_declaration_ast_node &method_decl) const
