@@ -61,7 +61,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::OPERATOR_MODULO, u"ויושרה", word_boundary::BOTH},
     {token_group::OPERATOR_MINUS, u"ויחזק את־לב", word_boundary::BOTH},
     {token_group::OPERATOR_BY, u"פי־", word_boundary::BEFORE},
-    {token_group::OPERATOR_THE, u"את־", word_boundary::BEFORE},
+    {token_group::OPERATOR_THE, u"את", word_boundary::BOTH},
 
     {token_group::OPERATOR_ADDITION_ASSIGNMENT, u"ויסף ל־", word_boundary::BEFORE},
     {token_group::OPERATOR_SUBTRACTION_ASSIGNMENT, u"ויחסר מן", word_boundary::BOTH},

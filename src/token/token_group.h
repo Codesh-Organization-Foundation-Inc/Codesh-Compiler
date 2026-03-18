@@ -61,7 +61,7 @@ enum class token_group : int
     OPERATOR_MODULO, // ויושרה
     OPERATOR_MINUS, // ויחזק את־לב
     OPERATOR_BY, // פי־
-    OPERATOR_THE, // את־
+    OPERATOR_THE, // את
 
     OPERATOR_ADDITION_ASSIGNMENT, // ויסף ל־
     OPERATOR_SUBTRACTION_ASSIGNMENT, // ויחסר מן
