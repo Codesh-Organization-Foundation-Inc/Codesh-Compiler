@@ -244,6 +244,26 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     return resolved_method;
 }
 
+static std::optional<parent_type_result> resolve_call_parent_type_for_super(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto &current_type = containing_method.get_parent_type();
+    if (!current_type.has_super_type() || !current_type.get_super_type().is_resolved())
+    {
+        context.throw_blasphemy(
+            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            method_call.get_name_range()
+        );
+        return std::nullopt;
+    }
+    return parent_type_result {
+        &current_type.get_super_type().get_resolved(),
+        nullptr
+    };
+}
+
 static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -254,6 +274,9 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
         return resolve_call_parent_type(context, *new_call);
+
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::SUPER)
+        return resolve_call_parent_type_for_super(context, containing_method, method_call);
 
     if (!name.get_parts().empty())
     {
