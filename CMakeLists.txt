@@ -79,6 +79,7 @@ add_executable(codeshc
         src/defenition/visibility.cpp
         src/output/jvm_target/defs/class_file.h
         src/output/jvm_target/defs/cp_info.h
+        src/output/jvm_target/defs/fields_info_entry.h
         src/output/jvm_target/defs/methods_info_entry.h
         src/output/jvm_target/defs/attribute_info_entry.h
         src/defenition/visibility.cpp
