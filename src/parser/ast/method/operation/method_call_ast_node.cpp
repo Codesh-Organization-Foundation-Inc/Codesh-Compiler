@@ -23,7 +23,8 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
         const lexer::code_position code_position) :
     value_ast_node(code_position),
-    name(code_position)
+    name(code_position),
+    association(var_reference::reference_association::UNKNOWN)
 {
 }
 
@@ -65,6 +66,18 @@ void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
 bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
 {
     return chained_method.has_value();
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_association(
+        const var_reference::reference_association association)
+{
+    this->association = association;
+}
+
+codesh::ast::var_reference::reference_association codesh::ast::method::operation::method_call_ast_node::
+    get_association() const
+{
+    return association;
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const

@@ -79,7 +79,7 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_start(const lexer::code_position pos)
+void codesh::definition::fully_qualified_name::set_start_position(const lexer::code_position pos)
 {
     source_range.start = pos;
 }

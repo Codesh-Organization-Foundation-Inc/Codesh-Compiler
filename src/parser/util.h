@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ast/var_reference/reference_association.h"
+
 #include <memory>
 #include <queue>
 
@@ -101,10 +103,13 @@ bool consume_the(std::queue<std::unique_ptr<token>> &tokens);
 bool consume_punc_equal(std::queue<std::unique_ptr<token>> &tokens);
 
 /**
- * Optionally consumes a leading `this` token (and its following dot), prepends "this" to @p fqn_out,
- * then delegates to parse_fqn() for the rest of the name.
- * Use this wherever both plain identifiers and `this.field` / `this.method` syntax should be accepted.
+ * Optionally consumes a leading association token (and its following dot).
+ *
+ * An association token is either @c this or @c super.
+ *
+ * @returns Whether "this" was used or not
  */
-void parse_this_and_fqn(std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out);
+[[nodiscard]] ast::var_reference::reference_association parse_association_and_fqn(
+        std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out);
 
 }
