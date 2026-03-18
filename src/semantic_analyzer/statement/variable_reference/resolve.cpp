@@ -130,11 +130,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
+    if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
+        return find_field_symbol(context, var_ref_node, scope);
+
     if (!full_var_name.is_single_part())
     {
-        if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
-            return find_field_symbol(context, var_ref_node, scope);
-
         return context.symbol_table_.resolve(
             context,
             full_var_name
