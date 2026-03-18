@@ -124,15 +124,15 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
     if (!full_var_name.is_single_part())
     {
-        // If `this` was the first argument of the FQN, then it must be a field.
-        if (full_var_name.get_parts().front() == "this")
+        if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
             return find_field_symbol(context, var_ref_node, scope);
 
         return context.symbol_table_.resolve(

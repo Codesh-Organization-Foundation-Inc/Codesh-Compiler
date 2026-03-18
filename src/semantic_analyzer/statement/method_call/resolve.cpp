@@ -96,7 +96,7 @@ static void prepend_external_this_argument(
         codesh::semantic_analyzer::variable_symbol &receiver_variable);
 
 /**
- * For non-static calls targeting the same class (e.g. bare @c method or @c this / @c method), prepends @c this
+ * For non-static calls targeting the same class (e.g. bare @c method or @c this.method), prepends @c this
  * as the first argument.
  *
  * Emits a semantic error if the containing method is static.
@@ -257,10 +257,11 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     if (!name.get_parts().empty())
     {
-        // For method calls prefixed by "this", we must be speaking of type members.
+        // For "this" methods, we must be speaking of type members.
         // For single-names, the method must either be a type member or a static import.
         //TODO: Handle static imports
-        if (name.is_single_part() || name.get_parts().front() == "this")
+        if (name.is_single_part() ||
+            method_call.get_association() == codesh::ast::var_reference::reference_association::THIS)
         {
             return parent_type_result {
                 &containing_method.get_parent_type(),
