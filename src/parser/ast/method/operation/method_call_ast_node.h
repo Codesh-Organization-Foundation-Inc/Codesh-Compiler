@@ -21,6 +21,12 @@ class method_symbol;
 namespace codesh::ast::method::operation
 {
 
+struct named_argument
+{
+    std::string name;
+    std::unique_ptr<var_reference::value_ast_node> value;
+};
+
 class method_call_ast_node : public var_reference::value_ast_node,
     public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
@@ -32,7 +38,7 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     std::optional<std::unique_ptr<method_call_ast_node>> chained_method;
 
-    std::deque<std::unique_ptr<value_ast_node>> arguments;
+    std::deque<named_argument> arguments;
 
     static size_t determine_stack_delta(const type::type_ast_node &type);
 
