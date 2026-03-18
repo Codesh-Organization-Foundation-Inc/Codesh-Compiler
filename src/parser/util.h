@@ -92,6 +92,12 @@ void ensure_end_op(std::queue<std::unique_ptr<token>> &tokens);
  */
 bool consume_by(std::queue<std::unique_ptr<token>> &tokens);
 
+/**
+* Consumes the "the" operator token if present, or reports an error.
+* @return Whether the "the" token was consumed
+*/
+bool consume_the(std::queue<std::unique_ptr<token>> &tokens);
+
 bool consume_punc_equal(std::queue<std::unique_ptr<token>> &tokens);
 
 /**

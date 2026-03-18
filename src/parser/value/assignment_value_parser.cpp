@@ -20,13 +20,13 @@
 
 /**
  * @param tokens The queue of tokens
- * @param sepd_by_by Whether the operands should be separated by the "by" operator
+ * @param sepd_by_by Are the operands separated by the "by" operator or by the "the" operator
  * @returns The lhs & rhs of the operator, or @c std::nullopt upon failure
  */
 static std::optional<std::pair<
     std::unique_ptr<variable_reference_ast_node>,
     std::unique_ptr<codesh::ast::var_reference::value_ast_node>
->> parse_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, bool sepd_by_by);
+>> parse_assignment_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, bool sepd_by_by);
 
 /**
  * Parses the next value from @p tokens and validates it is a variable reference.
@@ -80,7 +80,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
-        auto result = parse_operator_sides(tokens, false);
+        auto result = parse_assignment_operator_sides(tokens, false);
         if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
@@ -95,7 +95,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
-        auto result = parse_operator_sides(tokens, false);
+        auto result = parse_assignment_operator_sides(tokens, false);
         if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
@@ -110,7 +110,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
-        auto result = parse_operator_sides(tokens, true);
+        auto result = parse_assignment_operator_sides(tokens, true);
         if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
@@ -125,7 +125,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
-        auto result = parse_operator_sides(tokens, true);
+        auto result = parse_assignment_operator_sides(tokens, true);
         if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
@@ -140,7 +140,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
 
-        auto result = parse_operator_sides(tokens, true);
+        auto result = parse_assignment_operator_sides(tokens, true);
         if (!result.has_value())
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
 
@@ -187,13 +187,16 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 static std::optional<std::pair<
     std::unique_ptr<variable_reference_ast_node>,
     std::unique_ptr<codesh::ast::var_reference::value_ast_node>
->> parse_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, const bool sepd_by_by)
+>> parse_assignment_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, const bool sepd_by_by)
 {
     auto left_variable_node = parse_variable(tokens);
     if (!left_variable_node)
         return std::nullopt;
 
     if (sepd_by_by && !codesh::parser::util::consume_by(tokens))
+        return std::nullopt;
+
+    if (!sepd_by_by && !codesh::parser::util::consume_the(tokens))
         return std::nullopt;
 
     auto right_value_node = codesh::parser::value::parse_value(tokens);

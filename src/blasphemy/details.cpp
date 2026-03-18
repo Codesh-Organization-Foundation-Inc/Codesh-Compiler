@@ -63,6 +63,8 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_PUNC_EQUAL =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ב־";
 const std::string codesh::blasphemy::details::NO_KEYWORD_BY =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה פי־";
+const std::string codesh::blasphemy::details::NO_KEYWORD_THE =
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה את";
 const std::string codesh::blasphemy::details::NO_KEYWORD_TO =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עד";
 const std::string codesh::blasphemy::details::NO_KEYWORD_FROM =
