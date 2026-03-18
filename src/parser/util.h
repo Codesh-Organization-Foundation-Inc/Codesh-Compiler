@@ -106,8 +106,6 @@ bool consume_punc_equal(std::queue<std::unique_ptr<token>> &tokens);
  * Optionally consumes a leading association token (and its following dot).
  *
  * An association token is either @c this or @c super.
- *
- * @returns Whether "this" was used or not
  */
 [[nodiscard]] ast::var_reference::reference_association parse_association_and_fqn(
         std::queue<std::unique_ptr<token>> &tokens, definition::fully_qualified_name &fqn_out);
