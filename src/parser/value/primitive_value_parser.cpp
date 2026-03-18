@@ -42,11 +42,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto id_pos = tokens.front()->get_code_position();
 
         definition::fully_qualified_name name(id_pos);
-        const auto var_ref = std::make_unique<ast::var_reference::variable_reference_ast_node>(id_pos, name);
-
         const auto association = util::parse_association_and_fqn(tokens, name);
+
+        auto var_ref = std::make_unique<ast::var_reference::variable_reference_ast_node>(id_pos, std::move(name));
         var_ref->set_association(association);
 
+        value = std::move(var_ref);
         break;
     }
 
