@@ -60,7 +60,7 @@ bool statement::resolve(const semantic_context &context,
         return method_call::resolve(context, *method_call, containing_method, scope);
     }
 
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&stmnt))
+    if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&stmnt))
     {
         return variable_reference::resolve(context, *var_ref, scope);
     }
@@ -220,7 +220,7 @@ static bool resolve_value(const semantic_context &context,
                           const method_symbol &containing_method,
                           const method_scope_symbol &scope)
 {
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
+    if (const auto var_ref = dynamic_cast<codesh::ast::var_reference::variable_reference_ast_node *>(&val_node))
     {
         return statement::variable_reference::resolve(context, *var_ref, scope);
     }

@@ -12,7 +12,6 @@
 #include "parser/ast/operator/assignment/multiplication_assignment_operator_ast_node.h"
 #include "parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
-#include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
 #include "token/token.h"
@@ -24,7 +23,7 @@
  * @returns The lhs & rhs of the operator, or @c std::nullopt upon failure
  */
 static std::optional<std::pair<
-    std::unique_ptr<variable_reference_ast_node>,
+    std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node>,
     std::unique_ptr<codesh::ast::var_reference::value_ast_node>
 >> parse_assignment_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, bool sepd_by_by);
 
@@ -32,7 +31,7 @@ static std::optional<std::pair<
  * Parses the next value from @p tokens and validates it is a variable reference.
  * @returns The variable node on success, or @c nullptr (after reporting a blasphemy) on failure.
  */
-static std::unique_ptr<variable_reference_ast_node> parse_variable(std::queue<std::unique_ptr<codesh::token>> &tokens);
+static std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node> parse_variable(std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_assignment_operator(
     std::queue<std::unique_ptr<token>> &tokens)
@@ -55,7 +54,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto right_value_node = parse_value(tokens);
 
         // lhs must be a variable
-        if (!dynamic_cast<const variable_reference_ast_node *>(left_value_node.get()))
+        if (!dynamic_cast<const codesh::ast::var_reference::variable_reference_ast_node *>(left_value_node.get()))
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::EXPECTED_VARIABLE,
@@ -68,8 +67,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         eval_ast_node = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
             op_pos,
-            std::unique_ptr<variable_reference_ast_node>(
-                static_cast<variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node>(
+                static_cast<codesh::ast::var_reference::variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
             ),
             std::move(right_value_node)
         );
@@ -185,7 +184,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 }
 
 static std::optional<std::pair<
-    std::unique_ptr<variable_reference_ast_node>,
+    std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node>,
     std::unique_ptr<codesh::ast::var_reference::value_ast_node>
 >> parse_assignment_operator_sides(std::queue<std::unique_ptr<codesh::token>> &tokens, const bool sepd_by_by)
 {
@@ -204,14 +203,14 @@ static std::optional<std::pair<
     return std::pair { std::move(left_variable_node), std::move(right_value_node) };
 }
 
-static std::unique_ptr<variable_reference_ast_node> parse_variable(std::queue<std::unique_ptr<codesh::token>> &tokens)
+static std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node> parse_variable(std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     auto value_node = codesh::parser::value::parse_value(tokens);
 
-    if (auto *var = dynamic_cast<variable_reference_ast_node *>(value_node.get()))
+    if (auto *var = dynamic_cast<codesh::ast::var_reference::variable_reference_ast_node *>(value_node.get()))
     {
         value_node.release(); // NOLINT(*-unused-return-value)
-        return std::unique_ptr<variable_reference_ast_node>(var);
+        return std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node>(var);
     }
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(

@@ -79,7 +79,7 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_start(const lexer::code_position pos)
+void codesh::definition::fully_qualified_name::set_start_position(const lexer::code_position pos)
 {
     source_range.start = pos;
 }
@@ -131,14 +131,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
     fully_qualified_name pretty_fqn(source_range.start);
     for (const auto &part : get_parts())
     {
-        if (part == "this")
-        {
-            pretty_fqn.add(lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_THIS));
-        }
-        else
-        {
-            pretty_fqn.add(part);
-        }
+        pretty_fqn.add(part);
     }
 
     return pretty_fqn.join(" ל־");

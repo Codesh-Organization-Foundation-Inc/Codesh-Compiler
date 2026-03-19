@@ -1,7 +1,6 @@
 #include "resolve.h"
 
 #include "blasphemy/details.h"
-#include "fmt/args.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
@@ -14,17 +13,19 @@
  * Otherwise, uses imports and such regularly.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
-        variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope);
+        codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
  * @returns Whether that the local variable referenced is accessed when it's supposed to
  */
 static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol &local_var,
-                          const variable_reference_ast_node &var_ref_node,
+                          const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
                           const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
@@ -32,13 +33,13 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
  * directly in the enclosing type's scope.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
-        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 
 bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
-                                                                       variable_reference_ast_node &var_ref_node,
-                                                                       const method_scope_symbol &scope)
+        ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const method_scope_symbol &scope)
 {
     if (!resolve_variable_reference(context, var_ref_node, scope))
         return false;
@@ -66,7 +67,7 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
 }
 
 static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol &local_var,
-                          const variable_reference_ast_node &var_ref_node,
+                          const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
                           const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     // Only validate variable range if the reference is within the SAME scope as the declaration.
@@ -74,8 +75,12 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
     //
     // To get the local_var parameter we use resolve_up anyway,
     // so we literally can't get a variable from a scope lower than the current.
-    if (local_var.get_parent_symbol() != static_cast<const codesh::semantic_analyzer::i_scope_containing_symbol *>(&scope))
+    if (local_var.get_parent_symbol() != static_cast<const codesh::semantic_analyzer::i_scope_containing_symbol *>(
+        &scope
+    ))
+    {
         return true;
+    }
 
 
     const auto &local_var_node = local_var.get_producing_node();
@@ -88,7 +93,7 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
 }
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
-        variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope)
+        codesh::ast::var_reference::variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     if (var_ref_node.get_producing_declaration().has_value())
     {
@@ -119,17 +124,17 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
-        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
+    if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
+        return find_field_symbol(context, var_ref_node, scope);
+
     if (!full_var_name.is_single_part())
     {
-        // If `this` was the first argument of the FQN, then it must be a field.
-        if (full_var_name.get_parts().front() == "this")
-            return find_field_symbol(context, var_ref_node, scope);
-
         return context.symbol_table_.resolve(
             context,
             full_var_name
@@ -157,7 +162,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
-        const codesh::semantic_analyzer::semantic_context &context, const variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
     const auto &type = scope.get_producing_node()

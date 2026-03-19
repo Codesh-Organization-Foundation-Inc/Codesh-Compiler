@@ -9,7 +9,7 @@ class increment_decrement_operator_ast_node : public assignment_operator_ast_nod
 {
 protected:
     increment_decrement_operator_ast_node(lexer::code_position code_position,
-            std::unique_ptr<variable_reference_ast_node> variable);
+            std::unique_ptr<var_reference::variable_reference_ast_node> variable);
 };
 
 }
