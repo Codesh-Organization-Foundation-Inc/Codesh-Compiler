@@ -35,11 +35,11 @@ enum class token_group : int
     KEYWORD_ENUM, // מניין
     KEYWORD_INTERFACE, // צלם
 
-    KEYWORD_PUBLIC, // נגלה
-    KEYWORD_PRIVATE, // נחבא
-    KEYWORD_PROTECTED, // קדש
+    KEYWORD_PUBLIC, // נגלה / נגלית
+    KEYWORD_PRIVATE, // נחבא / נחבאת
+    KEYWORD_PROTECTED, // קדש / קדשה
     KEYWORD_STATIC, // לכל־
-    KEYWORD_FINAL, // ימות ולא־יתחלף
+    KEYWORD_FINAL, // ימות ולא־יתחלף / תמות ולא־תתחלף
 
     KEYWORD_ANNOTATION, // חותם
     KEYWORD_ANNOTATE, // והיה

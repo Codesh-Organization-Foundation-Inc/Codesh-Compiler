@@ -36,10 +36,14 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_INTERFACE, u"צלם", word_boundary::BOTH},
 
     {token_group::KEYWORD_PUBLIC, u"נגלה", word_boundary::BOTH},
+    {token_group::KEYWORD_PUBLIC, u"נגלית", word_boundary::BOTH},
     {token_group::KEYWORD_PRIVATE, u"נחבא", word_boundary::BOTH},
+    {token_group::KEYWORD_PRIVATE, u"נחבאת", word_boundary::BOTH},
     {token_group::KEYWORD_PROTECTED, u"קדש", word_boundary::BOTH},
-    {token_group::KEYWORD_STATIC, u"לכל־", word_boundary::BEFORE},
+    {token_group::KEYWORD_PROTECTED, u"קדשה", word_boundary::BOTH},
     {token_group::KEYWORD_FINAL, u"ימות ולא־יתחלף", word_boundary::BOTH},
+    {token_group::KEYWORD_FINAL, u"תמות ולא־תתחלף", word_boundary::BOTH},
+    {token_group::KEYWORD_STATIC, u"לכל־", word_boundary::BEFORE},
 
     {token_group::KEYWORD_ANNOTATION, u"חותם", word_boundary::BOTH},
     {token_group::KEYWORD_ANNOTATE, u"והיה", word_boundary::BOTH},
