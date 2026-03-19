@@ -263,10 +263,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(i_scope_containing_symbol *const parent_symbol,
         indexed_locals_container &index_to_local_variable,
+        type_symbol &containing_type,
         ast::method::method_scope_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD_SCOPE),
     producing_node(producing_node),
     index_to_local_variable(index_to_local_variable),
+    containing_type(containing_type),
     scope(ALLOWED_SYMBOL_TYPES)
 {
     if (producing_node != nullptr)
@@ -282,10 +284,7 @@ codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_sc
 
 codesh::semantic_analyzer::type_symbol &codesh::semantic_analyzer::method_scope_symbol::get_parent_type() const
 {
-    return get_producing_node()
-        ->get_parent_method()
-        .get_resolved()
-        .get_parent_type();
+    return containing_type;
 }
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
@@ -354,7 +353,7 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
     create_method_scope(i_scope_containing_symbol &parent_scope, ast::method::method_scope_ast_node &producing_node)
 {
-    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &producing_node);
+    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, parent_type, &producing_node);
 }
 
 const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::method_symbol::get_full_name() const

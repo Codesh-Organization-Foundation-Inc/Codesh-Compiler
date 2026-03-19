@@ -247,6 +247,7 @@ class method_scope_symbol final : public symbol, public i_ast_produced<ast::meth
     ast::method::method_scope_ast_node *producing_node;
 
     indexed_locals_container &index_to_local_variable;
+    type_symbol &containing_type;
 
     named_symbol_map scope;
     std::vector<std::unique_ptr<method_scope_symbol>> inner_scopes;
@@ -256,6 +257,7 @@ protected:
 
 public:
     method_scope_symbol(i_scope_containing_symbol *parent_symbol, indexed_locals_container &index_to_local_variable,
+            type_symbol &containing_type,
             ast::method::method_scope_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::method::method_scope_ast_node *get_producing_node() const override;
