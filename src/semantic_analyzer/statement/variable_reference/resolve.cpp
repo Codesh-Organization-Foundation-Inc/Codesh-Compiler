@@ -2,6 +2,7 @@
 
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -33,6 +34,14 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
  * directly in the enclosing type's scope.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
+        const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
+
+/**
+ * Resolves a field reference of the form @c super.fieldName by looking up the field name
+ * in the enclosing type's super type's scope.
+ */
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_super_field_symbol(
         const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
@@ -133,6 +142,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
         return find_field_symbol(context, var_ref_node, scope);
 
+    if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::SUPER)
+        return find_super_field_symbol(context, var_ref_node, scope);
+
     if (!full_var_name.is_single_part())
     {
         return context.symbol_table_.resolve(
@@ -182,4 +194,33 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     }
 
     return result;
+}
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_super_field_symbol(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    const auto &type = scope.get_producing_node()
+        ->get_parent_method()
+        .get_resolved()
+        .get_parent_type();
+
+    const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
+
+    const codesh::semantic_analyzer::type_symbol *current = &type;
+    while (current->has_super_type() && current->get_super_type().is_resolved())
+    {
+        current = &current->get_super_type().get_resolved();
+
+        const auto result = current->get_field_scope().resolve_local(field_name);
+        if (result.has_value())
+            return result;
+    }
+
+    context.throw_blasphemy(fmt::format(
+        codesh::blasphemy::details::SYMBOL_NOT_FOUND,
+        field_name
+    ), var_ref_node.get_unresolved_name().get_source_range());
+    return std::nullopt;
 }

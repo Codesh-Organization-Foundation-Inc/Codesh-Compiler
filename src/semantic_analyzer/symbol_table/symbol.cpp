@@ -280,6 +280,14 @@ codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_sc
     return producing_node;
 }
 
+codesh::semantic_analyzer::type_symbol &codesh::semantic_analyzer::method_scope_symbol::get_parent_type() const
+{
+    return get_producing_node()
+        ->get_parent_method()
+        .get_resolved()
+        .get_parent_type();
+}
+
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
                                                                     std::unique_ptr<local_variable_symbol> variable)
 {
