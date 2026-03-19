@@ -176,6 +176,12 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
         )
     );
 
+    // Emit fields
+    for (const auto &field : get_fields())
+    {
+        field->emit_constants(root_node, constant_pool);
+    }
+
     // Emit methods
     for (const auto &method_decl : get_all_methods())
     {
