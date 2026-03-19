@@ -258,6 +258,7 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
         );
         return std::nullopt;
     }
+    
     return parent_type_result {
         &current_type.get_super_type().get_resolved(),
         nullptr
@@ -278,19 +279,16 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     if (method_call.get_association() == codesh::ast::var_reference::reference_association::SUPER)
         return resolve_call_parent_type_for_super(context, containing_method, method_call);
 
-    if (!name.get_parts().empty())
+    // For "this" methods, we must be speaking of type members.
+    // For single-names, the method must either be a type member or a static import.
+    //TODO: Handle static imports
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::THIS
+        || name.is_single_part())
     {
-        // For "this" methods, we must be speaking of type members.
-        // For single-names, the method must either be a type member or a static import.
-        //TODO: Handle static imports
-        if (name.is_single_part() ||
-            method_call.get_association() == codesh::ast::var_reference::reference_association::THIS)
-        {
-            return parent_type_result {
-                &containing_method.get_parent_type(),
-                nullptr
-            };
-        }
+        return parent_type_result {
+            &containing_method.get_parent_type(),
+            nullptr
+        };
     }
 
     if (method_call.has_chained_method())
