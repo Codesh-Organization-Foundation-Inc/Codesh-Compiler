@@ -3,7 +3,8 @@
 #include "lexer/trie/keywords.h"
 
 codesh::ast::op::assignment::decrement_operator_ast_node::decrement_operator_ast_node(
-        const lexer::code_position code_position, std::unique_ptr<variable_reference_ast_node> variable) :
+        const lexer::code_position code_position,
+        std::unique_ptr<var_reference::variable_reference_ast_node> variable) :
     increment_decrement_operator_ast_node(code_position, std::move(variable))
 {
 }

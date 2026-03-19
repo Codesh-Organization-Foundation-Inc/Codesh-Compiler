@@ -121,7 +121,7 @@ static std::unique_ptr<ast::op::assignment::assign_operator_ast_node> create_ini
 
     return std::make_unique<ast::op::assignment::assign_operator_ast_node>(
         assignment_token->get_code_position(),
-        std::make_unique<variable_reference_ast_node>(
+        std::make_unique<ast::var_reference::variable_reference_ast_node>(
             pos,
             codesh::definition::fully_qualified_name(name_pos, dest.get_name())
         ),

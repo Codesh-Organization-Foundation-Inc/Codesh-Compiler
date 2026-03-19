@@ -49,7 +49,7 @@ public:
     void add(std::string part);
     [[nodiscard]] const std::vector<std::string> &get_parts() const;
 
-    void set_start(lexer::code_position pos);
+    void set_start_position(lexer::code_position pos);
     void set_end_position(lexer::code_position pos);
     [[nodiscard]] const lexer::code_range &get_source_range() const;
 

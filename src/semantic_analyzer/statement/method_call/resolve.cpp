@@ -96,7 +96,7 @@ static void prepend_external_this_argument(
         codesh::semantic_analyzer::variable_symbol &receiver_variable);
 
 /**
- * For non-static calls targeting the same class (e.g. bare @c method or @c this / @c method), prepends @c this
+ * For non-static calls targeting the same class (e.g. bare @c method or @c this.method), prepends @c this
  * as the first argument.
  *
  * Emits a semantic error if the containing method is static.
@@ -257,10 +257,11 @@ static std::optional<parent_type_result> resolve_call_parent_type(
 
     if (!name.get_parts().empty())
     {
-        // For method calls prefixed by "this", we must be speaking of type members.
+        // For "this" methods, we must be speaking of type members.
         // For single-names, the method must either be a type member or a static import.
         //TODO: Handle static imports
-        if (name.is_single_part() || name.get_parts().front() == "this")
+        if (name.is_single_part() ||
+            method_call.get_association() == codesh::ast::var_reference::reference_association::THIS)
         {
             return parent_type_result {
                 &containing_method.get_parent_type(),
@@ -362,7 +363,7 @@ static void prepend_external_this_argument(
         codesh::ast::method::operation::method_call_ast_node &method_call,
         codesh::semantic_analyzer::variable_symbol &receiver_variable)
 {
-    auto receiver_node = std::make_unique<variable_reference_ast_node>(
+    auto receiver_node = std::make_unique<codesh::ast::var_reference::variable_reference_ast_node>(
         method_call.get_code_position(),
         codesh::definition::fully_qualified_name(
             method_call.get_code_position(),
@@ -407,7 +408,7 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
     const auto this_symbol = scope.resolve_up("this");
     auto &this_var_symbol = static_cast<codesh::semantic_analyzer::variable_symbol &>(this_symbol->get()); // NOLINT(*-pro-type-static-cast-downcast)
 
-    auto this_var = std::make_unique<variable_reference_ast_node>(
+    auto this_var = std::make_unique<codesh::ast::var_reference::variable_reference_ast_node>(
         method_call.get_code_position(),
         codesh::definition::fully_qualified_name(method_call.get_code_position(), std::string("this"))
     );
