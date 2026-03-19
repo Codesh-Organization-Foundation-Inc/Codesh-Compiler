@@ -38,6 +38,7 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
     case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
     case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
     case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
+    case codesh::token_group::KEYWORD_JCIK: return codesh::definition::basad_type::JCIK;
 
     default: {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(

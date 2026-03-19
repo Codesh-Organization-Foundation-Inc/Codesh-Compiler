@@ -6,6 +6,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_BASAD, u"בס\"ד", word_boundary::BOTH},
     {token_group::KEYWORD_BH, u"בע\"ה", word_boundary::BOTH},
     {token_group::KEYWORD_IAW, u"אי\"א", word_boundary::BOTH},
+    {token_group::KEYWORD_JCIK, u"ימ\"מ", word_boundary::BOTH},
 
     {token_group::SCOPE_BEGIN, u"ויאמר:", word_boundary::BEFORE},
     {token_group::SCOPE_END, u"ויתם:", word_boundary::BEFORE},
