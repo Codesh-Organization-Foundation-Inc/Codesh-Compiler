@@ -259,6 +259,10 @@ public:
             ast::method::method_scope_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::method::method_scope_ast_node *get_producing_node() const override;
+    /**
+     * @returns The type containing this symbol
+     */
+    [[nodiscard]] type_symbol &get_parent_type() const;
 
     /**
      * @returns The new variable's index

@@ -177,14 +177,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    const auto &type = scope.get_producing_node()
-        ->get_parent_method()
-        .get_resolved()
-        .get_parent_type();
-
+    const auto &type = scope.get_parent_type();
     const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
-    const auto result = type.get_field_scope().resolve_local(field_name);
 
+    const auto result = type.get_field_scope().resolve_local(field_name);
     if (!result.has_value())
     {
         context.throw_blasphemy(fmt::format(
@@ -201,11 +197,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    const auto &type = scope.get_producing_node()
-        ->get_parent_method()
-        .get_resolved()
-        .get_parent_type();
-
+    const auto &type = scope.get_parent_type();
     const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
 
     const codesh::semantic_analyzer::type_symbol *current = &type;
