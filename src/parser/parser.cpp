@@ -28,7 +28,8 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
     std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, file_id);
 
-    if (root_node->get_basad_type() == definition::basad_type::IAW)
+    if (root_node->get_basad_type() == definition::basad_type::IAW ||
+        root_node->get_basad_type() == definition::basad_type::JCIK)
     {
         std::cout << "צַדִּיק בֶּאֱמוּנָתוֹ יִחְיֶה" << std::endl;
         std::exit(0);
