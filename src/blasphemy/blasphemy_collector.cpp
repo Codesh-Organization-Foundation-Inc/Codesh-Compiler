@@ -29,7 +29,7 @@ static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
                                                            lexer::code_range source_range, bool is_fatal)
 {
-    blasphemies.emplace_back(std::move(details), type, file_id, source_range, is_fatal);
+    blasphemies.emplace_back(std::move(details), type, file_id, relative_source_path, source_range, is_fatal);
 
     if (is_fatal)
     {
@@ -60,6 +60,7 @@ void codesh::blasphemy::blasphemy_collector::add_warning(std::string details, bl
         std::move(details),
         type,
         file_id,
+        relative_source_path,
         source_range,
         false
     );
@@ -119,8 +120,7 @@ void codesh::blasphemy::blasphemy_collector::clear()
     warnings.clear();
 }
 
-void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_info &blasphemy,
-        const std::string &color) const
+void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_info &blasphemy, const std::string &color)
 {
     std::cerr << color;
 
@@ -133,7 +133,7 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
 
     fmt::print(stderr,
         " בְּסֵפֶר {}",
-        relative_source_path.string()
+        blasphemy.source_path.string()
     );
 
     if (const auto &code_pos = blasphemy.source_range)
