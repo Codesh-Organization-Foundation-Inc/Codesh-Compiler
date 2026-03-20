@@ -72,6 +72,8 @@ extern const fmt::runtime_format_string<> RETURN_TYPE_MISMATCH;
 extern const fmt::runtime_format_string<> DUPLICATE_TYPE_DECLARATION;
 extern const fmt::runtime_format_string<> DUPLICATE_METHOD_DECLARATION;
 extern const fmt::runtime_format_string<> NON_STATIC_CALL_FROM_STATIC_CONTEXT;
+extern const fmt::runtime_format_string<> NOT_AN_ARRAY;
+extern const std::string ARRAY_INDEX_NOT_INTEGER;
 
 // OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
