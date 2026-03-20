@@ -125,7 +125,7 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::UNEXPECTED_END_OF_NUMBER,
-                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+                lexer::trie::token_to_string(current_number->producing_token->get_group())
             ),
             blasphemy::blasphemy_type::SYNTAX,
             current_number->producing_token->get_code_position()
@@ -146,7 +146,7 @@ void codesh::parser::value::biblical_numbers_parser::handle_addition()
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING,
-                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+                lexer::trie::token_to_string(current_number->producing_token->get_group())
             ),
             blasphemy::blasphemy_type::SYNTAX,
             current_number->producing_token->get_code_position()
@@ -167,7 +167,7 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::INVALID_MULTIPLICATION_FACTOR,
-                lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+                lexer::trie::token_to_string(current_number->producing_token->get_group())
             ),
             blasphemy::blasphemy_type::SYNTAX,
             current_number->producing_token->get_code_position()
@@ -182,8 +182,8 @@ void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 fmt::format(
                     blasphemy::details::INVALID_NUMBER_FORMAT_DESCENDING,
-                    lexer::trie::TOKEN_TO_NAME_MAP.at(next_number->producing_token->get_group()),
-                    lexer::trie::TOKEN_TO_NAME_MAP.at(current_number->producing_token->get_group())
+                    lexer::trie::token_to_string(next_number->producing_token->get_group()),
+                    lexer::trie::token_to_string(current_number->producing_token->get_group())
                 ),
                 blasphemy::blasphemy_type::SYNTAX,
                 next_number->producing_token->get_code_position()
@@ -251,7 +251,7 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
     blasphemy::get_blasphemy_collector().add_blasphemy(
         fmt::format(
             blasphemy::details::UNEXPECTED_ADDITION_OPERATOR,
-            lexer::trie::TOKEN_TO_NAME_MAP.at(next_number->producing_token->get_group())
+            lexer::trie::token_to_string(next_number->producing_token->get_group())
         ),
         blasphemy::blasphemy_type::SYNTAX,
         next_number->producing_token->get_code_position()

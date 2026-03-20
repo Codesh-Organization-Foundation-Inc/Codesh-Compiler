@@ -11,7 +11,7 @@ codesh::ast::op::assignment::multiplication_assignment_operator_ast_node::multip
 
 std::string codesh::ast::op::assignment::multiplication_assignment_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT);
+    return lexer::trie::token_to_string(token_group::OPERATOR_MULTIPLICATION_ASSIGNMENT);
 }
 
 codesh::output::ir::operator_type codesh::ast::op::assignment::

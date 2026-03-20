@@ -11,5 +11,5 @@ codesh::ast::op::less_equals_operator_ast_node::less_equals_operator_ast_node(
 
 std::string codesh::ast::op::less_equals_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_LESS_EQUALS);
+    return lexer::trie::token_to_string(token_group::OPERATOR_LESS_EQUALS);
 }
