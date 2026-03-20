@@ -205,9 +205,19 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    const auto invokation_type = method.get_attributes().get_is_static()
-        ? output::ir::invokation_type::STATIC
-        : output::ir::invokation_type::VIRTUAL;
+    output::ir::invokation_type invokation_type;
+    if (method.get_attributes().get_is_static())
+    {
+        invokation_type = output::ir::invokation_type::STATIC;
+    }
+    else if (association == var_reference::reference_association::SUPER)
+    {
+        invokation_type = output::ir::invokation_type::SPECIAL;
+    }
+    else
+    {
+        invokation_type = output::ir::invokation_type::VIRTUAL;
+    }
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
         invokation_type,

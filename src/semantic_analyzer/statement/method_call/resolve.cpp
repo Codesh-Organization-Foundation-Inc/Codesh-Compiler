@@ -119,6 +119,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::type_symbol &start,
+        const std::string &name);
+
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_from_overload(
         const codesh::semantic_analyzer::semantic_context &context, args_match_type match_type,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
@@ -244,6 +248,27 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     return resolved_method;
 }
 
+static std::optional<parent_type_result> resolve_call_parent_type_for_super(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto &current_type = containing_method.get_parent_type();
+    if (!current_type.has_super_type() || !current_type.get_super_type().is_resolved())
+    {
+        context.throw_blasphemy(
+            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            method_call.get_name_range()
+        );
+        return std::nullopt;
+    }
+
+    return parent_type_result {
+        &current_type.get_super_type().get_resolved(),
+        nullptr
+    };
+}
+
 static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -255,19 +280,19 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
         return resolve_call_parent_type(context, *new_call);
 
-    if (!name.get_parts().empty())
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::SUPER)
+        return resolve_call_parent_type_for_super(context, containing_method, method_call);
+
+    // For "this" methods, we must be speaking of type members.
+    // For single-names, the method must either be a type member or a static import.
+    //TODO: Handle static imports
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::THIS
+        || name.is_single_part())
     {
-        // For "this" methods, we must be speaking of type members.
-        // For single-names, the method must either be a type member or a static import.
-        //TODO: Handle static imports
-        if (name.is_single_part() ||
-            method_call.get_association() == codesh::ast::var_reference::reference_association::THIS)
-        {
-            return parent_type_result {
-                &containing_method.get_parent_type(),
-                nullptr
-            };
-        }
+        return parent_type_result {
+            &containing_method.get_parent_type(),
+            nullptr
+        };
     }
 
     if (method_call.has_chained_method())
@@ -502,11 +527,12 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::type_symbol &type,
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    const auto method_overloads_raw = type.get_scope().resolve_local(
+    const auto method_overloads_raw = resolve_method_in_hierarchy(
+        type,
         method_call.get_last_name(false)
     );
 
-    if (!method_overloads_raw)
+    if (!method_overloads_raw.has_value())
     {
         context.throw_blasphemy(fmt::format(
             codesh::blasphemy::details::METHOD_NOT_FOUND,
@@ -560,6 +586,26 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         //TODO: Highlight arguments, not method name
         method_call.get_name_range()
     );
+    return std::nullopt;
+}
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::type_symbol &start,
+        const std::string &name)
+{
+    const codesh::semantic_analyzer::type_symbol *current = &start;
+    while (current != nullptr)
+    {
+        const auto result = current->get_scope().resolve_local(name);
+        if (result.has_value())
+            return result;
+
+        if (!current->has_super_type() || !current->get_super_type().is_resolved())
+            break;
+
+        current = &current->get_super_type().get_resolved();
+    }
+
     return std::nullopt;
 }
 
