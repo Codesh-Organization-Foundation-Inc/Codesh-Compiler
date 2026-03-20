@@ -13,7 +13,7 @@ static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
     {token_group::LITERAL_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+\bצף\b)"},
     {token_group::LITERAL_NUMBER_DOUBLE, R"(\d+\.\d+)"},
     {token_group::LITERAL_NUMBER_INT, R"(\d+)"},
-    {token_group::LITERAL_STRING, R"(ויקרא(?: | [^\n]+? )(?<! ליטרלי )לאמר)"},
+    {token_group::LITERAL_STRING, R"(יקרא(?: | [^\n]+? )(?<! ליטרלי )לאמר)"},
     {token_group::LITERAL_CHAR, R"('(?:[^'\\]|\\.)')"},
 
     {token_group::IDENTIFIER, R"([^\s.;[\]/<>:]+)"},
