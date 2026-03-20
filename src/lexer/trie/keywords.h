@@ -7,8 +7,9 @@
 
 namespace codesh::lexer::trie
 {
+using keywords_map = std::unordered_map<token_group, keyword_info>;
+extern const keywords_map KEYWORDS;
 
-extern const std::unordered_map<token_group, keyword_info> KEYWORDS;
 std::string token_to_string(token_group token);
 
 namespace keyword
@@ -27,5 +28,4 @@ inline constexpr std::string_view STRING_NEWLINE = " ש\"ח ";
 
 inline constexpr std::string_view STRING_ESCAPE = "ליטרלי ";
 }
-
 }

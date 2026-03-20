@@ -3,7 +3,7 @@
 #include <cassert>
 #include <utf8.h>
 
-const std::unordered_map<codesh::token_group, codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWORDS = {
+const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_BASAD, {u"בס\"ד", word_boundary::BOTH}},
     {token_group::KEYWORD_BH, {u"בע\"ה", word_boundary::BOTH}},
     {token_group::KEYWORD_IAW, {u"אי\"א", word_boundary::BOTH}},
