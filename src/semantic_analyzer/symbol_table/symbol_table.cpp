@@ -5,6 +5,7 @@
 #include "defenition/definitions.h"
 #include "semantic_analyzer/external/class_loader.h"
 #include "semantic_analyzer/external/jimage_loader.h"
+#include "semantic_analyzer/external/jar_loader.h"
 #include "semantic_analyzer/semantic_context.h"
 
 #include <filesystem>
@@ -17,6 +18,7 @@
         std::vector<std::string>::const_iterator fqn_end);
 
 static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jimage_loader>> jimage_cache;
+static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jar_loader>> jar_cache;
 
 
 codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths,
@@ -241,6 +243,17 @@ bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::stri
             }
 
             if (jimage_cache.at(key)->load("java.base", definition::fully_qualified_name::parse(candidate, lexer::NO_CODE_POS), *this))
+                return true;
+        }
+        else if (external::is_jar(classpath))
+        {
+            const auto key = classpath.string();
+            if (!jar_cache.contains(key))
+            {
+                jar_cache.emplace(key, std::make_unique<external::jar_loader>(classpath));
+            }
+
+            if (jar_cache.at(key)->load(candidate, *this))
                 return true;
         }
     }
