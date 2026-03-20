@@ -326,6 +326,8 @@ add_executable(codeshc
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
         src/semantic_analyzer/external/jimage_loader.h
         src/semantic_analyzer/external/jimage_loader.cpp
+        src/semantic_analyzer/external/interop_replacements.h
+        src/semantic_analyzer/external/interop_replacements.cpp
         src/semantic_analyzer/external/util.cpp
         src/semantic_analyzer/external/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
