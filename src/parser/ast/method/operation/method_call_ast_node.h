@@ -20,6 +20,12 @@ class method_symbol;
 
 namespace codesh::ast::method::operation
 {
+struct named_argument
+{
+    std::string name;
+    std::unique_ptr<var_reference::value_ast_node> value;
+};
+
 class method_call_ast_node : public var_reference::value_ast_node,
     public impl::i_constant_pool_emitter,
     public impl::i_resolvable<semantic_analyzer::method_symbol>,
@@ -31,9 +37,7 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     std::optional<std::unique_ptr<method_call_ast_node>> chained_method;
 
-    std::deque<std::unique_ptr<value_ast_node>> arguments;
-
-    std::deque<std::string> named_arguments;
+    std::deque<named_argument> arguments;
 
     static size_t determine_stack_delta(const type::type_ast_node &type);
 
@@ -63,14 +67,13 @@ public:
     using i_descriptor_emitter::generate_descriptor;
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
-    [[nodiscard]] const std::deque<std::unique_ptr<value_ast_node>> &get_arguments() const;
-    [[nodiscard]] const std::deque<std::string> &get_named_arguments() const;
+    [[nodiscard]] std::deque<named_argument> &get_arguments();
+    [[nodiscard]] const std::deque<named_argument> &get_arguments() const;
 
-    void add_argument(std::string name, std::unique_ptr<value_ast_node> value);
-    void add_argument_front(std::string name, std::unique_ptr<value_ast_node> value);
+    void set_statement_at(size_t index, std::unique_ptr<value_ast_node> value);
+
 
     void set_statement_index(size_t statement_index) override;
-
 
     [[nodiscard]] std::string to_pretty_string() const override;
 
