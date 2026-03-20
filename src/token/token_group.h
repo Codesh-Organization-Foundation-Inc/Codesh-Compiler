@@ -19,7 +19,6 @@ enum class token_group : int
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_IMPORT, // ויבא
-    KEYWORD_IMPORT_REGULAR, // את
     KEYWORD_IMPORT_STATIC, // לכל־את
 
     KEYWORD_LET, // ויהי
