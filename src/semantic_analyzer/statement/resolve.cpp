@@ -19,6 +19,7 @@
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type/widening_cast_ast_node.h"
+#include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -48,6 +49,12 @@ static bool is_primitive_type(const codesh::ast::var_reference::value_ast_node &
 static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_node &val_node);
 
 static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node);
+
+static bool resolve_array_operand(const semantic_context &context,
+                                  codesh::ast::op::array_access_ast_node &arr_access);
+
+static bool resolve_array_index(const semantic_context &context,
+                                const codesh::ast::op::array_access_ast_node &arr_access);
 
 
 bool statement::resolve(const semantic_context &context,
@@ -209,6 +216,23 @@ bool statement::resolve(const semantic_context &context,
         return all_succeed;
     }
 
+    if (const auto arr_access = dynamic_cast<ast::op::array_access_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        if (all_succeed &= resolve_value(context, arr_access->get_array(), containing_method, scope))
+        {
+            all_succeed &= resolve_array_operand(context, *arr_access);
+        }
+
+        if (all_succeed &= resolve_value(context, arr_access->get_index(), containing_method, scope))
+        {
+            all_succeed &= resolve_array_index(context, *arr_access);
+        }
+
+        return all_succeed;
+    }
+
     // Probably doesn't need to be resolved.
     return true;
 }
@@ -301,4 +325,47 @@ static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_
         val_node.get_code_position()
     );
     return false;
+}
+
+static bool resolve_array_operand(const semantic_context &context,
+                                  codesh::ast::op::array_access_ast_node &arr_access)
+{
+    const auto *arr_type = arr_access.get_array().get_type();
+    if (arr_type == nullptr)
+        return false;
+
+    if (arr_type->get_array_dimensions() == 0)
+    {
+        context.throw_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::NOT_AN_ARRAY,
+                arr_type->to_pretty_string()
+            ),
+            arr_access.get_array().get_code_position()
+        );
+        return false;
+    }
+
+    auto elem_type = arr_type->clone();
+    elem_type->set_array_dimensions(arr_type->get_array_dimensions() - 1);
+    arr_access.set_element_type(std::move(elem_type));
+    return true;
+}
+
+static bool resolve_array_index(const semantic_context &context,
+                                const codesh::ast::op::array_access_ast_node &arr_access)
+{
+    const auto *idx_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(
+        arr_access.get_index().get_type()
+    );
+
+    if (idx_prim == nullptr || idx_prim->get_type() != codesh::definition::primitive_type::INTEGER)
+    {
+        context.throw_blasphemy(
+            codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER,
+            arr_access.get_index().get_code_position()
+        );
+        return false;
+    }
+    return true;
 }

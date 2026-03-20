@@ -20,9 +20,14 @@ codesh::ast::var_reference::value_ast_node& codesh::ast::op::array_access_ast_no
     return *index;
 }
 
+void codesh::ast::op::array_access_ast_node::set_element_type(std::unique_ptr<type::type_ast_node> type)
+{
+    element_type = std::move(type);
+}
+
 codesh::ast::type::type_ast_node* codesh::ast::op::array_access_ast_node::get_type() const
 {
-    return nullptr;
+    return element_type.get();
 }
 
 void codesh::ast::op::array_access_ast_node::emit_ir(output::ir::code_block &containing_block,

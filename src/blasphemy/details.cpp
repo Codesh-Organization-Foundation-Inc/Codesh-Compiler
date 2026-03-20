@@ -155,6 +155,12 @@ const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rf
     "קְרִיאָה אֵינָהּ כְּשֵׁרָה: וָלֹא־תְּבַשֵּׁל מַעֲשֶׂה כְּלָלִי {} בָּאֵנוּ כְּלָלֵי"
 );
 
+const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
+    "סוּג אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְהִשְׁתַּמֵּשׁ בְּ{} כְּאוֹסֶף"
+);
+const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
+    "סוּג אֵינוֹ כָּשֵׁר: מַפְתֵּחַ הָאוֹסֶף חַיָּב לִהְיוֹת מִסּוּג שָׁלֵם";
+
 // OUTPUT
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG =
     "גְּבוּל נֶעֱבַר: אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף";
