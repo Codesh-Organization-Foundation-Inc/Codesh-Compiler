@@ -25,14 +25,6 @@ void codesh::ast::op::array_access_ast_node::set_element_type(std::unique_ptr<ty
     element_type = std::move(type);
 }
 
-codesh::ast::type::type_ast_node &codesh::ast::op::array_access_ast_node::get_element_type() const
-{
-    if (element_type == nullptr)
-        throw std::runtime_error("Element type was not resolved, yet it was attempted to be accessed");
-
-    return *element_type;
-}
-
 codesh::ast::type::type_ast_node* codesh::ast::op::array_access_ast_node::get_type() const
 {
     return element_type.get();

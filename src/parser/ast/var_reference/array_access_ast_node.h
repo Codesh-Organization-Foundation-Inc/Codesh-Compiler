@@ -21,7 +21,6 @@ public:
     [[nodiscard]] value_ast_node &get_index() const;
 
     void set_element_type(std::unique_ptr<type::type_ast_node> type);
-    [[nodiscard]] type::type_ast_node &get_element_type() const;
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
