@@ -10,5 +10,5 @@ codesh::ast::op::greater_operator_ast_node::greater_operator_ast_node(const lexe
 
 std::string codesh::ast::op::greater_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_GREATER);
+    return lexer::trie::token_to_string(token_group::OPERATOR_GREATER);
 }

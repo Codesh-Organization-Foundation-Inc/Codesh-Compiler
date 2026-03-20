@@ -11,5 +11,5 @@ codesh::ast::op::greater_equals_operator_ast_node::greater_equals_operator_ast_n
 
 std::string codesh::ast::op::greater_equals_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_GREATER_EQUALS);
+    return lexer::trie::token_to_string(token_group::OPERATOR_GREATER_EQUALS);
 }

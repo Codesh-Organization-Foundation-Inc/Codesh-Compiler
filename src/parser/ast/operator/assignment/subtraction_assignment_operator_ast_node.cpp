@@ -11,7 +11,7 @@ assignment_operator_ast_node(code_position, std::move(left), std::move(right))
 
 std::string codesh::ast::op::assignment::subtraction_assignment_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_SUBTRACTION_ASSIGNMENT);
+    return lexer::trie::token_to_string(token_group::OPERATOR_SUBTRACTION_ASSIGNMENT);
 }
 
 codesh::output::ir::operator_type codesh::ast::op::assignment::subtraction_assignment_operator_ast_node::

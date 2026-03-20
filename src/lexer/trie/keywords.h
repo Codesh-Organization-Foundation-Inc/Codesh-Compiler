@@ -8,8 +8,8 @@
 namespace codesh::lexer::trie
 {
 
-extern const std::vector<keyword_info> KEYWORDS;
-extern const std::unordered_map<token_group, std::string> TOKEN_TO_NAME_MAP;
+extern const std::unordered_map<token_group, keyword_info> KEYWORDS;
+std::string token_to_string(token_group token);
 
 namespace keyword
 {

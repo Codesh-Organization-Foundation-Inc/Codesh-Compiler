@@ -133,7 +133,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
     {
         if (part == "this")
         {
-            pretty_fqn.add(lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_THIS));
+            pretty_fqn.add(lexer::trie::token_to_string(token_group::KEYWORD_THIS));
         }
         else
         {

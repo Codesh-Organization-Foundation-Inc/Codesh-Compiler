@@ -60,30 +60,25 @@ static bool is_annoying_char(const char16_t c)
     return u_isalnum(c);
 }
 
-static bool check_boundary(const std::u16string &code, const trie::keyword_info *keyword, const size_t start,
+static bool check_boundary(const std::u16string &code, const trie::word_boundary boundary, const size_t start,
                            const size_t end) {
-    if (!keyword)
-        return false;
-
     // If there are no boundaries at all, the checks don't really matter.
-    if (keyword->boundary == trie::word_boundary::NONE)
+    if (boundary == trie::word_boundary::NONE)
         return true;
 
-
-    if (keyword->boundary == trie::word_boundary::BEFORE || keyword->boundary == trie::word_boundary::BOTH)
+    if (boundary == trie::word_boundary::BEFORE || boundary == trie::word_boundary::BOTH)
     {
         // Check whether a character exists before this keyword
         if (start > 0 && is_annoying_char(code[start-1]))
             return false;
     }
 
-    if (keyword->boundary == trie::word_boundary::AFTER || keyword->boundary == trie::word_boundary::BOTH)
+    if (boundary == trie::word_boundary::AFTER || boundary == trie::word_boundary::BOTH)
     {
         // Check whether a character exists after this keyword
         if (end < code.size() && is_annoying_char(code[end]))
             return false;
     }
-
 
     return true;
 }
@@ -188,16 +183,16 @@ static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
                                                     const size_t code_pos)
 {
     const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
-    const trie::keyword_info *last_match = nullptr;
+    std::optional<trie::trie_match> last_match;
     size_t last_match_end = code_pos;
 
     for (size_t i = code_pos; i < code.size() && current->get_child(code[i]); i++)
     {
         current = &current->get_child(code[i])->get();
 
-        if (const auto keyword = current->get_keyword())
+        if (const auto keyword = current->get_match())
         {
-            last_match = &keyword->get();
+            last_match = keyword;
             last_match_end = i + 1;
         }
 
@@ -210,8 +205,16 @@ static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
         }
     }
 
-    if (last_match && check_boundary(code, last_match, code_pos, last_match_end))
-        return handle_keyword_match(code, current_code_position, last_match->token, tokens, last_match_end);
+    if (last_match && check_boundary(code, last_match->boundary, code_pos, last_match_end))
+    {
+        return handle_keyword_match(
+            code,
+            current_code_position,
+            last_match->keyword_token,
+            tokens,
+            last_match_end
+        );
+    }
 
     return std::nullopt;
 }
