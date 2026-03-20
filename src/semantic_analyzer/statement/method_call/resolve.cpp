@@ -137,7 +137,7 @@ static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &me
 static std::optional<std::unordered_set<size_t>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context, args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
-        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, size_t offset);
+        const std::deque<codesh::ast::method::operation::named_argument> &arguments, size_t offset);
 
 
 
@@ -178,7 +178,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     for (const auto &arg : arguments)
     {
-        if (arg->get_type() == nullptr)
+        if (arg.value->get_type() == nullptr)
             return std::nullopt;
     }
 
@@ -397,7 +397,8 @@ static void prepend_external_this_argument(
     );
 
     receiver_node->set_resolved(receiver_variable);
-    method_call.get_arguments().push_front(std::move(receiver_node));
+
+    method_call.get_arguments().emplace_front("this", std::move(receiver_node));
 }
 
 static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
@@ -435,10 +436,12 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 
     auto this_var = std::make_unique<codesh::ast::var_reference::variable_reference_ast_node>(
         method_call.get_code_position(),
-        codesh::definition::fully_qualified_name(method_call.get_code_position(), std::string("this"))
+        codesh::definition::fully_qualified_name(method_call.get_code_position(), "this")
     );
+
     this_var->set_resolved(this_var_symbol);
-    method_call.get_arguments().push_front(std::move(this_var));
+
+    method_call.get_arguments().emplace_front("this", std::move(this_var));
 
     return true;
 }
@@ -454,7 +457,7 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
 
     for (const auto &arg : method_call_node.get_arguments())
     {
-        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg.get()))
+        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg.value.get()))
         {
             all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
@@ -651,8 +654,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         {
             if (needs_widening.contains(i))
             {
-                arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
-                    std::move(arguments.at(i)),
+                arguments.at(i).value = codesh::semantic_analyzer::util::make_widening_cast(
+                    std::move(arguments.at(i).value),
                     *params.at(i + offset)
                 );
             }
@@ -668,7 +671,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context,
         const args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
-        const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &arguments, const size_t offset)
+        const std::deque<codesh::ast::method::operation::named_argument> &arguments, const size_t offset)
 {
     std::unordered_set<size_t> match_results;
     match_results.reserve(arguments.size());
@@ -676,7 +679,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
     for (size_t i = 0; i < arguments.size(); i++)
     {
         auto &param_type = *params.at(i + offset);
-        const auto &arg_type = *arguments.at(i)->get_type();
+        const auto &arg_type = *arguments.at(i).value->get_type();
 
         if (!codesh::semantic_analyzer::util::resolve_type_node(context, param_type))
             return std::nullopt;
