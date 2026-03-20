@@ -102,18 +102,20 @@ const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &c
     return arguments;
 }
 
-void codesh::ast::method::operation::method_call_ast_node::add_argument(std::string name,
-        std::unique_ptr<value_ast_node> value)
+std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
+    method_call_ast_node::get_arguments()
 {
-    named_arguments.push_back(std::move(name));
-    arguments.push_back(std::move(value));
+    return arguments;
 }
 
-void codesh::ast::method::operation::method_call_ast_node::add_argument_front(std::string name,
-        std::unique_ptr<value_ast_node> value)
+const std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments() const
 {
-    named_arguments.push_front(std::move(name));
-    arguments.push_front(std::move(value));
+    return named_arguments;
+}
+
+std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments()
+{
+    return named_arguments;
 }
 
 void codesh::ast::method::operation::method_call_ast_node::set_statement_index(const size_t statement_index)
@@ -130,28 +132,6 @@ std::string codesh::ast::method::operation::method_call_ast_node::to_pretty_stri
 {
     return fmt::format(
         definition::METHOD_PRETTY_STRING,
-        get_last_name(false)
-    );
-}
-
-void codesh::ast::method::operation::method_call_ast_node::emit_constants(
-    const compilation_unit_ast_node &root_node, output::jvm_target::constant_pool &constant_pool)
-{
-    constant_pool.goc_methodref_info(
-        constant_pool.goc_class_info(
-            constant_pool.goc_utf8_info(get_resolved_name().omit_last().join())
-        ),
-
-        constant_pool.goc_name_and_type_info(
-            constant_pool.goc_utf8_info(get_last_name(true)),
-            constant_pool.goc_utf8_info(generate_descriptor())
-        )
-    );
-
-    // Emit arguments
-    for (const auto &argument : get_arguments())
-    {
-        if (const auto constant_emitter = dynamic_cast<i_constant_pool_STRING,
         get_last_name(false)
     );
 }
@@ -223,8 +203,8 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 
 
     const auto invokation_type = method.get_attributes().get_is_static()
-                                     ? output::ir::invokation_type::STATIC
-                                     : output::ir::invokation_type::VIRTUAL;
+        ? output::ir::invokation_type::STATIC
+        : output::ir::invokation_type::VIRTUAL;
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
         invokation_type,
@@ -241,4 +221,30 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     {
         containing_block.add_instruction(std::make_unique<output::ir::stack_size_delta_marker>(stack_delta));
     }
+}
+
+size_t codesh::ast::method::operation::method_call_ast_node::determine_stack_delta(const type::type_ast_node &type)
+{
+    if (const auto primitive_type = dynamic_cast<const type::primitive_type_ast_node *>(&type))
+    {
+        switch (primitive_type->get_type())
+        {
+        case definition::primitive_type::VOID:
+            return 0;
+
+        case definition::primitive_type::LONG:
+        case definition::primitive_type::DOUBLE:
+            return 2;
+
+        default:
+            return 1;
+        }
+    }
+
+    if (dynamic_cast<const type::custom_type_ast_node *>(&type))
+    {
+        return 1;
+    }
+
+    throw std::invalid_argument("Unknown type");
 }
