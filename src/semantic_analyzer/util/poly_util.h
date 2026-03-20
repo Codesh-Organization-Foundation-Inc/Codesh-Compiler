@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 namespace codesh::semantic_analyzer
 {
 class type_symbol;

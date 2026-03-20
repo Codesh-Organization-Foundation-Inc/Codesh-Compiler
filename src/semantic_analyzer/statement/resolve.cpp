@@ -60,7 +60,7 @@ bool statement::resolve(const semantic_context &context,
         return method_call::resolve(context, *method_call, containing_method, scope);
     }
 
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&stmnt))
+    if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&stmnt))
     {
         return variable_reference::resolve(context, *var_ref, scope);
     }
@@ -125,12 +125,13 @@ bool statement::resolve(const semantic_context &context,
 
     if (const auto return_node = dynamic_cast<ast::method::operation::return_ast_node *>(&stmnt))
     {
-        if (return_node->get_return_value() == nullptr)
+        const auto ret_val = return_node->get_return_value();
+        if (ret_val == nullptr)
             return true;
 
         // Perform compatibility check only if we could resolve the return value
         // Otherwise it's a useless, guaranteed error.
-        if (!resolve_value(context, *return_node->get_return_value(), containing_method, scope))
+        if (!resolve_value(context, *ret_val, containing_method, scope))
             return false;
 
 
@@ -147,7 +148,7 @@ bool statement::resolve(const semantic_context &context,
             context.throw_blasphemy(
                 fmt::format(
                     blasphemy::details::RETURN_TYPE_MISMATCH,
-                    return_node->get_return_value()->get_type()->to_pretty_string(),
+                    ret_val->get_type()->to_pretty_string(),
                     expected_return_type.to_pretty_string()
                 ),
                 return_node->get_code_position()
@@ -162,9 +163,7 @@ bool statement::resolve(const semantic_context &context,
     if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
     {
         if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
-        {
             return false;
-        }
 
         if (!unary_op->is_value_valid())
         {
@@ -220,12 +219,17 @@ static bool resolve_value(const semantic_context &context,
                           const method_symbol &containing_method,
                           const method_scope_symbol &scope)
 {
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
+    if (const auto var_ref = dynamic_cast<codesh::ast::var_reference::variable_reference_ast_node *>(&val_node))
     {
-        return statement::variable_reference::resolve(context, *var_ref, scope);
+        if (!statement::variable_reference::resolve(context, *var_ref, scope))
+            return false;
+    }
+    else if (!statement::resolve(context, val_node, containing_method, scope))
+    {
+        return false;
     }
 
-    return statement::resolve(context, val_node, containing_method, scope);
+    return val_node.get_type() != nullptr;
 }
 
 static bool resolve_scope(const semantic_context &context,

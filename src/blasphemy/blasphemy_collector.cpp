@@ -39,7 +39,8 @@ void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, 
 }
 
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, const blasphemy_type type,
-                                                           const lexer::code_position code_start_pos, const bool is_fatal)
+                                                           const lexer::code_position code_start_pos,
+                                                           const bool is_fatal)
 {
     add_blasphemy(
         std::move(details),

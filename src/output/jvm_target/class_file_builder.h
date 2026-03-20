@@ -13,6 +13,7 @@ class symbol_table;
 namespace codesh::ast::type_decl
 {
 class class_declaration_ast_node;
+class field_declaration_ast_node;
 }
 namespace codesh::ast::type_decl
 {
@@ -111,6 +112,9 @@ class class_file_builder
 
     void add_constant_pool_entries() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
+    void add_field(const ast::type_decl::field_declaration_ast_node &field_decl) const;
+    [[nodiscard]] std::unique_ptr<defs::fields_info_entry> create_field_entry(
+            const ast::type_decl::field_declaration_ast_node &field_decl) const;
     void add_source_file() const;
 
     static void set_access_flags(unsigned char buffer[], const std::vector<access_flag> &flags);

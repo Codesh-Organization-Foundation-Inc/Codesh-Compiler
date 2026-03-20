@@ -8,6 +8,7 @@ enum class token_group : int
     KEYWORD_BASAD, // בס"ד
     KEYWORD_BH, // בע"ה
     KEYWORD_IAW, // אי"א
+    KEYWORD_JCIK, // ימ"מ
 
     SCOPE_BEGIN, // ויאמר:
     SCOPE_END, // ויתם:
@@ -18,7 +19,6 @@ enum class token_group : int
 
     KEYWORD_ORIGIN_COUNTRY, // וישב בארץ
     KEYWORD_IMPORT, // ויבא
-    KEYWORD_IMPORT_REGULAR, // את
     KEYWORD_IMPORT_STATIC, // לכל־את
 
     KEYWORD_LET, // ויהי

@@ -7,6 +7,7 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_BASAD, {u"בס\"ד", word_boundary::BOTH}},
     {token_group::KEYWORD_BH, {u"בע\"ה", word_boundary::BOTH}},
     {token_group::KEYWORD_IAW, {u"אי\"א", word_boundary::BOTH}},
+    {token_group::KEYWORD_JCIK, {u"ימ\"מ", word_boundary::BOTH}},
 
     {token_group::SCOPE_BEGIN, {u"ויאמר:", word_boundary::BEFORE}},
     {token_group::SCOPE_END, {u"ויתם:", word_boundary::BEFORE}},
@@ -18,7 +19,6 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_ORIGIN_COUNTRY, {u"וישב בארץ", word_boundary::BOTH}},
     {token_group::KEYWORD_IMPORT, {u"ויבא", word_boundary::BOTH}},
     {token_group::KEYWORD_IMPORT_STATIC, {u"לכל־את", word_boundary::BOTH}},
-    {token_group::KEYWORD_IMPORT_REGULAR, {u"את", word_boundary::BOTH}},
 
     {token_group::KEYWORD_LET, {u"ויהי", word_boundary::BOTH}},
     {token_group::KEYWORD_NAME, {u"ושמו", word_boundary::BOTH}},

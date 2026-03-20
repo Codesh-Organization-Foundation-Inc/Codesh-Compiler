@@ -154,7 +154,8 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
 
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    util::parse_this_and_fqn(tokens, method_call_node->get_fqn());
+    const auto association = util::parse_association_and_fqn(tokens, method_call_node->get_fqn());
+    method_call_node->set_association(association);
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {

@@ -163,13 +163,20 @@ static void lsp_server(const codesh::command_args &args)
 {
     while (true)
     {
-        const auto request = codesh::lsp::wait_for_request();
-        if (request == nullptr)
-            continue;
-
-        if (const auto diagnostics_req = dynamic_cast<const codesh::lsp::diagnostics_request *>(request.get()))
+        try
         {
-            handle_lsp_diagnostic_request(args, *diagnostics_req);
+            const auto request = codesh::lsp::wait_for_request();
+            if (request == nullptr)
+                continue;
+
+            if (const auto diagnostics_req = dynamic_cast<const codesh::lsp::diagnostics_request *>(request.get()))
+            {
+                handle_lsp_diagnostic_request(args, *diagnostics_req);
+            }
+        }
+        catch (...)
+        {
+            // skill issue segment
         }
     }
 }

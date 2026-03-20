@@ -11,12 +11,15 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "output/jvm_target/defs/fields_info_entry.h"
 #include "output/jvm_target/defs/methods_info_entry.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
 #include "output/jvm_target/defs/class_file.h"
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
+static void write_fields(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry>> &fields);
 static void write_methods(std::ofstream &out,
         const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
 static void write_attributes(std::ofstream &out,
@@ -64,6 +67,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     write_bytes(destination_file, class_file.interfaces_count, 2);
     write_bytes(destination_file, class_file.fields_count, 2);
+    write_fields(destination_file, class_file.fields_info);
     write_bytes(destination_file, class_file.methods_count, 2);
 
     write_methods(destination_file, class_file.methods_info);
@@ -268,6 +272,19 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         {
             throw std::runtime_error("Unknown attribute type");
         }
+    }
+}
+
+static void write_fields(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry>> &fields)
+{
+    for (const auto &field : fields)
+    {
+        write_bytes(out, field->access_flags, 2);
+        write_bytes(out, field->name_index, 2);
+        write_bytes(out, field->descriptor_index, 2);
+        write_bytes(out, field->attributes_count, 2);
+        write_attributes(out, field->attribute_info);
     }
 }
 

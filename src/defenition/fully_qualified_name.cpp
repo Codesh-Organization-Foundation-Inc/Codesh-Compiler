@@ -38,10 +38,7 @@ codesh::definition::fully_qualified_name codesh::definition::fully_qualified_nam
     std::string item;
     while (std::getline(fqn_stream, item, '/'))
     {
-        if (!item.empty())
-        {
-            result.add(item);
-        }
+        result.add(item);
     }
 
     return result;
@@ -79,7 +76,7 @@ const std::vector<std::string> &codesh::definition::fully_qualified_name::get_pa
     return parts;
 }
 
-void codesh::definition::fully_qualified_name::set_start(const lexer::code_position pos)
+void codesh::definition::fully_qualified_name::set_start_position(const lexer::code_position pos)
 {
     source_range.start = pos;
 }
@@ -128,20 +125,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
         return result.value();
     }
 
-    fully_qualified_name pretty_fqn(source_range.start);
-    for (const auto &part : get_parts())
-    {
-        if (part == "this")
-        {
-            pretty_fqn.add(lexer::trie::token_to_string(token_group::KEYWORD_THIS));
-        }
-        else
-        {
-            pretty_fqn.add(part);
-        }
-    }
-
-    return pretty_fqn.join(" ל־");
+    return join(" ל־");
 }
 
 std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
