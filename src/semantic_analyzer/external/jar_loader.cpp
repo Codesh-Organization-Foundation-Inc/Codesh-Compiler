@@ -38,7 +38,7 @@ bool jar_loader::load(const std::string &class_candidate, const symbol_table &ta
     if (entry.isNull())
         return false;
 
-    std::stringstream stream(std::ios::binary);
+    std::stringstream stream;
     entry.readContent(stream);
     load_class_file(stream, table);
     return true;
