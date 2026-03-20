@@ -33,6 +33,8 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     std::deque<std::unique_ptr<value_ast_node>> arguments;
 
+    std::deque<std::string> named_arguments;
+
     static size_t determine_stack_delta(const type::type_ast_node &type);
 
 protected:
@@ -63,6 +65,9 @@ public:
 
     [[nodiscard]] const std::deque<std::unique_ptr<value_ast_node>> &get_arguments() const;
     [[nodiscard]] std::deque<std::unique_ptr<value_ast_node>> &get_arguments();
+
+    [[nodiscard]] const std::deque<std::string> &get_named_arguments() const;
+    [[nodiscard]] std::deque<std::string> &get_named_arguments();
 
     void set_statement_index(size_t statement_index) override;
 
