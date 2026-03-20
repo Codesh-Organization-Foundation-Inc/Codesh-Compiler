@@ -1,9 +1,11 @@
 #include "resolve.h"
 
 #include "lexer/source_file_info.h"
+#include "semantic_analyzer/external/interop_replacements.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
+#include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
@@ -108,6 +110,9 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope);
 
+static void maybe_warn_interop_exists(
+        const codesh::ast::method::operation::method_call_ast_node &method_call);
+
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -158,7 +163,6 @@ bool codesh::semantic_analyzer::statement::method_call::resolve(const semantic_c
 
     return true;
 }
-
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
@@ -219,6 +223,11 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 
     // Update the AST node to the found result
     method_call.set_resolved(resolved_method.value());
+
+    if (resolved_method->get().get_producing_node() == nullptr)
+    {
+        maybe_warn_interop_exists(method_call);
+    }
 
     // Handle prepending `this` for non-static method calls
     if (!resolved_method->get().get_attributes().get_is_static())
@@ -451,13 +460,11 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
                               const codesh::semantic_analyzer::method_symbol &containing_method,
                               const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    //TODO: When calling non-static methods, also add 'this' as the first argument
-
     bool all_succeed = true;
 
-    for (const auto &arg : method_call_node.get_arguments())
+    for (const auto &[arg_name, arg_value] : method_call_node.get_arguments())
     {
-        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg.value.get()))
+        if (const auto stmnt = dynamic_cast<codesh::ast::method::operation::method_operation_ast_node *>(arg_value.get()))
         {
             all_succeed &= codesh::semantic_analyzer::statement::resolve(
                 context,
@@ -710,4 +717,24 @@ static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &me
     return !is_external && !method.get_attributes().get_is_static()
         ? 1
         : 0;
+}
+
+static void maybe_warn_interop_exists(
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto replacement = codesh::semantic_analyzer::external::find_codesh_replacement(
+        method_call.get_unresolved_name()
+    );
+
+    if (!replacement.has_value())
+        return;
+
+    codesh::blasphemy::get_blasphemy_collector().add_warning(
+        fmt::format(
+            codesh::blasphemy::details::INTEROP_REPLACEMENT_EXISTS,
+            method_call.get_unresolved_name().holy_join(), replacement->holy_join()
+        ),
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        method_call.get_unresolved_name().get_source_range()
+    );
 }
