@@ -102,20 +102,23 @@ const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &c
     return arguments;
 }
 
-std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
-    method_call_ast_node::get_arguments()
-{
-    return arguments;
-}
-
 const std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments() const
 {
     return named_arguments;
 }
 
-std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments()
+void codesh::ast::method::operation::method_call_ast_node::add_argument(std::string name,
+    std::unique_ptr<value_ast_node> value)
 {
-    return named_arguments;
+    named_arguments.push_back(std::move(name));
+    arguments.push_back(std::move(value));
+}
+
+void codesh::ast::method::operation::method_call_ast_node::add_argument_front(std::string name,
+    std::unique_ptr<value_ast_node> value)
+{
+    named_arguments.push_front(std::move(name));
+    arguments.push_front(std::move(value));
 }
 
 void codesh::ast::method::operation::method_call_ast_node::set_statement_index(const size_t statement_index)

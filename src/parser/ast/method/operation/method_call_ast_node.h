@@ -64,10 +64,11 @@ public:
     [[nodiscard]] std::string generate_descriptor(bool resolved) const override;
 
     [[nodiscard]] const std::deque<std::unique_ptr<value_ast_node>> &get_arguments() const;
-    [[nodiscard]] std::deque<std::unique_ptr<value_ast_node>> &get_arguments();
 
     [[nodiscard]] const std::deque<std::string> &get_named_arguments() const;
-    [[nodiscard]] std::deque<std::string> &get_named_arguments();
+
+    void add_argument(std::string name, std::unique_ptr<value_ast_node> value);
+    void add_argument_front(std::string name, std::unique_ptr<value_ast_node> value);
 
     void set_statement_index(size_t statement_index) override;
 
