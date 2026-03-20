@@ -50,6 +50,7 @@ const std::vector<codesh::lexer::trie::keyword_info> codesh::lexer::trie::KEYWOR
     {token_group::KEYWORD_ANNOTATE_OVERRIDE, u"ויגזול", word_boundary::BOTH},
 
     {token_group::KEYWORD_EXTENDS, u"בן־", word_boundary::BEFORE},
+    {token_group::KEYWORD_EXTENDS, u"בת־", word_boundary::BEFORE},
     {token_group::KEYWORD_IMPLEMENTS, u"בצלם", word_boundary::BOTH},
     {token_group::KEYWORD_NEW, u"ויברא", word_boundary::BOTH},
     {token_group::KEYWORD_INSTANCE, u"מזרע", word_boundary::BOTH},
