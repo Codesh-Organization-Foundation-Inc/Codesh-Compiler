@@ -1,14 +1,13 @@
 #include "trie_node.h"
 
-std::optional<std::reference_wrapper<const codesh::lexer::trie::keyword_info>> codesh::lexer::trie::trie_node::
-    get_keyword() const
+std::optional<codesh::lexer::trie::trie_match> codesh::lexer::trie::trie_node::get_match() const
 {
-    return this->keyword;
+    return this->match;
 }
 
-void codesh::lexer::trie::trie_node::set_keyword(const keyword_info &keyword)
+void codesh::lexer::trie::trie_node::set_match(const trie_match &match)
 {
-    this->keyword.emplace(keyword);
+    this->match.emplace(match);
 }
 
 codesh::lexer::trie::trie_node &codesh::lexer::trie::trie_node::get_or_create_child(const char16_t c)

@@ -10,5 +10,5 @@ codesh::ast::op::and_operator_ast_node::and_operator_ast_node(const lexer::code_
 
 std::string codesh::ast::op::and_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_AND);
+    return lexer::trie::token_to_string(token_group::OPERATOR_AND);
 }

@@ -276,11 +276,7 @@ std::string codesh::parser::util::get_token_display_name(const token &token)
     if (const auto id = dynamic_cast<const identifier_token *>(&token))
         return id->get_content();
 
-    const auto it = lexer::trie::TOKEN_TO_NAME_MAP.find(token.get_group());
-    if (it != lexer::trie::TOKEN_TO_NAME_MAP.end())
-        return it->second;
-
-    return definition::ERROR_IDENTIFIER_CONTENT;
+    return lexer::trie::token_to_string(token.get_group());
 }
 
 bool codesh::parser::util::consume_by(std::queue<std::unique_ptr<token>> &tokens)
