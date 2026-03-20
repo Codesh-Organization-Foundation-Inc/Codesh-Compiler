@@ -24,14 +24,13 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
         import_node->set_is_static(true);
         break;
 
-    case token_group::KEYWORD_IMPORT_REGULAR:
+    case token_group::OPERATOR_THE:
         // Already not static
         break;
 
     default:
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IMPORT_TYPE,
             blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
-
     }
 
 
