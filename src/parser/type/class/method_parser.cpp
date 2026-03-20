@@ -332,16 +332,8 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
     while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
     {
         const auto name_token = util::consume_identifier_token(tokens);
-        if (!name_token)
-        {
-            return;
-        }
 
         auto value_node = value::parse_value(tokens);
-        if (!value_node)
-        {
-            return;
-        }
 
         method_call.get_named_arguments().push_back(name_token->get_content());
         method_call.get_arguments().push_back(std::move(value_node));
