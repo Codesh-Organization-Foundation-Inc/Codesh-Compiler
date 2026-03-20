@@ -258,8 +258,7 @@ static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_acces
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> value)
 {
-    auto op_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto op_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
 
     auto index_value = codesh::parser::value::parse_value(tokens);
 
