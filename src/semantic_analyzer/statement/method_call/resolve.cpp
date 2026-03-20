@@ -410,7 +410,7 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 
     auto this_var = std::make_unique<variable_reference_ast_node>(
         method_call.get_code_position(),
-        codesh::definition::fully_qualified_name(method_call.get_code_position(), std::string("this"))
+        codesh::definition::fully_qualified_name(method_call.get_code_position(), "this")
     );
 
     this_var->set_resolved(this_var_symbol);
