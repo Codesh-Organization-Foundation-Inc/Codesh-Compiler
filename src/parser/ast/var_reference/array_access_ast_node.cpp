@@ -12,6 +12,13 @@ codesh::ast::op::array_access_ast_node::array_access_ast_node(
 {
 }
 
+void codesh::ast::op::array_access_ast_node::set_statement_index(const size_t statement_index)
+{
+    method_operation_ast_node::set_statement_index(statement_index);
+    array->set_statement_index(statement_index);
+    index->set_statement_index(statement_index);
+}
+
 codesh::ast::var_reference::value_ast_node& codesh::ast::op::array_access_ast_node::get_array() const
 {
     return *array;
