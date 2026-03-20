@@ -128,13 +128,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
         return result.value();
     }
 
-    fully_qualified_name pretty_fqn(source_range.start);
-    for (const auto &part : get_parts())
-    {
-        pretty_fqn.add(part);
-    }
-
-    return pretty_fqn.join(" ל־");
+    return join(" ל־");
 }
 
 std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
