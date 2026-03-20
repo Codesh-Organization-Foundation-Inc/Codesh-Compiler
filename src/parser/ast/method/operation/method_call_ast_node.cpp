@@ -96,13 +96,13 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     );
 }
 
-const std::deque<codesh::ast::method::operation::named_argument> &codesh::ast::method::operation::
+const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments() const
 {
     return arguments;
 }
 
-std::deque<codesh::ast::method::operation::named_argument> &codesh::ast::method::operation::
+std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
     method_call_ast_node::get_arguments()
 {
     return arguments;
@@ -114,7 +114,7 @@ void codesh::ast::method::operation::method_call_ast_node::set_statement_index(c
 
     for (const auto &argument : get_arguments())
     {
-        argument.value->set_statement_index(statement_index);
+        argument->set_statement_index(statement_index);
     }
 }
 
@@ -143,7 +143,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
     // Emit arguments
     for (const auto &argument : get_arguments())
     {
-        if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(argument.value.get()))
+        if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(argument.get()))
         {
             constant_emitter->emit_constants(root_node, constant_pool);
         }
@@ -175,7 +175,7 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     for (const auto &argument : arguments)
     {
         containing_block.set_is_consuming(true);
-        argument.value->emit_ir(containing_block, symbol_table, containing_type_decl);
+        argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
     containing_block.set_is_consuming(false);
 

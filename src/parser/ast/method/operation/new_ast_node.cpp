@@ -58,7 +58,7 @@ void codesh::ast::op::new_ast_node::emit_ir(output::ir::code_block &containing_b
     // load arguments
     for (const auto &argument : get_arguments())
     {
-        argument.value->emit_ir(containing_block, symbol_table, containing_type_decl);
+        argument->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
 
     // Call constructor
