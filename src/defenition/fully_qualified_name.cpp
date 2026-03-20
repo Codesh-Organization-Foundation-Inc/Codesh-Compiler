@@ -38,10 +38,7 @@ codesh::definition::fully_qualified_name codesh::definition::fully_qualified_nam
     std::string item;
     while (std::getline(fqn_stream, item, '/'))
     {
-        if (!item.empty())
-        {
-            result.add(item);
-        }
+        result.add(item);
     }
 
     return result;

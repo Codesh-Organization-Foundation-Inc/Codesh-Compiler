@@ -31,7 +31,7 @@ public:
             std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
     /**
-     * Parses an FQN separated by slashes
+     * Parses a binary FQN (FQN separated by slashes)
      */
     static fully_qualified_name parse(const std::string &fqn_str, lexer::code_position start);
 
