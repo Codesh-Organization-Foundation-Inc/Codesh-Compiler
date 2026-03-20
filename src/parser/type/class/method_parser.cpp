@@ -332,7 +332,10 @@ void codesh::parser::parse_methods_call_parameters(std::queue<std::unique_ptr<to
 {
     while (!util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS))
     {
-        method_call.get_arguments().push_back(value::parse_value(tokens));
+        const auto name_token = util::consume_identifier_token(tokens);
+        auto value_node = value::parse_value(tokens);
+
+        method_call.get_arguments().emplace_back(name_token->get_content(), std::move(value_node));
 
         if (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR))
             continue;
