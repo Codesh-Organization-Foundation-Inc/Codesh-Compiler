@@ -180,6 +180,7 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
 
     {token_group::COMMENT_ONE_LINER, {u"וכה הגה ה' לאמר", word_boundary::BEFORE}},
     {token_group::COMMENT_MULTILINE, {u"ויאמר ה' לאמר:", word_boundary::BEFORE}},
+    {token_group::COMMENT_MULTILINE_DOCS, {u"וכה הגה ה' לאמר:", word_boundary::BEFORE}},
 };
 
 const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS_FEMININE = {
@@ -190,7 +191,6 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS_FEMININE =
     {token_group::KEYWORD_PROTECTED, {u"קדשה", word_boundary::BOTH}},
     {token_group::KEYWORD_FINAL, {u"תמות ולא־תתחלף", word_boundary::BOTH}},
     {token_group::KEYWORD_EXTENDS, {u"בת־", word_boundary::BEFORE}},
-    {token_group::COMMENT_MULTILINE, {u"וכה הגה ה' לאמר:", word_boundary::BEFORE}},
 };
 
 std::string codesh::lexer::trie::token_to_string(const token_group token, const bool prefer_feminine)

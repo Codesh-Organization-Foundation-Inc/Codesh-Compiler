@@ -129,8 +129,9 @@ enum class token_group : int
     KEYWORD_THROW, // גזר
     KEYWORD_THROWS, // פן־יחטא
 
-    COMMENT_MULTILINE, // כה הגה ה' לאמור: ... ויחדל:
-    COMMENT_ONE_LINER, // כה הגה ה'
+    COMMENT_MULTILINE, // ויאמר ה' לאמר: ... ויחדל:
+    COMMENT_MULTILINE_DOCS, // וכה הגה ה' לאמר: ... ויחדל:
+    COMMENT_ONE_LINER, // וכה הגה ה' לאמר
 
 
     // Biblical numbers

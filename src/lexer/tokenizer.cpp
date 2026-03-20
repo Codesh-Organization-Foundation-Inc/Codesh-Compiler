@@ -266,6 +266,7 @@ static size_t handle_keyword_match(const std::u16string &code, codesh::lexer::co
             return keyword_end;
         }
 
+        case codesh::token_group::COMMENT_MULTILINE_DOCS:
         case codesh::token_group::COMMENT_MULTILINE: {
             // If it's a multiline comment, look for a trie::keyword::MULTILINE_COMMENT_END match.
             const size_t end = code.find(trie::keyword::MULTILINE_COMMENT_END, keyword_end);
