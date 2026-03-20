@@ -18,7 +18,6 @@
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
