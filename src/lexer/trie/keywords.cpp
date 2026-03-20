@@ -22,9 +22,7 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
 
     {token_group::KEYWORD_LET, {u"ויהי", word_boundary::BOTH}},
     {token_group::KEYWORD_NAME, {u"ושמו", word_boundary::BOTH}},
-    {token_group::KEYWORD_NAME, {u"ושמה", word_boundary::BOTH}},
     {token_group::KEYWORD_SHALL_BE, {u"היה", word_boundary::BOTH}},
-    {token_group::KEYWORD_SHALL_BE, {u"תהיה", word_boundary::BOTH}},
     {token_group::KEYWORD_RETURN, {u"וישב", word_boundary::BOTH}},
 
     {token_group::KEYWORD_METHOD, {u"מעשה", word_boundary::BOTH}},
@@ -37,13 +35,9 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_INTERFACE, {u"צלם", word_boundary::BOTH}},
 
     {token_group::KEYWORD_PUBLIC, {u"נגלה", word_boundary::BOTH}},
-    {token_group::KEYWORD_PUBLIC, {u"נגלית", word_boundary::BOTH}},
     {token_group::KEYWORD_PRIVATE, {u"נחבא", word_boundary::BOTH}},
-    {token_group::KEYWORD_PRIVATE, {u"נחבאת", word_boundary::BOTH}},
     {token_group::KEYWORD_PROTECTED, {u"קדש", word_boundary::BOTH}},
-    {token_group::KEYWORD_PROTECTED, {u"קדשה", word_boundary::BOTH}},
     {token_group::KEYWORD_FINAL, {u"ימות ולא־יתחלף", word_boundary::BOTH}},
-    {token_group::KEYWORD_FINAL, {u"תמות ולא־תתחלף", word_boundary::BOTH}},
     {token_group::KEYWORD_STATIC, {u"לכל־", word_boundary::BEFORE}},
 
     {token_group::KEYWORD_ANNOTATION, {u"חותם", word_boundary::BOTH}},
@@ -51,7 +45,6 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_ANNOTATE_OVERRIDE, {u"ויגזול", word_boundary::BOTH}},
 
     {token_group::KEYWORD_EXTENDS, {u"בן־", word_boundary::BEFORE}},
-    {token_group::KEYWORD_EXTENDS, {u"בת־", word_boundary::BEFORE}},
     {token_group::KEYWORD_IMPLEMENTS, {u"בצלם", word_boundary::BOTH}},
     {token_group::KEYWORD_NEW, {u"ויברא", word_boundary::BOTH}},
     {token_group::KEYWORD_INSTANCE, {u"מזרע", word_boundary::BOTH}},
@@ -187,14 +180,38 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
 
     {token_group::COMMENT_ONE_LINER, {u"וכה הגה ה' לאמר", word_boundary::BEFORE}},
     {token_group::COMMENT_MULTILINE, {u"ויאמר ה' לאמר:", word_boundary::BEFORE}},
+};
+
+const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS_FEMININE = {
+    {token_group::KEYWORD_NAME, {u"ושמה", word_boundary::BOTH}},
+    {token_group::KEYWORD_SHALL_BE, {u"תהיה", word_boundary::BOTH}},
+    {token_group::KEYWORD_PUBLIC, {u"נגלית", word_boundary::BOTH}},
+    {token_group::KEYWORD_PRIVATE, {u"נחבאת", word_boundary::BOTH}},
+    {token_group::KEYWORD_PROTECTED, {u"קדשה", word_boundary::BOTH}},
+    {token_group::KEYWORD_FINAL, {u"תמות ולא־תתחלף", word_boundary::BOTH}},
+    {token_group::KEYWORD_EXTENDS, {u"בת־", word_boundary::BEFORE}},
     {token_group::COMMENT_MULTILINE, {u"וכה הגה ה' לאמר:", word_boundary::BEFORE}},
 };
 
-std::string codesh::lexer::trie::token_to_string(const token_group token)
+std::string codesh::lexer::trie::token_to_string(const token_group token, const bool prefer_feminine)
 {
     assert(KEYWORDS.contains(token) && "Forgor to put a token group in the keywords list");
 
-    return utf8::utf16to8(
-        KEYWORDS.at(token).keyword
-    );
+    const keyword_info *keyword = nullptr;
+
+    if (prefer_feminine)
+    {
+        const auto fem_keyword = KEYWORDS_FEMININE.find(token);
+        if (fem_keyword != KEYWORDS_FEMININE.end())
+        {
+            keyword = &KEYWORDS_FEMININE.at(token);
+        }
+    }
+
+    if (keyword == nullptr)
+    {
+        keyword = &KEYWORDS.at(token);
+    }
+
+    return utf8::utf16to8(keyword->keyword);
 }

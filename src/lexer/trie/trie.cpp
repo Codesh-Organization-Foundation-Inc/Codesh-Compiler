@@ -11,6 +11,7 @@ static std::unique_ptr<const codesh::lexer::trie::trie_node> create_language_tri
     auto root = std::make_unique<codesh::lexer::trie::trie_node>();
 
     add_keywords_to_trie(*root, codesh::lexer::trie::KEYWORDS);
+    add_keywords_to_trie(*root, codesh::lexer::trie::KEYWORDS_FEMININE);
 
     return std::move(root);
 }

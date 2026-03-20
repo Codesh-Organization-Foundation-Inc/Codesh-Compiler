@@ -9,8 +9,9 @@ namespace codesh::lexer::trie
 {
 using keywords_map = std::unordered_map<token_group, keyword_info>;
 extern const keywords_map KEYWORDS;
+extern const keywords_map KEYWORDS_FEMININE;
 
-std::string token_to_string(token_group token);
+std::string token_to_string(token_group token, bool prefer_feminine = false);
 
 namespace keyword
 {
