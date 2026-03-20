@@ -372,7 +372,7 @@ static void prepend_external_this_argument(
 
     receiver_node->set_resolved(receiver_variable);
 
-    method_call.get_arguments().push_front(std::move(receiver_node));
+    method_call.add_argument_front("this", std::move(receiver_node));
 }
 
 static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::semantic_context &context,
@@ -414,7 +414,8 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
     );
 
     this_var->set_resolved(this_var_symbol);
-    method_call.get_arguments().push_front(std::move(this_var));
+
+    method_call.add_argument_front("this", std::move(this_var));
 
     return true;
 }
@@ -606,6 +607,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         {
             if (needs_widening.contains(i))
             {
+                //FIXME: Check whats wrong here
                 arguments.at(i) = codesh::semantic_analyzer::util::make_widening_cast(
                     std::move(arguments.at(i)),
                     *params.at(i + offset)
