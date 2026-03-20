@@ -326,6 +326,8 @@ add_executable(codeshc
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
         src/semantic_analyzer/external/jimage_loader.h
         src/semantic_analyzer/external/jimage_loader.cpp
+        src/semantic_analyzer/external/jar_loader.h
+        src/semantic_analyzer/external/jar_loader.cpp
         src/semantic_analyzer/external/util.cpp
         src/semantic_analyzer/external/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
@@ -396,6 +398,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 target_link_libraries(codeshc PRIVATE nlohmann_json::nlohmann_json)
+
+# sudo dnf install libzip-devel
+find_package(libzip REQUIRED)
+
+# libzippp
+FetchContent_Declare(
+    libzippp
+    GIT_REPOSITORY https://github.com/ctabin/libzippp.git
+    GIT_TAG        libzippp-v7.1-1.10.1
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(libzippp)
+target_link_libraries(codeshc PRIVATE libzippp)
 
 
 # Support includes starting from relative paths
