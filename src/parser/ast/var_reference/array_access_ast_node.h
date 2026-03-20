@@ -17,6 +17,9 @@ public:
     array_access_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> array,
             std::unique_ptr<value_ast_node> index);
 
+    void set_statement_index(size_t statement_index) override;
+
+
     [[nodiscard]] value_ast_node &get_array() const;
     [[nodiscard]] value_ast_node &get_index() const;
 
