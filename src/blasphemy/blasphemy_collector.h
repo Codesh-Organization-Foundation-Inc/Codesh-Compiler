@@ -34,6 +34,7 @@ struct blasphemy_info
     blasphemy_type type;
 
     std::optional<size_t> file_id;
+    std::filesystem::path source_path;
     std::optional<lexer::code_range> source_range;
 
     bool is_fatal;
@@ -53,7 +54,7 @@ class blasphemy_collector
     [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
     [[nodiscard]] static fmt::format_string<std::string> get_random_message();
 
-    void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color) const;
+    static void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color);
 
 
 public:
