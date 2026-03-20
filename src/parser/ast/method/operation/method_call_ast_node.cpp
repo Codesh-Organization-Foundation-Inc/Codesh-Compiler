@@ -108,12 +108,12 @@ std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh:
     return arguments;
 }
 
-const std::deque<std::string> & codesh::ast::method::operation::method_call_ast_node::get_named_arguments() const
+const std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments() const
 {
     return named_arguments;
 }
 
-std::deque<std::string> & codesh::ast::method::operation::method_call_ast_node::get_named_arguments()
+std::deque<std::string> &codesh::ast::method::operation::method_call_ast_node::get_named_arguments()
 {
     return named_arguments;
 }

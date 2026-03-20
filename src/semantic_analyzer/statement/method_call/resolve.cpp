@@ -424,6 +424,8 @@ static bool resolve_arguments(const codesh::semantic_analyzer::semantic_context 
                               const codesh::semantic_analyzer::method_symbol &containing_method,
                               const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
+    //TODO: When calling non-static methods, also add 'this' as the first argument
+
     bool all_succeed = true;
 
     for (const auto &arg : method_call_node.get_arguments())
@@ -566,7 +568,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         const codesh::semantic_analyzer::semantic_context &context, const args_match_type match_type,
         const codesh::semantic_analyzer::method_overloads_symbol &method_overloads,
         codesh::ast::method::operation::method_call_ast_node &method_call)
-{ // TODO: change it because of the new method_call arguments struct
+{
     auto &arguments = method_call.get_arguments();
 
     for (const auto &symbol : method_overloads.get_scope().internals() | std::views::values)
