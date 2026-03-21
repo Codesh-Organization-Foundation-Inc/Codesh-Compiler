@@ -15,6 +15,7 @@ struct code_position
 };
 
 constexpr code_position NO_CODE_POS = {static_cast<size_t>(-1), static_cast<size_t>(-1)};
+constexpr code_position FILE_BEGIN = {1, 0};
 
 struct code_range
 {

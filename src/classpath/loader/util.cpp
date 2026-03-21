@@ -8,8 +8,8 @@
 
 #include <zlib.h>
 
-namespace util = codesh::semantic_analyzer::external::util;
-using codesh::semantic_analyzer::external::jimage_location_attribute;
+namespace util = codesh::external::util;
+using codesh::external::jimage_location_attribute;
 
 
 struct location_string_offsets
@@ -36,42 +36,42 @@ int32_t jimage_perfect_hash(const std::string &str, int32_t seed);
         const std::vector<unsigned char> &location_bytes, uint32_t location_offset);
 
 
-uint8_t codesh::semantic_analyzer::external::util::read_u1(std::istream &file)
+uint8_t codesh::external::util::read_u1(std::istream &file)
 {
     uint8_t byte;
     file.read(reinterpret_cast<char *>(&byte), 1);
     return byte;
 }
 
-uint16_t codesh::semantic_analyzer::external::util::read_u2(std::istream &file)
+uint16_t codesh::external::util::read_u2(std::istream &file)
 {
     const uint16_t high = read_u1(file);
     const uint16_t low = read_u1(file);
     return static_cast<uint16_t>(high << 8 | low);
 }
 
-uint32_t codesh::semantic_analyzer::external::util::read_u4(std::istream &file)
+uint32_t codesh::external::util::read_u4(std::istream &file)
 {
     const uint32_t high = read_u2(file);
     const uint32_t low = read_u2(file);
     return high << 16 | low;
 }
 
-uint16_t codesh::semantic_analyzer::external::util::read_u2_le(std::istream &file)
+uint16_t codesh::external::util::read_u2_le(std::istream &file)
 {
     const uint16_t lo = read_u1(file);
     const uint16_t hi = read_u1(file);
     return static_cast<uint16_t>(lo | hi << 8);
 }
 
-uint32_t codesh::semantic_analyzer::external::util::read_u4_le(std::istream &file)
+uint32_t codesh::external::util::read_u4_le(std::istream &file)
 {
     const uint32_t lo = read_u2_le(file);
     const uint32_t hi = read_u2_le(file);
     return lo | hi << 16;
 }
 
-int32_t codesh::semantic_analyzer::external::util::jimage_perfect_hash_index(const std::string &str,
+int32_t codesh::external::util::jimage_perfect_hash_index(const std::string &str,
         const uint32_t table_length, const int32_t seed)
 {
     return jimage_perfect_hash(str, seed) % static_cast<int32_t>(table_length);
@@ -209,7 +209,7 @@ static location_string_offsets parse_offsets(
 }
 
 
-uint64_t codesh::semantic_analyzer::external::util::read_location_attribute(
+uint64_t codesh::external::util::read_location_attribute(
         const std::vector<unsigned char> &location_bytes, const uint32_t location_offset,
         const jimage_location_attribute kind)
 {

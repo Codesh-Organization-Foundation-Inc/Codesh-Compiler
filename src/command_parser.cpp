@@ -11,7 +11,6 @@ static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
-static std::filesystem::path parse_directory_path(std::queue<std::string> &args);
 static std::filesystem::path get_default_jre_path();
 
 static void add_default_classpaths(codesh::command_args &args);
@@ -69,12 +68,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--jre-path")
         {
             has_jre_path = true;
-            result.jre_path = parse_directory_path(args).string();
+            result.jre_path = consume_argument(args);
         }
         else if (arg == "--talmud-codesh-path")
         {
             has_talmud_codesh_path = true;
-            result.talmud_codesh_path = parse_directory_path(args).string();
+            result.talmud_codesh_path = consume_argument(args);
         }
         else if (arg == "--unholy")
         {
@@ -109,24 +108,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     add_default_classpaths(result);
-    //TODO: Check whether the paths truly exist
 
     return result;
 }
 
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result)
 {
-    if (args.empty())
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_ARG,
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS,
-            true
-        );
-        return;
-    }
-
     std::stringstream stream(consume_argument(args));
     std::string entry;
 
@@ -145,36 +132,9 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(codesh::blasphemy::details::INVALID_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS, false
+            codesh::lexer::NO_CODE_POS
         );
     }
-}
-
-static std::filesystem::path parse_directory_path(std::queue<std::string> &args)
-{
-    if (args.empty())
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_ARG,
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS,
-            true
-        );
-        throw std::runtime_error("");
-    }
-
-    const std::filesystem::path folder_path(consume_argument(args));
-
-    if (!std::filesystem::is_directory(folder_path))
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(codesh::blasphemy::details::INVALID_ARG, folder_path.string()),
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS, false
-        );
-    }
-
-    return folder_path;
 }
 
 static std::filesystem::path get_default_jre_path()
@@ -207,7 +167,15 @@ static bool is_zip(const std::string &file_name)
 static std::string consume_argument(std::queue<std::string> &args)
 {
     if (args.empty())
-        return "";
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_ARG,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::lexer::NO_CODE_POS,
+            true
+        );
+        throw std::runtime_error("");
+    }
 
     const auto arg_content = args.front();
     args.pop();

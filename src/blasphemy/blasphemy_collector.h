@@ -23,6 +23,7 @@ enum class blasphemy_type
     SYNTAX,
     SEMANTIC,
 
+    EXTERNAL,
     OUTPUT,
 
     UNKNOWN
