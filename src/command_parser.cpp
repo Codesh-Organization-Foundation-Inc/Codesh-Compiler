@@ -11,7 +11,6 @@ static std::string consume_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
-static std::filesystem::path parse_directory_path(std::queue<std::string> &args);
 static std::filesystem::path get_default_jre_path();
 
 static void add_default_classpaths(codesh::command_args &args);
@@ -69,12 +68,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--jre-path")
         {
             has_jre_path = true;
-            result.jre_path = parse_directory_path(args).string();
+            result.jre_path = consume_argument(args);
         }
         else if (arg == "--talmud-codesh-path")
         {
             has_talmud_codesh_path = true;
-            result.talmud_codesh_path = parse_directory_path(args).string();
+            result.talmud_codesh_path = consume_argument(args);
         }
         else if (arg == "--unholy")
         {
@@ -115,17 +114,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result)
 {
-    if (args.empty())
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_ARG,
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS,
-            true
-        );
-        return;
-    }
-
     std::stringstream stream(consume_argument(args));
     std::string entry;
 
@@ -147,22 +135,6 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
             codesh::lexer::NO_CODE_POS
         );
     }
-}
-
-static std::filesystem::path parse_directory_path(std::queue<std::string> &args)
-{
-    const std::filesystem::path dir_path(consume_argument(args));
-
-    if (!std::filesystem::is_directory(dir_path))
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(codesh::blasphemy::details::INVALID_ARG, dir_path.string()),
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS
-        );
-    }
-
-    return dir_path;
 }
 
 static std::filesystem::path get_default_jre_path()

@@ -6,6 +6,10 @@
 codesh::external::class_directory_loader::class_directory_loader(std::filesystem::path directory)
     : path(std::move(directory))
 {
+    if (!std::filesystem::is_directory(path))
+    {
+        _is_loaded = false;
+    }
 }
 
 bool codesh::external::class_directory_loader::load(const semantic_analyzer::symbol_table &symbol_table,
