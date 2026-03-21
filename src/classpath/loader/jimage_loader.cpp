@@ -1,10 +1,11 @@
 #include "jimage_loader.h"
 
-#include "util.h"
+#include "class_file_loader.h"
 #include "class_loader.h"
 #include "defenition/fully_qualified_name.h"
 #include "fmt/base.h"
 #include "fmt/xchar.h"
+#include "util.h"
 
 #include <fstream>
 #include <optional>
@@ -40,6 +41,10 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
         return;
     }
 
+    // Assume we're always loading JVM modules bc literally nobody besides them uses a JImage file.
+    // Also, OpenJDK does this too.
+    module_name = "java.base";
+
     _layout = parse_header();
     _redirect_table = load_redirect_table();
     _offsets = load_offsets();
@@ -47,10 +52,10 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
     _strings = load_strings();
 }
 
-bool jimage_loader::load(const std::string &module_name, const definition::fully_qualified_name &class_name,
-        const semantic_analyzer::symbol_table &table)
+bool jimage_loader::load(const semantic_analyzer::symbol_table &table,
+                         const definition::fully_qualified_name &class_name)
 {
-    const auto lookup = lookup_class_file(module_name, class_name.join());
+    const auto lookup = lookup_class_file(class_name.join());
     if (!lookup.has_value())
         return false;
 
@@ -59,7 +64,7 @@ bool jimage_loader::load(const std::string &module_name, const definition::fully
     if (lookup->compressed_size == 0)
     {
         _file.seekg(file_offset);
-        load_class_file(_file, table);
+        class_file_loader::load(table, _file);
     }
     else
     {
@@ -102,7 +107,7 @@ codesh::external::jimage_offsets jimage_loader::parse_header()
 }
 
 std::optional<codesh::external::class_file_lookup_result> jimage_loader::lookup_class_file(
-        const std::string &module_name, const std::string &target_class) const
+        const std::string &target_class) const
 {
     const auto path = fmt::format("/{}/{}.class", module_name, target_class);
     const auto offset_index = get_location_offset_index(path);
@@ -203,5 +208,5 @@ void jimage_loader::load_compressed_class_file(const std::streamoff file_offset,
 
     std::string buf(uncompressed.begin(), uncompressed.end());
     std::istringstream stream(std::move(buf), std::ios::binary);
-    load_class_file(stream, table);
+    class_file_loader::load(table, stream);
 }

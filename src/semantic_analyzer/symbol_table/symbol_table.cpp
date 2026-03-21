@@ -173,9 +173,13 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     {
         definition::fully_qualified_name prefix(lexer::NO_CODE_POS, parts.begin(), end);
 
-        const auto candidate = import_prefix.empty()
-            ? prefix.join()
-            : import_prefix + "/" + prefix.join();
+        const auto candidate = definition::fully_qualified_name::parse(
+            import_prefix.empty()
+                ? prefix.join()
+                : import_prefix + "/" + prefix.join(),
+
+            lexer::NO_CODE_POS
+        );
 
         if (try_load_candidate(candidate))
         {
@@ -185,10 +189,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
                 suffix.emplace(lexer::NO_CODE_POS, end, name.get_parts().end());
             }
 
-            return std::pair{
-                definition::fully_qualified_name::parse(candidate, lexer::NO_CODE_POS),
-                std::move(suffix)
-            };
+            return std::pair{candidate, std::move(suffix)};
         }
     }
 
@@ -219,21 +220,18 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     return std::nullopt;
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const
+bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definition::fully_qualified_name &candidate)
+    const
 {
     for (const auto &classpath : classpaths)
     {
         if (std::filesystem::is_directory(classpath))
         {
             // A classpath directory may only contain class files
-            const auto class_file_path = classpath / (candidate + ".class");
-            if (std::filesystem::exists(class_file_path))
-            {
-                external::load_class_file(class_file_path, *this);
-                return true;
-            }
+            const auto class_file_path = classpath / (candidate.get_last_part() + ".class");
+            return external::class_file_loader(class_file_path).load(*this);
         }
-        else if (external::is_jimage(classpath))
+        if (external::is_jimage(classpath))
         {
             const auto key = classpath.string();
             if (!jimage_cache.contains(key))
@@ -241,15 +239,9 @@ bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::stri
                 jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
             }
 
-            const bool did_load = jimage_cache.at(key)->load(
-                "java.base",
-                definition::fully_qualified_name::parse(candidate, lexer::NO_CODE_POS),
-                *this
-            );
-            if (did_load)
-                return true;
+            return jimage_cache.at(key)->load(*this, candidate);
         }
-        else if (external::is_jar(classpath))
+        if (external::is_jar(classpath))
         {
             const auto key = classpath.string();
             if (!jar_cache.contains(key))
@@ -257,8 +249,7 @@ bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::stri
                 jar_cache.emplace(key, std::make_unique<external::jar_loader>(classpath));
             }
 
-            if (jar_cache.at(key)->load(candidate, *this))
-                return true;
+            return jar_cache.at(key)->load(*this, candidate);
         }
     }
 

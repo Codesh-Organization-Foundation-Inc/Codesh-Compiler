@@ -33,7 +33,7 @@ public:
     /**
      * Parses a binary FQN (FQN separated by slashes)
      */
-    static fully_qualified_name parse(const std::string &fqn_str, lexer::code_position start);
+    [[nodiscard]] static fully_qualified_name parse(const std::string &fqn_str, lexer::code_position start);
 
 
     [[nodiscard]] bool operator==(const fully_qualified_name &other) const;

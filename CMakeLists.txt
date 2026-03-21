@@ -328,8 +328,8 @@ add_executable(codeshc
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
         src/classpath/loader/jimage_loader.h
         src/classpath/loader/jimage_loader.cpp
-        src/classpath/loader/interop_replacements.h
-        src/classpath/loader/interop_replacements.cpp
+        src/semantic_analyzer/external/interop_replacements.h
+        src/semantic_analyzer/external/interop_replacements.cpp
         src/classpath/loader/jar_loader.h
         src/classpath/loader/jar_loader.cpp
         src/classpath/loader/util.cpp
@@ -345,12 +345,8 @@ add_executable(codeshc
         src/lsp/lsp_receiever.cpp
         src/lsp/lsp_receiver.h
         src/parser/ast/var_reference/reference_association.h
-        src/classpath/classpath_item.cpp
-        src/classpath/classpath_item.h
-        src/classpath/jimage_classpath_item.cpp
-        src/classpath/jimage_classpath_item.h
-        src/classpath/loader/class_file_container_loader.cpp
-        src/classpath/loader/class_file_container_loader.h
+        src/classpath/loader/class_loader.cpp
+        src/classpath/loader/class_loader.h
 )
 
 # sudo dnf install boost-regex boost-devel

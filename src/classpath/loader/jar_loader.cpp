@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "class_file_loader.h"
+#include "defenition/fully_qualified_name.h"
 #include "util.h"
 
 #include <cassert>
@@ -36,16 +37,14 @@ bool codesh::external::is_jar(const std::filesystem::path &path)
     return sig == ZIP_LOCAL_SIG || sig == ZIP_EOCD_SIG;
 }
 
-bool jar_loader::load(const std::string &class_candidate, const semantic_analyzer::symbol_table &table) const
+bool jar_loader::load(const semantic_analyzer::symbol_table &table, const definition::fully_qualified_name &class_name)
 {
-    assert(is_loaded());
-
-    const auto entry = archive.getEntry(class_candidate + ".class");
+    const auto entry = archive.getEntry(class_name.get_last_part() + ".class");
     if (entry.isNull())
         return false;
 
     std::stringstream stream;
     entry.readContent(stream);
-    load_class_file(stream, table);
+    class_file_loader::load(table, stream);
     return true;
 }

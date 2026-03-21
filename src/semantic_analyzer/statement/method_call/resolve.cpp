@@ -1,6 +1,6 @@
 #include "resolve.h"
 
-#include "../../../classpath/loader/interop_replacements.h"
+#include "../../external/interop_replacements.h"
 #include "lexer/source_file_info.h"
 #include "semantic_analyzer/statement/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"

@@ -28,46 +28,32 @@ using cp_strings = std::unordered_map<int, std::string>;
 namespace util = codesh::external::util;
 
 using codesh::output::jvm_target::defs::constant_info_type;
-using codesh::semantic_analyzer::country_symbol;
-using codesh::semantic_analyzer::type_symbol;
-using codesh::semantic_analyzer::field_symbol;
-using codesh::semantic_analyzer::method_symbol;
-using codesh::semantic_analyzer::method_overloads_symbol;
-using codesh::semantic_analyzer::symbol_table;
+using namespace codesh::semantic_analyzer;
 using codesh::definition::fully_qualified_name;
 
-static void skip_attributes(std::istream &file, uint16_t count);
-static std::string get_utf8(const cp_strings &strings, int idx);
-static fully_qualified_name get_class_name(const cp_strings &strings, int idx);
-static void parse_constant_pool(std::istream &file, cp_strings &strings);
+codesh::external::class_file_loader::class_file_loader(std::filesystem::path path) : path(std::move(path))
+{
+    if (!std::filesystem::exists(this->path))
+        _is_loaded = false;
+}
 
-static std::vector<fully_qualified_name> read_interface_names(std::istream &file, const cp_strings &strings);
-
-static void read_magic(std::istream &file);
-static type_symbol &parse_type(std::istream &file, const cp_strings &strings, const symbol_table &table);
-static void parse_fields(std::istream &file, const cp_strings &strings, type_symbol &type_sym);
-static void parse_methods(std::istream &file, const cp_strings &strings, type_symbol &type_sym);
-
-static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
-static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
-        size_t &pos);
-
-static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym);
-
-
-//TODO: Convert all errors to blasphemies
-void codesh::external::load_class_file(
-        const std::filesystem::path &path, const symbol_table &table)
+bool codesh::external::class_file_loader::load(const symbol_table &symbol_table) const
 {
     std::ifstream file(path, std::ios::binary);
     if (!file)
-        throw std::runtime_error("Cannot open: " + path.string());
+        return false;
 
-    load_class_file(file, table);
+    //TODO: Make "return load" and do not throw exceptions below
+    load(symbol_table, file);
+    return true;
 }
 
-void codesh::external::load_class_file(std::istream &file, const symbol_table &table)
+bool codesh::external::class_file_loader::load(const symbol_table &symbol_table, const fully_qualified_name &)
+{
+    return load(symbol_table);
+}
+
+void codesh::external::class_file_loader::load(const symbol_table &table, std::istream &file)
 {
     read_magic(file);
     util::read_u2(file); // minor_version
@@ -81,7 +67,8 @@ void codesh::external::load_class_file(std::istream &file, const symbol_table &t
     parse_methods(file, strings, type_sym);
 }
 
-static void parse_methods(std::istream &file, const cp_strings &strings, type_symbol &type_sym)
+void codesh::external::class_file_loader::parse_methods(std::istream &file, const cp_strings &strings,
+        type_symbol &type_sym)
 {
     const auto methods_count = util::read_u2(file);
     for (size_t i = 0; i < methods_count; i++)
@@ -105,11 +92,12 @@ static void parse_methods(std::istream &file, const cp_strings &strings, type_sy
     }
 }
 
-static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
-        std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> attributes, type_symbol &type_sym)
+void codesh::external::class_file_loader::add_method_symbol(const std::string &method_descriptor,
+        const std::string &method_name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        type_symbol &type_sym)
 {
     // Parse descriptor "(param1param2...)return_type"
-    std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> param_types;
+    std::vector<std::unique_ptr<ast::type::type_ast_node>> param_types;
 
     size_t pos = 1; // '('
     while (pos < method_descriptor.size() && method_descriptor.at(pos) != ')')
@@ -121,7 +109,7 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
     auto return_type = descriptor_to_node_type(method_descriptor, pos);
 
 
-    method_overloads_symbol &overloads = codesh::semantic_analyzer::util::get_method_overloads_symbol(
+    method_overloads_symbol &overloads = semantic_analyzer::util::get_method_overloads_symbol(
         method_name,
         type_sym
     );
@@ -140,7 +128,8 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
     );
 }
 
-static type_symbol &parse_type(std::istream &file, const cp_strings &strings, const symbol_table &table)
+type_symbol &codesh::external::class_file_loader::parse_type(std::istream &file, const cp_strings &strings,
+        const symbol_table &table)
 {
     auto access_flags = flags_to_attributes(util::read_u2(file));
     const auto this_class_idx = util::read_u2(file);
@@ -148,34 +137,34 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
 
     const auto class_name = get_class_name(strings, this_class_idx);
 
-    std::unique_ptr<codesh::ast::type::custom_type_ast_node> super_type_node;
+    std::unique_ptr<ast::type::custom_type_ast_node> super_type_node;
     if (super_class_idx != 0)
     {
         const auto super_class_name = get_class_name(strings, super_class_idx);
 
-        super_type_node = std::make_unique<codesh::ast::type::custom_type_ast_node>(
-            codesh::lexer::NO_CODE_POS,
+        super_type_node = std::make_unique<ast::type::custom_type_ast_node>(
+            lexer::NO_CODE_POS,
             super_class_name
         );
     }
 
     const auto interfaces = read_interface_names(file, strings);
-    std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> interface_nodes;
+    std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> interface_nodes;
     interface_nodes.reserve(interfaces.size());
     for (const auto &interface_name : interfaces)
     {
-        interface_nodes.push_back(std::make_unique<codesh::ast::type::custom_type_ast_node>(
-            codesh::lexer::NO_CODE_POS,
+        interface_nodes.push_back(std::make_unique<ast::type::custom_type_ast_node>(
+            lexer::NO_CODE_POS,
             interface_name
         ));
     }
 
-    country_symbol &country = codesh::semantic_analyzer::util::find_or_create_country(
+    country_symbol &country = semantic_analyzer::util::find_or_create_country(
         table,
         class_name.omit_last().join()
     );
 
-    return codesh::semantic_analyzer::util::add_type_symbol(
+    return semantic_analyzer::util::add_type_symbol(
         country,
         class_name.get_last_part(),
         std::move(access_flags),
@@ -184,7 +173,8 @@ static type_symbol &parse_type(std::istream &file, const cp_strings &strings, co
     ).first.get();
 }
 
-static void parse_fields(std::istream &file, const cp_strings &strings, type_symbol &type_sym)
+void codesh::external::class_file_loader::parse_fields(std::istream &file, const cp_strings &strings,
+        type_symbol &type_sym)
 {
     const auto fields_count = util::read_u2(file);
     for (size_t fi = 0; fi < fields_count; fi++)
@@ -200,7 +190,7 @@ static void parse_fields(std::istream &file, const cp_strings &strings, type_sym
         const auto field_descriptor = get_utf8(strings, field_desc_idx);
 
         size_t pos = 0;
-        codesh::semantic_analyzer::util::add_field_symbol(
+        semantic_analyzer::util::add_field_symbol(
             type_sym,
             field_name,
             std::move(attributes),
@@ -210,16 +200,17 @@ static void parse_fields(std::istream &file, const cp_strings &strings, type_sym
 }
 
 
-static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_attributes(const uint16_t flags)
+std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> codesh::external::class_file_loader::flags_to_attributes(
+        const uint16_t flags)
 {
-    auto result = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
+    auto result = std::make_unique<ast::type_decl::attributes_ast_node>(lexer::NO_CODE_POS);
 
     if (flags & 0x0001)
-        result->set_visibility(codesh::definition::visibility::PUBLIC);
+        result->set_visibility(definition::visibility::PUBLIC);
     else if (flags & 0x0002)
-        result->set_visibility(codesh::definition::visibility::PRIVATE);
+        result->set_visibility(definition::visibility::PRIVATE);
     else if (flags & 0x0004)
-        result->set_visibility(codesh::definition::visibility::PROTECTED);
+        result->set_visibility(definition::visibility::PROTECTED);
     // else: PACKAGE_PRIVATE (default)
 
     result->set_is_static(flags & 0x0008);
@@ -229,13 +220,13 @@ static std::unique_ptr<codesh::ast::type_decl::attributes_ast_node> flags_to_att
     return result;
 }
 
-static std::unique_ptr<codesh::ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
-        size_t &pos)
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::external::class_file_loader::descriptor_to_node_type(
+        const std::string &descriptor, size_t &pos)
 {
-    return codesh::ast::type::type_ast_node::from_descriptor(descriptor, pos, codesh::lexer::NO_CODE_POS);
+    return ast::type::type_ast_node::from_descriptor(descriptor, pos, lexer::NO_CODE_POS);
 }
 
-static void parse_constant_pool(std::istream &file, cp_strings &strings)
+void codesh::external::class_file_loader::parse_constant_pool(std::istream &file, cp_strings &strings)
 {
     const uint16_t cp_count = util::read_u2(file);
 
@@ -307,13 +298,14 @@ static void parse_constant_pool(std::istream &file, cp_strings &strings)
     }
 }
 
-static void read_magic(std::istream &file)
+void codesh::external::class_file_loader::read_magic(std::istream &file)
 {
     if (util::read_u4(file) != 0xCAFEBABE)
         throw std::runtime_error("Not a valid .class file");
 }
 
-static std::vector<fully_qualified_name> read_interface_names(std::istream &file, const cp_strings &strings)
+std::vector<fully_qualified_name> codesh::external::class_file_loader::read_interface_names(std::istream &file,
+        const cp_strings &strings)
 {
     const auto interfaces = util::read_u2(file);
 
@@ -328,7 +320,7 @@ static std::vector<fully_qualified_name> read_interface_names(std::istream &file
     return interface_names;
 }
 
-static void skip_attributes(std::istream &file, const uint16_t count)
+void codesh::external::class_file_loader::skip_attributes(std::istream &file, const uint16_t count)
 {
     for (uint16_t a = 0; a < count; a++)
     {
@@ -337,7 +329,7 @@ static void skip_attributes(std::istream &file, const uint16_t count)
     }
 }
 
-static std::string get_utf8(const cp_strings &strings, const int idx)
+std::string codesh::external::class_file_loader::get_utf8(const cp_strings &strings, const int idx)
 {
     const auto it = strings.find(idx);
     if (it == strings.end())
@@ -346,11 +338,11 @@ static std::string get_utf8(const cp_strings &strings, const int idx)
     return it->second;
 }
 
-static fully_qualified_name get_class_name(const cp_strings &strings, const int idx)
+fully_qualified_name codesh::external::class_file_loader::get_class_name(const cp_strings &strings, const int idx)
 {
     const auto it = strings.find(idx);
     if (it == strings.end())
         throw std::runtime_error("Constant pool index " + std::to_string(idx) + " is not a class entry");
 
-    return fully_qualified_name::parse(it->second, codesh::lexer::NO_CODE_POS);
+    return fully_qualified_name::parse(it->second, lexer::NO_CODE_POS);
 }
