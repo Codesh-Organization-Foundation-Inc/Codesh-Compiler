@@ -1,4 +1,6 @@
 #pragma once
+#include <filesystem>
+#include <memory>
 
 namespace codesh::definition
 {
@@ -20,6 +22,7 @@ protected:
     class_loader();
 
 public:
+    [[nodiscard]] static std::unique_ptr<class_loader> create(const std::filesystem::path &classpath);
     virtual ~class_loader();
 
     /**

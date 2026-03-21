@@ -75,6 +75,10 @@ extern const fmt::runtime_format_string<> NON_STATIC_CALL_FROM_STATIC_CONTEXT;
 extern const fmt::runtime_format_string<> NOT_AN_ARRAY;
 extern const std::string ARRAY_INDEX_NOT_INTEGER;
 
+// EXTERNAL
+extern const fmt::runtime_format_string<> CLASSPATH_NOT_SUPPORTED;
+extern const fmt::runtime_format_string<> CLASSPATH_OPEN_ERROR;
+
 // OUTPUT
 extern const std::string CONSTANT_POOL_TOO_BIG;
 extern const std::string METHOD_TOO_BIG;
