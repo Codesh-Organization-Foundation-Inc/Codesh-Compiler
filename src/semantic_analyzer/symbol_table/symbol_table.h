@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../../classpath/loader/jimage_loader.h"
 #include "lexer/source_file_info.h"
-#include "semantic_analyzer/external/jimage_loader.h"
 #include "symbol.h"
 
 #include <string>
@@ -35,7 +35,7 @@ class symbol_table final : public i_scope_containing_symbol
     named_symbol_map scope;
 
     /**
-     * Imports that will be looked into even if a book did not specify them explictly.
+     * Imports that will be looked into even if a book did not specify them explicitly.
      */
     const std::vector<std::string> default_imports;
     const std::vector<std::filesystem::path> &classpaths;

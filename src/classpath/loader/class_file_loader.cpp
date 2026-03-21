@@ -1,6 +1,5 @@
-#include "class_loader.h"
+#include "class_file_loader.h"
 
-#include "../util.h"
 #include "util.h"
 
 #include <cstdint>
@@ -14,18 +13,19 @@
 
 #include "parser/ast/type/custom_type_ast_node.h"
 
-#include "lexer/source_file_info.h"
 #include "defenition/fully_qualified_name.h"
+#include "lexer/source_file_info.h"
 #include "output/jvm_target/defs/cp_info.h"
 #include "parser/ast/type_declaration/attributes_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "semantic_analyzer/util.h"
 
 /**
  * Maps a constant pool index to its associated string
  */
 using cp_strings = std::unordered_map<int, std::string>;
 
-namespace util = codesh::semantic_analyzer::external::util;
+namespace util = codesh::external::util;
 
 using codesh::output::jvm_target::defs::constant_info_type;
 using codesh::semantic_analyzer::country_symbol;
@@ -57,7 +57,7 @@ static void add_method_symbol(const std::string &method_descriptor, const std::s
 
 
 //TODO: Convert all errors to blasphemies
-void codesh::semantic_analyzer::external::load_class_file(
+void codesh::external::load_class_file(
         const std::filesystem::path &path, const symbol_table &table)
 {
     std::ifstream file(path, std::ios::binary);
@@ -67,7 +67,7 @@ void codesh::semantic_analyzer::external::load_class_file(
     load_class_file(file, table);
 }
 
-void codesh::semantic_analyzer::external::load_class_file(std::istream &file, const symbol_table &table)
+void codesh::external::load_class_file(std::istream &file, const symbol_table &table)
 {
     read_magic(file);
     util::read_u2(file); // minor_version

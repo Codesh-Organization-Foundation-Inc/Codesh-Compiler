@@ -17,7 +17,7 @@ class symbol_table;
 }
 
 
-namespace codesh::semantic_analyzer::external
+namespace codesh::external
 {
 
 enum class jimage_location_attribute : unsigned char
@@ -84,13 +84,13 @@ class jimage_loader
             const std::string &module_name, const std::string &target_class) const;
 
     void load_compressed_class_file(std::streamoff file_offset, const class_file_lookup_result &lookup,
-            const symbol_table &table);
+            const semantic_analyzer::symbol_table &table);
 
 public:
     explicit jimage_loader(const std::filesystem::path &path);
 
     bool load(const std::string &module_name, const definition::fully_qualified_name &class_name,
-              const symbol_table &table);
+              const semantic_analyzer::symbol_table &table);
 };
 
 }

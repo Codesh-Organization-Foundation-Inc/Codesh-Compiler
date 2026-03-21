@@ -22,7 +22,7 @@ static codesh::definition::fully_qualified_name make_fqn(std::string name)
     return codesh::definition::fully_qualified_name::parse(std::move(name), codesh::lexer::NO_CODE_POS);
 }
 
-std::optional<codesh::definition::fully_qualified_name> codesh::semantic_analyzer::external::find_codesh_replacement(
+std::optional<codesh::definition::fully_qualified_name> codesh::external::find_codesh_replacement(
         const definition::fully_qualified_name &name)
 {
     const auto it = CODESH_REPLACEMENTS.find(name);
