@@ -17,15 +17,12 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
-static std::unordered_map<std::string, std::unique_ptr<codesh::external::jimage_loader>> jimage_cache;
-static std::unordered_map<std::string, std::unique_ptr<codesh::external::jar_loader>> jar_cache;
-
-
-codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths,
+codesh::semantic_analyzer::symbol_table::symbol_table(
+        const definition::class_loaders &class_loaders,
         std::vector<std::string> default_country_lookups) :
     scope(ALLOWED_SYMBOL_TYPES),
     default_imports(std::move(default_country_lookups)),
-    classpaths(classpaths)
+    class_loaders(class_loaders)
 {
     global_scope = &scope.add_symbol(
         "",
@@ -224,32 +221,10 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
 bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definition::fully_qualified_name &candidate)
     const
 {
-    for (const auto &classpath : classpaths)
+    for (const auto &[path, class_loader] : class_loaders)
     {
-        if (std::filesystem::is_directory(classpath))
-        {
-            return external::class_directory_loader(classpath).load(*this, candidate);
-        }
-        if (external::is_jimage(classpath))
-        {
-            const auto key = classpath.string();
-            if (!jimage_cache.contains(key))
-            {
-                jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
-            }
-
-            return jimage_cache.at(key)->load(*this, candidate);
-        }
-        if (external::is_jar(classpath))
-        {
-            const auto key = classpath.string();
-            if (!jar_cache.contains(key))
-            {
-                jar_cache.emplace(key, std::make_unique<external::jar_loader>(classpath));
-            }
-
-            return jar_cache.at(key)->load(*this, candidate);
-        }
+        if (class_loader->load(*this, candidate))
+            return true;
     }
 
     return false;
