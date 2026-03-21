@@ -44,7 +44,7 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_BASAD,
             codesh::blasphemy::blasphemy_type::LEXICAL,
-            codesh::lexer::code_position {1, 0},
+            codesh::lexer::FILE_BEGIN,
             true
         );
 
