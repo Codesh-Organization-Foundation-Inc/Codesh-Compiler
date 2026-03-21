@@ -67,4 +67,9 @@ public:
     [[nodiscard]] std::string holy_join() const;
 };
 
+struct fully_qualified_name_hasher
+{
+    size_t operator()(const fully_qualified_name &fqn) const noexcept;
+};
+
 }

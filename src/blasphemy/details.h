@@ -84,6 +84,7 @@ extern const fmt::runtime_format_string<> TOO_MANY_LOCAL_VARIABLES;
 
 // WARNINGS
 extern const fmt::runtime_format_string<> NON_BIBLICAL_NUMBER;
+extern const fmt::runtime_format_string<> INTEROP_REPLACEMENT_EXISTS;
 extern const fmt::runtime_format_string<> ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES;
 
 }

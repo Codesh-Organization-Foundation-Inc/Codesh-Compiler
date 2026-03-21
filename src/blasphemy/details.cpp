@@ -178,6 +178,9 @@ const rfs_t codesh::blasphemy::details::TOO_MANY_LOCAL_VARIABLES = rfs(
 const rfs_t codesh::blasphemy::details::NON_BIBLICAL_NUMBER = rfs(
     "וָלֹא תֹּאכַל גְּדִי בַּחֲלֵב אִמּוֹ: הַמְּסַפֵּר {} אֵינוֹ כָּשֵׁר לִמְהַדְּרִין"
 );
+const rfs_t codesh::blasphemy::details::INTEROP_REPLACEMENT_EXISTS = rfs(
+    "וָלֹא תֹּאכַל גְּדִי בַּחֲלֵב אִמּוֹ: נִקְרָא הַמַּעֲשֶׂה {} וְגוֹי גָּדוֹל יִהְיֶה, כִּי קַיֶּמֶת תְּמוּרָה כְּשֵׁרָה בְּתַּלְמוּד קוֹדֶשׁ: {}"
+);
 const rfs_t codesh::blasphemy::details::ILLEGAL_IDENTIFIER_CONTENT_FOR_NON_KOSHER_LANGUAGES = rfs(
     "אוֹר לַגּוֹיִים: אֵין בִּיכֹלֶת מַרְבִּית הַלָּשׁוֹן הַזָּרָה לְהִשְׁתַּמֵּשׁ בְּשֵׁם הַמֵּכִיל {}"
 );
