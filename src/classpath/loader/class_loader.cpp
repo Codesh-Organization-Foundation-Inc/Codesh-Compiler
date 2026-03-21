@@ -34,7 +34,7 @@ std::unique_ptr<codesh::external::class_loader> codesh::external::class_loader::
 
     if (result == nullptr)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_warning(
             fmt::format(blasphemy::details::CLASSPATH_NOT_SUPPORTED, classpath.string()),
             blasphemy::blasphemy_type::EXTERNAL,
             lexer::NO_CODE_POS
@@ -44,7 +44,7 @@ std::unique_ptr<codesh::external::class_loader> codesh::external::class_loader::
 
     if (!result->is_loaded())
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_warning(
             fmt::format(blasphemy::details::CLASSPATH_OPEN_ERROR, classpath.string()),
             blasphemy::blasphemy_type::EXTERNAL,
             lexer::NO_CODE_POS
