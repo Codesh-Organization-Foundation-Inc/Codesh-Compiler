@@ -10,6 +10,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
@@ -221,7 +222,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
 bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definition::fully_qualified_name &candidate)
     const
 {
-    for (const auto &[path, class_loader] : class_loaders)
+    for (const auto &class_loader : class_loaders | std::views::values)
     {
         if (class_loader->load(*this, candidate))
             return true;

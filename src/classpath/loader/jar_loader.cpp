@@ -39,12 +39,14 @@ bool codesh::external::is_jar(const std::filesystem::path &path)
 
 bool jar_loader::load(const semantic_analyzer::symbol_table &table, const definition::fully_qualified_name &class_name)
 {
-    const auto entry = archive.getEntry(class_name.get_last_part() + ".class");
+    const auto entry = archive.getEntry(class_name.join() + ".class");
     if (entry.isNull())
         return false;
 
     std::stringstream stream;
-    entry.readContent(stream);
+    if (entry.readContent(stream) != LIBZIPPP_OK)
+        return false;
+
     class_file_loader::load(table, stream);
     return true;
 }

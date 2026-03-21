@@ -35,7 +35,7 @@ static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
 
-[[nodiscard]] static codesh::definition::class_loaders init_classloaders(
+[[nodiscard]] static codesh::definition::class_loaders init_class_loaders(
         const std::vector<std::filesystem::path> &classpaths);
 
 [[nodiscard]] static std::string read_file(const std::string &file_name);
@@ -70,7 +70,7 @@ int main(const int argc, char **const argv)
 {
     const codesh::command_args args = codesh::parse_command(argc, argv);
     // Initialize classloaders early on to get their blasphemies, if those exist
-    const auto class_loaders = init_classloaders(args.classpaths);
+    const auto class_loaders = init_class_loaders(args.classpaths);
 
     if (args.lsp_mode)
     {
@@ -348,7 +348,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     return master_symbol_table;
 }
 
-static codesh::definition::class_loaders init_classloaders(const std::vector<std::filesystem::path> &classpaths)
+static codesh::definition::class_loaders init_class_loaders(const std::vector<std::filesystem::path> &classpaths)
 {
     codesh::definition::class_loaders results;
     results.reserve(classpaths.size());
