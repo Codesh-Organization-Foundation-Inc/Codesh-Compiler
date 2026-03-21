@@ -35,7 +35,10 @@ bool codesh::external::is_jimage(const std::filesystem::path &path)
 jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, std::ios::binary)
 {
     if (!_file.is_open())
-        throw std::runtime_error("Could not open " + path.string());
+    {
+        _is_loaded = false;
+        return;
+    }
 
     _layout = parse_header();
     _redirect_table = load_redirect_table();

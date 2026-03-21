@@ -1,8 +1,10 @@
 #pragma once
 
+#include "class_file_container_loader.h"
+
 #include <filesystem>
-#include <string>
 #include <libzippp.h>
+#include <string>
 
 namespace codesh::semantic_analyzer
 {
@@ -14,17 +16,12 @@ namespace codesh::external
 
 [[nodiscard]] bool is_jar(const std::filesystem::path &path);
 
-class jar_loader final
+class jar_loader final : public class_file_container_loader
 {
     libzippp::ZipArchive archive;
-    bool _is_loaded;
 
 public:
     explicit jar_loader(const std::filesystem::path &path);
-    /**
-     * @return Whether the requested JAR is loaded fine
-     */
-    [[nodiscard]] bool is_loaded() const;
 
     [[nodiscard]] bool load(const std::string &class_candidate, const semantic_analyzer::symbol_table &table) const;
 };

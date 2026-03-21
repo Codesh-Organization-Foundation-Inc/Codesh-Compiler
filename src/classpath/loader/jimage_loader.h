@@ -1,11 +1,13 @@
 #pragma once
 
+#include "class_file_container_loader.h"
+
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace codesh::definition
 {
@@ -62,7 +64,7 @@ struct class_file_lookup_result
 
 [[nodiscard]] bool is_jimage(const std::filesystem::path &path);
 
-class jimage_loader
+class jimage_loader final : public class_file_container_loader
 {
     static constexpr std::streamoff HEADER_SIZE = 28;
 

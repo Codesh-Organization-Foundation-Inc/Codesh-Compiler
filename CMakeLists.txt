@@ -349,6 +349,8 @@ add_executable(codeshc
         src/classpath/classpath_item.h
         src/classpath/jimage_classpath_item.cpp
         src/classpath/jimage_classpath_item.h
+        src/classpath/loader/class_file_container_loader.cpp
+        src/classpath/loader/class_file_container_loader.h
 )
 
 # sudo dnf install boost-regex boost-devel
