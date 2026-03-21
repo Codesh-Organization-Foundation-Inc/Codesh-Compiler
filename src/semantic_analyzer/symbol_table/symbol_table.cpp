@@ -1,6 +1,7 @@
 #include "symbol_table.h"
 
 #include "blasphemy/blasphemy_consumer.h"
+#include "classpath/loader/class_directory_loader.h"
 #include "classpath/loader/class_file_loader.h"
 #include "classpath/loader/jar_loader.h"
 #include "defenition/definitions.h"
@@ -227,9 +228,7 @@ bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definitio
     {
         if (std::filesystem::is_directory(classpath))
         {
-            // A classpath directory may only contain class files
-            const auto class_file_path = classpath / (candidate.get_last_part() + ".class");
-            return external::class_file_loader(class_file_path).load(*this);
+            return external::class_directory_loader(classpath).load(*this, candidate);
         }
         if (external::is_jimage(classpath))
         {

@@ -345,6 +345,8 @@ add_executable(codeshc
         src/lsp/lsp_receiever.cpp
         src/lsp/lsp_receiver.h
         src/parser/ast/var_reference/reference_association.h
+        src/classpath/loader/class_directory_loader.cpp
+        src/classpath/loader/class_directory_loader.h
         src/classpath/loader/class_loader.cpp
         src/classpath/loader/class_loader.h
 )
