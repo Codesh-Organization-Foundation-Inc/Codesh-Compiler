@@ -109,7 +109,6 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
 
     add_default_classpaths(result);
-    //TODO: Check whether the paths truly exist
 
     return result;
 }
@@ -145,36 +144,25 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(codesh::blasphemy::details::INVALID_ARG, entry),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS, false
+            codesh::lexer::NO_CODE_POS
         );
     }
 }
 
 static std::filesystem::path parse_directory_path(std::queue<std::string> &args)
 {
-    if (args.empty())
+    const std::filesystem::path dir_path(consume_argument(args));
+
+    if (!std::filesystem::is_directory(dir_path))
     {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_ARG,
+            fmt::format(codesh::blasphemy::details::INVALID_ARG, dir_path.string()),
             codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS,
-            true
-        );
-        throw std::runtime_error("");
-    }
-
-    const std::filesystem::path folder_path(consume_argument(args));
-
-    if (!std::filesystem::is_directory(folder_path))
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(codesh::blasphemy::details::INVALID_ARG, folder_path.string()),
-            codesh::blasphemy::blasphemy_type::INIT,
-            codesh::lexer::NO_CODE_POS, false
+            codesh::lexer::NO_CODE_POS
         );
     }
 
-    return folder_path;
+    return dir_path;
 }
 
 static std::filesystem::path get_default_jre_path()
@@ -207,7 +195,15 @@ static bool is_zip(const std::string &file_name)
 static std::string consume_argument(std::queue<std::string> &args)
 {
     if (args.empty())
-        return "";
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_ARG,
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::lexer::NO_CODE_POS,
+            true
+        );
+        throw std::runtime_error("");
+    }
 
     const auto arg_content = args.front();
     args.pop();
