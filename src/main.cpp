@@ -20,10 +20,12 @@
 #include <utility>
 #include <vector>
 
-static int compile(const codesh::command_args &args);
-[[noreturn]] static void lsp_server(const codesh::command_args &args);
+static int compile(const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders);
+[[noreturn]] static void lsp_server(const codesh::command_args &args,
+        const codesh::definition::class_loaders &class_loaders);
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
-        const codesh::lsp::diagnostics_request &request);
+        const codesh::lsp::diagnostics_request &request,
+        const codesh::definition::class_loaders &class_loaders);
 [[nodiscard]] static std::filesystem::path uri_to_path(const std::string &file_uri);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
@@ -32,6 +34,9 @@ static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
+
+[[nodiscard]] static codesh::definition::class_loaders init_class_loaders(
+        const std::vector<std::filesystem::path> &classpaths);
 
 [[nodiscard]] static std::string read_file(const std::string &file_name);
 [[nodiscard]] static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
@@ -46,7 +51,8 @@ static void log_analysis_progress(const codesh::command_args &args, size_t proce
         const std::string &pass_name, const codesh::ast::compilation_unit_ast_node &root_node);
 
 static codesh::semantic_analyzer::symbol_table analyze_asts(const codesh::command_args &args,
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts);
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::definition::class_loaders &class_loaders);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, bool is_project,
@@ -63,16 +69,18 @@ static void println(const codesh::command_args &args, const std::string &msg);
 int main(const int argc, char **const argv)
 {
     const codesh::command_args args = codesh::parse_command(argc, argv);
+    // Initialize classloaders early on to get their blasphemies, if those exist
+    const auto class_loaders = init_class_loaders(args.classpaths);
 
     if (args.lsp_mode)
     {
-        lsp_server(args);
+        lsp_server(args, class_loaders);
     }
 
-    return compile(args);
+    return compile(args, class_loaders);
 }
 
-static int compile(const codesh::command_args &args)
+static int compile(const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders)
 {
     if (!args.src_path)
     {
@@ -132,7 +140,7 @@ static int compile(const codesh::command_args &args)
     println(args, "\n---------------------\n");
     const auto asts = parse_source_files(args, source_files);
     println(args, "");
-    const auto master_symbol_table = analyze_asts(args, asts);
+    const auto master_symbol_table = analyze_asts(args, asts, class_loaders);
     println(args, "");
 
 
@@ -159,7 +167,7 @@ static int compile(const codesh::command_args &args)
 }
 
 
-static void lsp_server(const codesh::command_args &args)
+static void lsp_server(const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders)
 {
     while (true)
     {
@@ -171,7 +179,7 @@ static void lsp_server(const codesh::command_args &args)
 
             if (const auto diagnostics_req = dynamic_cast<const codesh::lsp::diagnostics_request *>(request.get()))
             {
-                handle_lsp_diagnostic_request(args, *diagnostics_req);
+                handle_lsp_diagnostic_request(args, *diagnostics_req, class_loaders);
             }
         }
         catch (...)
@@ -182,7 +190,8 @@ static void lsp_server(const codesh::command_args &args)
 }
 
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
-        const codesh::lsp::diagnostics_request &request)
+        const codesh::lsp::diagnostics_request &request,
+        const codesh::definition::class_loaders &class_loaders)
 {
     const auto source_path = uri_to_path(request.file_uri);
     auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents);
@@ -192,7 +201,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
     asts.emplace_back(codesh::parser::parse(tokens, file_id));
 
     //TODO: Could be optimized if we cache the master AST and always remove the source and re-add it or something
-    analyze_asts(args, asts);
+    analyze_asts(args, asts, class_loaders);
 
 
     // Now that all the errors were collected, send them:
@@ -290,11 +299,12 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
 static codesh::semantic_analyzer::symbol_table analyze_asts(
         const codesh::command_args &args,
-        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts)
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::definition::class_loaders &class_loaders)
 {
     println(args, "וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
 
-    codesh::semantic_analyzer::symbol_table master_symbol_table(args.classpaths, generate_default_imports(args));
+    codesh::semantic_analyzer::symbol_table master_symbol_table(class_loaders, generate_default_imports(args));
     codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
 
     const auto process_amount = asts.size() * 3; // 3 passes
@@ -336,6 +346,22 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     }
 
     return master_symbol_table;
+}
+
+static codesh::definition::class_loaders init_class_loaders(const std::vector<std::filesystem::path> &classpaths)
+{
+    codesh::definition::class_loaders results;
+    results.reserve(classpaths.size());
+
+    for (const auto &classpath : classpaths)
+    {
+        if (auto class_loader = codesh::external::class_loader::create(classpath))
+        {
+            results.emplace(classpath, std::move(class_loader));
+        }
+    }
+
+    return results;
 }
 
 static void log_analysis_progress(const codesh::command_args &args, const size_t processed, const size_t total,

@@ -236,8 +236,8 @@ add_executable(codeshc
         src/parser/ast/method/util.h
         src/semantic_analyzer/builtins.cpp
         src/semantic_analyzer/builtins.h
-        src/semantic_analyzer/external/class_loader.h
-        src/semantic_analyzer/external/class_loader.cpp
+        src/classpath/loader/class_file_loader.h
+        src/classpath/loader/class_file_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
@@ -326,12 +326,14 @@ add_executable(codeshc
         src/parser/ast/type_declaration/field_declaration_ast_node.h
         src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
-        src/semantic_analyzer/external/jimage_loader.h
-        src/semantic_analyzer/external/jimage_loader.cpp
+        src/classpath/loader/jimage_loader.h
+        src/classpath/loader/jimage_loader.cpp
         src/semantic_analyzer/external/interop_replacements.h
         src/semantic_analyzer/external/interop_replacements.cpp
-        src/semantic_analyzer/external/util.cpp
-        src/semantic_analyzer/external/util.h
+        src/classpath/loader/jar_loader.h
+        src/classpath/loader/jar_loader.cpp
+        src/classpath/loader/util.cpp
+        src/classpath/loader/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
         src/parser/ast/var_reference/array_access_ast_node.h
         src/parser/ast/operator/assignment/cast_ast_node.cpp
@@ -343,6 +345,10 @@ add_executable(codeshc
         src/lsp/lsp_receiever.cpp
         src/lsp/lsp_receiver.h
         src/parser/ast/var_reference/reference_association.h
+        src/classpath/loader/class_directory_loader.cpp
+        src/classpath/loader/class_directory_loader.h
+        src/classpath/loader/class_loader.cpp
+        src/classpath/loader/class_loader.h
 )
 
 # sudo dnf install boost-regex boost-devel
@@ -400,6 +406,19 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 target_link_libraries(codeshc PRIVATE nlohmann_json::nlohmann_json)
+
+# sudo dnf install libzip-devel
+find_package(libzip REQUIRED)
+
+# libzippp
+FetchContent_Declare(
+    libzippp
+    GIT_REPOSITORY https://github.com/ctabin/libzippp.git
+    GIT_TAG        libzippp-v7.1-1.10.1
+    GIT_SHALLOW    TRUE
+)
+FetchContent_MakeAvailable(libzippp)
+target_link_libraries(codeshc PRIVATE libzippp)
 
 
 # Support includes starting from relative paths

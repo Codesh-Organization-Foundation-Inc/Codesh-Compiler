@@ -1,11 +1,13 @@
 #pragma once
 
+#include "class_loader.h"
+
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace codesh::definition
 {
@@ -17,7 +19,7 @@ class symbol_table;
 }
 
 
-namespace codesh::semantic_analyzer::external
+namespace codesh::external
 {
 
 enum class jimage_location_attribute : unsigned char
@@ -62,9 +64,11 @@ struct class_file_lookup_result
 
 [[nodiscard]] bool is_jimage(const std::filesystem::path &path);
 
-class jimage_loader
+class jimage_loader final : public class_loader
 {
     static constexpr std::streamoff HEADER_SIZE = 28;
+
+    std::string module_name;
 
     std::ifstream _file;
     jimage_offsets _layout{};
@@ -80,17 +84,16 @@ class jimage_loader
     [[nodiscard]] std::vector<char> load_strings();
 
     [[nodiscard]] std::optional<int32_t> get_location_offset_index(const std::string &path) const;
-    [[nodiscard]] std::optional<class_file_lookup_result> lookup_class_file(
-            const std::string &module_name, const std::string &target_class) const;
+    [[nodiscard]] std::optional<class_file_lookup_result> lookup_class_file(const std::string &target_class) const;
 
     void load_compressed_class_file(std::streamoff file_offset, const class_file_lookup_result &lookup,
-            const symbol_table &table);
+            const semantic_analyzer::symbol_table &table);
 
 public:
     explicit jimage_loader(const std::filesystem::path &path);
 
-    bool load(const std::string &module_name, const definition::fully_qualified_name &class_name,
-              const symbol_table &table);
+    bool load(const semantic_analyzer::symbol_table &table,
+              const definition::fully_qualified_name &class_name) override;
 };
 
 }

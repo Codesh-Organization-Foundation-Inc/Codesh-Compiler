@@ -161,6 +161,14 @@ const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
 const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
     "סוּג אֵינוֹ כָּשֵׁר: מַפְתֵּחַ הָאוֹסֶף חַיָּב לִהְיוֹת מִסּוּג שָׁלֵם";
 
+// EXTERNAL
+const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
+    "סֵפֶר אָטוּם הֱיֵה: סוּג הַנְּתִיב {} אֵינוֹ נִתְמָךְ"
+);
+const rfs_t codesh::blasphemy::details::CLASSPATH_OPEN_ERROR = rfs(
+    "סֵפֶר אָטוּם הֱיֵה: לֹא נִתַּן לִפְתֹּחַ אֶת נְתִיב {}"
+);
+
 // OUTPUT
 const std::string codesh::blasphemy::details::CONSTANT_POOL_TOO_BIG =
     "גְּבוּל נֶעֱבַר: אָחִי, תִּרְגַּע... לֹא צָרִיךְ כָּל־כָּךְ הַרְבֵּה קְּבוּעִים. הַגְּבוּל הוּא חָמֵשׁ וּשְׁלֹשִׁים וַחֲמֵשׁ מֵאוֹת וַחֲמִשָּׁה וְשִׁשִּׁים אָלֶף";

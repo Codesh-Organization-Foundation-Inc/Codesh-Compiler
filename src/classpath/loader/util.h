@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace codesh::semantic_analyzer::external::util
+namespace codesh::external::util
 {
 
 uint8_t read_u1(std::istream &file);

@@ -177,6 +177,7 @@ std::string codesh::blasphemy::blasphemy_collector::type_to_string(const blasphe
     case blasphemy_type::LEXICAL: return "לֶקְסִיקָלִית";
     case blasphemy_type::SEMANTIC: return "סֶמָנטִית";
     case blasphemy_type::SYNTAX: return "תַּחְבִּירִית";
+    case blasphemy_type::EXTERNAL: return "זָרָה";
     case blasphemy_type::OUTPUT: return "דְּבָרִים ל\"ד";
     case blasphemy_type::UNKNOWN: return "לֹא יְדוּעָה";
 

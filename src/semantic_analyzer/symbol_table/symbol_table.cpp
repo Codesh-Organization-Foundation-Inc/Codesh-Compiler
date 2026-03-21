@@ -1,14 +1,16 @@
 #include "symbol_table.h"
 
-#include "lexer/source_file_info.h"
 #include "blasphemy/blasphemy_consumer.h"
+#include "classpath/loader/class_directory_loader.h"
+#include "classpath/loader/class_file_loader.h"
+#include "classpath/loader/jar_loader.h"
 #include "defenition/definitions.h"
-#include "semantic_analyzer/external/class_loader.h"
-#include "semantic_analyzer/external/jimage_loader.h"
+#include "lexer/source_file_info.h"
 #include "semantic_analyzer/semantic_context.h"
 
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
@@ -16,14 +18,12 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
-static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jimage_loader>> jimage_cache;
-
-
-codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths,
+codesh::semantic_analyzer::symbol_table::symbol_table(
+        const definition::class_loaders &class_loaders,
         std::vector<std::string> default_country_lookups) :
     scope(ALLOWED_SYMBOL_TYPES),
     default_imports(std::move(default_country_lookups)),
-    classpaths(classpaths)
+    class_loaders(class_loaders)
 {
     global_scope = &scope.add_symbol(
         "",
@@ -172,9 +172,13 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     {
         definition::fully_qualified_name prefix(lexer::NO_CODE_POS, parts.begin(), end);
 
-        const auto candidate = import_prefix.empty()
-            ? prefix.join()
-            : import_prefix + "/" + prefix.join();
+        const auto candidate = definition::fully_qualified_name::parse(
+            import_prefix.empty()
+                ? prefix.join()
+                : import_prefix + "/" + prefix.join(),
+
+            lexer::NO_CODE_POS
+        );
 
         if (try_load_candidate(candidate))
         {
@@ -184,10 +188,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
                 suffix.emplace(lexer::NO_CODE_POS, end, name.get_parts().end());
             }
 
-            return std::pair{
-                definition::fully_qualified_name::parse(candidate, lexer::NO_CODE_POS),
-                std::move(suffix)
-            };
+            return std::pair{candidate, std::move(suffix)};
         }
     }
 
@@ -218,31 +219,13 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     return std::nullopt;
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const
+bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definition::fully_qualified_name &candidate)
+    const
 {
-    for (const auto &classpath : classpaths)
+    for (const auto &class_loader : class_loaders | std::views::values)
     {
-        if (std::filesystem::is_directory(classpath))
-        {
-            // A classpath directory may only contain class files
-            const auto class_file_path = classpath / (candidate + ".class");
-            if (std::filesystem::exists(class_file_path))
-            {
-                external::load_class_file(class_file_path, *this);
-                return true;
-            }
-        }
-        else if (external::is_jimage(classpath))
-        {
-            const auto key = classpath.string();
-            if (!jimage_cache.contains(key))
-            {
-                jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
-            }
-
-            if (jimage_cache.at(key)->load("java.base", definition::fully_qualified_name::parse(candidate, lexer::NO_CODE_POS), *this))
-                return true;
-        }
+        if (class_loader->load(*this, candidate))
+            return true;
     }
 
     return false;

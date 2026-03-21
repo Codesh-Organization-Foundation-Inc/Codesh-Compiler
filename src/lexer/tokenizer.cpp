@@ -105,7 +105,7 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     blasphemy::get_blasphemy_collector().set_source_file(file_id);
 
 
-    code_position curr_keyword_pos{1, 0};
+    code_position curr_keyword_pos = FILE_BEGIN;
 
     size_t code_pos = 0;
     while (code_pos < code.size())
