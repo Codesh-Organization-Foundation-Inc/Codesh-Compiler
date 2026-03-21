@@ -1,6 +1,7 @@
 #include "fully_qualified_name.h"
 
 #include "fmt/xchar.h"
+#include <boost/functional/hash.hpp>
 #include "lexer/trie/keywords.h"
 #include "semantic_analyzer/builtins.h"
 
@@ -126,6 +127,18 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
     }
 
     return join(" ל־");
+}
+
+size_t codesh::definition::fully_qualified_name_hasher::operator()(
+        const fully_qualified_name &fqn) const noexcept
+{
+    size_t seed = 0;
+    for (const auto &part : fqn.get_parts())
+    {
+        boost::hash_combine(seed, part);
+    }
+
+    return seed;
 }
 
 std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
