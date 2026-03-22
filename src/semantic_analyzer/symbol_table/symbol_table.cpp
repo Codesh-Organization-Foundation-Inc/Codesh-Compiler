@@ -6,6 +6,7 @@
 #include "defenition/definitions.h"
 #include "lexer/source_file_info.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 #include <filesystem>
 #include <iostream>
@@ -29,7 +30,10 @@ codesh::semantic_analyzer::symbol_table::symbol_table(
         std::make_unique<country_symbol>(definition::fully_qualified_name(lexer::NO_CODE_POS))
     ).first.get();
 
-    talmud_codesh_country = &add_talmud_codesh_country();
+    talmud_codesh_country = &util::find_or_create_country(*this, definition::fully_qualified_name::parse(
+        "ישראל/קודש/בן/משה",
+        lexer::NO_CODE_POS
+    ));
 }
 
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_country() const
@@ -40,6 +44,11 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_tab
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_talmud_codesh_country() const
 {
     return *talmud_codesh_country;
+}
+
+const std::vector<std::string> &codesh::semantic_analyzer::symbol_table::get_default_imports() const
+{
+    return default_imports;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
@@ -113,28 +122,6 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     }
 
     return std::nullopt;
-}
-
-codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::add_talmud_codesh_country() const
-{
-    auto &israel = add_nested_country(get_global_country(), "ישראל", "ישראל");
-    auto &codesh = add_nested_country(israel, "קודש","ישראל/קודש");
-    auto &ben = add_nested_country(codesh, "בן", "ישראל/קודש/בן");
-    auto &moshe = add_nested_country(ben, "משה", "ישראל/קודש/בן/משה");
-
-    return moshe;
-}
-
-codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::add_nested_country(
-    country_symbol &parent, const std::string &name, const std::string &bin_fqn)
-{
-    return parent.get_scope().add_symbol(
-        name,
-        std::make_unique<country_symbol>(
-            definition::fully_qualified_name::parse(bin_fqn, lexer::NO_CODE_POS),
-            &parent
-        )
-    ).first.get();
 }
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
