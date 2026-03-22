@@ -62,7 +62,7 @@ static void add_country(
 
 
 const codesh::definition::fully_qualified_name codesh::semantic_analyzer::DEFAULT_SUPER_CLASS_NAME =
-    codesh::definition::fully_qualified_name::parse(std::string(builtins::ALIAS_OBJECT), lexer::NO_CODE_POS);
+    definition::fully_qualified_name::parse(std::string(builtins::ALIAS_OBJECT), lexer::NO_CODE_POS);
 
 
 void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &ast_root)
@@ -305,7 +305,7 @@ static codesh::semantic_analyzer::country_symbol &get_own_country(
     const std::string country_path = ast_root.get_package_name().join("/");
 
     if (country_path.empty())
-        return table.get_global_scope();
+        return table.get_global_country();
 
     return codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
 }
@@ -317,7 +317,9 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
     std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> countries;
 
     // Global country always comes first
-    countries.emplace_back(table.get_global_scope());
+    countries.emplace_back(table.get_global_country());
+    // And Talmud Codesh
+    countries.emplace_back(table.get_talmud_codesh_country());
 
     // Include the file's own package country for same-package type resolution
     add_country(countries, get_own_country(ast_root, table));

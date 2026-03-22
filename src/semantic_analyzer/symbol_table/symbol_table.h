@@ -35,6 +35,9 @@ class symbol_table final : public i_scope_containing_symbol
     static const std::vector<symbol_type> ALLOWED_SYMBOL_TYPES;
     named_symbol_map scope;
 
+    country_symbol &add_talmud_codesh_country() const;
+    static country_symbol &add_nested_country(country_symbol &parent, const std::string &name, const std::string &bin_fqn);
+
     /**
      * Imports that will be looked into even if a book did not specify them explicitly.
      */
@@ -44,7 +47,8 @@ class symbol_table final : public i_scope_containing_symbol
     static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
             std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
-    country_symbol *global_scope;
+    country_symbol *global_country;
+    country_symbol *talmud_codesh_country;
 
     /**
      * Load ALL external symbols related to a type, if one exists
@@ -75,7 +79,8 @@ public:
     symbol_table(const definition::class_loaders &class_loaders,
             std::vector<std::string> default_country_lookups);
 
-    [[nodiscard]] country_symbol &get_global_scope() const;
+    [[nodiscard]] country_symbol &get_global_country() const;
+    [[nodiscard]] country_symbol &get_talmud_codesh_country() const;
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 

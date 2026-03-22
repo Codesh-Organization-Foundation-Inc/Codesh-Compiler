@@ -5,47 +5,16 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
-static codesh::semantic_analyzer::country_symbol &talmud_codesh_country(
-        const codesh::semantic_analyzer::symbol_table &table);
-static codesh::semantic_analyzer::country_symbol &nested_country(codesh::semantic_analyzer::country_symbol &parent,
-        const std::string &name, const std::string &bin_fqn);
-
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country);
 static void add_alias_het(codesh::semantic_analyzer::country_symbol &country);
 
 
-void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &table)
+void codesh::semantic_analyzer::builtins::collect_builtins(country_symbol &country)
 {
-    auto &country = talmud_codesh_country(table);
-
     add_alias_ktuvim(country);
     add_alias_labubu(country);
     add_alias_het(country);
-}
-
-static codesh::semantic_analyzer::country_symbol &talmud_codesh_country(
-        const codesh::semantic_analyzer::symbol_table &table)
-{
-    auto &global = table.get_global_scope();
-    auto &israel = nested_country(global, "ישראל", "ישראל");
-    auto &codesh = nested_country(israel, "קודש","ישראל/קודש");
-    auto &ben = nested_country(codesh, "בן", "ישראל/קודש/בן");
-    auto &moshe = nested_country(ben, "משה", "ישראל/קודש/בן/משה");
-
-    return moshe;
-}
-
-static codesh::semantic_analyzer::country_symbol &nested_country(
-        codesh::semantic_analyzer::country_symbol &parent, const std::string &name, const std::string &bin_fqn)
-{
-    return parent.get_scope().add_symbol(
-        name,
-        std::make_unique<codesh::semantic_analyzer::country_symbol>(
-            codesh::definition::fully_qualified_name::parse(bin_fqn, codesh::lexer::NO_CODE_POS),
-            &parent
-        )
-    ).first.get();
 }
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country)

@@ -3,7 +3,6 @@
 #include "blasphemy/blasphemy_consumer.h"
 #include "classpath/loader/class_directory_loader.h"
 #include "classpath/loader/class_file_loader.h"
-#include "classpath/loader/jar_loader.h"
 #include "defenition/definitions.h"
 #include "lexer/source_file_info.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -25,15 +24,22 @@ codesh::semantic_analyzer::symbol_table::symbol_table(
     default_imports(std::move(default_country_lookups)),
     class_loaders(class_loaders)
 {
-    global_scope = &scope.add_symbol(
+    global_country = &scope.add_symbol(
         "",
         std::make_unique<country_symbol>(definition::fully_qualified_name(lexer::NO_CODE_POS))
     ).first.get();
+
+    talmud_codesh_country = &add_talmud_codesh_country();
 }
 
-codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_scope() const
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_country() const
 {
-    return *global_scope;
+    return *global_country;
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_talmud_codesh_country() const
+{
+    return *talmud_codesh_country;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
@@ -109,6 +115,28 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
     return std::nullopt;
 }
 
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::add_talmud_codesh_country() const
+{
+    auto &israel = add_nested_country(get_global_country(), "ישראל", "ישראל");
+    auto &codesh = add_nested_country(israel, "קודש","ישראל/קודש");
+    auto &ben = add_nested_country(codesh, "בן", "ישראל/קודש/בן");
+    auto &moshe = add_nested_country(ben, "משה", "ישראל/קודש/בן/משה");
+
+    return moshe;
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::add_nested_country(
+    country_symbol &parent, const std::string &name, const std::string &bin_fqn)
+{
+    return parent.get_scope().add_symbol(
+        name,
+        std::make_unique<country_symbol>(
+            definition::fully_qualified_name::parse(bin_fqn, lexer::NO_CODE_POS),
+            &parent
+        )
+    ).first.get();
+}
+
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     try_load_external_symbols(const semantic_context &context, const definition::fully_qualified_name &name) const
 {
@@ -150,7 +178,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     // Then from the global scope
     if (const auto result = resolve_method_from_scope_container(
-        *global_scope,
+        *global_country,
         loaded_name_parts.begin(),
         loaded_name_parts.end())
     )

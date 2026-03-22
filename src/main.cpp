@@ -305,7 +305,8 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     println(args, "וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
 
     codesh::semantic_analyzer::symbol_table master_symbol_table(class_loaders, generate_default_imports(args));
-    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
+    // Add all builtins to the Talmud Codesh country
+    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table.get_talmud_codesh_country());
 
     const auto process_amount = asts.size() * 3; // 3 passes
     size_t processed = 1;
