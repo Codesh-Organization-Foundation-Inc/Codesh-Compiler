@@ -13,6 +13,7 @@ inline constexpr std::string CLASS_RANGE = "טווח";
 
 inline constexpr std::string ALIAS_STRING = "כתובים";
 inline constexpr std::string ALIAS_OBJECT = "לאבובו";
+inline constexpr std::string ALIAS_EXCEPTION = "חטא";
 
 void collect_builtins(const symbol_table &table);
 }

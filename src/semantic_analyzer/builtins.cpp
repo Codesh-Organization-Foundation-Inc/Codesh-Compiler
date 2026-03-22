@@ -12,6 +12,7 @@ static codesh::semantic_analyzer::country_symbol &nested_country(codesh::semanti
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country);
+static void add_alias_het(codesh::semantic_analyzer::country_symbol &country);
 
 
 void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &table)
@@ -20,6 +21,7 @@ void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &t
 
     add_alias_ktuvim(country);
     add_alias_labubu(country);
+    add_alias_het(country);
 }
 
 static codesh::semantic_analyzer::country_symbol &talmud_codesh_country(
@@ -76,6 +78,25 @@ static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country)
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
             codesh::definition::fully_qualified_name::parse("java/lang/Object", codesh::lexer::NO_CODE_POS),
+            nullptr,
+            std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
+            std::move(attributes),
+            nullptr
+        )
+    );
+}
+
+static void add_alias_het(codesh::semantic_analyzer::country_symbol &country)
+{
+    auto attributes = std::make_unique<codesh::ast::type_decl::attributes_ast_node>(codesh::lexer::NO_CODE_POS);
+    attributes->set_visibility(codesh::definition::visibility::PUBLIC);
+    attributes->set_is_final(true);
+
+    country.get_scope().add_symbol(
+        codesh::semantic_analyzer::builtins::ALIAS_EXCEPTION,
+        std::make_unique<codesh::semantic_analyzer::type_symbol>(
+            &country,
+            codesh::definition::fully_qualified_name::parse("java/lang/Exception", codesh::lexer::NO_CODE_POS),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
