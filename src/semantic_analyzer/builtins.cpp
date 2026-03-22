@@ -27,11 +27,11 @@ void codesh::semantic_analyzer::builtins::collect_builtins(const symbol_table &t
 static codesh::semantic_analyzer::country_symbol &talmud_codesh_country(
         const codesh::semantic_analyzer::symbol_table &table)
 {
-    codesh::semantic_analyzer::country_symbol &global = table.get_global_scope();
-    codesh::semantic_analyzer::country_symbol &israel = nested_country(global, "ישראל", "ישראל");
-    codesh::semantic_analyzer::country_symbol &codesh = nested_country(israel, "קודש","ישראל/קודש");
-    codesh::semantic_analyzer::country_symbol &ben = nested_country(codesh, "בן", "ישראל/קודש/בן");
-    codesh::semantic_analyzer::country_symbol &moshe = nested_country(ben, "משה", "ישראל/קודש/בן/משה");
+    auto &global = table.get_global_scope();
+    auto &israel = nested_country(global, "ישראל", "ישראל");
+    auto &codesh = nested_country(israel, "קודש","ישראל/קודש");
+    auto &ben = nested_country(codesh, "בן", "ישראל/קודש/בן");
+    auto &moshe = nested_country(ben, "משה", "ישראל/קודש/בן/משה");
 
     return moshe;
 }
