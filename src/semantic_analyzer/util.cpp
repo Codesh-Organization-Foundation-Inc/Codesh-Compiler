@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include "blasphemy/details.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_context.h"
@@ -112,26 +113,19 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
 }
 
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find_or_create_country(
-        const symbol_table &table, const std::string &package_name)
+        const symbol_table &table, const definition::fully_qualified_name &fqn)
 {
     country_symbol &root = table.get_global_country();
 
-    if (package_name.empty())
+    const auto &parts = fqn.get_parts();
+    if (parts.empty())
         return root;
 
     country_symbol *current = &root;
-    std::string accumulated;
 
-    size_t start = 0;
-    while (true)
+    for (size_t i = 0; i < parts.size(); ++i)
     {
-        const size_t slash_pos = package_name.find('/', start);
-        const bool last = slash_pos == std::string::npos;
-        const std::string part = package_name.substr(start, last ? std::string::npos : slash_pos - start);
-
-        if (!accumulated.empty())
-            accumulated += '/';
-        accumulated += part;
+        const auto &part = parts[i];
 
         const auto existing = current->get_scope().resolve_local(part);
         if (existing)
@@ -140,19 +134,17 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find
         }
         else
         {
+            definition::fully_qualified_name sub_fqn(
+                lexer::NO_CODE_POS,
+                parts.cbegin(),
+                parts.cbegin() + static_cast<std::ptrdiff_t>(i) + 1
+            );
+
             current = &current->get_scope().add_symbol(
                 part,
-                std::make_unique<country_symbol>(
-                    definition::fully_qualified_name::parse(accumulated, lexer::NO_CODE_POS),
-                    current
-                )
+                std::make_unique<country_symbol>(std::move(sub_fqn), current)
             ).first.get();
         }
-
-        if (last)
-            break;
-
-        start = slash_pos + 1;
     }
 
     return *current;

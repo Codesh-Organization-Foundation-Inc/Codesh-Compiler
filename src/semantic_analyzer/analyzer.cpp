@@ -302,12 +302,7 @@ static codesh::semantic_analyzer::country_symbol &get_own_country(
         const codesh::ast::compilation_unit_ast_node &ast_root,
         const codesh::semantic_analyzer::symbol_table &table)
 {
-    const std::string country_path = ast_root.get_package_name().join("/");
-
-    if (country_path.empty())
-        return table.get_global_country();
-
-    return codesh::semantic_analyzer::util::find_or_create_country(table, country_path);
+    return codesh::semantic_analyzer::util::find_or_create_country(table, ast_root.get_package_name());
 }
 
 static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>> collect_lookup_countries(
@@ -330,17 +325,11 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
 
         // On-demand (wildcard) import: the whole package_name IS the country.
         // Specific import: strip the type name to get the parent country.
-        const std::string country_path = country_name.is_wildcard()
-            ? country_name.join("/")
-            : country_name.omit_last().join("/");
+        const codesh::definition::fully_qualified_name country_fqn = country_name.is_wildcard()
+            ? country_name
+            : country_name.omit_last();
 
-        if (country_path.empty())
-        {
-            // Global country already exists
-            continue;
-        }
-
-        add_country(countries, codesh::semantic_analyzer::util::find_or_create_country(table, country_path));
+        add_country(countries, codesh::semantic_analyzer::util::find_or_create_country(table, country_fqn));
     }
 
     return countries;
