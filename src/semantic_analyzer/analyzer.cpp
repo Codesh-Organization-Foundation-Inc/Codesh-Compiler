@@ -330,7 +330,7 @@ static std::vector<std::reference_wrapper<codesh::semantic_analyzer::country_sym
 
         // On-demand (wildcard) import: the whole package_name IS the country.
         // Specific import: strip the type name to get the parent country.
-        const std::string country_path = import_decl->get_is_on_demand()
+        const std::string country_path = country_name.is_wildcard()
             ? country_name.join("/")
             : country_name.omit_last().join("/");
 
