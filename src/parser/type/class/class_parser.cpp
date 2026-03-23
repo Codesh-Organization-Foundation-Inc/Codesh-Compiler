@@ -285,6 +285,37 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
         );
     }
 
+    if (parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_THROWS))
+    {
+        do
+        {
+            auto exception_name = parser::util::consume_identifier_token(tokens);
+
+            if (!exception_name)
+            {
+                codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                    codesh::blasphemy::details::NO_IDENTIFIER,
+                    codesh::blasphemy::blasphemy_type::SYNTAX,
+                    code_position
+                );
+                break;
+            }
+
+            auto exception_type = std::make_unique<ast::type::custom_type_ast_node>(
+                exception_name->get_code_position(),
+                codesh::definition::fully_qualified_name(
+                    exception_name->get_code_position(),
+                    exception_name->get_content()
+                )
+            );
+
+            method_decl.get_exceptions_thrown().push_back(std::move(exception_type));
+
+        }
+        while (parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR));
+
+    }
+
 
     if (!did_capture_scope_begin && !parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
     {
