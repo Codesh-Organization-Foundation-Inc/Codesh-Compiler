@@ -3,10 +3,10 @@
 #include "blasphemy/blasphemy_consumer.h"
 #include "classpath/loader/class_directory_loader.h"
 #include "classpath/loader/class_file_loader.h"
-#include "classpath/loader/jar_loader.h"
 #include "defenition/definitions.h"
 #include "lexer/source_file_info.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 #include <filesystem>
 #include <iostream>
@@ -20,20 +20,36 @@
 
 codesh::semantic_analyzer::symbol_table::symbol_table(
         const definition::class_loaders &class_loaders,
-        std::vector<std::string> default_country_lookups) :
+        std::vector<definition::fully_qualified_name> default_country_lookups) :
     scope(ALLOWED_SYMBOL_TYPES),
     default_imports(std::move(default_country_lookups)),
     class_loaders(class_loaders)
 {
-    global_scope = &scope.add_symbol(
+    global_country = &scope.add_symbol(
         "",
         std::make_unique<country_symbol>(definition::fully_qualified_name(lexer::NO_CODE_POS))
     ).first.get();
+
+    talmud_codesh_country = &util::find_or_create_country(*this, definition::fully_qualified_name::parse(
+        "ישראל/קודש/בן/משה",
+        lexer::NO_CODE_POS
+    ));
 }
 
-codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_scope() const
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_country() const
 {
-    return *global_scope;
+    return *global_country;
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_talmud_codesh_country() const
+{
+    return *talmud_codesh_country;
+}
+
+const std::vector<codesh::definition::fully_qualified_name> &codesh::semantic_analyzer::symbol_table::
+    get_default_imports() const
+{
+    return default_imports;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
@@ -150,7 +166,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     // Then from the global scope
     if (const auto result = resolve_method_from_scope_container(
-        *global_scope,
+        *global_country,
         loaded_name_parts.begin(),
         loaded_name_parts.end())
     )
@@ -164,31 +180,29 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 }
 
 std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::symbol_table::try_load_prefixes(
-        const std::string &import_prefix, const definition::fully_qualified_name &name) const
+        const definition::fully_qualified_name &import_prefix, const definition::fully_qualified_name &name) const
 {
     const auto &parts = name.get_parts();
 
     for (auto end = parts.end(); end != parts.begin(); --end)
     {
-        definition::fully_qualified_name prefix(lexer::NO_CODE_POS, parts.begin(), end);
-
-        const auto candidate = definition::fully_qualified_name::parse(
-            import_prefix.empty()
-                ? prefix.join()
-                : import_prefix + "/" + prefix.join(),
-
-            lexer::NO_CODE_POS
-        );
+        definition::fully_qualified_name candidate = import_prefix;
+        // Each of the outer for iteration we try to use a smaller FQN to see if one fits.
+        // Hence, here, iterate up to `end`, not the full parts range.
+        for (auto part = parts.begin(); part != end; ++part)
+        {
+            candidate.add(*part);
+        }
 
         if (try_load_candidate(candidate))
         {
             std::optional<definition::fully_qualified_name> suffix;
-            if (end != name.get_parts().end())
+            if (end != parts.end())
             {
-                suffix.emplace(lexer::NO_CODE_POS, end, name.get_parts().end());
+                suffix.emplace(lexer::NO_CODE_POS, end, parts.end());
             }
 
-            return std::pair{candidate, std::move(suffix)};
+            return std::pair{std::move(candidate), std::move(suffix)};
         }
     }
 
@@ -199,7 +213,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
         const semantic_context &context, const definition::fully_qualified_name &name) const
 {
     // 1. Direct absolute FQN (programmer wrote "java/lang/String" explicitly)
-    if (const auto result = try_load_prefixes("", name))
+    if (const auto result = try_load_prefixes(definition::fully_qualified_name(lexer::NO_CODE_POS), name))
         return result;
 
     // 2. Default imports (java/lang, Talmud Codesh)
@@ -212,7 +226,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     // 3. Explicit imports from the source file
     for (const auto &country : context.lookup_countries)
     {
-        if (const auto result = try_load_prefixes(country.get().get_full_name().join(), name))
+        if (const auto result = try_load_prefixes(country.get().get_full_name(), name))
             return result;
     }
 

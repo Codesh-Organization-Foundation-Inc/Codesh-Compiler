@@ -90,7 +90,7 @@ bool do_types_match(const ast::type::type_ast_node &from, const ast::type::type_
  * within the symbol table, creating missing intermediate countries as needed.
  */
 [[nodiscard]] country_symbol &find_or_create_country(const symbol_table &table,
-        const std::string &package_name);
+        const definition::fully_qualified_name &fqn);
 
 /**
  * Creates a @c type_symbol in the given @p country and adds it to its scope.
