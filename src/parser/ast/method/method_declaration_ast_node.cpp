@@ -144,6 +144,19 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
         constant_pool.goc_utf8_info("StackMapTable");
     }
 
+    if (!exceptions_thrown.empty())
+    {
+        constant_pool.goc_utf8_info("Exceptions");
+        for (const auto &exception_type : exceptions_thrown)
+        {
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(
+                    exception_type->get_resolved_name().join()
+                )
+            );
+        }
+    }
+
     for (const auto &param : parameters)
     {
         param.get().emit_constants(root_node, constant_pool);
