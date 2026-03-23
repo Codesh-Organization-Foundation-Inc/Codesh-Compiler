@@ -1,7 +1,7 @@
 #include "widen_util.h"
 
+#include "../../parser/ast/operator/cast/widening_cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 #include "semantic_analyzer/util.h"
 #include "semantic_analyzer/util/poly_util.h"
