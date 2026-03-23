@@ -44,12 +44,21 @@ enum class opcode : unsigned char
 
     WIDE = 0xC4,
 
-    CAST_INT_TO_LONG = 0x85,
-    CAST_INT_TO_FLOAT = 0x86,
-    CAST_INT_TO_DOUBLE = 0x87,
-    CAST_LONG_TO_FLOAT = 0x89,
-    CAST_LONG_TO_DOUBLE = 0x8A,
-    CAST_FLOAT_TO_DOUBLE = 0x8B,
+    CAST_INT_TO_LONG     = 0x85,
+    CAST_INT_TO_FLOAT    = 0x86,
+    CAST_INT_TO_DOUBLE   = 0x87,
+    CAST_LONG_TO_INT     = 0x88,
+    CAST_LONG_TO_FLOAT   = 0x89,
+    CAST_LONG_TO_DOUBLE  = 0x8A,
+    CAST_FLOAT_TO_INT    = 0x8B,
+    CAST_FLOAT_TO_LONG   = 0x8C,
+    CAST_FLOAT_TO_DOUBLE = 0x8D,
+    CAST_DOUBLE_TO_INT   = 0x8E,
+    CAST_DOUBLE_TO_LONG  = 0x8F,
+    CAST_DOUBLE_TO_FLOAT = 0x90,
+    CAST_INT_TO_BYTE     = 0x91,
+    CAST_INT_TO_CHAR     = 0x92,
+    CAST_INT_TO_SHORT    = 0x93,
 
     CHECKCAST = 0xC0,
 
