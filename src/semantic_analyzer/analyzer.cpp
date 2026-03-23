@@ -79,13 +79,15 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
     add_this_param_to_non_static_methods(ast_root);
 }
 
-void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_node &ast_root,
-                                                const symbol_table &table)
+codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::make_context(
+        const ast::compilation_unit_ast_node &ast_root, const symbol_table &table)
 {
-    const auto lookup_countries = collect_lookup_countries(ast_root, table);
-    country_symbol &country = get_own_country(ast_root, table);
+    return {table, collect_lookup_countries(ast_root, table), ast_root, blasphemy::semantic_consumer};
+}
 
-    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
+void codesh::semantic_analyzer::collect_symbols(const semantic_context &context)
+{
+    country_symbol &country = get_own_country(context.root, context.symbol_table_);
 
     for (const auto &type_decl : context.root.get_type_declarations())
     {
@@ -93,25 +95,17 @@ void codesh::semantic_analyzer::collect_symbols(const ast::compilation_unit_ast_
     }
 }
 
-void codesh::semantic_analyzer::post_collect(const ast::compilation_unit_ast_node &ast_root,
-                                             const symbol_table &table)
+void codesh::semantic_analyzer::post_collect(const semantic_context &context)
 {
-    const auto lookup_countries = collect_lookup_countries(ast_root, table);
-    country_symbol &country = get_own_country(ast_root, table);
-
-    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
+    country_symbol &country = get_own_country(context.root, context.symbol_table_);
 
     type_declaration::dispatch_collect_methods(context, country);
     field_declaration::collect(context, country);
 }
 
-void codesh::semantic_analyzer::analyze(const ast::compilation_unit_ast_node &ast_root,
-                                        const symbol_table &table)
+void codesh::semantic_analyzer::analyze(const semantic_context &context)
 {
-    const auto lookup_countries = collect_lookup_countries(ast_root, table);
-    const country_symbol &country = get_own_country(ast_root, table);
-
-    const semantic_context context = {table, lookup_countries, ast_root, blasphemy::semantic_consumer};
+    const country_symbol &country = get_own_country(context.root, context.symbol_table_);
 
     for (const auto &type_decl : context.root.get_type_declarations())
     {
