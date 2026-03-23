@@ -66,10 +66,10 @@ codesh::ast::type_decl::attributes_ast_node *codesh::ast::type_decl::
     return attributes.get();
 }
 
-const codesh::output::jvm_target::constant_pool& codesh::ast::type_decl::interface_declaration_ast_node::
+const codesh::output::jvm_target::constant_pool &codesh::ast::type_decl::interface_declaration_ast_node::
         get_constant_pool() const
 {
-    return nullptr;
+    return *constant_pool;
 }
 
 void codesh::ast::type_decl::interface_declaration_ast_node::set_constant_pool(
