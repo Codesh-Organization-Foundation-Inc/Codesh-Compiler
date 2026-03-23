@@ -17,8 +17,8 @@
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "primitive_value_parser.h"
 
+#include "../ast/operator/cast/manual_cast_ast_node.h"
 #include "fmt/format.h"
-#include "parser/ast/operator/assignment/cast_ast_node.h"
 #include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
@@ -288,7 +288,7 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting
         return std::make_unique<codesh::ast::var_reference::error_value_ast_node>(error_pos);
     }
 
-    return std::make_unique<codesh::ast::op::assignment::cast_ast_node>(
+    return std::make_unique<codesh::ast::op::assignment::manual_cast_ast_node>(
         value->get_code_position(),
         std::move(value),
         std::move(type_node)

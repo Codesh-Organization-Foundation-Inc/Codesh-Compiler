@@ -102,8 +102,8 @@ add_executable(codeshc
         src/parser/ast/type/custom_type_ast_node.h
         src/parser/ast/type/primitive_type_ast_node.cpp
         src/parser/ast/type/primitive_type_ast_node.h
-        src/parser/ast/type/widening_cast_ast_node.cpp
-        src/parser/ast/type/widening_cast_ast_node.h
+        src/parser/ast/operator/cast/widening_cast_ast_node.cpp
+        src/parser/ast/operator/cast/widening_cast_ast_node.h
         src/defenition/primitive_type.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
@@ -336,8 +336,10 @@ add_executable(codeshc
         src/classpath/loader/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
         src/parser/ast/var_reference/array_access_ast_node.h
-        src/parser/ast/operator/assignment/cast_ast_node.cpp
-        src/parser/ast/operator/assignment/cast_ast_node.h
+        src/parser/ast/operator/cast/cast_ast_node.cpp
+        src/parser/ast/operator/cast/cast_ast_node.h
+        src/parser/ast/operator/cast/manual_cast_ast_node.cpp
+        src/parser/ast/operator/cast/manual_cast_ast_node.h
         src/semantic_analyzer/util/widen_util.cpp
         src/semantic_analyzer/util/widen_util.h
         src/semantic_analyzer/util/poly_util.cpp
