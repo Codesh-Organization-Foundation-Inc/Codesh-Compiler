@@ -1,4 +1,4 @@
-#include "interface_ast_node.h"
+#include "interface_declaration_ast_node.h"
 
 codesh::ast::type_decl::interface_declaration_ast_node::interface_declaration_ast_node(
         lexer::code_position code_position, definition::fully_qualified_name name) :
