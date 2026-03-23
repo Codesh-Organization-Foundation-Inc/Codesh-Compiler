@@ -224,7 +224,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     // Update the AST node to the found result
     method_call.set_resolved(resolved_method.value());
 
-    if (resolved_method->get().get_producing_node() == nullptr)
+    if (resolved_method->get().is_external())
     {
         maybe_warn_interop_exists(method_call);
     }
@@ -712,9 +712,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)
 {
-    const bool is_external = method.get_producing_node() == nullptr;
-
-    return !is_external && !method.get_attributes().get_is_static()
+    return !method.is_external() && !method.get_attributes().get_is_static()
         ? 1
         : 0;
 }

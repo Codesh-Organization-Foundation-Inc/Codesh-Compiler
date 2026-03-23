@@ -88,6 +88,7 @@ public:
     virtual ~i_ast_produced();
 
     [[nodiscard]] virtual T *get_producing_node() const = 0;
+    [[nodiscard]] bool is_external() const;
 };
 
 /**
