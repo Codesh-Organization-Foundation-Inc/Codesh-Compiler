@@ -38,13 +38,14 @@ class symbol_table final : public i_scope_containing_symbol
     /**
      * Imports that will be looked into even if a book did not specify them explicitly.
      */
-    const std::vector<std::string> default_imports;
+    const std::vector<definition::fully_qualified_name> default_imports;
     const definition::class_loaders &class_loaders;
 
     static std::optional<std::reference_wrapper<symbol>> resolve_from_imports(const semantic_context &context,
             std::vector<std::string>::const_iterator name_start, std::vector<std::string>::const_iterator name_end);
 
-    country_symbol *global_scope;
+    country_symbol *global_country;
+    country_symbol *talmud_codesh_country;
 
     /**
      * Load ALL external symbols related to a type, if one exists
@@ -67,15 +68,17 @@ class symbol_table final : public i_scope_containing_symbol
      * In that case, the return value will be a @c System suffix (what was loaded) and @c out (what was omitted).
      */
     [[nodiscard]] std::optional<split_fqn> try_load_prefixes(
-            const std::string &import_prefix, const definition::fully_qualified_name &name) const;
+            const definition::fully_qualified_name &import_prefix, const definition::fully_qualified_name &name) const;
     [[nodiscard]] std::optional<split_fqn> try_load_any_candidate(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
 public:
     symbol_table(const definition::class_loaders &class_loaders,
-            std::vector<std::string> default_country_lookups);
+            std::vector<definition::fully_qualified_name> default_country_lookups);
 
-    [[nodiscard]] country_symbol &get_global_scope() const;
+    [[nodiscard]] country_symbol &get_global_country() const;
+    [[nodiscard]] country_symbol &get_talmud_codesh_country() const;
+    [[nodiscard]] const std::vector<definition::fully_qualified_name> &get_default_imports() const;
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;
 
