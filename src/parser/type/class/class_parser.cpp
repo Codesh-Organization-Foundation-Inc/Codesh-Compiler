@@ -81,6 +81,26 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
         }
     }
 
+    if (util::consuming_check(tokens, token_group::KEYWORD_IMPLEMENTS))
+    {
+        do
+        {
+            const auto interface_name = util::consume_identifier_token(tokens);
+
+            auto interface_type = std::make_unique<ast::type::custom_type_ast_node>(
+                interface_name->get_code_position(),
+                definition::fully_qualified_name(
+                    interface_name->get_code_position(),
+                    interface_name->get_content()
+                )
+            );
+
+            node->add_interface(std::move(interface_type));
+
+        }
+        while (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR));
+    }
+
 
     // Get attributes
     node->set_attributes(parse_modifiers(code_position, tokens));
