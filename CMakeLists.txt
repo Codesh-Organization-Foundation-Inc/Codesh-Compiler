@@ -171,6 +171,8 @@ add_executable(codeshc
         src/output/ir/instruction/widening_cast_instruction.h
         src/output/ir/instruction/checkcast_instruction.cpp
         src/output/ir/instruction/checkcast_instruction.h
+        src/output/ir/instruction/narrowing_cast_instruction.cpp
+        src/output/ir/instruction/narrowing_cast_instruction.h
         src/output/ir/instruction/invoke_instruction.cpp
         src/output/ir/instruction/invoke_instruction.h
         src/output/ir/instruction/load_int_constant_instruction.cpp
