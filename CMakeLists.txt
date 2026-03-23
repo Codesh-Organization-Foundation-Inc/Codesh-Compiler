@@ -349,6 +349,8 @@ add_executable(codeshc
         src/classpath/loader/class_directory_loader.h
         src/classpath/loader/class_loader.cpp
         src/classpath/loader/class_loader.h
+        src/parser/ast/type_declaration/interface_ast_node.cpp
+        src/parser/ast/type_declaration/interface_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel
