@@ -3,7 +3,6 @@
 #include "lexer/source_file_info.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
-#include "semantic_analyzer/symbol_table/symbol_table.h"
 
 static void add_alias_ktuvim(codesh::semantic_analyzer::country_symbol &country);
 static void add_alias_labubu(codesh::semantic_analyzer::country_symbol &country);
@@ -65,7 +64,10 @@ static void add_alias_het(codesh::semantic_analyzer::country_symbol &country)
         codesh::semantic_analyzer::builtins::ALIAS_EXCEPTION,
         std::make_unique<codesh::semantic_analyzer::type_symbol>(
             &country,
-            codesh::definition::fully_qualified_name::parse("java/lang/Exception", codesh::lexer::NO_CODE_POS),
+            codesh::definition::fully_qualified_name::parse(
+                "java/lang/Exception",
+                codesh::lexer::NO_CODE_POS
+            ),
             nullptr,
             std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>>(),
             std::move(attributes),
