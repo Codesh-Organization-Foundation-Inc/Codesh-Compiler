@@ -4,16 +4,9 @@
 #include "parser/ast/impl/i_descriptor_emitter.h"
 #include "parser/ast/impl/i_resolvable.h"
 #include "parser/ast/impl/i_constant_pool_emitter.h"
-
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
-
 #include "output/jvm_target/constant_pool.h"
-
-#include <deque>
-#include <memory>
-#include <optional>
-#include <vector>
 
 namespace codesh::semantic_analyzer
 {
