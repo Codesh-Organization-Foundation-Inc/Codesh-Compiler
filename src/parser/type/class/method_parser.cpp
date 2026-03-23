@@ -161,6 +161,10 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
     {
         parse_methods_call_parameters(tokens, *method_call_node);
     }
+    if (util::consuming_check(tokens, token_group::KEYWORD_THROWS))
+    {
+
+    }
     return method_call_node;
 }
 
