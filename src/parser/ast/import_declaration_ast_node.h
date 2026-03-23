@@ -15,6 +15,7 @@ public:
     explicit import_declaration_ast_node(lexer::code_position code_position);
 
     [[nodiscard]] definition::fully_qualified_name &get_package_name();
+    [[nodiscard]] const definition::fully_qualified_name &get_package_name() const;
     [[nodiscard]] bool get_is_static() const;
 
     void set_is_static(bool is_static);
