@@ -51,6 +51,8 @@ enum class opcode : unsigned char
     CAST_LONG_TO_DOUBLE = 0x8A,
     CAST_FLOAT_TO_DOUBLE = 0x8B,
 
+    CHECKCAST = 0xC0,
+
     I_INC = 0x84,
 
     I_ADD = 0x60,
