@@ -40,8 +40,7 @@ std::string codesh::ast::method::util::generate_parameters_descriptor(
 
     // If the method isn't static, skip the first parameter ('this').
     // NOTE that external symbols do NOT have 'this' prepended.
-    const auto is_external = resolved_symbol->get().get_producing_node() == nullptr;
-    if (!is_external && !attributes.get_is_static())
+    if (!resolved_symbol->get().is_external() && !attributes.get_is_static())
     {
         ++it;
     }
