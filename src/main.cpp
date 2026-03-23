@@ -30,7 +30,9 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
-[[nodiscard]] static std::vector<codesh::definition::fully_qualified_name> generate_default_imports(const codesh::command_args &args);
+[[nodiscard]] static std::vector<codesh::definition::fully_qualified_name> generate_default_imports(
+        const codesh::command_args &args);
+static codesh::definition::fully_qualified_name generate_default_import(const std::string &fqn_str);
 static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -240,20 +242,25 @@ static std::vector<codesh::definition::fully_qualified_name> generate_default_im
 
     if (args.is_java_default_classpath)
     {
-        results.push_back(codesh::definition::fully_qualified_name::parse(
-            "java/lang",
-            codesh::lexer::NO_CODE_POS
-        ));
+        results.push_back(generate_default_import("java/lang"));
     }
     if (args.is_talmud_codesh_classpath)
     {
-        results.push_back(codesh::definition::fully_qualified_name::parse(
-            "ישראל/קודש/בן/משה",
-            codesh::lexer::NO_CODE_POS
-        ));
+        results.push_back(generate_default_import("ישראל/קודש/בן/משה"));
     }
 
     return results;
+}
+
+static codesh::definition::fully_qualified_name generate_default_import(const std::string &fqn_str)
+{
+    auto result = codesh::definition::fully_qualified_name::parse(
+        fqn_str,
+        codesh::lexer::NO_CODE_POS
+    );
+    result.set_is_wildcard(true);
+
+    return result;
 }
 
 static void update_source_file(const size_t file_id)
