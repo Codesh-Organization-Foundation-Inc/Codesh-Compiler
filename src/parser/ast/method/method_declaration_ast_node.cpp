@@ -111,14 +111,14 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter_front(
     method_scope.add_local_variable_front(std::move(parameter));
 }
 
-const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_exceptions_thrown() const
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_exceptions_thrown() const
 {
     return exceptions_thrown;
 }
 
-std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_exceptions_thrown()
+std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_exceptions_thrown()
 {
     return exceptions_thrown;
 }

@@ -35,7 +35,7 @@ class method_declaration_ast_node : public impl::ast_node, public impl::i_descri
     std::deque<std::reference_wrapper<type::type_ast_node>> parameter_types;
 
     // "throws" declaration
-    std::vector<std::unique_ptr<type::type_ast_node>> exceptions_thrown;
+    std::vector<std::unique_ptr<type::custom_type_ast_node>> exceptions_thrown;
 
     method_scope_ast_node method_scope;
 
@@ -73,8 +73,8 @@ public:
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);
     void add_parameter_front(std::unique_ptr<local_variable_declaration_ast_node> parameter);
 
-    [[nodiscard]] const std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown() const;
-    [[nodiscard]] std::vector<std::unique_ptr<type::type_ast_node>> &get_exceptions_thrown();
+    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_exceptions_thrown() const;
+    [[nodiscard]] std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_exceptions_thrown();
 
 
     [[nodiscard]] std::string to_pretty_string() const override;
