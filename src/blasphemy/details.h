@@ -74,6 +74,7 @@ extern const fmt::runtime_format_string<> DUPLICATE_METHOD_DECLARATION;
 extern const fmt::runtime_format_string<> NON_STATIC_CALL_FROM_STATIC_CONTEXT;
 extern const fmt::runtime_format_string<> NOT_AN_ARRAY;
 extern const std::string ARRAY_INDEX_NOT_INTEGER;
+extern const fmt::runtime_format_string<> INVALID_CAST;
 extern const fmt::runtime_format_string<> THROWS_NOT_EXCEPTION;
 
 // EXTERNAL

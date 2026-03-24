@@ -1,5 +1,6 @@
 #include "resolve.h"
 
+#include "semantic_analyzer/statement/cast/resolve.h"
 #include "semantic_analyzer/statement/method_call/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
@@ -17,6 +18,7 @@
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
+#include "parser/ast/operator/cast/cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
@@ -230,6 +232,11 @@ bool statement::resolve(const semantic_context &context,
         }
 
         return all_succeed;
+    }
+
+    if (const auto cast = dynamic_cast<ast::op::assignment::cast_ast_node *>(&stmnt))
+    {
+        return cast::resolve(context, *cast, containing_method, scope);
     }
 
     // Probably doesn't need to be resolved.

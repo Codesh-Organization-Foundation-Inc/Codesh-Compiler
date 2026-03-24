@@ -160,6 +160,9 @@ const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
 );
 const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
     "סוּג אֵינוֹ כָּשֵׁר: מַפְתֵּחַ הָאוֹסֶף חַיָּב לִהְיוֹת מִסּוּג שָׁלֵם";
+const rfs_t codesh::blasphemy::details::INVALID_CAST = rfs(
+    "סוּג אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְהַמִּיר אֶת הַסּוּג {} לַסּוּג {}"
+);
 const rfs_t codesh::blasphemy::details::THROWS_NOT_EXCEPTION = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: הַסּוּג {} אֵינוֹ חֲטָא"
 );
