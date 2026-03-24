@@ -37,8 +37,10 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX, token->get_code_position());
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX, token->get_code_position()
+        );
 
         return make_error_identifier_token(token->get_code_position());
     }
