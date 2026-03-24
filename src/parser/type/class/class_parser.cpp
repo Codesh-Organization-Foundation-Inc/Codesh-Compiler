@@ -289,7 +289,7 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
     {
         do
         {
-            auto exception_name = parser::util::consume_identifier_token(tokens);
+            const auto exception_name = parser::util::consume_identifier_token(tokens);
 
             if (!exception_name)
             {
@@ -313,7 +313,6 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
 
         }
         while (parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR));
-
     }
 
 
