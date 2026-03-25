@@ -36,6 +36,17 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
     }
 
     util::parse_fqn(tokens, import_node->get_package_name());
+
+    //TODO: Remove once implemented
+    if (!import_node->get_package_name().is_wildcard())
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+           "יבוא לא כולל אינו נתמך בשלב זה",
+           blasphemy::blasphemy_type::SYNTAX,
+           import_node->get_package_name().get_source_range()
+       );
+    }
+
     util::ensure_end_op(tokens);
     return import_node;
 }
