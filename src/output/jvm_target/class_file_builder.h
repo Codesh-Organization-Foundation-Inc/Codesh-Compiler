@@ -82,6 +82,9 @@ class class_file_builder
     [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
             const ast::method::method_declaration_ast_node &method_decl) const;
 
+    [[nodiscard]] std::unique_ptr<defs::exceptions_attribute_entry> create_exceptions_attribute(
+            const ast::method::method_declaration_ast_node &method_decl) const;
+
     ir::code_block emit_method_bytecode(defs::code_attribute_entry &code_attr,
                               const ast::method::method_declaration_ast_node &method_decl) const;
     [[nodiscard]] static int get_locals_count(const ast::method::method_declaration_ast_node &method_decl);
