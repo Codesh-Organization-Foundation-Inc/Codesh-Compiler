@@ -772,11 +772,16 @@ static bool validate_sins_thrown(
 {
     for (const auto &sin : resolved_method.get_sins_thrown())
     {
-        const auto &sin_name = sin->get_unresolved_name();
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *sin))
+            continue;
+
         const auto &sins = containing_method.get_sins_thrown();
 
-        const auto sin_declared = std::ranges::any_of(sins, [&sin_name](const auto &containing_sin) {
-            return containing_sin->get_unresolved_name() == sin_name;
+        const auto sin_declared = std::ranges::any_of(sins, [&sin, &context](const auto &containing_sin) {
+            if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *containing_sin))
+                return false;
+
+            return containing_sin->get_resolved_name() == sin->get_resolved_name();
         });
 
         if (!sin_declared)
@@ -785,7 +790,7 @@ static bool validate_sins_thrown(
                 fmt::format(
                     codesh::blasphemy::details::UNDECLARED_SIN,
                     method_call.get_unresolved_name().get_last_part(),
-                    sin_name.holy_join()
+                    sin->get_unresolved_name().holy_join()
                 ),
                 {
                     method_call.get_code_position(),
