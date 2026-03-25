@@ -16,6 +16,6 @@ namespace codesh::semantic_analyzer::statement::cast
 /**
  * @returns Whether the operation succeeded
  */
-bool resolve(const semantic_context &context, const ast::op::assignment::cast_ast_node &cast,
+bool resolve(const semantic_context &context, ast::op::assignment::cast_ast_node &cast,
         const method_symbol &containing_method, const method_scope_symbol &scope);
 }

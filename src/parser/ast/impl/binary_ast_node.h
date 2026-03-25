@@ -23,7 +23,7 @@ public:
     [[nodiscard]] value_ast_node &get_right() const;
 
     //TODO: Nodes like ++ should specify that only numerical types are allowed.
-    [[nodiscard]] bool is_value_valid() const override;
+    [[nodiscard]] bool is_value_valid(const semantic_analyzer::semantic_context &context) const override;
 
     /**
      * Wraps the narrower child in a widening_cast_ast_node if the two types differ

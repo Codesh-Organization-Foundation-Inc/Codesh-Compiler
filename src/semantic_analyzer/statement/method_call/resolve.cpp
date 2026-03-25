@@ -133,6 +133,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name);
 
@@ -296,7 +297,19 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto &current_type = containing_method.get_parent_type();
-    if (!current_type.has_super_type() || !current_type.get_super_type().is_resolved())
+    if (!current_type.has_super_type())
+    {
+        context.throw_blasphemy(
+            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            method_call.get_name_range()
+        );
+        return std::nullopt;
+    }
+
+    const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context, current_type.get_super_type()
+    );
+    if (!super)
     {
         context.throw_blasphemy(
             fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
@@ -306,7 +319,7 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
     }
 
     return parent_type_result {
-        &current_type.get_super_type().get_resolved(),
+        &super->get(),
         nullptr
     };
 }
@@ -571,6 +584,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto method_overloads_raw = resolve_method_in_hierarchy(
+        context,
         type,
         method_call.get_last_name(false)
     );
@@ -633,6 +647,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name)
 {
@@ -643,10 +658,16 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         if (result.has_value())
             return result;
 
-        if (!current->has_super_type() || !current->get_super_type().is_resolved())
+        if (!current->has_super_type())
             break;
 
-        current = &current->get_super_type().get_resolved();
+        const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context, current->get_super_type()
+        );
+        if (!super)
+            break;
+
+        current = &super->get();
     }
 
     return std::nullopt;
@@ -726,7 +747,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
 
 
         const bool is_exact_type = codesh::semantic_analyzer::util::do_types_match(arg_type, param_type)
-            || codesh::semantic_analyzer::util::can_poly_cast_to(arg_type, param_type);
+            || codesh::semantic_analyzer::util::can_poly_cast_to(context, arg_type, param_type);
 
         if (!is_exact_type)
         {
@@ -751,11 +772,16 @@ static bool validate_sins_thrown(
 {
     for (const auto &sin : resolved_method.get_sins_thrown())
     {
-        const auto &sin_name = sin->get_unresolved_name();
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *sin))
+            continue;
+
         const auto &sins = containing_method.get_sins_thrown();
 
-        const auto sin_declared = std::ranges::any_of(sins, [&sin_name](const auto &containing_sin) {
-            return containing_sin->get_unresolved_name() == sin_name;
+        const auto sin_declared = std::ranges::any_of(sins, [&sin, &context](const auto &containing_sin) {
+            if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *containing_sin))
+                return false;
+
+            return containing_sin->get_resolved_name() == sin->get_resolved_name();
         });
 
         if (!sin_declared)
@@ -764,9 +790,12 @@ static bool validate_sins_thrown(
                 fmt::format(
                     codesh::blasphemy::details::UNDECLARED_SIN,
                     method_call.get_unresolved_name().get_last_part(),
-                    sin_name.join()
+                    sin->get_unresolved_name().holy_join()
                 ),
-                method_call.get_code_position()
+                {
+                    method_call.get_code_position(),
+                    method_call.get_unresolved_name().get_source_range().end
+                }
             );
             return false;
         }

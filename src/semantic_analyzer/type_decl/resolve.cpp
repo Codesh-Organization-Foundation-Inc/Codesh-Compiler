@@ -24,10 +24,13 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
 static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type, const codesh::semantic_analyzer::type_symbol &source,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl);
-static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::type_symbol &type,
+static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type,
         const std::string &method_name, const codesh::semantic_analyzer::method_overload &method);
-static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &type);
-static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &type,
+static void collect_abstract_methods(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::semantic_analyzer::type_symbol &type);
+static void collect_abstract_methods(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::semantic_analyzer::type_symbol &type,
         codesh::semantic_analyzer::type_symbol &collector);
 
 void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context &context,
@@ -75,7 +78,7 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
     // Collecting in resolve phase because the types must be resolved here.
     // We need to know the full resolved methods to determine whether they are abstract and to put them in the
     // internal abstracts map.
-    collect_abstract_methods(type);
+    collect_abstract_methods(context, type);
 
     check_unimplemented_methods(context, type, type_decl);
 }
@@ -100,23 +103,29 @@ static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semanti
     }
 }
 
-static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &type)
+static void collect_abstract_methods(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::semantic_analyzer::type_symbol &type)
 {
     if (type.are_abstract_methods_collected())
         return;
 
     // Super type
-    if (type.has_super_type() && type.get_super_type().is_resolved())
+    if (type.has_super_type())
     {
-        collect_abstract_methods(type.get_super_type().get_resolved(), type);
+        if (const auto super =
+            codesh::semantic_analyzer::util::resolve_custom_type_node(context, type.get_super_type()))
+        {
+            collect_abstract_methods(context, super->get(), type);
+        }
     }
 
     // Interfaces
     for (const auto &interface : type.get_interfaces())
     {
-        if (interface->is_resolved())
+        if (const auto resolved =
+            codesh::semantic_analyzer::util::resolve_custom_type_node(context, *interface))
         {
-            collect_abstract_methods(interface->get_resolved(), type);
+            collect_abstract_methods(context, resolved->get(), type);
         }
     }
 
@@ -138,10 +147,11 @@ static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &typ
     type.mark_abstract_methods_collected();
 }
 
-static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &type,
+static void collect_abstract_methods(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::semantic_analyzer::type_symbol &type,
         codesh::semantic_analyzer::type_symbol &collector)
 {
-    collect_abstract_methods(type);
+    collect_abstract_methods(context, type);
 
     for (const auto &[method_name, methods] : type.get_abstract_methods())
     {
@@ -158,15 +168,20 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
 {
     for (const auto &interface_node : type.get_interfaces())
     {
-        if (!interface_node->is_resolved())
-            continue;
-
-        check_unimplemented_from(context, type, interface_node->get_resolved(), type_decl);
+        if (const auto resolved =
+            codesh::semantic_analyzer::util::resolve_custom_type_node(context, *interface_node))
+        {
+            check_unimplemented_from(context, type, resolved->get(), type_decl);
+        }
     }
 
-    if (type.has_super_type() && type.get_super_type().is_resolved())
+    if (type.has_super_type())
     {
-        check_unimplemented_from(context, type, type.get_super_type().get_resolved(), type_decl);
+        if (const auto super =
+            codesh::semantic_analyzer::util::resolve_custom_type_node(context, type.get_super_type()))
+        {
+            check_unimplemented_from(context, type, super->get(), type_decl);
+        }
     }
 }
 
@@ -178,7 +193,7 @@ static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_c
     {
         for (const auto &method : methods)
         {
-            if (!is_method_implemented_in_hierarchy(type, method_name, method))
+            if (!is_method_implemented_in_hierarchy(context, type, method_name, method))
             {
                 context.throw_blasphemy(
                     fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
@@ -193,8 +208,9 @@ static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_c
     }
 }
 
-static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::type_symbol &type,
-        const std::string &method_name, const codesh::semantic_analyzer::method_overload &method)
+static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type, const std::string &method_name,
+        const codesh::semantic_analyzer::method_overload &method)
 {
     if (const auto overloads_raw = type.get_scope().resolve_local(method_name))
     {
@@ -206,13 +222,13 @@ static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::
             return true;
     }
 
-    if (type.has_super_type() && type.get_super_type().is_resolved())
+    if (type.has_super_type())
     {
-        return is_method_implemented_in_hierarchy(
-            type.get_super_type().get_resolved(),
-            method_name,
-            method
-        );
+        if (const auto super =
+            codesh::semantic_analyzer::util::resolve_custom_type_node(context, type.get_super_type()))
+        {
+            return is_method_implemented_in_hierarchy(context, super->get(), method_name, method);
+        }
     }
 
     return false;

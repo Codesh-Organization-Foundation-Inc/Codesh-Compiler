@@ -125,6 +125,7 @@ static void resolve_thrown_exceptions(const codesh::semantic_analyzer::semantic_
         const auto &resolved_type = resolved->get();
 
         const bool valid = codesh::semantic_analyzer::util::is_subtype_of(
+            context,
             resolved_type,
             static_cast<const codesh::semantic_analyzer::type_symbol &>(het.get()) // NOLINT(*-pro-type-static-cast-downcast)
         );
