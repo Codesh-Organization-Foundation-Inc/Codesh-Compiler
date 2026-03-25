@@ -172,6 +172,9 @@ const rfs_t codesh::blasphemy::details::UNDECLARED_SIN = rfs(
 const rfs_t codesh::blasphemy::details::DUPLICATE_INTERFACE = rfs(
     "נֵאִיפַת מְמַשֵּׁשׁ תִּהְיֶה: הַמְּמַשֵּׁשׁ {} מֻצְהָר יוֹתֵר מִפַּעַם אַחַת"
 );
+const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
+    "מַעֲשֶׂה בִּלְתִּי מְמֻמָּשׁ הֱיֵה: הָעֶצֶם {} אֵינוֹ מְמַשֵּׁשׁ אֶת הַמַּעֲשֶׂה {} מִן הַמְּמַשֵּׁשׁ {}"
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
