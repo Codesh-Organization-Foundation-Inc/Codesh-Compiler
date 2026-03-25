@@ -12,6 +12,7 @@
 #include "defenition/fully_qualified_name.h"
 
 namespace codesh::ast::type { class type_ast_node; }
+namespace codesh::ast::type { class custom_type_ast_node; }
 namespace codesh::ast::type_decl { class attributes_ast_node; }
 
 namespace codesh::semantic_analyzer
@@ -45,8 +46,11 @@ class class_file_loader final : public class_loader
     static std::unique_ptr<ast::type_decl::attributes_ast_node> flags_to_attributes(uint16_t flags);
     static std::unique_ptr<ast::type::type_ast_node> descriptor_to_node_type(const std::string &descriptor,
             size_t &pos);
+    [[nodiscard]] static std::vector<std::unique_ptr<ast::type::custom_type_ast_node>>
+            read_exceptions_attribute(std::istream &file, const cp_strings &strings);
     static void add_method_symbol(const std::string &method_descriptor, const std::string &method_name,
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+            std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> sins_thrown,
             semantic_analyzer::type_symbol &type_sym);
 
 public:
