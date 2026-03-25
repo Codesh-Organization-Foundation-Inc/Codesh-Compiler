@@ -123,6 +123,7 @@ void codesh::external::class_file_loader::add_method_symbol(const std::string &m
             std::move(attributes),
             std::move(param_types),
             std::move(return_type),
+            std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> {},
             nullptr
         )
     );

@@ -166,6 +166,9 @@ const rfs_t codesh::blasphemy::details::INVALID_CAST = rfs(
 const rfs_t codesh::blasphemy::details::THROWS_NOT_EXCEPTION = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: הַסּוּג {} אֵינוֹ חֲטָא"
 );
+const rfs_t codesh::blasphemy::details::UNDECLARED_SIN = rfs(
+    "חֵטְא בִּלְתִּי מוּכְרָז הֱיֵה: הַמַּעֲשֶׂה {} זוֹרֵק אֶת הַחֵטְא {} שֶׁאֵינוֹ מוּכְרָז בַּמַּעֲשֶׂה הַמְּכִיל"
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(

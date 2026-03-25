@@ -105,7 +105,7 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
 static void resolve_thrown_exceptions(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method_decl)
 {
-    const auto &exceptions = method_decl.get_exceptions_thrown();
+    const auto &exceptions = method_decl.get_sins_thrown();
     if (exceptions.empty())
         return;
 
