@@ -3,11 +3,11 @@
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
-#include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
+#include "semantic_analyzer/util.h"
 
 /**
  * If the requested name has a single part, will attempt to fetch by the method/class scope.
@@ -201,9 +201,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     const auto field_name = var_ref_node.get_unresolved_name().get_last_part();
 
     const codesh::semantic_analyzer::type_symbol *current = &type;
-    while (current->has_super_type() && current->get_super_type().is_resolved())
+    while (current->has_super_type())
     {
-        current = &current->get_super_type().get_resolved();
+        const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context, current->get_super_type()
+        );
+        if (!super)
+            break;
+
+        current = &super->get();
 
         const auto result = current->get_field_scope().resolve_local(field_name);
         if (result.has_value())

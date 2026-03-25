@@ -133,6 +133,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name);
 
@@ -296,7 +297,19 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto &current_type = containing_method.get_parent_type();
-    if (!current_type.has_super_type() || !current_type.get_super_type().is_resolved())
+    if (!current_type.has_super_type())
+    {
+        context.throw_blasphemy(
+            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            method_call.get_name_range()
+        );
+        return std::nullopt;
+    }
+
+    const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context, current_type.get_super_type()
+    );
+    if (!super)
     {
         context.throw_blasphemy(
             fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
@@ -306,7 +319,7 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
     }
 
     return parent_type_result {
-        &current_type.get_super_type().get_resolved(),
+        &super->get(),
         nullptr
     };
 }
@@ -571,6 +584,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto method_overloads_raw = resolve_method_in_hierarchy(
+        context,
         type,
         method_call.get_last_name(false)
     );
@@ -633,6 +647,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name)
 {
@@ -643,10 +658,16 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         if (result.has_value())
             return result;
 
-        if (!current->has_super_type() || !current->get_super_type().is_resolved())
+        if (!current->has_super_type())
             break;
 
-        current = &current->get_super_type().get_resolved();
+        const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context, current->get_super_type()
+        );
+        if (!super)
+            break;
+
+        current = &super->get();
     }
 
     return std::nullopt;
