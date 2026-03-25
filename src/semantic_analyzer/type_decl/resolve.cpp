@@ -21,6 +21,9 @@ static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semanti
 static void check_unimplemented_methods(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type,
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl);
+static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type, const codesh::semantic_analyzer::type_symbol &source,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl);
 static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::type_symbol &type,
         const std::string &method_name, const codesh::semantic_analyzer::method_overload &method);
 static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &type);
@@ -158,22 +161,33 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
         if (!interface_node->is_resolved())
             continue;
 
-        const auto &interface = interface_node->get_resolved();
-        for (const auto &[method_name, methods] : interface.get_abstract_methods())
+        check_unimplemented_from(context, type, interface_node->get_resolved(), type_decl);
+    }
+
+    if (type.has_super_type() && type.get_super_type().is_resolved())
+    {
+        check_unimplemented_from(context, type, type.get_super_type().get_resolved(), type_decl);
+    }
+}
+
+static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::semantic_analyzer::type_symbol &type, const codesh::semantic_analyzer::type_symbol &source,
+        const codesh::ast::type_decl::type_declaration_ast_node &type_decl)
+{
+    for (const auto &[method_name, methods] : source.get_abstract_methods())
+    {
+        for (const auto &method : methods)
         {
-            for (const auto &method : methods)
+            if (!is_method_implemented_in_hierarchy(type, method_name, method))
             {
-                if (!is_method_implemented_in_hierarchy(type, method_name, method))
-                {
-                    context.throw_blasphemy(
-                        fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
-                            type.get_full_name().holy_join(),
-                            "טודו", //TODO: Full method signature
-                            interface.get_full_name().holy_join()
-                        ),
-                        type_decl.get_code_position()
-                    );
-                }
+                context.throw_blasphemy(
+                    fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
+                        type.get_full_name().holy_join(),
+                        "טודו", //TODO: Full method signature
+                        source.get_full_name().holy_join()
+                    ),
+                    type_decl.get_code_position()
+                );
             }
         }
     }
