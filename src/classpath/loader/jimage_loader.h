@@ -84,6 +84,7 @@ class jimage_loader final : public class_loader
     [[nodiscard]] std::vector<unsigned char> load_locations();
     [[nodiscard]] std::vector<char> load_strings();
 
+    void load_package_to_module_name_map();
     std::optional<std::string> get_module_by_class_name(const definition::fully_qualified_name &class_name) const;
 
     [[nodiscard]] std::optional<int32_t> get_location_offset_index(const std::string &path) const;

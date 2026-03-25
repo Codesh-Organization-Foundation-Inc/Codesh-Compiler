@@ -45,6 +45,8 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
     _offsets = load_offsets();
     _locations = load_locations();
     _strings = load_strings();
+
+    load_package_to_module_name_map();
 }
 
 bool jimage_loader::load(const semantic_analyzer::symbol_table &table,
@@ -180,6 +182,40 @@ std::vector<char> jimage_loader::load_strings()
     _file.read(strings.data(), _layout.strings_size);
 
     return strings;
+}
+
+void jimage_loader::load_package_to_module_name_map()
+{
+    for (size_t i = 0; i < _layout.table_length; ++i)
+    {
+        const uint32_t loc_off = _offsets[i];
+
+        const uint64_t module_str_off = util::read_location_attribute(
+            _locations,
+            loc_off,
+            jimage_location_attribute::MODULE
+        );
+        if (module_str_off == 0)
+            continue;
+
+        const std::string module_name(_strings.data() + module_str_off);
+        if (module_name.empty())
+            continue;
+
+        const uint64_t parent_str_off = util::read_location_attribute(
+            _locations,
+            loc_off,
+            jimage_location_attribute::PARENT
+        );
+        if (parent_str_off == 0)
+            continue;
+
+        const std::string package(_strings.data() + parent_str_off);
+        if (package.empty())
+            continue;
+
+        package_to_module_name_map.emplace(package, module_name);
+    }
 }
 
 std::optional<int32_t> jimage_loader::get_location_offset_index(const std::string &path) const
