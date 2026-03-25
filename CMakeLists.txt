@@ -102,8 +102,8 @@ add_executable(codeshc
         src/parser/ast/type/custom_type_ast_node.h
         src/parser/ast/type/primitive_type_ast_node.cpp
         src/parser/ast/type/primitive_type_ast_node.h
-        src/parser/ast/type/widening_cast_ast_node.cpp
-        src/parser/ast/type/widening_cast_ast_node.h
+        src/parser/ast/operator/cast/widening_cast_ast_node.cpp
+        src/parser/ast/operator/cast/widening_cast_ast_node.h
         src/defenition/primitive_type.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
@@ -169,6 +169,10 @@ add_executable(codeshc
         src/output/ir/instruction/return_instruction.h
         src/output/ir/instruction/widening_cast_instruction.cpp
         src/output/ir/instruction/widening_cast_instruction.h
+        src/output/ir/instruction/checkcast_instruction.cpp
+        src/output/ir/instruction/checkcast_instruction.h
+        src/output/ir/instruction/narrowing_cast_instruction.cpp
+        src/output/ir/instruction/narrowing_cast_instruction.h
         src/output/ir/instruction/invoke_instruction.cpp
         src/output/ir/instruction/invoke_instruction.h
         src/output/ir/instruction/load_int_constant_instruction.cpp
@@ -271,6 +275,8 @@ add_executable(codeshc
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.h
+        src/semantic_analyzer/statement/cast/resolve.cpp
+        src/semantic_analyzer/statement/cast/resolve.h
         src/parser/ast/operator/assignment/assign_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
@@ -336,8 +342,10 @@ add_executable(codeshc
         src/classpath/loader/util.h
         src/parser/ast/var_reference/array_access_ast_node.cpp
         src/parser/ast/var_reference/array_access_ast_node.h
-        src/parser/ast/operator/assignment/cast_ast_node.cpp
-        src/parser/ast/operator/assignment/cast_ast_node.h
+        src/parser/ast/operator/cast/cast_ast_node.cpp
+        src/parser/ast/operator/cast/cast_ast_node.h
+        src/parser/ast/operator/cast/manual_cast_ast_node.cpp
+        src/parser/ast/operator/cast/manual_cast_ast_node.h
         src/semantic_analyzer/util/widen_util.cpp
         src/semantic_analyzer/util/widen_util.h
         src/semantic_analyzer/util/poly_util.cpp
@@ -349,6 +357,8 @@ add_executable(codeshc
         src/classpath/loader/class_directory_loader.h
         src/classpath/loader/class_loader.cpp
         src/classpath/loader/class_loader.h
+        src/parser/ast/type_declaration/interface_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/interface_declaration_ast_node.h
 )
 
 # sudo dnf install boost-regex boost-devel

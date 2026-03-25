@@ -33,14 +33,7 @@ std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
             blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
     }
 
-
     util::parse_fqn(tokens, import_node->get_package_name());
-
-    if (import_node->get_package_name().is_wildcard())
-    {
-        import_node->set_is_on_demand(true);
-    }
-
     util::ensure_end_op(tokens);
     return import_node;
 }

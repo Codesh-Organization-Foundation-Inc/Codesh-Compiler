@@ -161,7 +161,7 @@ type_symbol &codesh::external::class_file_loader::parse_type(std::istream &file,
 
     country_symbol &country = semantic_analyzer::util::find_or_create_country(
         table,
-        class_name.omit_last().join()
+        class_name.omit_last()
     );
 
     return semantic_analyzer::util::add_type_symbol(

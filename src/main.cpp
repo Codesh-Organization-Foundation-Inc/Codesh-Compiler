@@ -30,7 +30,9 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
 
-[[nodiscard]] static std::vector<std::string> generate_default_imports(const codesh::command_args &args);
+[[nodiscard]] static std::vector<codesh::definition::fully_qualified_name> generate_default_imports(
+        const codesh::command_args &args);
+static codesh::definition::fully_qualified_name generate_default_import(const std::string &fqn_str);
 static void update_source_file(size_t file_id);
 static void update_source_file(const std::filesystem::path &source_file_path);
 static void update_source_file(const codesh::ast::compilation_unit_ast_node &root_node);
@@ -53,6 +55,9 @@ static void log_analysis_progress(const codesh::command_args &args, size_t proce
 static codesh::semantic_analyzer::symbol_table analyze_asts(const codesh::command_args &args,
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::definition::class_loaders &class_loaders);
+static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::semantic_analyzer::symbol_table &table);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, bool is_project,
@@ -234,20 +239,31 @@ static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
     println(args, "וִיהִי נֹעַם הַמְּעַבֵּד עָלֵינוּ וּמַעֲשֵׂה יָדֵינוּ כּוֹנְנֵהוּ וּבְעֵת הַהַרָצָה יָאִיר לָנוּ הַמָּסָךְ בְּאוֹר הַהַצְלָחָה וְנֹאמַר אָמֵן.");
 }
 
-static std::vector<std::string> generate_default_imports(const codesh::command_args &args)
+static std::vector<codesh::definition::fully_qualified_name> generate_default_imports(const codesh::command_args &args)
 {
-    std::vector<std::string> results;
+    std::vector<codesh::definition::fully_qualified_name> results;
 
     if (args.is_java_default_classpath)
     {
-        results.emplace_back("java/lang");
+        results.push_back(generate_default_import("java/lang"));
     }
     if (args.is_talmud_codesh_classpath)
     {
-        results.emplace_back("ישראל/קודש/בן/משה");
+        results.push_back(generate_default_import("ישראל/קודש/בן/משה"));
     }
 
     return results;
+}
+
+static codesh::definition::fully_qualified_name generate_default_import(const std::string &fqn_str)
+{
+    auto result = codesh::definition::fully_qualified_name::parse(
+        fqn_str,
+        codesh::lexer::NO_CODE_POS
+    );
+    result.set_is_wildcard(true);
+
+    return result;
 }
 
 static void update_source_file(const size_t file_id)
@@ -305,18 +321,21 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     println(args, "וְיַחֵל עֵת הַנִּתּוּחַ הַסֵּמַנְטִי\n");
 
     codesh::semantic_analyzer::symbol_table master_symbol_table(class_loaders, generate_default_imports(args));
-    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table);
+    // Add all builtins to the Talmud Codesh country
+    codesh::semantic_analyzer::builtins::collect_builtins(master_symbol_table.get_talmud_codesh_country());
+
+
+    const auto contexts = make_semantic_contexts(asts, master_symbol_table);
 
     const auto process_amount = asts.size() * 3; // 3 passes
     size_t processed = 1;
 
-    for (const auto &root_node : asts)
+    for (const auto &context : contexts)
     {
-        log_analysis_progress(args, processed, process_amount, "אחד", *root_node);
+        log_analysis_progress(args, processed, process_amount, "אחד", context.root);
 
-        update_source_file(*root_node);
-        codesh::semantic_analyzer::prepare(*root_node);
-        codesh::semantic_analyzer::collect_symbols(*root_node, master_symbol_table);
+        update_source_file(context.root);
+        codesh::semantic_analyzer::collect_symbols(context);
 
         processed++;
     }
@@ -325,27 +344,44 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     // before analysis begins.
     //
     // This pass happens between symbol collection and analysis.
-    for (const auto &root_node : asts)
+    for (const auto &context : contexts)
     {
-        log_analysis_progress(args, processed, process_amount, "שתיים", *root_node);
+        log_analysis_progress(args, processed, process_amount, "שתיים", context.root);
 
-        update_source_file(*root_node);
-        codesh::semantic_analyzer::post_collect(*root_node, master_symbol_table);
+        update_source_file(context.root);
+        codesh::semantic_analyzer::post_collect(context);
 
         processed++;
     }
 
-    for (const auto &root_node : asts)
+    for (const auto &context : contexts)
     {
-        log_analysis_progress(args, processed, process_amount, "שלוש", *root_node);
+        log_analysis_progress(args, processed, process_amount, "שלוש", context.root);
 
-        update_source_file(*root_node);
-        codesh::semantic_analyzer::analyze(*root_node, master_symbol_table);
+        update_source_file(context.root);
+        codesh::semantic_analyzer::analyze(context);
 
         processed++;
     }
 
     return master_symbol_table;
+}
+
+static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::semantic_analyzer::symbol_table &table)
+{
+    std::vector<codesh::semantic_analyzer::semantic_context> contexts;
+    contexts.reserve(asts.size());
+
+    for (const auto &root_node : asts)
+    {
+        update_source_file(*root_node);
+        codesh::semantic_analyzer::prepare(*root_node);
+        contexts.push_back(codesh::semantic_analyzer::make_context(*root_node, table));
+    }
+
+    return contexts;
 }
 
 static codesh::definition::class_loaders init_class_loaders(const std::vector<std::filesystem::path> &classpaths)

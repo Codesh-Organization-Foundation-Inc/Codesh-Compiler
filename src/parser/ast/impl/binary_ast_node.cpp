@@ -1,8 +1,8 @@
 #include "binary_ast_node.h"
 
+#include "../operator/cast/widening_cast_ast_node.h"
 #include "lexer/source_file_info.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
 #include "semantic_analyzer/util.h"
 #include "semantic_analyzer/util/widen_util.h"
 

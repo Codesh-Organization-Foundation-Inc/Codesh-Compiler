@@ -36,6 +36,8 @@ static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_cons
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
         codesh::lexer::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void consume_throws(std::queue<std::unique_ptr<codesh::token>> &tokens,
+                           ast::method::method_declaration_ast_node &method_decl);
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
@@ -63,22 +65,34 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 
     if (util::consuming_check(tokens, token_group::KEYWORD_EXTENDS))
     {
-        if (const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens))
+        const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens);
+
+        auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
+            super_name->get_code_position(),
+            definition::fully_qualified_name(super_name->get_code_position(), super_name->get_content())
+        );
+
+        node->set_super_class(std::move(super_type));
+    }
+
+    if (util::consuming_check(tokens, token_group::KEYWORD_IMPLEMENTS))
+    {
+        do
         {
-            auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
-                super_name->get_code_position(),
-                definition::fully_qualified_name(super_name->get_code_position(), super_name->get_content())
+            const auto interface_name = util::consume_identifier_token(tokens);
+
+            auto interface_type = std::make_unique<ast::type::custom_type_ast_node>(
+                interface_name->get_code_position(),
+                definition::fully_qualified_name(
+                    interface_name->get_code_position(),
+                    interface_name->get_content()
+                )
             );
 
-            node->set_super_class(std::move(super_type));
+            node->add_interface(std::move(interface_type));
+
         }
-        else
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_IDENTIFIER,
-                blasphemy::blasphemy_type::SYNTAX, code_position
-            );
-        }
+        while (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR));
     }
 
 
@@ -285,6 +299,12 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
         );
     }
 
+    if (std::unique_ptr<codesh::token> throws_token;
+        parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_THROWS, throws_token))
+    {
+        consume_throws(tokens, method_decl);
+    }
+
 
     if (!did_capture_scope_begin && !parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
     {
@@ -296,6 +316,26 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
     }
 
     parser::parse_method_scope(tokens, method_decl.get_method_scope());
+}
+
+static void consume_throws(std::queue<std::unique_ptr<codesh::token>> &tokens,
+                           ast::method::method_declaration_ast_node &method_decl)
+{
+    do
+    {
+        const auto exception_name = parser::util::consume_identifier_token(tokens);
+
+        auto exception_type = std::make_unique<ast::type::custom_type_ast_node>(
+            exception_name->get_code_position(),
+            codesh::definition::fully_qualified_name(
+                exception_name->get_code_position(),
+                exception_name->get_content()
+            )
+        );
+
+        method_decl.get_exceptions_thrown().push_back(std::move(exception_type));
+    }
+    while (parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR));
 }
 
 std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> codesh::parser::parse_parameter_list(
