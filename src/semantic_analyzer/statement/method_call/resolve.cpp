@@ -113,12 +113,11 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 static void maybe_warn_interop_exists(
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
-static bool post_resolve(
-        const codesh::semantic_analyzer::semantic_context &context,
+static bool post_resolve(const codesh::semantic_analyzer::semantic_context &context,
         codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_symbol &containing_method,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
-        const codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::method_symbol &resolved_method,
         codesh::semantic_analyzer::variable_symbol *receiver_variable);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
@@ -215,8 +214,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         );
     }
 
-    const auto &name = method_call.get_unresolved_name();
-    if (name.get_parts().empty())
+    if (method_call.get_unresolved_name().get_parts().empty())
     {
         // Error in parsing phase; Ignore
         return std::nullopt;
@@ -238,29 +236,30 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     if (!resolved_method.has_value())
         return std::nullopt;
 
-
-    // Update the AST node to the found result
-    method_call.set_resolved(resolved_method.value());
-
-    if (resolved_method->get().is_external())
-    {
-        maybe_warn_interop_exists(method_call);
-    }
-
     if (!post_resolve(context, method_call, containing_method, scope, resolved_method->get(), receiver_variable))
         return std::nullopt;
 
     return resolved_method;
 }
 
-static bool post_resolve(
-        const codesh::semantic_analyzer::semantic_context &context,
+static bool post_resolve(const codesh::semantic_analyzer::semantic_context &context,
         codesh::ast::method::operation::method_call_ast_node &method_call,
         const codesh::semantic_analyzer::method_symbol &containing_method,
         const codesh::semantic_analyzer::method_scope_symbol &scope,
-        const codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::method_symbol &resolved_method,
         codesh::semantic_analyzer::variable_symbol *receiver_variable)
 {
+    // Update the AST node to the found result
+    method_call.set_resolved(resolved_method);
+
+    if (resolved_method.is_external())
+    {
+        maybe_warn_interop_exists(method_call);
+    }
+
+    // Resolve return type
+    codesh::semantic_analyzer::util::resolve_type_node(context, resolved_method.get_return_type());
+
     // Handle prepending `this` for non-static method calls
     if (!resolved_method.get_attributes().get_is_static())
     {
