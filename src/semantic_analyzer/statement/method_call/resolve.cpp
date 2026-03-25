@@ -113,6 +113,14 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 static void maybe_warn_interop_exists(
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static bool post_resolve(
+        const codesh::semantic_analyzer::semantic_context &context,
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        const codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::variable_symbol *receiver_variable);
+
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -229,8 +237,22 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         maybe_warn_interop_exists(method_call);
     }
 
+    if (!post_resolve(context, method_call, containing_method, scope, resolved_method->get(), receiver_variable))
+        return std::nullopt;
+
+    return resolved_method;
+}
+
+static bool post_resolve(
+        const codesh::semantic_analyzer::semantic_context &context,
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        const codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::variable_symbol *receiver_variable)
+{
     // Handle prepending `this` for non-static method calls
-    if (!resolved_method->get().get_attributes().get_is_static())
+    if (!resolved_method.get_attributes().get_is_static())
     {
         // For calls on local variables, prepend the receiver:
         if (receiver_variable != nullptr)
@@ -240,10 +262,9 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         else
         {
             if (!prepend_implicit_this_argument(context, method_call, containing_method, scope))
-                return std::nullopt;
+                return false;
         }
     }
-
 
     // For new calls, also resolve the constructed type:
     if (const auto new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
@@ -254,7 +275,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         );
     }
 
-    return resolved_method;
+    return true;
 }
 
 static std::optional<parent_type_result> resolve_call_parent_type_for_super(
