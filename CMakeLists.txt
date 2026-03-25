@@ -102,6 +102,8 @@ add_executable(codeshc
         src/parser/ast/type/custom_type_ast_node.h
         src/parser/ast/type/primitive_type_ast_node.cpp
         src/parser/ast/type/primitive_type_ast_node.h
+        src/parser/ast/type/null_type_ast_node.cpp
+        src/parser/ast/type/null_type_ast_node.h
         src/parser/ast/operator/cast/widening_cast_ast_node.cpp
         src/parser/ast/operator/cast/widening_cast_ast_node.h
         src/defenition/primitive_type.h
@@ -163,6 +165,8 @@ add_executable(codeshc
         src/output/ir/instruction/impl/typed_instruction.h
         src/output/ir/instruction/nop_instruction.cpp
         src/output/ir/instruction/nop_instruction.h
+        src/output/ir/instruction/aconst_null_instruction.cpp
+        src/output/ir/instruction/aconst_null_instruction.h
         src/output/ir/instruction/load_instruction.cpp
         src/output/ir/instruction/load_instruction.h
         src/output/ir/instruction/return_instruction.cpp
@@ -244,6 +248,8 @@ add_executable(codeshc
         src/classpath/loader/class_file_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/null_value_ast_node.cpp
+        src/parser/ast/var_reference/null_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
         src/parser/value/value_parser.cpp

@@ -23,7 +23,7 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
         const codesh::ast::type_decl::type_declaration_ast_node &type_decl);
 static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type, const codesh::semantic_analyzer::type_symbol &source,
-        const codesh::ast::type_decl::type_declaration_ast_node &type_decl);
+        const codesh::lexer::code_range &requesting_type_pos);
 static bool is_method_implemented_in_hierarchy(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type,
         const std::string &method_name, const codesh::semantic_analyzer::method_overload &method);
@@ -171,7 +171,12 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
         if (const auto resolved =
             codesh::semantic_analyzer::util::resolve_custom_type_node(context, *interface_node))
         {
-            check_unimplemented_from(context, type, resolved->get(), type_decl);
+            check_unimplemented_from(
+                context,
+                type,
+                resolved->get(),
+                interface_node->get_name_range()
+            );
         }
     }
 
@@ -180,14 +185,19 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
         if (const auto super =
             codesh::semantic_analyzer::util::resolve_custom_type_node(context, type.get_super_type()))
         {
-            check_unimplemented_from(context, type, super->get(), type_decl);
+            check_unimplemented_from(
+                context,
+                type,
+                super->get(),
+                type.get_full_name().get_source_range()
+            );
         }
     }
 }
 
 static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &type, const codesh::semantic_analyzer::type_symbol &source,
-        const codesh::ast::type_decl::type_declaration_ast_node &type_decl)
+        const codesh::lexer::code_range &requesting_type_pos)
 {
     for (const auto &[method_name, methods] : source.get_abstract_methods())
     {
@@ -201,7 +211,7 @@ static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_c
                         "טודו", //TODO: Full method signature
                         source.get_full_name().holy_join()
                     ),
-                    type_decl.get_code_position()
+                    requesting_type_pos
                 );
             }
         }
