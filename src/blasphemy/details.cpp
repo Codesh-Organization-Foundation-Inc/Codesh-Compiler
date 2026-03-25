@@ -163,6 +163,9 @@ const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
 const rfs_t codesh::blasphemy::details::INVALID_CAST = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְהַמִּיר אֶת הַסּוּג {} לַסּוּג {}"
 );
+const rfs_t codesh::blasphemy::details::THROWS_NOT_EXCEPTION = rfs(
+    "סוּג אֵינוֹ כָּשֵׁר: הַסּוּג {} אֵינוֹ חֲטָא"
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
