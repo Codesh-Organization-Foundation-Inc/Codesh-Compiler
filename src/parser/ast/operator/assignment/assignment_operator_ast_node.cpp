@@ -28,9 +28,10 @@ codesh::ast::type::type_ast_node *codesh::ast::op::assignment::assignment_operat
     return get_left().get_type();
 }
 
-bool codesh::ast::op::assignment::assignment_operator_ast_node::is_value_valid() const
+bool codesh::ast::op::assignment::assignment_operator_ast_node::is_value_valid(
+        const semantic_analyzer::semantic_context &context) const
 {
-    if (binary_ast_node::is_value_valid())
+    if (binary_ast_node::is_value_valid(context))
         return true;
 
     const auto *lhs_type = get_left().get_type();
@@ -38,7 +39,7 @@ bool codesh::ast::op::assignment::assignment_operator_ast_node::is_value_valid()
     if (!lhs_type || !rhs_type)
         return false;
 
-    return semantic_analyzer::util::can_poly_cast_to(*rhs_type, *lhs_type);
+    return semantic_analyzer::util::can_poly_cast_to(context, *rhs_type, *lhs_type);
 }
 
 void codesh::ast::op::assignment::assignment_operator_ast_node::emit_constants(

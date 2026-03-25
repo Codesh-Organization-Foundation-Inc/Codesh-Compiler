@@ -107,7 +107,7 @@ std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primi
 }
 
 codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::make_widening_cast_maybe(
-        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const semantic_context &context, std::unique_ptr<ast::var_reference::value_ast_node> value_node,
         const ast::type::type_ast_node &expected_type)
 {
     assert(value_node->get_type() != nullptr && "Value must have a type");
@@ -124,7 +124,7 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::m
         };
     }
 
-    if (can_poly_cast_to(type, expected_type))
+    if (can_poly_cast_to(context, type, expected_type))
         return {true, std::move(value_node)};
 
     return {false, std::move(value_node)};

@@ -6,6 +6,7 @@
 #include "blasphemy/details.h"
 #include "fmt/xchar.h"
 #include "parser/ast/operator/cast/cast_ast_node.h"
+#include "parser/ast/operator/cast/manual_cast_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/interface_declaration_ast_node.h"
@@ -17,12 +18,12 @@
 using namespace codesh::semantic_analyzer;
 
 static bool is_valid_reference_cast(const semantic_context &context,
-        const codesh::ast::op::assignment::cast_ast_node &cast);
+        codesh::ast::op::assignment::cast_ast_node &cast);
 static bool is_primitive(const codesh::ast::type::type_ast_node *type);
 static bool is_interface(const type_symbol &sym);
 static bool is_custom_type(const codesh::ast::type::type_ast_node *type);
 
-bool statement::cast::resolve(const semantic_context &context, const ast::op::assignment::cast_ast_node &cast,
+bool statement::cast::resolve(const semantic_context &context, ast::op::assignment::cast_ast_node &cast,
         const method_symbol &containing_method, const method_scope_symbol &scope)
 {
     auto &inner = cast.get_value();
@@ -66,8 +67,16 @@ bool statement::cast::resolve(const semantic_context &context, const ast::op::as
 }
 
 static bool is_valid_reference_cast(const semantic_context &context,
-        const codesh::ast::op::assignment::cast_ast_node &cast)
+        codesh::ast::op::assignment::cast_ast_node &cast)
 {
+    if (const auto manual_cast = dynamic_cast<codesh::ast::op::assignment::manual_cast_ast_node *>(&cast))
+    {
+        // Needed for manual casts' IR generation
+        manual_cast->set_is_upcast(
+            util::can_poly_cast_to(context, *cast.get_value().get_type(), *cast.get_type())
+        );
+    }
+
     const auto *source_custom = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(cast.get_value().get_type());
     const auto *target_custom = dynamic_cast<codesh::ast::type::custom_type_ast_node *>(cast.get_type());
 
@@ -82,8 +91,8 @@ static bool is_valid_reference_cast(const semantic_context &context,
     const auto &source_sym = source_custom->get_resolved();
     const auto &target_sym = target_custom->get_resolved();
 
-    const bool related = util::is_subtype_of(source_sym, target_sym) ||
-        util::is_subtype_of(target_sym, source_sym);
+    const bool related = util::is_subtype_of(context, source_sym, target_sym) ||
+        util::is_subtype_of(context, target_sym, source_sym);
 
     if (!related && !is_interface(source_sym) && !is_interface(target_sym))
     {

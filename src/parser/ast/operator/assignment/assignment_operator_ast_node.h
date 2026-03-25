@@ -18,7 +18,7 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
-    [[nodiscard]] bool is_value_valid() const override;
+    [[nodiscard]] bool is_value_valid(const semantic_analyzer::semantic_context &context) const override;
 
     [[nodiscard]] virtual output::ir::operator_type get_operator_type() const = 0;
 

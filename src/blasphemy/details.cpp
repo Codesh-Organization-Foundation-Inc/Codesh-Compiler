@@ -167,7 +167,7 @@ const rfs_t codesh::blasphemy::details::THROWS_NOT_EXCEPTION = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: הַסּוּג {} אֵינוֹ חֲטָא"
 );
 const rfs_t codesh::blasphemy::details::UNDECLARED_SIN = rfs(
-    "חֵטְא בִּלְתִּי מוּכְרָז הֱיֵה: הַמַּעֲשֶׂה {} זוֹרֵק אֶת הַחֵטְא {} שֶׁאֵינוֹ מוּכְרָז בַּמַּעֲשֶׂה הַמְּכִיל"
+    "חֵטְא בִּלְתִּי מוּכְרָז הֱיֵה: הַמַּעֲשֶׂה {} זוֹרֵק אֶת הַחֵטְא {} שֶׁאֵינוֹ מוּכְרָז"
 );
 const rfs_t codesh::blasphemy::details::DUPLICATE_INTERFACE = rfs(
     "נֵאִיפַת מְמַשֵּׁשׁ תִּהְיֶה: הַמְּמַשֵּׁשׁ {} מֻצְהָר יוֹתֵר מִפַּעַם אַחַת"
