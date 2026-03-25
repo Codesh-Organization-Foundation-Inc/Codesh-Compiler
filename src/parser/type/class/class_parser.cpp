@@ -323,17 +323,17 @@ static void consume_throws(std::queue<std::unique_ptr<codesh::token>> &tokens,
 {
     do
     {
-        const auto exception_name = parser::util::consume_identifier_token(tokens);
+        const auto sin_name = parser::util::consume_identifier_token(tokens);
 
         auto exception_type = std::make_unique<ast::type::custom_type_ast_node>(
-            exception_name->get_code_position(),
+            sin_name->get_code_position(),
             codesh::definition::fully_qualified_name(
-                exception_name->get_code_position(),
-                exception_name->get_content()
+                sin_name->get_code_position(),
+                sin_name->get_content()
             )
         );
 
-        method_decl.get_exceptions_thrown().push_back(std::move(exception_type));
+        method_decl.get_sins_thrown().push_back(std::move(exception_type));
     }
     while (parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR));
 }
