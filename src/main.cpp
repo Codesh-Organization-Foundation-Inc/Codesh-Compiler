@@ -340,6 +340,9 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
         processed++;
     }
 
+    if (codesh::blasphemy::get_blasphemy_collector().has_errors())
+        return master_symbol_table;
+
     // Methods require types to be resolved BEFORE they can be collected, but must also be collected
     // before analysis begins.
     //
@@ -353,6 +356,9 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
         processed++;
     }
+
+    if (codesh::blasphemy::get_blasphemy_collector().has_errors())
+        return master_symbol_table;
 
     for (const auto &context : contexts)
     {
