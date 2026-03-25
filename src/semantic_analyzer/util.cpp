@@ -99,7 +99,7 @@ bool codesh::semantic_analyzer::util::resolve_type_node(const semantic_context &
 }
 
 bool codesh::semantic_analyzer::util::do_types_match(const ast::type::type_ast_node &from,
-                                                           const ast::type::type_ast_node &to)
+                                                     const ast::type::type_ast_node &to)
 {
     return from.generate_descriptor() == to.generate_descriptor();
 }
