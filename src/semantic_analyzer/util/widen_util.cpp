@@ -116,12 +116,6 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::m
     if (do_types_match(type, expected_type))
         return {true, std::move(value_node)};
 
-    if (type.generate_descriptor() == "null"
-        && dynamic_cast<const ast::type::primitive_type_ast_node *>(&expected_type) == nullptr)
-    {
-        return {true, std::move(value_node)};
-    }
-
     if (can_widen_to(type, expected_type))
     {
         return {
