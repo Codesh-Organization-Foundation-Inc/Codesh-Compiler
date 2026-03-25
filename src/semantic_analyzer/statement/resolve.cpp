@@ -146,6 +146,7 @@ bool statement::resolve(const semantic_context &context,
         const auto &expected_return_type = containing_method.get_return_type();
 
         auto [are_types_compatible, return_value] = util::make_widening_cast_maybe(
+            context,
             return_node->take_return_value(),
             expected_return_type
         );
@@ -173,7 +174,7 @@ bool statement::resolve(const semantic_context &context,
         if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
             return false;
 
-        if (!unary_op->is_value_valid())
+        if (!unary_op->is_value_valid(context))
         {
             context.throw_blasphemy(fmt::format(
                 blasphemy::details::UNARY_TYPE_MISMATCH,
@@ -197,7 +198,7 @@ bool statement::resolve(const semantic_context &context,
         {
             binary_op->apply_widening_conversions();
 
-            if (!binary_op->is_value_valid())
+            if (!binary_op->is_value_valid(context))
             {
                 context.throw_blasphemy(
                     fmt::format(

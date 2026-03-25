@@ -7,7 +7,6 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
-#include "semantic_analyzer/util/poly_util.h"
 #include "semantic_analyzer/util/widen_util.h"
 
 codesh::ast::op::assignment::manual_cast_ast_node::manual_cast_ast_node(
@@ -21,6 +20,11 @@ codesh::ast::op::assignment::manual_cast_ast_node::manual_cast_ast_node(
 codesh::ast::type::type_ast_node *codesh::ast::op::assignment::manual_cast_ast_node::get_type() const
 {
     return target_type.get();
+}
+
+void codesh::ast::op::assignment::manual_cast_ast_node::set_is_upcast(const bool value)
+{
+    is_upcast = value;
 }
 
 void codesh::ast::op::assignment::manual_cast_ast_node::emit_constants(
@@ -50,19 +54,19 @@ void codesh::ast::op::assignment::manual_cast_ast_node::emit_ir(
     if (try_emit_primitive_cast(containing_block, *get_value().get_type(), *target_type))
         return;
 
-    // Reference cast - no-op for upcasts, checkcast for downcasts
-    if (semantic_analyzer::util::can_poly_cast_to(*get_value().get_type(), *target_type))
-        return;
+    if (!is_upcast)
+    {
+        // checkcast needed for downcasts
+        const auto *target = dynamic_cast<type::custom_type_ast_node *>(target_type.get());
+        const auto &cp = containing_type_decl.get_constant_pool();
+        const int class_cpi = cp.get_class_index(
+            cp.get_utf8_index(target->get_resolved_name().join())
+        );
 
-    const auto *custom_target = dynamic_cast<type::custom_type_ast_node *>(target_type.get());
-    const auto &cp = containing_type_decl.get_constant_pool();
-    const int class_cpi = cp.get_class_index(
-        cp.get_utf8_index(custom_target->get_resolved_name().join())
-    );
-
-    containing_block.add_instruction(
-        std::make_unique<output::ir::checkcast_instruction>(class_cpi)
-    );
+        containing_block.add_instruction(
+            std::make_unique<output::ir::checkcast_instruction>(class_cpi)
+        );
+    }
 }
 
 bool codesh::ast::op::assignment::manual_cast_ast_node::try_emit_primitive_cast(

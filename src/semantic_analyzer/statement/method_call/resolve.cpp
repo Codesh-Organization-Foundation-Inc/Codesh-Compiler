@@ -726,7 +726,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
 
 
         const bool is_exact_type = codesh::semantic_analyzer::util::do_types_match(arg_type, param_type)
-            || codesh::semantic_analyzer::util::can_poly_cast_to(arg_type, param_type);
+            || codesh::semantic_analyzer::util::can_poly_cast_to(context, arg_type, param_type);
 
         if (!is_exact_type)
         {

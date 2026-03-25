@@ -1,7 +1,6 @@
 #pragma once
 
 #include "parser/ast/var_reference/value_ast_node.h"
-#include "i_constant_pool_emitter.h"
 #include "operator_ast_node.h"
 
 #include <memory>
@@ -19,8 +18,8 @@ public:
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 
-    //TODO: Each node should specify this for THEMSELVES!!! This default should NOT exist
-    [[nodiscard]] bool is_value_valid() const override;
+    //FIXME: Each node should specify this for THEMSELVES!!! This default should NOT exist
+    [[nodiscard]] bool is_value_valid(const semantic_analyzer::semantic_context &context) const override;
 };
 
 }
