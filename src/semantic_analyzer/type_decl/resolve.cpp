@@ -6,9 +6,15 @@
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/error_type_declaration_ast_node.h"
+#include "blasphemy/details.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/util.h"
+
+#include <unordered_set>
+
+static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &interface_decls);
 
 void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context &context,
                                                           const ast::type_decl::type_declaration_ast_node &type_decl,
@@ -39,6 +45,8 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
         util::resolve_type_node(context, *interface_decls[i], *interface_syms[i]);
     }
 
+    detect_duplicate_interfaces(context, interface_decls);
+
 
     for (const auto &field_decl : type_decl.get_fields())
     {
@@ -47,5 +55,25 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
     for (const auto &method_decl : type_decl.get_all_methods())
     {
         method_declaration::resolve(new_context, type, *method_decl);
+    }
+}
+
+static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semantic_context &context,
+        const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &interface_decls)
+{
+    std::unordered_set<codesh::definition::fully_qualified_name, codesh::definition::fully_qualified_name_hasher> seen;
+    for (const auto &interface : interface_decls)
+    {
+        if (!interface->is_resolved())
+            continue;
+
+        const auto &name = interface->get_resolved().get_full_name();
+        if (!seen.insert(name).second)
+        {
+            context.throw_blasphemy(
+                fmt::format(codesh::blasphemy::details::DUPLICATE_INTERFACE, name.holy_join()),
+                interface->get_code_position()
+            );
+        }
     }
 }
