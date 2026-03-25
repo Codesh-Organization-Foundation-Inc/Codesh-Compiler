@@ -158,18 +158,22 @@ static void check_unimplemented_methods(const codesh::semantic_analyzer::semanti
         if (!interface_node->is_resolved())
             continue;
 
-        for (const auto &[method_name, method_symbol] : type.get_abstract_methods())
+        const auto &interface = interface_node->get_resolved();
+        for (const auto &[method_name, methods] : interface.get_abstract_methods())
         {
-            if (!is_method_implemented_in_hierarchy(type, method_name, method_symbol))
+            for (const auto &method : methods)
             {
-                context.throw_blasphemy(
-                    fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
-                        type.get_full_name().holy_join(),
-                        "טודו", //TODO: Full method signature
-                        interface_node->get_resolved().get_full_name().holy_join()
-                    ),
-                    type_decl.get_code_position()
-                );
+                if (!is_method_implemented_in_hierarchy(type, method_name, method))
+                {
+                    context.throw_blasphemy(
+                        fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
+                            type.get_full_name().holy_join(),
+                            "טודו", //TODO: Full method signature
+                            interface.get_full_name().holy_join()
+                        ),
+                        type_decl.get_code_position()
+                    );
+                }
             }
         }
     }
