@@ -268,6 +268,14 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         {
             write_bytes(out, src_attr->sourcefile_index, 2);
         }
+        else if (const auto exc_attr = dynamic_cast<const codesh::output::jvm_target::defs::exceptions_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, exc_attr->number_of_exceptions, 2);
+            for (const auto &entry : exc_attr->exception_index_table)
+            {
+                write_bytes(out, entry.data(), 2);
+            }
+        }
         else
         {
             throw std::runtime_error("Unknown attribute type");
