@@ -7,6 +7,7 @@
 #include <fstream>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace codesh::definition
@@ -68,8 +69,6 @@ class jimage_loader final : public class_loader
 {
     static constexpr std::streamoff HEADER_SIZE = 28;
 
-    std::string module_name;
-
     std::ifstream _file;
     jimage_offsets _layout{};
     std::vector<int32_t> _redirect_table;
@@ -77,14 +76,19 @@ class jimage_loader final : public class_loader
     std::vector<unsigned char> _locations;
     std::vector<char> _strings;
 
+    std::unordered_map<std::string, std::string> package_to_module_name_map;
+
     [[nodiscard]] jimage_offsets parse_header();
     [[nodiscard]] std::vector<int32_t> load_redirect_table();
     [[nodiscard]] std::vector<uint32_t> load_offsets();
     [[nodiscard]] std::vector<unsigned char> load_locations();
     [[nodiscard]] std::vector<char> load_strings();
 
+    std::optional<std::string> get_module_by_class_name(const definition::fully_qualified_name &class_name) const;
+
     [[nodiscard]] std::optional<int32_t> get_location_offset_index(const std::string &path) const;
-    [[nodiscard]] std::optional<class_file_lookup_result> lookup_class_file(const std::string &target_class) const;
+    [[nodiscard]] std::optional<class_file_lookup_result> lookup_class_file(
+            const definition::fully_qualified_name &class_name) const;
 
     void load_compressed_class_file(std::streamoff file_offset, const class_file_lookup_result &lookup,
             const semantic_analyzer::symbol_table &table);

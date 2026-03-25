@@ -3,7 +3,6 @@
 #include "class_file_loader.h"
 #include "class_loader.h"
 #include "defenition/fully_qualified_name.h"
-#include "fmt/base.h"
 #include "fmt/xchar.h"
 #include "util.h"
 
@@ -41,10 +40,6 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
         return;
     }
 
-    // Assume we're always loading JVM modules bc literally nobody besides them uses a JImage file.
-    // Also, OpenJDK does this too.
-    module_name = "java.base";
-
     _layout = parse_header();
     _redirect_table = load_redirect_table();
     _offsets = load_offsets();
@@ -55,7 +50,7 @@ jimage_loader::jimage_loader(const std::filesystem::path &path) : _file(path, st
 bool jimage_loader::load(const semantic_analyzer::symbol_table &table,
                          const definition::fully_qualified_name &class_name)
 {
-    const auto lookup = lookup_class_file(class_name.join());
+    const auto lookup = lookup_class_file(class_name);
     if (!lookup.has_value())
         return false;
 
@@ -107,9 +102,13 @@ codesh::external::jimage_offsets jimage_loader::parse_header()
 }
 
 std::optional<codesh::external::class_file_lookup_result> jimage_loader::lookup_class_file(
-        const std::string &target_class) const
+        const definition::fully_qualified_name &class_name) const
 {
-    const auto path = fmt::format("/{}/{}.class", module_name, target_class);
+    const auto module_name = get_module_by_class_name(class_name);
+    if (!module_name.has_value())
+        return std::nullopt;
+
+    const auto path = fmt::format("/{}/{}.class", module_name.value(), class_name.join());
     const auto offset_index = get_location_offset_index(path);
 
     if (!offset_index.has_value())
@@ -120,12 +119,21 @@ std::optional<codesh::external::class_file_lookup_result> jimage_loader::lookup_
     if (!util::verify_location(_locations, _strings, location_offset, path))
         return std::nullopt;
 
-
     return class_file_lookup_result {
         util::read_location_attribute(_locations, location_offset, jimage_location_attribute::OFFSET),
         util::read_location_attribute(_locations, location_offset, jimage_location_attribute::COMPRESSED),
         util::read_location_attribute(_locations, location_offset, jimage_location_attribute::UNCOMPRESSED)
     };
+}
+
+std::optional<std::string> jimage_loader::get_module_by_class_name(const definition::fully_qualified_name &class_name)
+    const
+{
+    const auto result = package_to_module_name_map.find(class_name.omit_last().join());
+    if (result == package_to_module_name_map.end())
+        return std::nullopt;
+
+    return result->second;
 }
 
 std::vector<int32_t> jimage_loader::load_redirect_table()
