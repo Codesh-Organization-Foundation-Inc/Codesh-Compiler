@@ -144,6 +144,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
 
 /**
+ * @return Whether all declared sins thrown by the resolved methods are also being declared at the containing method
+ */
+static bool validate_sins_thrown(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_symbol &resolved_method);
+
+/**
  * @returns A set describing whether an argument at index should widen to allow for a match,
  * or @c std::nullopt if at least one argument cannot be cast to the desired parameters.
  */
@@ -274,6 +283,9 @@ static bool post_resolve(
             new_call->get_constructed_type()
         );
     }
+
+    if (!validate_sins_thrown(context, method_call, containing_method, resolved_method))
+        return false;
 
     return true;
 }
@@ -729,6 +741,38 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
     }
 
     return match_results;
+}
+
+static bool validate_sins_thrown(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_symbol &resolved_method)
+{
+    for (const auto &sin : resolved_method.get_sins_thrown())
+    {
+        const auto &sin_name = sin->get_unresolved_name();
+        const auto &sins = containing_method.get_sins_thrown();
+
+        const auto sin_declared = std::ranges::any_of(sins, [&sin_name](const auto &containing_sin) {
+            return containing_sin->get_unresolved_name() == sin_name;
+        });
+
+        if (!sin_declared)
+        {
+            context.throw_blasphemy(
+                fmt::format(
+                    codesh::blasphemy::details::UNDECLARED_SIN,
+                    method_call.get_unresolved_name().get_last_part(),
+                    sin_name.join()
+                ),
+                method_call.get_code_position()
+            );
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)
