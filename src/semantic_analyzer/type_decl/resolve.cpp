@@ -61,17 +61,17 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
 static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semantic_context &context,
         const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &interface_decls)
 {
-    std::unordered_set<codesh::definition::fully_qualified_name> seen;
+    std::unordered_set<std::string> seen;
     for (const auto &interface : interface_decls)
     {
         if (!interface->is_resolved())
             continue;
 
-        const auto &name = interface->get_resolved().get_full_name();
-        if (!seen.insert(name).second)
+        const auto &fqn = interface->get_resolved().get_full_name();
+        if (!seen.insert(fqn.join()).second)
         {
             context.throw_blasphemy(
-                fmt::format(codesh::blasphemy::details::DUPLICATE_INTERFACE, name.holy_join()),
+                fmt::format(codesh::blasphemy::details::DUPLICATE_INTERFACE, fqn.holy_join()),
                 interface->get_code_position()
             );
         }
