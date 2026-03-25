@@ -54,7 +54,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         auto right_value_node = parse_value(tokens);
 
         // lhs must be a variable
-        if (!dynamic_cast<const codesh::ast::var_reference::variable_reference_ast_node *>(left_value_node.get()))
+        if (!dynamic_cast<const ast::var_reference::variable_reference_ast_node *>(left_value_node.get()))
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::EXPECTED_VARIABLE,
@@ -67,8 +67,8 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
         eval_ast_node = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
             op_pos,
-            std::unique_ptr<codesh::ast::var_reference::variable_reference_ast_node>(
-                static_cast<codesh::ast::var_reference::variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+            std::unique_ptr<ast::var_reference::variable_reference_ast_node>(
+                static_cast<ast::var_reference::variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
             ),
             std::move(right_value_node)
         );

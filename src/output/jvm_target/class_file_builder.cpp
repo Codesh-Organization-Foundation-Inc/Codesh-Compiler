@@ -153,7 +153,7 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
 
-    if (!method_decl.get_exceptions_thrown().empty())
+    if (!method_decl.get_sins_thrown().empty())
     {
         method_entry->attribute_info.push_back(create_exceptions_attribute(method_decl));
     }
@@ -236,7 +236,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::exceptions_attribute_entry>
     auto result = std::make_unique<defs::exceptions_attribute_entry>();
     util::put_int_bytes(result->attribute_name_index, 2, constant_pool_.get_utf8_index("Exceptions"));
 
-    const auto &exceptions = method_decl.get_exceptions_thrown();
+    const auto &exceptions = method_decl.get_sins_thrown();
     util::put_int_bytes(result->number_of_exceptions, 2, static_cast<int>(exceptions.size()));
 
     for (const auto &exception_type : exceptions)
