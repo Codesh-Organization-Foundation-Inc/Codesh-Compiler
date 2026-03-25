@@ -129,7 +129,7 @@ struct method_overload
 /**
  * Method name -> method overloads
  */
-using abstract_methods_map = std::unordered_map<std::string, method_overload>;
+using method_overloads_map = std::unordered_map<std::string, std::vector<method_overload>>;
 
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
@@ -145,7 +145,7 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
      *
      * References entries of @c methods_scope.
      */
-    abstract_methods_map abstract_methods;
+    method_overloads_map abstract_methods;
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
@@ -178,7 +178,7 @@ public:
     [[nodiscard]] named_symbol_map &get_field_scope();
     [[nodiscard]] const named_symbol_map &get_field_scope() const;
 
-    [[nodiscard]] const abstract_methods_map &get_abstract_methods() const;
+    [[nodiscard]] const method_overloads_map &get_abstract_methods() const;
     void add_abstract_method(std::string name, method_overload method);
 
     [[nodiscard]] bool are_abstract_methods_collected() const;

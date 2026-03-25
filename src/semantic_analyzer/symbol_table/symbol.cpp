@@ -124,7 +124,7 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::ty
     return fields_scope;
 }
 
-const codesh::semantic_analyzer::abstract_methods_map &codesh::semantic_analyzer::type_symbol::get_abstract_methods()
+const codesh::semantic_analyzer::method_overloads_map &codesh::semantic_analyzer::type_symbol::get_abstract_methods()
     const
 {
     return abstract_methods;
@@ -132,7 +132,7 @@ const codesh::semantic_analyzer::abstract_methods_map &codesh::semantic_analyzer
 
 void codesh::semantic_analyzer::type_symbol::add_abstract_method(std::string name, method_overload method)
 {
-    abstract_methods.emplace(std::move(name), std::move(method));
+    abstract_methods[std::move(name)].push_back(std::move(method));
 }
 
 bool codesh::semantic_analyzer::type_symbol::are_abstract_methods_collected() const

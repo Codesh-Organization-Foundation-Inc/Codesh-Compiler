@@ -140,9 +140,12 @@ static void collect_abstract_methods(codesh::semantic_analyzer::type_symbol &typ
 {
     collect_abstract_methods(type);
 
-    for (const auto &[method_name, method] : type.get_abstract_methods())
+    for (const auto &[method_name, methods] : type.get_abstract_methods())
     {
-        collector.add_abstract_method(method_name, method);
+        for (const auto &method : methods)
+        {
+            collector.add_abstract_method(method_name, method);
+        }
     }
 }
 
