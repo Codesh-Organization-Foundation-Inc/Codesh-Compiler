@@ -124,6 +124,27 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::ty
     return fields_scope;
 }
 
+const codesh::semantic_analyzer::abstract_methods_map &codesh::semantic_analyzer::type_symbol::get_abstract_methods()
+    const
+{
+    return abstract_methods;
+}
+
+void codesh::semantic_analyzer::type_symbol::add_abstract_method(std::string name, method_overload method)
+{
+    abstract_methods.emplace(std::move(name), std::move(method));
+}
+
+bool codesh::semantic_analyzer::type_symbol::are_abstract_methods_collected() const
+{
+    return abstract_methods_collected;
+}
+
+void codesh::semantic_analyzer::type_symbol::mark_abstract_methods_collected()
+{
+    abstract_methods_collected = true;
+}
+
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::type_symbol::
     resolve_own(const std::string &name) const
 {
@@ -144,6 +165,7 @@ codesh::semantic_analyzer::type_symbol::type_symbol(i_scope_containing_symbol *c
     full_name(std::move(full_name)),
     fields_scope({symbol_type::FIELD}),
     methods_scope({symbol_type::METHOD_OVERLOADS}),
+    abstract_methods_collected(false),
     producing_node(producing_node),
     super_type(std::move(super_type)),
     interfaces(std::move(interfaces)),
@@ -319,7 +341,8 @@ codesh::semantic_analyzer::symbols_collection &codesh::semantic_analyzer::method
     return scope;
 }
 
-codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbol *const parent_symbol, type_symbol &parent_type,
+codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbol *const parent_symbol,
+        type_symbol &parent_type,
         definition::fully_qualified_name full_name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
