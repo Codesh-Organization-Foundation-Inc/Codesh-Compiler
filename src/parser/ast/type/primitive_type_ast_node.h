@@ -18,6 +18,7 @@ class primitive_type_ast_node final : public type_ast_node
 
 protected:
     [[nodiscard]] output::ir::instruction_type _to_instruction_type() const override;
+    [[nodiscard]] type_ast_node *_clone() const override;
 
 public:
     primitive_type_ast_node(lexer::code_position code_position, definition::primitive_type type);
@@ -27,7 +28,9 @@ public:
 
     [[nodiscard]] definition::primitive_type get_type() const;
 
-    [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
+    // ReSharper disable once CppHidingFunction
+    [[nodiscard]] std::unique_ptr<primitive_type_ast_node> clone() const;
+
     [[nodiscard]] std::string to_pretty_string() const override;
 };
 

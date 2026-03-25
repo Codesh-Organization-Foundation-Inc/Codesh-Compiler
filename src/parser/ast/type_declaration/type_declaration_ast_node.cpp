@@ -75,9 +75,7 @@ std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> codesh::as
     results.reserve(interfaces.size());
     for (const auto &iface : interfaces)
     {
-        results.push_back(std::unique_ptr<type::custom_type_ast_node>(
-            static_cast<type::custom_type_ast_node *>(iface->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
-        ));
+        results.push_back(iface->clone());
     }
 
     return results;

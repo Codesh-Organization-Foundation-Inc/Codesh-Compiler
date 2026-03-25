@@ -91,10 +91,7 @@ static std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> clo
 
     for (const auto &sin_node : method_decl.get_sins_thrown())
     {
-        auto cloned = sin_node->clone();
-        result.push_back(std::unique_ptr<codesh::ast::type::custom_type_ast_node>(
-            static_cast<codesh::ast::type::custom_type_ast_node *>(cloned.release()) // NOLINT(*-pro-type-static-cast-downcast)
-        ));
+        result.push_back(sin_node->clone());
     }
 
     return result;
