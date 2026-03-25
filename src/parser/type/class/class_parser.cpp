@@ -182,6 +182,8 @@ static std::pair<
         parser::var_decl_assignment_policy::FORBID
     );
 
+    parser::util::ensure_end_op(tokens);
+
     return {std::move(decl_node), std::move(assignment)};
 }
 
