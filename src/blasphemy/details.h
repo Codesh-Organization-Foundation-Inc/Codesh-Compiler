@@ -77,6 +77,8 @@ extern const std::string ARRAY_INDEX_NOT_INTEGER;
 extern const fmt::runtime_format_string<> INVALID_CAST;
 extern const fmt::runtime_format_string<> THROWS_NOT_EXCEPTION;
 extern const fmt::runtime_format_string<> UNDECLARED_SIN;
+extern const fmt::runtime_format_string<> DUPLICATE_INTERFACE;
+extern const fmt::runtime_format_string<> UNIMPLEMENTED_METHOD;
 
 // EXTERNAL
 extern const fmt::runtime_format_string<> CLASSPATH_NOT_SUPPORTED;

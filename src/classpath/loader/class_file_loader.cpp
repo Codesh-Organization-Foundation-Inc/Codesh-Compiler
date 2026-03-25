@@ -79,6 +79,7 @@ void codesh::external::class_file_loader::parse_methods(std::istream &file, cons
         const auto method_attr_count = util::read_u2(file);
 
         std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> exceptions_thrown;
+
         for (uint16_t a = 0; a < method_attr_count; a++)
         {
             const auto attr_name_index = util::read_u2(file);
@@ -131,8 +132,9 @@ void codesh::external::class_file_loader::add_method_symbol(const std::string &m
         type_sym
     );
 
+    const std::string params_descriptor = method_descriptor.substr(1, method_descriptor.find(')') - 1);
     overloads.get_scope().add_symbol(
-        method_descriptor,
+        params_descriptor,
         std::make_unique<method_symbol>(
             &overloads,
             type_sym,

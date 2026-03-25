@@ -120,6 +120,17 @@ public:
     [[nodiscard]] const definition::fully_qualified_name &get_full_name() const;
 };
 
+struct method_overload
+{
+    std::string parameters_descriptor;
+    method_symbol &method;
+};
+
+/**
+ * Method name -> method overloads
+ */
+using method_overloads_map = std::unordered_map<std::string, std::vector<method_overload>>;
+
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
 {
@@ -127,6 +138,14 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 
     named_symbol_map fields_scope;
     named_symbol_map methods_scope;
+
+    bool abstract_methods_collected;
+    /**
+     * Contains all abstract methods of this and parent types.
+     *
+     * References entries of @c methods_scope.
+     */
+    method_overloads_map abstract_methods;
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
@@ -152,11 +171,19 @@ public:
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_interfaces() const;
 
+
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
 
     [[nodiscard]] named_symbol_map &get_field_scope();
     [[nodiscard]] const named_symbol_map &get_field_scope() const;
+
+    [[nodiscard]] const method_overloads_map &get_abstract_methods() const;
+    void add_abstract_method(std::string name, method_overload method);
+
+    [[nodiscard]] bool are_abstract_methods_collected() const;
+    void mark_abstract_methods_collected();
+
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const override;
 
