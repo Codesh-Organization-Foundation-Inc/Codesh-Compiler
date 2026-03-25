@@ -61,7 +61,7 @@ void codesh::semantic_analyzer::type_declaration::resolve(const semantic_context
 static void detect_duplicate_interfaces(const codesh::semantic_analyzer::semantic_context &context,
         const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &interface_decls)
 {
-    std::unordered_set<codesh::definition::fully_qualified_name, codesh::definition::fully_qualified_name_hasher> seen;
+    std::unordered_set<codesh::definition::fully_qualified_name> seen;
     for (const auto &interface : interface_decls)
     {
         if (!interface->is_resolved())
