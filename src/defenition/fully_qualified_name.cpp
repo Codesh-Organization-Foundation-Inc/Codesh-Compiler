@@ -129,18 +129,6 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
     return join(" ל־");
 }
 
-size_t codesh::definition::fully_qualified_name_hasher::operator()(
-        const fully_qualified_name &fqn) const noexcept
-{
-    size_t seed = 0;
-    for (const auto &part : fqn.get_parts())
-    {
-        boost::hash_combine(seed, part);
-    }
-
-    return seed;
-}
-
 std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
 {
     const auto joined = join();
@@ -151,4 +139,16 @@ std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias
         return semantic_analyzer::builtins::ALIAS_OBJECT;
 
     return std::nullopt;
+}
+
+std::size_t std::hash<codesh::definition::fully_qualified_name>::operator()(
+        const codesh::definition::fully_qualified_name &fqn) const noexcept
+{
+    size_t seed = 0;
+    for (const auto &part : fqn.get_parts())
+    {
+        boost::hash_combine(seed, part);
+    }
+
+    return seed;
 }
