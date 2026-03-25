@@ -4,9 +4,10 @@
 #include "defenition/fully_qualified_name.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/null_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
-
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
     resolve_custom_type(const semantic_context &context, const ast::type::custom_type_ast_node &custom_type_node)
@@ -101,6 +102,9 @@ bool codesh::semantic_analyzer::util::resolve_type_node(const semantic_context &
 bool codesh::semantic_analyzer::util::do_types_match(const ast::type::type_ast_node &from,
                                                      const ast::type::type_ast_node &to)
 {
+    if (dynamic_cast<const ast::type::null_type_ast_node *>(&from))
+        return !dynamic_cast<const ast::type::primitive_type_ast_node *>(&to);
+
     return from.generate_descriptor() == to.generate_descriptor();
 }
 
