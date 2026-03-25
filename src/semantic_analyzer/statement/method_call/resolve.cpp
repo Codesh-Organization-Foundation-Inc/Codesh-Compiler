@@ -764,9 +764,12 @@ static bool validate_sins_thrown(
                 fmt::format(
                     codesh::blasphemy::details::UNDECLARED_SIN,
                     method_call.get_unresolved_name().get_last_part(),
-                    sin_name.join()
+                    sin_name.holy_join()
                 ),
-                method_call.get_code_position()
+                {
+                    method_call.get_code_position(),
+                    method_call.get_unresolved_name().get_source_range().end
+                }
             );
             return false;
         }
