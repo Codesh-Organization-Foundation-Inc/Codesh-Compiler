@@ -257,6 +257,9 @@ static bool post_resolve(const codesh::semantic_analyzer::semantic_context &cont
         maybe_warn_interop_exists(method_call);
     }
 
+    // Resolve return type
+    codesh::semantic_analyzer::util::resolve_type_node(context, resolved_method.get_return_type());
+
     // Handle prepending `this` for non-static method calls
     if (!resolved_method.get_attributes().get_is_static())
     {
