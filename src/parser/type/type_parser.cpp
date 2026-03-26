@@ -73,7 +73,6 @@ std::unique_ptr<ast::op::assignment::assign_operator_ast_node> codesh::parser::p
         policy
     );
 
-    util::ensure_end_op(tokens);
     return assignment;
 }
 

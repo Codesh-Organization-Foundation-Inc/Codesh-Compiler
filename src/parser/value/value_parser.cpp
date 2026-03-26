@@ -241,7 +241,7 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> eval_ast_node)
 {
-    const auto code_pos = codesh::parser::util::consume_token(tokens)->get_code_position();
+    const auto code_pos = tokens.front()->get_code_position();
 
     auto to_val = codesh::parser::value::parse_value(tokens);
 
