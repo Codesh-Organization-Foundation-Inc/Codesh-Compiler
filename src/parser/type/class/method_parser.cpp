@@ -164,11 +164,21 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
         || front_group == token_group::KEYWORD_TRUE
         || front_group == token_group::KEYWORD_FALSE;
 
-    if (is_literal_receiver)
+    // ויעש כי־ויעש כי־וכו'
+    if (front_group == token_group::OPEN_PARENTHESIS)
+    {
+        tokens.pop();
+        method_call_node->set_receiver(value::parse_value(tokens));
+        method_call_node->set_association(ast::var_reference::reference_association::EXPRESSION);
+        util::consuming_check(tokens, token_group::CLOSE_PARENTHESIS);
+
+        util::consuming_check(tokens, token_group::PUNCTUATION_DOT);
+        util::parse_fqn(tokens, method_call_node->get_fqn());
+    }
+    else if (is_literal_receiver)
     {
         method_call_node->set_receiver(value::parse_primitive_value(tokens));
         method_call_node->set_association(ast::var_reference::reference_association::EXPRESSION);
-
         util::consuming_check(tokens, token_group::PUNCTUATION_DOT);
         util::parse_fqn(tokens, method_call_node->get_fqn());
     }
