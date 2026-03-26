@@ -24,8 +24,7 @@ static int compile(const codesh::command_args &args, const codesh::definition::c
 [[noreturn]] static void lsp_server(const codesh::command_args &args,
         const codesh::definition::class_loaders &class_loaders);
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
-        const codesh::lsp::diagnostics_request &request,
-        const codesh::definition::class_loaders &class_loaders);
+        const codesh::lsp::diagnostics_request &request, const codesh::definition::class_loaders &class_loaders);
 [[nodiscard]] static std::filesystem::path uri_to_path(const std::string &file_uri);
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args);
@@ -195,8 +194,7 @@ static void lsp_server(const codesh::command_args &args, const codesh::definitio
 }
 
 static void handle_lsp_diagnostic_request(const codesh::command_args &args,
-        const codesh::lsp::diagnostics_request &request,
-        const codesh::definition::class_loaders &class_loaders)
+        const codesh::lsp::diagnostics_request &request, const codesh::definition::class_loaders &class_loaders)
 {
     const auto source_path = uri_to_path(request.file_uri);
     auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents);
@@ -347,6 +345,14 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
     // before analysis begins.
     //
     // This pass happens between symbol collection and analysis.
+    if (args.is_java_default_classpath)
+    {
+        codesh::semantic_analyzer::builtins::resolve_builtins(
+            master_symbol_table.get_talmud_codesh_country(),
+            master_symbol_table
+        );
+    }
+
     for (const auto &context : contexts)
     {
         log_analysis_progress(args, processed, process_amount, "שתיים", context.root);
