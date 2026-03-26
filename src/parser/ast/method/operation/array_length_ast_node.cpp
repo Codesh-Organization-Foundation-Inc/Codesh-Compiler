@@ -8,5 +8,5 @@ codesh::ast::method::operation::array_length_ast_node::array_length_ast_node(con
 
 std::string codesh::ast::method::operation::array_length_ast_node::to_pretty_string() const
 {
-    return "אֹרֶךְ־מַעֲרָךְ";
+    return "אֹרֶךְ־מִסְדָּר";
 }
