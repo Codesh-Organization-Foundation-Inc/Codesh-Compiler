@@ -370,11 +370,13 @@ void codesh::output::jvm_target::class_file_builder::add_interfaces() const
 
     for (const auto &interface : interfaces)
     {
-        const int utf8_idx = constant_pool_.get_utf8_index(interface->get_resolved_name().join());
-        const int class_idx = constant_pool_.get_class_index(utf8_idx);
-
         std::array<unsigned char, 2> entry{};
+
+        const int class_idx = constant_pool_.get_class_index(
+            constant_pool_.get_utf8_index(interface->get_resolved_name().join())
+        );
         util::put_int_bytes(entry.data(), 2, class_idx);
+
         class_file.interfaces_info.push_back(std::move(entry));
     }
 }

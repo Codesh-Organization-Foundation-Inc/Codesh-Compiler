@@ -162,6 +162,17 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
     );
     const int super_class_constant = constant_pool.goc_class_info(super_class_cpi);
 
+    // Interface
+    if (!interfaces.empty())
+    {
+        for (const auto &interface : interfaces)
+        {
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(interface->get_resolved_name().join())
+            );
+        }
+    }
+
     // Add super constructor method reference
     //TODO: Move to IR
     constant_pool.goc_methodref_info(
