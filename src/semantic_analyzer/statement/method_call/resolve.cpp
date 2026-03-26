@@ -210,6 +210,16 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return std::nullopt;
     }
 
+    if (method_call.has_receiver())
+    {
+        codesh::semantic_analyzer::statement::resolve(
+            context,
+            method_call.get_receiver(),
+            containing_method,
+            scope
+        );
+    }
+
     const auto result = resolve_call_parent_type(context, containing_method, method_call, scope);
     if (!result.has_value())
         return std::nullopt;
