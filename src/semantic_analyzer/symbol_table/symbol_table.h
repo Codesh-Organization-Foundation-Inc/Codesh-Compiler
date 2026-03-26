@@ -2,7 +2,6 @@
 
 #include "../../classpath/loader/jimage_loader.h"
 #include "defenition/definitions.h"
-#include "lexer/source_file_info.h"
 #include "symbol.h"
 
 #include <string>
@@ -58,7 +57,6 @@ class symbol_table final : public i_scope_containing_symbol
     std::optional<std::reference_wrapper<symbol>> resolve_loaded_symbol(const semantic_context &context,
             const definition::fully_qualified_name &name) const;
 
-    [[nodiscard]] bool try_load_candidate(const definition::fully_qualified_name &candidate) const;
     /**
      * @return The prefix and suffix of the split name, or @c nullptr if the loading was not successful.
      *
@@ -87,6 +85,8 @@ public:
             //FIXME: They're flipped
             std::optional<std::vector<std::string>::const_iterator> name_end = std::nullopt,
             std::optional<std::vector<std::string>::const_iterator> name_start = std::nullopt) const;
+
+    bool try_load_candidate(const definition::fully_qualified_name &candidate) const;
 
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;

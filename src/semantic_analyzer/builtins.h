@@ -17,4 +17,5 @@ inline constexpr std::string ALIAS_OBJECT = "לאבובו";
 inline constexpr std::string ALIAS_EXCEPTION = "חטא";
 
 void collect_builtins(country_symbol &country);
+void resolve_builtins(country_symbol &country, const symbol_table &table);
 }
