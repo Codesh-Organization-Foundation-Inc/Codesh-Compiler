@@ -136,7 +136,8 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
         blasphemy.source_path.string()
     );
 
-    if (const auto &code_pos = blasphemy.source_range)
+    if (const auto &code_pos = blasphemy.source_range;
+        code_pos->start != lexer::NO_CODE_POS)
     {
         const auto [line, column] = code_pos->start;
 

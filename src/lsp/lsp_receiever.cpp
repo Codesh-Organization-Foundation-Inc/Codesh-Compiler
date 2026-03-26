@@ -98,7 +98,7 @@ static nlohmann::json blasphemy_to_diagnostic(const codesh::blasphemy::blasphemy
 
     const auto end_pos = has_range
         ? token_to_lsp_end(info.source_range->end, info.file_id)
-        : codesh::lexer::code_position{0, 0};
+        : codesh::lexer::code_position {0, 0};
 
     const nlohmann::json range = {
         {"start", {
