@@ -50,24 +50,6 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
-codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
-    get_chained_method() const
-{
-    assert(chained_method.has_value() && "Tried to get chained method though one does not exist");
-    return *chained_method.value();
-}
-
-void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
-        std::unique_ptr<method_call_ast_node> chained_method)
-{
-    this->chained_method.emplace(std::move(chained_method));
-}
-
-bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
-{
-    return chained_method.has_value();
-}
-
 void codesh::ast::method::operation::method_call_ast_node::set_receiver(
         std::unique_ptr<value_ast_node> receiver)
 {
@@ -211,11 +193,6 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
         }
     }
 
-    // Emit for chained method
-    if (has_chained_method())
-    {
-        get_chained_method().emit_constants(root_node, constant_pool);
-    }
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
@@ -224,14 +201,6 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
 {
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
-
-    // Execute chained methods first
-    if (has_chained_method())
-    {
-        containing_block.set_is_consuming(true);
-        get_chained_method().emit_ir(containing_block, symbol_table, containing_type_decl);
-        containing_block.set_is_consuming(false);
-    }
 
     // Load arguments
     for (const auto &[arg_name, arg_value] : arguments)

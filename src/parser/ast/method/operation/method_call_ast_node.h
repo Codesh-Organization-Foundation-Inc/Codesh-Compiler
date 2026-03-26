@@ -38,8 +38,6 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     var_reference::reference_association association;
 
-    std::optional<std::unique_ptr<method_call_ast_node>> chained_method;
-
     std::optional<std::unique_ptr<value_ast_node>> receiver_expression;
 
     std::deque<named_argument> arguments;
@@ -60,11 +58,6 @@ public:
     [[nodiscard]] definition::fully_qualified_name &get_fqn();
     [[nodiscard]] const definition::fully_qualified_name &get_fqn() const;
 
-
-    [[nodiscard]] method_call_ast_node &get_chained_method() const;
-    void set_chained_method(std::unique_ptr<method_call_ast_node> chained_method);
-
-    [[nodiscard]] bool has_chained_method() const;
 
     void set_receiver(std::unique_ptr<value_ast_node> receiver);
     [[nodiscard]] bool has_receiver() const;
