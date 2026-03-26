@@ -329,8 +329,9 @@ codesh::ast::var_reference::reference_association codesh::parser::util::parse_as
     if (this_token != nullptr)
     {
         fqn_out.set_start_position(this_token->get_code_position());
-        consuming_check(tokens, token_group::PUNCTUATION_DOT);
     }
+
+    consuming_check(tokens, token_group::PUNCTUATION_DOT);
 
     parse_fqn(tokens, fqn_out);
     return association;
