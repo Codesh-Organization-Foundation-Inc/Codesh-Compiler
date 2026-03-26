@@ -17,6 +17,7 @@
 #include "parser/ast/method/operation/block/if_ast_node.h"
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/array_length_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/operator/cast/cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
@@ -168,6 +169,24 @@ bool statement::resolve(const semantic_context &context,
         return true;
     }
 
+
+    if (const auto arr_length = dynamic_cast<ast::method::operation::array_length_ast_node *>(&stmnt))
+    {
+        if (!resolve_value(context, arr_length->get_child(), containing_method, scope))
+            return false;
+
+        const auto *child_type = arr_length->get_child().get_type();
+        if (child_type->get_array_dimensions() == 0)
+        {
+            context.throw_blasphemy(
+                fmt::format(blasphemy::details::NOT_AN_ARRAY, child_type->to_pretty_string()),
+                arr_length->get_child().get_code_position()
+            );
+            return false;
+        }
+
+        return true;
+    }
 
     if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
     {
