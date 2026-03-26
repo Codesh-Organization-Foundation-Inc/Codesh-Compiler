@@ -11,6 +11,7 @@
 #include "parser/ast/operator/assignment/addition_assignment_operator_ast_node.h"
 #include "parser/type/type_parser.h"
 #include "parser/util.h"
+#include "parser/value/primitive_value_parser.h"
 #include "parser/value/value_parser.h"
 
 static std::optional<codesh::lexer::code_position> check_consume_scope_begin(
@@ -151,11 +152,31 @@ std::unique_ptr<codesh::ast::method::operation::method_call_ast_node> codesh::pa
         std::queue<std::unique_ptr<token>> &tokens)
 {
     auto call_pos = util::consume_token(tokens)->get_code_position();
-
     auto method_call_node = std::make_unique<ast::method::operation::method_call_ast_node>(call_pos);
 
-    const auto association = util::parse_association_and_fqn(tokens, method_call_node->get_fqn());
-    method_call_node->set_association(association);
+    const auto front_group = tokens.front()->get_group();
+    const bool is_literal_receiver =
+           front_group == token_group::LITERAL_STRING
+        || front_group == token_group::LITERAL_NUMBER_INT
+        || front_group == token_group::LITERAL_NUMBER_FLOAT
+        || front_group == token_group::LITERAL_NUMBER_DOUBLE
+        || front_group == token_group::LITERAL_CHAR
+        || front_group == token_group::KEYWORD_TRUE
+        || front_group == token_group::KEYWORD_FALSE;
+
+    if (is_literal_receiver)
+    {
+        method_call_node->set_receiver(value::parse_primitive_value(tokens));
+        method_call_node->set_association(ast::var_reference::reference_association::EXPRESSION);
+
+        util::consuming_check(tokens, token_group::PUNCTUATION_DOT);
+        util::parse_fqn(tokens, method_call_node->get_fqn());
+    }
+    else
+    {
+        const auto association = util::parse_association_and_fqn(tokens, method_call_node->get_fqn());
+        method_call_node->set_association(association);
+    }
 
     if (util::consuming_check(tokens, token_group::OPEN_PARENTHESIS))
     {
