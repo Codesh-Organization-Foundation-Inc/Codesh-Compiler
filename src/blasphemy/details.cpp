@@ -156,7 +156,7 @@ const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rf
 );
 
 const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
-    "סוּג אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְהִשְׁתַּמֵּשׁ בְּ{} כְּאוֹסֶף"
+    "סוּג אֵינוֹ כָּשֵׁר: {} אֵינוֹ מִסְדָּר"
 );
 const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
     "סוּג אֵינוֹ כָּשֵׁר: מַפְתֵּחַ הָאוֹסֶף חַיָּב לִהְיוֹת מִסּוּג שָׁלֵם";
