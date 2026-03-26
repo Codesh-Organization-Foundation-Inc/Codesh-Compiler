@@ -5,6 +5,7 @@
 #include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
+#include "parser/ast/var_reference/null_value_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "parser/util.h"
 #include "semantic_analyzer/builtins.h"
@@ -64,6 +65,13 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             util::consume_alnum_identifier_token(tokens)->get_content()
         );
 
+        break;
+    }
+
+    case token_group::KEYWORD_NULL: {
+        value = std::make_unique<ast::var_reference::null_value_ast_node>(
+            util::consume_token(tokens)->get_code_position()
+        );
         break;
     }
 

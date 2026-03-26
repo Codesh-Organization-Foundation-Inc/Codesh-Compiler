@@ -21,7 +21,6 @@
 #include "fmt/format.h"
 #include "parser/ast/method/operation/array_length_ast_node.h"
 #include "parser/ast/var_reference/array_access_ast_node.h"
-#include "parser/ast/var_reference/null_value_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
 #include "token/token_group.h"
@@ -59,6 +58,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
     case token_group::LITERAL_CHAR:
     case token_group::KEYWORD_TRUE:
     case token_group::KEYWORD_FALSE:
+    case token_group::KEYWORD_NULL:
         lhs = parse_primitive_value(tokens);
         break;
 
@@ -150,12 +150,6 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         lhs = parse_method_call(tokens);
         break;
 
-    case token_group::KEYWORD_NULL: {
-        lhs = std::make_unique<ast::var_reference::null_value_ast_node>(
-            util::consume_token(tokens)->get_code_position()
-        );
-        break;
-    }
     case token_group::KEYWORD_ARRAY_LENGTH: {
         auto op_pos = tokens.front()->get_code_position();
         tokens.pop();
