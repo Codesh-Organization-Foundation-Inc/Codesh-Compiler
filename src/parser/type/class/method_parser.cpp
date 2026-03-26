@@ -53,7 +53,7 @@ void codesh::parser::parse_method_scope(std::queue<std::unique_ptr<token>> &toke
             auto [var_decl, var_assignment] =
                 parse_variable_declaration(tokens, var_decl_assignment_policy::REQUIRE);
 
-                util::ensure_end_op(tokens);
+            util::ensure_end_op(tokens);
 
             method_scope.add_local_variable(std::move(var_decl));
 
