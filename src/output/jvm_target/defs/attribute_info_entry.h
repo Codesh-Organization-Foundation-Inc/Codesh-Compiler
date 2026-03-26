@@ -2,6 +2,7 @@
 
 #include "stack_map_table.h"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -72,5 +73,11 @@ struct local_variable_table_attribute_entry : attribute_info_entry
 struct source_file_attribute_entry : attribute_info_entry
 {
     unsigned char sourcefile_index[2];
+};
+
+struct exceptions_attribute_entry : attribute_info_entry
+{
+    unsigned char number_of_exceptions[2];
+    std::vector<std::array<unsigned char, 2>> exception_index_table;
 };
 }

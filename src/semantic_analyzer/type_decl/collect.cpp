@@ -25,9 +25,7 @@ void codesh::semantic_analyzer::type_declaration::collect(const semantic_context
         country,
         name,
         type_decl.get_attributes()->clone(),
-        std::unique_ptr<ast::type::custom_type_ast_node>(
-            static_cast<ast::type::custom_type_ast_node *>(type_decl.get_super_class()->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
-        ),
+        type_decl.get_super_class()->clone(),
         type_decl.get_interfaces_copy(),
         &type_decl
     );

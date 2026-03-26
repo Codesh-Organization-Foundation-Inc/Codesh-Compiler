@@ -37,8 +37,10 @@ std::unique_ptr<codesh::identifier_token> codesh::parser::util::consume_identifi
 
     if (token->get_group() != token_group::IDENTIFIER)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX, token->get_code_position());
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX, token->get_code_position()
+        );
 
         return make_error_identifier_token(token->get_code_position());
     }
@@ -327,8 +329,9 @@ codesh::ast::var_reference::reference_association codesh::parser::util::parse_as
     if (this_token != nullptr)
     {
         fqn_out.set_start_position(this_token->get_code_position());
-        consuming_check(tokens, token_group::PUNCTUATION_DOT);
     }
+
+    consuming_check(tokens, token_group::PUNCTUATION_DOT);
 
     parse_fqn(tokens, fqn_out);
     return association;

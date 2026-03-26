@@ -163,6 +163,18 @@ const std::string codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER =
 const rfs_t codesh::blasphemy::details::INVALID_CAST = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְהַמִּיר אֶת הַסּוּג {} לַסּוּג {}"
 );
+const rfs_t codesh::blasphemy::details::THROWS_NOT_EXCEPTION = rfs(
+    "סוּג אֵינוֹ כָּשֵׁר: הַסּוּג {} אֵינוֹ חֲטָא"
+);
+const rfs_t codesh::blasphemy::details::UNDECLARED_SIN = rfs(
+    "חֵטְא בִּלְתִּי מוּכְרָז הֱיֵה: הַמַּעֲשֶׂה {} זוֹרֵק אֶת הַחֵטְא {} שֶׁאֵינוֹ מוּכְרָז"
+);
+const rfs_t codesh::blasphemy::details::DUPLICATE_INTERFACE = rfs(
+    "נֵאִיפַת מְמַשֵּׁשׁ תִּהְיֶה: הַמְּמַשֵּׁשׁ {} מֻצְהָר יוֹתֵר מִפַּעַם אַחַת"
+);
+const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
+    "מַעֲשֶׂה בִּלְתִּי מְמֻמָּשׁ הֱיֵה: הָעֶצֶם {} אֵינוֹ מְמַשֵּׁשׁ אֶת הַמַּעֲשֶׂה {} מִן הַמְמַמֵּשׁ {}"
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(

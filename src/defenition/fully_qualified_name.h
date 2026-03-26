@@ -2,6 +2,7 @@
 
 #include "lexer/source_file_info.h"
 
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -67,9 +68,10 @@ public:
     [[nodiscard]] std::string holy_join() const;
 };
 
-struct fully_qualified_name_hasher
-{
-    size_t operator()(const fully_qualified_name &fqn) const noexcept;
-};
-
 }
+
+template<>
+struct std::hash<codesh::definition::fully_qualified_name>
+{
+    size_t operator()(const codesh::definition::fully_qualified_name &fqn) const noexcept;
+};

@@ -8,6 +8,7 @@ enum class reference_association
 {
     THIS,
     SUPER,
+    EXPRESSION,
     UNKNOWN
 };
 

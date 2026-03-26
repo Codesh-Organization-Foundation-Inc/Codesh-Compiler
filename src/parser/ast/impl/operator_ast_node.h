@@ -4,6 +4,10 @@
 #include "i_constant_pool_emitter.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 
+namespace codesh::semantic_analyzer
+{
+struct semantic_context;
+}
 namespace codesh::ast::impl
 {
 
@@ -17,7 +21,7 @@ protected:
 public:
     using value_ast_node::value_ast_node;
 
-    [[nodiscard]] virtual bool is_value_valid() const = 0;
+    [[nodiscard]] virtual bool is_value_valid(const semantic_analyzer::semantic_context &context) const = 0;
 
     void set_statement_index(size_t statement_index) override;
 

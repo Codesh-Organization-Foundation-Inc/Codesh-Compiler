@@ -92,6 +92,11 @@ void codesh::ast::type::type_ast_node::set_array_dimensions(const int array_dime
     this->array_dimensions = array_dimensions;
 }
 
+std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::type_ast_node::clone() const
+{
+    return std::unique_ptr<type_ast_node>(_clone());
+}
+
 codesh::output::ir::instruction_type codesh::ast::type::type_ast_node::to_instruction_type() const
 {
     if (array_dimensions > 0)

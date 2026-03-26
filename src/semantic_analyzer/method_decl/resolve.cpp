@@ -1,12 +1,17 @@
 #include "resolve.h"
 
+#include "blasphemy/details.h"
 #include "lexer/source_file_info.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
 #include "parser/ast/method/constructor_declaration_ast_node.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "semantic_analyzer/builtins.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/poly_util.h"
 
+#include <fmt/format.h>
 #include <functional>
 #include <ranges>
 
@@ -21,6 +26,9 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::method_declaration_ast_node &method_decl,
         const codesh::semantic_analyzer::type_symbol &type);
+
+static void resolve_thrown_exceptions(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve(
@@ -61,6 +69,7 @@ static codesh::semantic_analyzer::method_symbol &resolve_method_signature(
 
     resolve_return_type(context, method_decl, *method);
     resolve_local_variables(context, *method);
+    resolve_thrown_exceptions(context, method_decl);
 
     // Move to a new overloads entry, now that the parameters' descriptors are valid
     const auto insert_result =
@@ -90,5 +99,46 @@ static void resolve_local_variables(const codesh::semantic_analyzer::semantic_co
             *var_symbol.get().get_type(),
             *var_symbol.get().get_producing_node()->get_type()
         );
+    }
+}
+
+static void resolve_thrown_exceptions(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::method_declaration_ast_node &method_decl)
+{
+    const auto &exceptions = method_decl.get_sins_thrown();
+    if (exceptions.empty())
+        return;
+
+    const auto het = context.symbol_table_
+        .get_talmud_codesh_country()
+        .resolve_own(codesh::semantic_analyzer::builtins::ALIAS_EXCEPTION)
+        .value();
+
+    for (const auto &exception_node : exceptions)
+    {
+        const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context, *exception_node
+        );
+        if (!resolved.has_value())
+            continue;
+
+        const auto &resolved_type = resolved->get();
+
+        const bool valid = codesh::semantic_analyzer::util::is_subtype_of(
+            context,
+            resolved_type,
+            static_cast<const codesh::semantic_analyzer::type_symbol &>(het.get()) // NOLINT(*-pro-type-static-cast-downcast)
+        );
+
+        if (!valid)
+        {
+            context.throw_blasphemy(
+                fmt::format(
+                    codesh::blasphemy::details::THROWS_NOT_EXCEPTION,
+                    exception_node->get_unresolved_name().join()
+                ),
+                exception_node->get_code_position()
+            );
+        }
     }
 }

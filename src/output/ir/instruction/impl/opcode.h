@@ -6,6 +6,7 @@ namespace codesh::output::ir
 enum class opcode : unsigned char
 {
     NOP = 0x00, // No operation
+    ACONST_NULL = 0x01, // Pushes a null reference onto the stack
 
     I_CONST_M1 = 0x02, // Loads -1 onto the stack
 

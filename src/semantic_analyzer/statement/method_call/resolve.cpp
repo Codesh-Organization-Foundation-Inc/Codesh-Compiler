@@ -78,8 +78,9 @@ static std::optional<parent_type_result> resolve_call_parent_type(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::op::new_ast_node &new_call);
 
-static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
-        const codesh::ast::method::operation::method_call_ast_node &chained_method);
+static std::optional<parent_type_result> resolve_parent_type_for_expression_receiver(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call);
 
 /**
  * @returns Whether all arguments were successfully resolved.
@@ -113,6 +114,13 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
 static void maybe_warn_interop_exists(
         const codesh::ast::method::operation::method_call_ast_node &method_call);
 
+static bool post_resolve(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::variable_symbol *receiver_variable);
+
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> resolve_method_call(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::method_symbol &containing_method,
@@ -125,6 +133,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name);
 
@@ -134,6 +143,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
+
+/**
+ * @return Whether all declared sins thrown by the resolved methods are also being declared at the containing method
+ */
+static bool validate_sins_thrown(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_symbol &resolved_method);
 
 /**
  * @returns A set describing whether an argument at index should widen to allow for a match,
@@ -186,22 +204,20 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
             return std::nullopt;
     }
 
-    // Recursively resolve all chained methods first
-    if (method_call.has_chained_method())
-    {
-        resolve_method_call(
-            context,
-            containing_method,
-            method_call.get_chained_method(),
-            scope
-        );
-    }
-
-    const auto &name = method_call.get_unresolved_name();
-    if (name.get_parts().empty())
+    if (method_call.get_unresolved_name().get_parts().empty())
     {
         // Error in parsing phase; Ignore
         return std::nullopt;
+    }
+
+    if (method_call.has_receiver())
+    {
+        codesh::semantic_analyzer::statement::resolve(
+            context,
+            method_call.get_receiver(),
+            containing_method,
+            scope
+        );
     }
 
     const auto result = resolve_call_parent_type(context, containing_method, method_call, scope);
@@ -220,30 +236,47 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
     if (!resolved_method.has_value())
         return std::nullopt;
 
+    if (!post_resolve(context, method_call, containing_method, scope, resolved_method->get(), receiver_variable))
+        return std::nullopt;
 
+    return resolved_method;
+}
+
+static bool post_resolve(const codesh::semantic_analyzer::semantic_context &context,
+        codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_scope_symbol &scope,
+        codesh::semantic_analyzer::method_symbol &resolved_method,
+        codesh::semantic_analyzer::variable_symbol *receiver_variable)
+{
     // Update the AST node to the found result
-    method_call.set_resolved(resolved_method.value());
+    method_call.set_resolved(resolved_method);
 
-    if (resolved_method->get().is_external())
+    if (resolved_method.is_external())
     {
         maybe_warn_interop_exists(method_call);
     }
 
+    // Resolve return type
+    codesh::semantic_analyzer::util::resolve_type_node(context, resolved_method.get_return_type());
+
     // Handle prepending `this` for non-static method calls
-    if (!resolved_method->get().get_attributes().get_is_static())
+    if (!resolved_method.get_attributes().get_is_static())
     {
-        // For calls on local variables, prepend the receiver:
-        if (receiver_variable != nullptr)
+        if (method_call.get_association() == codesh::ast::var_reference::reference_association::EXPRESSION)
+        {
+            method_call.get_arguments().emplace_front("this", method_call.take_receiver());
+        }
+        else if (receiver_variable != nullptr)
         {
             prepend_external_this_argument(method_call, *receiver_variable);
         }
         else
         {
             if (!prepend_implicit_this_argument(context, method_call, containing_method, scope))
-                return std::nullopt;
+                return false;
         }
     }
-
 
     // For new calls, also resolve the constructed type:
     if (const auto new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
@@ -254,7 +287,10 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         );
     }
 
-    return resolved_method;
+    if (!validate_sins_thrown(context, method_call, containing_method, resolved_method))
+        return false;
+
+    return true;
 }
 
 static std::optional<parent_type_result> resolve_call_parent_type_for_super(
@@ -263,7 +299,19 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto &current_type = containing_method.get_parent_type();
-    if (!current_type.has_super_type() || !current_type.get_super_type().is_resolved())
+    if (!current_type.has_super_type())
+    {
+        context.throw_blasphemy(
+            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            method_call.get_name_range()
+        );
+        return std::nullopt;
+    }
+
+    const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context, current_type.get_super_type()
+    );
+    if (!super)
     {
         context.throw_blasphemy(
             fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
@@ -273,7 +321,7 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
     }
 
     return parent_type_result {
-        &current_type.get_super_type().get_resolved(),
+        &super->get(),
         nullptr
     };
 }
@@ -289,6 +337,9 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     if (const auto *new_call = dynamic_cast<const codesh::ast::op::new_ast_node *>(&method_call))
         return resolve_call_parent_type(context, *new_call);
 
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::EXPRESSION)
+        return resolve_parent_type_for_expression_receiver(context, method_call);
+
     if (method_call.get_association() == codesh::ast::var_reference::reference_association::SUPER)
         return resolve_call_parent_type_for_super(context, containing_method, method_call);
 
@@ -302,11 +353,6 @@ static std::optional<parent_type_result> resolve_call_parent_type(
             &containing_method.get_parent_type(),
             nullptr
         };
-    }
-
-    if (method_call.has_chained_method())
-    {
-        return resolve_parent_type_for_chained_call(method_call.get_chained_method());
     }
 
     // Check if the front of the name matches a local variable in the scope.
@@ -343,26 +389,28 @@ static std::optional<parent_type_result> resolve_call_parent_type(
     };
 }
 
-static std::optional<parent_type_result> resolve_parent_type_for_chained_call(
-        const codesh::ast::method::operation::method_call_ast_node &chained_method)
+static std::optional<parent_type_result> resolve_parent_type_for_expression_receiver(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
-    if (!chained_method.is_resolved())
-        return std::nullopt;
-
-    // For chained methods, `this` is their return value
-    const auto *return_type = dynamic_cast<const codesh::ast::type::custom_type_ast_node *>(
-        &chained_method.get_resolved().get_return_type()
+    const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type_node(
+        context, *method_call.get_receiver().get_type()
     );
-
-    if (return_type == nullptr)
+    if (!resolved.has_value())
     {
-        // Non-custom return type - can't chain further calls on it.
-        // E.g. a primitive
+        const auto *receiver_type = method_call.get_receiver().get_type();
+        context.throw_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
+                receiver_type ? receiver_type->to_pretty_string() : "?"
+            ),
+            method_call.get_name_range()
+        );
         return std::nullopt;
     }
 
     return parent_type_result {
-        &return_type->get_resolved(),
+        &resolved->get(),
         nullptr
     };
 }
@@ -415,8 +463,8 @@ static bool prepend_implicit_this_argument(const codesh::semantic_analyzer::sema
                                            const codesh::semantic_analyzer::method_symbol &containing_method,
                                            const codesh::semantic_analyzer::method_scope_symbol &scope)
 {
-    // Method calls get the result and do not need `this`
-    if (method_call.has_chained_method())
+    // Expression calls handle their own receiver injection in post_resolve
+    if (method_call.get_association() == codesh::ast::var_reference::reference_association::EXPRESSION)
         return true;
 
     // New calls don't need `this`
@@ -538,6 +586,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call)
 {
     const auto method_overloads_raw = resolve_method_in_hierarchy(
+        context,
         type,
         method_call.get_last_name(false)
     );
@@ -600,6 +649,7 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
+        const codesh::semantic_analyzer::semantic_context &context,
         const codesh::semantic_analyzer::type_symbol &start,
         const std::string &name)
 {
@@ -610,10 +660,16 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
         if (result.has_value())
             return result;
 
-        if (!current->has_super_type() || !current->get_super_type().is_resolved())
+        if (!current->has_super_type())
             break;
 
-        current = &current->get_super_type().get_resolved();
+        const auto super = codesh::semantic_analyzer::util::resolve_custom_type_node(
+            context, current->get_super_type()
+        );
+        if (!super)
+            break;
+
+        current = &super->get();
     }
 
     return std::nullopt;
@@ -693,7 +749,7 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
 
 
         const bool is_exact_type = codesh::semantic_analyzer::util::do_types_match(arg_type, param_type)
-            || codesh::semantic_analyzer::util::can_poly_cast_to(arg_type, param_type);
+            || codesh::semantic_analyzer::util::can_poly_cast_to(context, arg_type, param_type);
 
         if (!is_exact_type)
         {
@@ -708,6 +764,46 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
     }
 
     return match_results;
+}
+
+static bool validate_sins_thrown(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call,
+        const codesh::semantic_analyzer::method_symbol &containing_method,
+        const codesh::semantic_analyzer::method_symbol &resolved_method)
+{
+    for (const auto &sin : resolved_method.get_sins_thrown())
+    {
+        if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *sin))
+            continue;
+
+        const auto &sins = containing_method.get_sins_thrown();
+
+        const auto sin_declared = std::ranges::any_of(sins, [&sin, &context](const auto &containing_sin) {
+            if (!codesh::semantic_analyzer::util::resolve_custom_type_node(context, *containing_sin))
+                return false;
+
+            return containing_sin->get_resolved_name() == sin->get_resolved_name();
+        });
+
+        if (!sin_declared)
+        {
+            context.throw_blasphemy(
+                fmt::format(
+                    codesh::blasphemy::details::UNDECLARED_SIN,
+                    method_call.get_unresolved_name().get_last_part(),
+                    sin->get_unresolved_name().holy_join()
+                ),
+                {
+                    method_call.get_code_position(),
+                    method_call.get_unresolved_name().get_source_range().end
+                }
+            );
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method)

@@ -73,8 +73,8 @@ public:
     void add_parameter(std::unique_ptr<local_variable_declaration_ast_node> parameter);
     void add_parameter_front(std::unique_ptr<local_variable_declaration_ast_node> parameter);
 
-    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_exceptions_thrown() const;
-    [[nodiscard]] std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_exceptions_thrown();
+    [[nodiscard]] const std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_sins_thrown() const;
+    [[nodiscard]] std::vector<std::unique_ptr<type::custom_type_ast_node>> &get_sins_thrown();
 
 
     [[nodiscard]] std::string to_pretty_string() const override;

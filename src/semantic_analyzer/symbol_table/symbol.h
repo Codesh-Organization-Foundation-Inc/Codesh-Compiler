@@ -120,6 +120,17 @@ public:
     [[nodiscard]] const definition::fully_qualified_name &get_full_name() const;
 };
 
+struct method_overload
+{
+    std::string parameters_descriptor;
+    method_symbol &method;
+};
+
+/**
+ * Method name -> method overloads
+ */
+using method_overloads_map = std::unordered_map<std::string, std::vector<method_overload>>;
+
 class type_symbol final : public symbol, public i_scope_containing_symbol,
         public i_resolvable_symbol<ast::type_decl::type_declaration_ast_node>
 {
@@ -127,6 +138,14 @@ class type_symbol final : public symbol, public i_scope_containing_symbol,
 
     named_symbol_map fields_scope;
     named_symbol_map methods_scope;
+
+    bool abstract_methods_collected;
+    /**
+     * Contains all abstract methods of this and parent types.
+     *
+     * References entries of @c methods_scope.
+     */
+    method_overloads_map abstract_methods;
 
     ast::type_decl::type_declaration_ast_node *producing_node;
 
@@ -152,11 +171,19 @@ public:
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_interfaces() const;
 
+
     [[nodiscard]] named_symbol_map &get_scope() override;
     [[nodiscard]] const named_symbol_map &get_scope() const override;
 
     [[nodiscard]] named_symbol_map &get_field_scope();
     [[nodiscard]] const named_symbol_map &get_field_scope() const;
+
+    [[nodiscard]] const method_overloads_map &get_abstract_methods() const;
+    void add_abstract_method(std::string name, method_overload method);
+
+    [[nodiscard]] bool are_abstract_methods_collected() const;
+    void mark_abstract_methods_collected();
+
 
     [[nodiscard]] std::optional<std::reference_wrapper<symbol>> resolve_own(const std::string &name) const override;
 
@@ -290,6 +317,7 @@ class method_symbol final : public symbol, public i_resolvable_symbol<ast::metho
 
     const std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types;
     const std::unique_ptr<ast::type::type_ast_node> return_type;
+    const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> sins_thrown;
 
     indexed_locals_container local_variables;
 
@@ -309,6 +337,7 @@ public:
             std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
             std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
             std::unique_ptr<ast::type::type_ast_node> return_type,
+            std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> sins_thrown,
             ast::method::method_declaration_ast_node *producing_node);
 
     [[nodiscard]] std::unique_ptr<method_scope_symbol> create_method_scope(i_scope_containing_symbol &parent_scope,
@@ -322,6 +351,7 @@ public:
 
     [[nodiscard]] const std::vector<std::unique_ptr<ast::type::type_ast_node>> &get_parameter_types() const;
     [[nodiscard]] ast::type::type_ast_node &get_return_type() const;
+    [[nodiscard]] const std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> &get_sins_thrown() const;
 
     [[nodiscard]] const indexed_locals_container &get_all_local_variables() const;
 

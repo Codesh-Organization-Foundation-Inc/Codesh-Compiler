@@ -75,9 +75,7 @@ std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> codesh::as
     results.reserve(interfaces.size());
     for (const auto &iface : interfaces)
     {
-        results.push_back(std::unique_ptr<type::custom_type_ast_node>(
-            static_cast<type::custom_type_ast_node *>(iface->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
-        ));
+        results.push_back(iface->clone());
     }
 
     return results;
@@ -163,6 +161,17 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
         get_super_class()->get_resolved_name().join()
     );
     const int super_class_constant = constant_pool.goc_class_info(super_class_cpi);
+
+    // Interface
+    if (!interfaces.empty())
+    {
+        for (const auto &interface : interfaces)
+        {
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(interface->get_resolved_name().join())
+            );
+        }
+    }
 
     // Add super constructor method reference
     //TODO: Move to IR

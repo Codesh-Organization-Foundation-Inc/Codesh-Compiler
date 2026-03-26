@@ -71,9 +71,14 @@ codesh::output::ir::instruction_type codesh::ast::type::primitive_type_ast_node:
 
 }
 
-std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+codesh::ast::type::type_ast_node *codesh::ast::type::primitive_type_ast_node::_clone() const
 {
-    return std::make_unique<primitive_type_ast_node>(*this);
+    return new primitive_type_ast_node(*this);
+}
+
+std::unique_ptr<codesh::ast::type::primitive_type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+{
+    return std::unique_ptr<primitive_type_ast_node>(static_cast<primitive_type_ast_node *>(_clone()));
 }
 
 std::string codesh::ast::type::primitive_type_ast_node::to_pretty_string() const

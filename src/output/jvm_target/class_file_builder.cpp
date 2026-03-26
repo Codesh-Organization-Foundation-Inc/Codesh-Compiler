@@ -57,7 +57,7 @@ void codesh::output::jvm_target::class_file_builder::build() const
     util::put_int_bytes(class_file.this_class, 2, this_class_cpi);
     util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
-    util::put_int_bytes(class_file.interfaces_count, 2, 0);
+    add_interfaces();
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -153,6 +153,13 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
 
+    if (!method_decl.get_sins_thrown().empty())
+    {
+        method_entry->attribute_info.push_back(create_exceptions_attribute(method_decl));
+    }
+
+    util::put_int_bytes(method_entry->attributes_count, 2, static_cast<int>(method_entry->attribute_info.size()));
+
     class_file.methods_info.push_back(std::move(method_entry));
 }
 
@@ -220,6 +227,33 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     util::put_int_bytes(code_attr->attribute_count, 2, static_cast<int>(code_attr->attributes.size()));
 
     return code_attr;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::exceptions_attribute_entry>
+    codesh::output::jvm_target::class_file_builder::create_exceptions_attribute(
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    auto result = std::make_unique<defs::exceptions_attribute_entry>();
+    util::put_int_bytes(result->attribute_name_index, 2, constant_pool_.get_utf8_index("Exceptions"));
+
+    const auto &exceptions = method_decl.get_sins_thrown();
+    util::put_int_bytes(result->number_of_exceptions, 2, static_cast<int>(exceptions.size()));
+
+    for (const auto &exception_type : exceptions)
+    {
+        const std::string class_name = exception_type->get_resolved_name().join();
+        const int utf8_idx = constant_pool_.get_utf8_index(class_name);
+        const int class_idx = constant_pool_.get_class_index(utf8_idx);
+
+        std::array<unsigned char, 2> entry{};
+        util::put_int_bytes(entry.data(), 2, class_idx);
+        result->exception_index_table.push_back(entry);
+    }
+
+    // attribute_length = 2 (number_of_exceptions) + 2 * count
+    util::put_int_bytes(result->attribute_length, 4, 2 + 2 * static_cast<int>(exceptions.size()));
+
+    return result;
 }
 
 codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::emit_method_bytecode(
@@ -327,6 +361,24 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
     );
 
     return local_variable_table;
+}
+
+void codesh::output::jvm_target::class_file_builder::add_interfaces() const
+{
+    const auto &interfaces = type_decl.get_interfaces();
+    util::put_int_bytes(class_file.interfaces_count, 2, static_cast<int>(interfaces.size()));
+
+    for (const auto &interface : interfaces)
+    {
+        std::array<unsigned char, 2> entry{};
+
+        const int class_idx = constant_pool_.get_class_index(
+            constant_pool_.get_utf8_index(interface->get_resolved_name().join())
+        );
+        util::put_int_bytes(entry.data(), 2, class_idx);
+
+        class_file.interfaces_info.push_back(std::move(entry));
+    }
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const

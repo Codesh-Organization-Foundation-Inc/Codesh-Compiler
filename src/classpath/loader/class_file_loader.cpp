@@ -78,7 +78,23 @@ void codesh::external::class_file_loader::parse_methods(std::istream &file, cons
         const auto method_desc_idx = util::read_u2(file);
         const auto method_attr_count = util::read_u2(file);
 
-        skip_attributes(file, method_attr_count);
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> exceptions_thrown;
+
+        for (uint16_t a = 0; a < method_attr_count; a++)
+        {
+            const auto attr_name_index = util::read_u2(file);
+            const uint32_t attr_length = util::read_u4(file);
+
+            const auto name_it = strings.find(attr_name_index);
+            if (name_it != strings.end() && name_it->second == "Exceptions")
+            {
+                exceptions_thrown = read_exceptions_attribute(file, strings);
+            }
+            else
+            {
+                file.seekg(attr_length, std::ios::cur);
+            }
+        }
 
         const auto method_name = get_utf8(strings, method_name_idx);
         const auto method_descriptor = get_utf8(strings, method_desc_idx);
@@ -87,6 +103,7 @@ void codesh::external::class_file_loader::parse_methods(std::istream &file, cons
             method_descriptor,
             method_name,
             std::move(access_flags),
+            std::move(exceptions_thrown),
             type_sym
         );
     }
@@ -94,6 +111,7 @@ void codesh::external::class_file_loader::parse_methods(std::istream &file, cons
 
 void codesh::external::class_file_loader::add_method_symbol(const std::string &method_descriptor,
         const std::string &method_name, std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> sins_thrown,
         type_symbol &type_sym)
 {
     // Parse descriptor "(param1param2...)return_type"
@@ -114,8 +132,9 @@ void codesh::external::class_file_loader::add_method_symbol(const std::string &m
         type_sym
     );
 
+    const std::string params_descriptor = method_descriptor.substr(1, method_descriptor.find(')') - 1);
     overloads.get_scope().add_symbol(
-        method_descriptor,
+        params_descriptor,
         std::make_unique<method_symbol>(
             &overloads,
             type_sym,
@@ -123,6 +142,7 @@ void codesh::external::class_file_loader::add_method_symbol(const std::string &m
             std::move(attributes),
             std::move(param_types),
             std::move(return_type),
+            std::move(sins_thrown),
             nullptr
         )
     );
@@ -327,6 +347,26 @@ void codesh::external::class_file_loader::skip_attributes(std::istream &file, co
         util::read_u2(file);
         file.seekg(util::read_u4(file), std::ios::cur);
     }
+}
+
+std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> codesh::external::class_file_loader::
+    read_exceptions_attribute(std::istream &file, const cp_strings &strings)
+{
+    std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> result;
+
+    const uint16_t count = util::read_u2(file);
+    result.reserve(count);
+
+    for (uint16_t i = 0; i < count; i++)
+    {
+        const auto class_index = util::read_u2(file);
+        result.push_back(std::make_unique<ast::type::custom_type_ast_node>(
+            lexer::NO_CODE_POS,
+            get_class_name(strings, class_index)
+        ));
+    }
+
+    return result;
 }
 
 std::string codesh::external::class_file_loader::get_utf8(const cp_strings &strings, const int idx)

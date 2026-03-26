@@ -39,6 +39,8 @@ protected:
     [[nodiscard]] const std::optional<std::reference_wrapper<semantic_analyzer::type_symbol>> &_get_resolved()
         const override;
 
+    [[nodiscard]] type_ast_node *_clone() const override;
+
     [[nodiscard]] output::ir::instruction_type _to_instruction_type() const override;
 
 public:
@@ -52,7 +54,8 @@ public:
 
     [[nodiscard]] const definition::fully_qualified_name &get_unresolved_name() const override;
 
-    [[nodiscard]] std::unique_ptr<type_ast_node> clone() const override;
+    // ReSharper disable once CppHidingFunction
+    [[nodiscard]] std::unique_ptr<custom_type_ast_node> clone() const;
     [[nodiscard]] std::string to_pretty_string() const override;
 
     /**

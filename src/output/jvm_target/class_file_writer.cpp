@@ -66,6 +66,11 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     write_bytes(destination_file, class_file.super_class, 2);
 
     write_bytes(destination_file, class_file.interfaces_count, 2);
+    for (const auto &iface : class_file.interfaces_info)
+    {
+        write_bytes(destination_file, iface.data(), 2);
+    }
+
     write_bytes(destination_file, class_file.fields_count, 2);
     write_fields(destination_file, class_file.fields_info);
     write_bytes(destination_file, class_file.methods_count, 2);
@@ -267,6 +272,14 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         else if (const auto src_attr = dynamic_cast<const codesh::output::jvm_target::defs::source_file_attribute_entry *>(attr.get()))
         {
             write_bytes(out, src_attr->sourcefile_index, 2);
+        }
+        else if (const auto exc_attr = dynamic_cast<const codesh::output::jvm_target::defs::exceptions_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, exc_attr->number_of_exceptions, 2);
+            for (const auto &entry : exc_attr->exception_index_table)
+            {
+                write_bytes(out, entry.data(), 2);
+            }
         }
         else
         {
