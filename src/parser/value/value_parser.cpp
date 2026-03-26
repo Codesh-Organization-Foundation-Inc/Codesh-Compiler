@@ -223,6 +223,14 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
                 codesh::parser::value::parse_value(tokens)
             );
         }
+        // Allow "".method()
+        case codesh::token_group::KEYWORD_FUNCTION_CALL: {
+            auto method_call = codesh::parser::parse_method_call(tokens);
+            method_call->set_receiver(std::move(lhs));
+            method_call->set_association(codesh::ast::var_reference::reference_association::EXPRESSION);
+            // ...And method chaining
+            return check_extras(tokens, std::move(method_call));
+        }
         default: {
             return lhs;
         }
