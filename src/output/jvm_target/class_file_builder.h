@@ -114,6 +114,7 @@ class class_file_builder
 
 
     void add_constant_pool_entries() const;
+    void add_interfaces() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
     void add_field(const ast::type_decl::field_declaration_ast_node &field_decl) const;
     [[nodiscard]] std::unique_ptr<defs::fields_info_entry> create_field_entry(
