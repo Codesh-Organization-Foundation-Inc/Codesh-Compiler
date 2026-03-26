@@ -57,7 +57,7 @@ void codesh::output::jvm_target::class_file_builder::build() const
     util::put_int_bytes(class_file.this_class, 2, this_class_cpi);
     util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
-    util::put_int_bytes(class_file.interfaces_count, 2, 0);
+    add_interfaces();
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -361,6 +361,24 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
     );
 
     return local_variable_table;
+}
+
+void codesh::output::jvm_target::class_file_builder::add_interfaces() const
+{
+    const auto &interfaces = type_decl.get_interfaces();
+    util::put_int_bytes(class_file.interfaces_count, 2, static_cast<int>(interfaces.size()));
+
+    for (const auto &interface : interfaces)
+    {
+        std::array<unsigned char, 2> entry{};
+
+        const int class_idx = constant_pool_.get_class_index(
+            constant_pool_.get_utf8_index(interface->get_resolved_name().join())
+        );
+        util::put_int_bytes(entry.data(), 2, class_idx);
+
+        class_file.interfaces_info.push_back(std::move(entry));
+    }
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
