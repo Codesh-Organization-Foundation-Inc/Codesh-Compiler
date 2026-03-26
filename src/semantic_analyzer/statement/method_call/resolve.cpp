@@ -7,6 +7,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "lexer/trie/keywords.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
@@ -302,7 +303,10 @@ static std::optional<parent_type_result> resolve_call_parent_type_for_super(
     if (!current_type.has_super_type())
     {
         context.throw_blasphemy(
-            fmt::format(codesh::blasphemy::details::TYPE_DOES_NOT_EXIST, "super"),
+            fmt::format(
+                codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
+                codesh::lexer::trie::token_to_string(codesh::token_group::KEYWORD_SUPER)
+            ),
             method_call.get_name_range()
         );
         return std::nullopt;
