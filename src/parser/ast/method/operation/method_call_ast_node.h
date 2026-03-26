@@ -40,6 +40,8 @@ class method_call_ast_node : public var_reference::value_ast_node,
 
     std::optional<std::unique_ptr<method_call_ast_node>> chained_method;
 
+    std::optional<std::unique_ptr<value_ast_node>> receiver_expression;
+
     std::deque<named_argument> arguments;
 
     static size_t determine_stack_delta(const type::type_ast_node &type);
@@ -63,6 +65,12 @@ public:
     void set_chained_method(std::unique_ptr<method_call_ast_node> chained_method);
 
     [[nodiscard]] bool has_chained_method() const;
+
+    void set_receiver(std::unique_ptr<value_ast_node> receiver);
+    [[nodiscard]] bool has_receiver() const;
+    [[nodiscard]] value_ast_node &get_receiver();
+    [[nodiscard]] const value_ast_node &get_receiver() const;
+    [[nodiscard]] std::unique_ptr<value_ast_node> take_receiver();
 
     void set_association(var_reference::reference_association association);
     [[nodiscard]] var_reference::reference_association get_association() const;

@@ -68,6 +68,39 @@ bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() 
     return chained_method.has_value();
 }
 
+void codesh::ast::method::operation::method_call_ast_node::set_receiver(
+        std::unique_ptr<value_ast_node> receiver)
+{
+    receiver_expression.emplace(std::move(receiver));
+}
+
+bool codesh::ast::method::operation::method_call_ast_node::has_receiver() const
+{
+    return receiver_expression.has_value();
+}
+
+codesh::ast::var_reference::value_ast_node &codesh::ast::method::operation::method_call_ast_node::get_receiver()
+{
+    assert(receiver_expression.has_value() && "Tried to get receiver though one does not exist");
+    return *receiver_expression.value();
+}
+
+const codesh::ast::var_reference::value_ast_node &codesh::ast::method::operation::method_call_ast_node::
+    get_receiver() const
+{
+    assert(receiver_expression.has_value() && "Tried to get receiver though one does not exist");
+    return *receiver_expression.value();
+}
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::ast::method::operation::
+    method_call_ast_node::take_receiver()
+{
+    assert(receiver_expression.has_value() && "Tried to take receiver though one does not exist");
+    auto result = std::move(receiver_expression.value());
+    receiver_expression.reset();
+    return result;
+}
+
 void codesh::ast::method::operation::method_call_ast_node::set_association(
         const var_reference::reference_association association)
 {
@@ -135,6 +168,9 @@ void codesh::ast::method::operation::method_call_ast_node::set_statement_index(c
     {
         arg_value->set_statement_index(statement_index);
     }
+
+    if (has_receiver())
+        get_receiver().set_statement_index(statement_index);
 }
 
 std::string codesh::ast::method::operation::method_call_ast_node::to_pretty_string() const
@@ -158,6 +194,13 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
             constant_pool.goc_utf8_info(generate_descriptor())
         )
     );
+
+    // Emit receiver (defensive guard; normally moved into arguments before this runs)
+    if (has_receiver())
+    {
+        if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(&get_receiver()))
+            cp_emitter->emit_constants(root_node, constant_pool);
+    }
 
     // Emit arguments
     for (const auto &[arg_name, arg_value] : get_arguments())
