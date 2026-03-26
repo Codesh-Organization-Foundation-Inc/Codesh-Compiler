@@ -398,13 +398,11 @@ static std::optional<parent_type_result> resolve_parent_type_for_expression_rece
     );
     if (!resolved.has_value())
     {
-        //NOTE: This usually happens when --sinful is not enabled
+        const auto *receiver_type = method_call.get_receiver().get_type();
         context.throw_blasphemy(
             fmt::format(
                 codesh::blasphemy::details::TYPE_DOES_NOT_EXIST,
-                //TODO: While this should typically always be string (Java does not support primitive.something()),
-                // a better approach would be a pretty_print impl for value_ast_node.
-                "כתובים"
+                receiver_type ? receiver_type->to_pretty_string() : "?"
             ),
             method_call.get_name_range()
         );
