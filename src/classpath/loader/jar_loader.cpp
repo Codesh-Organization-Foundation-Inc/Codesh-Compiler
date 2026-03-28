@@ -18,7 +18,7 @@ static constexpr uint32_t ZIP_EOCD_SIG = 0x06054b50;
 
 jar_loader::jar_loader(const std::filesystem::path &path) : archive(path.string())
 {
-    if (archive.open(libzippp::ZipArchive::ReadOnly) != LIBZIPPP_OK)
+    if (!archive.open(libzippp::ZipArchive::ReadOnly))
     {
         _is_loaded = false;
     }
