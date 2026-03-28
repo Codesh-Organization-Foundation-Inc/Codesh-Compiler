@@ -45,16 +45,22 @@ std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::pars
 {
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX, code_position);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_NAME,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     // Get name
     const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens);
     if (!name_token)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX, code_position);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(

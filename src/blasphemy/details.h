@@ -21,6 +21,7 @@ extern const std::string UNKNOWN_FLAG;
 // LEXICAL
 extern const std::string NO_BASAD;
 extern const std::string TOKEN_DOESNT_EXIST;
+extern const std::string BAD_BASAD;
 
 // SYNTAX
 extern const std::string NO_IDENTIFIER;
