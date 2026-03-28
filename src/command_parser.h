@@ -2,10 +2,14 @@
 
 #include <filesystem>
 #include <optional>
+#include <string>
 #include <vector>
+
 
 namespace codesh
 {
+extern const std::string DEFAULT_JRE_PATH;
+extern const std::string DEFAULT_TALMUD_CODESH_PATH;
 
 struct command_args
 {
@@ -13,6 +17,7 @@ struct command_args
     std::optional<std::filesystem::path> dest_path;
 
     bool lsp_mode;
+    bool help_requested;
 
     std::vector<std::filesystem::path> classpaths;
 
