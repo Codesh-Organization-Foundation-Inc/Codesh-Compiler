@@ -14,6 +14,7 @@ extern const fmt::runtime_format_string<> SOURCE_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> OUTPUT_FILE_OPEN_ERROR;
 extern const fmt::runtime_format_string<> DEST_PATH_NOT_DIRECTORY;
 extern const fmt::runtime_format_string<> INVALID_ARG;
+extern const fmt::runtime_format_string<> PATH_DOESNT_EXIST;
 extern const std::string NO_MAIN_ARGS;
 extern const std::string NO_ARG;
 extern const std::string UNKNOWN_FLAG;
