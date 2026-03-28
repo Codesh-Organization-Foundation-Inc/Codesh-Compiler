@@ -140,8 +140,10 @@ void codesh::parser::value::biblical_numbers_parser::handle_addition()
 {
     result += current_distro;
 
-    // Distro order should be ascending
-    if (previous_distro >= current_distro)
+    const bool is_initial = previous_distro == std::numeric_limits<int>::min();
+
+    // Distro order should be descending
+    if (!is_initial && current_distro >= previous_distro)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
@@ -153,7 +155,7 @@ void codesh::parser::value::biblical_numbers_parser::handle_addition()
         );
     }
 
-    previous_distro = current_distro;
+    previous_distro = is_initial ? std::numeric_limits<int>::max() : current_distro;
     current_distro = **current_number;
 }
 
