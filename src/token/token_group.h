@@ -187,6 +187,8 @@ enum class token_group : int
     KEYWORD_BIBLICAL_THOUSAND_ADDED,  // ואלף
     KEYWORD_BIBLICAL_TEN_THOUSAND_ADDED,  // ורבבה
 
+    // EOF
+    FILE_EOF,
 
     // REGEX Matches
 

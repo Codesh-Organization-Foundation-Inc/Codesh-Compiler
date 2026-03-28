@@ -37,6 +37,8 @@ const std::string codesh::blasphemy::details::NO_BASAD =
     "בְּרָכָה חֲסֵרָה: בַּסַּ\"ד אֵינוֹ";
 const std::string codesh::blasphemy::details::TOKEN_DOESNT_EXIST =
     "מִלָּה זָרָה תִּהְיֶה: מִלָּה אֵינָהּ קַיֶּמֶת אוֹ שְׁאוּלָה מִלּוֹעֲזִית";
+const std::string codesh::blasphemy::details::BAD_BASAD =
+    "צדִיִק בֶּאֱמוּנָתוֹ יִחְיֶה";
 
 // SYNTAX
 const std::string codesh::blasphemy::details::NO_IDENTIFIER =

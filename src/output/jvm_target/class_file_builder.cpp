@@ -295,8 +295,10 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
 
     if (code_attr.code.size() > 0xFFFFFF)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::METHOD_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, lexer::NO_CODE_POS, true);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::METHOD_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT, lexer::NO_CODE_POS, true
+        );
     }
 
     util::put_int_bytes(code_attr.code_length, 4, code_attr.code.size()); // NOLINT(*-narrowing-conversions)
@@ -377,7 +379,7 @@ void codesh::output::jvm_target::class_file_builder::add_interfaces() const
         );
         util::put_int_bytes(entry.data(), 2, class_idx);
 
-        class_file.interfaces_info.push_back(std::move(entry));
+        class_file.interfaces_info.push_back(entry);
     }
 }
 
