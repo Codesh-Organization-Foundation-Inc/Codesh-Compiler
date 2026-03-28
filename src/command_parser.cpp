@@ -203,11 +203,39 @@ static void add_default_classpaths(codesh::command_args &args)
 
     if (args.is_java_default_classpath)
     {
-        args.classpaths.emplace_back(args.jre_path / "lib/modules");
+        if (!std::filesystem::exists(args.jre_path))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    codesh::blasphemy::details::PATH_DOESNT_EXIST,
+                    args.jre_path.string()
+                ),
+                codesh::blasphemy::blasphemy_type::INIT,
+                codesh::lexer::NO_CODE_POS
+            );
+        }
+        else
+        {
+            args.classpaths.emplace_back(args.jre_path / "lib/modules");
+        }
     }
 
     if (args.is_talmud_codesh_classpath)
     {
-        args.classpaths.emplace_back(args.talmud_codesh_path);
+        if (!std::filesystem::exists(args.talmud_codesh_path))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                fmt::format(
+                    codesh::blasphemy::details::PATH_DOESNT_EXIST,
+                    args.talmud_codesh_path.string()
+                ),
+                codesh::blasphemy::blasphemy_type::INIT,
+                codesh::lexer::NO_CODE_POS
+            );
+        }
+        else
+        {
+            args.classpaths.emplace_back(args.talmud_codesh_path);
+        }
     }
 }

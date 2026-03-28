@@ -25,6 +25,9 @@ const rfs_t codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY = rfs(
 const rfs_t codesh::blasphemy::details::INVALID_ARG = rfs(
     "דֶּרֶךְ תּוֹעָה הֱיֵה: הֵעָרֵךְ {} אֵינוֹ מַתְאִים"
 );
+const rfs_t codesh::blasphemy::details::PATH_DOESNT_EXIST = rfs(
+    "דֶּרֶךְ תּוֹעָה הֱיֵה: הַנָּתִיב {} אֵינוֹ קַיָּם"
+);
 const std::string codesh::blasphemy::details::NO_MAIN_ARGS =
     "מִנְחוֹת אֵינָם: נְתִיבֵי מוֹצָא וְיַעַד נִּדְרָשִׁים";
 const std::string codesh::blasphemy::details::NO_ARG =
