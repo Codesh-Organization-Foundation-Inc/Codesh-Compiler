@@ -1,6 +1,7 @@
 #include "resolve.h"
 #include "semantic_analyzer/field_decl/resolve.h"
 #include "semantic_analyzer/method_decl/resolve.h"
+#include "parser/ast/method/util.h"
 
 #include "fmt/xchar.h"
 #include "parser/ast/compilation_unit_ast_node.h"
@@ -208,7 +209,7 @@ static void check_unimplemented_from(const codesh::semantic_analyzer::semantic_c
                 context.throw_blasphemy(
                     fmt::format(codesh::blasphemy::details::UNIMPLEMENTED_METHOD,
                         type.get_full_name().holy_join(),
-                        "טודו", //TODO: Full method signature
+                        codesh::ast::method::util::pretty_method_signature(method.method),
                         source.get_full_name().holy_join()
                     ),
                     requesting_type_pos

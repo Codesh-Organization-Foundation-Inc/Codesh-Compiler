@@ -3,6 +3,7 @@
 #include "lexer/source_file_info.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/util.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -46,10 +47,9 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
 
     if (!inserted)
     {
-        //TODO: Print full method signature
         new_context.throw_blasphemy(fmt::format(
             blasphemy::details::DUPLICATE_METHOD_DECLARATION,
-            method_name
+            ast::method::util::pretty_method_signature(it.get())
         ), method_decl.get_name_range());
     }
 
