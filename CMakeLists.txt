@@ -371,6 +371,15 @@ add_executable(codeshc
         src/parser/ast/method/operation/array_length_ast_node.h
 )
 
+
+# Configure git to trust build dependencies for FetchContent
+#NOTE: This modifies ~/.gitconfig
+file(GLOB _deps_dirs "${CMAKE_BINARY_DIR}/_deps/*-src")
+foreach(_dir ${_deps_dirs})
+    execute_process(COMMAND git config --global --add safe.directory "${_dir}" OUTPUT_QUIET ERROR_QUIET)
+endforeach()
+
+
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
 
