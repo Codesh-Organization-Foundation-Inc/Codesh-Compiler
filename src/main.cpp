@@ -74,6 +74,12 @@ static void println(const codesh::command_args &args, const std::string &msg);
 int main(const int argc, char **const argv)
 {
     const codesh::command_args args = codesh::parse_command(argc, argv);
+    if (codesh::blasphemy::get_blasphemy_collector().has_errors())
+    {
+        codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
+        return EXIT_FAILURE;
+    }
+
     // Initialize classloaders early on to get their blasphemies, if those exist
     const auto class_loaders = init_class_loaders(args.classpaths);
 
