@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#include <iostream>
-
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "compilation_unit_parser.h"
@@ -20,9 +18,9 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_BASAD,
             blasphemy::blasphemy_type::LEXICAL,
-            lexer::NO_CODE_POS,
-            true
+            lexer::NO_CODE_POS
         );
+        return std::make_unique<ast::compilation_unit_ast_node>(file_id, definition::basad_type::MISSING);
     }
 
 
@@ -31,8 +29,12 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
     if (root_node->get_basad_type() == definition::basad_type::IAW ||
         root_node->get_basad_type() == definition::basad_type::JCIK)
     {
-        std::cout << "צַדִּיק בֶּאֱמוּנָתוֹ יִחְיֶה" << std::endl;
-        std::exit(0);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::BAD_BASAD,
+            blasphemy::blasphemy_type::LEXICAL,
+            lexer::NO_CODE_POS
+        );
+        return root_node;
     }
 
 
