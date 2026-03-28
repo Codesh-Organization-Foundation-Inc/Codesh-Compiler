@@ -48,6 +48,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, bool is
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
+static void print_help();
 static void log_analysis_progress(const codesh::command_args &args, size_t processed, size_t total,
         const std::string &pass_name, const codesh::ast::compilation_unit_ast_node &root_node);
 
@@ -75,6 +76,12 @@ int main(const int argc, char **const argv)
     const codesh::command_args args = codesh::parse_command(argc, argv);
     // Initialize classloaders early on to get their blasphemies, if those exist
     const auto class_loaders = init_class_loaders(args.classpaths);
+
+    if (args.help_requested)
+    {
+        print_help();
+        return EXIT_SUCCESS;
+    }
 
     if (args.lsp_mode)
     {
@@ -225,6 +232,29 @@ static std::filesystem::path uri_to_path(const std::string &file_uri)
     return file_uri;
 }
 
+
+static void print_help()
+{
+    std::puts("Welcome to The Motzie B'Shelea - Official compiler to the Codesh programming language.");
+    std::puts("");
+    std::puts("This help message is written in English for all to understand. Your code, fortunately, is not.");
+    std::puts("");
+    std::puts("Usage:");
+    std::puts("\tcodeshc --src <path> --dest <path> [options]");
+    std::puts("");
+    std::puts("Required:");
+    std::puts("\t--src <path>                  Source file or directory to compile");
+    std::puts("\t--dest <path>                 Output file or directory for .class files");
+    std::puts("");
+    std::puts("Options:");
+    fmt::println("\t--jre-path <path>             Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
+    std::puts("\t--classpath <entries>         Semicolon-separated list of classpaths to use (dirs or JARs)");
+    fmt::println("\t--talmud-codesh-path <path>   Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
+    std::puts("\t--unholy                      Exclude the standard Codesh talmud");
+    std::puts("\t--sinful                      Include the standard Java library");
+    std::puts("\t--lsp                         Run in LSP Server Mode (for IDEs)");
+    std::puts("\t--help, -h                    Show this help message");
+}
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
 {

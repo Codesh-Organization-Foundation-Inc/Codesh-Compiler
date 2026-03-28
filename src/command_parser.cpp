@@ -27,8 +27,8 @@ const std::string COMMON_JAVA_PATH = LIB_PATH + "jvm/";
 const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
 const std::string COMMON_TALMUD_CODESH_PATH = "קודש/תלמוד־קודש";
 
-const std::string DEFAULT_JRE_PATH = COMMON_JAVA_PATH + COMMON_JRE_DIR;
-const std::string DEFAULT_TALMUD_CODESH_PATH = LIB_PATH + COMMON_TALMUD_CODESH_PATH;
+const std::string codesh::DEFAULT_JRE_PATH = COMMON_JAVA_PATH + COMMON_JRE_DIR;
+const std::string codesh::DEFAULT_TALMUD_CODESH_PATH = LIB_PATH + COMMON_TALMUD_CODESH_PATH;
 
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
@@ -37,7 +37,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
     if (argc == 1)
     {
-        //TODO: Print help
+        result.help_requested = true;
         return result;
     }
 
@@ -49,7 +49,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     bool has_jre_path = false;
     bool has_talmud_codesh_path = false;
 
-    while (!args.empty())
+    while (!args.empty() & !result.help_requested)
     {
         std::string arg = consume_argument(args);
 
@@ -86,6 +86,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--lsp")
         {
             result.lsp_mode = true;
+        }
+        else if (arg == "--help" || arg == "-h")
+        {
+            result.help_requested = true;
         }
         else
         {
@@ -146,7 +150,7 @@ static std::filesystem::path get_default_jre_path()
         return std::filesystem::path(java_home) / COMMON_JRE_DIR;
     }
 #endif
-    return DEFAULT_JRE_PATH;
+    return codesh::DEFAULT_JRE_PATH;
 }
 
 static bool is_zip(const std::string &file_name)
