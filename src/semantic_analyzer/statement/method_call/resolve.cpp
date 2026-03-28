@@ -1,5 +1,6 @@
 #include "resolve.h"
 
+#include "parser/ast/method/util.h"
 #include "../../external/interop_replacements.h"
 #include "lexer/source_file_info.h"
 #include "semantic_analyzer/statement/resolve.h"
@@ -144,6 +145,8 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         codesh::ast::method::operation::method_call_ast_node &method_call);
 
 static size_t param_offset_of(const codesh::semantic_analyzer::method_symbol &method);
+static void throw_arguments_mismatch_blasphemy(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call);
 
 /**
  * @return Whether all declared sins thrown by the resolved methods are also being declared at the containing method
@@ -639,17 +642,26 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sy
         return ma_zot_omeret_beereh_method;
 
 
+    throw_arguments_mismatch_blasphemy(context, method_call);
+    return std::nullopt;
+}
+
+static void throw_arguments_mismatch_blasphemy(const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::method::operation::method_call_ast_node &method_call)
+{
+    const auto arg_types = method_call.get_arguments()
+        | std::views::transform([](const codesh::ast::method::operation::named_argument &arg) {
+            return arg.value->get_type()->to_pretty_string();
+        });
+
     context.throw_blasphemy(
         fmt::format(
             codesh::blasphemy::details::ARGUMENT_TYPE_MISMATCH,
-            //TODO: Pretty print argument types
-            "טודו",
+            fmt::join(arg_types, " וְ־"),
             method_call.to_pretty_string()
         ),
-        //TODO: Highlight arguments, not method name
         method_call.get_name_range()
     );
-    return std::nullopt;
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> resolve_method_in_hierarchy(
