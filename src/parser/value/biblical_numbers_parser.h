@@ -33,6 +33,7 @@ class biblical_numbers_parser
     // יעני פילוג
     int previous_distro;
     int current_distro;
+    std::unique_ptr<token> current_distro_token;
 
     int result;
     int integer_result;

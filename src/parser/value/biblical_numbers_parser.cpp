@@ -132,6 +132,22 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
         );
     }
 
+    // Check the final distro's order
+    const auto distros_exist = previous_distro != std::numeric_limits<int>::min()
+        && previous_distro != std::numeric_limits<int>::max();
+
+    if (distros_exist && current_distro >= previous_distro)
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING,
+                lexer::trie::token_to_string(current_distro_token->get_group())
+            ),
+            blasphemy::blasphemy_type::SYNTAX,
+            current_distro_token->get_code_position()
+        );
+    }
+
     result += current_distro;
 }
 
@@ -140,21 +156,24 @@ void codesh::parser::value::biblical_numbers_parser::handle_addition()
 {
     result += current_distro;
 
-    // Distro order should be ascending
-    if (previous_distro >= current_distro)
+    const bool is_initial = previous_distro == std::numeric_limits<int>::min();
+
+    // Distro order should be descending
+    if (!is_initial && current_distro >= previous_distro)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING,
-                lexer::trie::token_to_string(current_number->producing_token->get_group())
+                lexer::trie::token_to_string(current_distro_token->get_group())
             ),
             blasphemy::blasphemy_type::SYNTAX,
-            current_number->producing_token->get_code_position()
+            current_distro_token->get_code_position()
         );
     }
 
-    previous_distro = current_distro;
+    previous_distro = is_initial ? std::numeric_limits<int>::max() : current_distro;
     current_distro = **current_number;
+    current_distro_token = std::move(current_number->producing_token);
 }
 
 void codesh::parser::value::biblical_numbers_parser::handle_multiplication()
