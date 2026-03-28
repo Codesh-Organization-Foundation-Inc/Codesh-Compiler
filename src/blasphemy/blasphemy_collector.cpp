@@ -131,10 +131,13 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
 
     std::cerr << get_blasphemy_message(blasphemy.type);
 
-    fmt::print(stderr,
-        " בְּסֵפֶר {}",
-        blasphemy.source_path.string()
-    );
+    if (blasphemy.file_id.has_value() || !blasphemy.source_path.empty())
+    {
+        fmt::print(stderr,
+            " בְּסֵפֶר {}",
+            blasphemy.source_path.string()
+        );
+    }
 
     if (const auto &code_pos = blasphemy.source_range;
         code_pos->start != lexer::NO_CODE_POS)
