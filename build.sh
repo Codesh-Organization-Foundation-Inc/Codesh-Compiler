@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#TODO: Replace with build-jar once compiler support for JARs exist
-
 if (( EUID != 0 )); then
     echo "וִיבַקֵּשׁ ה' לְהָרִץ אֶת־הַסְּקְרִיפְּט בְּסַמְכוּת שֹׁרֶשׁ"
     exit 1
@@ -9,7 +7,6 @@ fi
 
 CODESH_PATH="/usr/lib/קודש"
 CODESH_EXECUTABLE=$CODESH_PATH/codeshc
-TALMUD_CODESH_PATH="$CODESH_PATH/תלמוד־קודש"
 
 
 # Compile codeshc
@@ -25,7 +22,11 @@ ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
 
 # Build Talmud Codesh
-mkdir -p $TALMUD_CODESH_PATH
-$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $TALMUD_CODESH_PATH --sinful
+TALMUD_CODESH_PATH_TEMP=/tmp/talmud-codesh
+mkdir -p $TALMUD_CODESH_PATH_TEMP
+$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $TALMUD_CODESH_PATH_TEMP --sinful
+
+# Package as JAR file
+jar cf $CODESH_PATH/תלמוד־קודש.jar -C $TALMUD_CODESH_PATH_TEMP .
 
 echo "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
