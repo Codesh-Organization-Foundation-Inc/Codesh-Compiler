@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.31.6)
 
+# vcpkg triplet for MinGW on Windows
+if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic" CACHE STRING "vcpkg target triplet")
+endif()
+
 # vcpkg toolchain
 if(DEFINED ENV{VCPKG_ROOT})
     set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 elseif(NOT WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     # sudo dnf install git curl zip unzip tar ninja-build pkg-config autoconf automake libtool
     set(CMAKE_TOOLCHAIN_FILE "$ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
@@ -386,14 +393,22 @@ find_package(Boost REQUIRED COMPONENTS regex headers)
 target_link_libraries(codeshc PRIVATE Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
+# On Windows, use MSYS2 ucrt64 prebuilt ICU: pacman -S mingw-w64-ucrt-x86_64-icu
+if(WIN32 AND NOT DEFINED ICU_ROOT)
+    set(ICU_ROOT "C:/msys64/ucrt64" CACHE PATH "Path to ICU installation")
+endif()
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
 
-target_link_libraries(codeshc PRIVATE
-        ${ICU_LIBRARIES} icui18n
-        icuuc
-        icudata
-)
+if(WIN32)
+    target_link_libraries(codeshc PRIVATE ICU::i18n ICU::uc ICU::data)
+else()
+    target_link_libraries(codeshc PRIVATE
+            ${ICU_LIBRARIES} icui18n
+            icuuc
+            icudata
+    )
+endif()
 
 
 # vcpkg

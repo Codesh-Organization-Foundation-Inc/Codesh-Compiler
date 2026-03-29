@@ -3,16 +3,14 @@
   "version": "0.1.0",
   "dependencies": [
     "boost-regex",
+    "boost-functional",
+    "boost-container-hash",
     "utfcpp",
     "fmt",
     "nlohmann-json",
     { "name": "libzip", "default-features": false, "features": ["bzip2"] },
     "libzippp",
 
-    {
-      "platform": "windows",
-      "name": "icu"
-    },
     {
       "platform": "windows",
       "name": "zlib"
