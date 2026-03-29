@@ -11,6 +11,9 @@
 #include "semantic_analyzer/builtins.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <filesystem>
 #include <fmt/xchar.h>
 #include <fstream>
@@ -69,10 +72,13 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 template <typename... T>
 static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args);
 static void println(const codesh::command_args &args, const std::string &msg);
+static void fuck_windows();
 
 
 int main(const int argc, char **const argv)
 {
+    fuck_windows();
+
     const codesh::command_args args = codesh::parse_command(argc, argv);
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
     {
@@ -334,7 +340,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
         update_source_file(source_path);
 
         // LEXING
-        const std::string code = read_file(source_path);
+        const std::string code = read_file(source_path.string());
         auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
 
         // PARSING
@@ -645,4 +651,23 @@ static void println(const codesh::command_args &args, const std::string &msg)
         return;
 
     std::puts(msg.c_str());
+}
+
+static void fuck_windows()
+{
+#ifdef _WIN32
+    // 100% all-pure vibe coded slop solution
+    // makes Hebrew & color coding work (i think)
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
+    DWORD dwMode = 0;
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleMode(hOut, &dwMode);
+    SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+    HANDLE hErr = GetStdHandle(STD_ERROR_HANDLE);
+    GetConsoleMode(hErr, &dwMode);
+    SetConsoleMode(hErr, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+#endif
 }
