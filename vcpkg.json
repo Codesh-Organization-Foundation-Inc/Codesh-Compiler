@@ -1,0 +1,21 @@
+{
+  "name": "codeshc",
+  "version": "0.1.0",
+  "dependencies": [
+    "boost-regex",
+    "utfcpp",
+    "fmt",
+    "nlohmann-json",
+    { "name": "libzip", "default-features": false, "features": ["bzip2"] },
+    "libzippp",
+
+    {
+      "platform": "windows",
+      "name": "icu"
+    },
+    {
+      "platform": "windows",
+      "name": "zlib"
+    }
+  ]
+}

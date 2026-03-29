@@ -4,6 +4,7 @@
 #include "blasphemy/details.h"
 #include "output/jvm_target/class_file_builder.h"
 
+#include <fstream>
 #include <queue>
 
 static std::queue<std::string> create_args_queue(int argc, char **argv);
