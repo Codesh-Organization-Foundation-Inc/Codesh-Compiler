@@ -76,8 +76,8 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_FROM =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה מן";
 const std::string codesh::blasphemy::details::NO_KEYWORD_SKIP =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה וידלג";
-const std::string codesh::blasphemy::details::NO_KEYWORD_ON =
-    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה על";
+const std::string codesh::blasphemy::details::NO_KEYWORD_CUBITS =
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה אמה";
 const std::string codesh::blasphemy::details::NO_KEYWORD_HIS_LENGTH =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ואורכו";
 const std::string codesh::blasphemy::details::NO_KEYWORD_AGAINST =
