@@ -9,6 +9,7 @@
 
 static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
+static std::string consume_string_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
@@ -56,11 +57,11 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
         if (arg == "--src")
         {
-            result.src_path = consume_argument(args);
+            result.src_path = consume_string_argument(args);
         }
         else if (arg == "--dest")
         {
-            result.dest_path = consume_argument(args);
+            result.dest_path = consume_string_argument(args);
         }
         else if (arg == "--classpath")
         {
@@ -69,12 +70,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--jre-path")
         {
             has_jre_path = true;
-            result.jre_path = consume_argument(args);
+            result.jre_path = consume_string_argument(args);
         }
         else if (arg == "--talmud-codesh-path")
         {
             has_talmud_codesh_path = true;
-            result.talmud_codesh_path = consume_argument(args);
+            result.talmud_codesh_path = consume_string_argument(args);
         }
         else if (arg == "--unholy")
         {
@@ -119,7 +120,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result)
 {
-    std::stringstream stream(consume_argument(args));
+    std::stringstream stream(consume_string_argument(args));
     std::string entry;
 
     while (std::getline(stream, entry, ';'))
@@ -186,6 +187,15 @@ static std::string consume_argument(std::queue<std::string> &args)
     args.pop();
 
     return arg_content;
+}
+
+static std::string consume_string_argument(std::queue<std::string> &args)
+{
+    std::string arg = consume_argument(args);
+    if (arg.size() >= 2 && arg.front() == '"' && arg.back() == '"')
+        return arg.substr(1, arg.size() - 2);
+
+    return arg;
 }
 
 static std::queue<std::string> create_args_queue(const int argc, char **argv)
