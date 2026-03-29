@@ -7,6 +7,7 @@
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
+#include "value_parser.h"
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_new_operator(
         std::queue<std::unique_ptr<token>> &tokens)
@@ -51,6 +52,29 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         std::move(parsed_type)
     );
 
+    if (!util::consuming_check(tokens, token_group::KEYWORD_HIS_LENGTH))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_HIS_LENGTH,
+            blasphemy::blasphemy_type::SEMANTIC,
+            new_pos
+        );
+    }
 
+    do
+    {
+        array_node->add_dimension(parse_value(tokens));
+    }
+    while (util::consuming_check(tokens, token_group::KEYWORD_BY));
 
+    if (!util::consuming_check(tokens, token_group::KEYWORD_CUBIT))
+    {
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_CUBITS,
+            blasphemy::blasphemy_type::SEMANTIC,
+            new_pos
+        );
+    }
+
+    return array_node;
 }
