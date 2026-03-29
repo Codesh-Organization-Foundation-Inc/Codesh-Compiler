@@ -41,6 +41,8 @@ extern const std::string NO_KEYWORD_THE;
 extern const std::string NO_KEYWORD_TO;
 extern const std::string NO_KEYWORD_FROM;
 extern const std::string NO_KEYWORD_SKIP;
+extern const std::string NO_KEYWORD_ON;
+extern const std::string NO_KEYWORD_HIS_LENGTH;
 extern const std::string NO_KEYWORD_AGAINST;
 extern const std::string NO_PUNCTUATION_END_OP;
 extern const std::string NO_TYPE;
