@@ -24,7 +24,6 @@ if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
 }
 
 $CodeshPath = "C:\Program Files\קודש"
-$CodeshExecutable = "$CodeshPath\codeshc.exe"
 
 # Compile codeshc
 cmake -B ./cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
@@ -40,10 +39,11 @@ if ($syspath -notlike "*$CodeshPath*") {
     [Environment]::SetEnvironmentVariable("Path", "$syspath;$CodeshPath", "Machine")
 }
 
-# Build Talmud Codesh
+# Build Talmud Codesh (use the freshly built binary directly — Hebrew paths can't be invoked by PowerShell)
 $TalmudCodeshTemp = "$env:TEMP\talmud-codesh"
 New-Item -ItemType Directory -Force -Path $TalmudCodeshTemp | Out-Null
-& $CodeshExecutable --src .\resources\lib-src\ --dest $TalmudCodeshTemp --sinful
+& ".\cmake-build-release\codeshc.exe" --src .\resources\lib-src\ --dest $TalmudCodeshTemp --sinful
+if ($LASTEXITCODE -ne 0) { throw "codeshc failed with exit code $LASTEXITCODE" }
 
 # Package as JAR file (jar can't handle Hebrew paths, so build to temp first)
 $jarTemp = "$env:TEMP\talmud-codesh.jar"
