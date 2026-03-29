@@ -32,4 +32,8 @@ static void add_keywords_to_trie(codesh::lexer::trie::trie_node &root,
     }
 }
 
-const std::unique_ptr<const codesh::lexer::trie::trie_node> codesh::lexer::trie::LANGUAGE_TRIE = create_language_trie();
+const codesh::lexer::trie::trie_node &codesh::lexer::trie::get_language_trie()
+{
+    static const auto trie = create_language_trie();
+    return *trie;
+}
