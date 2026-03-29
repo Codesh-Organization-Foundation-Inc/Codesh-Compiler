@@ -4,6 +4,13 @@
 
 $ErrorActionPreference = "Stop"
 
+# Resolve jar from JAVA_HOME
+$javaHome = $env:JAVA_HOME
+if (-not $javaHome) { $javaHome = [System.Environment]::GetEnvironmentVariable("JAVA_HOME", "Machine") }
+if (-not $javaHome) { throw "JAVA_HOME is not set." }
+$jar = "$javaHome\bin\jar.exe"
+if (-not (Test-Path $jar)) { throw "jar.exe not found at $jar — is a JDK installed?" }
+
 # Resolve cmake from vcpkg's bundled copy if not already in PATH
 if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
     $vcpkgCmake = Get-ChildItem "C:\vcpkg\downloads\tools" -Filter "cmake.exe" -Recurse -ErrorAction SilentlyContinue |
@@ -38,7 +45,9 @@ $TalmudCodeshTemp = "$env:TEMP\talmud-codesh"
 New-Item -ItemType Directory -Force -Path $TalmudCodeshTemp | Out-Null
 & $CodeshExecutable --src .\resources\lib-src\ --dest $TalmudCodeshTemp --sinful
 
-# Package as JAR file
-jar cf "$CodeshPath\תלמוד־קודש.jar" -C $TalmudCodeshTemp .
+# Package as JAR file (jar can't handle Hebrew paths, so build to temp first)
+$jarTemp = "$env:TEMP\talmud-codesh.jar"
+& $jar cf $jarTemp -C $TalmudCodeshTemp .
+Move-Item -Force $jarTemp "$CodeshPath\תלמוד־קודש.jar"
 
 Write-Host "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
