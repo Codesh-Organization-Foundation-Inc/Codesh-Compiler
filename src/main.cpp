@@ -42,7 +42,7 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 [[nodiscard]] static codesh::definition::class_loaders init_class_loaders(
         const std::vector<std::filesystem::path> &classpaths);
 
-[[nodiscard]] static std::string read_file(const std::string &file_name);
+[[nodiscard]] static std::string read_file(const std::filesystem::path &file_name);
 [[nodiscard]] static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const codesh::command_args &args, const std::vector<std::filesystem::path> &source_files);
 static void collect_source_files(const std::filesystem::path &path,
@@ -340,7 +340,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
         update_source_file(source_path);
 
         // LEXING
-        const std::string code = read_file(source_path.string());
+        const std::string code = read_file(source_path);
         auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
 
         // PARSING
@@ -589,7 +589,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
     return result;
 }
 
-static std::string read_file(const std::string &file_name)
+static std::string read_file(const std::filesystem::path &file_name)
 {
     std::ifstream file;
     file.open(file_name);
@@ -599,7 +599,7 @@ static std::string read_file(const std::string &file_name)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
                 codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
-                file_name
+                file_name.string()
             ),
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::lexer::NO_CODE_POS,
