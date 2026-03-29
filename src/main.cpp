@@ -72,14 +72,27 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 template <typename... T>
 static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args);
 static void println(const codesh::command_args &args, const std::string &msg);
-static void fuck_windows();
+static std::vector<std::string> fuck_windows();
 
 
 int main(const int argc, char **const argv)
 {
-    fuck_windows();
+    // argv on Windows is in the ANSI code page, which doesn't support Hebrew paths.
+    // fuck_windows() returns UTF-8 args via the wide-char API on Windows, empty on other platforms.
+    const auto utf8_args = fuck_windows();
 
-    const codesh::command_args args = codesh::parse_command(argc, argv);
+    std::vector<char *> utf8_argv_ptrs;
+    const codesh::command_args args = [&]
+    {
+        if (!utf8_args.empty())
+        {
+            utf8_argv_ptrs.reserve(utf8_args.size());
+            for (const auto &arg : utf8_args)
+                utf8_argv_ptrs.push_back(const_cast<char *>(arg.c_str()));
+            return codesh::parse_command(static_cast<int>(utf8_argv_ptrs.size()), utf8_argv_ptrs.data());
+        }
+        return codesh::parse_command(argc, argv);
+    }();
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
     {
         codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
@@ -653,7 +666,7 @@ static void println(const codesh::command_args &args, const std::string &msg)
     std::puts(msg.c_str());
 }
 
-static void fuck_windows()
+static std::vector<std::string> fuck_windows()
 {
 #ifdef _WIN32
     // 100% all-pure vibe coded slop solution
@@ -669,5 +682,22 @@ static void fuck_windows()
     HANDLE hErr = GetStdHandle(STD_ERROR_HANDLE);
     GetConsoleMode(hErr, &dwMode);
     SetConsoleMode(hErr, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+    // argv is in the ANSI code page — get the real wide-char command line and convert to UTF-8
+    int wargc;
+    LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    std::vector<std::string> result;
+    result.reserve(wargc);
+    for (int i = 0; i < wargc; ++i)
+    {
+        const int size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, nullptr, 0, nullptr, nullptr);
+        std::string utf8(size - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, utf8.data(), size, nullptr, nullptr);
+        result.push_back(std::move(utf8));
+    }
+    LocalFree(wargv);
+    return result;
+#else
+    return {};
 #endif
 }
