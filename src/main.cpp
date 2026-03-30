@@ -73,26 +73,17 @@ template <typename... T>
 static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args);
 static void println(const codesh::command_args &args, const std::string &msg);
 static std::vector<std::string> fuck_windows();
+[[nodiscard]] static codesh::command_args parse_args(int argc, char **argv,
+        const std::vector<std::string> &utf8_args, std::vector<char *> &utf8_argv);
 
 
 int main(const int argc, char **const argv)
 {
-    // argv on Windows is in the ANSI code page, which doesn't support Hebrew paths.
-    // fuck_windows() returns UTF-8 args via the wide-char API on Windows, empty on other platforms.
     const auto utf8_args = fuck_windows();
 
-    std::vector<char *> utf8_argv_ptrs;
-    const codesh::command_args args = [&]
-    {
-        if (!utf8_args.empty())
-        {
-            utf8_argv_ptrs.reserve(utf8_args.size());
-            for (const auto &arg : utf8_args)
-                utf8_argv_ptrs.push_back(const_cast<char *>(arg.c_str()));
-            return codesh::parse_command(static_cast<int>(utf8_argv_ptrs.size()), utf8_argv_ptrs.data());
-        }
-        return codesh::parse_command(argc, argv);
-    }();
+    std::vector<char *> utf8_argv;
+    const codesh::command_args args = parse_args(argc, argv, utf8_args, utf8_argv);
+
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
     {
         codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
@@ -664,6 +655,21 @@ static void println(const codesh::command_args &args, const std::string &msg)
         return;
 
     std::puts(msg.c_str());
+}
+
+static codesh::command_args parse_args(const int argc, char **const argv,
+        const std::vector<std::string> &utf8_args, std::vector<char *> &utf8_argv)
+{
+    if (utf8_args.empty())
+        return codesh::parse_command(argc, argv);
+
+    utf8_argv.reserve(utf8_args.size());
+    for (const auto &arg : utf8_args)
+    {
+        utf8_argv.push_back(const_cast<char *>(arg.c_str()));
+    }
+
+    return codesh::parse_command(static_cast<int>(utf8_argv.size()), utf8_argv.data());
 }
 
 static std::vector<std::string> fuck_windows()
