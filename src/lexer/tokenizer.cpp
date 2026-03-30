@@ -182,7 +182,7 @@ static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
                                                     std::queue<std::unique_ptr<codesh::token>> &tokens,
                                                     const size_t code_pos)
 {
-    const trie::trie_node *current = trie::LANGUAGE_TRIE.get();
+    const trie::trie_node *current = &trie::get_language_trie();
     std::optional<trie::trie_match> last_match;
     size_t last_match_end = code_pos;
 

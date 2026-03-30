@@ -1,4 +1,20 @@
 cmake_minimum_required(VERSION 3.31.6)
+
+# vcpkg triplet for MinGW on Windows
+if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic" CACHE STRING "vcpkg target triplet")
+endif()
+
+# vcpkg toolchain
+if(DEFINED ENV{VCPKG_ROOT})
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif(NOT WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    # sudo dnf install git curl zip unzip tar ninja-build pkg-config autoconf automake libtool
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+endif()
+
 project(codeshc CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -372,82 +388,47 @@ add_executable(codeshc
 )
 
 
-# Configure git to trust build dependencies for FetchContent
-#NOTE: This modifies ~/.gitconfig
-file(GLOB _deps_dirs "${CMAKE_BINARY_DIR}/_deps/*-src")
-foreach(_dir ${_deps_dirs})
-    execute_process(COMMAND git config --global --add safe.directory "${_dir}" OUTPUT_QUIET ERROR_QUIET)
-endforeach()
-
-
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
-
 target_link_libraries(codeshc PRIVATE Boost::boost Boost::regex)
+
+# sudo dnf install libicu-devel
+# On Windows, use MSYS2 ucrt64 prebuilt ICU: pacman -S mingw-w64-ucrt-x86_64-icu
+if(WIN32 AND NOT DEFINED ICU_ROOT)
+    set(ICU_ROOT "C:/msys64/ucrt64" CACHE PATH "Path to ICU installation")
+endif()
+find_package(ICU REQUIRED COMPONENTS i18n uc data)
+include_directories(${ICU_INCLUDE_DIRS})
+
+if(WIN32)
+    target_link_libraries(codeshc PRIVATE ICU::i18n ICU::uc ICU::data)
+else()
+    target_link_libraries(codeshc PRIVATE
+            ${ICU_LIBRARIES} icui18n
+            icuuc
+            icudata
+    )
+endif()
+
+
+# vcpkg
 
 find_package(ZLIB REQUIRED)
 target_link_libraries(codeshc PRIVATE ZLIB::ZLIB)
 
-# sudo dnf install libicu-devel
-find_package(ICU REQUIRED COMPONENTS i18n uc data)
-include_directories(${ICU_INCLUDE_DIRS})
+find_package(utf8cpp CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE utf8cpp::utf8cpp)
 
-target_link_libraries(codeshc PRIVATE
-        ${ICU_LIBRARIES} icui18n
-        icuuc
-        icudata
-)
-
-
-include(FetchContent)
-
-
-# utfcpp
-# Declare utfcpp content
-FetchContent_Declare(
-        utfcpp
-        GIT_REPOSITORY https://github.com/nemtrif/utfcpp.git
-        GIT_TAG        origin/master
-        GIT_SHALLOW    TRUE
-)
-
-FetchContent_MakeAvailable(utfcpp)
-
-target_include_directories(codeshc PRIVATE
-        ${utfcpp_SOURCE_DIR}/source
-)
-
-# fmt
-FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG 12.1.0
-)
-
-FetchContent_MakeAvailable(fmt)
+find_package(fmt CONFIG REQUIRED)
 target_link_libraries(codeshc PRIVATE fmt::fmt)
 
-# nlohmann_json
-FetchContent_Declare(
-    json
-    URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-)
-FetchContent_MakeAvailable(json)
-
+find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(codeshc PRIVATE nlohmann_json::nlohmann_json)
 
-# sudo dnf install libzip-devel
-find_package(libzip REQUIRED)
+find_package(libzip CONFIG REQUIRED)
 
-# libzippp
-FetchContent_Declare(
-    libzippp
-    GIT_REPOSITORY https://github.com/ctabin/libzippp.git
-    GIT_TAG        libzippp-v7.1-1.10.1
-    GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(libzippp)
-target_link_libraries(codeshc PRIVATE libzippp)
+find_package(libzippp CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE libzippp::libzippp)
 
 
 # Support includes starting from relative paths
