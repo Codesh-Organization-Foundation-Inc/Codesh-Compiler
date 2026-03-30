@@ -26,7 +26,7 @@ const std::filesystem::path &codesh::ast::compilation_unit_ast_node::get_source_
 
 std::string codesh::ast::compilation_unit_ast_node::get_source_stem() const
 {
-    return source_path.stem();
+    return source_path.stem().string();
 }
 
 codesh::definition::basad_type codesh::ast::compilation_unit_ast_node::get_basad_type() const

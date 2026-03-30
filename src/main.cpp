@@ -11,6 +11,9 @@
 #include "semantic_analyzer/builtins.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <filesystem>
 #include <fmt/xchar.h>
 #include <fstream>
@@ -39,7 +42,7 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 [[nodiscard]] static codesh::definition::class_loaders init_class_loaders(
         const std::vector<std::filesystem::path> &classpaths);
 
-[[nodiscard]] static std::string read_file(const std::string &file_name);
+[[nodiscard]] static std::string read_file(const std::filesystem::path &file_name);
 [[nodiscard]] static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> parse_source_files(
         const codesh::command_args &args, const std::vector<std::filesystem::path> &source_files);
 static void collect_source_files(const std::filesystem::path &path,
@@ -69,11 +72,18 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 template <typename... T>
 static void printfln(const codesh::command_args &args, fmt::format_string<T...> fmt, T&&... format_args);
 static void println(const codesh::command_args &args, const std::string &msg);
+static std::vector<std::string> fuck_windows();
+[[nodiscard]] static codesh::command_args parse_args(int argc, char **argv,
+        const std::vector<std::string> &utf8_args, std::vector<char *> &utf8_argv);
 
 
 int main(const int argc, char **const argv)
 {
-    const codesh::command_args args = codesh::parse_command(argc, argv);
+    const auto utf8_args = fuck_windows();
+
+    std::vector<char *> utf8_argv;
+    const codesh::command_args args = parse_args(argc, argv, utf8_args, utf8_argv);
+
     if (codesh::blasphemy::get_blasphemy_collector().has_errors())
     {
         codesh::blasphemy::get_blasphemy_collector().print_all_blasphemies();
@@ -583,7 +593,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
     return result;
 }
 
-static std::string read_file(const std::string &file_name)
+static std::string read_file(const std::filesystem::path &file_name)
 {
     std::ifstream file;
     file.open(file_name);
@@ -593,7 +603,7 @@ static std::string read_file(const std::string &file_name)
         codesh::blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
                 codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
-                file_name
+                file_name.string()
             ),
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::lexer::NO_CODE_POS,
@@ -645,4 +655,55 @@ static void println(const codesh::command_args &args, const std::string &msg)
         return;
 
     std::puts(msg.c_str());
+}
+
+static codesh::command_args parse_args(const int argc, char **const argv,
+        const std::vector<std::string> &utf8_args, std::vector<char *> &utf8_argv)
+{
+    if (utf8_args.empty())
+        return codesh::parse_command(argc, argv);
+
+    utf8_argv.reserve(utf8_args.size());
+    for (const auto &arg : utf8_args)
+    {
+        utf8_argv.push_back(const_cast<char *>(arg.c_str()));
+    }
+
+    return codesh::parse_command(static_cast<int>(utf8_argv.size()), utf8_argv.data());
+}
+
+static std::vector<std::string> fuck_windows()
+{
+#ifdef _WIN32
+    // 100% all-pure vibe coded slop solution
+    // makes Hebrew & color coding work (i think)
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+
+    DWORD dwMode = 0;
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleMode(hOut, &dwMode);
+    SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+    HANDLE hErr = GetStdHandle(STD_ERROR_HANDLE);
+    GetConsoleMode(hErr, &dwMode);
+    SetConsoleMode(hErr, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+
+    // argv is in the ANSI code page — get the real wide-char command line and convert to UTF-8
+    int wargc;
+    LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    std::vector<std::string> result;
+    result.reserve(wargc);
+    for (int i = 0; i < wargc; ++i)
+    {
+        const int size = WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, nullptr, 0, nullptr, nullptr);
+        std::string utf8(size - 1, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, utf8.data(), size, nullptr, nullptr);
+        result.push_back(std::move(utf8));
+    }
+    LocalFree(wargv);
+    return result;
+#else
+    return {};
+#endif
 }
