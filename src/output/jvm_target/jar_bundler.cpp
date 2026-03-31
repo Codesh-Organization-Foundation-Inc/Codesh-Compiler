@@ -26,7 +26,7 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         const std::filesystem::path &temp_class_dir, const std::filesystem::path &dest_jar_path,
         const std::filesystem::path &jre_path)
 {
-    semantic_analyzer::type_symbol *main_class;
+    semantic_analyzer::type_symbol *main_class = nullptr;
     if (!get_main_class(symbol_table, &main_class))
         return false;
 
@@ -103,7 +103,7 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
         return true;
     }
 
-    return false;
+    return true;
 }
 
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
