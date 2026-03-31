@@ -139,6 +139,8 @@ add_executable(codeshc
         src/output/jvm_target/constant_pool.h
         src/output/jvm_target/class_file_writer.cpp
         src/output/jvm_target/class_file_writer.h
+        src/output/jvm_target/jar_bundler.cpp
+        src/output/jvm_target/jar_bundler.h
         src/parser/type/class/method_parser.cpp
         src/parser/type/class/method_parser.h
         src/semantic_analyzer/analyzer.h
