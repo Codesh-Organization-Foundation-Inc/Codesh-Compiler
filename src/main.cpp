@@ -6,6 +6,7 @@
 #include "lsp/lsp_receiver.h"
 #include "output/jvm_target/class_file_builder.h"
 #include "output/jvm_target/class_file_writer.h"
+#include "output/jvm_target/jar_bundler.h"
 #include "parser/parser.h"
 #include "semantic_analyzer/analyzer.h"
 #include "semantic_analyzer/builtins.h"
@@ -13,6 +14,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <process.h>
+#else
+#include <unistd.h>
 #endif
 #include <filesystem>
 #include <fmt/xchar.h>
@@ -22,6 +26,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+static unsigned long get_pid();
+[[nodiscard]] static std::filesystem::path make_temp_class_dir();
 
 static int compile(const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders);
 [[noreturn]] static void lsp_server(const codesh::command_args &args,
@@ -48,6 +55,10 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 static void collect_source_files(const std::filesystem::path &path,
         std::vector<std::filesystem::path> &source_files_out);
 static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
+[[nodiscard]] static bool build_and_bundle_jar(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::command_args &args, bool is_project,
+        const codesh::semantic_analyzer::symbol_table &symbol_table);
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
@@ -63,7 +74,7 @@ static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_co
         const codesh::semantic_analyzer::symbol_table &table);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args, bool is_project,
+        const codesh::command_args &args, const std::filesystem::path &dest_path, bool is_project,
         const codesh::semantic_analyzer::symbol_table &symbol_table);
 static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_node,
         codesh::ast::type_decl::type_declaration_ast_node &type_decl, const std::filesystem::path &dest_path,
@@ -182,11 +193,20 @@ static int compile(const codesh::command_args &args, const codesh::definition::c
     }
 
 
-    if (!validate_output_path(*args.dest_path, is_project))
-        return EXIT_FAILURE;
-    if (!build_class_files(asts, args, is_project, master_symbol_table))
-        return EXIT_FAILURE;
+    println(args, "וַיְחַל עֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה\n");
 
+    if (args.jar_output)
+    {
+        if (!build_and_bundle_jar(asts, args, is_project, master_symbol_table))
+            return EXIT_FAILURE;
+    }
+    else
+    {
+        if (!validate_output_path(*args.dest_path, is_project))
+            return EXIT_FAILURE;
+        if (!build_class_files(asts, args, *args.dest_path, is_project, master_symbol_table))
+            return EXIT_FAILURE;
+    }
 
     println(args, "\n---------------------\n");
     println(args, "וַיִּשְׁבֹּת֙ הַמּוֹצִיא בִּשְׁאֵלָה מִכׇּל־מְלַאכְתּ֖וֹ אֲשֶׁ֥ר עָשׂה וַיֵּשֶׁב חָמָס וְיִתֹּם:");
@@ -491,12 +511,23 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
     codesh::output::jvm_target::write_to_file(class_file, type_decl, dest_path);
 }
 
-static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+static bool build_and_bundle_jar(
+        const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, const bool is_project,
         const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
-    println(args, "וַיְחַל עֵת הַהוֹצָאָה בְּשֶׁאֵלֶּה\n");
+    const auto temp_dir = make_temp_class_dir();
+    const bool build_ok = build_class_files(asts, args, temp_dir, is_project, symbol_table);
+    const bool bundle_ok = build_ok &&
+        codesh::output::jvm_target::bundle_jar(temp_dir, *args.dest_path, args.jre_path);
+    std::filesystem::remove_all(temp_dir);
+    return bundle_ok;
+}
 
+static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
+        const codesh::command_args &args, const std::filesystem::path &dest_path, const bool is_project,
+        const codesh::semantic_analyzer::symbol_table &symbol_table)
+{
     const auto process_amount = asts.size();
     size_t processed = 1;
 
@@ -518,7 +549,7 @@ static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::com
         for (auto &type_declaration : root_node->get_type_declarations())
         {
             const auto output_dir = get_output_path(
-                *args.dest_path,
+                dest_path,
                 *args.src_path,
                 source_file_path,
                 is_project
@@ -706,4 +737,23 @@ static std::vector<std::string> fuck_windows()
 #else
     return {};
 #endif
+}
+
+static unsigned long get_pid()
+{
+    return static_cast<unsigned long>(
+#ifdef _WIN32
+        _getpid()
+#else
+        getpid()
+#endif
+    );
+}
+
+static std::filesystem::path make_temp_class_dir()
+{
+    const std::filesystem::path temp_class_dir =
+        std::filesystem::temp_directory_path() / fmt::format("codesh-{}", get_pid());
+    std::filesystem::create_directories(temp_class_dir);
+    return temp_class_dir;
 }
