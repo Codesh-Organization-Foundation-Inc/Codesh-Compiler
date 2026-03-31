@@ -46,6 +46,8 @@ class symbol_table final : public i_scope_containing_symbol
     country_symbol *global_country;
     country_symbol *talmud_codesh_country;
 
+    std::vector<std::reference_wrapper<type_symbol>> main_classes;
+
     /**
      * Load ALL external symbols related to a type, if one exists
      *
@@ -76,6 +78,8 @@ public:
 
     [[nodiscard]] country_symbol &get_global_country() const;
     [[nodiscard]] country_symbol &get_talmud_codesh_country() const;
+    [[nodiscard]] const std::vector<std::reference_wrapper<type_symbol>> &get_main_classes() const;
+    void add_main_class(type_symbol &type);
     [[nodiscard]] const std::vector<definition::fully_qualified_name> &get_default_imports() const;
 
     [[nodiscard]] std::optional<std::reference_wrapper<country_symbol>> resolve_country(const std::string &name) const;

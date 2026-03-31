@@ -2,6 +2,7 @@
 
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
 
 /**
@@ -16,7 +17,10 @@ static void rename_method(codesh::semantic_analyzer::type_symbol &type,
 
 void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semantic_context &context, type_symbol &type)
 {
-    handle_bereshit_aliases(context, type);
+    if (handle_bereshit_aliases(context, type))
+    {
+        context.symbol_table_.add_main_class(type);
+    }
 }
 
 static bool handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,

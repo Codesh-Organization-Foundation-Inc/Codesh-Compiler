@@ -64,8 +64,7 @@ static void collect_source_files(const std::filesystem::path &path,
 static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
 [[nodiscard]] static bool build_and_bundle_jar(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args, bool is_project,
-        const codesh::semantic_analyzer::symbol_table &symbol_table);
+        const codesh::command_args &args, bool is_project, const codesh::semantic_analyzer::symbol_table &symbol_table);
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
@@ -78,7 +77,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(const codesh::comman
         const codesh::definition::class_loaders &class_loaders);
 static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::semantic_analyzer::symbol_table &table);
+        codesh::semantic_analyzer::symbol_table &table);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, const std::filesystem::path &dest_path, bool is_project,
@@ -454,7 +453,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
 static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::semantic_analyzer::symbol_table &table)
+        codesh::semantic_analyzer::symbol_table &table)
 {
     std::vector<codesh::semantic_analyzer::semantic_context> contexts;
     contexts.reserve(asts.size());

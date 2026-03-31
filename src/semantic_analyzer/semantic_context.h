@@ -19,12 +19,12 @@ private:
     const blasphemy::blasphemy_consumer blasphemy_consumer;
 
 public:
-    semantic_context(const symbol_table &symbol_table_,
+    semantic_context(symbol_table &symbol_table_,
             std::vector<std::reference_wrapper<country_symbol>> lookup_countries,
             const ast::compilation_unit_ast_node &root,
             blasphemy::blasphemy_consumer blasphemy_consumer);
 
-    const symbol_table &symbol_table_;
+    symbol_table &symbol_table_;
     const std::vector<std::reference_wrapper<country_symbol>> lookup_countries;
     const ast::compilation_unit_ast_node &root;
 
