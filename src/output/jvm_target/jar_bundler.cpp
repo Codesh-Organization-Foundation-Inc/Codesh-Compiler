@@ -18,6 +18,8 @@ static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path);
+static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
+        const std::filesystem::path &jar_cli_path, const codesh::semantic_analyzer::type_symbol *main_class);
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
@@ -50,25 +52,9 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     const std::filesystem::path temp_jar =
         temp_class_dir.parent_path() / (temp_class_dir.filename().string() + ".jar");
 
-    auto command = fmt::format(
-        R"("{}" cf "{}" -C "{}" .)",
-        jar_cli_path.string(),
-        temp_jar.string(),
-        temp_class_dir.string()
-    );
-
-    if (main_class != nullptr)
-    {
-        command += fmt::format(
-            " -e {}",
-            main_class->get_full_name().join()
-        );
-    }
-
-    command = finalize_command(command);
-
-
+    const auto command = build_jar_command(temp_jar, temp_class_dir, jar_cli_path, main_class);
     const int exit_code = std::system(command.c_str());
+
     if (exit_code != 0)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -118,6 +104,27 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
     }
 
     return false;
+}
+
+static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
+        const std::filesystem::path &jar_cli_path, const codesh::semantic_analyzer::type_symbol *main_class)
+{
+    auto command = fmt::format(
+        R"("{}" cf "{}" -C "{}" .)",
+        jar_cli_path.string(),
+        temp_jar.string(),
+        temp_class_dir.string()
+    );
+
+    if (main_class != nullptr)
+    {
+        command += fmt::format(
+            " -e {}",
+            main_class->get_full_name().join()
+        );
+    }
+
+    return finalize_command(command);
 }
 
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
