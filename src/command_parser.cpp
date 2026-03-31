@@ -14,6 +14,7 @@ static std::string consume_string_argument(std::queue<std::string> &args);
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 static std::filesystem::path get_default_jre_path();
+static void validate_jre_path(const codesh::command_args &args);
 
 static void add_default_classpaths(codesh::command_args &args);
 
@@ -113,6 +114,14 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         result.talmud_codesh_path = DEFAULT_TALMUD_CODESH_PATH;
     }
 
+    result.jar_output = result.dest_path.has_value() && result.dest_path->extension() == ".jar";
+
+    // Operations that require the JRE to exist:
+    if (result.is_java_default_classpath || result.jar_output)
+    {
+        validate_jre_path(result);
+    }
+
     add_default_classpaths(result);
 
     return result;
@@ -206,27 +215,28 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
     return result;
 }
 
+static void validate_jre_path(const codesh::command_args &args)
+{
+    if (!std::filesystem::exists(args.jre_path))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::PATH_DOESNT_EXIST,
+                args.jre_path.string()
+            ),
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::lexer::NO_CODE_POS
+        );
+    }
+}
+
 static void add_default_classpaths(codesh::command_args &args)
 {
     args.classpaths.emplace_back(".");
 
     if (args.is_java_default_classpath)
     {
-        if (!std::filesystem::exists(args.jre_path))
-        {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                fmt::format(
-                    codesh::blasphemy::details::PATH_DOESNT_EXIST,
-                    args.jre_path.string()
-                ),
-                codesh::blasphemy::blasphemy_type::INIT,
-                codesh::lexer::NO_CODE_POS
-            );
-        }
-        else
-        {
-            args.classpaths.emplace_back(args.jre_path / "lib/modules");
-        }
+        args.classpaths.emplace_back(args.jre_path / "lib/modules");
     }
 
     if (args.is_talmud_codesh_classpath)
