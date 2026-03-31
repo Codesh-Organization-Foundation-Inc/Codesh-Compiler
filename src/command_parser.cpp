@@ -234,6 +234,7 @@ static void add_default_classpaths(codesh::command_args &args)
 {
     args.classpaths.emplace_back(".");
 
+    // Even if validate_jre_path fails, we throw a blasphemy before anything can happen.
     if (args.is_java_default_classpath)
     {
         args.classpaths.emplace_back(args.jre_path / "lib/modules");
