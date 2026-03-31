@@ -193,3 +193,4 @@ CMakeUserPresets.json
 CLAUDE.md
 *.kate-swp
 build/
+vcpkg_installed/
