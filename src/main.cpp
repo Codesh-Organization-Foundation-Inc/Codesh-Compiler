@@ -527,7 +527,14 @@ static bool build_and_bundle_jar(
 
     if (build_class_files(asts, args, temp_dir, is_project, symbol_table))
     {
-        return codesh::output::jvm_target::bundle_jar(symbol_table, temp_dir, *args.dest_path, args.jre_path);
+        return codesh::output::jvm_target::bundle_jar(
+            symbol_table,
+            {
+                temp_dir,
+                *args.dest_path,
+                args.jre_path
+            }
+        );
     }
 
     return false;

@@ -23,12 +23,14 @@ static std::string build_jar_command(const std::filesystem::path &temp_jar, cons
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
-        const std::filesystem::path &temp_class_dir, const std::filesystem::path &dest_jar_path,
-        const std::filesystem::path &jre_path)
+        const jar_builder_context &context)
 {
     semantic_analyzer::type_symbol *main_class = nullptr;
     if (!get_main_class(symbol_table, &main_class))
         return false;
+
+
+    const auto [temp_class_dir, dest_jar_path, jre_path] = context;
 
     const auto jar_cli_path = get_jar_cli_path(jre_path);
     if (!std::filesystem::exists(jar_cli_path))
