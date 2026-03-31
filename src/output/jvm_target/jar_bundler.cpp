@@ -28,7 +28,7 @@ bool codesh::output::jvm_target::bundle_jar(const std::filesystem::path &temp_cl
                 blasphemy::details::PATH_DOESNT_EXIST,
                 jar_cli_path.string()
             ),
-            blasphemy::blasphemy_type::INIT,
+            blasphemy::blasphemy_type::OUTPUT,
             lexer::NO_CODE_POS,
             true
         );
@@ -56,7 +56,9 @@ bool codesh::output::jvm_target::bundle_jar(const std::filesystem::path &temp_cl
                 blasphemy::details::JAR_COMMAND_FAILED,
                 exit_code
             ),
-            blasphemy::blasphemy_type::INIT, lexer::NO_CODE_POS, true
+            blasphemy::blasphemy_type::OUTPUT,
+            lexer::NO_CODE_POS,
+            true
         );
         std::filesystem::remove(temp_jar);
         return false;
@@ -84,17 +86,19 @@ static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         std::filesystem::copy_options::overwrite_existing,
         error
     );
-    std::filesystem::remove(temp_jar);
 
     if (!error)
+    {
+        std::filesystem::remove(temp_jar);
         return true;
+    }
 
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         fmt::format(
             codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
             dest_jar_path.string()
         ),
-        codesh::blasphemy::blasphemy_type::INIT,
+        codesh::blasphemy::blasphemy_type::OUTPUT,
         codesh::lexer::NO_CODE_POS,
         true
     );
