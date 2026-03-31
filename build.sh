@@ -21,12 +21,7 @@ cp ./cmake-build-release/codeshc $CODESH_PATH/
 ln -sf $CODESH_EXECUTABLE /usr/local/bin/codeshc
 
 
-# Build Talmud Codesh
-TALMUD_CODESH_PATH_TEMP=/tmp/talmud-codesh
-mkdir -p $TALMUD_CODESH_PATH_TEMP
-$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $TALMUD_CODESH_PATH_TEMP --sinful
-
-# Package as JAR file
-jar cf $CODESH_PATH/תלמוד־קודש.jar -C $TALMUD_CODESH_PATH_TEMP .
+# Build Talmud Codesh as JAR
+$CODESH_EXECUTABLE --src ./resources/lib-src/ --dest $CODESH_PATH/תלמוד־קודש.jar --sinful
 
 echo "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
