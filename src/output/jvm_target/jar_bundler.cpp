@@ -12,7 +12,8 @@
 #include <filesystem>
 #include <fmt/format.h>
 
-static bool validate_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table);
+static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table,
+        codesh::semantic_analyzer::type_symbol **main_class_out);
 static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
@@ -23,7 +24,8 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         const std::filesystem::path &temp_class_dir, const std::filesystem::path &dest_jar_path,
         const std::filesystem::path &jre_path)
 {
-    if (!validate_main_class(symbol_table))
+    semantic_analyzer::type_symbol *main_class;
+    if (!get_main_class(symbol_table, &main_class))
         return false;
 
     const auto jar_cli_path = get_jar_cli_path(jre_path);
@@ -41,18 +43,30 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         return false;
     }
 
+
     // To avoid Hebrew path issues in the jar CLI, bundle in a temp path first.
     // Windows-only thing, but whatever.
     // build.ps1 does the same.
     const std::filesystem::path temp_jar =
         temp_class_dir.parent_path() / (temp_class_dir.filename().string() + ".jar");
 
-    const auto command = finalize_command(fmt::format(
+    auto command = fmt::format(
         R"("{}" cf "{}" -C "{}" .)",
         jar_cli_path.string(),
         temp_jar.string(),
         temp_class_dir.string()
-    ));
+    );
+
+    if (main_class != nullptr)
+    {
+        command += fmt::format(
+            " -e {}",
+            main_class->get_full_name().join()
+        );
+    }
+
+    command = finalize_command(command);
+
 
     const int exit_code = std::system(command.c_str());
     if (exit_code != 0)
@@ -76,27 +90,34 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     return true;
 }
 
-static bool validate_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table)
+static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table,
+        codesh::semantic_analyzer::type_symbol **main_class_out)
 {
     // When building a jar, we need to know what the main class is.
     // There can only either be no main class, or a single main class.
     const auto &main_classes = symbol_table.get_main_classes();
-    if (!main_classes.empty() && main_classes.size() != 1)
+    if (!main_classes.empty())
     {
-        for (const auto &main_class : main_classes)
+        if (main_classes.size() != 1)
         {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                codesh::blasphemy::details::DUPLICATE_MAIN_CLASS,
-                codesh::blasphemy::blasphemy_type::SEMANTIC,
-                main_class.get().get_full_name().get_source_range(),
-                true
-            );
+            for (const auto &main_class : main_classes)
+            {
+                codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                    codesh::blasphemy::details::DUPLICATE_MAIN_CLASS,
+                    codesh::blasphemy::blasphemy_type::SEMANTIC,
+                    main_class.get().get_full_name().get_source_range(),
+                    true
+                );
+            }
+
+            return false;
         }
 
-        return false;
+        *main_class_out = &main_classes.front().get();
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
