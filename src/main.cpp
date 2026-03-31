@@ -18,6 +18,7 @@
 #else
 #include <unistd.h>
 #endif
+#include <chrono>
 #include <filesystem>
 #include <fmt/xchar.h>
 #include <fstream>
@@ -26,6 +27,12 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+struct temp_dir_cleanup_guard
+{
+    const std::filesystem::path &dir;
+    ~temp_dir_cleanup_guard();
+};
 
 static unsigned long get_pid();
 [[nodiscard]] static std::filesystem::path make_temp_class_dir();
@@ -517,11 +524,14 @@ static bool build_and_bundle_jar(
         const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
     const auto temp_dir = make_temp_class_dir();
-    const bool build_ok = build_class_files(asts, args, temp_dir, is_project, symbol_table);
-    const bool bundle_ok = build_ok &&
-        codesh::output::jvm_target::bundle_jar(temp_dir, *args.dest_path, args.jre_path);
-    std::filesystem::remove_all(temp_dir);
-    return bundle_ok;
+    const temp_dir_cleanup_guard cleanup{temp_dir};
+
+    if (build_class_files(asts, args, temp_dir, is_project, symbol_table))
+    {
+        return codesh::output::jvm_target::bundle_jar(temp_dir, *args.dest_path, args.jre_path);
+    }
+
+    return false;
 }
 
 static bool build_class_files(const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
@@ -739,6 +749,11 @@ static std::vector<std::string> fuck_windows()
 #endif
 }
 
+temp_dir_cleanup_guard::~temp_dir_cleanup_guard()
+{
+    std::filesystem::remove_all(dir);
+}
+
 static unsigned long get_pid()
 {
     return static_cast<unsigned long>(
@@ -752,8 +767,10 @@ static unsigned long get_pid()
 
 static std::filesystem::path make_temp_class_dir()
 {
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
     const std::filesystem::path temp_class_dir =
-        std::filesystem::temp_directory_path() / fmt::format("codesh-{}", get_pid());
+        std::filesystem::temp_directory_path() / fmt::format("codesh-{}-{}", get_pid(), timestamp);
+
     std::filesystem::create_directories(temp_class_dir);
     return temp_class_dir;
 }
