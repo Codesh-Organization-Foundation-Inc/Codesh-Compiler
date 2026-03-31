@@ -733,6 +733,9 @@ static std::vector<std::string> fuck_windows()
     // argv is in the ANSI code page — get the real wide-char command line and convert to UTF-8
     int wargc;
     LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
+    if (wargv == nullptr)
+        return {};
+
     std::vector<std::string> result;
     result.reserve(wargc);
     for (int i = 0; i < wargc; ++i)
@@ -742,6 +745,7 @@ static std::vector<std::string> fuck_windows()
         WideCharToMultiByte(CP_UTF8, 0, wargv[i], -1, utf8.data(), size, nullptr, nullptr);
         result.push_back(std::move(utf8));
     }
+
     LocalFree(wargv);
     return result;
 #else
