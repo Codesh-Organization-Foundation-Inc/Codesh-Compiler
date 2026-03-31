@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <vector>
 
 namespace codesh::semantic_analyzer
 {
@@ -20,6 +21,7 @@ struct jar_builder_context
  * Packages all .class files in @c temp_class_dir into a JAR at @c dest_jar_path.
  * @returns Whether the operation succeeded
  */
-[[nodiscard]] bool bundle_jar(const semantic_analyzer::symbol_table &symbol_table, const jar_builder_context &context);
+[[nodiscard]] bool bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
+        const std::vector<std::filesystem::path> &classpaths, const jar_builder_context &context);
 
 }

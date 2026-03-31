@@ -23,7 +23,7 @@ static std::string build_jar_command(const std::filesystem::path &temp_jar, cons
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
-        const jar_builder_context &context)
+        const std::vector<std::filesystem::path> &classpaths, const jar_builder_context &context)
 {
     semantic_analyzer::type_symbol *main_class = nullptr;
     if (!get_main_class(symbol_table, &main_class))

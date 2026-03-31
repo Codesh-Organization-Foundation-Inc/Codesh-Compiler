@@ -529,6 +529,7 @@ static bool build_and_bundle_jar(
     {
         return codesh::output::jvm_target::bundle_jar(
             symbol_table,
+            args.classpaths,
             {
                 temp_dir,
                 *args.dest_path,
