@@ -23,6 +23,7 @@ struct command_args
 
     bool is_java_default_classpath; // Enabled by --sinful
     bool is_talmud_codesh_classpath; // Disabled by --unholy
+    bool jar_output; // true when dest_path has a ".jar" extension
 
     std::filesystem::path jre_path;
     std::filesystem::path talmud_codesh_path;

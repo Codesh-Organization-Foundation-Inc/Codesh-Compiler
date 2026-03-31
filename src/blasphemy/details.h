@@ -18,6 +18,7 @@ extern const fmt::runtime_format_string<> PATH_DOESNT_EXIST;
 extern const std::string NO_MAIN_ARGS;
 extern const std::string NO_ARG;
 extern const std::string UNKNOWN_FLAG;
+extern const fmt::runtime_format_string<> JAR_COMMAND_FAILED;
 
 // LEXICAL
 extern const std::string NO_BASAD;

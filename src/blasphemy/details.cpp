@@ -34,6 +34,9 @@ const std::string codesh::blasphemy::details::NO_ARG =
     "מִנְחוֹת אֵינָם: נִדְרָשׁ עֵרֶךְ הַכְנָסָה לַדֶּגֶל";
 const std::string codesh::blasphemy::details::UNKNOWN_FLAG =
     "דֶּרֶךְ תּוֹעָה הֱיֵה: דֶּגֶל לֹא יָדוּעַ";
+const rfs_t codesh::blasphemy::details::JAR_COMMAND_FAILED = rfs(
+    "נִלְאָכָה כּוֹשֶׁלֶת תִּהְיֶה: כְּלִי הַצְנָצֶנֶת נִכְשַׁל בְּקוֹד {}"
+);
 
 // LEXICAL
 const std::string codesh::blasphemy::details::NO_BASAD =
