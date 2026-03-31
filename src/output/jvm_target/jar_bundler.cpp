@@ -109,18 +109,25 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
         const std::filesystem::path &jar_cli_path, const codesh::semantic_analyzer::type_symbol *main_class)
 {
-    auto command = fmt::format(
-        R"("{}" cf "{}" -C "{}" .)",
-        jar_cli_path.string(),
-        temp_jar.string(),
-        temp_class_dir.string()
-    );
+    std::string command;
 
     if (main_class != nullptr)
     {
-        command += fmt::format(
-            " -e {}",
-            main_class->get_full_name().join()
+        command = fmt::format(
+            R"("{}" cfe "{}" {} -C "{}" .)",
+            jar_cli_path.string(),
+            temp_jar.string(),
+            main_class->get_full_name().join(),
+            temp_class_dir.string()
+        );
+    }
+    else
+    {
+        command = fmt::format(
+            R"("{}" cf "{}" -C "{}" .)",
+            jar_cli_path.string(),
+            temp_jar.string(),
+            temp_class_dir.string()
         );
     }
 
