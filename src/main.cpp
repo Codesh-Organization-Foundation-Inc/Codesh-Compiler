@@ -287,6 +287,7 @@ static void print_help()
     std::puts("Required:");
     std::puts("\t--src <path>                  Source file or directory to compile");
     std::puts("\t--dest <path>                 Output file or directory for .class files");
+    std::puts("\t                              If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
     fmt::println("\t--jre-path <path>             Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
