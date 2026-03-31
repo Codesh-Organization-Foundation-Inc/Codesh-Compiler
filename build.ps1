@@ -33,7 +33,8 @@ if ($syspath -notlike "*$CodeshPath*") {
 }
 
 # Build Talmud Codesh as JAR (use the freshly built binary directly — Hebrew paths can't be invoked by PowerShell)
-& ".\cmake-build-release\codeshc.exe" --src .\resources\lib-src\ --dest "$CodeshPath\תלמוד־קודש.jar" --sinful
+# --unholy because we are MAKING the Talmud Codesh and do not rely on it
+& ".\cmake-build-release\codeshc.exe" --src .\resources\lib-src\ --dest "$CodeshPath\תלמוד־קודש.jar" --sinful --unholy
 if ($LASTEXITCODE -ne 0) { throw "codeshc failed with exit code $LASTEXITCODE" }
 
 Write-Host "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"

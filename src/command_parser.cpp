@@ -154,11 +154,9 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
 
 static std::filesystem::path get_default_jre_path()
 {
-#ifdef _WIN32
-    // Prefer JAVA_HOME if set
     if (const char* java_home = std::getenv("JAVA_HOME"))
         return {java_home};
-#endif
+
     return codesh::DEFAULT_JRE_PATH;
 }
 
