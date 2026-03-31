@@ -2,7 +2,6 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
-#include "lexer/tokenizer.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 #ifdef _WIN32
@@ -10,7 +9,10 @@
 #endif
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <fmt/format.h>
+
+static constexpr size_t MANIFEST_MAX_LINE_BYTES = 72;
 
 static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table,
         codesh::semantic_analyzer::type_symbol **main_class_out);
@@ -18,8 +20,11 @@ static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path);
+static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
+        const codesh::semantic_analyzer::type_symbol *main_class,
+        const std::vector<std::filesystem::path> &classpaths);
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
-        const std::filesystem::path &jar_cli_path, const codesh::semantic_analyzer::type_symbol *main_class);
+        const std::filesystem::path &jar_cli_path, const std::filesystem::path *manifest_path);
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
@@ -54,8 +59,24 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     const std::filesystem::path temp_jar =
         temp_class_dir.parent_path() / (temp_class_dir.filename().string() + ".jar");
 
-    const auto command = build_jar_command(temp_jar, temp_class_dir, jar_cli_path, main_class);
+    std::optional<std::filesystem::path> manifest_path;
+    if (main_class != nullptr || !classpaths.empty())
+    {
+        manifest_path = write_manifest(temp_class_dir.parent_path(), main_class, classpaths);
+    }
+
+    const auto command = build_jar_command(
+        temp_jar,
+        temp_class_dir,
+        jar_cli_path,
+        manifest_path ? &manifest_path.value() : nullptr
+    );
     const int exit_code = std::system(command.c_str());
+
+    if (manifest_path)
+    {
+        std::filesystem::remove(*manifest_path);
+    }
 
     if (exit_code != 0)
     {
@@ -108,18 +129,70 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
     return true;
 }
 
-static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
-        const std::filesystem::path &jar_cli_path, const codesh::semantic_analyzer::type_symbol *main_class)
+static void write_manifest_attribute(std::ofstream &manifest, std::string line)
 {
-    std::string command;
+    // Fold at 72 bytes per the JAR manifest spec
+    while (line.size() > MANIFEST_MAX_LINE_BYTES)
+    {
+        manifest << line.substr(0, MANIFEST_MAX_LINE_BYTES) << "\r\n";
+        // Continuation lines start with a single space
+        line = ' ' + line.substr(MANIFEST_MAX_LINE_BYTES);
+    }
+
+    manifest << line << "\r\n";
+}
+
+static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
+        const codesh::semantic_analyzer::type_symbol *main_class,
+        const std::vector<std::filesystem::path> &classpaths)
+{
+    const auto manifest_path = temp_dir / "MANIFEST.MF";
+    std::ofstream manifest(manifest_path);
+
+    manifest << "Manifest-Version: 1.0\r\n";
 
     if (main_class != nullptr)
     {
+        write_manifest_attribute(
+            manifest,
+            fmt::format(
+                "Main-Class: {}",
+                main_class->get_full_name().join()
+            )
+        );
+    }
+
+    if (!classpaths.empty())
+    {
+        std::string class_path_line = "Class-Path: ";
+        for (size_t i = 0; i < classpaths.size(); ++i)
+        {
+            if (i > 0)
+            {
+                class_path_line += ' ';
+            }
+            class_path_line += classpaths.at(i).generic_string();
+        }
+
+        write_manifest_attribute(manifest, class_path_line);
+    }
+
+    manifest << "\r\n";
+    return manifest_path;
+}
+
+static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
+        const std::filesystem::path &jar_cli_path, const std::filesystem::path *manifest_path)
+{
+    std::string command;
+
+    if (manifest_path != nullptr)
+    {
         command = fmt::format(
-            R"("{}" cfe "{}" {} -C "{}" .)",
+            R"("{}" cfm "{}" "{}" -C "{}" .)",
             jar_cli_path.string(),
             temp_jar.string(),
-            main_class->get_full_name().join(),
+            manifest_path->string(),
             temp_class_dir.string()
         );
     }
