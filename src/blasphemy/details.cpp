@@ -183,6 +183,8 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_INTERFACE = rfs(
 const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
     "מַעֲשֶׂה בִּלְתִּי מְמֻמָּשׁ הֱיֵה: הָעֶצֶם {} אֵינוֹ מְמַשֵּׁשׁ אֶת הַמַּעֲשֶׂה {} מִן הַמְמַמֵּשׁ {}"
 );
+const std::string codesh::blasphemy::details::DUPLICATE_MAIN_CLASS =
+    "TODO: Hebrew message for duplicate main class";
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(

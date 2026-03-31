@@ -3,6 +3,7 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "lexer/tokenizer.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -11,15 +12,20 @@
 #include <filesystem>
 #include <fmt/format.h>
 
+static bool validate_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table);
 static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path);
 
 
-bool codesh::output::jvm_target::bundle_jar(const std::filesystem::path &temp_class_dir,
-        const std::filesystem::path &dest_jar_path, const std::filesystem::path &jre_path)
+bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
+        const std::filesystem::path &temp_class_dir, const std::filesystem::path &dest_jar_path,
+        const std::filesystem::path &jre_path)
 {
+    if (!validate_main_class(symbol_table))
+        return false;
+
     const auto jar_cli_path = get_jar_cli_path(jre_path);
     if (!std::filesystem::exists(jar_cli_path))
     {
@@ -66,6 +72,29 @@ bool codesh::output::jvm_target::bundle_jar(const std::filesystem::path &temp_cl
 
     if (!move_jar_to_dest(temp_jar, dest_jar_path))
         return false;
+
+    return true;
+}
+
+static bool validate_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table)
+{
+    // When building a jar, we need to know what the main class is.
+    // There can only either be no main class, or a single main class.
+    const auto &main_classes = symbol_table.get_main_classes();
+    if (!main_classes.empty() && main_classes.size() != 1)
+    {
+        for (const auto &main_class : main_classes)
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::DUPLICATE_MAIN_CLASS,
+                codesh::blasphemy::blasphemy_type::SEMANTIC,
+                main_class.get().get_full_name().get_source_range(),
+                true
+            );
+        }
+
+        return false;
+    }
 
     return true;
 }
