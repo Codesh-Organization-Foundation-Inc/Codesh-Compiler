@@ -354,6 +354,12 @@ add_executable(codeshc
         src/output/ir/instruction/array_load_instruction.h
         src/output/ir/instruction/array_length_instruction.cpp
         src/output/ir/instruction/array_length_instruction.h
+        src/output/ir/instruction/new_array_instruction.cpp
+        src/output/ir/instruction/new_array_instruction.h
+        src/output/ir/instruction/anewarray_instruction.cpp
+        src/output/ir/instruction/anewarray_instruction.h
+        src/output/ir/instruction/multianewarray_instruction.cpp
+        src/output/ir/instruction/multianewarray_instruction.h
         src/parser/ast/type_declaration/field_declaration_ast_node.cpp
         src/parser/ast/type_declaration/field_declaration_ast_node.h
         src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
