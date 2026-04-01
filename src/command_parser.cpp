@@ -86,6 +86,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             result.is_java_default_classpath = true;
         }
+        else if (arg == "--imashkha-kol-kakh-shmena")
+        {
+            result.fat_jar = true;
+        }
         else if (arg == "--main-class")
         {
             result.explicit_main_class = definition::fully_qualified_name::parse(
