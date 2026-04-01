@@ -387,6 +387,8 @@ add_executable(codeshc
         src/parser/ast/type_declaration/interface_declaration_ast_node.h
         src/parser/ast/method/operation/array_length_ast_node.cpp
         src/parser/ast/method/operation/array_length_ast_node.h
+        src/parser/ast/method/operation/new_array_ast_node.cpp
+        src/parser/ast/method/operation/new_array_ast_node.h
 )
 
 
