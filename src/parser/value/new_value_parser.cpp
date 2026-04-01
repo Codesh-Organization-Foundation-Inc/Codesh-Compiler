@@ -75,17 +75,16 @@ static std::unique_ptr<codesh::ast::op::new_array_ast_node> parse_array_initiali
     do
     {
         array_node->add_dimension(codesh::parser::value::parse_value(tokens));
-    }
-    while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BY));
 
-    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CUBIT))
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_KEYWORD_CUBITS,
-            codesh::blasphemy::blasphemy_type::SEMANTIC,
-            new_pos
-        );
-    }
+        if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_CUBIT))
+        {
+            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                codesh::blasphemy::details::NO_KEYWORD_CUBITS,
+                codesh::blasphemy::blasphemy_type::SEMANTIC,
+                new_pos
+            );
+        }
+    } while (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BY));
 
     return array_node;
 }
