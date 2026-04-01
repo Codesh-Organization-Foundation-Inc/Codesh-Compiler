@@ -1,6 +1,9 @@
 #pragma once
 
+#include "defenition/fully_qualified_name.h"
+
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 namespace codesh::semantic_analyzer
@@ -12,9 +15,14 @@ namespace codesh::output::jvm_target
 
 struct jar_builder_context
 {
+    const std::filesystem::path &jre_path;
+
     const std::filesystem::path &temp_class_dir;
     const std::filesystem::path &dest_jar_path;
-    const std::filesystem::path &jre_path;
+
+    // Manifest-related
+    const std::optional<definition::fully_qualified_name> &explicit_main_class;
+    const std::vector<std::filesystem::path> &classpaths;
 };
 
 /**
@@ -22,6 +30,6 @@ struct jar_builder_context
  * @returns Whether the operation succeeded
  */
 [[nodiscard]] bool bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
-        const std::vector<std::filesystem::path> &classpaths, const jar_builder_context &context);
+        const jar_builder_context &context);
 
 }

@@ -295,6 +295,7 @@ static void print_help()
     fmt::println("\t--talmud-codesh-path <path>   Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--unholy                      Exclude the standard Codesh talmud");
     std::puts("\t--sinful                      Include the standard Java library");
+    std::puts("\t--main-class <fqn>            JAR only: fully-qualified name of the main class entry point");
     std::puts("\t--lsp                         Run in LSP Server Mode (for IDEs)");
     std::puts("\t--help, -h                    Show this help message");
 }
@@ -530,11 +531,12 @@ static bool build_and_bundle_jar(
     {
         return codesh::output::jvm_target::bundle_jar(
             symbol_table,
-            args.classpaths,
             {
+                args.jre_path,
                 temp_dir,
                 *args.dest_path,
-                args.jre_path
+                args.explicit_main_class,
+                args.classpaths,
             }
         );
     }

@@ -16,6 +16,9 @@ static constexpr size_t MANIFEST_MAX_LINE_BYTES = 72;
 
 static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table,
         codesh::semantic_analyzer::type_symbol **main_class_out);
+static bool get_main_class_by_name(const codesh::semantic_analyzer::symbol_table &symbol_table,
+        codesh::semantic_analyzer::type_symbol **main_class_out,
+        const codesh::definition::fully_qualified_name &class_name);
 static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
@@ -28,14 +31,25 @@ static std::string build_jar_command(const std::filesystem::path &temp_jar, cons
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
-        const std::vector<std::filesystem::path> &classpaths, const jar_builder_context &context)
+        const jar_builder_context &context)
 {
+    const auto [
+        jre_path,
+        temp_class_dir,
+        dest_jar_path,
+        explicit_main_class,
+        classpaths
+    ] = context;
+
     semantic_analyzer::type_symbol *main_class = nullptr;
-    if (!get_main_class(symbol_table, &main_class))
+    if (explicit_main_class.has_value())
+    {
+        if (!get_main_class_by_name(symbol_table, &main_class, *explicit_main_class))
+            return false;
+    }
+    else if (!get_main_class(symbol_table, &main_class))
         return false;
 
-
-    const auto [temp_class_dir, dest_jar_path, jre_path] = context;
 
     const auto jar_cli_path = get_jar_cli_path(jre_path);
     if (!std::filesystem::exists(jar_cli_path))
@@ -102,31 +116,52 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
 static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol_table,
         codesh::semantic_analyzer::type_symbol **main_class_out)
 {
-    // When building a jar, we need to know what the main class is.
-    // There can only either be no main class, or a single main class.
     const auto &main_classes = symbol_table.get_main_classes();
-    if (!main_classes.empty())
+
+    // This function may only be called if the main-class parameter was not passed.
+    // Therefore, there must only be ONE main class available to pull from.
+    if (!main_classes.empty() && main_classes.size() == 1)
     {
-        if (main_classes.size() != 1)
-        {
-            for (const auto &main_class : main_classes)
-            {
-                codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                    codesh::blasphemy::details::DUPLICATE_MAIN_CLASS,
-                    codesh::blasphemy::blasphemy_type::SEMANTIC,
-                    main_class.get().get_full_name().get_source_range(),
-                    true
-                );
-            }
-
-            return false;
-        }
-
         *main_class_out = &main_classes.front().get();
         return true;
     }
 
-    return true;
+    // Otherwise, mark all as duplicated
+    for (const auto &main_class : main_classes)
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::DUPLICATE_MAIN_CLASS,
+            codesh::blasphemy::blasphemy_type::SEMANTIC,
+            main_class.get().get_full_name().get_source_range(),
+            true
+        );
+    }
+    return false;
+}
+
+static bool get_main_class_by_name(const codesh::semantic_analyzer::symbol_table &symbol_table,
+        codesh::semantic_analyzer::type_symbol **main_class_out,
+        const codesh::definition::fully_qualified_name &class_name)
+{
+    for (const auto &main_class : symbol_table.get_main_classes())
+    {
+        if (main_class.get().get_full_name() == class_name)
+        {
+            *main_class_out = &main_class.get();
+            return true;
+        }
+    }
+
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+        fmt::format(
+            codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND,
+            class_name.holy_join()
+        ),
+        codesh::blasphemy::blasphemy_type::SEMANTIC,
+        codesh::lexer::NO_CODE_POS,
+        true
+    );
+    return false;
 }
 
 static void write_manifest_attribute(std::ofstream &manifest, std::string line)
