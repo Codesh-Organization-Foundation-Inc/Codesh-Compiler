@@ -294,11 +294,11 @@ static void print_help()
     std::puts("\t--unholy                             Exclude the standard Codesh talmud (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
     std::puts("\t--classpath <entries>                Semicolon-separated list of classpaths to use (dirs or JARs)");
-    fmt::println("\t--talmud-codesh-path <path>   Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
+    fmt::println("\t--talmud-codesh-path <path>          Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--lsp                                Run in LSP Server Mode (for IDEs)");
     std::puts("");
     std::puts("JAR Target:");
-    std::puts("\t--imashkha-kol-kakh-shmena           Make the resulting JAR (almost) fat as your mother by embedding all classpath entries within it.");
+    std::puts("\t--imashkha-kol-kakh-shmena           Makes the resulting JAR (almost) as fat as your mother by embedding all classpath entries within it.");
     std::puts("\t                                     Makes the JAR device-portable but bigger.");
     std::puts("\t--main-class <fqn>                   Fully-qualified name of the main class. Mandatory if more than one Bereshit method exists in a project");
     std::puts("");
