@@ -79,6 +79,10 @@ const std::string codesh::blasphemy::details::NO_KEYWORD_FROM =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה מן";
 const std::string codesh::blasphemy::details::NO_KEYWORD_SKIP =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה וידלג";
+const std::string codesh::blasphemy::details::NO_KEYWORD_CUBITS =
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה אמה";
+const std::string codesh::blasphemy::details::NO_KEYWORD_HIS_LENGTH =
+    "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה ואורכו";
 const std::string codesh::blasphemy::details::NO_KEYWORD_AGAINST =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה לנגד";
 const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP =
@@ -185,8 +189,9 @@ const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
 );
 const std::string codesh::blasphemy::details::DUPLICATE_MAIN_CLASS =
     "TODO: Hebrew message for duplicate main class";
-const fmt::runtime_format_string<> codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND =
-    fmt::runtime("Specified main class '{}' was not found among classes with a main method.");
+const rfs_t codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND = rfs(
+    "Specified main class '{}' was not found among classes with a main method."
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
