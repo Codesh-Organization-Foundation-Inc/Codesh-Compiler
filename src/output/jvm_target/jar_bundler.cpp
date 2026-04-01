@@ -193,7 +193,7 @@ static std::filesystem::path write_manifest(const std::filesystem::path &temp_di
         const std::vector<std::filesystem::path> &classpaths)
 {
     const auto manifest_path = temp_dir / "MANIFEST.MF";
-    std::ofstream manifest(manifest_path);
+    std::ofstream manifest(manifest_path, std::ios::binary);
 
     manifest << "Manifest-Version: 1.0\r\n";
 
