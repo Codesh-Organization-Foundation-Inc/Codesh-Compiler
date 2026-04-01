@@ -12,7 +12,6 @@
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
 #include "parser/ast/operator/boolean/not_operator_ast_node.h"
 #include "parser/ast/operator/boolean/or_operator_ast_node.h"
-#include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "primitive_value_parser.h"
@@ -258,14 +257,7 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
     }
     else
     {
-        skip_val = std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
-            code_pos,
-            std::make_unique<codesh::ast::type::primitive_type_ast_node>(
-                code_pos,
-                codesh::definition::primitive_type::INTEGER
-            ),
-            1
-        );
+        skip_val = codesh::ast::var_reference::evaluable_ast_node<int>::make_int(code_pos, 1);
     }
 
     return std::make_unique<codesh::ast::collection::range_ast_node>(

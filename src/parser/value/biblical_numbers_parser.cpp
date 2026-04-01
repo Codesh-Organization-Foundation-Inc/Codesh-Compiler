@@ -44,7 +44,9 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         // then add it to the result.
         double divisor = 1.0;
         while (divisor <= result)
+        {
             divisor *= 10;
+        }
 
         const double value = integer_result + result / divisor;
 
@@ -64,11 +66,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         );
     }
 
-    return std::make_unique<ast::var_reference::evaluable_ast_node<int>>(
-        pos,
-        std::make_unique<ast::type::primitive_type_ast_node>(pos, definition::primitive_type::INTEGER),
-        result
-    );
+    return ast::var_reference::evaluable_ast_node<int>::make_int(pos, result);
 }
 
 void codesh::parser::value::biblical_numbers_parser::collect_numbers()
