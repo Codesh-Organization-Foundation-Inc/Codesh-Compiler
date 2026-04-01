@@ -126,10 +126,12 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
         codesh::semantic_analyzer::type_symbol **main_class_out)
 {
     const auto &main_classes = symbol_table.get_main_classes();
+    if (main_classes.empty())
+        return true;
 
     // This function may only be called if the main-class parameter was not passed.
     // Therefore, there must only be ONE main class available to pull from.
-    if (!main_classes.empty() && main_classes.size() == 1)
+    if (main_classes.size() == 1)
     {
         *main_class_out = &main_classes.front().get();
         return true;
