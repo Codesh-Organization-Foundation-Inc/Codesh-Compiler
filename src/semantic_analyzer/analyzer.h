@@ -23,8 +23,7 @@ void prepare(const ast::compilation_unit_ast_node &ast_root);
  *
  * The context can then be reused across all analysis passes for the same unit.
  */
-[[nodiscard]] semantic_context make_context(const ast::compilation_unit_ast_node &ast_root,
-        const symbol_table &table);
+[[nodiscard]] semantic_context make_context(const ast::compilation_unit_ast_node &ast_root, symbol_table &table);
 
 /**
  * These run after the symbol table is constructed.

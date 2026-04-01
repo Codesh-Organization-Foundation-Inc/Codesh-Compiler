@@ -18,6 +18,7 @@ extern const fmt::runtime_format_string<> PATH_DOESNT_EXIST;
 extern const std::string NO_MAIN_ARGS;
 extern const std::string NO_ARG;
 extern const std::string UNKNOWN_FLAG;
+extern const fmt::runtime_format_string<> JAR_COMMAND_FAILED;
 
 // LEXICAL
 extern const std::string NO_BASAD;
@@ -83,6 +84,8 @@ extern const fmt::runtime_format_string<> THROWS_NOT_EXCEPTION;
 extern const fmt::runtime_format_string<> UNDECLARED_SIN;
 extern const fmt::runtime_format_string<> DUPLICATE_INTERFACE;
 extern const fmt::runtime_format_string<> UNIMPLEMENTED_METHOD;
+extern const std::string DUPLICATE_MAIN_CLASS;
+extern const fmt::runtime_format_string<> MAIN_CLASS_NOT_FOUND;
 
 // EXTERNAL
 extern const fmt::runtime_format_string<> CLASSPATH_NOT_SUPPORTED;

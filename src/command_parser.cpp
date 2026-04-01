@@ -4,14 +4,17 @@
 #include "blasphemy/details.h"
 #include "output/jvm_target/class_file_builder.h"
 
+#include <fstream>
 #include <queue>
 
 static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
+static std::string consume_string_argument(std::queue<std::string> &args);
 
 static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 static std::filesystem::path get_default_jre_path();
+static void validate_jre_path(const codesh::command_args &args);
 
 static void add_default_classpaths(codesh::command_args &args);
 
@@ -55,11 +58,11 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
         if (arg == "--src")
         {
-            result.src_path = consume_argument(args);
+            result.src_path = consume_string_argument(args);
         }
         else if (arg == "--dest")
         {
-            result.dest_path = consume_argument(args);
+            result.dest_path = consume_string_argument(args);
         }
         else if (arg == "--classpath")
         {
@@ -68,12 +71,12 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--jre-path")
         {
             has_jre_path = true;
-            result.jre_path = consume_argument(args);
+            result.jre_path = consume_string_argument(args);
         }
         else if (arg == "--talmud-codesh-path")
         {
             has_talmud_codesh_path = true;
-            result.talmud_codesh_path = consume_argument(args);
+            result.talmud_codesh_path = consume_string_argument(args);
         }
         else if (arg == "--unholy")
         {
@@ -82,6 +85,17 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         else if (arg == "--sinful")
         {
             result.is_java_default_classpath = true;
+        }
+        else if (arg == "--imashkha-kol-kakh-shmena")
+        {
+            result.fat_jar = true;
+        }
+        else if (arg == "--main-class")
+        {
+            result.explicit_main_class = definition::fully_qualified_name::parse(
+                consume_string_argument(args),
+                lexer::NO_CODE_POS
+            );
         }
         else if (arg == "--lsp")
         {
@@ -111,6 +125,14 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         result.talmud_codesh_path = DEFAULT_TALMUD_CODESH_PATH;
     }
 
+    result.jar_output = result.dest_path.has_value() && result.dest_path->extension() == ".jar";
+
+    // Operations that require the JRE to exist:
+    if (result.is_java_default_classpath || result.jar_output)
+    {
+        validate_jre_path(result);
+    }
+
     add_default_classpaths(result);
 
     return result;
@@ -118,7 +140,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
 
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result)
 {
-    std::stringstream stream(consume_argument(args));
+    std::stringstream stream(consume_string_argument(args));
     std::string entry;
 
     while (std::getline(stream, entry, ';'))
@@ -143,13 +165,9 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
 
 static std::filesystem::path get_default_jre_path()
 {
-#ifdef _WIN32
-    // Prefer JAVA_HOME if set
     if (const char* java_home = std::getenv("JAVA_HOME"))
-    {
-        return std::filesystem::path(java_home) / COMMON_JRE_DIR;
-    }
-#endif
+        return {java_home};
+
     return codesh::DEFAULT_JRE_PATH;
 }
 
@@ -187,6 +205,15 @@ static std::string consume_argument(std::queue<std::string> &args)
     return arg_content;
 }
 
+static std::string consume_string_argument(std::queue<std::string> &args)
+{
+    std::string arg = consume_argument(args);
+    if (arg.size() >= 2 && arg.front() == '"' && arg.back() == '"')
+        return arg.substr(1, arg.size() - 2);
+
+    return arg;
+}
+
 static std::queue<std::string> create_args_queue(const int argc, char **argv)
 {
     std::queue<std::string> result;
@@ -197,27 +224,29 @@ static std::queue<std::string> create_args_queue(const int argc, char **argv)
     return result;
 }
 
+static void validate_jre_path(const codesh::command_args &args)
+{
+    if (!std::filesystem::exists(args.jre_path))
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::PATH_DOESNT_EXIST,
+                args.jre_path.string()
+            ),
+            codesh::blasphemy::blasphemy_type::INIT,
+            codesh::lexer::NO_CODE_POS
+        );
+    }
+}
+
 static void add_default_classpaths(codesh::command_args &args)
 {
     args.classpaths.emplace_back(".");
 
+    // Even if validate_jre_path fails, we throw a blasphemy before anything can happen.
     if (args.is_java_default_classpath)
     {
-        if (!std::filesystem::exists(args.jre_path))
-        {
-            codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                fmt::format(
-                    codesh::blasphemy::details::PATH_DOESNT_EXIST,
-                    args.jre_path.string()
-                ),
-                codesh::blasphemy::blasphemy_type::INIT,
-                codesh::lexer::NO_CODE_POS
-            );
-        }
-        else
-        {
-            args.classpaths.emplace_back(args.jre_path / "lib/modules");
-        }
+        args.classpaths.emplace_back(args.jre_path / "lib/modules");
     }
 
     if (args.is_talmud_codesh_classpath)
