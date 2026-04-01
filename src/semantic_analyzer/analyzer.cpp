@@ -80,7 +80,7 @@ void codesh::semantic_analyzer::prepare(const ast::compilation_unit_ast_node &as
 }
 
 codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::make_context(
-        const ast::compilation_unit_ast_node &ast_root, const symbol_table &table)
+        const ast::compilation_unit_ast_node &ast_root, symbol_table &table)
 {
     return {table, collect_lookup_countries(ast_root, table), ast_root, blasphemy::semantic_consumer};
 }

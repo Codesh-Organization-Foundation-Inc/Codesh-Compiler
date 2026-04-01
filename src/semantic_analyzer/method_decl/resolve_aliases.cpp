@@ -2,52 +2,62 @@
 
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
 #include "semantic_analyzer/util.h"
 
-static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &context,
+/**
+ * @returns Whether this type contains a Bereshit method
+ */
+static bool handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &context,
         codesh::semantic_analyzer::type_symbol &type);
 static void rename_method(codesh::semantic_analyzer::type_symbol &type,
-                          const codesh::ast::method::method_declaration_ast_node &method_node, const std::string &new_name);
+                          const codesh::ast::method::method_declaration_ast_node &method_node,
+                          const std::string &new_name);
 
 
 void codesh::semantic_analyzer::method_declaration::resolve_aliases(const semantic_context &context, type_symbol &type)
 {
-    handle_bereshit_aliases(context, type);
+    if (handle_bereshit_aliases(context, type))
+    {
+        context.symbol_table_.add_main_class(type);
+    }
 }
 
-static void handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,
+static bool handle_bereshit_aliases(const codesh::semantic_analyzer::semantic_context &,
         codesh::semantic_analyzer::type_symbol &type)
 {
     const auto bereshit = type.get_scope().resolve_local("בראשית");
     if (!bereshit)
-        return;
+        return false;
 
     const auto bereshit_method_overloads = dynamic_cast<codesh::semantic_analyzer::method_overloads_symbol *>(
         &bereshit.value().get()
     );
     if (!bereshit_method_overloads)
-        return;
+        return false;
 
     const auto bereshit_method =
         static_cast<codesh::semantic_analyzer::method_overloads_symbol *>(&bereshit.value().get()) // NOLINT(*-pro-type-static-cast-downcast)
             ->resolve_method("[Ljava/lang/String;");
 
     if (!bereshit_method.has_value())
-        return;
+        return false;
 
+    // From this point, the method has the exact signature of Bereshit.
+    // Method name + parameter types.
+    // Therefore, it MUST be Bereshit.
     const auto &method_node = *bereshit_method->get().get_producing_node();
-
 
     // Validate flags
     const auto &attributes = bereshit_method->get().get_attributes();
 
     if (attributes.get_visibility() != codesh::definition::visibility::PUBLIC)
-        return;
+        return true;
     if (!attributes.get_is_static())
-        return;
-
+        return true;
 
     rename_method(type, method_node, "main");
+    return true;
 }
 
 

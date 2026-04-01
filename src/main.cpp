@@ -64,8 +64,7 @@ static void collect_source_files(const std::filesystem::path &path,
 static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
 [[nodiscard]] static bool build_and_bundle_jar(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args, bool is_project,
-        const codesh::semantic_analyzer::symbol_table &symbol_table);
+        const codesh::command_args &args, bool is_project, const codesh::semantic_analyzer::symbol_table &symbol_table);
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
@@ -78,7 +77,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(const codesh::comman
         const codesh::definition::class_loaders &class_loaders);
 static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::semantic_analyzer::symbol_table &table);
+        codesh::semantic_analyzer::symbol_table &table);
 [[nodiscard]] static bool build_class_files(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
         const codesh::command_args &args, const std::filesystem::path &dest_path, bool is_project,
@@ -288,6 +287,7 @@ static void print_help()
     std::puts("Required:");
     std::puts("\t--src <path>                  Source file or directory to compile");
     std::puts("\t--dest <path>                 Output file or directory for .class files");
+    std::puts("\t                              If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
     fmt::println("\t--jre-path <path>             Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
@@ -295,6 +295,7 @@ static void print_help()
     fmt::println("\t--talmud-codesh-path <path>   Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--unholy                      Exclude the standard Codesh talmud");
     std::puts("\t--sinful                      Include the standard Java library");
+    std::puts("\t--main-class <fqn>            JAR only: fully-qualified name of the main class entry point");
     std::puts("\t--lsp                         Run in LSP Server Mode (for IDEs)");
     std::puts("\t--help, -h                    Show this help message");
 }
@@ -454,7 +455,7 @@ static codesh::semantic_analyzer::symbol_table analyze_asts(
 
 static std::vector<codesh::semantic_analyzer::semantic_context> make_semantic_contexts(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::semantic_analyzer::symbol_table &table)
+        codesh::semantic_analyzer::symbol_table &table)
 {
     std::vector<codesh::semantic_analyzer::semantic_context> contexts;
     contexts.reserve(asts.size());
@@ -528,7 +529,16 @@ static bool build_and_bundle_jar(
 
     if (build_class_files(asts, args, temp_dir, is_project, symbol_table))
     {
-        return codesh::output::jvm_target::bundle_jar(temp_dir, *args.dest_path, args.jre_path);
+        return codesh::output::jvm_target::bundle_jar(
+            symbol_table,
+            {
+                args.jre_path,
+                temp_dir,
+                *args.dest_path,
+                args.explicit_main_class,
+                args.classpaths,
+            }
+        );
     }
 
     return false;

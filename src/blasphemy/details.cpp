@@ -35,7 +35,7 @@ const std::string codesh::blasphemy::details::NO_ARG =
 const std::string codesh::blasphemy::details::UNKNOWN_FLAG =
     "דֶּרֶךְ תּוֹעָה הֱיֵה: דֶּגֶל לֹא יָדוּעַ";
 const rfs_t codesh::blasphemy::details::JAR_COMMAND_FAILED = rfs(
-    "נִלְאָכָה כּוֹשֶׁלֶת תִּהְיֶה: כְּלִי הַצְנָצֶנֶת נִכְשַׁל בְּקוֹד {}"
+    "מְלָאכָה כּוֹשֶׁלֶת תִּהְיֶה: כְּלִי הַצְנָצֶנֶת נִכְשַׁל בְּקוֹד {}"
 );
 
 // LEXICAL
@@ -183,6 +183,10 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_INTERFACE = rfs(
 const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
     "מַעֲשֶׂה בִּלְתִּי מְמֻמָּשׁ הֱיֵה: הָעֶצֶם {} אֵינוֹ מְמַשֵּׁשׁ אֶת הַמַּעֲשֶׂה {} מִן הַמְמַמֵּשׁ {}"
 );
+const std::string codesh::blasphemy::details::DUPLICATE_MAIN_CLASS =
+    "TODO: Hebrew message for duplicate main class";
+const fmt::runtime_format_string<> codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND =
+    fmt::runtime("Specified main class '{}' was not found among classes with a main method.");
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
