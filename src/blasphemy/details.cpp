@@ -188,9 +188,9 @@ const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
     "מַעֲשֶׂה בִּלְתִּי מְמֻמָּשׁ הֱיֵה: הָעֶצֶם {} אֵינוֹ מְמַשֵּׁשׁ אֶת הַמַּעֲשֶׂה {} מִן הַמְמַמֵּשׁ {}"
 );
 const std::string codesh::blasphemy::details::DUPLICATE_MAIN_CLASS =
-    "TODO: Hebrew message for duplicate main class";
+    "נֵאִיפַת עֶצֶם תִּהְיֶה: מַעֲשֵׂה בְּרֵאשִׁית הֻכְרַז מִסְפַּר פְּעָמִים";
 const rfs_t codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND = rfs(
-    "Specified main class '{}' was not found among classes with a main method."
+    "הַפְנָיָה פְּסוּלָה הָיָה: הָעֶצֶם {} לֹא נִמְצָא אוֹ אֵינוֹ מֵכִיל אֶת מַעֲשֵׂה בְּרֵאשִׁית"
 );
 
 // EXTERNAL
