@@ -5,7 +5,6 @@
 #include "parser/ast/method/operation/new_array_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
-#include "parser/ast/type/primitive_type_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
@@ -80,13 +79,8 @@ static std::unique_ptr<codesh::ast::op::new_array_ast_node> parse_array_initiali
         if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_ONE_CUBIT, token))
         {
             array_node->add_dimension(
-                // Constant 1
-                std::make_unique<codesh::ast::var_reference::evaluable_ast_node<int>>(
+                codesh::ast::var_reference::evaluable_ast_node<int>::make_int(
                     token->get_code_position(),
-                    std::make_unique<codesh::ast::type::primitive_type_ast_node>(
-                        token->get_code_position(),
-                        codesh::definition::primitive_type::INTEGER
-                    ),
                     1
                 )
             );
