@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "classpath/loader/jar_loader.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
 #ifdef _WIN32
@@ -28,6 +29,8 @@ static std::filesystem::path write_manifest(const std::filesystem::path &temp_di
         const std::vector<std::filesystem::path> &classpaths);
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
         const std::filesystem::path &jar_cli_path, const std::filesystem::path *manifest_path);
+static bool add_classpaths_to_dir(const std::vector<std::filesystem::path> &classpaths,
+        const std::filesystem::path &temp_class_dir, const std::filesystem::path &jar_cli_path);
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
@@ -38,7 +41,8 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         temp_class_dir,
         dest_jar_path,
         explicit_main_class,
-        classpaths
+        classpaths,
+        fat_jar
     ] = context;
 
     semantic_analyzer::type_symbol *main_class = nullptr;
@@ -67,6 +71,10 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     }
 
 
+    if (fat_jar && !add_classpaths_to_dir(classpaths, temp_class_dir, jar_cli_path))
+        return false;
+
+
     // To avoid Hebrew path issues in the jar CLI, bundle in a temp path first.
     // Windows-only thing, but whatever.
     // build.ps1 does the same.
@@ -74,7 +82,8 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         temp_class_dir.parent_path() / (temp_class_dir.filename().string() + ".jar");
 
     std::optional<std::filesystem::path> manifest_path;
-    if (main_class != nullptr || !classpaths.empty())
+    // In fat JAR mode, classpaths are already embedded.
+    if (!fat_jar && (main_class != nullptr || !classpaths.empty()))
     {
         manifest_path = write_manifest(temp_class_dir.parent_path(), main_class, classpaths);
     }
@@ -296,4 +305,64 @@ static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_p
 #else
     return jre_path / "bin" / "jar";
 #endif
+}
+
+static bool add_classpaths_to_dir(const std::vector<std::filesystem::path> &classpaths,
+        const std::filesystem::path &temp_class_dir, const std::filesystem::path &jar_cli_path)
+{
+    for (const auto &cp : classpaths)
+    {
+        if (cp == std::filesystem::path("."))
+            continue;
+
+        if (std::filesystem::is_directory(cp))
+        {
+            std::error_code exit_code;
+            std::filesystem::copy(
+                cp,
+                temp_class_dir,
+                std::filesystem::copy_options::recursive
+                    | std::filesystem::copy_options::overwrite_existing,
+                exit_code
+            );
+
+            if (exit_code)
+            {
+                codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                    fmt::format(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR, cp.string()),
+                    codesh::blasphemy::blasphemy_type::OUTPUT,
+                    codesh::lexer::NO_CODE_POS,
+                    true
+                );
+                return false;
+            }
+        }
+        else if (codesh::external::is_jar(cp))
+        {
+            // `jar xf` extracts to the current working directory.
+            // So temporarily change to temp_class_dir:
+            const auto curr_path = std::filesystem::current_path();
+            const auto abs_cp = std::filesystem::absolute(cp);
+            std::filesystem::current_path(temp_class_dir);
+
+            const std::string cmd = finalize_command(
+                fmt::format(R"("{}" xf "{}")", jar_cli_path.string(), abs_cp.string())
+            );
+            const int exit_code = std::system(cmd.c_str());
+
+            std::filesystem::current_path(curr_path);
+
+            if (exit_code != 0)
+            {
+                codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+                    fmt::format(codesh::blasphemy::details::JAR_COMMAND_FAILED, exit_code),
+                    codesh::blasphemy::blasphemy_type::OUTPUT,
+                    codesh::lexer::NO_CODE_POS,
+                    true
+                );
+                return false;
+            }
+        }
+    }
+    return true;
 }

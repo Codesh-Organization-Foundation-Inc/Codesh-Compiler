@@ -285,19 +285,24 @@ static void print_help()
     std::puts("\tcodeshc --src <path> --dest <path> [options]");
     std::puts("");
     std::puts("Required:");
-    std::puts("\t--src <path>                  Source file or directory to compile");
-    std::puts("\t--dest <path>                 Output file or directory for .class files");
-    std::puts("\t                              If the path ends with .jar, outputs a bundled JAR");
+    std::puts("\t--src <path>                         Source file or directory to compile");
+    std::puts("\t--dest <path>                        Output file or directory for .class files");
+    std::puts("\t                                     If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
-    fmt::println("\t--jre-path <path>             Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
-    std::puts("\t--classpath <entries>         Semicolon-separated list of classpaths to use (dirs or JARs)");
+    std::puts("\t--sinful                             Include the standard Java library");
+    std::puts("\t--unholy                             Exclude the standard Codesh talmud (not recommended)");
+    fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
+    std::puts("\t--classpath <entries>                Semicolon-separated list of classpaths to use (dirs or JARs)");
     fmt::println("\t--talmud-codesh-path <path>   Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
-    std::puts("\t--unholy                      Exclude the standard Codesh talmud");
-    std::puts("\t--sinful                      Include the standard Java library");
-    std::puts("\t--main-class <fqn>            JAR only: fully-qualified name of the main class entry point");
-    std::puts("\t--lsp                         Run in LSP Server Mode (for IDEs)");
-    std::puts("\t--help, -h                    Show this help message");
+    std::puts("\t--lsp                                Run in LSP Server Mode (for IDEs)");
+    std::puts("");
+    std::puts("JAR Target:");
+    std::puts("\t--imashkha-kol-kakh-shmena           Make the resulting JAR (almost) fat as your mother by embedding all classpath entries within it.");
+    std::puts("\t                                     Makes the JAR device-portable but bigger.");
+    std::puts("\t--main-class <fqn>                   Fully-qualified name of the main class. Mandatory if more than one Bereshit method exists in a project");
+    std::puts("");
+    std::puts("\t--help, -h                           Show this help message");
 }
 
 static void print_tefilat_hahotsaa_besheela(const codesh::command_args &args)
@@ -537,6 +542,7 @@ static bool build_and_bundle_jar(
                 *args.dest_path,
                 args.explicit_main_class,
                 args.classpaths,
+                args.fat_jar,
             }
         );
     }
