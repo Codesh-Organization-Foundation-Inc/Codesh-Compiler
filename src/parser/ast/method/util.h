@@ -15,4 +15,6 @@ namespace codesh::ast::method::util
         std::optional<std::reference_wrapper<semantic_analyzer::method_symbol>> resolved_symbol,
         const std::deque<std::reference_wrapper<type::type_ast_node>> &parameter_types,
         const type_decl::attributes_ast_node &attributes);
+
+[[nodiscard]] std::string pretty_method_signature(const semantic_analyzer::method_symbol &method);
 }

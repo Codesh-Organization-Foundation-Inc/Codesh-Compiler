@@ -10,10 +10,10 @@ using codesh::token_group;
 
 // The order of this vector determines the order of regex priority & group number.
 static const std::vector<std::pair<token_group, std::string>> TOKEN_REGEXES = {
-    {token_group::LITERAL_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+צף)"},
+    {token_group::LITERAL_NUMBER_FLOAT, R"(\d+(?:\.\d+)?\s+\bצף\b)"},
     {token_group::LITERAL_NUMBER_DOUBLE, R"(\d+\.\d+)"},
     {token_group::LITERAL_NUMBER_INT, R"(\d+)"},
-    {token_group::LITERAL_STRING, R"(ויקרא(?: | [^\n]+? )(?<! ליטרלי )לאמר)"},
+    {token_group::LITERAL_STRING, R"(יקרא(?: | [^\n]+? )(?<! ליטרלי )לאמר)"},
     {token_group::LITERAL_CHAR, R"('(?:[^'\\]|\\.)')"},
 
     {token_group::IDENTIFIER, R"([^\s.;[\]/<>:]+)"},
@@ -54,7 +54,7 @@ const boost::u32regex codesh::lexer::LEXER_RGX = boost::make_u32regex(LEXER_RGX_
 token_group codesh::lexer::token_group_from_regex_id(const int group_id)
 {
     if (group_id > TOKEN_GROUP_RGX_COUNT)
-        throw std::invalid_argument("Invalid token group id");
+        throw std::invalid_argument("Invalid token group ID");
 
     return static_cast<token_group>(static_cast<size_t>(TOKEN_GROUP_RGX_START) + group_id - 1);
 }

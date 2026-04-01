@@ -2,6 +2,7 @@
 
 #include "evaluable_ast_node.h"
 #include "output/ir/code_block.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "output/ir/instruction/load_constant_pool_instruction.h"
 #include "output/ir/instruction/load_int_constant_instruction.h"
 #include "output/ir/instruction/load_wide_constant_pool_instruction.h"
@@ -9,12 +10,23 @@
 #include "output/jvm_target/constant_pool.h"
 
 template <typename T>
-codesh::ast::var_reference::evaluable_ast_node<T>::evaluable_ast_node(const blasphemy::code_position code_position,
+codesh::ast::var_reference::evaluable_ast_node<T>::evaluable_ast_node(const lexer::code_position code_position,
         std::unique_ptr<type::type_ast_node> type, T value) :
     value_ast_node(code_position),
     type(std::move(type)),
     value(std::move(value))
 {
+}
+
+template <typename T>
+std::unique_ptr<codesh::ast::var_reference::evaluable_ast_node<int>> codesh::ast::var_reference::evaluable_ast_node<T>::
+    make_int(const lexer::code_position pos, const int value)
+{
+    return std::make_unique<evaluable_ast_node<int>>(
+        pos,
+        std::make_unique<type::primitive_type_ast_node>(pos, definition::primitive_type::INTEGER),
+        value
+    );
 }
 
 template <typename T>

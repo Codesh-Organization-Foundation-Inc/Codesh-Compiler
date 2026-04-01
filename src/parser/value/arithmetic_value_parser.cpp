@@ -26,6 +26,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
+
+        if (!util::consume_the(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        }
+
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::addition_operator_ast_node>(
@@ -42,6 +48,12 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         tokens.pop();
 
         auto left_value_node = parse_value(tokens);
+
+        if (!util::consume_the(tokens))
+        {
+            return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
+        }
+
         auto right_value_node = parse_value(tokens);
 
         eval_ast_node = std::make_unique<ast::op::subtraction_operator_ast_node>(

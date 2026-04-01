@@ -1,18 +1,18 @@
 #include "import_declaration_ast_node.h"
 
 
-codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const blasphemy::code_position code_position) :
-    ast_node(code_position), is_on_demand(false), is_static(false)
+codesh::ast::import_declaration_ast_node::import_declaration_ast_node(const lexer::code_position code_position) :
+    ast_node(code_position), package_name(code_position), is_static(false)
 {}
 
-codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_country_name()
+codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_package_name()
 {
-    return this->country_name;
+    return this->package_name;
 }
 
-bool codesh::ast::import_declaration_ast_node::get_is_on_demand() const
+const codesh::definition::fully_qualified_name &codesh::ast::import_declaration_ast_node::get_package_name() const
 {
-    return this->is_on_demand;
+    return this->package_name;
 }
 
 bool codesh::ast::import_declaration_ast_node::get_is_static() const
@@ -20,15 +20,6 @@ bool codesh::ast::import_declaration_ast_node::get_is_static() const
     return this->is_static;
 }
 
-void codesh::ast::import_declaration_ast_node::set_package_name(
-        const definition::fully_qualified_name &package_name)
-{
-    this->country_name = package_name;
-}
-void codesh::ast::import_declaration_ast_node::set_is_on_demand(const bool is_on_demand)
-{
-    this->is_on_demand = is_on_demand;
-}
 void codesh::ast::import_declaration_ast_node::set_is_static(const bool is_static)
 {
     this->is_static = is_static;

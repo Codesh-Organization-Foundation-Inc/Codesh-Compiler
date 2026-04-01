@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const blasphemy::code_position code_position,
+codesh::ast::type::primitive_type_ast_node::primitive_type_ast_node(const lexer::code_position code_position,
         const definition::primitive_type type) :
     type_ast_node(code_position), type(type)
 {
@@ -71,9 +71,14 @@ codesh::output::ir::instruction_type codesh::ast::type::primitive_type_ast_node:
 
 }
 
-std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+codesh::ast::type::type_ast_node *codesh::ast::type::primitive_type_ast_node::_clone() const
 {
-    return std::make_unique<primitive_type_ast_node>(*this);
+    return new primitive_type_ast_node(*this);
+}
+
+std::unique_ptr<codesh::ast::type::primitive_type_ast_node> codesh::ast::type::primitive_type_ast_node::clone() const
+{
+    return std::unique_ptr<primitive_type_ast_node>(static_cast<primitive_type_ast_node *>(_clone()));
 }
 
 std::string codesh::ast::type::primitive_type_ast_node::to_pretty_string() const
@@ -81,21 +86,21 @@ std::string codesh::ast::type::primitive_type_ast_node::to_pretty_string() const
     switch (get_type())
     {
     case definition::primitive_type::INTEGER:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_INTEGER);
+        return lexer::trie::token_to_string(token_group::KEYWORD_INTEGER);
     case definition::primitive_type::DOUBLE:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_DOUBLE);
+        return lexer::trie::token_to_string(token_group::KEYWORD_DOUBLE);
     case definition::primitive_type::FLOAT:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_FLOAT);
+        return lexer::trie::token_to_string(token_group::KEYWORD_FLOAT);
     case definition::primitive_type::LONG:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_LONG);
+        return lexer::trie::token_to_string(token_group::KEYWORD_LONG);
     case definition::primitive_type::SHORT:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_SHORT);
+        return lexer::trie::token_to_string(token_group::KEYWORD_SHORT);
     case definition::primitive_type::BYTE:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_BYTE);
+        return lexer::trie::token_to_string(token_group::KEYWORD_BYTE);
     case definition::primitive_type::CHAR:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_CHAR);
+        return lexer::trie::token_to_string(token_group::KEYWORD_CHAR);
     case definition::primitive_type::BOOLEAN:
-        return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_BOOLEAN);
+        return lexer::trie::token_to_string(token_group::KEYWORD_BOOLEAN);
 
     case definition::primitive_type::VOID:
         return lexer::trie::keyword::TYPE_VOID;

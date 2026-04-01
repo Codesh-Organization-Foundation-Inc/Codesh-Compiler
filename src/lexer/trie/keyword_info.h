@@ -10,7 +10,6 @@ namespace codesh::lexer::trie
 
 struct keyword_info
 {
-    token_group token;
     std::u16string keyword;
     word_boundary boundary;
 };

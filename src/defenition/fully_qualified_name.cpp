@@ -1,44 +1,53 @@
 #include "fully_qualified_name.h"
 
 #include "fmt/xchar.h"
+#include <boost/functional/hash.hpp>
 #include "lexer/trie/keywords.h"
 #include "semantic_analyzer/builtins.h"
 
 #include <sstream>
 
-codesh::definition::fully_qualified_name::fully_qualified_name() :
-    _is_wildcard(false)
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start) :
+    _is_wildcard(false),
+    source_range(start, start)
 {
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(const char *binary_fqn) :
-    fully_qualified_name()
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start,
+        std::string part) :
+    fully_qualified_name(start)
 {
-    std::istringstream fqn_stream(binary_fqn);
+    add(std::move(part));
+}
+
+codesh::definition::fully_qualified_name::fully_qualified_name(const lexer::code_position start,
+        const std::vector<std::string>::const_iterator name_start,
+        const std::vector<std::string>::const_iterator name_end) :
+    parts(name_start, name_end),
+    _is_wildcard(false),
+    source_range(start, start)
+{
+}
+
+codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::parse(
+        const std::string &fqn_str, const lexer::code_position start)
+{
+    fully_qualified_name result(start);
+    std::istringstream fqn_stream(fqn_str);
 
     // Split by '/'
     std::string item;
     while (std::getline(fqn_stream, item, '/'))
     {
-        if (!item.empty())
-        {
-            add(item);
-        }
+        result.add(item);
     }
+
+    return result;
 }
 
-codesh::definition::fully_qualified_name::fully_qualified_name(std::string part) :
-    fully_qualified_name()
+bool codesh::definition::fully_qualified_name::operator==(const fully_qualified_name &other) const
 {
-    add(std::move(part));
-}
-
-codesh::definition::fully_qualified_name::fully_qualified_name(
-        const std::vector<std::string>::const_iterator name_start,
-        const std::vector<std::string>::const_iterator name_end) :
-    parts(name_start, name_end),
-    _is_wildcard(false)
-{
+    return parts == other.parts && _is_wildcard == other._is_wildcard;
 }
 
 codesh::definition::fully_qualified_name codesh::definition::fully_qualified_name::with(std::string part)
@@ -66,6 +75,21 @@ void codesh::definition::fully_qualified_name::add(std::string part)
 const std::vector<std::string> &codesh::definition::fully_qualified_name::get_parts() const
 {
     return parts;
+}
+
+void codesh::definition::fully_qualified_name::set_start_position(const lexer::code_position pos)
+{
+    source_range.start = pos;
+}
+
+void codesh::definition::fully_qualified_name::set_end_position(const lexer::code_position pos)
+{
+    source_range.end = pos;
+}
+
+const codesh::lexer::code_range &codesh::definition::fully_qualified_name::get_source_range() const
+{
+    return source_range;
 }
 
 void codesh::definition::fully_qualified_name::set_is_wildcard(const bool wildcard)
@@ -102,20 +126,7 @@ std::string codesh::definition::fully_qualified_name::holy_join() const
         return result.value();
     }
 
-    fully_qualified_name pretty_fqn;
-    for (const auto &part : get_parts())
-    {
-        if (part == "this")
-        {
-            pretty_fqn.add(lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::KEYWORD_THIS));
-        }
-        else
-        {
-            pretty_fqn.add(part);
-        }
-    }
-
-    return pretty_fqn.join(" ל־");
+    return join(" ל־");
 }
 
 std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias() const
@@ -128,4 +139,16 @@ std::optional<std::string> codesh::definition::fully_qualified_name::parse_alias
         return semantic_analyzer::builtins::ALIAS_OBJECT;
 
     return std::nullopt;
+}
+
+std::size_t std::hash<codesh::definition::fully_qualified_name>::operator()(
+        const codesh::definition::fully_qualified_name &fqn) const noexcept
+{
+    size_t seed = 0;
+    for (const auto &part : fqn.get_parts())
+    {
+        boost::hash_combine(seed, part);
+    }
+
+    return seed;
 }

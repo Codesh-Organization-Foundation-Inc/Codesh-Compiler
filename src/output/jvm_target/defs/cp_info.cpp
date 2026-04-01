@@ -22,7 +22,7 @@ codesh::output::jvm_target::defs::CONSTANT_Utf8_info::CONSTANT_Utf8_info(const s
         blasphemy::blasphemy_collector().add_blasphemy(
             blasphemy::details::STRING_TOO_BIG,
             blasphemy::blasphemy_type::OUTPUT,
-            blasphemy::NO_CODE_POS,
+            lexer::NO_CODE_POS,
             true
         );
     }

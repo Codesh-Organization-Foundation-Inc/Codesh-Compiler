@@ -4,6 +4,7 @@
 
 namespace codesh::semantic_analyzer
 {
+class country_symbol;
 class symbol_table;
 }
 
@@ -13,6 +14,8 @@ inline constexpr std::string CLASS_RANGE = "טווח";
 
 inline constexpr std::string ALIAS_STRING = "כתובים";
 inline constexpr std::string ALIAS_OBJECT = "לאבובו";
+inline constexpr std::string ALIAS_EXCEPTION = "חטא";
 
-void collect_builtins(const symbol_table &table);
+void collect_builtins(country_symbol &country);
+void resolve_builtins(country_symbol &country, const symbol_table &table);
 }

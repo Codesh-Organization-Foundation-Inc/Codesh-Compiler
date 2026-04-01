@@ -10,37 +10,41 @@ namespace ast = codesh::ast;
 std::unique_ptr<ast::import_declaration_ast_node> codesh::parser::parse_import(
         std::queue<std::unique_ptr<token>> &tokens)
 {
-    auto import_pos = tokens.front()->get_code_position();
-    tokens.pop();
+    auto import_pos = util::consume_token(tokens)->get_code_position();
 
-    std::unique_ptr<ast::import_declaration_ast_node> import_node = std::make_unique<ast::import_declaration_ast_node>(
+    auto import_node = std::make_unique<ast::import_declaration_ast_node>(
         import_pos
     );
 
-    // Check if is a static import
-    util::ensure_tokens_exist(tokens, blasphemy::details::NO_IMPORT_TYPE); // TODO: provide better reason
-    switch (tokens.front()->get_group())
+    // Static/regular import
+    const auto token = util::consume_token(tokens, blasphemy::details::NO_IMPORT_TYPE); // TODO: provide better reason
+    switch (token->get_group())
     {
     case token_group::KEYWORD_IMPORT_STATIC:
         import_node->set_is_static(true);
         break;
 
-    case token_group::KEYWORD_IMPORT_REGULAR:
+    case token_group::OPERATOR_THE:
         // Already not static
         break;
 
     default:
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IMPORT_TYPE,
-            blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position());
-
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_IMPORT_TYPE,
+            blasphemy::blasphemy_type::SYNTAX, tokens.front()->get_code_position()
+        );
     }
 
+    util::parse_fqn(tokens, import_node->get_package_name());
 
-    util::parse_fqn(tokens, import_node->get_country_name());
-
-    if (import_node->get_country_name().is_wildcard())
+    //TODO: Remove once implemented
+    if (!import_node->get_package_name().is_wildcard())
     {
-        import_node->set_is_on_demand(true);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+           "יבוא לא כולל אינו נתמך בשלב זה",
+           blasphemy::blasphemy_type::SYNTAX,
+           import_node->get_package_name().get_source_range()
+       );
     }
 
     util::ensure_end_op(tokens);

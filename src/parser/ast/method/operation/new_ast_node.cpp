@@ -9,7 +9,7 @@
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
-codesh::ast::op::new_ast_node::new_ast_node(const blasphemy::code_position code_position,
+codesh::ast::op::new_ast_node::new_ast_node(const lexer::code_position code_position,
         std::unique_ptr<type::custom_type_ast_node> constructed_type) :
     method_call_ast_node(code_position), constructed_type(std::move(constructed_type))
 {
@@ -56,9 +56,9 @@ void codesh::ast::op::new_ast_node::emit_ir(output::ir::code_block &containing_b
     containing_block.add_instruction(std::make_unique<output::ir::dup_instruction>());
 
     // load arguments
-    for (const auto &argument : get_arguments())
+    for (const auto &[arg_name, arg_value] : get_arguments())
     {
-        argument->emit_ir(containing_block, symbol_table, containing_type_decl);
+        arg_value->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
 
     // Call constructor

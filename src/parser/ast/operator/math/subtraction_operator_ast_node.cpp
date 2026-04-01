@@ -3,7 +3,7 @@
 #include "lexer/trie/keywords.h"
 
 codesh::ast::op::subtraction_operator_ast_node::subtraction_operator_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<value_ast_node> left,
+        const lexer::code_position code_position, std::unique_ptr<value_ast_node> left,
         std::unique_ptr<value_ast_node> right) :
     binary_ast_node(code_position, std::move(left), std::move(right))
 {
@@ -11,7 +11,7 @@ codesh::ast::op::subtraction_operator_ast_node::subtraction_operator_ast_node(
 
 std::string codesh::ast::op::subtraction_operator_ast_node::to_pretty_string() const
 {
-    return lexer::trie::TOKEN_TO_NAME_MAP.at(token_group::OPERATOR_SUBTRACTION);
+    return lexer::trie::token_to_string(token_group::OPERATOR_SUBTRACTION);
 }
 
 codesh::output::ir::operator_type codesh::ast::op::subtraction_operator_ast_node::get_ir_operator_type() const

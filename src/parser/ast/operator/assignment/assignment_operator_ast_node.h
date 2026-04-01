@@ -11,12 +11,14 @@ class assignment_operator_ast_node : public impl::binary_ast_node
     std::optional<int> rhs_cpi;
 
 public:
-    assignment_operator_ast_node(blasphemy::code_position code_position,
-            std::unique_ptr<variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right);
+    assignment_operator_ast_node(lexer::code_position code_position,
+            std::unique_ptr<var_reference::variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right);
 
-    [[nodiscard]] variable_reference_ast_node &get_left() const override;
+    [[nodiscard]] var_reference::variable_reference_ast_node &get_left() const override;
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
+
+    [[nodiscard]] bool is_value_valid(const semantic_analyzer::semantic_context &context) const override;
 
     [[nodiscard]] virtual output::ir::operator_type get_operator_type() const = 0;
 

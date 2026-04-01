@@ -5,6 +5,10 @@
 #include <memory>
 #include <optional>
 
+namespace codesh::semantic_analyzer
+{
+struct semantic_context;
+}
 namespace codesh::ast::var_reference
 {
 class value_ast_node;
@@ -45,8 +49,9 @@ struct widen_result
 /**
  * Wraps @p value_node in a @c widening_cast_ast_node targeting @p target_type only if it's REALLY needed.
  */
-[[nodiscard]] widen_result make_widening_cast_maybe(std::unique_ptr<ast::var_reference::value_ast_node> value_node,
-    const ast::type::type_ast_node &expected_type);
+[[nodiscard]] widen_result make_widening_cast_maybe(const semantic_context &context,
+        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const ast::type::type_ast_node &expected_type);
 
 /**
  * Wraps @p value_node in a @c widening_cast_ast_node targeting @p target_type

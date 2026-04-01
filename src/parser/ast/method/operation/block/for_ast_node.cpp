@@ -11,7 +11,7 @@
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 
-codesh::ast::block::for_ast_node::for_ast_node(const blasphemy::code_position code_position,
+codesh::ast::block::for_ast_node::for_ast_node(const lexer::code_position code_position,
                            std::unique_ptr<var_reference::value_ast_node> collection,
                            method::method_scope_ast_node &body_scope) :
     method_operation_ast_node(code_position),

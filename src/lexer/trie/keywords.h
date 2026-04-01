@@ -7,9 +7,11 @@
 
 namespace codesh::lexer::trie
 {
+using keywords_map = std::unordered_map<token_group, keyword_info>;
+extern const keywords_map KEYWORDS;
+extern const keywords_map KEYWORDS_FEMININE;
 
-extern const std::vector<keyword_info> KEYWORDS;
-extern const std::unordered_map<token_group, std::string> TOKEN_TO_NAME_MAP;
+std::string token_to_string(token_group token, bool prefer_feminine = false);
 
 namespace keyword
 {
@@ -20,12 +22,11 @@ inline constexpr std::string TYPE_VOID = "תֹּהוּ";
 
 // These are not UTF-16 as this is used for post-processing the returned string.
 // The returned string is in UTF-8.
-inline constexpr std::string_view STRING_OPEN = "ויקרא ";
+inline constexpr std::string_view STRING_OPEN = "יקרא ";
 inline constexpr std::string_view STRING_END = " לאמר";
 
 inline constexpr std::string_view STRING_NEWLINE = " ש\"ח ";
 
 inline constexpr std::string_view STRING_ESCAPE = "ליטרלי ";
 }
-
 }

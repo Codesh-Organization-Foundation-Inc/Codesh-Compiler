@@ -10,14 +10,19 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
     return resolved_symbol;
 }
 
-codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const blasphemy::code_position code_position,
+codesh::ast::type::type_ast_node *codesh::ast::type::custom_type_ast_node::_clone() const
+{
+    return new custom_type_ast_node(*this);
+}
+
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const lexer::code_position code_position,
         definition::fully_qualified_name name) :
     type_ast_node(code_position),
     name(std::move(name))
 {
 }
 
-codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const blasphemy::code_position code_position,
+codesh::ast::type::custom_type_ast_node::custom_type_ast_node(const lexer::code_position code_position,
                                                               ast::type_decl::type_declaration_ast_node &type_decl) :
     type_ast_node(code_position),
     name(type_decl.get_unresolved_name()),
@@ -44,9 +49,9 @@ const codesh::definition::fully_qualified_name &codesh::ast::type::custom_type_a
     return name;
 }
 
-std::unique_ptr<codesh::ast::type::type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const
+std::unique_ptr<codesh::ast::type::custom_type_ast_node> codesh::ast::type::custom_type_ast_node::clone() const
 {
-    return std::make_unique<custom_type_ast_node>(*this);
+    return std::unique_ptr<custom_type_ast_node>(static_cast<custom_type_ast_node *>(_clone()));
 }
 
 std::string codesh::ast::type::custom_type_ast_node::to_pretty_string() const

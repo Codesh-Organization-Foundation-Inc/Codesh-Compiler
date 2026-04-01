@@ -24,61 +24,81 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
     std::unique_ptr<ast::type_decl::field_declaration_ast_node>,
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
 > parse_field_declaration(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::blasphemy::code_position declaration_pos);
+        codesh::lexer::code_position declaration_pos);
 
 static void parse_method_signature_to(
-        ast::type_decl::type_declaration_ast_node &type_decl, codesh::blasphemy::code_position code_position,
+        ast::type_decl::type_declaration_ast_node &type_decl, codesh::lexer::code_position code_position,
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
-        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+        codesh::lexer::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
 static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
-        codesh::blasphemy::code_position code_position, ast::type_decl::type_declaration_ast_node &type_decl,
+        codesh::lexer::code_position code_position, ast::type_decl::type_declaration_ast_node &type_decl,
         std::queue<std::unique_ptr<codesh::token>> &tokens);
 static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
-        codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+        codesh::lexer::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens);
+static void consume_throws(std::queue<std::unique_ptr<codesh::token>> &tokens,
+                           ast::method::method_declaration_ast_node &method_decl);
 
 
 std::unique_ptr<ast::type_decl::class_declaration_ast_node> codesh::parser::parse_class_declaration(
-    blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
+    lexer::code_position code_position, std::queue<std::unique_ptr<token>> &tokens)
 {
     if (!util::consuming_check(tokens, token_group::KEYWORD_NAME))
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_KEYWORD_NAME,
-            blasphemy::blasphemy_type::SYNTAX, code_position);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_KEYWORD_NAME,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     // Get name
     const std::unique_ptr<identifier_token> name_token = util::consume_identifier_token(tokens);
     if (!name_token)
     {
-        blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::NO_IDENTIFIER,
-            blasphemy::blasphemy_type::SYNTAX, code_position);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::NO_IDENTIFIER,
+            blasphemy::blasphemy_type::SYNTAX,
+            code_position
+        );
     }
 
     auto node = std::make_unique<ast::type_decl::class_declaration_ast_node>(
         code_position,
-        definition::fully_qualified_name(name_token->get_content())
+        definition::fully_qualified_name(name_token->get_code_position(), name_token->get_content())
     );
 
 
     if (util::consuming_check(tokens, token_group::KEYWORD_EXTENDS))
     {
-        if (const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens))
+        const std::unique_ptr<identifier_token> super_name = util::consume_identifier_token(tokens);
+
+        auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
+            super_name->get_code_position(),
+            definition::fully_qualified_name(super_name->get_code_position(), super_name->get_content())
+        );
+
+        node->set_super_class(std::move(super_type));
+    }
+
+    if (util::consuming_check(tokens, token_group::KEYWORD_IMPLEMENTS))
+    {
+        do
         {
-            auto super_type = std::make_unique<ast::type::custom_type_ast_node>(
-                super_name->get_code_position(),
-                definition::fully_qualified_name(super_name->get_content())
+            const auto interface_name = util::consume_identifier_token(tokens);
+
+            auto interface_type = std::make_unique<ast::type::custom_type_ast_node>(
+                interface_name->get_code_position(),
+                definition::fully_qualified_name(
+                    interface_name->get_code_position(),
+                    interface_name->get_content()
+                )
             );
 
-            node->set_super_class(std::move(super_type));
+            node->add_interface(std::move(interface_type));
+
         }
-        else
-        {
-            blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_IDENTIFIER,
-                blasphemy::blasphemy_type::SYNTAX, code_position
-            );
-        }
+        while (util::consuming_check(tokens, token_group::PUNCTUATION_ARG_SEPARATOR));
     }
 
 
@@ -171,7 +191,7 @@ static std::pair<
     std::unique_ptr<ast::type_decl::field_declaration_ast_node>,
     std::unique_ptr<ast::op::assignment::assignment_operator_ast_node>
 > parse_field_declaration(std::queue<std::unique_ptr<codesh::token>> &tokens,
-        codesh::blasphemy::code_position declaration_pos)
+        codesh::lexer::code_position declaration_pos)
 {
     auto decl_node = std::make_unique<ast::type_decl::field_declaration_ast_node>(declaration_pos);
     auto assignment = parser::parse_variable_declaration(
@@ -181,12 +201,13 @@ static std::pair<
         //TODO: Implement field initialization
         parser::var_decl_assignment_policy::FORBID
     );
+    parser::util::ensure_end_op(tokens);
 
     return {std::move(decl_node), std::move(assignment)};
 }
 
 static void parse_method_signature_to(
-        ast::type_decl::type_declaration_ast_node &type_decl, const codesh::blasphemy::code_position code_position,
+        ast::type_decl::type_declaration_ast_node &type_decl, const codesh::lexer::code_position code_position,
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     bool is_constructor = false;
@@ -217,14 +238,14 @@ static void parse_method_signature_to(
 }
 
 static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_signature(
-        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+        const codesh::lexer::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     // * (the name)
     const std::unique_ptr<codesh::identifier_token> name_token = parser::util::consume_identifier_token(tokens);
 
     auto method_decl = std::make_unique<ast::method::method_declaration_ast_node>(
         code_position,
-        codesh::definition::fully_qualified_name(name_token->get_content())
+        codesh::definition::fully_qualified_name(name_token->get_code_position(), name_token->get_content())
     );
 
     parse_method_signature_continuation(*method_decl, code_position, tokens);
@@ -232,7 +253,7 @@ static std::unique_ptr<ast::method::method_declaration_ast_node> parse_method_si
 }
 
 static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_constructor_signature(
-        const codesh::blasphemy::code_position code_position,
+        const codesh::lexer::code_position code_position,
         ast::type_decl::type_declaration_ast_node &type_decl,
         std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
@@ -248,7 +269,7 @@ static std::unique_ptr<ast::method::constructor_declaration_ast_node> parse_cons
 }
 
 static void parse_method_signature_continuation(ast::method::method_declaration_ast_node &method_decl,
-        const codesh::blasphemy::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
+        const codesh::lexer::code_position code_position, std::queue<std::unique_ptr<codesh::token>> &tokens)
 {
     // Attributes
     method_decl.set_attributes(parser::parse_modifiers(code_position, tokens));
@@ -285,6 +306,12 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
         );
     }
 
+    if (std::unique_ptr<codesh::token> throws_token;
+        parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_THROWS, throws_token))
+    {
+        consume_throws(tokens, method_decl);
+    }
+
 
     if (!did_capture_scope_begin && !parser::util::consuming_check(tokens, codesh::token_group::SCOPE_BEGIN))
     {
@@ -296,6 +323,26 @@ static void parse_method_signature_continuation(ast::method::method_declaration_
     }
 
     parser::parse_method_scope(tokens, method_decl.get_method_scope());
+}
+
+static void consume_throws(std::queue<std::unique_ptr<codesh::token>> &tokens,
+                           ast::method::method_declaration_ast_node &method_decl)
+{
+    do
+    {
+        const auto sin_name = parser::util::consume_identifier_token(tokens);
+
+        auto exception_type = std::make_unique<ast::type::custom_type_ast_node>(
+            sin_name->get_code_position(),
+            codesh::definition::fully_qualified_name(
+                sin_name->get_code_position(),
+                sin_name->get_content()
+            )
+        );
+
+        method_decl.get_sins_thrown().push_back(std::move(exception_type));
+    }
+    while (parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_ARG_SEPARATOR));
 }
 
 std::vector<std::unique_ptr<ast::local_variable_declaration_ast_node>> codesh::parser::parse_parameter_list(

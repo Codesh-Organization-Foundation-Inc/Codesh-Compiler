@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cp_info.h"
+#include "fields_info_entry.h"
 #include "methods_info_entry.h"
 #include "attribute_info_entry.h"
 
@@ -18,9 +19,9 @@ struct class_file
     unsigned char this_class[2];
     unsigned char super_class[2];
     unsigned char interfaces_count[2];
-    unsigned char interfaces_info[0]; // change later
+    std::vector<std::array<unsigned char, 2>> interfaces_info;
     unsigned char fields_count[2];
-    unsigned char fields_info[0]; // change later
+    std::vector<std::unique_ptr<fields_info_entry>> fields_info;
     unsigned char methods_count[2];
     std::vector<std::unique_ptr<methods_info_entry>> methods_info;
     unsigned char attribute_count[2];

@@ -1,17 +1,18 @@
 #include "widen_util.h"
 
+#include "../../parser/ast/operator/cast/widening_cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
 #include "parser/ast/var_reference/value_ast_node.h"
 #include "semantic_analyzer/util.h"
+#include "semantic_analyzer/util/poly_util.h"
 
 #include <cassert>
-#include <set>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace codesh::definition;
 
-static const std::unordered_map<primitive_type, std::set<primitive_type>> WIDENING_MAP = {
+static const std::unordered_map<primitive_type, std::unordered_set<primitive_type>> WIDENING_MAP = {
     {
         primitive_type::BYTE,
         {
@@ -106,7 +107,7 @@ std::optional<primitive_type> codesh::semantic_analyzer::util::get_widened_primi
 }
 
 codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::make_widening_cast_maybe(
-        std::unique_ptr<ast::var_reference::value_ast_node> value_node,
+        const semantic_context &context, std::unique_ptr<ast::var_reference::value_ast_node> value_node,
         const ast::type::type_ast_node &expected_type)
 {
     assert(value_node->get_type() != nullptr && "Value must have a type");
@@ -122,6 +123,9 @@ codesh::semantic_analyzer::util::widen_result codesh::semantic_analyzer::util::m
             make_widening_cast(std::move(value_node), expected_type)
         };
     }
+
+    if (can_poly_cast_to(context, type, expected_type))
+        return {true, std::move(value_node)};
 
     return {false, std::move(value_node)};
 }

@@ -9,7 +9,7 @@ namespace codesh::ast::op
 class minus_operator_ast_node final : public impl::unary_ast_node, public i_math_operator_holder
 {
 public:
-    minus_operator_ast_node(blasphemy::code_position code_position, std::unique_ptr<value_ast_node> child);
+    minus_operator_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> child);
 
     [[nodiscard]] std::string to_pretty_string() const override;
 
