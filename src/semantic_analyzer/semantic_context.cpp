@@ -2,7 +2,7 @@
 
 #include "fmt/xchar.h"
 
-codesh::semantic_analyzer::semantic_context::semantic_context(const symbol_table &symbol_table_,
+codesh::semantic_analyzer::semantic_context::semantic_context(symbol_table &symbol_table_,
         std::vector<std::reference_wrapper<country_symbol>> lookup_countries,
         const ast::compilation_unit_ast_node &root,
         blasphemy::blasphemy_consumer blasphemy_consumer) :

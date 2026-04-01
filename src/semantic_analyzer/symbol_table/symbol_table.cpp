@@ -46,6 +46,17 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_tab
     return *talmud_codesh_country;
 }
 
+const std::vector<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::semantic_analyzer::
+    symbol_table::get_main_classes() const
+{
+    return main_classes;
+}
+
+void codesh::semantic_analyzer::symbol_table::add_main_class(type_symbol &type)
+{
+    main_classes.emplace_back(type);
+}
+
 const std::vector<codesh::definition::fully_qualified_name> &codesh::semantic_analyzer::symbol_table::
     get_default_imports() const
 {

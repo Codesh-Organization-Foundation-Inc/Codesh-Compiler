@@ -1,5 +1,7 @@
 #pragma once
 
+#include "defenition/fully_qualified_name.h"
+
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -27,6 +29,7 @@ struct command_args
 
     std::filesystem::path jre_path;
     std::filesystem::path talmud_codesh_path;
+    std::optional<definition::fully_qualified_name> explicit_main_class; // Set by --main-class (JAR only)
 };
 
 command_args parse_command(int argc, char **argv);
