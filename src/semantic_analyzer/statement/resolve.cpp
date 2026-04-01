@@ -18,6 +18,7 @@
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
 #include "parser/ast/method/operation/array_length_ast_node.h"
+#include "parser/ast/method/operation/new_array_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
 #include "parser/ast/operator/cast/cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
@@ -257,6 +258,30 @@ bool statement::resolve(const semantic_context &context,
     if (const auto cast = dynamic_cast<ast::op::assignment::cast_ast_node *>(&stmnt))
     {
         return cast::resolve(context, *cast, containing_method, scope);
+    }
+
+    if (const auto new_arr = dynamic_cast<ast::op::new_array_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        all_succeed &= util::resolve_type_node(context, new_arr->get_element_type());
+
+        for (auto &dim : new_arr->get_dimensions())
+        {
+            if (!resolve_value(context, *dim, containing_method, scope))
+            {
+                all_succeed = false;
+                continue;
+            }
+
+            all_succeed &= is_primitive_type(
+                *dim,
+                definition::primitive_type::INTEGER,
+                blasphemy::details::ARRAY_INDEX_NOT_INTEGER
+            );
+        }
+
+        return all_succeed;
     }
 
     // Probably doesn't need to be resolved.
