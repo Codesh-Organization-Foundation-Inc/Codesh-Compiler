@@ -85,7 +85,7 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::KEYWORD_ARRAY, {u"כמסדר", word_boundary::BOTH}},
     {token_group::KEYWORD_INDEX, {u"במקום", word_boundary::BOTH}},
     {token_group::KEYWORD_ARRAY_LENGTH, {u"אורכו של", word_boundary::BOTH}},
-    {token_group::KEYWORD_HIS_LENGTH, {u"ואורכו", word_boundary::BOTH}},
+    {token_group::KEYWORD_LENGTH, {u"ואורכו", word_boundary::BOTH}},
     {token_group::KEYWORD_BY, {u"על", word_boundary::BOTH}},
     {token_group::KEYWORD_CUBIT, {u"אמה", word_boundary::BOTH}},
     {token_group::KEYWORD_REPLACE, {u"ויחלף", word_boundary::BOTH}},

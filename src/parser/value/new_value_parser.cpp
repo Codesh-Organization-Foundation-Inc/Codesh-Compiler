@@ -52,7 +52,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         std::move(parsed_type)
     );
 
-    if (!util::consuming_check(tokens, token_group::KEYWORD_HIS_LENGTH))
+    if (!util::consuming_check(tokens, token_group::KEYWORD_LENGTH))
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_KEYWORD_HIS_LENGTH,
