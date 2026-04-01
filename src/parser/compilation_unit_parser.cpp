@@ -12,10 +12,10 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse_compilation_unit(
-        std::queue<std::unique_ptr<token>> &tokens, const std::filesystem::path &source_path)
+        std::queue<std::unique_ptr<token>> &tokens, const size_t file_id)
 {
-    std::unique_ptr<ast::compilation_unit_ast_node> node = std::make_unique<ast::compilation_unit_ast_node>(
-        parse_basad_type(tokens), source_path
+    auto node = std::make_unique<ast::compilation_unit_ast_node>(
+        file_id, parse_basad_type(tokens)
     );
 
     if (!tokens.empty())
@@ -38,13 +38,13 @@ static codesh::definition::basad_type parse_basad_type(std::queue<std::unique_pt
     case codesh::token_group::KEYWORD_BASAD: return codesh::definition::basad_type::BASAD;
     case codesh::token_group::KEYWORD_BH: return codesh::definition::basad_type::BH;
     case codesh::token_group::KEYWORD_IAW: return codesh::definition::basad_type::IAW;
+    case codesh::token_group::KEYWORD_JCIK: return codesh::definition::basad_type::JCIK;
 
     default: {
         codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::NO_BASAD,
             codesh::blasphemy::blasphemy_type::LEXICAL,
-            {1, 0},
-            true
+            codesh::lexer::FILE_BEGIN
         );
 
         return codesh::definition::basad_type::MISSING;

@@ -1,5 +1,6 @@
 #include "assignment_operator_ast_node.h"
 
+#include "semantic_analyzer/util/poly_util.h"
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/ir/instruction/put_field_instruction.h"
@@ -9,21 +10,36 @@
 #include "semantic_analyzer/symbol_table/symbol.h"
 
 codesh::ast::op::assignment::assignment_operator_ast_node::assignment_operator_ast_node(
-        const blasphemy::code_position code_position, std::unique_ptr<variable_reference_ast_node> left,
+        const lexer::code_position code_position, std::unique_ptr<var_reference::variable_reference_ast_node> left,
         std::unique_ptr<value_ast_node> right) :
     binary_ast_node(code_position, std::move(left), std::move(right))
 {
 }
 
-variable_reference_ast_node &codesh::ast::op::assignment::assignment_operator_ast_node::get_left() const
+codesh::ast::var_reference::variable_reference_ast_node &codesh::ast::op::assignment::assignment_operator_ast_node::
+    get_left() const
 {
-    return static_cast<variable_reference_ast_node &>(binary_ast_node::get_left()); // NOLINT(*-pro-type-static-cast-downcast)
+    return static_cast<var_reference::variable_reference_ast_node &>(binary_ast_node::get_left()); // NOLINT(*-pro-type-static-cast-downcast)
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::op::assignment::assignment_operator_ast_node::get_type() const
 {
     // In assignment, the return type is determined by the left operand.
     return get_left().get_type();
+}
+
+bool codesh::ast::op::assignment::assignment_operator_ast_node::is_value_valid(
+        const semantic_analyzer::semantic_context &context) const
+{
+    if (binary_ast_node::is_value_valid(context))
+        return true;
+
+    const auto *lhs_type = get_left().get_type();
+    const auto *rhs_type = get_right().get_type();
+    if (!lhs_type || !rhs_type)
+        return false;
+
+    return semantic_analyzer::util::can_poly_cast_to(context, *rhs_type, *lhs_type);
 }
 
 void codesh::ast::op::assignment::assignment_operator_ast_node::emit_constants(

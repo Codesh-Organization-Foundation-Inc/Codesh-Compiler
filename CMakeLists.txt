@@ -1,4 +1,20 @@
 cmake_minimum_required(VERSION 3.31.6)
+
+# vcpkg triplet for MinGW on Windows
+if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(VCPKG_TARGET_TRIPLET "x64-mingw-dynamic" CACHE STRING "vcpkg target triplet")
+endif()
+
+# vcpkg toolchain
+if(DEFINED ENV{VCPKG_ROOT})
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+elseif(NOT WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    # sudo dnf install git curl zip unzip tar ninja-build pkg-config autoconf automake libtool
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{HOME}/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
+endif()
+
 project(codeshc CXX)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -15,6 +31,8 @@ add_executable(codeshc
         src/parser/parser.cpp
         src/lexer/tokenizer.h
         src/lexer/tokenizer.cpp
+        src/lexer/source_file_info.cpp
+        src/lexer/source_file_info.h
         src/parser/ast/impl/ast_node.cpp
         src/parser/ast/impl/ast_node.h
         src/parser/ast/impl/binary_ast_node.cpp
@@ -77,6 +95,7 @@ add_executable(codeshc
         src/defenition/visibility.cpp
         src/output/jvm_target/defs/class_file.h
         src/output/jvm_target/defs/cp_info.h
+        src/output/jvm_target/defs/fields_info_entry.h
         src/output/jvm_target/defs/methods_info_entry.h
         src/output/jvm_target/defs/attribute_info_entry.h
         src/defenition/visibility.cpp
@@ -99,15 +118,15 @@ add_executable(codeshc
         src/parser/ast/type/custom_type_ast_node.h
         src/parser/ast/type/primitive_type_ast_node.cpp
         src/parser/ast/type/primitive_type_ast_node.h
-        src/parser/ast/type/widening_cast_ast_node.cpp
-        src/parser/ast/type/widening_cast_ast_node.h
+        src/parser/ast/type/null_type_ast_node.cpp
+        src/parser/ast/type/null_type_ast_node.h
+        src/parser/ast/operator/cast/widening_cast_ast_node.cpp
+        src/parser/ast/operator/cast/widening_cast_ast_node.h
         src/defenition/primitive_type.h
         src/parser/ast/local_variable_declaration_ast_node.cpp
         src/parser/ast/local_variable_declaration_ast_node.h
         src/parser/ast/type/type_ast_node.cpp
         src/parser/ast/impl/i_descriptor_emitter.h
-        src/test.cpp
-        src/test.h
         src/output/jvm_target/class_file_builder.cpp
         src/output/jvm_target/class_file_builder.h
         src/output/jvm_target/stack_map_table_builder.cpp
@@ -120,6 +139,8 @@ add_executable(codeshc
         src/output/jvm_target/constant_pool.h
         src/output/jvm_target/class_file_writer.cpp
         src/output/jvm_target/class_file_writer.h
+        src/output/jvm_target/jar_bundler.cpp
+        src/output/jvm_target/jar_bundler.h
         src/parser/type/class/method_parser.cpp
         src/parser/type/class/method_parser.h
         src/semantic_analyzer/analyzer.h
@@ -162,12 +183,18 @@ add_executable(codeshc
         src/output/ir/instruction/impl/typed_instruction.h
         src/output/ir/instruction/nop_instruction.cpp
         src/output/ir/instruction/nop_instruction.h
+        src/output/ir/instruction/aconst_null_instruction.cpp
+        src/output/ir/instruction/aconst_null_instruction.h
         src/output/ir/instruction/load_instruction.cpp
         src/output/ir/instruction/load_instruction.h
         src/output/ir/instruction/return_instruction.cpp
         src/output/ir/instruction/return_instruction.h
         src/output/ir/instruction/widening_cast_instruction.cpp
         src/output/ir/instruction/widening_cast_instruction.h
+        src/output/ir/instruction/checkcast_instruction.cpp
+        src/output/ir/instruction/checkcast_instruction.h
+        src/output/ir/instruction/narrowing_cast_instruction.cpp
+        src/output/ir/instruction/narrowing_cast_instruction.h
         src/output/ir/instruction/invoke_instruction.cpp
         src/output/ir/instruction/invoke_instruction.h
         src/output/ir/instruction/load_int_constant_instruction.cpp
@@ -235,10 +262,12 @@ add_executable(codeshc
         src/parser/ast/method/util.h
         src/semantic_analyzer/builtins.cpp
         src/semantic_analyzer/builtins.h
-        src/semantic_analyzer/external/class_loader.h
-        src/semantic_analyzer/external/class_loader.cpp
+        src/classpath/loader/class_file_loader.h
+        src/classpath/loader/class_file_loader.cpp
         src/parser/ast/var_reference/error_value_ast_node.cpp
         src/parser/ast/var_reference/error_value_ast_node.h
+        src/parser/ast/var_reference/null_value_ast_node.cpp
+        src/parser/ast/var_reference/null_value_ast_node.h
         src/parser/ast/var_reference/variable_reference_ast_node.cpp
         src/parser/ast/var_reference/variable_reference_ast_node.h
         src/parser/value/value_parser.cpp
@@ -270,6 +299,8 @@ add_executable(codeshc
         src/semantic_analyzer/statement/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.cpp
         src/semantic_analyzer/statement/variable_reference/resolve.h
+        src/semantic_analyzer/statement/cast/resolve.cpp
+        src/semantic_analyzer/statement/cast/resolve.h
         src/parser/ast/operator/assignment/assign_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
@@ -311,71 +342,106 @@ add_executable(codeshc
         src/defenition/i_pretty_string_convertable.h
         src/output/ir/util.cpp
         src/output/ir/util.h
+        src/parser/value/biblical_numbers_parser.cpp
+        src/parser/value/biblical_numbers_parser.h
         src/output/ir/instruction/dup_instruction.cpp
         src/output/ir/instruction/dup_instruction.h
         src/output/ir/instruction/new_instruction.cpp
         src/output/ir/instruction/new_instruction.h
         src/output/ir/instruction/pop_instruction.cpp
         src/output/ir/instruction/pop_instruction.h
+        src/output/ir/instruction/array_load_instruction.cpp
+        src/output/ir/instruction/array_load_instruction.h
+        src/output/ir/instruction/array_length_instruction.cpp
+        src/output/ir/instruction/array_length_instruction.h
+        src/output/ir/instruction/new_array_instruction.cpp
+        src/output/ir/instruction/new_array_instruction.h
+        src/output/ir/instruction/anewarray_instruction.cpp
+        src/output/ir/instruction/anewarray_instruction.h
+        src/output/ir/instruction/multianewarray_instruction.cpp
+        src/output/ir/instruction/multianewarray_instruction.h
         src/parser/ast/type_declaration/field_declaration_ast_node.cpp
         src/parser/ast/type_declaration/field_declaration_ast_node.h
         src/parser/ast/type_declaration/variable_declaration_ast_node.cpp
         src/parser/ast/type_declaration/variable_declaration_ast_node.h
-        src/semantic_analyzer/external/jimage_loader.h
-        src/semantic_analyzer/external/jimage_loader.cpp
-        src/semantic_analyzer/external/util.cpp
-        src/semantic_analyzer/external/util.h
+        src/classpath/loader/jimage_loader.h
+        src/classpath/loader/jimage_loader.cpp
+        src/semantic_analyzer/external/interop_replacements.h
+        src/semantic_analyzer/external/interop_replacements.cpp
+        src/classpath/loader/jar_loader.h
+        src/classpath/loader/jar_loader.cpp
+        src/classpath/loader/util.cpp
+        src/classpath/loader/util.h
+        src/parser/ast/var_reference/array_access_ast_node.cpp
+        src/parser/ast/var_reference/array_access_ast_node.h
+        src/parser/ast/operator/cast/cast_ast_node.cpp
+        src/parser/ast/operator/cast/cast_ast_node.h
+        src/parser/ast/operator/cast/manual_cast_ast_node.cpp
+        src/parser/ast/operator/cast/manual_cast_ast_node.h
         src/semantic_analyzer/util/widen_util.cpp
         src/semantic_analyzer/util/widen_util.h
+        src/semantic_analyzer/util/poly_util.cpp
+        src/semantic_analyzer/util/poly_util.h
+        src/lsp/lsp_receiever.cpp
+        src/lsp/lsp_receiver.h
+        src/parser/ast/var_reference/reference_association.h
+        src/classpath/loader/class_directory_loader.cpp
+        src/classpath/loader/class_directory_loader.h
+        src/classpath/loader/class_loader.cpp
+        src/classpath/loader/class_loader.h
+        src/parser/ast/type_declaration/interface_declaration_ast_node.cpp
+        src/parser/ast/type_declaration/interface_declaration_ast_node.h
+        src/parser/ast/method/operation/array_length_ast_node.cpp
+        src/parser/ast/method/operation/array_length_ast_node.h
+        src/parser/ast/method/operation/new_array_ast_node.cpp
+        src/parser/ast/method/operation/new_array_ast_node.h
 )
+
 
 # sudo dnf install boost-regex boost-devel
 find_package(Boost REQUIRED COMPONENTS regex headers)
-
-target_link_libraries(codeshc Boost::boost Boost::regex)
-
-find_package(ZLIB REQUIRED)
-target_link_libraries(codeshc ZLIB::ZLIB)
+target_link_libraries(codeshc PRIVATE Boost::boost Boost::regex)
 
 # sudo dnf install libicu-devel
+# On Windows, use MSYS2 ucrt64 prebuilt ICU: pacman -S mingw-w64-ucrt-x86_64-icu
+if(WIN32 AND NOT DEFINED ICU_ROOT)
+    set(ICU_ROOT "C:/msys64/ucrt64" CACHE PATH "Path to ICU installation")
+endif()
 find_package(ICU REQUIRED COMPONENTS i18n uc data)
 include_directories(${ICU_INCLUDE_DIRS})
 
-target_link_libraries(codeshc
-        ${ICU_LIBRARIES} icui18n
-        icuuc
-        icudata
-)
+if(WIN32)
+    target_link_libraries(codeshc PRIVATE ICU::i18n ICU::uc ICU::data)
+else()
+    target_link_libraries(codeshc PRIVATE
+            ${ICU_LIBRARIES} icui18n
+            icuuc
+            icudata
+    )
+endif()
 
 
-include(FetchContent)
+# vcpkg
 
+find_package(ZLIB REQUIRED)
+target_link_libraries(codeshc PRIVATE ZLIB::ZLIB)
 
-# utfcpp
-# Declare utfcpp content
-FetchContent_Declare(
-        utfcpp
-        GIT_REPOSITORY https://github.com/nemtrif/utfcpp.git
-        GIT_TAG        origin/master
-        GIT_SHALLOW    TRUE
-)
+find_package(utf8cpp CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE utf8cpp::utf8cpp)
 
-FetchContent_MakeAvailable(utfcpp)
+find_package(fmt CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE fmt::fmt)
 
-target_include_directories(codeshc PRIVATE
-        ${utfcpp_SOURCE_DIR}/source
-)
+find_package(nlohmann_json CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE nlohmann_json::nlohmann_json)
 
-# fmt
-FetchContent_Declare(
-        fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG 12.1.0
-)
+find_package(libzip CONFIG REQUIRED)
 
-FetchContent_MakeAvailable(fmt)
-target_link_libraries(codeshc fmt::fmt)
+find_package(libzippp CONFIG REQUIRED)
+target_link_libraries(codeshc PRIVATE libzippp::libzippp)
 
 
 # Support includes starting from relative paths
 target_include_directories(codeshc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+install(TARGETS codeshc DESTINATION .)

@@ -13,6 +13,8 @@
 #include "parser/ast/method/method_scope_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/class_declaration_ast_node.h"
+#include "parser/ast/type_declaration/field_declaration_ast_node.h"
+#include "output/jvm_target/defs/fields_info_entry.h"
 #include "util.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
@@ -21,9 +23,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <functional>
-
-#include <ranges>
-#include <set>
 
 codesh::output::jvm_target::class_file_builder::class_file_builder(defs::class_file &class_file_out,
         const ast::compilation_unit_ast_node &root_node,
@@ -58,8 +57,7 @@ void codesh::output::jvm_target::class_file_builder::build() const
     util::put_int_bytes(class_file.this_class, 2, this_class_cpi);
     util::put_int_bytes(class_file.super_class, 2, super_class_cpi);
 
-    util::put_int_bytes(class_file.interfaces_count, 2, 0);
-    util::put_int_bytes(class_file.fields_count, 2, 0);
+    add_interfaces();
 
     if (const auto class_decl = dynamic_cast<const ast::type_decl::class_declaration_ast_node *>(&type_decl))
     {
@@ -68,6 +66,7 @@ void codesh::output::jvm_target::class_file_builder::build() const
     else
     {
         // TODO: Handle
+        util::put_int_bytes(class_file.fields_count, 2, 0);
         util::put_int_bytes(class_file.methods_count, 2, 0);
     }
 
@@ -79,6 +78,16 @@ void codesh::output::jvm_target::class_file_builder::build() const
 void codesh::output::jvm_target::class_file_builder::handle_class_type(
     const ast::type_decl::class_declaration_ast_node &class_decl) const
 {
+    for (const auto &field_decl : class_decl.get_fields())
+    {
+        add_field(*field_decl);
+    }
+
+    util::put_int_bytes(
+        class_file.fields_count, 2,
+        static_cast<int>(class_decl.get_fields().size())
+    );
+
     for (const auto &method_decl : class_decl.get_all_methods())
     {
         add_method(*method_decl);
@@ -97,7 +106,7 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
     if (constant_pool_size > 0xFFFF)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(blasphemy::details::CONSTANT_POOL_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, blasphemy::NO_CODE_POS, true);
+            blasphemy::blasphemy_type::OUTPUT, lexer::NO_CODE_POS, true);
     }
 
     util::put_int_bytes(class_file.constant_pool_count, 2, constant_pool_size); // NOLINT(*-narrowing-conversions) (Checked overflow above)
@@ -110,12 +119,46 @@ void codesh::output::jvm_target::class_file_builder::add_constant_pool_entries()
 }
 
 
+void codesh::output::jvm_target::class_file_builder::add_field(
+        const ast::type_decl::field_declaration_ast_node &field_decl) const
+{
+    class_file.fields_info.push_back(create_field_entry(field_decl));
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry> codesh::output::jvm_target::class_file_builder::
+    create_field_entry(const ast::type_decl::field_declaration_ast_node &field_decl) const
+{
+    auto entry = std::make_unique<defs::fields_info_entry>();
+
+    set_access_flags(entry->access_flags, field_decl.get_attributes()->get_access_flags());
+    util::put_int_bytes(
+        entry->name_index,
+        2,
+        constant_pool_.get_utf8_index(field_decl.get_name())
+    );
+    util::put_int_bytes(
+        entry->descriptor_index,
+        2,
+        constant_pool_.get_utf8_index(field_decl.generate_descriptor(true))
+    );
+    util::put_int_bytes(entry->attributes_count, 2, 0);
+
+    return entry;
+}
+
 void codesh::output::jvm_target::class_file_builder::add_method(
         const ast::method::method_declaration_ast_node &method_decl) const
 {
     auto method_entry = create_method_entry(method_decl);
 
     method_entry->attribute_info.push_back(create_code_attribute(method_decl));
+
+    if (!method_decl.get_sins_thrown().empty())
+    {
+        method_entry->attribute_info.push_back(create_exceptions_attribute(method_decl));
+    }
+
+    util::put_int_bytes(method_entry->attributes_count, 2, static_cast<int>(method_entry->attribute_info.size()));
 
     class_file.methods_info.push_back(std::move(method_entry));
 }
@@ -186,6 +229,33 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     return code_attr;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::exceptions_attribute_entry>
+    codesh::output::jvm_target::class_file_builder::create_exceptions_attribute(
+        const ast::method::method_declaration_ast_node &method_decl) const
+{
+    auto result = std::make_unique<defs::exceptions_attribute_entry>();
+    util::put_int_bytes(result->attribute_name_index, 2, constant_pool_.get_utf8_index("Exceptions"));
+
+    const auto &exceptions = method_decl.get_sins_thrown();
+    util::put_int_bytes(result->number_of_exceptions, 2, static_cast<int>(exceptions.size()));
+
+    for (const auto &exception_type : exceptions)
+    {
+        const std::string class_name = exception_type->get_resolved_name().join();
+        const int utf8_idx = constant_pool_.get_utf8_index(class_name);
+        const int class_idx = constant_pool_.get_class_index(utf8_idx);
+
+        std::array<unsigned char, 2> entry{};
+        util::put_int_bytes(entry.data(), 2, class_idx);
+        result->exception_index_table.push_back(entry);
+    }
+
+    // attribute_length = 2 (number_of_exceptions) + 2 * count
+    util::put_int_bytes(result->attribute_length, 4, 2 + 2 * static_cast<int>(exceptions.size()));
+
+    return result;
+}
+
 codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::emit_method_bytecode(
     defs::code_attribute_entry &code_attr, const ast::method::method_declaration_ast_node &method_decl) const
 {
@@ -225,8 +295,10 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
 
     if (code_attr.code.size() > 0xFFFFFF)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(blasphemy::details::METHOD_TOO_BIG,
-            blasphemy::blasphemy_type::OUTPUT, blasphemy::NO_CODE_POS, true);
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::METHOD_TOO_BIG,
+            blasphemy::blasphemy_type::OUTPUT, lexer::NO_CODE_POS, true
+        );
     }
 
     util::put_int_bytes(code_attr.code_length, 4, code_attr.code.size()); // NOLINT(*-narrowing-conversions)
@@ -291,6 +363,24 @@ std::unique_ptr<codesh::output::jvm_target::defs::local_variable_table_attribute
     );
 
     return local_variable_table;
+}
+
+void codesh::output::jvm_target::class_file_builder::add_interfaces() const
+{
+    const auto &interfaces = type_decl.get_interfaces();
+    util::put_int_bytes(class_file.interfaces_count, 2, static_cast<int>(interfaces.size()));
+
+    for (const auto &interface : interfaces)
+    {
+        std::array<unsigned char, 2> entry{};
+
+        const int class_idx = constant_pool_.get_class_index(
+            constant_pool_.get_utf8_index(interface->get_resolved_name().join())
+        );
+        util::put_int_bytes(entry.data(), 2, class_idx);
+
+        class_file.interfaces_info.push_back(entry);
+    }
 }
 
 void codesh::output::jvm_target::class_file_builder::add_source_file() const
@@ -370,7 +460,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
                     method_decl.get_resolved_name().holy_join()
                 ),
                 blasphemy::blasphemy_type::OUTPUT,
-                blasphemy::NO_CODE_POS,
+                lexer::NO_CODE_POS,
                 true
             );
         }

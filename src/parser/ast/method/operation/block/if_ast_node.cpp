@@ -5,7 +5,7 @@
 #include "parser/ast/method/method_declaration_ast_node.h"
 #include "parser/ast/method/method_scope_ast_node.h"
 
-codesh::ast::block::if_ast_node::if_ast_node(const blasphemy::code_position code_position,
+codesh::ast::block::if_ast_node::if_ast_node(const lexer::code_position code_position,
         conditioned_scope_container if_branch) :
     method_operation_ast_node(code_position),
     if_branch(std::move(if_branch))

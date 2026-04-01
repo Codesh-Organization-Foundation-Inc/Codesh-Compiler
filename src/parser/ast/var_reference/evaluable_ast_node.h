@@ -3,6 +3,12 @@
 #include "parser/ast/impl/i_constant_pool_emitter.h"
 #include "value_ast_node.h"
 
+namespace codesh::ast::type
+{
+class type_ast_node;
+}
+
+
 namespace codesh::ast::var_reference
 {
 
@@ -15,7 +21,9 @@ class evaluable_ast_node : public value_ast_node, public impl::i_constant_pool_e
     std::optional<int> value_cpi;
 
 public:
-    evaluable_ast_node(blasphemy::code_position code_position, std::unique_ptr<type::type_ast_node> type, T value);
+    evaluable_ast_node(lexer::code_position code_position, std::unique_ptr<type::type_ast_node> type, T value);
+
+    [[nodiscard]] static std::unique_ptr<evaluable_ast_node<int>> make_int(lexer::code_position pos, int value);
 
     [[nodiscard]] type::type_ast_node *get_type() const override;
 

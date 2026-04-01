@@ -11,12 +11,15 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "parser/ast/compilation_unit_ast_node.h"
+#include "output/jvm_target/defs/fields_info_entry.h"
 #include "output/jvm_target/defs/methods_info_entry.h"
 
 #include "output/jvm_target/defs/attribute_info_entry.h"
 #include "output/jvm_target/defs/class_file.h"
 
 static void write_bytes(std::ofstream &out, const unsigned char *data, std::streamsize length);
+static void write_fields(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry>> &fields);
 static void write_methods(std::ofstream &out,
         const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry>> &methods);
 static void write_attributes(std::ofstream &out,
@@ -32,20 +35,25 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
                                                const ast::type_decl::type_declaration_ast_node &type_decl,
                                                const std::filesystem::path &destination)
 {
-    std::ofstream destination_file(
-        destination / (type_decl.get_last_name(false) + ".class"),
-        std::ios::binary
-    );
+    const auto class_file_path = destination / (type_decl.get_last_name(false) + ".class");
+#ifndef _WIN32
+    std::ofstream destination_file(class_file_path, std::ios::binary);
+#else
+    std::ofstream destination_file;
+    // Windows is whiny and its feewings get huwwwt when it sees Hebrew as UTF-8.
+    // Expand it to wstring.
+    destination_file.open(class_file_path.wstring().c_str(), std::ios::binary);
+#endif
 
     if (!destination_file)
     {
         blasphemy::blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::SOURCE_FILE_OPEN_ERROR,
-                (destination / (type_decl.get_last_name(false) + ".class")).string()
+                class_file_path.string()
             ),
             blasphemy::blasphemy_type::OUTPUT,
-            blasphemy::NO_CODE_POS,
+            lexer::NO_CODE_POS,
             true
         );
     }
@@ -63,7 +71,13 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
     write_bytes(destination_file, class_file.super_class, 2);
 
     write_bytes(destination_file, class_file.interfaces_count, 2);
+    for (const auto &iface : class_file.interfaces_info)
+    {
+        write_bytes(destination_file, iface.data(), 2);
+    }
+
     write_bytes(destination_file, class_file.fields_count, 2);
+    write_fields(destination_file, class_file.fields_info);
     write_bytes(destination_file, class_file.methods_count, 2);
 
     write_methods(destination_file, class_file.methods_info);
@@ -264,10 +278,31 @@ static void write_attributes(std::ofstream &out, const std::vector<std::unique_p
         {
             write_bytes(out, src_attr->sourcefile_index, 2);
         }
+        else if (const auto exc_attr = dynamic_cast<const codesh::output::jvm_target::defs::exceptions_attribute_entry *>(attr.get()))
+        {
+            write_bytes(out, exc_attr->number_of_exceptions, 2);
+            for (const auto &entry : exc_attr->exception_index_table)
+            {
+                write_bytes(out, entry.data(), 2);
+            }
+        }
         else
         {
             throw std::runtime_error("Unknown attribute type");
         }
+    }
+}
+
+static void write_fields(std::ofstream &out,
+        const std::vector<std::unique_ptr<codesh::output::jvm_target::defs::fields_info_entry>> &fields)
+{
+    for (const auto &field : fields)
+    {
+        write_bytes(out, field->access_flags, 2);
+        write_bytes(out, field->name_index, 2);
+        write_bytes(out, field->descriptor_index, 2);
+        write_bytes(out, field->attributes_count, 2);
+        write_attributes(out, field->attribute_info);
     }
 }
 

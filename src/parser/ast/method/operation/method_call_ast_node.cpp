@@ -13,6 +13,7 @@
 
 #include <cassert>
 
+
 const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> &codesh::ast::method::operation::
     method_call_ast_node::_get_resolved() const
 {
@@ -20,8 +21,10 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::operation::method_call_ast_node::method_call_ast_node(
-        const blasphemy::code_position code_position) :
-    value_ast_node(code_position)
+        const lexer::code_position code_position) :
+    value_ast_node(code_position),
+    name(code_position),
+    association(var_reference::reference_association::UNKNOWN)
 {
 }
 
@@ -47,22 +50,49 @@ const codesh::definition::fully_qualified_name &codesh::ast::method::operation::
     return name;
 }
 
-codesh::ast::method::operation::method_call_ast_node &codesh::ast::method::operation::method_call_ast_node::
-    get_chained_method() const
+void codesh::ast::method::operation::method_call_ast_node::set_receiver(
+        std::unique_ptr<value_ast_node> receiver)
 {
-    assert(chained_method.has_value() && "Tried to get chained method though one does not exist");
-    return *chained_method.value();
+    receiver_expression.emplace(std::move(receiver));
 }
 
-void codesh::ast::method::operation::method_call_ast_node::set_chained_method(
-        std::unique_ptr<method_call_ast_node> chained_method)
+bool codesh::ast::method::operation::method_call_ast_node::has_receiver() const
 {
-    this->chained_method.emplace(std::move(chained_method));
+    return receiver_expression.has_value();
 }
 
-bool codesh::ast::method::operation::method_call_ast_node::has_chained_method() const
+codesh::ast::var_reference::value_ast_node &codesh::ast::method::operation::method_call_ast_node::get_receiver()
 {
-    return chained_method.has_value();
+    assert(receiver_expression.has_value() && "Tried to get receiver though one does not exist");
+    return *receiver_expression.value();
+}
+
+const codesh::ast::var_reference::value_ast_node &codesh::ast::method::operation::method_call_ast_node::
+    get_receiver() const
+{
+    assert(receiver_expression.has_value() && "Tried to get receiver though one does not exist");
+    return *receiver_expression.value();
+}
+
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::ast::method::operation::
+    method_call_ast_node::take_receiver()
+{
+    assert(receiver_expression.has_value() && "Tried to take receiver though one does not exist");
+    auto result = std::move(receiver_expression.value());
+    receiver_expression.reset();
+    return result;
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_association(
+        const var_reference::reference_association association)
+{
+    this->association = association;
+}
+
+codesh::ast::var_reference::reference_association codesh::ast::method::operation::method_call_ast_node::
+    get_association() const
+{
+    return association;
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::method::operation::method_call_ast_node::get_type() const
@@ -94,26 +124,35 @@ std::string codesh::ast::method::operation::method_call_ast_node::generate_descr
     );
 }
 
-const std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
-    method_call_ast_node::get_arguments() const
+std::deque<codesh::ast::method::operation::named_argument> &codesh::ast::method::operation::
+    method_call_ast_node::get_arguments()
 {
     return arguments;
 }
 
-std::deque<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &codesh::ast::method::operation::
-    method_call_ast_node::get_arguments()
+const std::deque<codesh::ast::method::operation::named_argument> &codesh::ast::method::operation::
+        method_call_ast_node::get_arguments() const
 {
     return arguments;
+}
+
+void codesh::ast::method::operation::method_call_ast_node::set_statement_at(const size_t index,
+    std::unique_ptr<value_ast_node> value)
+{
+    arguments.at(index).value = std::move(value);
 }
 
 void codesh::ast::method::operation::method_call_ast_node::set_statement_index(const size_t statement_index)
 {
     method_operation_ast_node::set_statement_index(statement_index);
 
-    for (const auto &argument : get_arguments())
+        for (const auto &[arg_name, arg_value] : get_arguments())
     {
-        argument->set_statement_index(statement_index);
+        arg_value->set_statement_index(statement_index);
     }
+
+    if (has_receiver())
+        get_receiver().set_statement_index(statement_index);
 }
 
 std::string codesh::ast::method::operation::method_call_ast_node::to_pretty_string() const
@@ -138,20 +177,22 @@ void codesh::ast::method::operation::method_call_ast_node::emit_constants(
         )
     );
 
-    // Emit arguments
-    for (const auto &argument : get_arguments())
+    // Emit receiver (defensive guard; normally moved into arguments before this runs)
+    if (has_receiver())
     {
-        if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(argument.get()))
+        if (const auto cp_emitter = dynamic_cast<i_constant_pool_emitter *>(&get_receiver()))
+            cp_emitter->emit_constants(root_node, constant_pool);
+    }
+
+    // Emit arguments
+    for (const auto &[arg_name, arg_value] : get_arguments())
+    {
+        if (const auto constant_emitter = dynamic_cast<i_constant_pool_emitter *>(arg_value.get()))
         {
             constant_emitter->emit_constants(root_node, constant_pool);
         }
     }
 
-    // Emit for chained method
-    if (has_chained_method())
-    {
-        get_chained_method().emit_constants(root_node, constant_pool);
-    }
 }
 
 void codesh::ast::method::operation::method_call_ast_node::emit_ir(
@@ -161,19 +202,11 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     const auto &method = get_resolved();
     const auto &cp = containing_type_decl.get_constant_pool();
 
-    // Execute chained methods first
-    if (has_chained_method())
-    {
-        containing_block.set_is_consuming(true);
-        get_chained_method().emit_ir(containing_block, symbol_table, containing_type_decl);
-        containing_block.set_is_consuming(false);
-    }
-
     // Load arguments
-    for (const auto &argument : arguments)
+    for (const auto &[arg_name, arg_value] : arguments)
     {
         containing_block.set_is_consuming(true);
-        argument->emit_ir(containing_block, symbol_table, containing_type_decl);
+        arg_value->emit_ir(containing_block, symbol_table, containing_type_decl);
     }
     containing_block.set_is_consuming(false);
 
@@ -190,9 +223,19 @@ void codesh::ast::method::operation::method_call_ast_node::emit_ir(
     );
 
 
-    const auto invokation_type = method.get_attributes().get_is_static()
-        ? output::ir::invokation_type::STATIC
-        : output::ir::invokation_type::VIRTUAL;
+    output::ir::invokation_type invokation_type;
+    if (method.get_attributes().get_is_static())
+    {
+        invokation_type = output::ir::invokation_type::STATIC;
+    }
+    else if (association == var_reference::reference_association::SUPER)
+    {
+        invokation_type = output::ir::invokation_type::SPECIAL;
+    }
+    else
+    {
+        invokation_type = output::ir::invokation_type::VIRTUAL;
+    }
 
     containing_block.add_instruction(std::make_unique<output::ir::invoke_instruction>(
         invokation_type,

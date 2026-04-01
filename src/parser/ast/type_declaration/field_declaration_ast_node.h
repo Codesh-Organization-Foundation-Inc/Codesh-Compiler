@@ -16,7 +16,7 @@ class field_declaration_ast_node : public variable_declaration_ast_node, public 
     std::optional<std::reference_wrapper<semantic_analyzer::field_symbol>> resolved_symbol;
 
 public:
-    explicit field_declaration_ast_node(blasphemy::code_position pos);
+    explicit field_declaration_ast_node(lexer::code_position pos);
 
     [[nodiscard]] var_reference::value_ast_node* get_value() const;
     void set_value(std::unique_ptr<var_reference::value_ast_node> val);

@@ -16,7 +16,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbo
 }
 
 codesh::ast::type_decl::type_declaration_ast_node::type_declaration_ast_node(
-        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+        const lexer::code_position code_position, definition::fully_qualified_name name) :
     ast_node(code_position), name(std::move(name))
 {
 }
@@ -75,9 +75,7 @@ std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> codesh::as
     results.reserve(interfaces.size());
     for (const auto &iface : interfaces)
     {
-        results.push_back(std::unique_ptr<type::custom_type_ast_node>(
-            static_cast<type::custom_type_ast_node *>(iface->clone().release()) // NOLINT(*-pro-type-static-cast-downcast)
-        ));
+        results.push_back(iface->clone());
     }
 
     return results;
@@ -164,6 +162,17 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
     );
     const int super_class_constant = constant_pool.goc_class_info(super_class_cpi);
 
+    // Interface
+    if (!interfaces.empty())
+    {
+        for (const auto &interface : interfaces)
+        {
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(interface->get_resolved_name().join())
+            );
+        }
+    }
+
     // Add super constructor method reference
     //TODO: Move to IR
     constant_pool.goc_methodref_info(
@@ -175,6 +184,12 @@ void codesh::ast::type_decl::type_declaration_ast_node::emit_constants(
             constant_pool.goc_utf8_info("()V")
         )
     );
+
+    // Emit fields
+    for (const auto &field : get_fields())
+    {
+        field->emit_constants(root_node, constant_pool);
+    }
 
     // Emit methods
     for (const auto &method_decl : get_all_methods())

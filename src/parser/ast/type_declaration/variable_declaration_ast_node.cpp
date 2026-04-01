@@ -4,7 +4,7 @@
 
 
 codesh::ast::type_decl::variable_declaration_ast_node::variable_declaration_ast_node(
-        const blasphemy::code_position pos) :
+        const lexer::code_position pos) :
     ast_node(pos)
 {
 }

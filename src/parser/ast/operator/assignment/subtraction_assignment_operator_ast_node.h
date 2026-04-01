@@ -7,8 +7,8 @@ namespace codesh::ast::op::assignment
 class subtraction_assignment_operator_ast_node final : public assignment_operator_ast_node
 {
 public:
-    subtraction_assignment_operator_ast_node(blasphemy::code_position code_position,
-            std::unique_ptr<variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right);
+    subtraction_assignment_operator_ast_node(lexer::code_position code_position,
+            std::unique_ptr<var_reference::variable_reference_ast_node> left, std::unique_ptr<value_ast_node> right);
 
     [[nodiscard]] std::string to_pretty_string() const override;
 

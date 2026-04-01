@@ -16,7 +16,7 @@ class method_operation_ast_node : public impl::ast_node, public impl::i_ir_emitt
     size_t statement_index;
 
 public:
-    explicit method_operation_ast_node(blasphemy::code_position code_position);
+    explicit method_operation_ast_node(lexer::code_position code_position);
 
     [[nodiscard]] size_t get_statement_index() const;
     virtual void set_statement_index(size_t statement_index);

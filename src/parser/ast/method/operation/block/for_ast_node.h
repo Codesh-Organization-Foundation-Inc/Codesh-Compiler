@@ -24,7 +24,7 @@ class for_ast_node final : public method::operation::method_operation_ast_node, 
     std::optional<int> skip_constant_cpi;
 
 public:
-    for_ast_node(blasphemy::code_position code_position, std::unique_ptr<var_reference::value_ast_node> collection,
+    for_ast_node(lexer::code_position code_position, std::unique_ptr<var_reference::value_ast_node> collection,
             method::method_scope_ast_node &body_scope);
 
     [[nodiscard]] local_variable_declaration_ast_node &get_iterator() const;

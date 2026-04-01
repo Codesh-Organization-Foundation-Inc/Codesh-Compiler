@@ -1,14 +1,16 @@
 #include "symbol_table.h"
 
-#include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/blasphemy_consumer.h"
+#include "classpath/loader/class_directory_loader.h"
+#include "classpath/loader/class_file_loader.h"
 #include "defenition/definitions.h"
-#include "semantic_analyzer/external/class_loader.h"
-#include "semantic_analyzer/external/jimage_loader.h"
+#include "lexer/source_file_info.h"
 #include "semantic_analyzer/semantic_context.h"
+#include "semantic_analyzer/util.h"
 
 #include <filesystem>
 #include <iostream>
+#include <ranges>
 
 [[nodiscard]] static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>>
     resolve_method_from_scope_container(
@@ -16,24 +18,49 @@
         std::vector<std::string>::const_iterator fqn_start,
         std::vector<std::string>::const_iterator fqn_end);
 
-static std::unordered_map<std::string, std::unique_ptr<codesh::semantic_analyzer::external::jimage_loader>> jimage_cache;
-
-
-codesh::semantic_analyzer::symbol_table::symbol_table(const std::vector<std::filesystem::path> &classpaths,
-        std::vector<std::string> default_country_lookups) :
+codesh::semantic_analyzer::symbol_table::symbol_table(
+        const definition::class_loaders &class_loaders,
+        std::vector<definition::fully_qualified_name> default_country_lookups) :
     scope(ALLOWED_SYMBOL_TYPES),
     default_imports(std::move(default_country_lookups)),
-    classpaths(classpaths)
+    class_loaders(class_loaders)
 {
-    global_scope = &scope.add_symbol(
+    global_country = &scope.add_symbol(
         "",
-        std::make_unique<country_symbol>("")
+        std::make_unique<country_symbol>(definition::fully_qualified_name(lexer::NO_CODE_POS))
     ).first.get();
+
+    talmud_codesh_country = &util::find_or_create_country(*this, definition::fully_qualified_name::parse(
+        "ישראל/קודש/בן/משה",
+        lexer::NO_CODE_POS
+    ));
 }
 
-codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_scope() const
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_global_country() const
 {
-    return *global_scope;
+    return *global_country;
+}
+
+codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::symbol_table::get_talmud_codesh_country() const
+{
+    return *talmud_codesh_country;
+}
+
+const std::vector<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> &codesh::semantic_analyzer::
+    symbol_table::get_main_classes() const
+{
+    return main_classes;
+}
+
+void codesh::semantic_analyzer::symbol_table::add_main_class(type_symbol &type)
+{
+    main_classes.emplace_back(type);
+}
+
+const std::vector<codesh::definition::fully_qualified_name> &codesh::semantic_analyzer::symbol_table::
+    get_default_imports() const
+{
+    return default_imports;
 }
 
 const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::symbol_table::get_scope() const
@@ -56,7 +83,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::country_symbol>>
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::symbol_table::
     resolve(const semantic_context &context, const definition::fully_qualified_name &full_name,
-        const blasphemy::code_position code_pos, const std::optional<std::vector<std::string>::const_iterator> name_end,
+        const std::optional<std::vector<std::string>::const_iterator> name_end,
         const std::optional<std::vector<std::string>::const_iterator> name_start) const
 {
     if (full_name.join() == definition::ERROR_IDENTIFIER_CONTENT)
@@ -75,17 +102,17 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
         return result.value();
     }
 
-    const definition::fully_qualified_name name(name_start_fr, name_end_fr);
+    const definition::fully_qualified_name name(lexer::NO_CODE_POS, name_start_fr, name_end_fr);
     if (const auto result = try_load_external_symbols(context, name))
     {
         return result.value();
     }
 
 
-    context.blasphemy_consumer(fmt::format(
+    context.throw_blasphemy(fmt::format(
         "עֶצֶם בִּלְתִּי־מְזֹהֶה: {}",
         full_name.holy_join()
-    ), code_pos);
+    ), full_name.get_source_range());
 
     return std::nullopt;
 }
@@ -150,7 +177,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 
     // Then from the global scope
     if (const auto result = resolve_method_from_scope_container(
-        *global_scope,
+        *global_country,
         loaded_name_parts.begin(),
         loaded_name_parts.end())
     )
@@ -164,30 +191,29 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh:
 }
 
 std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::symbol_table::try_load_prefixes(
-        const std::string &import_prefix, const definition::fully_qualified_name &name) const
+        const definition::fully_qualified_name &import_prefix, const definition::fully_qualified_name &name) const
 {
     const auto &parts = name.get_parts();
 
     for (auto end = parts.end(); end != parts.begin(); --end)
     {
-        definition::fully_qualified_name prefix(parts.begin(), end);
-
-        const auto candidate = import_prefix.empty()
-            ? prefix.join()
-            : import_prefix + "/" + prefix.join();
+        definition::fully_qualified_name candidate = import_prefix;
+        // Each of the outer for iteration we try to use a smaller FQN to see if one fits.
+        // Hence, here, iterate up to `end`, not the full parts range.
+        for (auto part = parts.begin(); part != end; ++part)
+        {
+            candidate.add(*part);
+        }
 
         if (try_load_candidate(candidate))
         {
             std::optional<definition::fully_qualified_name> suffix;
-            if (end != name.get_parts().end())
+            if (end != parts.end())
             {
-                suffix.emplace(end, name.get_parts().end());
+                suffix.emplace(lexer::NO_CODE_POS, end, parts.end());
             }
 
-            return std::pair{
-                candidate.data(),
-                std::move(suffix)
-            };
+            return std::pair{std::move(candidate), std::move(suffix)};
         }
     }
 
@@ -198,7 +224,7 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
         const semantic_context &context, const definition::fully_qualified_name &name) const
 {
     // 1. Direct absolute FQN (programmer wrote "java/lang/String" explicitly)
-    if (const auto result = try_load_prefixes("", name))
+    if (const auto result = try_load_prefixes(definition::fully_qualified_name(lexer::NO_CODE_POS), name))
         return result;
 
     // 2. Default imports (java/lang, Talmud Codesh)
@@ -211,38 +237,20 @@ std::optional<codesh::semantic_analyzer::split_fqn> codesh::semantic_analyzer::s
     // 3. Explicit imports from the source file
     for (const auto &country : context.lookup_countries)
     {
-        if (const auto result = try_load_prefixes(country.get().get_full_name().join(), name))
+        if (const auto result = try_load_prefixes(country.get().get_full_name(), name))
             return result;
     }
 
     return std::nullopt;
 }
 
-bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const std::string &candidate) const
+bool codesh::semantic_analyzer::symbol_table::try_load_candidate(const definition::fully_qualified_name &candidate)
+    const
 {
-    for (const auto &classpath : classpaths)
+    for (const auto &class_loader : class_loaders | std::views::values)
     {
-        if (std::filesystem::is_directory(classpath))
-        {
-            // A classpath directory may only contain class files
-            const auto class_file_path = classpath / (candidate + ".class");
-            if (std::filesystem::exists(class_file_path))
-            {
-                external::load_class_file(class_file_path, *this);
-                return true;
-            }
-        }
-        else if (external::is_jimage(classpath))
-        {
-            const auto key = classpath.string();
-            if (!jimage_cache.contains(key))
-            {
-                jimage_cache.emplace(key, std::make_unique<external::jimage_loader>(classpath));
-            }
-
-            if (jimage_cache.at(key)->load("java.base", candidate.data(), *this))
-                return true;
-        }
+        if (class_loader->load(*this, candidate))
+            return true;
     }
 
     return false;

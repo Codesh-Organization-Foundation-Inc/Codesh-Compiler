@@ -1,12 +1,13 @@
 #include "util.h"
 
 #include "blasphemy/details.h"
-#include "fmt/compile.h"
+#include "defenition/fully_qualified_name.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/null_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
-
 
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> codesh::semantic_analyzer::util::
     resolve_custom_type(const semantic_context &context, const ast::type::custom_type_ast_node &custom_type_node)
@@ -22,8 +23,7 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
 
     const auto result_raw = context.symbol_table_.resolve(
         context,
-        full_name,
-        blasphemy::NO_CODE_POS
+        full_name
     );
 
     if (!result_raw.has_value())
@@ -32,10 +32,10 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::type_symbol>> co
     const auto result = dynamic_cast<type_symbol *>(&result_raw->get());
     if (!result)
     {
-        context.blasphemy_consumer(fmt::format(
+        context.throw_blasphemy(fmt::format(
             blasphemy::details::NOT_AN_OBJECT,
             full_name.holy_join()
-        ), blasphemy::NO_CODE_POS);
+        ), full_name.get_source_range());
         return std::nullopt;
     }
 
@@ -100,8 +100,11 @@ bool codesh::semantic_analyzer::util::resolve_type_node(const semantic_context &
 }
 
 bool codesh::semantic_analyzer::util::do_types_match(const ast::type::type_ast_node &from,
-                                                           const ast::type::type_ast_node &to)
+                                                     const ast::type::type_ast_node &to)
 {
+    if (dynamic_cast<const ast::type::null_type_ast_node *>(&from))
+        return !dynamic_cast<const ast::type::primitive_type_ast_node *>(&to);
+
     return from.generate_descriptor() == to.generate_descriptor();
 }
 
@@ -114,28 +117,19 @@ codesh::semantic_analyzer::method_overloads_symbol &codesh::semantic_analyzer::u
 }
 
 codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find_or_create_country(
-        const symbol_table &table, const std::string &country_name)
+        const symbol_table &table, const definition::fully_qualified_name &fqn)
 {
-    country_symbol &root = table.get_global_scope();
+    country_symbol &root = table.get_global_country();
 
-    if (country_name.empty())
+    const auto &parts = fqn.get_parts();
+    if (parts.empty())
         return root;
 
-    auto *current = &root;
-    std::string accumulated;
+    country_symbol *current = &root;
 
-    size_t start = 0;
-    while (true)
+    for (size_t i = 0; i < parts.size(); ++i)
     {
-        const auto slash_pos = country_name.find('/', start);
-        const auto last = slash_pos == std::string::npos;
-        const auto part = country_name.substr(start, last ? std::string::npos : slash_pos - start);
-
-        if (!accumulated.empty())
-        {
-            accumulated += '/';
-        }
-        accumulated += part;
+        const auto &part = parts[i];
 
         const auto existing = current->get_scope().resolve_local(part);
         if (existing)
@@ -144,16 +138,17 @@ codesh::semantic_analyzer::country_symbol &codesh::semantic_analyzer::util::find
         }
         else
         {
+            definition::fully_qualified_name sub_fqn(
+                lexer::NO_CODE_POS,
+                parts.cbegin(),
+                parts.cbegin() + static_cast<std::ptrdiff_t>(i) + 1
+            );
+
             current = &current->get_scope().add_symbol(
                 part,
-                std::make_unique<country_symbol>(accumulated.c_str(), current)
+                std::make_unique<country_symbol>(std::move(sub_fqn), current)
             ).first.get();
         }
-
-        if (last)
-            break;
-
-        start = slash_pos + 1;
     }
 
     return *current;

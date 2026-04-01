@@ -124,6 +124,27 @@ const codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::ty
     return fields_scope;
 }
 
+const codesh::semantic_analyzer::method_overloads_map &codesh::semantic_analyzer::type_symbol::get_abstract_methods()
+    const
+{
+    return abstract_methods;
+}
+
+void codesh::semantic_analyzer::type_symbol::add_abstract_method(std::string name, method_overload method)
+{
+    abstract_methods[std::move(name)].push_back(std::move(method));
+}
+
+bool codesh::semantic_analyzer::type_symbol::are_abstract_methods_collected() const
+{
+    return abstract_methods_collected;
+}
+
+void codesh::semantic_analyzer::type_symbol::mark_abstract_methods_collected()
+{
+    abstract_methods_collected = true;
+}
+
 std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> codesh::semantic_analyzer::type_symbol::
     resolve_own(const std::string &name) const
 {
@@ -144,6 +165,7 @@ codesh::semantic_analyzer::type_symbol::type_symbol(i_scope_containing_symbol *c
     full_name(std::move(full_name)),
     fields_scope({symbol_type::FIELD}),
     methods_scope({symbol_type::METHOD_OVERLOADS}),
+    abstract_methods_collected(false),
     producing_node(producing_node),
     super_type(std::move(super_type)),
     interfaces(std::move(interfaces)),
@@ -163,6 +185,11 @@ const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::type_
 const codesh::ast::type_decl::attributes_ast_node &codesh::semantic_analyzer::type_symbol::get_attributes() const
 {
     return *attributes;
+}
+
+bool codesh::semantic_analyzer::type_symbol::has_super_type() const
+{
+    return super_type != nullptr;
 }
 
 codesh::ast::type::custom_type_ast_node &codesh::semantic_analyzer::type_symbol::get_super_type() const
@@ -258,10 +285,12 @@ std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_symbol>> 
 
 codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(i_scope_containing_symbol *const parent_symbol,
         indexed_locals_container &index_to_local_variable,
+        type_symbol &containing_type,
         ast::method::method_scope_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD_SCOPE),
     producing_node(producing_node),
     index_to_local_variable(index_to_local_variable),
+    containing_type(containing_type),
     scope(ALLOWED_SYMBOL_TYPES)
 {
     if (producing_node != nullptr)
@@ -273,6 +302,11 @@ codesh::semantic_analyzer::method_scope_symbol::method_scope_symbol(i_scope_cont
 codesh::ast::method::method_scope_ast_node *codesh::semantic_analyzer::method_scope_symbol::get_producing_node() const
 {
     return producing_node;
+}
+
+codesh::semantic_analyzer::type_symbol &codesh::semantic_analyzer::method_scope_symbol::get_parent_type() const
+{
+    return containing_type;
 }
 
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
@@ -307,16 +341,20 @@ codesh::semantic_analyzer::symbols_collection &codesh::semantic_analyzer::method
     return scope;
 }
 
-codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbol *const parent_symbol, type_symbol &parent_type,
+codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbol *const parent_symbol,
+        type_symbol &parent_type,
         definition::fully_qualified_name full_name,
         std::unique_ptr<ast::type_decl::attributes_ast_node> attributes,
         std::vector<std::unique_ptr<ast::type::type_ast_node>> parameter_types,
-        std::unique_ptr<ast::type::type_ast_node> return_type, ast::method::method_declaration_ast_node *producing_node) :
+        std::unique_ptr<ast::type::type_ast_node> return_type,
+        std::vector<std::unique_ptr<ast::type::custom_type_ast_node>> sins_thrown,
+        ast::method::method_declaration_ast_node *producing_node) :
     symbol(parent_symbol, symbol_type::METHOD),
     full_name(std::move(full_name)),
     attributes(std::move(attributes)),
     parameter_types(std::move(parameter_types)),
     return_type(std::move(return_type)),
+    sins_thrown(std::move(sins_thrown)),
     local_variables(),
     scope(ALLOWED_SYMBOL_TYPES),
     method_scope(nullptr),
@@ -341,7 +379,7 @@ codesh::semantic_analyzer::method_symbol::method_symbol(i_scope_containing_symbo
 std::unique_ptr<codesh::semantic_analyzer::method_scope_symbol> codesh::semantic_analyzer::method_symbol::
     create_method_scope(i_scope_containing_symbol &parent_scope, ast::method::method_scope_ast_node &producing_node)
 {
-    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, &producing_node);
+    return std::make_unique<method_scope_symbol>(&parent_scope, local_variables, parent_type, &producing_node);
 }
 
 const codesh::definition::fully_qualified_name &codesh::semantic_analyzer::method_symbol::get_full_name() const
@@ -368,6 +406,12 @@ const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::se
 codesh::ast::type::type_ast_node &codesh::semantic_analyzer::method_symbol::get_return_type() const
 {
     return *return_type;
+}
+
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::semantic_analyzer::method_symbol::
+    get_sins_thrown() const
+{
+    return sins_thrown;
 }
 
 const codesh::semantic_analyzer::indexed_locals_container &codesh::semantic_analyzer::method_symbol::

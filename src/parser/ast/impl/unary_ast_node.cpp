@@ -2,7 +2,7 @@
 
 #include "parser/ast/type/primitive_type_ast_node.h"
 
-codesh::ast::impl::unary_ast_node::unary_ast_node(const blasphemy::code_position code_position,
+codesh::ast::impl::unary_ast_node::unary_ast_node(const lexer::code_position code_position,
         std::unique_ptr<value_ast_node> child) :
     operator_ast_node(code_position)
 {
@@ -19,7 +19,7 @@ codesh::ast::type::type_ast_node *codesh::ast::impl::unary_ast_node::get_type() 
     return get_child().get_type();
 }
 
-bool codesh::ast::impl::unary_ast_node::is_value_valid() const
+bool codesh::ast::impl::unary_ast_node::is_value_valid(const semantic_analyzer::semantic_context &context) const
 {
     return true;
 }

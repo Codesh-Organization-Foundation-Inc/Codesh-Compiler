@@ -14,7 +14,7 @@ const std::optional<std::reference_wrapper<codesh::semantic_analyzer::method_sym
 }
 
 codesh::ast::method::method_declaration_ast_node::method_declaration_ast_node(
-        const blasphemy::code_position code_position, definition::fully_qualified_name name) :
+        const lexer::code_position code_position, definition::fully_qualified_name name) :
     ast_node(code_position), name(std::move(name)), method_scope(code_position, *this)
 {
 }
@@ -111,14 +111,14 @@ void codesh::ast::method::method_declaration_ast_node::add_parameter_front(
     method_scope.add_local_variable_front(std::move(parameter));
 }
 
-const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_exceptions_thrown() const
+const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_sins_thrown() const
 {
     return exceptions_thrown;
 }
 
-std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &codesh::ast::method::method_declaration_ast_node::
-    get_exceptions_thrown()
+std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::method::
+    method_declaration_ast_node::get_sins_thrown()
 {
     return exceptions_thrown;
 }
@@ -142,6 +142,19 @@ void codesh::ast::method::method_declaration_ast_node::emit_constants(const comp
     if (has_inner_scopes())
     {
         constant_pool.goc_utf8_info("StackMapTable");
+    }
+
+    if (!exceptions_thrown.empty())
+    {
+        constant_pool.goc_utf8_info("Exceptions");
+        for (const auto &exception_type : exceptions_thrown)
+        {
+            constant_pool.goc_class_info(
+                constant_pool.goc_utf8_info(
+                    exception_type->get_resolved_name().join()
+                )
+            );
+        }
     }
 
     for (const auto &param : parameters)

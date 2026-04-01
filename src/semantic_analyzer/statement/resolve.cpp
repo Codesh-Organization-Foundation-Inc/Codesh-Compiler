@@ -1,5 +1,6 @@
 #include "resolve.h"
 
+#include "semantic_analyzer/statement/cast/resolve.h"
 #include "semantic_analyzer/statement/method_call/resolve.h"
 #include "semantic_analyzer/statement/variable_reference/resolve.h"
 
@@ -16,9 +17,12 @@
 #include "parser/ast/method/operation/block/if_ast_node.h"
 #include "parser/ast/method/operation/block/while_ast_node.h"
 #include "parser/ast/method/operation/method_call_ast_node.h"
+#include "parser/ast/method/operation/array_length_ast_node.h"
+#include "parser/ast/method/operation/new_array_ast_node.h"
 #include "parser/ast/method/operation/return_ast_node.h"
+#include "parser/ast/operator/cast/cast_ast_node.h"
 #include "parser/ast/type/primitive_type_ast_node.h"
-#include "parser/ast/type/widening_cast_ast_node.h"
+#include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/ast/var_reference/variable_reference_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
@@ -49,6 +53,12 @@ static bool is_condition_boolean(const codesh::ast::var_reference::value_ast_nod
 
 static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_node);
 
+static bool resolve_array_operand(const semantic_context &context,
+                                  codesh::ast::op::array_access_ast_node &arr_access);
+
+static bool resolve_array_index(const semantic_context &context,
+                                const codesh::ast::op::array_access_ast_node &arr_access);
+
 
 bool statement::resolve(const semantic_context &context,
                         ast::method::operation::method_operation_ast_node &stmnt,
@@ -60,7 +70,7 @@ bool statement::resolve(const semantic_context &context,
         return method_call::resolve(context, *method_call, containing_method, scope);
     }
 
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&stmnt))
+    if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&stmnt))
     {
         return variable_reference::resolve(context, *var_ref, scope);
     }
@@ -125,18 +135,20 @@ bool statement::resolve(const semantic_context &context,
 
     if (const auto return_node = dynamic_cast<ast::method::operation::return_ast_node *>(&stmnt))
     {
-        if (return_node->get_return_value() == nullptr)
+        const auto ret_val = return_node->get_return_value();
+        if (ret_val == nullptr)
             return true;
 
         // Perform compatibility check only if we could resolve the return value
         // Otherwise it's a useless, guaranteed error.
-        if (!resolve_value(context, *return_node->get_return_value(), containing_method, scope))
+        if (!resolve_value(context, *ret_val, containing_method, scope))
             return false;
 
 
         const auto &expected_return_type = containing_method.get_return_type();
 
         auto [are_types_compatible, return_value] = util::make_widening_cast_maybe(
+            context,
             return_node->take_return_value(),
             expected_return_type
         );
@@ -144,10 +156,10 @@ bool statement::resolve(const semantic_context &context,
 
         if (!are_types_compatible)
         {
-            context.blasphemy_consumer(
+            context.throw_blasphemy(
                 fmt::format(
                     blasphemy::details::RETURN_TYPE_MISMATCH,
-                    return_node->get_return_value()->get_type()->to_pretty_string(),
+                    ret_val->get_type()->to_pretty_string(),
                     expected_return_type.to_pretty_string()
                 ),
                 return_node->get_code_position()
@@ -159,16 +171,32 @@ bool statement::resolve(const semantic_context &context,
     }
 
 
-    if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
+    if (const auto arr_length = dynamic_cast<ast::method::operation::array_length_ast_node *>(&stmnt))
     {
-        if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
+        if (!resolve_value(context, arr_length->get_child(), containing_method, scope))
+            return false;
+
+        const auto *child_type = arr_length->get_child().get_type();
+        if (child_type->get_array_dimensions() == 0)
         {
+            context.throw_blasphemy(
+                fmt::format(blasphemy::details::NOT_AN_ARRAY, child_type->to_pretty_string()),
+                arr_length->get_child().get_code_position()
+            );
             return false;
         }
 
-        if (!unary_op->is_value_valid())
+        return true;
+    }
+
+    if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&stmnt))
+    {
+        if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
+            return false;
+
+        if (!unary_op->is_value_valid(context))
         {
-            context.blasphemy_consumer(fmt::format(
+            context.throw_blasphemy(fmt::format(
                 blasphemy::details::UNARY_TYPE_MISMATCH,
                 unary_op->get_child().get_type()->to_pretty_string(),
                 unary_op->to_pretty_string()
@@ -190,17 +218,69 @@ bool statement::resolve(const semantic_context &context,
         {
             binary_op->apply_widening_conversions();
 
-            if (!binary_op->is_value_valid())
+            if (!binary_op->is_value_valid(context))
             {
-                context.blasphemy_consumer(fmt::format(
-                    blasphemy::details::BINARY_TYPE_MISMATCH,
-                    binary_op->get_left().get_type()->to_pretty_string(),
-                    binary_op->get_right().get_type()->to_pretty_string(),
-                    binary_op->to_pretty_string()
-                ), binary_op->get_code_position());
+                context.throw_blasphemy(
+                    fmt::format(
+                        blasphemy::details::BINARY_TYPE_MISMATCH,
+                        binary_op->get_left().get_type()->to_pretty_string(),
+                        binary_op->get_right().get_type()->to_pretty_string(),
+                        binary_op->to_pretty_string()
+                    ),
+                    {
+                        binary_op->get_code_position(),
+                        binary_op->get_right().get_code_position()
+                    }
+                );
                 all_succeed = false;
             }
         }
+        return all_succeed;
+    }
+
+    if (const auto arr_access = dynamic_cast<ast::op::array_access_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        if (all_succeed &= resolve_value(context, arr_access->get_array(), containing_method, scope))
+        {
+            all_succeed &= resolve_array_operand(context, *arr_access);
+        }
+
+        if (all_succeed &= resolve_value(context, arr_access->get_index(), containing_method, scope))
+        {
+            all_succeed &= resolve_array_index(context, *arr_access);
+        }
+
+        return all_succeed;
+    }
+
+    if (const auto cast = dynamic_cast<ast::op::assignment::cast_ast_node *>(&stmnt))
+    {
+        return cast::resolve(context, *cast, containing_method, scope);
+    }
+
+    if (const auto new_arr = dynamic_cast<ast::op::new_array_ast_node *>(&stmnt))
+    {
+        bool all_succeed = true;
+
+        all_succeed &= util::resolve_type_node(context, new_arr->get_element_type());
+
+        for (auto &dim : new_arr->get_dimensions())
+        {
+            if (!resolve_value(context, *dim, containing_method, scope))
+            {
+                all_succeed = false;
+                continue;
+            }
+
+            all_succeed &= is_primitive_type(
+                *dim,
+                definition::primitive_type::INTEGER,
+                blasphemy::details::ARRAY_INDEX_NOT_INTEGER
+            );
+        }
+
         return all_succeed;
     }
 
@@ -214,12 +294,17 @@ static bool resolve_value(const semantic_context &context,
                           const method_symbol &containing_method,
                           const method_scope_symbol &scope)
 {
-    if (const auto var_ref = dynamic_cast<variable_reference_ast_node *>(&val_node))
+    if (const auto var_ref = dynamic_cast<codesh::ast::var_reference::variable_reference_ast_node *>(&val_node))
     {
-        return statement::variable_reference::resolve(context, *var_ref, scope);
+        if (!statement::variable_reference::resolve(context, *var_ref, scope))
+            return false;
+    }
+    else if (!statement::resolve(context, val_node, containing_method, scope))
+    {
+        return false;
     }
 
-    return statement::resolve(context, val_node, containing_method, scope);
+    return val_node.get_type() != nullptr;
 }
 
 static bool resolve_scope(const semantic_context &context,
@@ -291,4 +376,47 @@ static bool is_collection(const codesh::ast::var_reference::value_ast_node &val_
         val_node.get_code_position()
     );
     return false;
+}
+
+static bool resolve_array_operand(const semantic_context &context,
+                                  codesh::ast::op::array_access_ast_node &arr_access)
+{
+    const auto *arr_type = arr_access.get_array().get_type();
+    if (arr_type == nullptr)
+        return false;
+
+    if (arr_type->get_array_dimensions() == 0)
+    {
+        context.throw_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::NOT_AN_ARRAY,
+                arr_type->to_pretty_string()
+            ),
+            arr_access.get_array().get_code_position()
+        );
+        return false;
+    }
+
+    auto elem_type = arr_type->clone();
+    elem_type->set_array_dimensions(arr_type->get_array_dimensions() - 1);
+    arr_access.set_element_type(std::move(elem_type));
+    return true;
+}
+
+static bool resolve_array_index(const semantic_context &context,
+                                const codesh::ast::op::array_access_ast_node &arr_access)
+{
+    const auto *idx_prim = dynamic_cast<const codesh::ast::type::primitive_type_ast_node *>(
+        arr_access.get_index().get_type()
+    );
+
+    if (idx_prim == nullptr || idx_prim->get_type() != codesh::definition::primitive_type::INTEGER)
+    {
+        context.throw_blasphemy(
+            codesh::blasphemy::details::ARRAY_INDEX_NOT_INTEGER,
+            arr_access.get_index().get_code_position()
+        );
+        return false;
+    }
+    return true;
 }

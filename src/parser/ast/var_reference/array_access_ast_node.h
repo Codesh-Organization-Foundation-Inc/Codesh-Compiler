@@ -1,0 +1,34 @@
+#pragma once
+
+#include "parser/ast/type/type_ast_node.h"
+#include "parser/ast/var_reference/value_ast_node.h"
+#include <memory>
+
+namespace codesh::ast::op
+{
+
+class array_access_ast_node : public var_reference::value_ast_node
+{
+    std::unique_ptr<value_ast_node> array;
+    std::unique_ptr<value_ast_node> index;
+    std::unique_ptr<type::type_ast_node> element_type;
+
+public:
+    array_access_ast_node(lexer::code_position code_position, std::unique_ptr<value_ast_node> array,
+            std::unique_ptr<value_ast_node> index);
+
+    void set_statement_index(size_t statement_index) override;
+
+
+    [[nodiscard]] value_ast_node &get_array() const;
+    [[nodiscard]] value_ast_node &get_index() const;
+
+    void set_element_type(std::unique_ptr<type::type_ast_node> type);
+
+    [[nodiscard]] type::type_ast_node *get_type() const override;
+
+    void emit_ir(output::ir::code_block &containing_block, const semantic_analyzer::symbol_table &symbol_table,
+        const type_decl::type_declaration_ast_node &containing_type_decl) const override;
+};
+
+}

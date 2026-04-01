@@ -1,13 +1,18 @@
 #include "collect.h"
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 #include "blasphemy/details.h"
 #include "parser/ast/method/method_declaration_ast_node.h"
+#include "parser/ast/method/util.h"
+#include "parser/ast/type/custom_type_ast_node.h"
 #include "parser/ast/type_declaration/type_declaration_ast_node.h"
 #include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/util.h"
 
 static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_parameter_types(
+        const codesh::ast::method::method_declaration_ast_node &method_decl);
+
+static std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> clone_sins(
         const codesh::ast::method::method_declaration_ast_node &method_decl);
 
 static void collect_local_variables(const codesh::ast::method::method_scope_ast_node &scope_node,
@@ -34,6 +39,7 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
             method_decl.get_attributes()->clone(),
             clone_parameter_types(method_decl),
             method_decl.get_return_type()->clone(),
+            clone_sins(method_decl),
 
             &method_decl
         )
@@ -41,11 +47,10 @@ void codesh::semantic_analyzer::method_declaration::collect(const semantic_conte
 
     if (!inserted)
     {
-        //TODO: Print full method signature
-        new_context.blasphemy_consumer(fmt::format(
+        new_context.throw_blasphemy(fmt::format(
             blasphemy::details::DUPLICATE_METHOD_DECLARATION,
-            method_name
-        ), method_decl.get_code_position());
+            ast::method::util::pretty_method_signature(it.get())
+        ), method_decl.get_name_range());
     }
 
     collect_local_variables(method_decl.get_method_scope(), it.get().get_method_scope());
@@ -74,6 +79,19 @@ static std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> clone_para
     for (const auto &param_node : method_decl.get_parameters())
     {
         result.push_back(param_node.get().get_type()->clone());
+    }
+
+    return result;
+}
+
+static std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> clone_sins(
+        const codesh::ast::method::method_declaration_ast_node &method_decl)
+{
+    std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> result;
+
+    for (const auto &sin_node : method_decl.get_sins_thrown())
+    {
+        result.push_back(sin_node->clone());
     }
 
     return result;

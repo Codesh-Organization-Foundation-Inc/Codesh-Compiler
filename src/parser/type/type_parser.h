@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blasphemy/blasphemy_collector.h"
+#include "lexer/source_file_info.h"
 
 #include <memory>
 #include <queue>
@@ -38,13 +38,13 @@ enum class var_decl_assignment_policy
 };
 
 [[nodiscard]] std::unique_ptr<ast::type_decl::attributes_ast_node> parse_modifiers(
-        blasphemy::code_position code_position, std::queue<std::unique_ptr<token>> &tokens);
+        lexer::code_position code_position, std::queue<std::unique_ptr<token>> &tokens);
 [[nodiscard]] std::unique_ptr<ast::type_decl::type_declaration_ast_node> parse_type_declaration(
         std::queue<std::unique_ptr<token>> &tokens);
 
 [[nodiscard]] std::unique_ptr<ast::op::assignment::assign_operator_ast_node> parse_variable_declaration(
         ast::type_decl::variable_declaration_ast_node &dest,
-        blasphemy::code_position pos,
+        lexer::code_position pos,
         std::queue<std::unique_ptr<token>> &tokens,
         var_decl_assignment_policy policy = var_decl_assignment_policy::REQUIRE);
 

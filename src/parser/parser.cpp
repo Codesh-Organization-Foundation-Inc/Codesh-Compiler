@@ -11,25 +11,29 @@ namespace ast = codesh::ast;
 
 
 std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue<std::unique_ptr<token>> &tokens,
-        const std::filesystem::path &source_path)
+        const size_t file_id)
 {
     if (tokens.empty())
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::NO_BASAD,
             blasphemy::blasphemy_type::LEXICAL,
-            blasphemy::NO_CODE_POS,
-            true
+            lexer::NO_CODE_POS
         );
+        return std::make_unique<ast::compilation_unit_ast_node>(file_id, definition::basad_type::MISSING);
     }
 
 
-    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, source_path);
+    std::unique_ptr<ast::compilation_unit_ast_node> root_node = parse_compilation_unit(tokens, file_id);
 
-    if (root_node->get_basad_type() == definition::basad_type::IAW)
+    if (root_node->get_basad_type() == definition::basad_type::IAW ||
+        root_node->get_basad_type() == definition::basad_type::JCIK)
     {
-        //TODO: Return the joke program
-        // (Do not even make the compilation unit yet)
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::BAD_BASAD,
+            blasphemy::blasphemy_type::LEXICAL,
+            lexer::NO_CODE_POS
+        );
         return root_node;
     }
 
@@ -52,7 +56,12 @@ std::unique_ptr<ast::compilation_unit_ast_node> codesh::parser::parse(std::queue
 
         default:
             blasphemy::get_blasphemy_collector().add_blasphemy(
-                blasphemy::details::NO_KEYWORD_SHALL_BE,
+                //TODO: Move to formattable details
+                tokens.empty() ? blasphemy::details::UNEXPECTED_TOKEN : fmt::format(
+                    "{}: {}",
+                    blasphemy::details::UNEXPECTED_TOKEN,
+                    util::get_token_display_name(*tokens.front())
+                ),
                 blasphemy::blasphemy_type::SYNTAX,
                 tokens.front()->get_code_position()
             );
