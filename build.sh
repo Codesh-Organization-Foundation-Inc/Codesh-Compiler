@@ -11,6 +11,7 @@ fi
 if [ -z "$VCPKG_ROOT" ]; then
     VCPKG_ROOT="/home/$SUDO_USER/vcpkg"
 fi
+export VCPKG_ROOT
 
 CODESH_PATH="/usr/lib/קודש"
 CODESH_EXECUTABLE=$CODESH_PATH/codeshc

@@ -88,7 +88,8 @@ enum class token_group : int
     KEYWORD_ARRAY_LENGTH, // אורכו של
     KEYWORD_LENGTH, // ואורכו
     KEYWORD_BY, // על
-    KEYWORD_CUBIT, // אמה
+    KEYWORD_ONE_CUBIT, // אמות
+    KEYWORD_CUBIT, // אמות
     KEYWORD_REPLACE, // ויחלף
     PUNCTUATION_EQUAL, // ב־
 
