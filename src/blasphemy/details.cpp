@@ -189,8 +189,9 @@ const rfs_t codesh::blasphemy::details::UNIMPLEMENTED_METHOD = rfs(
 );
 const std::string codesh::blasphemy::details::DUPLICATE_MAIN_CLASS =
     "TODO: Hebrew message for duplicate main class";
-const fmt::runtime_format_string<> codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND =
-    fmt::runtime("Specified main class '{}' was not found among classes with a main method.");
+const rfs_t codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND = rfs(
+    "Specified main class '{}' was not found among classes with a main method."
+);
 
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
