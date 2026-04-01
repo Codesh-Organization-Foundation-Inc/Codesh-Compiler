@@ -29,7 +29,10 @@ enum class opcode : unsigned char
     RETURN = 0xB1,
 
     NEW = 0xBB,
+    NEW_ARRAY = 0xBC,
+    ANEWARRAY = 0xBD,
     ARRAY_LENGTH = 0xBE,
+    MULTIANEWARRAY = 0xC5,
     POP = 0x57,
     DUP = 0x59,
 
