@@ -1,5 +1,14 @@
 #include "new_array_ast_node.h"
 
+#include "output/ir/code_block.h"
+#include "output/ir/instruction/anewarray_instruction.h"
+#include "output/ir/instruction/multianewarray_instruction.h"
+#include "output/ir/instruction/new_array_instruction.h"
+#include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/type/primitive_type_ast_node.h"
+#include "parser/ast/type_declaration/type_declaration_ast_node.h"
+#include "semantic_analyzer/symbol_table/symbol_table.h"
+
 using namespace codesh::ast::op;
 
 new_array_ast_node::new_array_ast_node(const lexer::code_position code_position,
@@ -37,5 +46,43 @@ void new_array_ast_node::emit_ir(output::ir::code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    // TODO: Implement
+    for (const auto &dim : dimensions)
+    {
+        dim->emit_ir(containing_block, symbol_table, containing_type_decl);
+    }
+
+    const auto &cp = containing_type_decl.get_constant_pool();
+    const auto *prim = dynamic_cast<const type::primitive_type_ast_node *>(element_type.get());
+
+    if (dimensions.size() == 1)
+    {
+        if (prim != nullptr)
+        {
+            containing_block.add_instruction(
+                std::make_unique<output::ir::new_array_instruction>(prim->get_type())
+            );
+        }
+        else
+        {
+            const auto *type = static_cast<const type::custom_type_ast_node *>(element_type.get()); // NOLINT(*-pro-type-static-cast-downcast)
+            const int class_cpi = cp.get_class_index(
+                cp.get_utf8_index(type->get_resolved_name().join())
+            );
+            containing_block.add_instruction(
+                std::make_unique<output::ir::anewarray_instruction>(class_cpi)
+            );
+        }
+    }
+    else
+    {
+        const int class_cpi = cp.get_class_index(
+            cp.get_utf8_index(element_type->generate_descriptor(true))
+        );
+        containing_block.add_instruction(
+            std::make_unique<output::ir::multianewarray_instruction>(
+                class_cpi,
+                static_cast<unsigned char>(dimensions.size())
+            )
+        );
+    }
 }
