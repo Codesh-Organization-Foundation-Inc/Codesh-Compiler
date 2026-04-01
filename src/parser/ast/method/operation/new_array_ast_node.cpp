@@ -1,10 +1,8 @@
 #include "new_array_ast_node.h"
 
-namespace codesh::ast::op
-{
+using namespace codesh::ast::op;
 
-new_array_ast_node::new_array_ast_node(
-        lexer::code_position code_position,
+new_array_ast_node::new_array_ast_node(const lexer::code_position code_position,
         std::unique_ptr<type::type_ast_node> element_type) :
     value_ast_node(code_position),
     element_type(std::move(element_type))
@@ -16,17 +14,18 @@ void new_array_ast_node::add_dimension(std::unique_ptr<value_ast_node> size_expr
     dimensions.push_back(std::move(size_expr));
 }
 
-type::type_ast_node &new_array_ast_node::get_element_type() const
+codesh::ast::type::type_ast_node &new_array_ast_node::get_element_type() const
 {
     return *element_type;
 }
 
-const std::vector<std::unique_ptr<var_reference::value_ast_node>> &new_array_ast_node::get_dimensions() const
+const std::vector<std::unique_ptr<codesh::ast::var_reference::value_ast_node>> &new_array_ast_node::get_dimensions()
+    const
 {
     return dimensions;
 }
 
-type::type_ast_node *new_array_ast_node::get_type() const
+codesh::ast::type::type_ast_node *new_array_ast_node::get_type() const
 {
     return element_type.get();
 }
@@ -36,7 +35,5 @@ void new_array_ast_node::emit_ir(output::ir::code_block &containing_block,
         const semantic_analyzer::symbol_table &symbol_table,
         const type_decl::type_declaration_ast_node &containing_type_decl) const
 {
-    // TODO: implement this IR
-}
-
+    // TODO: Implement
 }
