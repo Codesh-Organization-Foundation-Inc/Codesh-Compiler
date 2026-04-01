@@ -23,6 +23,8 @@ struct jar_builder_context
     // Manifest-related
     const std::optional<definition::fully_qualified_name> &explicit_main_class;
     const std::vector<std::filesystem::path> &classpaths;
+
+    bool fat_jar = false;
 };
 
 /**
