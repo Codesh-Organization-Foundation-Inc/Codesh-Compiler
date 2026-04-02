@@ -95,7 +95,7 @@ static void resolve_builtin_alias(codesh::semantic_analyzer::country_symbol &cou
     country.get_scope().add_symbol(
         alias_name,
         std::unique_ptr<codesh::semantic_analyzer::type_symbol>(
-            static_cast<codesh::semantic_analyzer::type_symbol *>(loaded.release())
+            static_cast<codesh::semantic_analyzer::type_symbol *>(loaded.release()) // NOLINT(*-pro-type-static-cast-downcast)
         )
     );
 }
