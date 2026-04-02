@@ -320,9 +320,10 @@ static std::vector<codesh::definition::fully_qualified_name> generate_default_im
 {
     std::vector<codesh::definition::fully_qualified_name> results;
 
-    // Always add Talmud Codesh import
-    results.push_back(generate_default_import("ישראל/קודש/בן/משה"));
-
+    if (args.is_talmud_codesh_classpath)
+    {
+        results.push_back(generate_default_import("ישראל/קודש/בן/משה"));
+    }
     if (args.is_java_default_classpath)
     {
         results.push_back(generate_default_import("java/lang"));
