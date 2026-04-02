@@ -1,5 +1,6 @@
 #pragma once
 
+#include "defenition/definitions.h"
 #include "defenition/fully_qualified_name.h"
 
 #include <filesystem>
@@ -22,7 +23,7 @@ struct jar_builder_context
 
     // Manifest-related
     const std::optional<definition::fully_qualified_name> &explicit_main_class;
-    const std::vector<std::filesystem::path> &classpaths;
+    const definition::class_loaders &class_loaders;
 
     bool fat_jar = false;
 };

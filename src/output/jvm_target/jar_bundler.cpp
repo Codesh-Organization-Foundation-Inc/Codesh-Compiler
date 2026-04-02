@@ -5,6 +5,8 @@
 #include "classpath/loader/jar_loader.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
+#include <ranges>
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -28,10 +30,11 @@ static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path);
 static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
         const codesh::semantic_analyzer::type_symbol *main_class,
-        const std::vector<std::filesystem::path> &classpaths);
+        const codesh::definition::class_loaders &class_loaders);
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
         const std::filesystem::path &jar_cli_path, const std::filesystem::path *manifest_path);
-static bool add_classpaths_to_dir(const std::vector<std::filesystem::path> &classpaths,
+static std::string build_class_path_manifest_entry(const codesh::definition::class_loaders &class_loaders);
+static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class_loaders,
         const std::filesystem::path &temp_class_dir, const std::filesystem::path &jar_cli_path);
 
 
@@ -43,7 +46,7 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         temp_class_dir,
         dest_jar_path,
         explicit_main_class,
-        classpaths,
+        class_loaders,
         fat_jar
     ] = context;
 
@@ -73,7 +76,7 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     }
 
 
-    if (fat_jar && !add_classpaths_to_dir(classpaths, temp_class_dir, jar_cli_path))
+    if (fat_jar && !add_classpaths_to_dir(class_loaders, temp_class_dir, jar_cli_path))
         return false;
 
 
@@ -85,9 +88,9 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
 
     std::optional<std::filesystem::path> manifest_path;
     // In fat JAR mode, classpaths are already embedded.
-    if (!fat_jar && (main_class != nullptr || !classpaths.empty()))
+    if (!fat_jar && (main_class != nullptr || !class_loaders.empty()))
     {
-        manifest_path = write_manifest(temp_class_dir.parent_path(), main_class, classpaths);
+        manifest_path = write_manifest(temp_class_dir.parent_path(), main_class, class_loaders);
     }
 
     const auto command = build_jar_command(
@@ -192,7 +195,7 @@ static void write_manifest_attribute(std::ofstream &manifest, std::string line)
 
 static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
         const codesh::semantic_analyzer::type_symbol *main_class,
-        const std::vector<std::filesystem::path> &classpaths)
+        const codesh::definition::class_loaders &class_loaders)
 {
     const auto manifest_path = temp_dir / "MANIFEST.MF";
     std::ofstream manifest(manifest_path, std::ios::binary);
@@ -210,23 +213,26 @@ static std::filesystem::path write_manifest(const std::filesystem::path &temp_di
         );
     }
 
-    if (!classpaths.empty())
+    if (!class_loaders.empty())
     {
-        std::string class_path_line = "Class-Path: ";
-        for (size_t i = 0; i < classpaths.size(); ++i)
-        {
-            if (i > 0)
-            {
-                class_path_line += ' ';
-            }
-            class_path_line += classpaths.at(i).generic_string();
-        }
-
-        write_manifest_attribute(manifest, class_path_line);
+        write_manifest_attribute(manifest, build_class_path_manifest_entry(class_loaders));
     }
 
     manifest << "\r\n";
     return manifest_path;
+}
+
+static std::string build_class_path_manifest_entry(const codesh::definition::class_loaders &class_loaders)
+{
+    std::vector<std::string> paths;
+    paths.reserve(class_loaders.size());
+
+    for (const auto &cp : class_loaders | std::ranges::views::keys)
+    {
+        paths.push_back(cp.generic_string());
+    }
+
+    return fmt::format("Class-Path: {}", fmt::join(paths, " "));
 }
 
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
@@ -323,12 +329,16 @@ static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_p
 #endif
 }
 
-static bool add_classpaths_to_dir(const std::vector<std::filesystem::path> &classpaths,
+static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class_loaders,
         const std::filesystem::path &temp_class_dir, const std::filesystem::path &jar_cli_path)
 {
-    for (const auto &cp : classpaths)
+    for (const auto &[cp, class_loader] : class_loaders)
     {
         if (cp == std::filesystem::path("."))
+            continue;
+        // We don't care to specify modules.
+        // Assuming it's only native Java ones.
+        if (dynamic_cast<const codesh::external::jimage_loader *>(class_loader.get()))
             continue;
 
         if (std::filesystem::is_directory(cp))

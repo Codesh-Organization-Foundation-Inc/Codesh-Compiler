@@ -62,9 +62,10 @@ static void update_source_file(const codesh::ast::compilation_unit_ast_node &roo
 static void collect_source_files(const std::filesystem::path &path,
         std::vector<std::filesystem::path> &source_files_out);
 static bool validate_output_path(const std::filesystem::path &dest_path, bool is_project);
-[[nodiscard]] static bool build_and_bundle_jar(
+static bool build_and_bundle_jar(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args, bool is_project, const codesh::semantic_analyzer::symbol_table &symbol_table);
+        const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders, bool is_project,
+        const codesh::semantic_analyzer::symbol_table &symbol_table);
 [[nodiscard]] static std::optional<std::filesystem::path> get_output_path(const std::filesystem::path &cli_dest_path,
         const std::filesystem::path &sources_dir_path, const std::filesystem::path &source_file_path, bool is_project);
 
@@ -203,7 +204,7 @@ static int compile(const codesh::command_args &args, const codesh::definition::c
 
     if (args.jar_output)
     {
-        if (!build_and_bundle_jar(asts, args, is_project, master_symbol_table))
+        if (!build_and_bundle_jar(asts, args, class_loaders, is_project, master_symbol_table))
             return EXIT_FAILURE;
     }
     else
@@ -526,7 +527,7 @@ static void build_class_file(const codesh::ast::compilation_unit_ast_node &root_
 
 static bool build_and_bundle_jar(
         const std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> &asts,
-        const codesh::command_args &args, const bool is_project,
+        const codesh::command_args &args, const codesh::definition::class_loaders &class_loaders, const bool is_project,
         const codesh::semantic_analyzer::symbol_table &symbol_table)
 {
     const auto temp_dir = make_temp_class_dir();
@@ -541,7 +542,7 @@ static bool build_and_bundle_jar(
                 temp_dir,
                 *args.dest_path,
                 args.explicit_main_class,
-                args.classpaths,
+                class_loaders,
                 args.fat_jar,
             }
         );
