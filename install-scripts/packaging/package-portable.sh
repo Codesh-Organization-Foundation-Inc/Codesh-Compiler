@@ -20,11 +20,13 @@ if [ ! -f "$BUILD_DIR/codeshc" ]; then
     echo "Run build.sh first"
     exit 1
 fi
-rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
-cp "$BUILD_DIR/codeshc" "$OUT_DIR/codesh-raw"
-cp "$BUILD_DIR/תלמוד־קודש.jar" "$OUT_DIR/תלמוד־קודש.jar"
+STAGING_DIR="$(mktemp -d /tmp/codeshc-portable-staging.XXXXXX)"
+trap 'rm -rf "$STAGING_DIR"' EXIT
+
+cp "$BUILD_DIR/codeshc" "$STAGING_DIR/codesh-raw"
+cp "$BUILD_DIR/תלמוד־קודש.jar" "$STAGING_DIR/תלמוד־קודש.jar"
 
 # Bundle ICU
 for lib in libicui18n.so.76 libicuuc.so.76 libicudata.so.76; do
@@ -33,24 +35,24 @@ for lib in libicui18n.so.76 libicuuc.so.76 libicudata.so.76; do
         echo "Warning: $lib not found on this system, skipping"
     else
         # Copy the real file (resolve symlink)
-        cp -L "$path" "$OUT_DIR/$lib"
+        cp -L "$path" "$STAGING_DIR/$lib"
     fi
 done
 
-cat > "$OUT_DIR/codeshc" << 'EOF'
+cat > "$STAGING_DIR/codeshc" << 'EOF'
 #!/bin/bash
 DIR="$(cd "$(dirname "$0")" && pwd)"
 LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codesh-raw" "$@"
 EOF
-chmod +x "$OUT_DIR/codeshc"
+chmod +x "$STAGING_DIR/codeshc"
 
 # Bundle install/uninstall scripts
 SCRIPTS_DIR="$(dirname "$0")/.."
 for script in install-global.sh uninstall-global.sh; do
-    cp "$SCRIPTS_DIR/$script" "$OUT_DIR/$script"
+    cp "$SCRIPTS_DIR/$script" "$STAGING_DIR/$script"
 done
-chmod +x "$OUT_DIR/install-global.sh" "$OUT_DIR/uninstall-global.sh"
+chmod +x "$STAGING_DIR/install-global.sh" "$STAGING_DIR/uninstall-global.sh"
 
-tar -czf codeshc-portable.tar.gz -C "$OUT_DIR" .
+tar -czf "$OUT_DIR/codeshc-portable.tar.gz" -C "$STAGING_DIR" .
 
-echo "Created codeshc-portable.tar.gz successfully"
+echo "Created $OUT_DIR/codeshc-portable.tar.gz successfully"
