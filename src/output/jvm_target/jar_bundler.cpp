@@ -229,7 +229,7 @@ static std::string build_class_path_manifest_entry(const codesh::definition::cla
 
     for (const auto &cp : class_loaders | std::ranges::views::keys)
     {
-        paths.push_back(cp.generic_string());
+        paths.push_back(std::filesystem::absolute(cp).generic_string());
     }
 
     return fmt::format("Class-Path: {}", fmt::join(paths, " "));
