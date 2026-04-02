@@ -30,7 +30,7 @@ static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path);
-static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
+static std::filesystem::path write_manifest(const codesh::output::jvm_target::jar_builder_context &context,
         const codesh::semantic_analyzer::type_symbol *main_class,
         const codesh::definition::class_loaders &class_loaders);
 static std::string build_jar_command(const std::filesystem::path &temp_jar, const std::filesystem::path &temp_class_dir,
@@ -94,7 +94,7 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
     // In fat JAR mode, classpaths are already embedded.
     if (!fat_jar && (main_class != nullptr || !class_loaders.empty()))
     {
-        manifest_path = write_manifest(temp_class_dir.parent_path(), main_class, class_loaders);
+        manifest_path = write_manifest(context, main_class, class_loaders);
     }
 
     const auto command = build_jar_command(
@@ -197,11 +197,11 @@ static void write_manifest_attribute(std::ofstream &manifest, std::string line)
     manifest << line << "\r\n";
 }
 
-static std::filesystem::path write_manifest(const std::filesystem::path &temp_dir,
+static std::filesystem::path write_manifest(const codesh::output::jvm_target::jar_builder_context &context,
         const codesh::semantic_analyzer::type_symbol *main_class,
         const codesh::definition::class_loaders &class_loaders)
 {
-    const auto manifest_path = temp_dir / "MANIFEST.MF";
+    const auto manifest_path = context.temp_class_dir.parent_path() / "MANIFEST.MF";
     std::ofstream manifest(manifest_path, std::ios::binary);
 
     manifest << "Manifest-Version: 1.0\r\n";
@@ -217,7 +217,8 @@ static std::filesystem::path write_manifest(const std::filesystem::path &temp_di
         );
     }
 
-    if (!class_loaders.empty())
+    // Non-fat JARs need classpaths to find the libraries
+    if (!context.fat_jar && !class_loaders.empty())
     {
         write_manifest_attribute(manifest, build_class_path_manifest_entry(class_loaders));
     }
