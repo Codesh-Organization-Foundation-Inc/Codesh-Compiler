@@ -1,4 +1,7 @@
-﻿#Requires -RunAsAdministrator
+﻿param(
+    [Parameter(Mandatory)]
+    [string]$OutDir
+)
 
 # AI generated script, sourced from hand-made ./build.sh
 
@@ -16,25 +19,17 @@ if (-not (Get-Command cmake -ErrorAction SilentlyContinue)) {
     }
 }
 
-$CodeshPath = "C:\Program Files\קודש"
-
 # Compile codeshc
 cmake -B ./cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
 cmake --build ./cmake-build-release
 
-# Deploy to CodeshPath
-New-Item -ItemType Directory -Force -Path $CodeshPath | Out-Null
-Copy-Item -Force ".\cmake-build-release\codeshc.exe" "$CodeshPath\"
-
-# Add CodeshPath to system PATH if not already present
-$syspath = [Environment]::GetEnvironmentVariable("Path", "Machine")
-if ($syspath -notlike "*$CodeshPath*") {
-    [Environment]::SetEnvironmentVariable("Path", "$syspath;$CodeshPath", "Machine")
-}
+# Deploy to OutDir
+New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+Copy-Item -Force ".\cmake-build-release\codeshc.exe" "$OutDir\"
 
 # Build Talmud Codesh as JAR (use the freshly built binary directly — Hebrew paths can't be invoked by PowerShell)
 # --unholy because we are MAKING the Talmud Codesh and do not rely on it
-& ".\cmake-build-release\codeshc.exe" --src .\resources\lib-src\ --dest "$CodeshPath\תלמוד־קודש.jar" --sinful --unholy
+& ".\cmake-build-release\codeshc.exe" --src .\resources\lib-src\ --dest "$OutDir\תלמוד־קודש.jar" --sinful --unholy
 if ($LASTEXITCODE -ne 0) { throw "codeshc failed with exit code $LASTEXITCODE" }
 
 Write-Host "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
