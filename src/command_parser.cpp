@@ -45,7 +45,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         return result;
     }
 
-    result.is_java_default_classpath = false;
+    result.is_java_default_classpath = true;
     result.is_talmud_codesh_classpath = true;
 
     auto args = create_args_queue(argc, argv);
@@ -83,9 +83,9 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             result.is_talmud_codesh_classpath = false;
         }
-        else if (arg == "--sinful")
+        else if (arg == "--tzadik")
         {
-            result.is_java_default_classpath = true;
+            result.is_java_default_classpath = false;
         }
         else if (arg == "--imashkha-kol-kakh-shmena")
         {

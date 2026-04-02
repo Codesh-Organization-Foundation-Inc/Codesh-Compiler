@@ -23,7 +23,7 @@ struct command_args
 
     std::vector<std::filesystem::path> classpaths;
 
-    bool is_java_default_classpath; // Enabled by --sinful
+    bool is_java_default_classpath; // Disabled by --tzadik
     bool is_talmud_codesh_classpath; // Disabled by --unholy
     bool jar_output; // true when dest_path has a ".jar" extension
     bool fat_jar; // Enabled by --imashkha-kol-kakh-shmena; embeds all classpath entries into the JAR

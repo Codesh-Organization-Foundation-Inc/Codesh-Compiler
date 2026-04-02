@@ -290,7 +290,7 @@ static void print_help()
     std::puts("\t                                     If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
-    std::puts("\t--sinful                             Include the standard Java library");
+    std::puts("\t--tzadik                             Exclude the standard Java library");
     std::puts("\t--unholy                             Exclude the standard Codesh talmud (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
     std::puts("\t--classpath <entries>                Colon-separated (Unix) or semicolon-separated (Windows) list of classpaths to use (dirs or JARs)");
