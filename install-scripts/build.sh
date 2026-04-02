@@ -14,7 +14,9 @@ cmake --build ./cmake-build-release
 
 # Deploy to OUT_DIR
 mkdir -p "$OUT_DIR"
-cp ./cmake-build-release/codeshc "$OUT_DIR/codeshc"
+if [ "$(realpath ./cmake-build-release)" != "$(realpath "$OUT_DIR")" ]; then
+    cp ./cmake-build-release/codeshc "$OUT_DIR/codeshc"
+fi
 
 # Build Talmud Codesh as JAR
 # --unholy because we are MAKING the Talmud Codesh and do not rely on it

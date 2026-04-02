@@ -25,7 +25,11 @@ cmake --build ./cmake-build-release
 
 # Deploy to OutDir
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-Copy-Item -Force ".\cmake-build-release\codeshc.exe" "$OutDir\"
+$resolvedOut = (Resolve-Path $OutDir).Path.TrimEnd('\')
+$resolvedSrc = (Resolve-Path ".\cmake-build-release").Path.TrimEnd('\')
+if ($resolvedOut -ne $resolvedSrc) {
+    Copy-Item -Force ".\cmake-build-release\codeshc.exe" "$OutDir\"
+}
 
 # Build Talmud Codesh as JAR (use the freshly built binary directly — Hebrew paths can't be invoked by PowerShell)
 # --unholy because we are MAKING the Talmud Codesh and do not rely on it
