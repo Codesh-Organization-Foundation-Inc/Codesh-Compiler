@@ -9,14 +9,9 @@ fi
 OUT_DIR="$1"
 
 # Compile codeshc
-cmake -B ./cmake-build-release -S . -DCMAKE_BUILD_TYPE=Release
-cmake --build ./cmake-build-release
-
-# Deploy to OUT_DIR
 mkdir -p "$OUT_DIR"
-if [ "$(realpath ./cmake-build-release)" != "$(realpath "$OUT_DIR")" ]; then
-    cp ./cmake-build-release/codeshc "$OUT_DIR/codeshc"
-fi
+cmake -B "$OUT_DIR" -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build "$OUT_DIR"
 
 # Build Talmud Codesh as JAR
 # --unholy because we are MAKING the Talmud Codesh and do not rely on it
