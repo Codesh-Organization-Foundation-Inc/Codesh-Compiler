@@ -5,6 +5,7 @@
 #include "classpath/loader/jar_loader.h"
 #include "semantic_analyzer/symbol_table/symbol_table.h"
 
+#include <boost/algorithm/string/replace.hpp>
 #include <ranges>
 
 #ifdef _WIN32
@@ -229,7 +230,10 @@ static std::string build_class_path_manifest_entry(const codesh::definition::cla
 
     for (const auto &cp : class_loaders | std::ranges::views::keys)
     {
-        paths.push_back(std::filesystem::absolute(cp).generic_string());
+        auto path_str = std::filesystem::absolute(cp).generic_string();
+        boost::replace_all(path_str, " ", "%20");
+
+        paths.push_back(std::move(path_str));
     }
 
     return fmt::format("Class-Path: {}", fmt::join(paths, " "));
