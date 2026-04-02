@@ -8,22 +8,23 @@
 set -e
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 <binary> <out_dir>"
+    echo "Usage: $0 <build_dir> <out_dir>"
     exit 1
 fi
 
-BINARY="$1"
+BUILD_DIR="$1"
 OUT_DIR="$2"
 
-if [ ! -f "$BINARY" ]; then
-    echo "Binary not found at $BINARY"
+if [ ! -f "$BUILD_DIR/codeshc" ]; then
+    echo "Binary not found at $BUILD_DIR/codeshc"
     echo "Run build.sh first"
     exit 1
 fi
 rm -rf "$OUT_DIR"
 mkdir -p "$OUT_DIR"
 
-cp "$BINARY" "$OUT_DIR/codesh-raw"
+cp "$BUILD_DIR/codeshc" "$OUT_DIR/codesh-raw"
+cp "$BUILD_DIR/תלמוד־קודש.jar" "$OUT_DIR/תלמוד־קודש.jar"
 
 # Bundle ICU
 for lib in libicui18n.so.76 libicuuc.so.76 libicudata.so.76; do

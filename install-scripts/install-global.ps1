@@ -12,7 +12,7 @@ if (-not (Test-Path "$BuildDir\codeshc.exe")) {
     exit 1
 }
 
-$CodeshPath = "C:\Program Files\קודש"
+$CodeshPath = "C:\Program Files\" + (-join [char[]](0x05E7,0x05D5,0x05D3,0x05E9))
 
 New-Item -ItemType Directory -Force -Path $CodeshPath | Out-Null
 Copy-Item -Force "$BuildDir\*" "$CodeshPath\"

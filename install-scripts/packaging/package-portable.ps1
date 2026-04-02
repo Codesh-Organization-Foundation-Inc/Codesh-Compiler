@@ -1,21 +1,22 @@
 param(
     [Parameter(Mandatory)]
-    [string]$Binary,
+    [string]$BuildDir,
     [Parameter(Mandatory)]
     [string]$OutDir
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not (Test-Path $Binary)) {
-    Write-Error "Binary not found at $Binary`nRun build.ps1 first"
+if (-not (Test-Path "$BuildDir\codeshc.exe")) {
+    Write-Error "Binary not found at $BuildDir\codeshc.exe`nRun build.ps1 first"
     exit 1
 }
 
 Remove-Item -Recurse -Force $OutDir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-Copy-Item $Binary "$OutDir\codeshc.exe"
+Copy-Item "$BuildDir\codeshc.exe" "$OutDir\codeshc.exe"
+Get-ChildItem "$BuildDir\*.jar" | Copy-Item -Destination $OutDir
 
 # MinGW runtime DLLs
 $MinGWBin = "C:\msys64\ucrt64\bin"
@@ -39,7 +40,6 @@ foreach ($prefix in @("libicudt", "libicuin", "libicuuc")) {
 }
 
 # vcpkg DLLs (located inside the build directory)
-$BuildDir = Split-Path $Binary -Parent
 $VcpkgBin = Join-Path $BuildDir "vcpkg_installed\x64-mingw-dynamic\bin"
 if (Test-Path $VcpkgBin) {
     foreach ($dll in Get-ChildItem $VcpkgBin -Filter "*.dll") {

@@ -2,11 +2,9 @@
 
 $ErrorActionPreference = "Stop"
 
-$CodeshPath = "C:\Program Files\קודש"
+$CodeshPath = "C:\Program Files\" + (-join [char[]](0x05E7,0x05D5,0x05D3,0x05E9))
 
-Remove-Item -Force "C:\Program Files\קודש\codeshc.exe" -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force $CodeshPath -ErrorAction SilentlyContinue
-Remove-Item -Recurse -Force ".\cmake-build-release" -ErrorAction SilentlyContinue
 
 # Remove CodeshPath from system PATH if present
 $syspath = [Environment]::GetEnvironmentVariable("Path", "Machine")
@@ -15,4 +13,4 @@ if ($syspath -like "*$CodeshPath*") {
     [Environment]::SetEnvironmentVariable("Path", $newpath, "Machine")
 }
 
-Write-Host "וְיִגְעַר ה' בַּיּוֹצֵר כִּי־בָּחַר בַּחֹשֶׁךְ וְלֹא בָאוֹר וַיִּתְעַצֵּב מְאֹד מְאֹד וַיִּתֹּם:"
+Write-Host "Uninstallation complete."
