@@ -236,7 +236,7 @@ static std::string build_class_path_manifest_entry(const codesh::definition::cla
         if (should_ignore_classpath(cp, *class_loader))
             continue;
 
-        auto path_str = std::filesystem::absolute(cp).generic_string();
+        auto path_str = "file:///" + std::filesystem::absolute(cp).generic_string();
         codesh::util::replace_all(path_str, " ", "%20");
 
         paths.push_back(std::move(path_str));
