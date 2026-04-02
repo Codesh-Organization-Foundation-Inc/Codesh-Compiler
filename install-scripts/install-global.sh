@@ -6,15 +6,26 @@ if (( EUID != 0 )); then
     exit 1
 fi
 
-# sudo strips environment.
-# Recover VCPKG_ROOT from the invoking user's home
-if [ -z "$VCPKG_ROOT" ]; then
-    VCPKG_ROOT="/home/$SUDO_USER/vcpkg"
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <build_dir>"
+    echo "  build_dir: output directory from build.sh"
+    exit 1
 fi
-export VCPKG_ROOT
+
+BUILD_DIR="$1"
+
+if [ ! -f "$BUILD_DIR/codeshc" ]; then
+    echo "codeshc not found in $BUILD_DIR"
+    echo "Run build.sh first"
+    exit 1
+fi
 
 CODESH_PATH="/usr/lib/קודש"
 
-"$(dirname "$0")/build.sh" "$CODESH_PATH"
+mkdir -p "$CODESH_PATH"
+cp -r "$BUILD_DIR"/. "$CODESH_PATH/"
+rm -f "$CODESH_PATH/install-global.sh" "$CODESH_PATH/install-global.ps1"
 
 ln -sf "$CODESH_PATH/codeshc" /usr/local/bin/codeshc
+
+echo "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"

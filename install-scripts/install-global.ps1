@@ -1,14 +1,27 @@
 #Requires -RunAsAdministrator
 
+param(
+    [Parameter(Mandatory)]
+    [string]$BuildDir
+)
+
 $ErrorActionPreference = "Stop"
+
+if (-not (Test-Path "$BuildDir\codeshc.exe")) {
+    Write-Error "קוֹדֶשׁ אֵינוֹ נִמְצָא בְּתִיקִיַּת הַיַּעַד"
+    exit 1
+}
 
 $CodeshPath = "C:\Program Files\קודש"
 
-# Build using the build script
-& "$PSScriptRoot\build.ps1" -OutDir $CodeshPath
+New-Item -ItemType Directory -Force -Path $CodeshPath | Out-Null
+Copy-Item -Force "$BuildDir\*" "$CodeshPath\"
+Remove-Item -Force -ErrorAction SilentlyContinue "$CodeshPath\install-global.ps1", "$CodeshPath\install-global.sh"
 
 # Add CodeshPath to system PATH if not already present
 $syspath = [Environment]::GetEnvironmentVariable("Path", "Machine")
 if ($syspath -notlike "*$CodeshPath*") {
     [Environment]::SetEnvironmentVariable("Path", "$syspath;$CodeshPath", "Machine")
 }
+
+Write-Host "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
