@@ -37,6 +37,8 @@ static std::string build_jar_command(const std::filesystem::path &temp_jar, cons
 static std::string build_class_path_manifest_entry(const codesh::definition::class_loaders &class_loaders);
 static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class_loaders,
         const std::filesystem::path &temp_class_dir, const std::filesystem::path &jar_cli_path);
+static bool should_ignore_classpath(const std::filesystem::path &cp,
+        const codesh::external::class_loader &class_loader);
 
 
 bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_table &symbol_table,
@@ -228,8 +230,11 @@ static std::string build_class_path_manifest_entry(const codesh::definition::cla
     std::vector<std::string> paths;
     paths.reserve(class_loaders.size());
 
-    for (const auto &cp : class_loaders | std::ranges::views::keys)
+    for (const auto &[cp, class_loader] : class_loaders)
     {
+        if (should_ignore_classpath(cp, *class_loader))
+            continue;
+
         auto path_str = std::filesystem::absolute(cp).generic_string();
         boost::replace_all(path_str, " ", "%20");
 
@@ -338,11 +343,7 @@ static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class
 {
     for (const auto &[cp, class_loader] : class_loaders)
     {
-        if (cp == std::filesystem::path("."))
-            continue;
-        // We don't care to specify modules.
-        // Assuming it's only native Java ones.
-        if (dynamic_cast<const codesh::external::jimage_loader *>(class_loader.get()))
+        if (should_ignore_classpath(cp, *class_loader))
             continue;
 
         if (std::filesystem::is_directory(cp))
@@ -367,7 +368,7 @@ static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class
                 return false;
             }
         }
-        else if (codesh::external::is_jar(cp))
+        else if (dynamic_cast<const codesh::external::jar_loader *>(class_loader.get()))
         {
             // `jar xf` extracts to the current working directory.
             // So temporarily change to temp_class_dir:
@@ -395,4 +396,17 @@ static bool add_classpaths_to_dir(const codesh::definition::class_loaders &class
         }
     }
     return true;
+}
+
+static bool should_ignore_classpath(const std::filesystem::path &cp,
+        const codesh::external::class_loader &class_loader)
+{
+    if (cp == std::filesystem::path("."))
+        return true;
+    // We don't care to specify modules.
+    // Assuming it's only native Java ones.
+    if (dynamic_cast<const codesh::external::jimage_loader *>(&class_loader))
+        return true;
+
+    return false;
 }
