@@ -10,8 +10,9 @@
 #endif
 #include <cstdlib>
 #include <filesystem>
-#include <fstream>
 #include <fmt/format.h>
+#include <fstream>
+#include <iostream>
 
 static constexpr size_t MANIFEST_MAX_LINE_BYTES = 72;
 
@@ -260,11 +261,13 @@ static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
         const std::filesystem::path &dest_jar_path)
 {
     std::error_code error;
+    std::filesystem::remove(dest_jar_path, error);
     std::filesystem::rename(temp_jar, dest_jar_path, error);
 
     if (!error)
         return true;
 
+    std::filesystem::create_directories(dest_jar_path.parent_path(), error);
     // Try copy + remove instead of rename
     std::filesystem::copy_file(
         temp_jar,
