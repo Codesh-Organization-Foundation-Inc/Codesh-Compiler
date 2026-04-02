@@ -2,6 +2,7 @@
 
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
+#include "classpath/loader/jar_loader.h"
 #include "output/jvm_target/class_file_builder.h"
 
 #include <fstream>
@@ -11,7 +12,6 @@ static std::queue<std::string> create_args_queue(int argc, char **argv);
 static std::string consume_argument(std::queue<std::string> &args);
 static std::string consume_string_argument(std::queue<std::string> &args);
 
-static bool is_zip(const std::string &file_name);
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
 static std::filesystem::path get_default_jre_path();
 static void validate_jre_path(const codesh::command_args &args);
@@ -149,7 +149,7 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
             continue;
 
         const std::filesystem::path file_path(entry);
-        if (std::filesystem::is_directory(file_path) || is_zip(file_path.string()))
+        if (std::filesystem::is_directory(file_path) || codesh::external::is_jar(file_path.string()))
         {
             result.classpaths.emplace_back(file_path);
             continue;
@@ -169,21 +169,6 @@ static std::filesystem::path get_default_jre_path()
         return {java_home};
 
     return codesh::DEFAULT_JRE_PATH;
-}
-
-static bool is_zip(const std::string &file_name)
-{
-    std::ifstream file;
-    file.open(file_name, std::ios::binary);
-
-    if (!file)
-        return false;
-
-    char magic[4];
-    file.read(magic, 4);
-
-    return magic[0] == 0x50 && magic[1] == 0x4B &&
-           magic[2] == 0x03 && magic[3] == 0x04;
 }
 
 static std::string consume_argument(std::queue<std::string> &args)
