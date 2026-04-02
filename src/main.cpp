@@ -622,7 +622,10 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
 
     // In a non-project, the CLI dest path IS the output path.
     if (!is_project)
+    {
+        std::filesystem::create_directories(result);
         return result;
+    }
 
 
     // In a project, the CLI dest path is the output directory.
