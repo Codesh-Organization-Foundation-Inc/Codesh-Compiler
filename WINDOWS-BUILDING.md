@@ -1,7 +1,7 @@
 # Building Codesh Compiler on Windows (why)
 
 Do you feel like being a masochist for the day?  
-Do you not value your time at all and?  
+Do you not value your time at all?  
 Do you *really* hate your life and mere being with every fiber of your miserable soul?
 
 If so, I welcome you with open hands to the best guide on the internet for unemployed individuals like yourself.
