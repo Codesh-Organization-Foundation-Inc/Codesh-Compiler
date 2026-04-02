@@ -26,9 +26,6 @@ jar_loader::jar_loader(const std::filesystem::path &path) : archive(path.string(
 
 bool codesh::external::is_jar(const std::filesystem::path &path)
 {
-    if (path.extension() != ".jar")
-        return false;
-
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open())
         return false;
