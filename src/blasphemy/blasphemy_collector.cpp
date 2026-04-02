@@ -25,6 +25,12 @@ static constexpr std::string PRETTY_PRINT_RED = "\033[31m";
 static constexpr std::string PRETTY_PRINT_YELLOW = "\033[33m";
 static constexpr std::string PRETTY_PRINT_END = "\033[0m";
 
+codesh::blasphemy::blasphemy_collector::blasphemy_collector() = default;
+codesh::blasphemy::blasphemy_collector &codesh::blasphemy::blasphemy_collector::get_instance()
+{
+    static blasphemy_collector blasphemy_collector;
+    return blasphemy_collector;
+}
 
 void codesh::blasphemy::blasphemy_collector::add_blasphemy(std::string details, blasphemy_type type,
                                                            lexer::code_range source_range, bool is_fatal)
@@ -204,6 +210,5 @@ fmt::format_string<std::string> codesh::blasphemy::blasphemy_collector::get_rand
 
 codesh::blasphemy::blasphemy_collector &codesh::blasphemy::get_blasphemy_collector()
 {
-    static blasphemy_collector blasphemy_collector;
-    return blasphemy_collector;
+    return blasphemy_collector::get_instance();
 }

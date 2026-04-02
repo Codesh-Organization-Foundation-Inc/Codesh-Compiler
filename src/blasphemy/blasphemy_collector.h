@@ -57,8 +57,11 @@ class blasphemy_collector
 
     static void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color);
 
+    blasphemy_collector();
 
 public:
+    static blasphemy_collector &get_instance();
+
     void add_blasphemy(std::string details, blasphemy_type type, lexer::code_range source_range, bool is_fatal = false);
 
     /**

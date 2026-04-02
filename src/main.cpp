@@ -128,7 +128,7 @@ static int compile(const codesh::command_args &args, const codesh::definition::c
 {
     if (!args.src_path)
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::SRC_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::lexer::NO_CODE_POS,
@@ -138,7 +138,7 @@ static int compile(const codesh::command_args &args, const codesh::definition::c
     }
     if (!args.dest_path)
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             codesh::blasphemy::details::DEST_NOT_PROVIDED,
             codesh::blasphemy::blasphemy_type::INIT,
             codesh::lexer::NO_CODE_POS,
@@ -602,7 +602,7 @@ static bool validate_output_path(const std::filesystem::path &dest_path, const b
     if (std::filesystem::is_directory(dest_path, error))
         return true;
 
-    codesh::blasphemy::blasphemy_collector().add_blasphemy(
+    codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         fmt::format(
             codesh::blasphemy::details::DEST_PATH_NOT_DIRECTORY,
             dest_path.string()
@@ -632,7 +632,7 @@ static std::optional<std::filesystem::path> get_output_path(const std::filesyste
 
     if (error)
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
                 source_file_path.string()
@@ -657,7 +657,7 @@ static std::string read_file(const std::filesystem::path &file_name)
 
     if (!file.is_open())
     {
-        codesh::blasphemy::blasphemy_collector().add_blasphemy(
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
                 file_name.string()

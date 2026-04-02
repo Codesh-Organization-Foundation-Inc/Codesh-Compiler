@@ -139,7 +139,7 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
         }
 
         //FIXME: This is mostly caused by an unenclosed string.
-        blasphemy::blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::TOKEN_DOESNT_EXIST,
             blasphemy::blasphemy_type::LEXICAL,
             curr_keyword_pos

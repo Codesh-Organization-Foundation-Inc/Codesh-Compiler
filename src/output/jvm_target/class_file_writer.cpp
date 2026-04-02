@@ -47,7 +47,7 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
 
     if (!destination_file)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::SOURCE_FILE_OPEN_ERROR,
                 class_file_path.string()
@@ -56,8 +56,8 @@ void codesh::output::jvm_target::write_to_file(const defs::class_file &class_fil
             lexer::NO_CODE_POS,
             true
         );
+        return;
     }
-
 
     write_bytes(destination_file, class_file.magic, 4);
     write_bytes(destination_file, class_file.minor_version, 2);

@@ -19,7 +19,7 @@ codesh::output::jvm_target::defs::CONSTANT_Utf8_info::CONSTANT_Utf8_info(const s
 {
     if (utf8.size() > 0xFFFF)
     {
-        blasphemy::blasphemy_collector().add_blasphemy(
+        blasphemy::get_blasphemy_collector().add_blasphemy(
             blasphemy::details::STRING_TOO_BIG,
             blasphemy::blasphemy_type::OUTPUT,
             lexer::NO_CODE_POS,
