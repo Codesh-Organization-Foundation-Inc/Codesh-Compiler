@@ -20,6 +20,7 @@ static bool get_main_class(const codesh::semantic_analyzer::symbol_table &symbol
 static bool get_main_class_by_name(const codesh::semantic_analyzer::symbol_table &symbol_table,
         codesh::semantic_analyzer::type_symbol **main_class_out,
         const codesh::definition::fully_qualified_name &class_name);
+static std::string path_str(const std::filesystem::path &path);
 static std::string finalize_command(std::string command);
 static std::filesystem::path get_jar_cli_path(const std::filesystem::path &jre_path);
 static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
@@ -61,7 +62,7 @@ bool codesh::output::jvm_target::bundle_jar(const semantic_analyzer::symbol_tabl
         blasphemy::get_blasphemy_collector().add_blasphemy(
             fmt::format(
                 blasphemy::details::PATH_DOESNT_EXIST,
-                jar_cli_path.string()
+                path_str(jar_cli_path)
             ),
             blasphemy::blasphemy_type::OUTPUT,
             lexer::NO_CODE_POS,
@@ -281,13 +282,23 @@ static bool move_jar_to_dest(const std::filesystem::path &temp_jar,
     codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
         fmt::format(
             codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR,
-            dest_jar_path.string()
+            path_str(dest_jar_path)
         ),
         codesh::blasphemy::blasphemy_type::OUTPUT,
         codesh::lexer::NO_CODE_POS,
         true
     );
     return false;
+}
+
+static std::string path_str(const std::filesystem::path &path)
+{
+#ifdef _WIN32
+    const auto u8 = path.u8string();
+    return {reinterpret_cast<const char*>(u8.data()), u8.size()};
+#else
+    return path.string();
+#endif
 }
 
 static std::string finalize_command(std::string command)
@@ -331,7 +342,7 @@ static bool add_classpaths_to_dir(const std::vector<std::filesystem::path> &clas
             if (exit_code)
             {
                 codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-                    fmt::format(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR, cp.string()),
+                    fmt::format(codesh::blasphemy::details::OUTPUT_FILE_OPEN_ERROR, path_str(cp)),
                     codesh::blasphemy::blasphemy_type::OUTPUT,
                     codesh::lexer::NO_CODE_POS,
                     true
