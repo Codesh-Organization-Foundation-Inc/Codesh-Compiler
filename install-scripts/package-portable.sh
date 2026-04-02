@@ -43,6 +43,6 @@ LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codesh-raw" "$@"
 EOF
 chmod +x "$OUT_DIR/codeshc"
 
-zip -j codeshc-portable.zip "$OUT_DIR"/*
+tar -czf codeshc-portable.tar.gz -C "$OUT_DIR" .
 
-echo "Created codeshc-portable.zip successfully"
+echo "Created codeshc-portable.tar.gz successfully"
