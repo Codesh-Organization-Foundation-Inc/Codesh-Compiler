@@ -8,7 +8,7 @@ fi
 
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <build_dir>"
-    echo "  build_dir: output directory from build.sh"
+    echo "  build_dir: Output directory from build.sh"
     exit 1
 fi
 
