@@ -395,6 +395,7 @@ add_executable(codeshc
         src/parser/ast/method/operation/array_length_ast_node.h
         src/parser/ast/method/operation/new_array_ast_node.cpp
         src/parser/ast/method/operation/new_array_ast_node.h
+        src/parser/ast/impl/i_symbolically_linked.cpp
 )
 
 

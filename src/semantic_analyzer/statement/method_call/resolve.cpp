@@ -400,6 +400,14 @@ static std::optional<parent_type_result> resolve_parent_type_for_expression_rece
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::method::operation::method_call_ast_node &method_call)
 {
+    // Check if the receiver symbol is resolved before any ado
+    const auto *receiver_symbol = dynamic_cast<const codesh::ast::impl::i_symbolically_linked_base *>(
+        &method_call.get_receiver()
+    );
+    if (receiver_symbol && !receiver_symbol->is_resolved())
+        return std::nullopt;
+
+
     const auto resolved = codesh::semantic_analyzer::util::resolve_custom_type_node(
         context, *method_call.get_receiver().get_type()
     );
