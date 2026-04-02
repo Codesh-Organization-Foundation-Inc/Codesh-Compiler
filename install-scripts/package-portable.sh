@@ -43,6 +43,10 @@ LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codesh-raw" "$@"
 EOF
 chmod +x "$OUT_DIR/codeshc"
 
+# Bundle install script
+cp "$(dirname "$0")/install-global.sh" "$OUT_DIR/install-global.sh"
+chmod +x "$OUT_DIR/install-global.sh"
+
 tar -czf codeshc-portable.tar.gz -C "$OUT_DIR" .
 
 echo "Created codeshc-portable.tar.gz successfully"

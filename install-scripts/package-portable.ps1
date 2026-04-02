@@ -49,6 +49,9 @@ if (Test-Path $VcpkgBin) {
     Write-Warning "vcpkg bin not found at $VcpkgBin, skipping"
 }
 
+# Bundle install script
+Copy-Item "$PSScriptRoot\install-global.ps1" "$OutDir\install-global.ps1"
+
 Compress-Archive -Path "$OutDir\*" -DestinationPath "codeshc-portable.zip" -Force
 
 Write-Host "Created codeshc-portable.zip successfully"
