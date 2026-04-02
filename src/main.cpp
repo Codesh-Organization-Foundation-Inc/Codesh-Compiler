@@ -293,7 +293,7 @@ static void print_help()
     std::puts("\t--sinful                             Include the standard Java library");
     std::puts("\t--unholy                             Exclude the standard Codesh talmud (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
-    std::puts("\t--classpath <entries>                Semicolon-separated list of classpaths to use (dirs or JARs)");
+    std::puts("\t--classpath <entries>                Colon-separated (Unix) or semicolon-separated (Windows) list of classpaths to use (dirs or JARs)");
     fmt::println("\t--talmud-codesh-path <path>          Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--lsp                                Run in LSP Server Mode (for IDEs)");
     std::puts("");

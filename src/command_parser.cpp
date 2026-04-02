@@ -13,6 +13,7 @@ static std::string consume_argument(std::queue<std::string> &args);
 static std::string consume_string_argument(std::queue<std::string> &args);
 
 static void parse_classpath(std::queue<std::string> &args, codesh::command_args &result);
+static constexpr char get_classpath_separator();
 static std::filesystem::path get_default_jre_path();
 static void validate_jre_path(const codesh::command_args &args);
 
@@ -143,13 +144,13 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
     std::stringstream stream(consume_string_argument(args));
     std::string entry;
 
-    while (std::getline(stream, entry, ';'))
+    while (std::getline(stream, entry, get_classpath_separator()))
     {
         if (entry.empty())
             continue;
 
         const std::filesystem::path file_path(entry);
-        if (std::filesystem::is_directory(file_path) || codesh::external::is_jar(file_path.string()))
+        if (std::filesystem::is_directory(file_path) || codesh::external::is_jar(file_path))
         {
             result.classpaths.emplace_back(file_path);
             continue;
@@ -161,6 +162,15 @@ static void parse_classpath(std::queue<std::string> &args, codesh::command_args 
             codesh::lexer::NO_CODE_POS
         );
     }
+}
+
+static constexpr char get_classpath_separator()
+{
+#ifdef _WIN32
+    return ';';
+#else
+    return ':';
+#endif
 }
 
 static std::filesystem::path get_default_jre_path()
