@@ -47,6 +47,16 @@ In Codesh terminology, a Talmud is **a library written in the Codesh programming
 
 Talmud Codesh comes pre-installed in the portable builds of The Motzie B'She'ela under the name `תלמוד־קודש.jar`.
 
+## The Java Runtime Environment
+**Codesh requires\* the JRE to be present.**  
+**Recommended version:** 21.
+
+<sub>
+*If you really dislike the JRE, you can use `--tzadik` and `--unholy` as well as to not compile to `.jar` files. This removes dependencies on both Talmud Codesh and the JRE.
+<br/>
+Talmud Codesh needs the JRE to properly work.
+</sub>
+
 ## Compiling
 There are two primary ways to compile Codesh source code:
 
@@ -72,3 +82,14 @@ codeshc --src <source-file/directory> --dest <output-directory>
 
 >[!IMPORTANT]
 > Note the *absence* of the `.jar` suffix.
+
+## Default Paths
+The default paths below can be overwritten using `--talmud-codesh-path` and `"--jre-path`.
+
+### JRE
+The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
+* **Unix:** `/usr/lib/jvm/jre-21`
+* **Windows:** `C:\Program Files\Java\jre-21`
+
+### Talmud Codesh
+Always `./תלמוד־קודש.jar`.
