@@ -29,7 +29,7 @@ install-global
 
 The script is already present within the portable installation as both a Bash or PowerShell script.
 
-The global installation provides' system-wide access to `codeshc`.
+The global installation provides system-wide access to `codeshc`.
   * **On Unix:** Links `codeshc` to `/usr/local/bin/`.
   * **On Windows**: Installs into `C:\Program Files\קודש` which is then added to the system's `PATH`.
 
