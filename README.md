@@ -15,7 +15,7 @@ Official compiler for the Codesh programming language.
 
 ## Codesh
 
-For full **language documentation**, see [the project wiki](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/wiki).
+For **full language documentation**, see [the project wiki](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/wiki).
 
 You can learn more about the language on the [Codesh (קודש) Esolang page](https://esolangs.org/wiki/Codesh_(%D7%A7%D7%95%D7%93%D7%A9)).
 
