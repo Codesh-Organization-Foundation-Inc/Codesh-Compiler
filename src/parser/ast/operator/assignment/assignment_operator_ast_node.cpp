@@ -1,13 +1,14 @@
 #include "assignment_operator_ast_node.h"
 
-#include "semantic_analyzer/util/poly_util.h"
 #include "output/ir/instruction/assignment_from_code_block_instruction.h"
 #include "output/ir/instruction/load_instruction.h"
 #include "output/ir/instruction/put_field_instruction.h"
 #include "output/ir/instruction/put_static_instruction.h"
 #include "output/ir/instruction/store_in_local_var_instruction.h"
 #include "output/ir/util.h"
+#include "parser/ast/operator/cast/cast_ast_node.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
+#include "semantic_analyzer/util/poly_util.h"
 
 codesh::ast::op::assignment::assignment_operator_ast_node::assignment_operator_ast_node(
         const lexer::code_position code_position, std::unique_ptr<var_reference::variable_reference_ast_node> left,
@@ -19,7 +20,21 @@ codesh::ast::op::assignment::assignment_operator_ast_node::assignment_operator_a
 codesh::ast::var_reference::variable_reference_ast_node &codesh::ast::op::assignment::assignment_operator_ast_node::
     get_left() const
 {
-    return static_cast<var_reference::variable_reference_ast_node &>(binary_ast_node::get_left()); // NOLINT(*-pro-type-static-cast-downcast)
+    return get_var_ref_from_left(binary_ast_node::get_left());
+}
+
+codesh::ast::var_reference::variable_reference_ast_node &codesh::ast::op::assignment::assignment_operator_ast_node::
+    get_var_ref_from_left(value_ast_node &value)
+{
+    if (const auto var_ref = dynamic_cast<var_reference::variable_reference_ast_node *>(&value))
+        return *var_ref;
+
+    if (const auto cast = dynamic_cast<cast_ast_node *>(&value))
+    {
+        return get_var_ref_from_left(cast->get_value());
+    }
+
+    throw std::runtime_error("Unsupported assignment target");
 }
 
 codesh::ast::type::type_ast_node *codesh::ast::op::assignment::assignment_operator_ast_node::get_type() const
