@@ -19,6 +19,8 @@ For **full language documentation**, see [the project wiki](https://github.com/C
 
 You can learn more about the language on the [Codesh (קודש) Esolang page](https://esolangs.org/wiki/Codesh_(%D7%A7%D7%95%D7%93%D7%A9)).
 
+See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/tree/main/Examples).
+
 ## IDE
 [**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) best support RTL coding syntax. Either is extremely recommended when coding in Codesh, Kate being more lightweight.
 
