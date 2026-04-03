@@ -2,6 +2,10 @@
 
 Official compiler for the Codesh programming language.
 
-<p align="center"><img src="./public/example.png" width="600" alt="Example image"></p>
+<p align="center">
+  <img src="./public/logo.png" height="200" alt="Logo of Codesh">
+  &nbsp;&nbsp;&nbsp;
+  <img src="./public/example.png" height="200" alt="Example image">
+</p>
 
 # TODO
