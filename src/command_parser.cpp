@@ -29,10 +29,9 @@ const std::string COMMON_JAVA_PATH = LIB_PATH + "jvm/";
 
 
 const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
-const std::string COMMON_TALMUD_CODESH_PATH = "קודש/תלמוד־קודש.jar";
 
 const std::string codesh::DEFAULT_JRE_PATH = COMMON_JAVA_PATH + COMMON_JRE_DIR;
-const std::string codesh::DEFAULT_TALMUD_CODESH_PATH = LIB_PATH + COMMON_TALMUD_CODESH_PATH;
+const std::string codesh::DEFAULT_TALMUD_CODESH_PATH = "./תלמוד־קודש.jar";
 
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
