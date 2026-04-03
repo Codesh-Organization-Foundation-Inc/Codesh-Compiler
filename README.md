@@ -13,6 +13,9 @@ Official compiler for the Codesh programming language.
 
 **The Motzi B'She'ela** *(המוציא בשאלה)* is the official compiler for Codesh. It translates **Codesh source code** into **JVM bytecode**.
 
+## Codesh
+For the full **language documentation**, please refer to the [project's wiki](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/wiki).
+
 ## Installation
 
 1. Grab the [latest portable release](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/releases/latest) for your platform
