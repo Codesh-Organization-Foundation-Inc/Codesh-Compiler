@@ -5,10 +5,13 @@
 
 namespace codesh::ast::op::assignment
 {
+class cast_ast_node;
 
 class assignment_operator_ast_node : public impl::binary_ast_node
 {
     std::optional<int> rhs_cpi;
+
+    static var_reference::variable_reference_ast_node &get_var_ref_from_left(value_ast_node &value);
 
 public:
     assignment_operator_ast_node(lexer::code_position code_position,

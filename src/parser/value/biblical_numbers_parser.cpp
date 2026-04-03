@@ -259,7 +259,7 @@ codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::va
     if (next_number->is_period)
         return handle_invalid_period();
 
-    return parsing_state::START;
+    return parsing_state::HANDLE_ADDITION;
 }
 
 codesh::parser::value::biblical_numbers_parser::parsing_state codesh::parser::value::biblical_numbers_parser::
