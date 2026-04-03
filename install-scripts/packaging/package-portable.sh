@@ -25,7 +25,7 @@ mkdir -p "$OUT_DIR"
 STAGING_DIR="$(mktemp -d /tmp/codeshc-portable-staging.XXXXXX)"
 trap 'rm -rf "$STAGING_DIR"' EXIT
 
-cp "$BUILD_DIR/codeshc" "$STAGING_DIR/codesh-raw"
+cp "$BUILD_DIR/codeshc" "$STAGING_DIR/codeshc-raw"
 cp "$BUILD_DIR/תלמוד־קודש.jar" "$STAGING_DIR/תלמוד־קודש.jar"
 
 # Bundle ICU
@@ -42,7 +42,7 @@ done
 cat > "$STAGING_DIR/codeshc" << 'EOF'
 #!/bin/bash
 DIR="$(cd "$(dirname "$0")" && pwd)"
-LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codesh-raw" "$@"
+LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codeshc-raw" "$@"
 EOF
 chmod +x "$STAGING_DIR/codeshc"
 
