@@ -291,11 +291,11 @@ static void print_help()
     std::puts("\t                                     If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
-    std::puts("\t--tzadik                             Exclude the standard Java library");
-    std::puts("\t--unholy                             Exclude the standard Codesh talmud (not recommended)");
+    std::puts("\t--tzadik                             Do not use the standard Java library (not recommended)");
+    std::puts("\t--unholy                             Do not use Talmud Codesh (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
+    fmt::println("\t--talmud-codesh-path <path>          Path to Talmud Codesh (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--classpath <entries>                Colon-separated (Unix) or semicolon-separated (Windows) list of classpaths to use (dirs or JARs)");
-    fmt::println("\t--talmud-codesh-path <path>          Path to the Talmud Codesh standard library (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
     std::puts("\t--lsp                                Run in LSP Server Mode (for IDEs)");
     std::puts("");
     std::puts("JAR Target:");
