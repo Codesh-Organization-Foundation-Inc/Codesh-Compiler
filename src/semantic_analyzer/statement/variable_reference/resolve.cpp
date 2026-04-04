@@ -12,15 +12,17 @@
 /**
  * If the requested name has a single part, will attempt to fetch by the method/class scope.
  * Otherwise, uses imports and such regularly.
+ * @p scope may be @c std::nullopt when resolving outside a method body (e.g. static field initializers).
+ * In that case only multi-part (import-resolved) names are supported.
  */
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
-        const codesh::semantic_analyzer::method_scope_symbol &scope);
+        const std::optional<codesh::semantic_analyzer::method_scope_info> &method_info);
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
         codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
-        const codesh::semantic_analyzer::method_scope_symbol &scope);
+        const std::optional<codesh::semantic_analyzer::method_scope_info> &method_info);
 
 /**
  * @returns Whether that the local variable referenced is accessed when it's supposed to
@@ -33,8 +35,14 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
  * Resolves a field reference of the form @c this.fieldName by looking up the field name
  * directly in the enclosing type's scope.
  */
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_local_symbol(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope);
+
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_field_symbol(
-        const codesh::semantic_analyzer::semantic_context &context, const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
         const codesh::semantic_analyzer::method_scope_symbol &scope);
 
 /**
@@ -48,16 +56,15 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
 
 bool codesh::semantic_analyzer::statement::variable_reference::resolve(const semantic_context &context,
         ast::var_reference::variable_reference_ast_node &var_ref_node,
-        const method_scope_symbol &scope)
+        const std::optional<method_scope_info> &method_info)
 {
-    if (!resolve_variable_reference(context, var_ref_node, scope))
+    if (!resolve_variable_reference(context, var_ref_node, method_info))
         return false;
 
     //TODO: Add type checks
-
-    if (const auto &local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved()))
+    if (const auto &local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved()); method_info)
     {
-        if (!is_accessible(*local_var, var_ref_node, scope))
+        if (!is_accessible(*local_var, var_ref_node, method_info->scope))
         {
             const auto &local_var_node = local_var->get_producing_node();
 
@@ -102,7 +109,8 @@ static bool is_accessible(const codesh::semantic_analyzer::local_variable_symbol
 }
 
 static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic_context &context,
-        codesh::ast::var_reference::variable_reference_ast_node &var_ref_node, const codesh::semantic_analyzer::method_scope_symbol &scope)
+        codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const std::optional<codesh::semantic_analyzer::method_scope_info> &method_info)
 {
     if (var_ref_node.get_producing_declaration().has_value())
     {
@@ -113,7 +121,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     }
 
 
-    const auto result = find_symbol_local_first(context, var_ref_node, scope);
+    const auto result = find_symbol_local_first(context, var_ref_node, method_info);
     if (!result.has_value())
         return false;
 
@@ -129,21 +137,31 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     }
 
     var_ref_node.set_resolved(*var_symbol);
-    return true;
+    return codesh::semantic_analyzer::util::resolve_type_node(context, *var_symbol->get_type());
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(
         const codesh::semantic_analyzer::semantic_context &context,
         const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
-        const codesh::semantic_analyzer::method_scope_symbol &scope)
+        const std::optional<codesh::semantic_analyzer::method_scope_info> &method_info)
 {
     const auto &full_var_name = var_ref_node.get_unresolved_name();
 
     if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::THIS)
-        return find_field_symbol(context, var_ref_node, scope);
+    {
+        if (!method_info)
+            return std::nullopt;
+
+        return find_field_symbol(context, var_ref_node, method_info->scope);
+    }
 
     if (var_ref_node.get_association() == codesh::ast::var_reference::reference_association::SUPER)
-        return find_super_field_symbol(context, var_ref_node, scope);
+    {
+        if (!method_info)
+            return std::nullopt;
+
+        return find_super_field_symbol(context, var_ref_node, method_info->scope);
+    }
 
     if (!full_var_name.is_single_part())
     {
@@ -157,7 +175,18 @@ static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> 
     // If the variable name is made only with a single part, it MUST be either a local variable, class member,
     //TODO: or static import.
 
-    const auto var_name = full_var_name.get_last_part();
+    if (method_info)
+        return find_local_symbol(context, var_ref_node, method_info->scope);
+
+    return std::nullopt;
+}
+
+static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_local_symbol(
+        const codesh::semantic_analyzer::semantic_context &context,
+        const codesh::ast::var_reference::variable_reference_ast_node &var_ref_node,
+        const codesh::semantic_analyzer::method_scope_symbol &scope)
+{
+    const auto var_name = var_ref_node.get_unresolved_name().get_last_part();
 
     const auto result = scope.resolve_up(var_name);
     if (!result.has_value())

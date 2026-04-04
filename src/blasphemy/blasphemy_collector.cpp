@@ -168,10 +168,14 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
 void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
 {
     for (const auto &blasphemy : blasphemies)
+    {
         print_blasphemy(blasphemy, PRETTY_PRINT_RED);
+    }
 
     for (const auto &warning : warnings)
+    {
         print_blasphemy(warning, PRETTY_PRINT_YELLOW);
+    }
 }
 
 bool codesh::lexer::code_position::operator==(const code_position &other) const

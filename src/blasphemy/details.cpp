@@ -167,6 +167,9 @@ const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rf
     "קְרִיאָה אֵינָהּ כְּשֵׁרָה: וָלֹא־תְּבַשֵּׁל מַעֲשֶׂה כְּלָלִי {} בָּאֵנוּ כְּלָלֵי"
 );
 
+const std::string codesh::blasphemy::details::NON_STATIC_FIELD_INITIALIZATION =
+    "אִתְחוּל שָׂדֶה אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְאַתְחֵל שָׂדֶה שֶׁאֵינוֹ כְּלָלִי";
+
 const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: {} אֵינוֹ מִסְדָּר"
 );

@@ -4,7 +4,6 @@
 #include "defenition/primitive_type.h"
 #include "operator_ast_node.h"
 
-#include <cstddef>
 #include <memory>
 
 namespace codesh::ast::impl
@@ -21,6 +20,7 @@ protected:
 public:
     [[nodiscard]] virtual value_ast_node &get_left() const;
     [[nodiscard]] value_ast_node &get_right() const;
+    [[nodiscard]] std::unique_ptr<value_ast_node> release_right();
 
     //TODO: Nodes like ++ should specify that only numerical types are allowed.
     [[nodiscard]] bool is_value_valid(const semantic_analyzer::semantic_context &context) const override;
