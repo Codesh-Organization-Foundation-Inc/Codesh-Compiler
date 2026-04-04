@@ -21,8 +21,10 @@ namespace trie = codesh::lexer::trie;
  */
 static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry();
 
+static void advance_position(codesh::lexer::code_position &pos, char16_t c);
+
 static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::lexer::code_position &curr_keyword_pos,
-        codesh::lexer::source_file_info &source_info);
+        codesh::lexer::source_file_info &source_info, const std::u16string &code);
 
 /**
  * @returns How many characters should be consumed by this match
@@ -110,16 +112,10 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     size_t code_pos = 0;
     while (code_pos < code.size())
     {
-        curr_keyword_pos.column++;
+        advance_position(curr_keyword_pos, code[code_pos]);
 
         if (u_isspace(code[code_pos]))
         {
-            if (code[code_pos] == '\n')
-            {
-                curr_keyword_pos.line++;
-                curr_keyword_pos.column = 0;
-            }
-
             code_pos++;
             continue;
         }
@@ -127,14 +123,14 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
         // First, use the Trie structure word process built-in keywords.
         if (const auto new_code_pos = try_match_trie_keyword(code, curr_keyword_pos, tokens, code_pos))
         {
-            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info, code);
             continue;
         }
 
         // If not a keyword, resort to a REGEX literal/identifier check.
         if (const auto new_code_pos = try_match_regex_token(code, curr_keyword_pos, tokens, code_pos))
         {
-            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info);
+            step_keyword(code_pos, *new_code_pos, curr_keyword_pos, *source_info, code);
             continue;
         }
 
@@ -150,9 +146,8 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     return result;
 }
 
-static void step_keyword(size_t &code_pos, const size_t new_code_pos,
-        codesh::lexer::code_position &curr_keyword_pos,
-        codesh::lexer::source_file_info &source_info)
+static void step_keyword(size_t &code_pos, const size_t new_code_pos, codesh::lexer::code_position &curr_keyword_pos,
+        codesh::lexer::source_file_info &source_info, const std::u16string &code)
 {
     const size_t keyword_length = new_code_pos - code_pos;
 
@@ -163,8 +158,25 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos,
         }
     );
 
-    curr_keyword_pos.column += keyword_length - 1;
+    for (size_t i = code_pos + 1; i < new_code_pos; i++)
+    {
+        advance_position(curr_keyword_pos, code[i]);
+    }
+
     code_pos = new_code_pos;
+}
+
+static void advance_position(codesh::lexer::code_position &pos, const char16_t c)
+{
+    if (c == u'\n')
+    {
+        pos.line++;
+        pos.column = 0;
+    }
+    else
+    {
+        pos.column++;
+    }
 }
 
 static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry()
