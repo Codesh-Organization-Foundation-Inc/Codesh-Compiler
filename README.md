@@ -22,7 +22,7 @@ You can learn more about the language on the [Codesh (קודש) Esolang page](ht
 See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/tree/main/Examples).
 
 ## IDEs
-[**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) best support RTL coding syntax. Either one is extremely recommended when coding in Codesh, with Kate being more lightweight.
+[**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) offer the best support for RTL coding. Both are extremely recommended for writing in Codesh, with Kate being more lightweight.
 
 Codesh provides support for both editors - including syntax highlighting, indentation, and more. See [this repo](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) for more details.
 
