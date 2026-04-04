@@ -31,6 +31,12 @@
 
 using namespace codesh::semantic_analyzer;
 
+[[nodiscard]] static bool validate_binary_op(const semantic_context &context,
+                                              codesh::ast::impl::binary_ast_node &binary_op);
+
+[[nodiscard]] static bool validate_unary_op(const semantic_context &context,
+                                             const codesh::ast::impl::unary_ast_node &unary_op);
+
 static bool resolve_value(const semantic_context &context,
                           codesh::ast::var_reference::value_ast_node &val_node,
                           const method_symbol &containing_method,
@@ -194,17 +200,7 @@ bool statement::resolve(const semantic_context &context,
         if (!resolve_value(context, unary_op->get_child(), containing_method, scope))
             return false;
 
-        if (!unary_op->is_value_valid(context))
-        {
-            context.throw_blasphemy(fmt::format(
-                blasphemy::details::UNARY_TYPE_MISMATCH,
-                unary_op->get_child().get_type()->to_pretty_string(),
-                unary_op->to_pretty_string()
-            ), unary_op->get_code_position());
-            return false;
-        }
-
-        return true;
+        return validate_unary_op(context, *unary_op);
     }
 
     if (const auto binary_op = dynamic_cast<ast::impl::binary_ast_node *>(&stmnt))
@@ -216,25 +212,9 @@ bool statement::resolve(const semantic_context &context,
         // Do not perform value validation with an invalid variable reference
         if (all_succeed)
         {
-            binary_op->apply_widening_conversions();
-
-            if (!binary_op->is_value_valid(context))
-            {
-                context.throw_blasphemy(
-                    fmt::format(
-                        blasphemy::details::BINARY_TYPE_MISMATCH,
-                        binary_op->get_left().get_type()->to_pretty_string(),
-                        binary_op->get_right().get_type()->to_pretty_string(),
-                        binary_op->to_pretty_string()
-                    ),
-                    {
-                        binary_op->get_code_position(),
-                        binary_op->get_right().get_code_position()
-                    }
-                );
-                all_succeed = false;
-            }
+            all_succeed = validate_binary_op(context, *binary_op);
         }
+
         return all_succeed;
     }
 
@@ -288,6 +268,77 @@ bool statement::resolve(const semantic_context &context,
     return true;
 }
 
+bool statement::resolve_constant_expr(const semantic_context &context, ast::var_reference::value_ast_node &val_node)
+{
+    if (const auto str = dynamic_cast<ast::var_reference::evaluable_ast_node<std::string> *>(&val_node))
+    {
+        return util::resolve_type_node(context, *str->get_type());
+    }
+
+    if (const auto binary_op = dynamic_cast<ast::impl::binary_ast_node *>(&val_node))
+    {
+        bool all_succeed = true;
+        all_succeed &= resolve_constant_expr(context, binary_op->get_left());
+        all_succeed &= resolve_constant_expr(context, binary_op->get_right());
+
+        if (all_succeed)
+        {
+            all_succeed = validate_binary_op(context, *binary_op);
+        }
+
+        return all_succeed;
+    }
+
+    if (const auto unary_op = dynamic_cast<ast::impl::unary_ast_node *>(&val_node))
+    {
+        if (!resolve_constant_expr(context, unary_op->get_child()))
+            return false;
+
+        return validate_unary_op(context, *unary_op);
+    }
+
+    // Primitive literals and other constant values have types set at construction.
+    return true;
+}
+
+static bool validate_binary_op(const semantic_context &context,
+                               codesh::ast::impl::binary_ast_node &binary_op)
+{
+    binary_op.apply_widening_conversions();
+
+    if (!binary_op.is_value_valid(context))
+    {
+        context.throw_blasphemy(
+            fmt::format(
+                codesh::blasphemy::details::BINARY_TYPE_MISMATCH,
+                binary_op.get_left().get_type()->to_pretty_string(),
+                binary_op.get_right().get_type()->to_pretty_string(),
+                binary_op.to_pretty_string()
+            ),
+            {
+                binary_op.get_code_position(),
+                binary_op.get_right().get_code_position()
+            }
+        );
+        return false;
+    }
+    return true;
+}
+
+static bool validate_unary_op(const semantic_context &context,
+                               const codesh::ast::impl::unary_ast_node &unary_op)
+{
+    if (!unary_op.is_value_valid(context))
+    {
+        context.throw_blasphemy(fmt::format(
+            codesh::blasphemy::details::UNARY_TYPE_MISMATCH,
+            unary_op.get_child().get_type()->to_pretty_string(),
+            unary_op.to_pretty_string()
+        ), unary_op.get_code_position());
+        return false;
+    }
+    return true;
+}
 
 static bool resolve_value(const semantic_context &context,
                           codesh::ast::var_reference::value_ast_node &val_node,

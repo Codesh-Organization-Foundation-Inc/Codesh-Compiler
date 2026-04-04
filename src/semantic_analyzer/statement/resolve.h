@@ -9,6 +9,10 @@ namespace codesh::ast::method::operation
 class method_operation_ast_node;
 class method_call_ast_node;
 }
+namespace codesh::ast::var_reference
+{
+class value_ast_node;
+}
 namespace codesh::semantic_analyzer
 {
 class method_scope_symbol;
@@ -23,4 +27,6 @@ namespace codesh::semantic_analyzer::statement
 {
 bool resolve(const semantic_context &context, ast::method::operation::method_operation_ast_node &stmnt,
         const method_symbol &containing_method, const method_scope_symbol &scope);
+
+[[nodiscard]] bool resolve_constant_expr(const semantic_context &context, ast::var_reference::value_ast_node &val_node);
 }
