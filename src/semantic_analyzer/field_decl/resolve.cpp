@@ -38,7 +38,7 @@ void codesh::semantic_analyzer::field_declaration::resolve(const semantic_contex
         }
         else
         {
-            statement::resolve_constant_expr(context, *field_decl.get_value());
+            statement::resolve(context, *field_decl.get_value(), std::nullopt);
         }
     }
 }
