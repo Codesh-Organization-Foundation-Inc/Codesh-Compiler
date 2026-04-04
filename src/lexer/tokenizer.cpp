@@ -21,6 +21,8 @@ namespace trie = codesh::lexer::trie;
  */
 static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry();
 
+static void advance_position(codesh::lexer::code_position &pos, char16_t c);
+
 static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::lexer::code_position &curr_keyword_pos,
         codesh::lexer::source_file_info &source_info, const std::u16string &code);
 
@@ -110,15 +112,9 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     size_t code_pos = 0;
     while (code_pos < code.size())
     {
-        curr_keyword_pos.column++;
         if (u_isspace(code[code_pos]))
         {
-            if (code[code_pos] == '\n')
-            {
-                curr_keyword_pos.line++;
-                curr_keyword_pos.column = 0;
-            }
-
+            advance_position(curr_keyword_pos, code[code_pos]);
             code_pos++;
             continue;
         }
@@ -143,6 +139,7 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
             blasphemy::blasphemy_type::LEXICAL,
             curr_keyword_pos
         );
+        advance_position(curr_keyword_pos, code[code_pos]);
         code_pos++;
     }
 
@@ -161,22 +158,25 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos, codesh::le
         }
     );
 
-    // The tokenize_code loop already did column++ for code_pos. Iterate from code_pos+1 onward.
-    for (size_t i = code_pos + 1; i < new_code_pos; i++)
+    for (size_t i = code_pos; i < new_code_pos; i++)
     {
-        // Track newlines so multiline tokens (e.g. block comments) correctly update the position
-        if (code[i] == u'\n')
-        {
-            curr_keyword_pos.line++;
-            curr_keyword_pos.column = 0;
-        }
-        else
-        {
-            curr_keyword_pos.column++;
-        }
+        advance_position(curr_keyword_pos, code[i]);
     }
 
     code_pos = new_code_pos;
+}
+
+static void advance_position(codesh::lexer::code_position &pos, const char16_t c)
+{
+    if (c == u'\n')
+    {
+        pos.line++;
+        pos.column = 0;
+    }
+    else
+    {
+        pos.column++;
+    }
 }
 
 static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry()
