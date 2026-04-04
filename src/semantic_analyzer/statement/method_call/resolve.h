@@ -16,5 +16,5 @@ struct semantic_context;
 namespace codesh::semantic_analyzer::statement::method_call
 {
 bool resolve(const semantic_context &context, ast::method::operation::method_call_ast_node &method_call,
-             const method_scope_info &method_info);
+             const std::optional<method_scope_info> &method_info);
 }

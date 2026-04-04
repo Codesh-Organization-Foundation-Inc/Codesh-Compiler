@@ -70,10 +70,7 @@ bool statement::resolve(const semantic_context &context,
 {
     if (const auto method_call = dynamic_cast<ast::method::operation::method_call_ast_node *>(&stmnt))
     {
-        if (!method_info)
-            return false;
-
-        return method_call::resolve(context, *method_call, method_info.value());
+        return method_call::resolve(context, *method_call, method_info);
     }
 
     if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&stmnt))
