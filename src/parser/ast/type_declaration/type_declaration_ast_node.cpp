@@ -59,6 +59,7 @@ const std::vector<std::unique_ptr<codesh::ast::type_decl::field_declaration_ast_
 void codesh::ast::type_decl::type_declaration_ast_node::add_field(std::unique_ptr<field_declaration_ast_node> field)
 {
     fields.push_back(std::move(field));
+    fields.back()->set_containing_type(this);
 }
 
 const std::vector<std::unique_ptr<codesh::ast::type::custom_type_ast_node>> &codesh::ast::type_decl::
