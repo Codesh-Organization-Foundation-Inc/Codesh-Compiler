@@ -128,9 +128,6 @@ bool statement::resolve(const semantic_context &context,
 
     if (const auto range = dynamic_cast<ast::collection::range_ast_node *>(&stmnt))
     {
-        if (!method_info)
-            return false;
-
         bool all_succeed = true;
         all_succeed &= resolve_value(context, range->get_from(), method_info);
         all_succeed &= resolve_value(context, range->get_to(), method_info);
