@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Package Portable" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="./install-scripts/packaging/package-portable.sh ./cmake-build-release" />
+    <option name="SCRIPT_TEXT" value="./install-scripts/packaging/package-portable.sh ./cmake-build-release ./packaged" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
@@ -11,6 +11,10 @@
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="EXECUTE_IN_TERMINAL" value="true" />
     <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2" />
+  </configuration>
+  <configuration default="false" name="Package Portable" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="./install-scripts/packaging/package-portable.ps1" scriptParameters="./cmake-build-release ./packaged" workingDirectory="$PROJECT_DIR$" executablePath="$PROJECT_DIR$/../../../../Windows/System32/WindowsPowerShell/v1.0/powershell.exe">
     <envs />
     <method v="2" />
   </configuration>

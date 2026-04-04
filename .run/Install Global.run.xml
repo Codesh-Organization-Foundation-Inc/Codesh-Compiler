@@ -14,4 +14,8 @@
     <envs />
     <method v="2" />
   </configuration>
+  <configuration default="false" name="Install Global" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="./install-scripts/install-global.ps1" scriptParameters="./cmake-build-release" workingDirectory="$PROJECT_DIR$" executablePath="C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe">
+    <envs />
+    <method v="2" />
+  </configuration>
 </component>
