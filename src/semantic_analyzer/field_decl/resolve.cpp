@@ -4,7 +4,6 @@
 #include "blasphemy/details.h"
 #include "parser/ast/type_declaration/field_declaration_ast_node.h"
 #include "semantic_analyzer/statement/resolve.h"
-#include "semantic_analyzer/semantic_context.h"
 #include "semantic_analyzer/symbol_table/symbol.h"
 #include "semantic_analyzer/util.h"
 
