@@ -137,7 +137,7 @@ static bool resolve_variable_reference(const codesh::semantic_analyzer::semantic
     }
 
     var_ref_node.set_resolved(*var_symbol);
-    return true;
+    return codesh::semantic_analyzer::util::resolve_type_node(context, *var_symbol->get_type());
 }
 
 static std::optional<std::reference_wrapper<codesh::semantic_analyzer::symbol>> find_symbol_local_first(

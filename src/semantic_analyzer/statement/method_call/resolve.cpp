@@ -746,7 +746,8 @@ static std::optional<std::unordered_set<size_t>> check_args_match(
         const codesh::semantic_analyzer::semantic_context &context,
         const args_match_type match_type,
         const std::vector<std::unique_ptr<codesh::ast::type::type_ast_node>> &params,
-        const std::deque<codesh::ast::method::operation::named_argument> &arguments, const size_t offset)
+        const std::deque<codesh::ast::method::operation::named_argument> &arguments,
+        const size_t offset)
 {
     std::unordered_set<size_t> match_results;
     match_results.reserve(arguments.size());
