@@ -151,14 +151,12 @@ static void parse_class_scope(std::queue<std::unique_ptr<codesh::token>> &tokens
                 auto [var_decl, var_assignment] =
                     parse_field_declaration(tokens, let_pos);
 
-                class_node->add_field(std::move(var_decl));
-
-                // Add the produced assignment statement to the method body if one was generated
                 if (var_assignment != nullptr)
                 {
-                    //TODO: Implement field initialization
-                    // method_scope.add_statement(std::move(var_assignment));
+                    var_decl->set_value(var_assignment->release_right());
                 }
+
+                class_node->add_field(std::move(var_decl));
 
                 break;
             }
@@ -198,8 +196,7 @@ static std::pair<
         *decl_node,
         declaration_pos,
         tokens,
-        //TODO: Implement field initialization
-        parser::var_decl_assignment_policy::FORBID
+        parser::var_decl_assignment_policy::ALLOW
     );
     parser::util::ensure_end_op(tokens);
 

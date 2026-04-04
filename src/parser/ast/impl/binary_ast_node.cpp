@@ -24,6 +24,11 @@ codesh::ast::var_reference::value_ast_node &codesh::ast::impl::binary_ast_node::
     return *children[1];
 }
 
+std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::ast::impl::binary_ast_node::release_right()
+{
+    return std::move(children[1]);
+}
+
 bool codesh::ast::impl::binary_ast_node::is_value_valid(const semantic_analyzer::semantic_context &context) const
 {
     return semantic_analyzer::util::do_types_match(*get_left().get_type(), *get_right().get_type());
