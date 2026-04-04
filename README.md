@@ -44,7 +44,8 @@ codeshc --lsp
 You can install `codeshc` and Talmud Codesh *(native library of Codesh)* globally by running:
 
 ```bash
-install-global
+./install-global.sh ./ # Unix
+./install-global.ps1 ./ # Windows
 ```
 
 The script is already present within the portable installation as both a Bash or PowerShell script.
