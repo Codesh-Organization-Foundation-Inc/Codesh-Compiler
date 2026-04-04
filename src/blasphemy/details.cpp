@@ -89,6 +89,8 @@ const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה סִיֹּמֶת שׁוּרָה";
 const std::string codesh::blasphemy::details::UNEXPECTED_TOKEN =
     "נָבוֹא שְׁקָרַי הֱיֵה: מִלָּה לֹא צְפוּיָה";
+const std::string codesh::blasphemy::details::UNEXPECTED_EOF =
+    "נָבוֹא שְׁקָרַי הֱיֵה: סִיּוּם הַסֵּפֶר אֵינוֹ צָפוּי";
 const std::string codesh::blasphemy::details::EXPECTED_VARIABLE =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה משתנה";
 const std::string codesh::blasphemy::details::NO_TYPE =
@@ -168,6 +170,9 @@ const rfs_t codesh::blasphemy::details::DUPLICATE_METHOD_DECLARATION = rfs(
 const rfs_t codesh::blasphemy::details::NON_STATIC_CALL_FROM_STATIC_CONTEXT = rfs(
     "קְרִיאָה אֵינָהּ כְּשֵׁרָה: וָלֹא־תְּבַשֵּׁל מַעֲשֶׂה כְּלָלִי {} בָּאֵנוּ כְּלָלֵי"
 );
+
+const std::string codesh::blasphemy::details::NON_STATIC_FIELD_INITIALIZATION =
+    "אִתְחוּל שָׂדֶה אֵינוֹ כָּשֵׁר: לֹא נִתַּן לְאַתְחֵל שָׂדֶה שֶׁאֵינוֹ כְּלָלִי";
 
 const rfs_t codesh::blasphemy::details::NOT_AN_ARRAY = rfs(
     "סוּג אֵינוֹ כָּשֵׁר: {} אֵינוֹ מִסְדָּר"

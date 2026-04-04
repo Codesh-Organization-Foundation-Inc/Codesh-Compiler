@@ -16,4 +16,8 @@
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="codeshc Help" run_configuration_type="CMakeRunConfiguration" />
     </method>
   </configuration>
+  <configuration default="false" name="Build Release" type="PowerShellRunType" factoryName="PowerShell" scriptUrl="./install-scripts/build.ps1" scriptParameters="./cmake-build-release" workingDirectory="$PROJECT_DIR$" executablePath="C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe">
+    <envs />
+    <method v="2" />
+  </configuration>
 </component>

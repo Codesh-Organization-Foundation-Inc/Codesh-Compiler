@@ -215,6 +215,9 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
     std::unique_ptr<codesh::ast::var_reference::value_ast_node> lhs
 )
 {
+    if (!codesh::parser::util::ensure_tokens_exist(tokens, codesh::blasphemy::details::UNEXPECTED_EOF))
+        return lhs;
+
     switch (tokens.front()->get_group())
     {
         case codesh::token_group::KEYWORD_TO: {
