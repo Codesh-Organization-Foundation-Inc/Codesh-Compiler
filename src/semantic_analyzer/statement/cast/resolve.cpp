@@ -24,18 +24,19 @@ static bool is_interface(const type_symbol &sym);
 static bool is_custom_type(const codesh::ast::type::type_ast_node *type);
 
 bool statement::cast::resolve(const semantic_context &context, ast::op::assignment::cast_ast_node &cast,
-        const method_symbol &containing_method, const method_scope_symbol &scope)
+        const std::optional<method_scope_info> &method_info)
 {
     auto &inner = cast.get_value();
 
     if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&inner))
     {
-        if (!variable_reference::resolve(context, *var_ref, scope))
+        if (!variable_reference::resolve(context, *var_ref, method_info))
             return false;
     }
-    else if (!statement::resolve(context, inner, containing_method, scope))
+    else
     {
-        return false;
+        if (!statement::resolve(context, inner, method_info))
+            return false;
     }
 
     if (inner.get_type() == nullptr)

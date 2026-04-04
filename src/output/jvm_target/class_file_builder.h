@@ -78,6 +78,10 @@ class class_file_builder
 
     [[nodiscard]] std::unique_ptr<defs::methods_info_entry> create_method_entry(
             const ast::method::method_declaration_ast_node &method_decl) const;
+    [[nodiscard]] std::unique_ptr<defs::methods_info_entry> create_raw_method_entry(
+            const std::vector<access_flag> &flags,
+            const std::string &name,
+            const std::string &descriptor) const;
 
     [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attribute(
             const ast::method::method_declaration_ast_node &method_decl) const;
@@ -87,6 +91,11 @@ class class_file_builder
 
     ir::code_block emit_method_bytecode(defs::code_attribute_entry &code_attr,
                               const ast::method::method_declaration_ast_node &method_decl) const;
+    static void emit_code_block_to_attr(const ir::code_block &code_block,
+                              defs::code_attribute_entry &code_attr);
+
+    [[nodiscard]] std::unique_ptr<defs::code_attribute_entry> create_code_attr_entry() const;
+    static void finalize_code_attr(defs::code_attribute_entry &code_attr);
     [[nodiscard]] static int get_locals_count(const ast::method::method_declaration_ast_node &method_decl);
     [[nodiscard]] std::unique_ptr<defs::local_variable_table_attribute_entry> create_local_variable_table(
         const ast::method::method_declaration_ast_node &method_decl, int code_length_total, int lvt_size) const;
@@ -116,6 +125,15 @@ class class_file_builder
     void add_constant_pool_entries() const;
     void add_interfaces() const;
     void add_method(const ast::method::method_declaration_ast_node &method_decl) const;
+
+    /**
+     * @returns @c true if a <clinit> was emitted, @c false if there were no static initializers.
+     */
+    [[nodiscard]] bool emit_static_initializer(
+            const ast::type_decl::class_declaration_ast_node &class_decl) const;
+
+    [[nodiscard]] static std::vector<const ast::type_decl::field_declaration_ast_node *>
+            collect_static_init_fields(const ast::type_decl::type_declaration_ast_node &type_decl);
     void add_field(const ast::type_decl::field_declaration_ast_node &field_decl) const;
     [[nodiscard]] std::unique_ptr<defs::fields_info_entry> create_field_entry(
             const ast::type_decl::field_declaration_ast_node &field_decl) const;

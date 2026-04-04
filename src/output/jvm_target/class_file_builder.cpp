@@ -6,6 +6,8 @@
 #include "constant_pool.h"
 #include "defenition/definitions.h"
 #include "output/ir/code_block.h"
+#include "output/ir/instruction/put_static_instruction.h"
+#include "output/ir/instruction/return_instruction.h"
 #include "output/ir/instruction/scope_marker.h"
 #include "parser/ast/compilation_unit_ast_node.h"
 #include "parser/ast/local_variable_declaration_ast_node.h"
@@ -93,9 +95,12 @@ void codesh::output::jvm_target::class_file_builder::handle_class_type(
         add_method(*method_decl);
     }
 
+    const bool has_static_init = emit_static_initializer(class_decl);
+
     util::put_int_bytes(
         class_file.methods_count, 2,
         static_cast<int>(class_decl.get_all_methods().size())
+            + (has_static_init ? 1 : 0)
     );
 }
 
@@ -166,30 +171,54 @@ void codesh::output::jvm_target::class_file_builder::add_method(
 std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry> codesh::output::jvm_target::class_file_builder::
     create_method_entry(const ast::method::method_declaration_ast_node &method_decl) const
 {
-    auto method_entry = std::make_unique<defs::methods_info_entry>();
-
-    set_access_flags(method_entry->access_flags, method_decl.get_attributes()->get_access_flags());
-
-    util::put_int_bytes(
-        method_entry->name_index, 2,
-        constant_pool_.get_utf8_index(method_decl.get_last_name(true))
-    );
-    util::put_int_bytes(
-        method_entry->descriptor_index, 2,
-        constant_pool_.get_utf8_index(method_decl.generate_descriptor())
+    auto method_entry = create_raw_method_entry(
+        method_decl.get_attributes()->get_access_flags(),
+        method_decl.get_last_name(true),
+        method_decl.generate_descriptor()
     );
 
     util::put_int_bytes(method_entry->attributes_count, 2, 1);
+    return method_entry;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::methods_info_entry> codesh::output::jvm_target::class_file_builder::
+    create_raw_method_entry(const std::vector<access_flag> &flags, const std::string &name,
+        const std::string &descriptor) const
+{
+    auto method_entry = std::make_unique<defs::methods_info_entry>();
+
+    set_access_flags(method_entry->access_flags, flags);
+    util::put_int_bytes(method_entry->name_index, 2, constant_pool_.get_utf8_index(name));
+    util::put_int_bytes(method_entry->descriptor_index, 2, constant_pool_.get_utf8_index(descriptor));
 
     return method_entry;
+}
+
+std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry>
+    codesh::output::jvm_target::class_file_builder::create_code_attr_entry() const
+{
+    auto code_attr = std::make_unique<defs::code_attribute_entry>();
+    util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
+    return code_attr;
+}
+
+void codesh::output::jvm_target::class_file_builder::finalize_code_attr(defs::code_attribute_entry &code_attr)
+{
+    size_t attributes_size = 0;
+    for (const auto &attribute : code_attr.attributes)
+        attributes_size += 6 + util::read_int_bytes(attribute->attribute_length, 4);
+
+    util::put_int_bytes(
+        code_attr.attribute_length, 4,
+        12 + static_cast<int>(attributes_size) + static_cast<int>(code_attr.code.size())
+    );
+    util::put_int_bytes(code_attr.attribute_count, 2, static_cast<int>(code_attr.attributes.size()));
 }
 
 std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::output::jvm_target::class_file_builder::
         create_code_attribute(const ast::method::method_declaration_ast_node &method_decl) const
 {
-    auto code_attr = std::make_unique<defs::code_attribute_entry>();
-
-    util::put_int_bytes(code_attr->attribute_name_index, 2, constant_pool_.get_utf8_index("Code"));
+    auto code_attr = create_code_attr_entry();
     const auto method_code = emit_method_bytecode(*code_attr, method_decl);
 
     // Compute bytecode positions for local variables before creating LocalVariableTable
@@ -211,21 +240,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
         );
     }
 
-
-    size_t attributes_size = 0;
-    for (const auto &attribute : code_attr->attributes)
-    {
-        attributes_size += 6 + util::read_int_bytes(attribute->attribute_length, 4);
-    }
-
-    util::put_int_bytes(
-        code_attr->attribute_length, 4,
-        12
-            + static_cast<int>(attributes_size)
-            + static_cast<int>(code_attr->code.size())
-    );
-    util::put_int_bytes(code_attr->attribute_count, 2, static_cast<int>(code_attr->attributes.size()));
-
+    finalize_code_attr(*code_attr);
     return code_attr;
 }
 
@@ -259,10 +274,17 @@ std::unique_ptr<codesh::output::jvm_target::defs::exceptions_attribute_entry>
 codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::emit_method_bytecode(
     defs::code_attribute_entry &code_attr, const ast::method::method_declaration_ast_node &method_decl) const
 {
-    // Convert the method to IR
     ir::code_block code_block;
-    method_decl.get_method_scope().emit_ir(code_block, symbol_table, type_decl);
 
+    method_decl.get_method_scope().emit_ir(code_block, symbol_table, type_decl);
+    emit_code_block_to_attr(code_block, code_attr);
+
+    return code_block;
+}
+
+void codesh::output::jvm_target::class_file_builder::emit_code_block_to_attr(
+    const ir::code_block &code_block, defs::code_attribute_entry &code_attr)
+{
     std::vector<ir::instruction_container> bytecode_collector;
     for (const auto &instruction : code_block.get_instructions())
     {
@@ -292,7 +314,6 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
 
     util::put_int_bytes(code_attr.max_stack, 2, max_stack);
 
-
     if (code_attr.code.size() > 0xFFFFFF)
     {
         blasphemy::get_blasphemy_collector().add_blasphemy(
@@ -302,8 +323,6 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
     }
 
     util::put_int_bytes(code_attr.code_length, 4, code_attr.code.size()); // NOLINT(*-narrowing-conversions)
-
-
     util::put_int_bytes(code_attr.exception_table_length, 2, 0);
 
     //TODO: Re-add line number table
@@ -320,8 +339,6 @@ codesh::output::ir::code_block codesh::output::jvm_target::class_file_builder::e
     //
     // line_number_table_attr->line_number_table.push_back(std::move(lnt_entry));
     // code_attr->attributes.push_back(std::move(line_number_table_attr));
-
-    return code_block;
 }
 
 int codesh::output::jvm_target::class_file_builder::get_locals_count(
@@ -397,6 +414,60 @@ void codesh::output::jvm_target::class_file_builder::add_source_file() const
     );
 
     class_file.attribute_info.push_back(std::move(source_file_entry));
+}
+
+bool codesh::output::jvm_target::class_file_builder::emit_static_initializer(
+        const ast::type_decl::class_declaration_ast_node &class_decl) const
+{
+    const auto static_init_fields = collect_static_init_fields(class_decl);
+    if (static_init_fields.empty())
+        return false;
+
+    // Build IR
+    ir::code_block method_body;
+    for (const auto *field : static_init_fields)
+    {
+        field->get_value()->emit_ir(method_body, symbol_table, type_decl);
+        method_body.add_instruction(
+            std::make_unique<ir::put_static_instruction>(field->get_field_cpi().value())
+        );
+    }
+    method_body.add_instruction(std::make_unique<ir::return_instruction>());
+
+    auto code_attr = create_code_attr_entry();
+    emit_code_block_to_attr(method_body, *code_attr);
+    util::put_int_bytes(code_attr->max_locals, 2, 0);
+    finalize_code_attr(*code_attr);
+
+    auto method_entry = create_raw_method_entry(
+        {access_flag::ACC_STATIC},
+        "<clinit>",
+        "()V"
+    );
+    util::put_int_bytes(method_entry->attributes_count, 2, 1);
+    method_entry->attribute_info.push_back(std::move(code_attr));
+
+    class_file.methods_info.push_back(std::move(method_entry));
+    return true;
+}
+
+std::vector<const codesh::ast::type_decl::field_declaration_ast_node *> codesh::output::jvm_target::class_file_builder::
+    collect_static_init_fields(const ast::type_decl::type_declaration_ast_node &type_decl)
+{
+    std::vector<const ast::type_decl::field_declaration_ast_node *> result;
+    result.reserve(type_decl.get_fields().size());
+
+    for (const auto &field : type_decl.get_fields())
+    {
+        if (field->get_value() != nullptr
+            && field->get_attributes()->get_is_static()
+            && field->get_field_cpi().has_value())
+        {
+            result.push_back(field.get());
+        }
+    }
+
+    return result;
 }
 
 void codesh::output::jvm_target::class_file_builder::set_access_flags(

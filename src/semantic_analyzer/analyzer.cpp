@@ -138,8 +138,10 @@ static void resolve_method_bodies(const codesh::semantic_analyzer::semantic_cont
                 codesh::semantic_analyzer::statement::resolve(
                     method_context,
                     *stmnt,
-                    method_decl->get_resolved(),
-                    method_scope.get_resolved()
+                    codesh::semantic_analyzer::method_scope_info {
+                        method_decl->get_resolved(),
+                        method_scope.get_resolved()
+                    }
                 );
             }
         }
