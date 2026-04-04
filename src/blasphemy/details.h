@@ -51,6 +51,7 @@ extern const std::string UNEXPECTED_DECLARATION;
 extern const std::string UNEXPECTED_TOKEN;
 extern const std::string EXPECTED_VARIABLE;
 extern const std::string INVALID_TYPE_FOR_NEW;
+extern const std::string NO_SHIFTING_DIRECTION;
 
 // SEMANTIC
 extern const std::string UNRECOGNIZED_TYPE;

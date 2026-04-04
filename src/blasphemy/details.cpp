@@ -97,6 +97,8 @@ const std::string codesh::blasphemy::details::UNEXPECTED_DECLARATION =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עצם, צלם, מניין אוֹ חותם";
 const std::string codesh::blasphemy::details::INVALID_TYPE_FOR_NEW =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה עצם";
+const std::string codesh::blasphemy::details::NO_SHIFTING_DIRECTION =
+    "וְהַדֶּרֶךְ נֶחְלְקָה לְיָמִין וְלִשְׂמֹאל, וְלֹא בָּחַרְתָּ בְּאַחַת לָלֶכֶת בָּהּ";
 
 // SEMANTIC
 const std::string codesh::blasphemy::details::UNRECOGNIZED_TYPE =
