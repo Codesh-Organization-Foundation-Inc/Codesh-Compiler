@@ -112,9 +112,10 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     size_t code_pos = 0;
     while (code_pos < code.size())
     {
+        advance_position(curr_keyword_pos, code[code_pos]);
+
         if (u_isspace(code[code_pos]))
         {
-            advance_position(curr_keyword_pos, code[code_pos]);
             code_pos++;
             continue;
         }
@@ -139,7 +140,6 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
             blasphemy::blasphemy_type::LEXICAL,
             curr_keyword_pos
         );
-        advance_position(curr_keyword_pos, code[code_pos]);
         code_pos++;
     }
 
@@ -158,7 +158,7 @@ static void step_keyword(size_t &code_pos, const size_t new_code_pos, codesh::le
         }
     );
 
-    for (size_t i = code_pos; i < new_code_pos; i++)
+    for (size_t i = code_pos + 1; i < new_code_pos; i++)
     {
         advance_position(curr_keyword_pos, code[i]);
     }
