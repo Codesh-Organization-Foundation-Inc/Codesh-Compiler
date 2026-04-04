@@ -294,7 +294,7 @@ static void print_help()
     std::puts("\t--tzadik                             Do not use the standard Java library (not recommended)");
     std::puts("\t--unholy                             Do not use Talmud Codesh (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
-    fmt::println("\t--talmud-codesh-path <path>          Path to Talmud Codesh (default: {})", codesh::DEFAULT_TALMUD_CODESH_PATH);
+    fmt::println("\t--talmud-codesh-path <path>          Path to Talmud Codesh (default: {})", codesh::get_default_talmud_codesh_path().string());
     std::puts("\t--classpath <entries>                Colon-separated (Unix) or semicolon-separated (Windows) list of classpaths to use (dirs or JARs)");
     std::puts("\t--lsp                                Run in LSP Server Mode (for IDEs)");
     std::puts("");

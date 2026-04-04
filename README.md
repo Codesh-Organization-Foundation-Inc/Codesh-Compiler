@@ -110,4 +110,4 @@ The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is pla
 * **Windows:** `C:\Program Files\Java\jre-21`
 
 ### Talmud Codesh
-Always `./תלמוד־קודש.jar`.
+Always `./תלמוד־קודש.jar`, **relative to the binary's directory**.

@@ -5,6 +5,10 @@
 #include "classpath/loader/jar_loader.h"
 #include "output/jvm_target/class_file_builder.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <fstream>
 #include <queue>
 
@@ -27,11 +31,8 @@ const std::string LIB_PATH = "/usr/lib/";
 const std::string COMMON_JAVA_PATH = LIB_PATH + "jvm/";
 #endif
 
-
-const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);
-
+const std::string COMMON_JRE_DIR = "jre-" + std::to_string(codesh::output::jvm_target::JAVA_RELEASE_VERSION);\
 const std::string codesh::DEFAULT_JRE_PATH = COMMON_JAVA_PATH + COMMON_JRE_DIR;
-const std::string codesh::DEFAULT_TALMUD_CODESH_PATH = "./תלמוד־קודש.jar";
 
 
 codesh::command_args codesh::parse_command(const int argc, char **argv)
@@ -122,7 +123,7 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
     }
     if (!has_talmud_codesh_path)
     {
-        result.talmud_codesh_path = DEFAULT_TALMUD_CODESH_PATH;
+        result.talmud_codesh_path = get_default_talmud_codesh_path();
     }
 
     result.jar_output = result.dest_path.has_value() && result.dest_path->extension() == ".jar";
@@ -178,6 +179,17 @@ static std::filesystem::path get_default_jre_path()
         return {java_home};
 
     return codesh::DEFAULT_JRE_PATH;
+}
+
+std::filesystem::path codesh::get_default_talmud_codesh_path()
+{
+#ifdef _WIN32
+    wchar_t buf[MAX_PATH];
+    GetModuleFileNameW(nullptr, buf, MAX_PATH);
+    return std::filesystem::path(buf).parent_path() / L"תלמוד־קודש.jar";
+#else
+    return std::filesystem::read_symlink("/proc/self/exe").parent_path() / "תלמוד־קודש.jar";
+#endif
 }
 
 static std::string consume_argument(std::queue<std::string> &args)

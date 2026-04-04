@@ -11,7 +11,8 @@
 namespace codesh
 {
 extern const std::string DEFAULT_JRE_PATH;
-extern const std::string DEFAULT_TALMUD_CODESH_PATH;
+
+[[nodiscard]] std::filesystem::path get_default_talmud_codesh_path();
 
 struct command_args
 {
