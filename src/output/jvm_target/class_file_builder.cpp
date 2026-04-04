@@ -427,7 +427,10 @@ bool codesh::output::jvm_target::class_file_builder::emit_static_initializer(
     ir::code_block method_body;
     for (const auto *field : static_init_fields)
     {
+        method_body.set_is_consuming(true);
         field->get_value()->emit_ir(method_body, symbol_table, type_decl);
+        method_body.set_is_consuming(false);
+
         method_body.add_instruction(
             std::make_unique<ir::put_static_instruction>(field->get_field_cpi().value())
         );
