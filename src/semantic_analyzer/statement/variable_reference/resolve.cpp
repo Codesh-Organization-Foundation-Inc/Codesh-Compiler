@@ -62,7 +62,8 @@ bool codesh::semantic_analyzer::statement::variable_reference::resolve(const sem
         return false;
 
     //TODO: Add type checks
-    if (const auto &local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved()); method_info)
+    if (const auto local_var = dynamic_cast<const local_variable_symbol *>(&var_ref_node.get_resolved());
+        local_var && method_info)
     {
         if (!is_accessible(*local_var, var_ref_node, method_info->scope))
         {

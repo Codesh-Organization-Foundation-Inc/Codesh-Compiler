@@ -89,6 +89,8 @@ const std::string codesh::blasphemy::details::NO_PUNCTUATION_END_OP =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻפָּה סִיֹּמֶת שׁוּרָה";
 const std::string codesh::blasphemy::details::UNEXPECTED_TOKEN =
     "נָבוֹא שְׁקָרַי הֱיֵה: מִלָּה לֹא צְפוּיָה";
+const std::string codesh::blasphemy::details::UNEXPECTED_EOF =
+    "נָבוֹא שְׁקָרַי הֱיֵה: סִיּוּם הַסֵּפֶר אֵינוֹ צָפוּי";
 const std::string codesh::blasphemy::details::EXPECTED_VARIABLE =
     "נָבוֹא שְׁקָרַי הֱיֵה: צֻּפָּה משתנה";
 const std::string codesh::blasphemy::details::NO_TYPE =
