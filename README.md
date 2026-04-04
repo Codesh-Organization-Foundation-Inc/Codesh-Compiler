@@ -21,10 +21,17 @@ You can learn more about the language on the [Codesh (קודש) Esolang page](ht
 
 See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/tree/main/Examples).
 
-## IDE
-[**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) best support RTL coding syntax. Either is extremely recommended when coding in Codesh, Kate being more lightweight.
+## IDEs
+[**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) best support RTL coding syntax. Either one is extremely recommended when coding in Codesh, with Kate being more lightweight.
 
-Codesh provides support for both editors, including syntax highlighting, indentation, and more. See [this repo](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) for more details.
+Codesh provides support for both editors - including syntax highlighting, indentation, and more. See [this repo](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) for more details.
+
+The Motzie B'She'ela additionally provides an **LSP mode** that can be enabled using the `--lsp` flag:
+```bash
+codeshc --lsp
+```
+
+...allowing integration with any IDE that supports the Language Server Protocol *(including the aforementioned editors)*.
 
 ## Installation
 
