@@ -404,6 +404,8 @@ add_executable(codeshc
         src/parser/ast/operator/bitwise/bitwise_not_ast_node.h
         src/parser/ast/operator/bitwise/bitwise_shift_ast_node.cpp
         src/parser/ast/operator/bitwise/bitwise_shift_ast_node.h
+        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.cpp
+        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.h
 )
 
 
