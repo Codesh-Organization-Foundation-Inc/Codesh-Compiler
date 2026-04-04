@@ -31,7 +31,7 @@ The Motzie B'She'ela additionally provides an **LSP mode** that can be enabled u
 codeshc --lsp
 ```
 
-...allowing integration with **any** IDE that supports the Language Server Protocol *(including the aforementioned editors)*.
+...allowing integration with **any IDE** that supports the Language Server Protocol *(including the aforementioned editors)*.
 
 ## Installation
 
