@@ -30,7 +30,7 @@ bool statement::cast::resolve(const semantic_context &context, ast::op::assignme
 
     if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&inner))
     {
-        if (!method_info || !variable_reference::resolve(context, *var_ref, method_info->scope))
+        if (!variable_reference::resolve(context, *var_ref, method_info))
             return false;
     }
     else

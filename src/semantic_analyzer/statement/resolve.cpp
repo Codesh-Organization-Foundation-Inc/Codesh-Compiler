@@ -75,10 +75,7 @@ bool statement::resolve(const semantic_context &context,
 
     if (const auto var_ref = dynamic_cast<ast::var_reference::variable_reference_ast_node *>(&stmnt))
     {
-        if (!method_info)
-            return false;
-
-        return variable_reference::resolve(context, *var_ref, method_info->scope);
+        return variable_reference::resolve(context, *var_ref, method_info);
     }
 
     if (const auto str = dynamic_cast<ast::var_reference::evaluable_ast_node<std::string> *>(&stmnt))
@@ -326,7 +323,7 @@ static bool resolve_value(const semantic_context &context,
 {
     if (const auto var_ref = dynamic_cast<codesh::ast::var_reference::variable_reference_ast_node *>(&val_node))
     {
-        if (!method_info || !statement::variable_reference::resolve(context, *var_ref, method_info->scope))
+        if (!statement::variable_reference::resolve(context, *var_ref, method_info))
             return false;
     }
     else if (!statement::resolve(context, val_node, method_info))
