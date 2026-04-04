@@ -27,7 +27,7 @@ cmake --build $OutDir
 # Build Talmud Codesh as JAR (use the freshly built binary directly — Hebrew paths can't be invoked by PowerShell)
 # --unholy because we are MAKING the Talmud Codesh and do not rely on it
 $JarName = (-join [char[]](0x05EA,0x05DC,0x05DE,0x05D5,0x05D3,0x05BE,0x05E7,0x05D5,0x05D3,0x05E9)) + '.jar'
-& (Join-Path $OutDir "codeshc.exe") --src .\resources\lib-src\ --dest (Join-Path $OutDir $JarName) --unholy
+& (Join-Path $OutDir "codeshc.exe") --src .\resources\talmud-codesh\ --dest (Join-Path $OutDir $JarName) --unholy
 if ($LASTEXITCODE -ne 0) { throw "codeshc failed with exit code $LASTEXITCODE" }
 
 Write-Host "וְיִשְׂמַח ה' כִּי עָבְרָה הַהַתְקָנָה עָבְרָה בְּשָׁלוֹם וַיֹּאמֶר לְיוֹצֵר קַדֵּד וְהַצְלַח לֵאמֹ֑ר:"
