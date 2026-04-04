@@ -23,8 +23,7 @@ static std::unique_ptr<codesh::identifier_token> make_error_identifier_token(
 std::unique_ptr<codesh::token> codesh::parser::util::consume_token(std::queue<std::unique_ptr<token>> &tokens,
         const std::optional<std::string> &no_tokens_blasphemy_details)
 {
-    ensure_tokens_exist(tokens, no_tokens_blasphemy_details);
-    if (tokens.empty())
+    if (!ensure_tokens_exist(tokens, no_tokens_blasphemy_details))
         return std::make_unique<token>(lexer::NO_CODE_POS, token_type::KEYWORD, token_group::FILE_EOF);
 
     std::unique_ptr<token> token = std::move(tokens.front());
@@ -91,14 +90,14 @@ std::unique_ptr<codesh::ast::type::type_ast_node> codesh::parser::util::parse_ty
 {
     std::unique_ptr<ast::type::type_ast_node> result;
 
-    ensure_tokens_exist(tokens, blasphemy::details::NO_TYPE);
-    if (tokens.empty())
+    if (!ensure_tokens_exist(tokens, blasphemy::details::NO_TYPE))
     {
         return std::make_unique<ast::type::custom_type_ast_node>(
             lexer::NO_CODE_POS,
             definition::fully_qualified_name(lexer::NO_CODE_POS, definition::ERROR_IDENTIFIER_CONTENT)
         );
     }
+
     const auto type_pos = tokens.front()->get_code_position();
     const auto token_group = tokens.front()->get_group();
 
@@ -195,7 +194,7 @@ bool codesh::parser::util::peeking_check(const std::queue<std::unique_ptr<token>
     return !tokens.empty() && tokens.front()->get_group() == token_group;
 }
 
-void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
+bool codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
                                                const std::optional<std::string> &no_tokens_blasphemy_details)
 {
     if (tokens.empty())
@@ -207,7 +206,10 @@ void codesh::parser::util::ensure_tokens_exist(const std::queue<std::unique_ptr<
             blasphemy::blasphemy_type::SYNTAX,
             lexer::NO_CODE_POS
         );
+        return false;
     }
+
+    return true;
 }
 
 void codesh::parser::util::ensure_end_op(std::queue<std::unique_ptr<token>> &tokens)

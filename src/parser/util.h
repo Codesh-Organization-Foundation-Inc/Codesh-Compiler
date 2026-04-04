@@ -45,7 +45,7 @@ bool peeking_check(const std::queue<std::unique_ptr<token>> &tokens, token_group
  * Ensures the provided tokens list is not empty.
  * If not, raises a parsing error.
  */
-void ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
+[[nodiscard]] bool ensure_tokens_exist(const std::queue<std::unique_ptr<token>> &tokens,
                          const std::optional<std::string> &no_tokens_blasphemy_details = std::nullopt);
 
 /**
