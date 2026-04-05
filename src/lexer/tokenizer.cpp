@@ -94,7 +94,9 @@ static bool is_annoying_char(const char16_t c)
  */
 static bool is_nikkud(const char16_t c)
 {
-    return c >= u'\u0591' && c <= u'\u05C7';
+    return c >= u'\u0591' && c <= u'\u05C7'
+        // Allow Maqaf Elion:
+        && c != u'־';
 }
 
 static bool check_boundary(const std::u16string &code, const trie::word_boundary boundary, const size_t start,
