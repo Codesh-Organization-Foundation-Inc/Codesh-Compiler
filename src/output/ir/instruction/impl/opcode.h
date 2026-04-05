@@ -17,6 +17,7 @@ enum class opcode : unsigned char
     LDC2_W = 0x14,
 
     I_ARRAY_LOAD = 0x2E,
+    I_ARRAY_STORE = 0x4F,
 
     I_LOAD = 0x15, // Loads an integer variable from the local variable table at the specified index
     I_STORE = 0x36, // Stores an int value into variable #index

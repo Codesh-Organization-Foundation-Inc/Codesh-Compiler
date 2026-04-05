@@ -13,7 +13,9 @@
 #include "parser/ast/operator/assignment/subtraction_assignment_operator_ast_node.h"
 #include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/util.h"
+#include "parser/ast/operator/assignment/array_assign_operator_ast_node.h"
 #include "parser/ast/operator/assignment/assign_operator_ast_node.h"
+#include "parser/ast/var_reference/array_access_ast_node.h"
 #include "token/token.h"
 #include "token/token_group.h"
 
@@ -53,8 +55,27 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         // parse rhs
         auto right_value_node = parse_value(tokens);
 
-        // lhs must be a variable
-        if (!dynamic_cast<const ast::var_reference::variable_reference_ast_node *>(left_value_node.get()))
+        // lhs must be a variable or array access
+        if (auto *arr = dynamic_cast<ast::op::array_access_ast_node *>(left_value_node.get()))
+        {
+            left_value_node.release(); // NOLINT(*-unused-return-value)
+            eval_ast_node = std::make_unique<ast::op::assignment::array_assign_operator_ast_node>(
+                op_pos,
+                std::unique_ptr<ast::op::array_access_ast_node>(arr),
+                std::move(right_value_node)
+            );
+        }
+        else if (dynamic_cast<const ast::var_reference::variable_reference_ast_node *>(left_value_node.get()))
+        {
+            eval_ast_node = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
+                op_pos,
+                std::unique_ptr<ast::var_reference::variable_reference_ast_node>(
+                    static_cast<ast::var_reference::variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
+                ),
+                std::move(right_value_node)
+            );
+        }
+        else
         {
             blasphemy::get_blasphemy_collector().add_blasphemy(
                 blasphemy::details::EXPECTED_VARIABLE,
@@ -64,14 +85,6 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
 
             return std::make_unique<ast::var_reference::error_value_ast_node>(op_pos);
         }
-
-        eval_ast_node = std::make_unique<ast::op::assignment::assign_operator_ast_node>(
-            op_pos,
-            std::unique_ptr<ast::var_reference::variable_reference_ast_node>(
-                static_cast<ast::var_reference::variable_reference_ast_node *>(left_value_node.release()) // NOLINT(*-pro-type-static-cast-downcast)
-            ),
-            std::move(right_value_node)
-        );
 
         break;
     }
