@@ -33,10 +33,9 @@ bool statement::cast::resolve(const semantic_context &context, ast::op::assignme
         if (!variable_reference::resolve(context, *var_ref, method_info))
             return false;
     }
-    else
+    else if (!statement::resolve(context, inner, method_info))
     {
-        if (!statement::resolve(context, inner, method_info))
-            return false;
+        return false;
     }
 
     if (inner.get_type() == nullptr)
