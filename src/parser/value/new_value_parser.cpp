@@ -5,6 +5,7 @@
 #include "parser/ast/method/operation/new_array_ast_node.h"
 #include "parser/ast/method/operation/new_ast_node.h"
 #include "parser/ast/type/custom_type_ast_node.h"
+#include "parser/ast/var_reference/error_value_ast_node.h"
 #include "parser/ast/var_reference/evaluable_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
@@ -35,7 +36,7 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
             new_pos
         );
 
-        return nullptr;
+        return std::make_unique<ast::var_reference::error_value_ast_node>(new_pos);
     }
 
     auto constructed_type = std::unique_ptr<ast::type::custom_type_ast_node>(

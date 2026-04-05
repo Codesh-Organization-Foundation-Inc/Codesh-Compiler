@@ -301,6 +301,8 @@ add_executable(codeshc
         src/semantic_analyzer/statement/variable_reference/resolve.h
         src/semantic_analyzer/statement/cast/resolve.cpp
         src/semantic_analyzer/statement/cast/resolve.h
+        src/parser/ast/operator/assignment/array_assign_operator_ast_node.cpp
+        src/parser/ast/operator/assignment/array_assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assign_operator_ast_node.cpp
         src/parser/ast/operator/assignment/assign_operator_ast_node.h
         src/parser/ast/operator/assignment/assignment_operator_ast_node.cpp
@@ -352,6 +354,8 @@ add_executable(codeshc
         src/output/ir/instruction/pop_instruction.h
         src/output/ir/instruction/array_load_instruction.cpp
         src/output/ir/instruction/array_load_instruction.h
+        src/output/ir/instruction/array_store_instruction.cpp
+        src/output/ir/instruction/array_store_instruction.h
         src/output/ir/instruction/array_length_instruction.cpp
         src/output/ir/instruction/array_length_instruction.h
         src/output/ir/instruction/new_array_instruction.cpp
