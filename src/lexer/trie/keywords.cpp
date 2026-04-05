@@ -71,6 +71,14 @@ const codesh::lexer::trie::keywords_map codesh::lexer::trie::KEYWORDS = {
     {token_group::OPERATOR_INCREMENT, {u"ויתקדם", word_boundary::BOTH}},
     {token_group::OPERATOR_DECREMENT, {u"ויפחת", word_boundary::BOTH}},
 
+    {token_group::OPERATOR_BITWISE_AND, {u"גם־סיבי", word_boundary::BOTH}},
+    {token_group::OPERATOR_BITWISE_OR, {u"או־סיבי", word_boundary::BOTH}},
+    {token_group::OPERATOR_BITWISE_XOR, {u"או־בלעדי־סיבי", word_boundary::BOTH}},
+    {token_group::OPERATOR_BITWISE_NOT, {u"לא־סיבי", word_boundary::BOTH}},
+    {token_group::OPERATOR_BITWISE_SHIFT, {u"ויוסט", word_boundary::BOTH}},
+    {token_group::KEYWORD_BITWISE_RIGHT, {u"ימינה", word_boundary::BOTH}},
+    {token_group::KEYWORD_BITWISE_LEFT, {u"שמאלה", word_boundary::BOTH}},
+
     {token_group::KEYWORD_VAR, {u"משתנה", word_boundary::BOTH}},
     {token_group::KEYWORD_INTEGER, {u"שלם", word_boundary::BOTH}},
     {token_group::KEYWORD_FLOAT, {u"צף", word_boundary::BOTH}},
