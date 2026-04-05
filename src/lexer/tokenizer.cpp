@@ -15,6 +15,12 @@
 namespace trie = codesh::lexer::trie;
 
 /**
+ * Tokenizes code without Nikkud or Te'amim
+ */
+[[nodiscard]] static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path path,
+        const std::u16string &code);
+
+/**
  * Pushes a new file entry to @c get_global_source_info_map
  *
  * @returns The new file's associated ID to access @c get_global_source_info_map, and a pointer to the entry itself.
@@ -90,12 +96,17 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
     // Convert the string to UTF-8.
     // Necessary because the compiler tokenizes non-ASCII characters (Hebrew and Maqaf)
     const std::u16string utf16_code = utf8::utf8to16(code);
-        return tokenize_code(std::move(path), utf16_code);
+    return tokenize_code(std::move(path), utf16_code);
 }
 
 codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::u16string &code)
 {
-    lexing_result result;
+    return tokenize_clean_code(std::move(path), code);
+}
+
+static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path path, const std::u16string &code)
+{
+    codesh::lexer::lexing_result result;
     auto &tokens = result.tokens;
 
     const auto [file_id, source_info] = create_file_entry();
@@ -104,10 +115,10 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
 
     // main.cpp only provided the blasphemy collector with the file path.
     // Now it can also have access to the file ID.
-    blasphemy::get_blasphemy_collector().set_source_file(file_id);
+    codesh::blasphemy::get_blasphemy_collector().set_source_file(file_id);
 
 
-    code_position curr_keyword_pos = FILE_BEGIN;
+    codesh::lexer::code_position curr_keyword_pos = codesh::lexer::FILE_BEGIN;
 
     size_t code_pos = 0;
     while (code_pos < code.size())
@@ -135,9 +146,9 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
         }
 
         //FIXME: This is mostly caused by an unenclosed string.
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            blasphemy::details::TOKEN_DOESNT_EXIST,
-            blasphemy::blasphemy_type::LEXICAL,
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
+            codesh::blasphemy::blasphemy_type::LEXICAL,
             curr_keyword_pos
         );
         code_pos++;
