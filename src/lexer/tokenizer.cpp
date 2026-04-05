@@ -15,12 +15,6 @@
 namespace trie = codesh::lexer::trie;
 
 /**
- * Tokenizes code without Nikkud or Te'amim
- */
-[[nodiscard]] static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path path,
-        const std::u16string &code);
-
-/**
  * Pushes a new file entry to @c get_global_source_info_map
  *
  * @returns The new file's associated ID to access @c get_global_source_info_map, and a pointer to the entry itself.
@@ -28,6 +22,17 @@ namespace trie = codesh::lexer::trie;
 static std::pair<size_t, codesh::lexer::source_file_info *> create_file_entry();
 
 static void advance_position(codesh::lexer::code_position &pos, char16_t c);
+
+/**
+ * @returns Whether the code at @p code_pos, ignoring Nikkud, starts a string literal
+ */
+static bool starts_string(const std::u16string &code, size_t code_pos);
+
+/**
+ * @returns The position of the first non-Nikkud character at or before @p pos,
+ * searching backwards in @p code
+ */
+static size_t skip_nikkud_backwards(const std::u16string &code, size_t pos);
 
 static void step_keyword(size_t &code_pos, size_t new_code_pos, codesh::lexer::code_position &curr_keyword_pos,
         codesh::lexer::source_file_info &source_info, const std::u16string &code);
@@ -47,9 +52,25 @@ static std::optional<size_t> try_match_regex_token(const std::u16string &code,
                                                    codesh::lexer::code_position current_code_position,
                                                    std::queue<std::unique_ptr<codesh::token>> &tokens, size_t code_pos);
 
+/**
+ * Prepares the regex input range for @c try_match_regex_token.
+ *
+ * For string literals, the raw code is used directly (to preserve nikkud).
+ * For all other tokens, nikkud is stripped in @c cleaned and it will be used.
+ *
+ * @returns @c true if the original code was preserved
+ */
+[[nodiscard]] static bool create_match_params(const std::u16string &code, size_t code_pos, std::u16string &cleaned,
+                                              const char16_t *&match_begin, const char16_t *&match_end_ptr);
+
+/**
+ * Maps a match length in the cleaned (nikkud-stripped) slice back to the corresponding
+ * end offset in the original code, relative to @p code_pos.
+ */
+[[nodiscard]] static size_t get_original_length(const std::u16string &code, size_t code_pos, size_t cleaned_length);
+
 static void on_regex_token(codesh::token *token);
 static void escape_characters(std::string &str, std::string_view word);
-
 
 static const boost::regex NEWLINE_REPLACE_RGX(
     "(?<!"
@@ -68,6 +89,14 @@ static bool is_annoying_char(const char16_t c)
     return u_isalnum(c);
 }
 
+/**
+ * @returns Whether @p c is Nikkud or Ta'am
+ */
+static bool is_nikkud(const char16_t c)
+{
+    return c >= u'\u0591' && c <= u'\u05C7';
+}
+
 static bool check_boundary(const std::u16string &code, const trie::word_boundary boundary, const size_t start,
                            const size_t end) {
     // If there are no boundaries at all, the checks don't really matter.
@@ -76,8 +105,8 @@ static bool check_boundary(const std::u16string &code, const trie::word_boundary
 
     if (boundary == trie::word_boundary::BEFORE || boundary == trie::word_boundary::BOTH)
     {
-        // Check whether a character exists before this keyword
-        if (start > 0 && is_annoying_char(code[start-1]))
+        const auto before = skip_nikkud_backwards(code, start);
+        if (before > 0 && is_annoying_char(code[before - 1]))
             return false;
     }
 
@@ -101,12 +130,7 @@ codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path 
 
 codesh::lexer::lexing_result codesh::lexer::tokenize_code(std::filesystem::path path, const std::u16string &code)
 {
-    return tokenize_clean_code(std::move(path), code);
-}
-
-static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path path, const std::u16string &code)
-{
-    codesh::lexer::lexing_result result;
+    lexing_result result;
     auto &tokens = result.tokens;
 
     const auto [file_id, source_info] = create_file_entry();
@@ -115,10 +139,10 @@ static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path pa
 
     // main.cpp only provided the blasphemy collector with the file path.
     // Now it can also have access to the file ID.
-    codesh::blasphemy::get_blasphemy_collector().set_source_file(file_id);
+    blasphemy::get_blasphemy_collector().set_source_file(file_id);
 
 
-    codesh::lexer::code_position curr_keyword_pos = codesh::lexer::FILE_BEGIN;
+    code_position curr_keyword_pos = FILE_BEGIN;
 
     size_t code_pos = 0;
     while (code_pos < code.size())
@@ -146,9 +170,9 @@ static codesh::lexer::lexing_result tokenize_clean_code(std::filesystem::path pa
         }
 
         //FIXME: This is mostly caused by an unenclosed string.
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::TOKEN_DOESNT_EXIST,
-            codesh::blasphemy::blasphemy_type::LEXICAL,
+        blasphemy::get_blasphemy_collector().add_blasphemy(
+            blasphemy::details::TOKEN_DOESNT_EXIST,
+            blasphemy::blasphemy_type::LEXICAL,
             curr_keyword_pos
         );
         code_pos++;
@@ -209,20 +233,29 @@ static std::optional<size_t> try_match_trie_keyword(const std::u16string &code,
     std::optional<trie::trie_match> last_match;
     size_t last_match_end = code_pos;
 
-    for (size_t i = code_pos; i < code.size() && current->get_child(code[i]); i++)
+    for (size_t i = code_pos; i < code.size(); i++)
     {
+        if (is_nikkud(code[i]))
+            continue;
+
+        if (!current->get_child(code[i]))
+            break;
+
         current = &current->get_child(code[i])->get();
 
         if (const auto keyword = current->get_match())
         {
             last_match = keyword;
             last_match_end = i + 1;
+            // Advance past any nikkud/te'amim that immediately follow this match position
+            while (last_match_end < code.size() && is_nikkud(code[last_match_end]))
+                last_match_end++;
         }
 
         // If the current and next characters are spaces,
         // simply ignore it character.
         // This is as word allow "מילה     מילה" (multispace for the same keyword)
-        while (code[i] == u' ' && code[i + 1] == u' ')
+        while (code[i] == u' ' && i + 1 < code.size() && code[i + 1] == u' ')
         {
             i++;
         }
@@ -247,11 +280,20 @@ static std::optional<size_t> try_match_regex_token(const std::u16string &code,
                                                    std::queue<std::unique_ptr<codesh::token>> &tokens,
                                                    const size_t code_pos)
 {
-    const auto match = *boost::utf16regex_iterator(
-        code.c_str() + code_pos,
-        code.c_str() + code.length(),
-        codesh::lexer::LEXER_RGX
+    // For non-string tokens a nikkud-stripped slice is built and matched against.
+    std::u16string cleaned;
+    const char16_t *match_begin;
+    const char16_t *match_end_ptr;
+
+    const bool is_clean = create_match_params(
+        code,
+        code_pos,
+        cleaned,
+        match_begin,
+        match_end_ptr
     );
+
+    const auto match = *boost::utf16regex_iterator(match_begin, match_end_ptr, codesh::lexer::LEXER_RGX);
 
     for (int i = 1; i <= codesh::lexer::TOKEN_GROUP_RGX_COUNT; ++i)
     {
@@ -266,11 +308,58 @@ static std::optional<size_t> try_match_regex_token(const std::u16string &code,
             on_regex_token(token.get());
             tokens.push(std::move(token));
 
-            return code_pos + match_info.length();
+            if (is_clean)
+                return code_pos + match_info.length();
+
+            // Map the cleaned match length back to the original code position
+            return code_pos + get_original_length(code, code_pos, match_info.length());
         }
     }
 
     return std::nullopt;
+}
+
+static bool create_match_params(const std::u16string &code, const size_t code_pos, std::u16string &cleaned,
+        const char16_t *&match_begin, const char16_t *&match_end_ptr)
+{
+    if (starts_string(code, code_pos))
+    {
+        // Keep nikkud
+        match_begin = code.c_str() + code_pos;
+        match_end_ptr = code.c_str() + code.length();
+        return true;
+    }
+
+    // Skip all nikkud
+    for (size_t i = code_pos; i < code.size(); i++)
+    {
+        if (!is_nikkud(code[i]))
+        {
+            cleaned += code[i];
+        }
+    }
+
+    match_begin = cleaned.c_str();
+    match_end_ptr = cleaned.c_str() + cleaned.size();
+    return false;
+}
+
+static size_t get_original_length(const std::u16string &code, const size_t code_pos, const size_t cleaned_length)
+{
+    size_t count = 0;
+
+    for (size_t i = code_pos; i < code.size(); i++)
+    {
+        if (count == cleaned_length)
+            return i - code_pos;
+
+        if (!is_nikkud(code[i]))
+        {
+            count++;
+        }
+    }
+
+    return code.size() - code_pos;
 }
 
 static size_t handle_keyword_match(const std::u16string &code, codesh::lexer::code_position current_code_position,
@@ -403,4 +492,32 @@ static void escape_characters(std::string &str, const std::string_view word)
         std::string(trie::keyword::STRING_ESCAPE) + _word,
         _word
     );
+}
+
+static bool starts_string(const std::u16string &code, const size_t code_pos)
+{
+    static const std::u16string STRING_OPEN_U16 = utf8::utf8to16(std::string(trie::keyword::STRING_OPEN));
+    size_t j = 0;
+
+    for (size_t i = code_pos; i < code.size() && j < STRING_OPEN_U16.size(); i++)
+    {
+        if (is_nikkud(code[i]))
+            continue;
+        if (code[i] != STRING_OPEN_U16[j])
+            return false;
+
+        j++;
+    }
+
+    return j == STRING_OPEN_U16.size();
+}
+
+static size_t skip_nikkud_backwards(const std::u16string &code, size_t pos)
+{
+    while (pos > 0 && is_nikkud(code[pos - 1]))
+    {
+        pos--;
+    }
+
+    return pos;
 }
