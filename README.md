@@ -110,7 +110,7 @@ Nikkud and Te'amim can optionally be included within Codesh books by enabling `-
 > * Compilation times may be slightly slower
 
 ## Default Paths
-The default paths below can be overwritten using `--talmud-codesh-path` and `"--jre-path`.
+The default paths below can be overwritten using `--talmud-codesh-path` and `--jre-path`.
 
 ### JRE
 The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
