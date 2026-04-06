@@ -102,6 +102,10 @@ codesh::command_args codesh::parse_command(const int argc, char **argv)
         {
             result.lsp_mode = true;
         }
+        else if (arg == "--nikkud")
+        {
+            result.process_nikkud = true;
+        }
         else if (arg == "--help" || arg == "-h")
         {
             result.help_requested = true;
