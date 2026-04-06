@@ -247,7 +247,7 @@ static void handle_lsp_diagnostic_request(const codesh::command_args &args,
         const codesh::lsp::diagnostics_request &request, const codesh::definition::class_loaders &class_loaders)
 {
     const auto source_path = uri_to_path(request.file_uri);
-    auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents);
+    auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, request.file_contents, args.process_nikkud);
 
     std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> asts;
     asts.reserve(1);
@@ -291,6 +291,7 @@ static void print_help()
     std::puts("\t                                     If the path ends with .jar, outputs a bundled JAR");
     std::puts("");
     std::puts("Options:");
+    std::puts("\t--nikkud                             Enables Nikkud within Codesh books");
     std::puts("\t--tzadik                             Do not use the standard Java library (not recommended)");
     std::puts("\t--unholy                             Do not use Talmud Codesh (not recommended)");
     fmt::println("\t--jre-path <path>                    Path to the JRE (default: {})", codesh::DEFAULT_JRE_PATH);
@@ -379,7 +380,7 @@ static std::vector<std::unique_ptr<codesh::ast::compilation_unit_ast_node>> pars
 
         // LEXING
         const std::string code = read_file(source_path);
-        auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code);
+        auto [tokens, file_id] = codesh::lexer::tokenize_code(source_path, code, args.process_nikkud);
 
         // PARSING
         auto ast = codesh::parser::parse(tokens, file_id);

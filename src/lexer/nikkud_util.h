@@ -17,11 +17,13 @@ namespace codesh::lexer::nikkud
 [[nodiscard]] size_t skip_nikkud_backwards(const std::u16string &code, size_t pos);
 
 /**
- * Builds a nikkud-stripped copy of @p code from @p code_pos into @p cleaned and
- * sets @p match_begin / @p match_end_ptr to its bounds.
+ * Sets @p match_begin / @p match_end_ptr for regex matching.
+ * If @p process_nikkud, builds a nikkud-stripped copy into @p cleaned and points into it;
+ * otherwise points directly into the original @p code.
  */
-void create_nikkudless_match_params(const std::u16string &code, size_t code_pos,
-        std::u16string &cleaned, const char16_t *&match_begin, const char16_t *&match_end_ptr);
+void create_match_params(const std::u16string &code, size_t code_pos,
+        std::u16string &cleaned, const char16_t *&match_begin, const char16_t *&match_end_ptr,
+        bool process_nikkud);
 
 /**
  * Maps a match length in the cleaned (nikkud-stripped) slice back to the corresponding
