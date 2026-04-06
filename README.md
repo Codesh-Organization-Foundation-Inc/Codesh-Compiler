@@ -102,12 +102,12 @@ codeshc --src <source-file/directory> --dest <output-directory>
 > Note the *absence* of the `.jar` suffix.
 
 ## Nikkud
-You can optionally include Nikkud and Te'amim within Codesh books by enabling `--nikkud`. Use [נקדן אוטומטי](https://nakdan.dicta.org.il/) in Rabbinic mode for the best coding experience.
+Nikkud and Te'amim can optionally be included within Codesh books by enabling `--nikkud`. Use [נקדן אוטומטי](https://nakdan.dicta.org.il/) in Rabbinic mode for the best coding experience.
 
 >[!NOTE]
-> In Nikkud mode:
+> **In Nikkud mode:**
 > * Syntax highlighting for Kate will not work properly
-> * Compilation times may slightly be slower
+> * Compilation times may be slightly slower
 
 ## Default Paths
 The default paths below can be overwritten using `--talmud-codesh-path` and `"--jre-path`.
