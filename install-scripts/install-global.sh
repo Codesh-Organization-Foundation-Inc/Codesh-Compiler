@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-if (( EUID != 0 )); then
+if (( $EUID != 0 )); then
     echo "וִיבַקֵּשׁ ה' לְהָרִץ אֶת־הַסְּקְרִיפְּט בְּסַמְכוּת שֹׁרֶשׁ"
     exit 1
 fi
