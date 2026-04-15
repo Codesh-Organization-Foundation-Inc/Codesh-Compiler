@@ -7,7 +7,7 @@ fi
 CODESH_PATH="/usr/lib/קודש"
 
 rm -f /usr/local/bin/codeshc
-rm -rf $CODESH_PATH
+rm -rf "${CODESH_PATH:-NX_FILE}"
 rm -rf ./build
 
 echo "וְיִגְעַר ה' בַּיּוֹצֵר כִּי־בָּחַר בַּחֹשֶׁךְ וְלֹא בָאוֹר וַיִּתְעַצֵּב מְאֹד מְאֹד וַיִּתֹּם:"
