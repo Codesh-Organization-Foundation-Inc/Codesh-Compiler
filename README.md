@@ -34,8 +34,6 @@ codeshc --lsp
 
 ...allowing integration with **any IDE** that supports the Language Server Protocol *(including the aforementioned editors)*.
 
-...allowing integration with **any IDE** that supports the Language Server Protocol *(including the aforementioned editors)*.
-
 ## Installation
 
 1. Grab the [latest portable release](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/releases/latest) for your platform
