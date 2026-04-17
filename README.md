@@ -11,7 +11,7 @@ Official compiler for the Codesh programming language.
 ## About
 **Codesh** *(קודש)* is an esoteric programming language created by Stav Solomon and Eliran Ben Moshe whose syntax is modeled after the Hebrew Bible *(Tanakh)*.
 
-**The Motzi B'She'ela** *(המוציא בשאלה)* is the official compiler for Codesh. It translates **Codesh source code** into **JVM bytecode**.
+**The Motzie B'She'ela** *(המוציא בשאלה)* is the official compiler for Codesh. It translates **Codesh source code** into **JVM bytecode**.
 
 ## Codesh
 
@@ -58,7 +58,7 @@ The global installation provides system-wide access to `codeshc`.
 ## Talmud Codesh
 In Codesh terminology, a Talmud is **a library written in the Codesh programming language.**
 
-**Talmud Codesh** refersh to the standard library (talmud) of Codesh. Most notibly, it provides the `מסוף` class, allowing for the following syntax:
+**Talmud Codesh** refers to the standard library (talmud) of Codesh. Most notably, it provides the `מסוף` class, allowing for the following syntax:
 
 ```codesh
 ויעש מסוף ל־אמר כי־דבריו יקרא היי אמא לאמר כי־טוב:
