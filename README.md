@@ -114,7 +114,7 @@ Nikkud and Te'amim can optionally be included within Codesh books by enabling `-
 The default paths below can be overwritten using `--talmud-codesh-path` and `--jre-path`.
 
 ### JRE
-The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
+The Motzi B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
 * **Unix:** `/usr/lib/jvm/jre-21`
 * **Windows:** `C:\Program Files\Java\jre-21`
 
