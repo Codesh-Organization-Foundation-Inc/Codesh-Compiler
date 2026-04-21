@@ -1,4 +1,4 @@
-# The Motzie B'She'ela
+# The Motzi B'She'ela
 
 Official compiler for the Codesh programming language.
 
@@ -11,7 +11,7 @@ Official compiler for the Codesh programming language.
 ## About
 **Codesh** *(קודש)* is an esoteric programming language created by Stav Solomon and Eliran Ben Moshe whose syntax is modeled after the Hebrew Bible *(Tanakh)*.
 
-**The Motzie B'She'ela** *(המוציא בשאלה)* is the official compiler for Codesh. It translates **Codesh source code** into **JVM bytecode**.
+**The Motzi B'She'ela** *(המוציא בשאלה)* is the official compiler for Codesh. It translates **Codesh source code** into **JVM bytecode**.
 
 ## Codesh
 
@@ -27,7 +27,7 @@ See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/C
 [Codesh provides support for both editors](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) - including syntax highlighting, indentation, and more.
 
 ## LSP
-The Motzie B'She'ela is additionally an **LSP** that can be enabled using the `--lsp` flag:
+The Motzi B'She'ela is additionally an **LSP** that can be enabled using the `--lsp` flag:
 ```bash
 codeshc --lsp
 ```
@@ -64,7 +64,7 @@ In Codesh terminology, a Talmud is **a library written in the Codesh programming
 ויעש מסוף ל־אמר כי־דבריו יקרא היי אמא לאמר כי־טוב:
 ```
 
-Talmud Codesh comes pre-installed in the portable builds of The Motzie B'She'ela under the name `תלמוד־קודש.jar`.
+Talmud Codesh comes pre-installed in the portable builds of The Motzi B'She'ela under the name `תלמוד־קודש.jar`.
 
 ## The Java Runtime Environment
 **Codesh requires\* the JRE to be present.**  
