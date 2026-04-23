@@ -19,7 +19,7 @@ JARs **do not need command line arguments** to be ran as they use the `META-INF`
 
 You can build a JAR file directly in `codeshc.exe` by simply appending `.jar` to the `--dest` argument.
 
-The Motzi B'She'ela automatically registers a class containing a `בראשית ויקח כתובים כמסדר` method declaration as the main class, making the JAR an executable.
+The Motzie B'She'ela automatically registers a class containing a `בראשית ויקח כתובים כמסדר` method declaration as the main class, making the JAR an executable.
 
 JARs can then be run as:
 ```powershell

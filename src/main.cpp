@@ -278,7 +278,7 @@ static std::filesystem::path uri_to_path(const std::string &file_uri)
 
 static void print_help()
 {
-    std::puts("Welcome to The Motzi B'She'ela - Official compiler to the Codesh programming language.");
+    std::puts("Welcome to The Motzie B'She'elea - Official compiler to the Codesh programming language.");
     std::puts("");
     std::puts("This help message is written in English for all to understand. Your code, fortunately, is not.");
     std::puts("");
