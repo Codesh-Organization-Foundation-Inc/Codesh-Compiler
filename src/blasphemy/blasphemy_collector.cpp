@@ -90,6 +90,11 @@ void codesh::blasphemy::blasphemy_collector::set_source_directory(std::filesyste
     this->source_directory_path = std::move(source_directory_path);
 }
 
+const std::filesystem::path &codesh::blasphemy::blasphemy_collector::get_source_directory() const
+{
+    return source_directory_path;
+}
+
 void codesh::blasphemy::blasphemy_collector::set_source_file(const size_t file_id)
 {
     const auto &[path, _] = lexer::get_global_source_info_map().at(file_id);
