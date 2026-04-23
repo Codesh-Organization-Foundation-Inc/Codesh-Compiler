@@ -13,3 +13,8 @@ std::string codesh::ast::op::bitwise_or_ast_node::to_pretty_string() const
 {
     return lexer::trie::token_to_string(token_group::OPERATOR_BITWISE_OR);
 }
+
+codesh::output::ir::operator_type codesh::ast::op::bitwise_or_ast_node::get_ir_operator_type() const
+{
+    return output::ir::operator_type::OR;
+}

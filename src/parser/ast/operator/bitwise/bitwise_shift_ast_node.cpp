@@ -22,3 +22,10 @@ std::string codesh::ast::op::bitwise_shift_ast_node::to_pretty_string() const
             : lexer::trie::token_to_string(token_group::KEYWORD_BITWISE_RIGHT)
     );
 }
+
+codesh::output::ir::operator_type codesh::ast::op::bitwise_shift_ast_node::get_ir_operator_type() const
+{
+    return _shift_direction == shift_direction::LEFT
+        ? output::ir::operator_type::SHL
+        : output::ir::operator_type::SHR;
+}
