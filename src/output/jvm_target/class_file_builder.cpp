@@ -230,7 +230,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::code_attribute_entry> codesh::
     code_attr->attributes.push_back(create_local_variable_table(
         method_decl,
         static_cast<int>(code_attr->code.size()),
-        static_cast<int>(method_decl.get_resolved().get_all_local_variables().name_to_var.size())
+        static_cast<int>(method_decl.get_resolved().get_all_local_variables().index_to_var.size())
     ));
 
     if (method_decl.has_inner_scopes())
@@ -492,7 +492,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
         const ast::method::method_declaration_ast_node &method_decl,
         const int code_length_total) const
 {
-    for (const auto &[name, var] : method_decl.get_resolved().get_all_local_variables().name_to_var)
+    for (const auto &[idx, var] : method_decl.get_resolved().get_all_local_variables().index_to_var)
     {
         auto entry = std::make_unique<defs::local_variable_table_entry>();
 
@@ -513,7 +513,7 @@ void codesh::output::jvm_target::class_file_builder::collect_local_variables(
             entry->name_index,
             2,
             constant_pool_.get_utf8_index(
-                name
+                var.get().get_name()
             )
         );
         util::put_int_bytes(

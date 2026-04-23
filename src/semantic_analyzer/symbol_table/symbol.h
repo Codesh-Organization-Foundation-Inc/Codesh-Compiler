@@ -228,12 +228,14 @@ class local_variable_symbol final : public variable_symbol,
 {
     ast::local_variable_declaration_ast_node *producing_node;
     const size_t index;
+    const std::string name;
 
 public:
     local_variable_symbol(i_scope_containing_symbol *parent_symbol, std::unique_ptr<ast::type::type_ast_node> type,
-            size_t index, ast::local_variable_declaration_ast_node *producing_node = nullptr);
+            size_t index, std::string name, ast::local_variable_declaration_ast_node *producing_node = nullptr);
 
     [[nodiscard]] ast::local_variable_declaration_ast_node *get_producing_node() const override;
+    [[nodiscard]] const std::string &get_name() const;
     /**
      * Returns the index of the variable as per the JVM specifications.
      *
@@ -263,7 +265,7 @@ public:
 
 struct indexed_locals_container
 {
-    std::map<std::string, std::reference_wrapper<local_variable_symbol>> name_to_var;
+    std::map<size_t, std::reference_wrapper<local_variable_symbol>> index_to_var;
     size_t slots_used;
 };
 
