@@ -55,6 +55,9 @@ class stack_map_table_builder
     [[nodiscard]] std::unique_ptr<defs::verification_type_info> parse_verification_type(
             const ast::type::type_ast_node &type_node) const;
 
+    [[nodiscard]] std::unique_ptr<defs::object_variable_info> build_object_var_info(
+            const std::string &descriptor) const;
+
     [[nodiscard]] static frame_result build_stack_frame(
             const std::vector<std::unique_ptr<defs::verification_type_info>> &prev_locals,
             std::vector<std::unique_ptr<defs::verification_type_info>> &current_locals,
