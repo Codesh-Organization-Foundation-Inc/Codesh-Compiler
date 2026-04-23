@@ -231,11 +231,12 @@ codesh::ast::type_decl::field_declaration_ast_node *codesh::semantic_analyzer::f
 }
 
 codesh::semantic_analyzer::local_variable_symbol::local_variable_symbol(i_scope_containing_symbol *const parent_symbol,
-        std::unique_ptr<ast::type::type_ast_node> type, const size_t index,
+        std::unique_ptr<ast::type::type_ast_node> type, const size_t index, std::string name,
         ast::local_variable_declaration_ast_node *producing_node) :
     variable_symbol(parent_symbol, symbol_type::LOCAL_VARIABLE, std::move(type)),
     producing_node(producing_node),
-    index(index)
+    index(index),
+    name(std::move(name))
 {
     if (producing_node != nullptr)
     {
@@ -247,6 +248,11 @@ codesh::ast::local_variable_declaration_ast_node *codesh::semantic_analyzer::loc
     const
 {
     return producing_node;
+}
+
+const std::string &codesh::semantic_analyzer::local_variable_symbol::get_name() const
+{
+    return name;
 }
 
 int codesh::semantic_analyzer::local_variable_symbol::get_jvm_index() const
@@ -312,12 +318,12 @@ codesh::semantic_analyzer::type_symbol &codesh::semantic_analyzer::method_scope_
 size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(const std::string &name,
                                                                     std::unique_ptr<local_variable_symbol> variable)
 {
-    const size_t index = variable->get_jvm_index();
+    const size_t jvm_index = variable->get_jvm_index();
 
     const auto result = scope.add_symbol(name, std::move(variable));
-    index_to_local_variable.name_to_var.emplace(name, result.first);
+    index_to_local_variable.index_to_var.emplace(jvm_index, result.first);
 
-    return index;
+    return jvm_index;
 }
 
 codesh::semantic_analyzer::named_symbol_map &codesh::semantic_analyzer::method_scope_symbol::get_scope()
@@ -456,6 +462,7 @@ size_t codesh::semantic_analyzer::method_scope_symbol::add_variable(ast::local_v
         this,
         variable.get_type()->clone(),
         jvm_index,
+        variable.get_name(),
         &variable
     ));
 }

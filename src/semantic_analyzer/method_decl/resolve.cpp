@@ -92,7 +92,7 @@ static void resolve_return_type(const codesh::semantic_analyzer::semantic_contex
 static void resolve_local_variables(const codesh::semantic_analyzer::semantic_context &context,
                                     const codesh::semantic_analyzer::method_symbol &method_symbol)
 {
-    for (const auto &var_symbol : method_symbol.get_all_local_variables().name_to_var | std::views::values)
+    for (const auto &var_symbol : method_symbol.get_all_local_variables().index_to_var | std::views::values)
     {
         codesh::semantic_analyzer::util::resolve_type_node(
             context,
