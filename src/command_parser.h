@@ -22,6 +22,8 @@ struct command_args
     bool lsp_mode;
     bool help_requested;
 
+    bool process_nikkud;
+
     std::vector<std::filesystem::path> classpaths;
 
     bool is_java_default_classpath; // Disabled by --tzadik
