@@ -322,14 +322,14 @@ static std::unique_ptr<codesh::ast::op::bitwise_shift_ast_node> parse_bitwise_sh
 
     tokens.pop();
 
-    codesh::ast::op::direction direction;
+    codesh::ast::op::shift_direction direction;
     if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BITWISE_RIGHT))
     {
-        direction = codesh::ast::op::direction::RIGHT;
+        direction = codesh::ast::op::shift_direction::RIGHT;
     }
     else if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BITWISE_LEFT))
     {
-        direction = codesh::ast::op::direction::LEFT;
+        direction = codesh::ast::op::shift_direction::LEFT;
     }
     else
     {
@@ -341,16 +341,7 @@ static std::unique_ptr<codesh::ast::op::bitwise_shift_ast_node> parse_bitwise_sh
     }
 
     auto left = codesh::parser::value::parse_value(tokens);
-
-    if (!codesh::parser::util::consuming_check(tokens, codesh::token_group::PUNCTUATION_EQUAL))
-    {
-        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
-            codesh::blasphemy::details::NO_KEYWORD_PUNC_EQUAL,
-            codesh::blasphemy::blasphemy_type::SYNTAX,
-            code_pos
-        );
-    }
-
+    codesh::parser::util::consume_punc_equal(tokens);
     auto right = codesh::parser::value::parse_value(tokens);
 
     return std::make_unique<codesh::ast::op::bitwise_shift_ast_node>(

@@ -77,8 +77,8 @@ enum class token_group : int
     OPERATOR_BITWISE_XOR, // או־בלעדי־סיבי
     OPERATOR_BITWISE_NOT, // לא־סיבי
     OPERATOR_BITWISE_SHIFT, //ויוסט
-    KEYWORD_BITWISE_RIGHT, // ימין
-    KEYWORD_BITWISE_LEFT, // שמאל
+    KEYWORD_BITWISE_RIGHT, // ימינה
+    KEYWORD_BITWISE_LEFT, // שמאלה
 
     KEYWORD_VAR, // משתנה
     KEYWORD_INTEGER, // שלם

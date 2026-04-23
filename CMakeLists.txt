@@ -31,6 +31,8 @@ add_executable(codeshc
         src/parser/parser.cpp
         src/lexer/tokenizer.h
         src/lexer/tokenizer.cpp
+        src/lexer/nikkud_util.h
+        src/lexer/nikkud_util.cpp
         src/lexer/source_file_info.cpp
         src/lexer/source_file_info.h
         src/parser/ast/impl/ast_node.cpp
@@ -400,6 +402,8 @@ add_executable(codeshc
         src/parser/ast/method/operation/new_array_ast_node.cpp
         src/parser/ast/method/operation/new_array_ast_node.h
         src/parser/ast/impl/i_symbolically_linked.cpp
+        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.cpp
+        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.h
         src/parser/ast/operator/bitwise/bitwise_and_ast_node.cpp
         src/parser/ast/operator/bitwise/bitwise_and_ast_node.h
         src/parser/ast/operator/bitwise/bitwise_or_ast_node.cpp
@@ -408,8 +412,6 @@ add_executable(codeshc
         src/parser/ast/operator/bitwise/bitwise_not_ast_node.h
         src/parser/ast/operator/bitwise/bitwise_shift_ast_node.cpp
         src/parser/ast/operator/bitwise/bitwise_shift_ast_node.h
-        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.cpp
-        src/parser/ast/operator/bitwise/bitwise_xor_ast_node.h
 )
 
 

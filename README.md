@@ -21,12 +21,13 @@ You can learn more about the language on the [Codesh (קודש) Esolang page](ht
 
 See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-Compiler/tree/main/Examples).
 
-## IDEs
+# IDEs
 [**Kate**](https://kate-editor.org/) and [**KDevelop**](https://kdevelop.org/) offer the best support for RTL coding. Both are extremely recommended for writing in Codesh, with Kate being more lightweight.
 
-Codesh provides support for both editors - including syntax highlighting, indentation, and more. See [this repo](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) for more details.
+[Codesh provides support for both editors](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) - including syntax highlighting, indentation, and more.
 
-The Motzie B'She'ela additionally provides an **LSP mode** that can be enabled using the `--lsp` flag:
+## LSP
+The Motzie B'She'ela is additionally an **LSP** that can be enabled using the `--lsp` flag:
 ```bash
 codeshc --lsp
 ```
@@ -101,8 +102,16 @@ codeshc --src <source-file/directory> --dest <output-directory>
 >[!IMPORTANT]
 > Note the *absence* of the `.jar` suffix.
 
+## Nikkud
+Nikkud and Te'amim can optionally be included within Codesh books by enabling `--nikkud`. Use [נקדן אוטומטי](https://nakdan.dicta.org.il/) in Rabbinic mode for the best coding experience.
+
+>[!NOTE]
+> **In Nikkud mode:**
+> * Syntax highlighting for Kate will not work properly
+> * Compilation times may be slightly slower
+
 ## Default Paths
-The default paths below can be overwritten using `--talmud-codesh-path` and `"--jre-path`.
+The default paths below can be overwritten using `--talmud-codesh-path` and `--jre-path`.
 
 ### JRE
 The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:

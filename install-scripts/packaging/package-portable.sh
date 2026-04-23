@@ -41,7 +41,8 @@ done
 
 cat > "$STAGING_DIR/codeshc" << 'EOF'
 #!/bin/bash
-DIR="$(cd "$(dirname "$0")" && pwd)"
+SELF="$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")"
+DIR="$(cd "$(dirname "$SELF")" && pwd)"
 LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH" exec "$DIR/codeshc-raw" "$@"
 EOF
 chmod +x "$STAGING_DIR/codeshc"
