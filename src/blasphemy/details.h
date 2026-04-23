@@ -89,6 +89,7 @@ extern const fmt::runtime_format_string<> DUPLICATE_INTERFACE;
 extern const fmt::runtime_format_string<> UNIMPLEMENTED_METHOD;
 extern const std::string DUPLICATE_MAIN_CLASS;
 extern const fmt::runtime_format_string<> MAIN_CLASS_NOT_FOUND;
+extern const fmt::runtime_format_string<> COUNTRY_PATH_MISMATCH;
 
 // EXTERNAL
 extern const fmt::runtime_format_string<> CLASSPATH_NOT_SUPPORTED;
