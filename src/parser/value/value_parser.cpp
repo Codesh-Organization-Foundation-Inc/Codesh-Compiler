@@ -6,7 +6,6 @@
 #include "blasphemy/blasphemy_collector.h"
 #include "blasphemy/details.h"
 #include "boolean_value_parser.h"
-#include "defenition/primitive_type.h"
 #include "new_value_parser.h"
 #include "parser/ast/collection/range_ast_node.h"
 #include "parser/ast/operator/boolean/and_operator_ast_node.h"
@@ -19,6 +18,11 @@
 #include "../ast/operator/cast/manual_cast_ast_node.h"
 #include "fmt/format.h"
 #include "parser/ast/method/operation/array_length_ast_node.h"
+#include "parser/ast/operator/bitwise/bitwise_and_ast_node.h"
+#include "parser/ast/operator/bitwise/bitwise_not_ast_node.h"
+#include "parser/ast/operator/bitwise/bitwise_or_ast_node.h"
+#include "parser/ast/operator/bitwise/bitwise_shift_ast_node.h"
+#include "parser/ast/operator/bitwise/bitwise_xor_ast_node.h"
 #include "parser/ast/var_reference/array_access_ast_node.h"
 #include "parser/type/class/method_parser.h"
 #include "parser/util.h"
@@ -39,6 +43,9 @@ static std::unique_ptr<codesh::ast::op::array_access_ast_node> parse_array_acces
 static std::unique_ptr<codesh::ast::var_reference::value_ast_node> parse_casting(
         std::queue<std::unique_ptr<codesh::token>> &tokens,
         std::unique_ptr<codesh::ast::var_reference::value_ast_node> value);
+
+static std::unique_ptr<codesh::ast::op::bitwise_shift_ast_node> parse_bitwise_shift(
+        std::queue<std::unique_ptr<codesh::token>> &tokens);
 
 std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::value::parse_value(
         std::queue<std::unique_ptr<token>> &tokens)
@@ -145,6 +152,22 @@ std::unique_ptr<codesh::ast::var_reference::value_ast_node> codesh::parser::valu
         lhs = parse_assignment_operator(tokens);
         break;
 
+    case token_group::OPERATOR_BITWISE_SHIFT:
+        lhs = parse_bitwise_shift(tokens);
+        break;
+
+    case token_group::OPERATOR_BITWISE_NOT: {
+        auto op_pos = tokens.front()->get_code_position();
+        tokens.pop();
+
+        lhs = std::make_unique<ast::op::bitwise_not_ast_node>(
+            op_pos,
+            parse_value(tokens)
+        );
+
+        break;
+    }
+
     case token_group::KEYWORD_FUNCTION_CALL:
         lhs = parse_method_call(tokens);
         break;
@@ -221,6 +244,27 @@ static std::unique_ptr<codesh::ast::var_reference::value_ast_node> check_extras(
             return std::make_unique<codesh::ast::op::and_operator_ast_node>(op_pos, std::move(lhs),
                 codesh::parser::value::parse_value(tokens));
         }
+        case codesh::token_group::OPERATOR_BITWISE_AND: {
+            auto op_pos = tokens.front()->get_code_position();
+            tokens.pop();
+
+            return std::make_unique<codesh::ast::op::bitwise_and_ast_node>(op_pos, std::move(lhs),
+                codesh::parser::value::parse_value(tokens));
+        }
+        case codesh::token_group::OPERATOR_BITWISE_OR: {
+            auto op_pos = tokens.front()->get_code_position();
+            tokens.pop();
+
+            return std::make_unique<codesh::ast::op::bitwise_or_ast_node>(op_pos, std::move(lhs),
+                codesh::parser::value::parse_value(tokens));
+        }
+        case codesh::token_group::OPERATOR_BITWISE_XOR: {
+            auto op_pos = tokens.front()->get_code_position();
+            tokens.pop();
+
+            return std::make_unique<codesh::ast::op::bitwise_xor_ast_node>(op_pos, std::move(lhs),
+                codesh::parser::value::parse_value(tokens));
+        }
         case codesh::token_group::OPERATOR_OR: {
             auto op_pos = tokens.front()->get_code_position();
             tokens.pop();
@@ -268,6 +312,43 @@ static std::unique_ptr<codesh::ast::collection::range_ast_node> parse_range(
         std::move(eval_ast_node),
         std::move(to_val),
         std::move(skip_val)
+    );
+}
+
+static std::unique_ptr<codesh::ast::op::bitwise_shift_ast_node> parse_bitwise_shift(
+        std::queue<std::unique_ptr<codesh::token>> &tokens)
+{
+    const codesh::lexer::code_position code_pos = tokens.front()->get_code_position();
+
+    tokens.pop();
+
+    codesh::ast::op::shift_direction direction;
+    if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BITWISE_RIGHT))
+    {
+        direction = codesh::ast::op::shift_direction::RIGHT;
+    }
+    else if (codesh::parser::util::consuming_check(tokens, codesh::token_group::KEYWORD_BITWISE_LEFT))
+    {
+        direction = codesh::ast::op::shift_direction::LEFT;
+    }
+    else
+    {
+        codesh::blasphemy::get_blasphemy_collector().add_blasphemy(
+            codesh::blasphemy::details::NO_SHIFTING_DIRECTION,
+            codesh::blasphemy::blasphemy_type::SYNTAX,
+            code_pos
+        );
+    }
+
+    auto left = codesh::parser::value::parse_value(tokens);
+    codesh::parser::util::consume_punc_equal(tokens);
+    auto right = codesh::parser::value::parse_value(tokens);
+
+    return std::make_unique<codesh::ast::op::bitwise_shift_ast_node>(
+        code_pos,
+        std::move(left),
+        std::move(right),
+        direction
     );
 }
 
