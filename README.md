@@ -1,4 +1,4 @@
-# The Motzie B'She'ela
+# The Motzi B'She'ela
 
 Official compiler for the Codesh programming language.
 
@@ -27,7 +27,7 @@ See code examples [here](https://github.com/Codesh-Organization-Foundation-Inc/C
 [Codesh provides support for both editors](https://github.com/Codesh-Organization-Foundation-Inc/Codesh-for-Kate) - including syntax highlighting, indentation, and more.
 
 ## LSP
-The Motzie B'She'ela is additionally an **LSP** that can be enabled using the `--lsp` flag:
+The Motzi B'She'ela is additionally an **LSP** that can be enabled using the `--lsp` flag:
 ```bash
 codeshc --lsp
 ```
@@ -58,13 +58,13 @@ The global installation provides system-wide access to `codeshc`.
 ## Talmud Codesh
 In Codesh terminology, a Talmud is **a library written in the Codesh programming language.**
 
-**Talmud Codesh** refersh to the standard library (talmud) of Codesh. Most notibly, it provides the `מסוף` class, allowing for the following syntax:
+**Talmud Codesh** refers to the standard library (talmud) of Codesh. Most notably, it provides the `מסוף` class, allowing for the following syntax:
 
 ```codesh
 ויעש מסוף ל־אמר כי־דבריו יקרא היי אמא לאמר כי־טוב:
 ```
 
-Talmud Codesh comes pre-installed in the portable builds of The Motzie B'She'ela under the name `תלמוד־קודש.jar`.
+Talmud Codesh comes pre-installed in the portable builds of The Motzi B'She'ela under the name `תלמוד־קודש.jar`.
 
 ## The Java Runtime Environment
 **Codesh requires\* the JRE to be present.**  
@@ -114,7 +114,7 @@ Nikkud and Te'amim can optionally be included within Codesh books by enabling `-
 The default paths below can be overwritten using `--talmud-codesh-path` and `--jre-path`.
 
 ### JRE
-The Motzie B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
+The Motzi B'She'ela will first use `JAVA_HOME` if present. Otherwise, it is platform-dependent:
 * **Unix:** `/usr/lib/jvm/jre-21`
 * **Windows:** `C:\Program Files\Java\jre-21`
 
