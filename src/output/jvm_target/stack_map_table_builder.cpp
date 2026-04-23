@@ -121,7 +121,7 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
         locals.push_back(std::make_unique<defs::top_variable_info>());
     }
 
-    for (const auto &var : method_decl.get_resolved().get_all_local_variables().name_to_var | std::views::values)
+    for (const auto &var : method_decl.get_resolved().get_all_local_variables().index_to_var | std::views::values)
     {
         const auto *producing_node = var.get().get_producing_node();
 
