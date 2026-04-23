@@ -156,12 +156,28 @@ std::vector<std::unique_ptr<codesh::output::jvm_target::defs::verification_type_
     return locals;
 }
 
+std::unique_ptr<codesh::output::jvm_target::defs::object_variable_info> codesh::output::jvm_target::
+    stack_map_table_builder::build_object_var_info(const std::string &descriptor) const
+{
+    auto obj_var_info = std::make_unique<defs::object_variable_info>();
+
+    const int class_cpi = constant_pool_.get_class_index(
+        constant_pool_.get_utf8_index(descriptor)
+    );
+    util::put_int_bytes(obj_var_info->cpool_index, 2, class_cpi);
+
+    return obj_var_info;
+}
+
 std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info> codesh::output::jvm_target::
     stack_map_table_builder::parse_verification_type(
         const ast::type::type_ast_node &type_node) const
 {
     if (const auto primitive_type = dynamic_cast<const ast::type::primitive_type_ast_node *>(&type_node))
     {
+        if (primitive_type->get_array_dimensions() > 0)
+            return build_object_var_info(primitive_type->generate_descriptor());
+
         switch (primitive_type->get_type())
         {
         case definition::primitive_type::INTEGER:
@@ -181,18 +197,7 @@ std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info> codesh
             return std::make_unique<defs::double_variable_info>();
 
         case definition::primitive_type::REFERENCE:
-        {
-            auto obj_var_info = std::make_unique<defs::object_variable_info>();
-
-            const int class_cpi = constant_pool_.get_class_index(
-                constant_pool_.get_utf8_index(
-                    primitive_type->generate_descriptor()
-                )
-            );
-            util::put_int_bytes(obj_var_info->cpool_index, 2, class_cpi);
-
-            return obj_var_info;
-        }
+            return build_object_var_info(primitive_type->generate_descriptor());
 
         default:
             return std::make_unique<defs::top_variable_info>();
@@ -201,18 +206,10 @@ std::unique_ptr<codesh::output::jvm_target::defs::verification_type_info> codesh
 
     if (const auto custom_type = dynamic_cast<const ast::type::custom_type_ast_node *>(&type_node))
     {
-        auto obj_var_info = std::make_unique<defs::object_variable_info>();
-
-        const int class_cpi = constant_pool_.get_class_index(
-            constant_pool_.get_utf8_index(
-                custom_type->get_array_dimensions() == 0
-                    ? custom_type->get_resolved_name().join()
-                    : custom_type->generate_descriptor()
-            )
-        );
-        util::put_int_bytes(obj_var_info->cpool_index, 2, class_cpi);
-
-        return obj_var_info;
+        const std::string descriptor = custom_type->get_array_dimensions() == 0
+            ? custom_type->get_resolved_name().join()
+            : custom_type->generate_descriptor();
+        return build_object_var_info(descriptor);
     }
 
     throw std::invalid_argument("Invalid type provided");
