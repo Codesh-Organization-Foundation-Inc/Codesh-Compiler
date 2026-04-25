@@ -130,22 +130,6 @@ void codesh::parser::value::biblical_numbers_parser::collect_numbers()
         );
     }
 
-    // Check the final distro's order
-    const auto distros_exist = previous_distro != std::numeric_limits<int>::min()
-        && previous_distro != std::numeric_limits<int>::max();
-
-    if (distros_exist && current_distro >= previous_distro)
-    {
-        blasphemy::get_blasphemy_collector().add_blasphemy(
-            fmt::format(
-                blasphemy::details::INVALID_NUMBER_FORMAT_ASCENDING,
-                lexer::trie::token_to_string(current_distro_token->get_group())
-            ),
-            blasphemy::blasphemy_type::SYNTAX,
-            current_distro_token->get_code_position()
-        );
-    }
-
     result += current_distro;
 }
 
