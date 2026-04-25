@@ -147,6 +147,8 @@ add_executable(codeshc
         src/parser/type/class/method_parser.h
         src/semantic_analyzer/analyzer.h
         src/semantic_analyzer/analyzer.cpp
+        src/semantic_analyzer/country_verifier.h
+        src/semantic_analyzer/country_verifier.cpp
         src/semantic_analyzer/symbol_table/symbol_table.h
         src/semantic_analyzer/symbol_table/symbol_table.cpp
         src/semantic_analyzer/type_decl/collect.h

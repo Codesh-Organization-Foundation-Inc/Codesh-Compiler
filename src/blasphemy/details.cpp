@@ -200,6 +200,10 @@ const rfs_t codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND = rfs(
     "הַפְנָיָה פְּסוּלָה הָיָה: הָעֶצֶם {} לֹא נִמְצָא אוֹ אֵינוֹ מֵכִיל אֶת מַעֲשֵׂה בְּרֵאשִׁית"
 );
 
+const rfs_t codesh::blasphemy::details::COUNTRY_PATH_MISMATCH = rfs(
+    "אֶרֶץ מוֹצָא כּוֹזֶב הֱיֵה: הֻכְרְזָה אֶרֶץ הַמּוֹצָא {} אַךְ הַסֵּפֶר טוֹעֵן כִּי שׁוֹכֵן בְּ־{}"
+);
+
 // EXTERNAL
 const rfs_t codesh::blasphemy::details::CLASSPATH_NOT_SUPPORTED = rfs(
     "סֵפֶר אָטוּם הֱיֵה: סוּג הַנְּתִיב {} אֵינוֹ נִתְמָךְ"

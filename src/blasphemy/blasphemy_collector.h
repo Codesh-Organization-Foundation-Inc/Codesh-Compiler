@@ -78,6 +78,7 @@ public:
     void add_warning(std::string details, blasphemy_type type, lexer::code_position start_code_pos);
 
     void set_source_directory(std::filesystem::path source_directory_path);
+    [[nodiscard]] const std::filesystem::path &get_source_directory() const;
 
     /**
      * Makes all blasphemies from this point on blame the provided file.
