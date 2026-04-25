@@ -1,6 +1,7 @@
 #include "blasphemy_collector.h"
 
 #include "defenition/fully_qualified_name.h"
+#include "util.h"
 #include "fmt/xchar.h"
 
 #include <iostream>
@@ -146,7 +147,7 @@ void codesh::blasphemy::blasphemy_collector::print_blasphemy(const blasphemy_inf
     {
         fmt::print(stderr,
             " בְּסֵפֶר {}",
-            blasphemy.source_path.string()
+            path_to_holy_join(blasphemy.source_path)
         );
     }
 
@@ -181,6 +182,14 @@ void codesh::blasphemy::blasphemy_collector::print_all_blasphemies() const
     {
         print_blasphemy(warning, PRETTY_PRINT_YELLOW);
     }
+}
+
+std::string codesh::blasphemy::blasphemy_collector::path_to_holy_join(const std::filesystem::path& path)
+{
+    std::string result = path.string();
+    util::replace_all(result, "/", " ל־");
+    util::replace_all(result, "\\", " ל־");
+    return result;
 }
 
 bool codesh::lexer::code_position::operator==(const code_position &other) const

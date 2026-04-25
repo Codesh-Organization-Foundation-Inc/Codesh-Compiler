@@ -54,6 +54,7 @@ class blasphemy_collector
     static std::string type_to_string(blasphemy_type type);
     [[nodiscard]] static std::string get_blasphemy_message(blasphemy_type type);
     [[nodiscard]] static fmt::format_string<std::string> get_random_message();
+    [[nodiscard]] static std::string path_to_holy_join(const std::filesystem::path& path);
 
     static void print_blasphemy(const blasphemy_info &blasphemy, const std::string &color);
 
