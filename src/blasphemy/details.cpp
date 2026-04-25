@@ -201,7 +201,7 @@ const rfs_t codesh::blasphemy::details::MAIN_CLASS_NOT_FOUND = rfs(
 );
 
 const rfs_t codesh::blasphemy::details::COUNTRY_PATH_MISMATCH = rfs(
-    "אֶרֶץ מוֹצָא כּוֹזֶבֶת הֱיֵה: הֻכְרְזָה אֶרֶץ הַמּוֹצָא {} אַךְ הַסֵּפֶר טוֹעֵן כִּי שׁוֹכֵן בְּ־{}"
+    "אֶרֶץ מוֹצָא כּוֹזֶב הֱיֵה: הֻכְרְזָה אֶרֶץ הַמּוֹצָא {} אַךְ הַסֵּפֶר טוֹעֵן כִּי שׁוֹכֵן בְּ־{}"
 );
 
 // EXTERNAL
