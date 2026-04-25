@@ -19,6 +19,7 @@
 #include "semantic_analyzer/type_decl/collect.h"
 #include "semantic_analyzer/type_decl/resolve.h"
 #include "semantic_analyzer/type_decl/resolve_aliases.h"
+#include "country_verifier.h"
 #include "semantic_context.h"
 #include "symbol_table/symbol_table.h"
 #include "util.h"
@@ -87,6 +88,8 @@ codesh::semantic_analyzer::semantic_context codesh::semantic_analyzer::make_cont
 
 void codesh::semantic_analyzer::collect_symbols(const semantic_context &context)
 {
+    verify_country_matches_source_path(context);
+
     country_symbol &country = get_own_country(context.root, context.symbol_table_);
 
     for (const auto &type_decl : context.root.get_type_declarations())
